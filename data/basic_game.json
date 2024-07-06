@@ -1,0 +1,15 @@
+{
+      "game_id": null,
+      "game_name": null,
+      "game_ready": false,
+      "game_phase": [""],
+      "game_round": 1,
+      "players": {},
+      "available_colors": ["blue", "red", "green", "yellow", "black", "orange", "white"],
+      "used_colors": [],
+      "tile_deck": ["100", "101", "102", "103", "104"],
+      "tech_deck": ["avl", "ion", "avs", "avm"],
+      "placed_tiles": [],
+      "player_order": [],
+      "active_player": []
+}
