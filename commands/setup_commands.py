@@ -2,8 +2,10 @@ import discord
 import config
 from discord.ext import commands
 from discord import app_commands
-from typing import Optional
+from typing import Optional, List
+from setup.GameInit import GameInit
 from setup.GameSetup import GameSetup
+import helpers.game_state_helper as game_state_helper
 
 class SetupCommands(commands.Cog):
     def __init__(self, bot):
@@ -18,10 +20,22 @@ class SetupCommands(commands.Cog):
             if i != None:
                 player_list.append([i.id, i.name])
 
-        new_game = GameSetup(fun_game_name, player_list)
+        new_game = GameInit(fun_game_name, player_list)
         new_game.create_game()
-        new_game.game_ready()
         new_game.upload()
 
         await interaction.guild.create_text_channel(f'aeb.{config.game_number}')
         await interaction.response.send_message('New game created!')
+
+    @app_commands.command(name="setup_player")
+    @app_commands.choices(faction=[
+        app_commands.Choice(name="Hydran", value="hyd"),
+        app_commands.Choice(name="Human", value="hum"),
+    ])
+    async def setup_player(self, interaction: discord.Interaction, player: discord.Member, faction: app_commands.Choice[str]):
+
+        game_setup = GameSetup(interaction.channel)
+        try:
+            await interaction.response.send_message(game_setup.player_setup(player.id, faction.value))
+        except KeyError:
+            await interaction.response.send_message("That player is not in this game.")

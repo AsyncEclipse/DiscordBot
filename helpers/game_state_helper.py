@@ -2,10 +2,6 @@ import json
 import os
 import config
 
-#def get_directory():
-#    os.chdir("C:/users/taylo/Desktop/DiscordBot/ActiveGames")
-#    return(os.getcwd())
-
 def read(game_id):
 
     with open(f"{config.gamestate_path}/{game_id}.json", "r") as f:
