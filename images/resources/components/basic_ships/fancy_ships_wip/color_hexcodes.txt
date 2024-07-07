@@ -1,0 +1,6 @@
+red:C70000
+blue: 0026C7
+green: 008C03
+yellow: 9F8100
+white:AAAAAA
+purple: 72009F

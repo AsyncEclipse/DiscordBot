@@ -1,0 +1,6 @@
+Hexes include all sector tiles organized into five folders:
+1) defended systems: any system that begins the game with a Guardian (only relevant in non-6-player games, taking the place of a player homesystem; Ring II) or the GCDS (Ring 0).
+2) homesystems: starting player systems in Ring II
+3) sector1: rich systems explored in Ring I
+4) sector2: intermediate systems explored in Ring II, including expansion sectors found in the Worlds Afar expansion
+5) sector3: poor systems explored in Ring III, including expansion sectors found in the Worlds Afar expansion
