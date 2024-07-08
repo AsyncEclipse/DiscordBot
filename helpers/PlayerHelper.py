@@ -1,29 +1,15 @@
-import helpers.game_state_helper as game_state_helper
 
 class PlayerHelper:
-    def __init__(self, game_id, player_id):
+    def __init__(self, player_id, player_stats):
+        self.stats = player_stats
         self.player_id = str(player_id)
-        self.game_id = game_id
-
-    def get_player_stats(self):
-        gamestate = game_state_helper.read(self.game_id)
-        return(gamestate["players"][self.player_id])
-
-    def write_player_stats(self, stats):
-        gamestate = game_state_helper.read(self.game_id)
-        gamestate["players"][self.player_id] = stats
-        game_state_helper.write(self.game_id, gamestate)
 
     def get_resources(self):
-        stats = self.get_player_stats()
-        return(f"{stats["player_name"]}: Materials = {stats["materials"]}, Science = {stats["science"]}, Money = {stats["money"]}")
+        return(f"{self.stats["player_name"]}: Materials = {self.stats["materials"]}, Science = {self.stats["science"]}, Money = {self.stats["money"]}")
 
     def adjust_materials(self, adjustment):
 
-        stats = self.get_player_stats()
-        gamestate = game_state_helper.read(self.game_id)
-        before = stats["materials"]
-        stats["materials"] += adjustment
-        self.write_player_stats(stats)
+        before = self.stats["materials"]
+        self.stats["materials"] += adjustment
 
         return(f"Adjusted materials from {before} to {before+adjustment}")
