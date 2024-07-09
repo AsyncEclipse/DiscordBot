@@ -3,7 +3,6 @@ import config
 from commands.setup_commands import *
 from commands.player_commands import *
 from discord.ext import commands
-import helpers.game_state_helper as game_state_helper
 
 
 bot = commands.Bot(command_prefix="$", intents=discord.Intents.all())

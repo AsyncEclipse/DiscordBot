@@ -24,7 +24,7 @@
             "grid_tech": [],
             "nano_tech": ["avl"],
             "tech_track": [0, -1, -2, -3, -4, -5, -8],
-            "reputation_track": ["amb", "mixed", "mixed", "mixed"]
+            "reputation_track": ["amb", "mixed", "mixed", "mixed"],
             "cost_orbital": 4,
             "cost_monolith": 10,
             "cost_interceptor": 3,
