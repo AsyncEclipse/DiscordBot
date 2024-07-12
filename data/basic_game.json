@@ -1,7 +1,7 @@
 {
       "game_id": null,
       "game_name": null,
-      "game_ready": false,
+      "setup_finished": "False",
       "game_phase": [""],
       "game_round": 1,
       "players": {},
