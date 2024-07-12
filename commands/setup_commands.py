@@ -4,7 +4,7 @@ from discord.ext import commands
 from discord import app_commands
 from typing import Optional, List
 from setup.GameInit import GameInit
-from setup.GameSetup import GameSetup
+from helpers.GamestateHelper import GamestateHelper
 
 
 class SetupCommands(commands.Cog):
@@ -33,8 +33,13 @@ class SetupCommands(commands.Cog):
     ])
     async def setup_player(self, interaction: discord.Interaction, player: discord.Member, faction: app_commands.Choice[str]):
 
-        game_setup = GameSetup(interaction.channel)
-        try:
-            await interaction.response.send_message(game_setup.player_setup(player.id, faction.value))
-        except KeyError:
-            await interaction.response.send_message("That player is not in this game.")
+        game = GamestateHelper(interaction.channel)
+       #try:
+        await interaction.response.send_message(game.player_setup(player.id, faction.value))
+        #except KeyError:
+        #    await interaction.response.send_message("That player is not in this game.")
+
+    @app_commands.command(name="setup_finished")
+    async def setup_finished(self, interaction: discord.Interaction):
+        game = GamestateHelper(interaction.channel)
+        await interaction.response.send_message(game.setup_finished())
