@@ -5,7 +5,7 @@ from discord import app_commands
 from typing import Optional, List
 from setup.GameInit import GameInit
 from setup.GameSetup import GameSetup
-import helpers.game_state_helper as game_state_helper
+
 
 class SetupCommands(commands.Cog):
     def __init__(self, bot):
@@ -22,7 +22,6 @@ class SetupCommands(commands.Cog):
 
         new_game = GameInit(fun_game_name, player_list)
         new_game.create_game()
-        new_game.upload()
 
         await interaction.guild.create_text_channel(f'aeb.{config.game_number}')
         await interaction.response.send_message('New game created!')
