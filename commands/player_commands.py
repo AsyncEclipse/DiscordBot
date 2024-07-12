@@ -1,5 +1,4 @@
 import discord
-import config
 from discord.ext import commands
 from discord import app_commands
 from typing import Optional, List
@@ -23,4 +22,4 @@ class PlayerCommands(commands.Cog):
         player1 = PlayerHelper(discord_player1.id, gamestate.get_player_stats(discord_player1.id))
 
         await interaction.response.send_message(player1.adjust_materials(adjustment))
-        gamestate.update_player_stats(player1.player_id, player1.stats)
+        gamestate.update_player_stats(player1)

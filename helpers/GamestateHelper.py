@@ -19,6 +19,8 @@ class GamestateHelper:
     def get_player_stats(self, player_id):
         return self.gamestate["players"][str(player_id)]
 
-    def update_player_stats(self, player_id, player_stats):
-        self.gamestate["players"][str(player_id)] = player_stats
+    def update_player_stats(self, *args):
+
+        for ar in args:
+            self.gamestate["players"][ar.player_id] = ar.stats
         self.update()

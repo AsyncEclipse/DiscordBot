@@ -1,8 +1,7 @@
 import json
-import discord
 import config
 from config import update_game_number
-import helpers.game_state_helper as game_state_helper
+
 
 class GameInit:
     def __init__(self, game_name, player_list):
@@ -21,10 +20,8 @@ class GameInit:
         self.gamestate["game_name"] = self.game_name
 
         for i in self.player_list:
-            self.gamestate["players"].update({i[0]: {"player_name": i[1]}})
-
-        return self.gamestate
+            self.gamestate["players"].update({int(i[0]): {"player_name": i[1]}})
 
 
-    def upload(self):
-        game_state_helper.write(self.gamestate["game_id"], self.gamestate)
+        with open(f"{config.gamestate_path}/{self.gamestate["game_id"]}.json", "w") as f:
+            json.dump(self.gamestate, f)
