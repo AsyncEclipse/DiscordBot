@@ -1,0 +1,33 @@
+tech type,name,alias
+rare tech,absorption shield,abs
+grid tech,antimatter cannon,anc
+grid tech,advanced economy,ade
+nano tech,advanced labs,adl
+military tech,advanced mining,adm
+rare tech,ancient labs,anl
+rare tech,antimatter splitter,ans
+nano tech,advanced robotics,adr
+nano tech,artifact key,ark
+rare tech,cloaking device,clo
+rare tech,conifold field,con
+nano tech,fusion drive,fud
+rare tech,flux missile,flm
+grid tech,fusion source,fus
+military tech,gluon computer,glc
+grid tech,gauss shield,gas
+grid tech,improved hull,imh
+rare tech,improved logistics,iml
+rare tech,metasynthesis,met
+nano tech,mononlith,mon
+military tech,neutron bombs,neb
+nano tech,nanorobots,nar
+nano tech,orbital,orb
+grid tech,positron computer,poc
+military tech,plasma cannon,plc
+military tech,plasma missile,plm
+military tech,phase shield,phs
+grid tech,quantum grid,qug
+military tech,starbase,stb
+grid tech,tachyon drive,tad
+military tech,tachyon source,tas
+nano tech,wormhole generator,wog
