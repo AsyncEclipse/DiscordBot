@@ -20,8 +20,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
                     material_cubes: Optional[int],
                     science_cubes: Optional[int],
                     money_cubes: Optional[int],
-                    influence: Optional[int],
-                    colony_ships: Optional[int]):
+                    influence: Optional[int])
         """
 
         :param materials: Materials resource count - can use +1/-1 to add/subtract
@@ -31,10 +30,18 @@ class PlayerCommands(commands.GroupCog, name="player"):
         :param material_cubes: Material cube count - can use +1/-1 to add/subtract
         :param science_cubes: Science cube count - can use +1/-1 to add/subtract
         :param money_cubes: Money cube count - can use +1/-1 to add/subtract
+        :param influence: Influence disc count - can use +1/-1 to add/subtract
         :return:
         """
         gamestate = GamestateHelper(interaction.channel)
         p1 = PlayerHelper(player.id, gamestate.get_player(player.id))
+        options = [materials, science, money, material_cubes, science_cubes, money_cubes, influence]
+
+        if all(x is None for x in options):
+            pass
+        else:
+            pass
+
         response = f"{p1.name} made the following changes:"
 
 
@@ -50,6 +57,8 @@ class PlayerCommands(commands.GroupCog, name="player"):
             response += (p1.adjust_science_cube(science_cubes))
         if money_cubes:
             response += (p1.adjust_money_cube(money_cubes))
+        if influence:
+            response += (p1.adjust_influence(influence))
 
         gamestate.update_player(p1)
         await interaction.response.send_message(response)

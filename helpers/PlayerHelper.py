@@ -35,3 +35,7 @@ class PlayerHelper:
         before = self.stats["money_pop_cubes"]
         self.stats["money_pop_cubes"] += adjustment
         return (f"\nAdjusted money cubes from {before} to {before + adjustment}")
+    def adjust_influence(self, adjustment):
+        before = self.stats["influence_discs"]
+        self.stats["influence_discs"] += adjustment
+        return (f"\nAdjusted influence discs from {before} to {before + adjustment}")
