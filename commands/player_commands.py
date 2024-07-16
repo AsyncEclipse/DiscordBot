@@ -25,30 +25,17 @@ class PlayerCommands(commands.GroupCog, name="player"):
         :return:
         """
         gamestate = GamestateHelper(interaction.channel)
-        p1 = PlayerHelper(player.id, gamestate.get_player_stats(player.id))
+        p1 = PlayerHelper(player.id, gamestate.get_player(player.id))
+        response = ""
 
         if materials:
-            await interaction.channel.send("Done")
+            response += ("\n"+p1.adjust_materials(materials))
         if science:
-            await interaction.channel.send("Done1")
+            response += ("\n"+p1.adjust_science(science))
         if money:
-            await interaction.channel.send("Done2")
+            response += ("\n"+p1.adjust_money(money))
 
-        return
+        gamestate.update_player(p1)
+        await interaction.response.send_message(f"{response}")
 
 
-    #@stats.command(name="show_all")
-    #async def show_all(self, interaction: discord.Interaction, discord_player1: discord.Member):
-    #    gamestate = GamestateHelper(interaction.channel)
-    #    player1 = PlayerHelper(discord_player1.id, gamestate.get_player_stats(discord_player1.id))
-#
- #       await interaction.response.send_message(player1.stats)
-
-  #  @stats.command(name="materials")
-   # async def materials(self, interaction: discord.Interaction, discord_player1: discord.Member,
-    #                                  adjustment: "int"):
-    #    gamestate = GamestateHelper(interaction.channel)
-     #   player1 = PlayerHelper(discord_player1.id, gamestate.get_player_stats(discord_player1.id))
-
-      #  await interaction.response.send_message(player1.adjust_materials(adjustment))
-       # gamestate.update_player_stats(player1)

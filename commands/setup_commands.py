@@ -34,8 +34,18 @@ class SetupCommands(commands.GroupCog, name="setup"):
 
     @app_commands.command(name="add_player")
     @app_commands.choices(faction=[
-        app_commands.Choice(name="Hydran", value="hyd"),
-        app_commands.Choice(name="Human", value="hum"),
+        app_commands.Choice(name="Hydran Progress", value="hyd"),
+        app_commands.Choice(name="Eridian Empire", value="eri"),
+        app_commands.Choice(name="Orian Hegemony", value="ori"),
+        app_commands.Choice(name="Descendants of Draco", value=dra),
+        app_commands.Choice(name="Mechanema", value="mec"),
+        app_commands.Choice(name="Planta", value="pla"),
+        app_commands.Choice(name="Terran Alliance", value="ter1"),
+        app_commands.Choice(name="Terran Conglomerate", value="ter2"),
+        app_commands.Choice(name="Terran Directorate", value="ter3"),
+        app_commands.Choice(name="Terran Federation", value="ter4"),
+        app_commands.Choice(name="Terran Republic", value="ter5"),
+        app_commands.Choice(name="Terran Union", value="ter6"),
     ])
     async def add_player(self, interaction: discord.Interaction, player: discord.Member, faction: app_commands.Choice[str]):
 
