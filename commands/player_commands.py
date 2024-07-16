@@ -29,11 +29,11 @@ class PlayerCommands(commands.GroupCog, name="player"):
         response = ""
 
         if materials:
-            response += ("\n"+p1.adjust_materials(materials))
+            response += (p1.adjust_materials(materials))
         if science:
-            response += ("\n"+p1.adjust_science(science))
+            response += (p1.adjust_science(science))
         if money:
-            response += ("\n"+p1.adjust_money(money))
+            response += (p1.adjust_money(money))
 
         gamestate.update_player(p1)
         await interaction.response.send_message(f"{response}")

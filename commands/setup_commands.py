@@ -37,7 +37,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         app_commands.Choice(name="Hydran Progress", value="hyd"),
         app_commands.Choice(name="Eridian Empire", value="eri"),
         app_commands.Choice(name="Orian Hegemony", value="ori"),
-        app_commands.Choice(name="Descendants of Draco", value=dra),
+        app_commands.Choice(name="Descendants of Draco", value="dra"),
         app_commands.Choice(name="Mechanema", value="mec"),
         app_commands.Choice(name="Planta", value="pla"),
         app_commands.Choice(name="Terran Alliance", value="ter1"),

@@ -13,18 +13,18 @@ class PlayerHelper:
         before = self.stats["materials"]
         self.stats["materials"] += adjustment
 
-        return(f"{self.name} adjusted materials from {before} to {before+adjustment}")
+        return(f"\n{self.name} adjusted materials from {before} to {before+adjustment}")
 
     def adjust_science(self, adjustment):
 
         before = self.stats["science"]
         self.stats["science"] += adjustment
 
-        return (f"{self.name} adjusted science from {before} to {before + adjustment}")
+        return (f"\n{self.name} adjusted science from {before} to {before + adjustment}")
 
     def adjust_money(self, adjustment):
 
         before = self.stats["money"]
         self.stats["money"] += adjustment
 
-        return(f"{self.name} adjusted money from {before} to {before+adjustment}")
+        return(f"\n{self.name} adjusted money from {before} to {before+adjustment}")
