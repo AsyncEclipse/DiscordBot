@@ -5,8 +5,6 @@ class PlayerHelper:
         self.player_id = str(player_id)
         self.name = self.stats["player_name"]
 
-    def get_resources(self):
-        return(f"{self.stats["player_name"]}: Materials = {self.stats["materials"]}, Science = {self.stats["science"]}, Money = {self.stats["money"]}")
 
     def adjust_materials(self, adjustment):
         before = self.stats["materials"]
