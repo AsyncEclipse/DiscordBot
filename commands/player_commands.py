@@ -20,7 +20,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
                     material_cubes: Optional[int],
                     science_cubes: Optional[int],
                     money_cubes: Optional[int],
-                    influence: Optional[int])
+                    influence: Optional[int]):
         """
 
         :param materials: Materials resource count - can use +1/-1 to add/subtract
@@ -42,7 +42,8 @@ class PlayerCommands(commands.GroupCog, name="player"):
         else:
             pass
 
-        response = f"{p1.name} made the following changes:"
+        top_response = f"{p1.name} made the following changes:"
+        response = ""
 
 
         if materials:
@@ -61,6 +62,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
             response += (p1.adjust_influence(influence))
 
         gamestate.update_player(p1)
-        await interaction.response.send_message(response)
+        await interaction.response.send_message(top_response)
+        await interaction.channel.send(response)
 
 
