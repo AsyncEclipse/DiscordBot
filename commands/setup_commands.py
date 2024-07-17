@@ -5,11 +5,53 @@ from discord import app_commands
 from typing import Optional, List
 from setup.GameInit import GameInit
 from helpers.GamestateHelper import GamestateHelper
+from PIL import Image, ImageDraw, ImageFont
+from io import  BytesIO
+import random
 
 
 class SetupCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    
+    async def showGame(self, interaction, tileMap, game):
+        context = Image.new("RGBA",(4160,5100),(255,255,255,0))
+        for key,value in tileMap.items():
+            context = game.drawTile(context,key, value)
+        bytes = BytesIO()
+        context.save(bytes,format="PNG")
+        bytes.seek(0)
+        file = discord.File(bytes,filename="context.png")
+        await interaction.channel.send(file=file)
+
+
+    @app_commands.command(name="setup_initial_tiles")
+    async def setup_initial_tiles(self, interaction: discord.Interaction, player1: discord.Member, player2: Optional[discord.Member]=None, player3: Optional[discord.Member]=None, player4: Optional[discord.Member]=None, player5: Optional[discord.Member]=None, player6: Optional[discord.Member]=None):
+        temp_player_list = [player1, player2, player3, player4, player5, player6]
+        game = GamestateHelper(interaction.channel)
+        count = 0
+        for i in temp_player_list:
+            if i != None:
+                count = count + 1
+        
+        listOfTilesPos = ["201", "207","205","211","203","209"]
+        if count == 3:
+            listOfTilesPos = [ "201","205", "209","211","203","207",]
+        listPlayerHomes = ["222","224","226","228","230","232"]
+        random.shuffle(listPlayerHomes)
+        listDefended = ["271","272","273","274"]
+        random.shuffle(listDefended)
+        mappedSectorsToPos = {}
+        mappedSectorsToPos["000"] = "sector001"
+        for i in range(count):
+            mappedSectorsToPos[listOfTilesPos[i]]="sector"+listPlayerHomes[i]
+
+        for i in range(6-count):
+            mappedSectorsToPos[listOfTilesPos[5-i]]="sector"+listDefended[i]
+
+        await SetupCommands.showGame(self,interaction, mappedSectorsToPos, game)
+
 
     @app_commands.command(name="game_start_new")
     async def game_start_new(self, interaction: discord.Interaction, fun_game_name: str, player1: discord.Member, player2: Optional[discord.Member]=None, player3: Optional[discord.Member]=None, player4: Optional[discord.Member]=None, player5: Optional[discord.Member]=None, player6: Optional[discord.Member]=None):

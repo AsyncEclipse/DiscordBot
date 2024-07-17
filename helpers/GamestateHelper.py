@@ -1,5 +1,10 @@
 import json
 import config
+import numpy as np  
+from PIL import Image, ImageDraw, ImageFont
+from jproperties import Properties
+import cv2
+import os
 
 class GamestateHelper:
     def __init__(self, game_id):
@@ -9,8 +14,37 @@ class GamestateHelper:
     def get_gamestate(self):
         with open(f"{config.gamestate_path}/{self.game_id}.json", "r") as f:
             gamestate = json.load(f)
-
         return gamestate
+    
+    def drawTile(self, context, position, tileName):
+        configs = Properties()
+        with open("data/tileImageCoordinates.properties", "rb") as f:
+            configs.load(f)
+        x = configs.get(position)[0].split(",")[0]
+        y = configs.get(position)[0].split(",")[1]
+        filepath = "images/resources/hexes/defended/"+tileName+".png"
+        if not os.path.exists(filepath):  
+            filepath = "images/resources/hexes/homesystems/"+tileName+".png"
+
+        tileImage = Image.open(filepath).convert("RGBA")
+        tileImage = GamestateHelper.remove_background(tileImage)
+        tileImage = tileImage.resize((345, 322))
+        context.paste(tileImage,(int(x),int(y)))
+        return context
+
+    
+    def remove_background(image):  
+        cv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGBA2BGRA)  
+        gray = cv2.cvtColor(cv_image, cv2.COLOR_BGRA2GRAY)  
+        _, mask = cv2.threshold(gray, 250, 255, cv2.THRESH_BINARY)  
+        mask = cv2.bitwise_not(mask)  
+        result = cv2.bitwise_and(cv_image, cv_image, mask=mask)  
+
+        b, g, r, a = cv2.split(result)  
+        result_rgba = cv2.merge((r, g, b, a))  # Reorder the channels to RGBA format  
+
+        result_pil = Image.fromarray(result_rgba, 'RGBA')  
+        return result_pil
 
     def player_setup(self, player_id, faction):
 
@@ -29,7 +63,7 @@ class GamestateHelper:
 
         for i in self.gamestate["players"]:
             if len(self.gamestate["players"][i]) < 3:
-                return(f"{self.gamestate["players"][i]["player_name"]} still needs to be setup!")
+                return(f"{self.gamestate['players'][i]['player_name']} still needs to be setup!")
 
         self.gamestate["setup_finished"] = "True"
         return("Game setup complete")
