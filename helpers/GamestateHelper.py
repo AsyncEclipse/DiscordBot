@@ -55,9 +55,12 @@ class GamestateHelper:
 
         with open("data/factions.json", "r") as f:
             faction_data = json.load(f)
-        self.gamestate["players"][str(player_id)].update(faction_data[faction])
-        self.update()
-        return(f"{name} is now setup!")
+
+        for i in faction_data:
+            if i["alias"] == faction:
+                self.gamestate["players"][str(player_id)].update(i)
+                self.update()
+            return(f"{name} is now setup!")
 
     def setup_finished(self):
 
@@ -72,10 +75,10 @@ class GamestateHelper:
         with open(f"{config.gamestate_path}/{self.game_id}.json", "w") as f:
             json.dump(self.gamestate, f)
 
-    def get_player_stats(self, player_id):
+    def get_player(self, player_id):
         return self.gamestate["players"][str(player_id)]
 
-    def update_player_stats(self, *args):
+    def update_player(self, *args):
 
         for ar in args:
             self.gamestate["players"][ar.player_id] = ar.stats

@@ -5,21 +5,64 @@ from typing import Optional, List
 from helpers.PlayerHelper import PlayerHelper
 from helpers.GamestateHelper import GamestateHelper
 
-class PlayerCommands(commands.Cog):
+
+class PlayerCommands(commands.GroupCog, name="player"):
     def __init__(self, bot):
         self.bot = bot
 
-    @app_commands.command(name="player_show_all_stats")
-    async def player_show_all_stats(self, interaction: discord.Interaction, discord_player1: discord.Member):
+
+
+    @app_commands.command(name="stats", description="Anything to do with player stats")
+    async def stats(self, interaction: discord.Interaction, player: discord.Member,
+                    materials: Optional[int],
+                    science: Optional[int],
+                    money: Optional[int],
+                    material_cubes: Optional[int],
+                    science_cubes: Optional[int],
+                    money_cubes: Optional[int],
+                    influence: Optional[int]):
+        """
+
+        :param materials: Materials resource count - can use +1/-1 to add/subtract
+        :param science: Science resource count - can use +1/-1 to add/subtract
+        :param money: Money resource count - can use +1/-1 to add/subtract
+        :param influence: Influence disc count - can use +1/-1 to add/subtract
+        :param material_cubes: Material cube count - can use +1/-1 to add/subtract
+        :param science_cubes: Science cube count - can use +1/-1 to add/subtract
+        :param money_cubes: Money cube count - can use +1/-1 to add/subtract
+        :param influence: Influence disc count - can use +1/-1 to add/subtract
+        :return:
+        """
         gamestate = GamestateHelper(interaction.channel)
-        player1 = PlayerHelper(discord_player1.id, gamestate.get_player_stats(discord_player1.id))
+        p1 = PlayerHelper(player.id, gamestate.get_player(player.id))
+        options = [materials, science, money, material_cubes, science_cubes, money_cubes, influence]
 
-        await interaction.response.send_message(player1.stats)
+        if all(x is None for x in options):
+            pass
+        else:
+            pass
 
-    @app_commands.command(name="player_adjust_materials")
-    async def player_adjust_materials(self, interaction: discord.Interaction, discord_player1: discord.Member, adjustment: "int"):
-        gamestate = GamestateHelper(interaction.channel)
-        player1 = PlayerHelper(discord_player1.id, gamestate.get_player_stats(discord_player1.id))
+        top_response = f"{p1.name} made the following changes:"
+        response = ""
 
-        await interaction.response.send_message(player1.adjust_materials(adjustment))
-        gamestate.update_player_stats(player1)
+
+        if materials:
+            response += (p1.adjust_materials(materials))
+        if science:
+            response += (p1.adjust_science(science))
+        if money:
+            response += (p1.adjust_money(money))
+        if material_cubes:
+            response += (p1.adjust_material_cube(material_cubes))
+        if science_cubes:
+            response += (p1.adjust_science_cube(science_cubes))
+        if money_cubes:
+            response += (p1.adjust_money_cube(money_cubes))
+        if influence:
+            response += (p1.adjust_influence(influence))
+
+        gamestate.update_player(p1)
+        await interaction.response.send_message(top_response)
+        await interaction.channel.send(response)
+
+
