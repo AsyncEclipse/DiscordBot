@@ -55,12 +55,12 @@ class SetupCommands(commands.GroupCog, name="setup"):
 
     @app_commands.command(name="new_game")
     async def new_game(self, interaction: discord.Interaction, game_name: str,
-                             player1: discord.Member,
-                             player2: Optional[discord.Member]=None,
-                             player3: Optional[discord.Member]=None,
-                             player4: Optional[discord.Member]=None,
-                             player5: Optional[discord.Member]=None,
-                             player6: Optional[discord.Member]=None):
+                            player1: discord.Member,
+                            player2: Optional[discord.Member]=None,
+                            player3: Optional[discord.Member]=None,
+                            player4: Optional[discord.Member]=None,
+                            player5: Optional[discord.Member]=None,
+                            player6: Optional[discord.Member]=None):
         temp_player_list = [player1, player2, player3, player4, player5, player6]
         player_list = []
 
