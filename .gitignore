@@ -4,6 +4,7 @@ lib/
 scripts/
 include/
 pyvenv.cfg
+launch.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
