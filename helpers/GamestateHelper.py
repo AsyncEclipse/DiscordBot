@@ -5,6 +5,7 @@ from PIL import Image, ImageDraw, ImageFont
 from jproperties import Properties
 import cv2
 import os
+import random
 
 class GamestateHelper:
     def __init__(self, game_id):
@@ -60,15 +61,36 @@ class GamestateHelper:
             if i["alias"] == faction:
                 self.gamestate["players"][str(player_id)].update(i)
                 self.update()
-            return(f"{name} is now setup!")
+                return(f"{name} is now setup!")
 
     def setup_finished(self):
 
         for i in self.gamestate["players"]:
             if len(self.gamestate["players"][i]) < 3:
                 return(f"{self.gamestate['players'][i]['player_name']} still needs to be setup!")
+        self.gamestate["player_count"] = len(self.gamestate["players"])
+        draw_count = {2: [5, 12], 3: [8, 14], 4: [14, 16], 5: [16, 18], 6: [18, 20]}
+        third_sector_tiles = ["301", "302", "303", "304", "305", "306", "307", "308", "309", "310", "311", "312", "313", "314",
+                              "315", "316", "317", "318", "381", "382"]
+        sector_draws = draw_count[self.gamestate["player_count"]][0]
+        tech_draws = draw_count[self.gamestate["player_count"]][1]
 
-        self.gamestate["setup_finished"] = "True"
+        while sector_draws > 0:
+            random.shuffle(third_sector_tiles)
+            self.gamestate["tile_deck_300"].append(third_sector_tiles.pop(0))
+            sector_draws -= 1
+
+        while tech_draws > 0:
+            random.shuffle(self.gamestate["tech_deck"])
+            self.gamestate["available_techs"].append(self.gamestate["tech_deck"].pop(0))
+
+            # TODO: once tech tile JSON is complete, needs some logic to not decrement tech_draws if it's a rare tech
+            # TODO: Also add a read from the JSON file to add actual tech tile stats to available_techs board state
+
+            tech_draws -= 1
+
+        self.gamestate["setup_finished"] = 1
+        self.update()
         return("Game setup complete")
 
     def update(self):

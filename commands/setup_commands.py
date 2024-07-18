@@ -71,7 +71,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         new_game = GameInit(game_name, player_list)
         new_game.create_game()
 
-        await interaction.guild.create_text_channel(f'aeb.{config.game_number}')
+        await interaction.guild.create_text_channel(f'aeb{config.game_number}')
         await interaction.response.send_message('New game created!')
 
     @app_commands.command(name="add_player")
