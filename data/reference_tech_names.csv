@@ -1,33 +1,41 @@
-tech type,name,alias
-rare tech,absorption shield,abs
-grid tech,antimatter cannon,anc
-grid tech,advanced economy,ade
-nano tech,advanced labs,adl
-military tech,advanced mining,adm
-rare tech,ancient labs,anl
-rare tech,antimatter splitter,ans
-nano tech,advanced robotics,adr
-nano tech,artifact key,ark
-rare tech,cloaking device,clo
-rare tech,conifold field,con
-nano tech,fusion drive,fud
-rare tech,flux missile,flm
-grid tech,fusion source,fus
-military tech,gluon computer,glc
-grid tech,gauss shield,gas
-grid tech,improved hull,imh
-rare tech,improved logistics,iml
-rare tech,metasynthesis,met
-nano tech,mononlith,mon
-military tech,neutron bombs,neb
-nano tech,nanorobots,nar
-nano tech,orbital,orb
-grid tech,positron computer,poc
-military tech,plasma cannon,plc
-military tech,plasma missile,plm
-military tech,phase shield,phs
-grid tech,quantum grid,qug
-military tech,starbase,stb
-grid tech,tachyon drive,tad
-military tech,tachyon source,tas
-nano tech,wormhole generator,wog
+tech type,name,alias,number in deck
+grid tech,advanced economy,ade,4
+grid tech,antimatter cannon,anc,3
+grid tech,fusion source,fus,4
+grid tech,gauss shield,gas,4
+grid tech,improved hull,imh,5
+grid tech,positron computer,poc,4
+grid tech,quantum grid,qug,3
+grid tech,tachyon drive,tad,3
+military tech,advanced mining,adm,4
+military tech,gluon computer,glc,3
+military tech,neutron bombs,neb,5
+military tech,phase shield,phs,5
+military tech,plasma cannon,plc,5
+military tech,plasma missile,plm,3
+military tech,starbase,stb,5
+military tech,tachyon source,tas,3
+nano tech,advanced labs,adl,5
+nano tech,advanced robotics,adr,5
+nano tech,artifact key,ark,3
+nano tech,fusion drive,fud,5
+nano tech,mononlith,mon,3
+nano tech,nanorobots,nar,5
+nano tech,orbital,orb,5
+nano tech,wormhole generator,wog,3
+rare tech,absorption shield,abs,1
+rare tech,ancient labs,anl,1
+rare tech,antimatter splitter,ans,1
+rare tech,cloaking device,clo,1
+rare tech,conifold field,con,1
+rare tech,flux missile,flm,1
+rare tech,improved logistics,iml,1
+rare tech,metasynthesis,met,1
+rare tech,neutron absorber,nea,1
+rare tech,pico modulator,pim,1
+rare tech,rift cannon,rican,1
+rare tech,sentient hull,seh,1
+rare tech,soliton cannon,socan,1
+rare tech,trasition drive,trd,1
+rare tech,warp portal,wap,1
+rare tech,zero point source,zes,1
