@@ -374,7 +374,7 @@
         "missile": [],
         "hull": 0,
         "repair": 0,
-        "external": 0,
+        "external": 0
   },
   {
       "alias": "fud",
@@ -647,5 +647,5 @@
         "hull": 0,
         "repair": 0,
         "external": 0,
-  },
+  }
 ]  
