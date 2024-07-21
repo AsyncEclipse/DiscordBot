@@ -19,8 +19,8 @@
             "phs", "plc", "plc", "plc", "plc", "plc", "plm", "plm", "plm", "stb", "stb", "stb", "stb", "stb", "tas",
             "tas", "tas", "adl", "adl", "adl", "adl", "adl", "adr", "adr", "adr", "adr", "adr", "ark", "ark", "ark",
             "fud", "fud", "fud", "fud", "fud", "mon", "mon", "mon", "nar", "nar", "nar", "nar", "nar", "orb", "orb",
-            "orb", "orb", "orb", "wog", "wog", "wog", "abs", "anl", "ans", "clo", "con", "flm", "iml", "met", "nea",
-            "pic", "ric", "snh", "soc", "trn", "wrp", "zps"],
+            "orb", "orb", "orb", "wog", "wog", "wog", "abs", "anl", "ans", "clo", "con", "flm", "iml", "met", "rican",
+            "seh", "socan", "trd", "zes", "pim", "nea", "wap"],
       "available_techs": [],
       "board": []
 }
