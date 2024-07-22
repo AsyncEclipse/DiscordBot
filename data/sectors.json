@@ -1,2680 +1,3814 @@
 [
-  {"001":
-    {
-    "coordinates":[],
-    "name":"Galactic Center",
-    "ring": 0,
-    "disctile": 1,
-    "money_pop": ["empty","empty"],
-    "money1_snap": [476,590],
-    "money2_snap": [584,590],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [574,140],
-    "science2_snap": [],
-    "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [476,140],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [163,420],
-    "material2_snap": [],
-    "materialadv_pop": ["empty"],
-    "materialadv1_snap": [163,310],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0, 1, 2, 3, 4, 5],
-    "vp": 4,
-    "artifact": 1,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 1,
-    "warp": 0,
-    "type": "ai"
-    }
-  }
-  {"271":
-    {
-    "coordinates":[],
-    "name":"Omega Fornacis",
-    "ring": 2,
-    "disctile": 1,
-    "money_pop": ["empty"],
-    "money1_snap": [580, 190],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [512,580],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": ["empty"],
-    "materialadv1_snap": [205,245],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
-    "vp": 2,
-    "artifact": 1,
-    "ancient": 0,
-    "guardian": 1,
-    "gcds": 0,
-    "warp": 0,
-    "type": "ai"
-    }
-  }
-  {"272":
-    {
-    "coordinates":[],
-    "name":"Sigma Hydrae",
-    "ring": 2,
-    "disctile": 1,
-    "money_pop": ["empty"],
-    "money1_snap": [302,207],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [247,545],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [514,585],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
-    "vp": 2,
-    "artifact": 1,
-    "ancient": 0,
-    "guardian": 1,
-    "gcds": 0,
-    "warp": 0,
-    "type": "ai"
-    }
-  }
-  {"273":
-    {
-    "coordinates":[],
-    "name":"Theta Ophiuchi",
-    "ring": 2,
-    "disctile": 1,
-    "money_pop": ["empty"],
-    "money1_snap": [303,575],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [352,157],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": ["empty"],
-    "materialadv2_snap": [242,157],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
-    "vp": 2,
-    "artifact": 1,
-    "ancient": 0,
-    "guardian": 1,
-    "gcds": 0,
-    "warp": 0,
-    "type": "ai"
-    }
-  }
-  {"274":
-    {
-    "coordinates":[],
-    "name":"Alpha Lyncis",
-    "ring": 2,
-    "disctile": 1,
-    "money_pop": ["empty"],
-    "money1_snap": [593,554],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [184,395],
-    "science2_snap": [],
-    "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [184,290],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
-    "vp": 2,
-    "artifact": 1,
-    "ancient": 0,
-    "guardian": 1,
-    "gcds": 0,
-    "warp": 0,
-    "type": "ai"
-    }
-  }
-  {"221":
-    {
-    "coordinates":[],
-    "name":"Procyon",
-    "ring": 2,
-    "disctile": 0,
-    "money_pop": ["empty"],
-    "money1_snap": [489,169],
-    "money2_snap": [],
-    "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [380,169],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [365,532],
-    "science2_snap": [],
-    "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [258,532],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [536,555],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
-    "vp": 3,
-    "artifact": 1,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "home"
-    }
-  }
-  {"222":
-    {
-    "coordinates":[],
-    "name":"Epsilon Eridani",
-    "ring": 2,
-    "disctile": 0,
-    "money_pop": ["empty"],
-    "money1_snap": [474,184],
-    "money2_snap": [],
-    "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [367,184],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [600,529],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": ["empty"],
-    "scienceadv2_snap": [495,529],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
-    "vp": 3,
-    "artifact": 1,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "home"
-    }
-  }
-  {"223":
-    {
-    "coordinates":[],
-    "name":"Altair",
-    "ring": 2,
-    "disctile": 0,
-    "money_pop": ["empty"],
-    "money1_snap": [529,169],
-    "money2_snap": [],
-    "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [421,169],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [259,338],
-    "science2_snap": [],
-    "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [152,337],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [493,571],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
-    "vp": 3,
-    "artifact": 1,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "home"
-    }
-  }
-  {"224":
-    {
-    "coordinates":[],
-    "name":"Beta Hydri",
-    "ring": 2,
-    "disctile": 0,
-    "money_pop": ["empty"],
-    "money1_snap": [390,160],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [180,368],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": ["empty"],
-    "materialadv1_snap": [584,567],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0, 1, 3, 4],
-    "vp": 3,
-    "artifact": 1,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "home"
-    }
-  }
-  {"225":
-    {
-    "coordinates":[],
-    "name":"Eta Cassiopeiae",
-    "ring": 2,
-    "disctile": 0,
-    "money_pop": ["empty"],
-    "money1_snap": [278,582],
-    "money2_snap": [],
-    "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [278,486],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [609,525],
-    "science2_snap": [],
-    "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [501,525],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [281,208],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
-    "vp": 3,
-    "artifact": 1,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "home"
-    }
-  }
-  {"226":
-    {
-    "coordinates":[],
-    "name":"61 Cygni",
-    "ring": 2,
-    "disctile": 0,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [525,570],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [319,564],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
-    "vp": 3,
-    "artifact": 1,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "home"
-    }
-  }
-  {"227":
-    {
-    "coordinates":[],
-    "name":"Sirius",
-    "ring": 2,
-    "disctile": 0,
-    "money_pop": ["empty"],
-    "money1_snap": [540,603],
-    "money2_snap": [],
-    "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [540,493],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [401,178],
-    "science2_snap": [],
-    "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [295,178],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [256,542],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
-    "vp": 3,
-    "artifact": 1,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "home"
-    }
-  }
-  {"228":
-    {
-    "coordinates":[],
-    "name":"Sigma Draconis",
-    "ring": 2,
-    "disctile": 0,
-    "money_pop": ["empty"],
-    "money1_snap": [426,160],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [317,539],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": ["empty"],
-    "materialadv1_snap": [534,567],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
-    "vp": 3,
-    "artifact": 1,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "home"
-    }
-  }
-  {"229":
-    {
-    "coordinates":[],
-    "name":"Tau Ceti",
-    "ring": 2,
-    "disctile": 0,
-    "money_pop": ["empty"],
-    "money1_snap": [279,593],
-    "money2_snap": [],
-    "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [279,487],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [589,540],
-    "science2_snap": [],
-    "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [486,540],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [508,195],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
-    "vp": 3,
-    "artifact": 1,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "home"
-    }
-  }
-  {"230":
-    {
-    "coordinates":[],
-    "name":"Lambda Aurigae",
-    "ring": 2,
-    "disctile": 0,
-    "money_pop": ["empty"],
-    "money1_snap": [438,183],
-    "money2_snap": [],
-    "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [331,183],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [270,576],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": ["empty"],
-    "materialadv1_snap": [544,536],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
-    "vp": 3,
-    "artifact": 1,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "home"
-    }
-  }
-  {"231":
-    {
-    "coordinates":[],
-    "name":"Delta Pavonis",
-    "ring": 2,
-    "disctile": 0,
-    "money_pop": ["empty"],
-    "money1_snap": [604,523],
-    "money2_snap": [],
-    "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [494,523],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [463,180],
-    "science2_snap": [],
-    "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [357,180],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [282,578],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
-    "vp": 3,
-    "artifact": 1,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "home"
-    }
-  }
-  {"232":
-    {
-    "coordinates":[],
-    "name":"Rigel",
-    "ring": 2,
-    "disctile": 0,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [453,189],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [196,348],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [588,540],
-    "material2_snap": [],
-    "materialadv_pop": ["empty"],
-    "materialadv1_snap": [480,540],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
-    "vp": 3,
-    "artifact": 1,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "home"
-    }
-  }
-  {"101":
-    {
-    "coordinates":[],
-    "name":"Castor",
-    "ring": 1,
-    "disctile": 1,
-    "money_pop": ["empty"],
-    "money1_snap": [596,195],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [372,143],
-    "material2_snap": [],
-    "materialadv_pop": ["empty"],
-    "materialadv1_snap": [263,143],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [1, 2, 3, 4, 5],
-    "vp": 2,
-    "artifact": 0,
-    "ancient": 1,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"102":
-    {
-    "coordinates":[],
-    "name":"Pollux",
-    "ring": 1,
-    "disctile": 0,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": ["empty","empty"],
-    "scienceadv1_snap": [251,547],
-    "scienceadv2_snap": [359,544],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0, 2, 3, 5],
-    "vp": 2,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"103":
-    {
-    "coordinates":[],
-    "name":"Beta Leonis",
-    "ring": 1,
-    "disctile": 0,
-    "money_pop": ["empty"],
-    "money1_snap": [311,524],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [492,186],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0, 1, 2, 4, 5],
-    "vp": 2,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"104":
-    {
-    "coordinates":[],
-    "name":"Arcturus",
-    "ring": 1,
-    "disctile": 1,
-    "money_pop": ["empty"],
-    "money1_snap": [569,141],
-    "money2_snap": [],
-    "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [459,141],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [282,628],
-    "science2_snap": [],
-    "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [282,515],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
-    "vp": 2,
-    "artifact": 0,
-    "ancient": 2,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"105":
-    {
-    "coordinates":[],
-    "name":"Zeta Herculis",
-    "ring": 1,
-    "disctile": 1,
-    "money_pop": ["empty"],
-    "money1_snap": [535,127],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [146,380],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": ["empty"],
-    "materialadv1_snap": [590,557],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0, 1, 3, 4, 5],
-    "vp": 2,
-    "artifact": 0,
-    "ancient": 1,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"106":
-    {
-    "coordinates":[],
-    "name":"Capella",
-    "ring": 1,
-    "disctile": 0,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [287,226],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [553,218],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,2,3],
-    "vp": 2,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"107":
-    {
-    "coordinates":[],
-    "name":"Aldebaran",
-    "ring": 1,
-    "disctile": 0,
-    "money_pop": ["empty"],
-    "money1_snap": [226,462],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [490,147],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": ["empty"],
-    "materialadv1_snap": [575,542],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0, 1, 2, 3, 5],
-    "vp": 3,
-    "artifact": 1,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"108":
-    {
-    "coordinates":[],
-    "name":"Mu Cassiopeiae",
-    "ring": 1,
-    "disctile": 1,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [204,264],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [487,132],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": ["empty"],
-    "neutral1_snap": [500,569],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
-    "vp": 2,
-    "artifact": 0,
-    "ancient": 1,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"109":
-    {
-    "coordinates":[],
-    "name":"Alpha Lacertae",
-    "ring": 1,
-    "disctile": 1,
-    "money_pop": ["empty"],
-    "money1_snap": [522,149],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [326,117],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [1, 2, 3, 4, 5],
-    "vp": 4,
-    "artifact": 1,
-    "ancient": 2,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"110":
-    {
-    "coordinates":[],
-    "name":"Iota Bootis",
-    "ring": 1,
-    "disctile": 1,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [163,303],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": ["empty"],
-    "neutraladv2_snap": [498,594],
-    "wormholes": [0,2,3,4],
-    "vp": 2,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"201":
-    {
-    "coordinates":[],
-    "name":"Alpha Centauri",
-    "ring": 2,
-    "disctile": 0,
-    "money_pop": ["empty"],
-    "money1_snap": [256,490],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [373,168],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [1,3,5],
-    "vp": 1,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"202":
-    {
-    "coordinates":[],
-    "name":"Fomalhaut",
-    "ring": 2,
-    "disctile": 0,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [341,588],
-    "science2_snap": [],
-    "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [341,481],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [1,3,5],
-    "vp": 2,
-    "artifact": 1,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"203":
-    {
-    "coordinates":[],
-    "name":"Chi Draconis",
-    "ring": 2,
-    "disctile": 1,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [262,587],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [565,492],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [313,121],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3,5],
-    "vp": 2,
-    "artifact": 0,
-    "ancient": 2,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"204":
-    {
-    "coordinates":[],
-    "name":"Vega",
-    "ring": 2,
-    "disctile": 1,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [262,189],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": ["empty"],
-    "materialadv1_snap": [242,511],
-    "materialadv2_snap": [],
-    "neutral_pop": ["empty"],
-    "neutral1_snap": [594,207],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3,5],
-    "vp": 2,
-    "artifact": 1,
-    "ancient": 1,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"205":
-    {
-    "coordinates":[],
-    "name":"Mu Herculis",
-    "ring": 2,
-    "disctile": 0,
-    "money_pop": ["empty"],
-    "money1_snap": [399,192],
-    "money2_snap": [],
-    "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [292,192],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [559,548],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [2,3,4],
-    "vp": 1,
-    "artifact": 1,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"206":
-    {
-    "coordinates":[],
-    "name":"Epsilon Indi",
-    "ring": 2,
-    "disctile": 1,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [261,198],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [1,2,3,5],
-    "vp": 1,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"207":
-    {
-    "coordinates":[],
-    "name":"Zeta Reticuli",
-    "ring": 2,
-    "disctile": 1,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3],
-    "vp": 2,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"208":
-    {
-    "coordinates":[],
-    "name":"Iota Persei",
-    "ring": 2,
-    "disctile": 1,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,2,3,5],
-    "vp": 2,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"209":
-    {
-    "coordinates":[],
-    "name":"Delta Eridani",
-    "ring": 2,
-    "disctile": 0,
-    "money_pop": ["empty"],
-    "money1_snap": [501,201],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [207,398],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3,5],
-    "vp": 1,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"210":
-    {
-    "coordinates":[],
-    "name":"Psi Capricorni",
-    "ring": 2,
-    "disctile": 0,
-    "money_pop": ["empty"],
-    "money1_snap": [354,140],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [549,557],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,3,5],
-    "vp": 1,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"211":
-    {
-    "coordinates":[],
-    "name":"Beta Aquilae",
-    "ring": 2,
-    "disctile": 1,
-    "money_pop": ["empty"],
-    "money1_snap": [504,137],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": ["empty"],
-    "materialadv1_snap": [563,589],
-    "materialadv2_snap": [],
-    "neutral_pop": ["empty"],
-    "neutral1_snap": [260,515],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,2,3],
-    "vp": 1,
-    "artifact": 0,
-    "ancient": 1,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"214":
-    {
-    "coordinates":[],
-    "name":"Beta Monocerotis",
-    "ring": 2,
-    "disctile": 1,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [570,608],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": ["empty"],
-    "materialadv1_snap": [262,554],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": ["empty"],
-    "neutraladv1_snap": [286,167],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,2,4,5],
-    "vp": 2,
-    "artifact": 0,
-    "ancient": 1,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"281":
-    {
-    "coordinates":[],
-    "name":"Delta Corvi",
-    "ring": 2,
-    "disctile": 1,
-    "money_pop": ["empty"],
-    "money1_snap": [257,594],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [520,133],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,2,3,5],
-    "vp": 2,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 1,
-    "type": "standard"
-    }
-  }
-  {"295":
-    {
-    "coordinates":[],
-    "name":"NGC 5189",
-    "ring": 2,
-    "disctile": 2,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0, 1, 2, 3, 4, 5],
-    "vp": 0,
-    "artifact": 0,
-    "ancient": 1,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "nebula"
-    }
-  }
-  {"301":
-    {
-    "coordinates":[],
-    "name":"Zeta Draconis",
-    "ring": 3,
-    "disctile": 1,
-    "money_pop": ["empty"],
-    "money1_snap": [591,191],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [216,380],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": ["empty"],
-    "materialadv1_snap": [545,593],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,2,3],
-    "vp": 2,
-    "artifact": 1,
-    "ancient": 2,
-    "guardian": 0,
-    "gcds": 0
-    }
-  }
-  {"302":
-    {
-    "coordinates":[],
-    "name":"Gammma Serpentis",
-    "ring": 3,
-    "disctile": 1,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [516,145],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [233,218],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [553,595],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,3,4],
-    "vp": 2,
-    "artifact": 1,
-    "ancient": 1,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"303":
-    {
-    "coordinates":[],
-    "name":"Eta Cephei",
-    "ring": 3,
-    "disctile": 1,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [530,524],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [302,525],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": ["empty"],
-    "neutral1_snap": [546,115],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [3,5],
-    "vp": 2,
-    "artifact": 1,
-    "ancient": 1,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"304":
-    {
-    "coordinates":[],
-    "name":"Theta Pegasi",
-    "ring": 3,
-    "disctile": 0,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [251,221],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [285,556],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,3],
-    "vp": 2,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"305":
-    {
-    "coordinates":[],
-    "name":"Lambda Serpentis",
-    "ring": 3,
-    "disctile": 1,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [269,174],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [513,581],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3],
-    "vp": 1,
-    "artifact": 0,
-    "ancient": 1,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"306":
-    {
-    "coordinates":[],
-    "name":"Beta Centauri",
-    "ring": 3,
-    "disctile": 0,
-    "money_pop": ["empty"],
-    "money1_snap": [560,141],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [520,570],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [1,3],
-    "vp": 1,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"307":
-    {
-    "coordinates":[],
-    "name":"Sigma Sagittarii",
-    "ring": 3,
-    "disctile": 0,
-    "money_pop": ["empty"],
-    "money1_snap": [326,129],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [218,473],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,2,3],
-    "vp": 2,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"308":
-    {
-    "coordinates":[],
-    "name":"Kappa Scorpii",
-    "ring": 3,
-    "disctile": 0,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [505,153],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": ["empty"],
-    "materialadv1_snap": [170,408],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [2,3,5],
-    "vp": 2,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"309":
-    {
-    "coordinates":[],
-    "name":"Phi Piscium",
-    "ring": 3,
-    "disctile": 0,
-    "money_pop": ["empty"],
-    "money1_snap": [518,141],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [191,429],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,3,5],
-    "vp": 2,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"310":
-    {
-    "coordinates":[],
-    "name":"Nu Phoenicis",
-    "ring": 3,
-    "disctile": 0,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [536,136],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [298,514],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,3],
-    "vp": 1,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"311":
-    {
-    "coordinates":[],
-    "name":"Canopus",
-    "ring": 3,
-    "disctile": 1,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [511,573],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,2,3],
-    "vp": 1,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"312":
-    {
-    "coordinates":[],
-    "name":"Antares",
-    "ring": 3,
-    "disctile": 1,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [455,118],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3],
-    "vp": 1,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"313":
-    {
-    "coordinates":[],
-    "name":"Alpha Ursae Minoris",
-    "ring": 3,
-    "disctile": 1,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": ["empty"579,135],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,3],
-    "vp": 1,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"314":
-    {
-    "coordinates":[],
-    "name":"Spica",
-    "ring": 3,
-    "disctile": 1,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": ["empty"],
-    "neutral1_snap": [258,481],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [2,3,4],
-    "vp": 1,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"315":
-    {
-    "coordinates":[],
-    "name":"Epsilon Aurigae",
-    "ring": 3,
-    "disctile": 1,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,3,5],
-    "vp": 1,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"316":
-    {
-    "coordinates":[],
-    "name":"iota Carinae",
-    "ring": 3,
-    "disctile": 1,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3],
-    "vp": 1,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"317":
-    {
-    "coordinates":[],
-    "name":"Beta Crucius",
-    "ring": 3,
-    "disctile": 0,
-    "money_pop": ["empty"],
-    "money1_snap": [306,589],
-    "money2_snap": [],
-    "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [306,481],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [3,4],
-    "vp": 2,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    }
-  }
-  {"381":
-    {
-    "coordinates":[],
-    "name":"Beta Sextantis",
-    "ring": 3,
-    "disctile": 1,
-    "money_pop": ["empty"],
-    "money1_snap": [527,191],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [245,162],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,3,4],
-    "vp": 1,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 1,
-    "type": "standard"
-    }
-  }
-  {"382":
-    {
-    "coordinates":[],
-    "name":"Zeta Chamaeleontis",
-    "ring": 3,
-    "disctile": 1,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [226,536],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [515,582],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,2,3],
-    "vp": 1,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 1,
-    "type": "standard"
-    }
-  }
-  {"393":
-    {
-    "coordinates":[],
-    "name":"Geminga",
-    "ring": 3,
-    "disctile": 0,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [320,182],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3],
-    "vp": 1,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "pulsar"
-    }
-  }
-  {"394":
-    {
-    "coordinates":[],
-    "name":"Simeis 147",
-    "ring": 3,
-    "disctile": 0,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": ["empty"],
-    "material1_snap": [326,169],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,3,5],
-    "vp": 1,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "pulsar"
-    }
-  }
-  {"395":
-    {
-    "coordinates":[],
-    "name":"NGC 1952",
-    "ring": 3,
-    "disctile": 2,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0, 1, 2, 3, 4, 5],
-    "vp": 0,
-    "artifact": 0,
-    "ancient": 1,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "nebula"
-    }
-  }
-  {"396":
-    {
-    "coordinates":[],
-    "name":"Cygnus X-1",
-    "ring": 3,
-    "disctile": 1,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [1, 2, 4, 5],
-    "vp": 0,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "bh1"
-    }
-  }
-  {"397":
-    {
-    "coordinates":[],
-    "name":"Betelgeuse",
-    "ring": 3,
-    "disctile": 0,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [245,524],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [525,204],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": ["empty"],
-    "materialadv1_snap": [517,575],
-    "materialadv2_snap": [],
-    "neutral_pop": ["empty","empty"],
-    "neutral1_snap": [291,272],
-    "neutral2_snap": [183,272],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,1,3],
-    "vp": 0,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "supernova"
-    }
-  }
-  {"398":
-    {
-    "coordinates":[],
-    "name":"Deneb",
-    "ring": 3,
-    "disctile": 0,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [543,210],
-    "moneyadv2_snap": [],
-    "science_pop": ["empty"],
-    "science1_snap": [206,431],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": ["empty"],
-    "materialadv1_snap": [281,228],
-    "materialadv2_snap": [],
-    "neutral_pop": ["empty","empty"],
-    "neutral1_snap": [455,538],
-    "neutral2_snap": [566,538],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,3,5],
-    "vp": 0,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "supernova"
-    }
-  }
-  {"399":
-    {
-    "coordinates":[],
-    "name":"V616 MON",
-    "ring": 3,
-    "disctile": 1,
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [1, 2, 4, 5],
-    "vp": 0,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "bhborder"
+  {
+    "001": {
+      "coordinates": [],
+      "name": "Galactic Center",
+      "ring": 0,
+      "disctile": 1,
+      "money_pop": [
+        "empty",
+        "empty"
+      ],
+      "money1_snap": [
+        476,
+        590
+      ],
+      "money2_snap": [
+        584,
+        590
+      ],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        574,
+        140
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [
+        "empty"
+      ],
+      "scienceadv1_snap": [
+        476,
+        140
+      ],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        163,
+        420
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [
+        "empty"
+      ],
+      "materialadv1_snap": [
+        163,
+        310
+      ],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "vp": 4,
+      "artifact": 1,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 1,
+      "warp": 0,
+      "type": "ai"
+    }
+  },
+  {
+    "271": {
+      "coordinates": [],
+      "name": "Omega Fornacis",
+      "ring": 2,
+      "disctile": 1,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        580,
+        190
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        512,
+        580
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [
+        "empty"
+      ],
+      "materialadv1_snap": [
+        205,
+        245
+      ],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "vp": 2,
+      "artifact": 1,
+      "ancient": 0,
+      "guardian": 1,
+      "gcds": 0,
+      "warp": 0,
+      "type": "ai"
+    }
+  },
+  {
+    "272": {
+      "coordinates": [],
+      "name": "Sigma Hydrae",
+      "ring": 2,
+      "disctile": 1,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        302,
+        207
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [
+        "empty"
+      ],
+      "scienceadv1_snap": [
+        247,
+        545
+      ],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        514,
+        585
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "vp": 2,
+      "artifact": 1,
+      "ancient": 0,
+      "guardian": 1,
+      "gcds": 0,
+      "warp": 0,
+      "type": "ai"
+    }
+  },
+  {
+    "273": {
+      "coordinates": [],
+      "name": "Theta Ophiuchi",
+      "ring": 2,
+      "disctile": 1,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        303,
+        575
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        352,
+        157
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [
+        "empty"
+      ],
+      "materialadv2_snap": [
+        242,
+        157
+      ],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "vp": 2,
+      "artifact": 1,
+      "ancient": 0,
+      "guardian": 1,
+      "gcds": 0,
+      "warp": 0,
+      "type": "ai"
+    }
+  },
+  {
+    "274": {
+      "coordinates": [],
+      "name": "Alpha Lyncis",
+      "ring": 2,
+      "disctile": 1,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        593,
+        554
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        184,
+        395
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [
+        "empty"
+      ],
+      "scienceadv1_snap": [
+        184,
+        290
+      ],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "vp": 2,
+      "artifact": 1,
+      "ancient": 0,
+      "guardian": 1,
+      "gcds": 0,
+      "warp": 0,
+      "type": "ai"
+    }
+  },
+  {
+    "221": {
+      "coordinates": [],
+      "name": "Procyon",
+      "ring": 2,
+      "disctile": 0,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        489,
+        169
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [
+        "empty"
+      ],
+      "moneyadv1_snap": [
+        380,
+        169
+      ],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        365,
+        532
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [
+        "empty"
+      ],
+      "scienceadv1_snap": [
+        258,
+        532
+      ],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        536,
+        555
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "vp": 3,
+      "artifact": 1,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "home"
+    }
+  },
+  {
+    "222": {
+      "coordinates": [],
+      "name": "Epsilon Eridani",
+      "ring": 2,
+      "disctile": 0,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        474,
+        184
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [
+        "empty"
+      ],
+      "moneyadv1_snap": [
+        367,
+        184
+      ],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        600,
+        529
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [
+        "empty"
+      ],
+      "scienceadv2_snap": [
+        495,
+        529
+      ],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "vp": 3,
+      "artifact": 1,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "home"
+    }
+  },
+  {
+    "223": {
+      "coordinates": [],
+      "name": "Altair",
+      "ring": 2,
+      "disctile": 0,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        529,
+        169
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [
+        "empty"
+      ],
+      "moneyadv1_snap": [
+        421,
+        169
+      ],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        259,
+        338
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [
+        "empty"
+      ],
+      "scienceadv1_snap": [
+        152,
+        337
+      ],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        493,
+        571
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "vp": 3,
+      "artifact": 1,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "home"
+    }
+  },
+  {
+    "224": {
+      "coordinates": [],
+      "name": "Beta Hydri",
+      "ring": 2,
+      "disctile": 0,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        390,
+        160
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [
+        "empty"
+      ],
+      "scienceadv1_snap": [
+        180,
+        368
+      ],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [
+        "empty"
+      ],
+      "materialadv1_snap": [
+        584,
+        567
+      ],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "vp": 3,
+      "artifact": 1,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "home"
+    }
+  },
+  {
+    "225": {
+      "coordinates": [],
+      "name": "Eta Cassiopeiae",
+      "ring": 2,
+      "disctile": 0,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        278,
+        582
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [
+        "empty"
+      ],
+      "moneyadv1_snap": [
+        278,
+        486
+      ],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        609,
+        525
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [
+        "empty"
+      ],
+      "scienceadv1_snap": [
+        501,
+        525
+      ],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        281,
+        208
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "vp": 3,
+      "artifact": 1,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "home"
+    }
+  },
+  {
+    "226": {
+      "coordinates": [],
+      "name": "61 Cygni",
+      "ring": 2,
+      "disctile": 0,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        525,
+        570
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        319,
+        564
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "vp": 3,
+      "artifact": 1,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "home"
+    }
+  },
+  {
+    "227": {
+      "coordinates": [],
+      "name": "Sirius",
+      "ring": 2,
+      "disctile": 0,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        540,
+        603
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [
+        "empty"
+      ],
+      "moneyadv1_snap": [
+        540,
+        493
+      ],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        401,
+        178
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [
+        "empty"
+      ],
+      "scienceadv1_snap": [
+        295,
+        178
+      ],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        256,
+        542
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "vp": 3,
+      "artifact": 1,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "home"
+    }
+  },
+  {
+    "228": {
+      "coordinates": [],
+      "name": "Sigma Draconis",
+      "ring": 2,
+      "disctile": 0,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        426,
+        160
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        317,
+        539
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [
+        "empty"
+      ],
+      "materialadv1_snap": [
+        534,
+        567
+      ],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "vp": 3,
+      "artifact": 1,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "home"
+    }
+  },
+  {
+    "229": {
+      "coordinates": [],
+      "name": "Tau Ceti",
+      "ring": 2,
+      "disctile": 0,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        279,
+        593
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [
+        "empty"
+      ],
+      "moneyadv1_snap": [
+        279,
+        487
+      ],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        589,
+        540
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [
+        "empty"
+      ],
+      "scienceadv1_snap": [
+        486,
+        540
+      ],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        508,
+        195
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "vp": 3,
+      "artifact": 1,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "home"
+    }
+  },
+  {
+    "230": {
+      "coordinates": [],
+      "name": "Lambda Aurigae",
+      "ring": 2,
+      "disctile": 0,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        438,
+        183
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [
+        "empty"
+      ],
+      "moneyadv1_snap": [
+        331,
+        183
+      ],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        270,
+        576
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [
+        "empty"
+      ],
+      "materialadv1_snap": [
+        544,
+        536
+      ],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "vp": 3,
+      "artifact": 1,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "home"
+    }
+  },
+  {
+    "231": {
+      "coordinates": [],
+      "name": "Delta Pavonis",
+      "ring": 2,
+      "disctile": 0,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        604,
+        523
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [
+        "empty"
+      ],
+      "moneyadv1_snap": [
+        494,
+        523
+      ],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        463,
+        180
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [
+        "empty"
+      ],
+      "scienceadv1_snap": [
+        357,
+        180
+      ],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        282,
+        578
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "vp": 3,
+      "artifact": 1,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "home"
+    }
+  },
+  {
+    "232": {
+      "coordinates": [],
+      "name": "Rigel",
+      "ring": 2,
+      "disctile": 0,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [
+        "empty"
+      ],
+      "moneyadv1_snap": [
+        453,
+        189
+      ],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        196,
+        348
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        588,
+        540
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [
+        "empty"
+      ],
+      "materialadv1_snap": [
+        480,
+        540
+      ],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "vp": 3,
+      "artifact": 1,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "home"
+    }
+  },
+  {
+    "101": {
+      "coordinates": [],
+      "name": "Castor",
+      "ring": 1,
+      "disctile": 1,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        596,
+        195
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        372,
+        143
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [
+        "empty"
+      ],
+      "materialadv1_snap": [
+        263,
+        143
+      ],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "vp": 2,
+      "artifact": 0,
+      "ancient": 1,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "102": {
+      "coordinates": [],
+      "name": "Pollux",
+      "ring": 1,
+      "disctile": 0,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [
+        "empty",
+        "empty"
+      ],
+      "scienceadv1_snap": [
+        251,
+        547
+      ],
+      "scienceadv2_snap": [
+        359,
+        544
+      ],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        2,
+        3,
+        5
+      ],
+      "vp": 2,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "103": {
+      "coordinates": [],
+      "name": "Beta Leonis",
+      "ring": 1,
+      "disctile": 0,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        311,
+        524
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        492,
+        186
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        2,
+        4,
+        5
+      ],
+      "vp": 2,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "104": {
+      "coordinates": [],
+      "name": "Arcturus",
+      "ring": 1,
+      "disctile": 1,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        569,
+        141
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [
+        "empty"
+      ],
+      "moneyadv1_snap": [
+        459,
+        141
+      ],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        282,
+        628
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [
+        "empty"
+      ],
+      "scienceadv1_snap": [
+        282,
+        515
+      ],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "vp": 2,
+      "artifact": 0,
+      "ancient": 2,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "105": {
+      "coordinates": [],
+      "name": "Zeta Herculis",
+      "ring": 1,
+      "disctile": 1,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        535,
+        127
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        146,
+        380
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [
+        "empty"
+      ],
+      "materialadv1_snap": [
+        590,
+        557
+      ],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3,
+        4,
+        5
+      ],
+      "vp": 2,
+      "artifact": 0,
+      "ancient": 1,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "106": {
+      "coordinates": [],
+      "name": "Capella",
+      "ring": 1,
+      "disctile": 0,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        287,
+        226
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        553,
+        218
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "vp": 2,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "107": {
+      "coordinates": [],
+      "name": "Aldebaran",
+      "ring": 1,
+      "disctile": 0,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        226,
+        462
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [
+        "empty"
+      ],
+      "scienceadv1_snap": [
+        490,
+        147
+      ],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [
+        "empty"
+      ],
+      "materialadv1_snap": [
+        575,
+        542
+      ],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        2,
+        3,
+        5
+      ],
+      "vp": 3,
+      "artifact": 1,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "108": {
+      "coordinates": [],
+      "name": "Mu Cassiopeiae",
+      "ring": 1,
+      "disctile": 1,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [
+        "empty"
+      ],
+      "moneyadv1_snap": [
+        204,
+        264
+      ],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        487,
+        132
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [
+        "empty"
+      ],
+      "neutral1_snap": [
+        500,
+        569
+      ],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "vp": 2,
+      "artifact": 0,
+      "ancient": 1,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "109": {
+      "coordinates": [],
+      "name": "Alpha Lacertae",
+      "ring": 1,
+      "disctile": 1,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        522,
+        149
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        326,
+        117
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "vp": 4,
+      "artifact": 1,
+      "ancient": 2,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "110": {
+      "coordinates": [],
+      "name": "Iota Bootis",
+      "ring": 1,
+      "disctile": 1,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [
+        "empty"
+      ],
+      "moneyadv1_snap": [
+        163,
+        303
+      ],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [
+        "empty"
+      ],
+      "neutraladv2_snap": [
+        498,
+        594
+      ],
+      "wormholes": [
+        0,
+        2,
+        3,
+        4
+      ],
+      "vp": 2,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "201": {
+      "coordinates": [],
+      "name": "Alpha Centauri",
+      "ring": 2,
+      "disctile": 0,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        256,
+        490
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        373,
+        168
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        1,
+        3,
+        5
+      ],
+      "vp": 1,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "202": {
+      "coordinates": [],
+      "name": "Fomalhaut",
+      "ring": 2,
+      "disctile": 0,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        341,
+        588
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [
+        "empty"
+      ],
+      "scienceadv1_snap": [
+        341,
+        481
+      ],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        1,
+        3,
+        5
+      ],
+      "vp": 2,
+      "artifact": 1,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "203": {
+      "coordinates": [],
+      "name": "Chi Draconis",
+      "ring": 2,
+      "disctile": 1,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [
+        "empty"
+      ],
+      "moneyadv1_snap": [
+        262,
+        587
+      ],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        565,
+        492
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        313,
+        121
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3,
+        5
+      ],
+      "vp": 2,
+      "artifact": 0,
+      "ancient": 2,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "204": {
+      "coordinates": [],
+      "name": "Vega",
+      "ring": 2,
+      "disctile": 1,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [
+        "empty"
+      ],
+      "moneyadv1_snap": [
+        262,
+        189
+      ],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [
+        "empty"
+      ],
+      "materialadv1_snap": [
+        242,
+        511
+      ],
+      "materialadv2_snap": [],
+      "neutral_pop": [
+        "empty"
+      ],
+      "neutral1_snap": [
+        594,
+        207
+      ],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3,
+        5
+      ],
+      "vp": 2,
+      "artifact": 1,
+      "ancient": 1,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "205": {
+      "coordinates": [],
+      "name": "Mu Herculis",
+      "ring": 2,
+      "disctile": 0,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        399,
+        192
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [
+        "empty"
+      ],
+      "moneyadv1_snap": [
+        292,
+        192
+      ],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [
+        "empty"
+      ],
+      "scienceadv1_snap": [
+        559,
+        548
+      ],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        2,
+        3,
+        4
+      ],
+      "vp": 1,
+      "artifact": 1,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "206": {
+      "coordinates": [],
+      "name": "Epsilon Indi",
+      "ring": 2,
+      "disctile": 1,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        261,
+        198
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        1,
+        2,
+        3,
+        5
+      ],
+      "vp": 1,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "207": {
+      "coordinates": [],
+      "name": "Zeta Reticuli",
+      "ring": 2,
+      "disctile": 1,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3
+      ],
+      "vp": 2,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "208": {
+      "coordinates": [],
+      "name": "Iota Persei",
+      "ring": 2,
+      "disctile": 1,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        2,
+        3,
+        5
+      ],
+      "vp": 2,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "209": {
+      "coordinates": [],
+      "name": "Delta Eridani",
+      "ring": 2,
+      "disctile": 0,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        501,
+        201
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        207,
+        398
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3,
+        5
+      ],
+      "vp": 1,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "210": {
+      "coordinates": [],
+      "name": "Psi Capricorni",
+      "ring": 2,
+      "disctile": 0,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        354,
+        140
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        549,
+        557
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        3,
+        5
+      ],
+      "vp": 1,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "211": {
+      "coordinates": [],
+      "name": "Beta Aquilae",
+      "ring": 2,
+      "disctile": 1,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        504,
+        137
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [
+        "empty"
+      ],
+      "materialadv1_snap": [
+        563,
+        589
+      ],
+      "materialadv2_snap": [],
+      "neutral_pop": [
+        "empty"
+      ],
+      "neutral1_snap": [
+        260,
+        515
+      ],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "vp": 1,
+      "artifact": 0,
+      "ancient": 1,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "214": {
+      "coordinates": [],
+      "name": "Beta Monocerotis",
+      "ring": 2,
+      "disctile": 1,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        570,
+        608
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [
+        "empty"
+      ],
+      "materialadv1_snap": [
+        262,
+        554
+      ],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [
+        "empty"
+      ],
+      "neutraladv1_snap": [
+        286,
+        167
+      ],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        2,
+        4,
+        5
+      ],
+      "vp": 2,
+      "artifact": 0,
+      "ancient": 1,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "281": {
+      "coordinates": [],
+      "name": "Delta Corvi",
+      "ring": 2,
+      "disctile": 1,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        257,
+        594
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        520,
+        133
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        2,
+        3,
+        5
+      ],
+      "vp": 2,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 1,
+      "type": "standard"
+    }
+  },
+  {
+    "295": {
+      "coordinates": [],
+      "name": "NGC 5189",
+      "ring": 2,
+      "disctile": 2,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "vp": 0,
+      "artifact": 0,
+      "ancient": 1,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "nebula"
+    }
+  },
+  {
+    "301": {
+      "coordinates": [],
+      "name": "Zeta Draconis",
+      "ring": 3,
+      "disctile": 1,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        591,
+        191
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        216,
+        380
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [
+        "empty"
+      ],
+      "materialadv1_snap": [
+        545,
+        593
+      ],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        2,
+        3
+      ],
+      "vp": 2,
+      "artifact": 1,
+      "ancient": 2,
+      "guardian": 0,
+      "gcds": 0
+    }
+  },
+  {
+    "302": {
+      "coordinates": [],
+      "name": "Gammma Serpentis",
+      "ring": 3,
+      "disctile": 1,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [
+        "empty"
+      ],
+      "moneyadv1_snap": [
+        516,
+        145
+      ],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [
+        "empty"
+      ],
+      "scienceadv1_snap": [
+        233,
+        218
+      ],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        553,
+        595
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        3,
+        4
+      ],
+      "vp": 2,
+      "artifact": 1,
+      "ancient": 1,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "303": {
+      "coordinates": [],
+      "name": "Eta Cephei",
+      "ring": 3,
+      "disctile": 1,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [
+        "empty"
+      ],
+      "moneyadv1_snap": [
+        530,
+        524
+      ],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [
+        "empty"
+      ],
+      "scienceadv1_snap": [
+        302,
+        525
+      ],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [
+        "empty"
+      ],
+      "neutral1_snap": [
+        546,
+        115
+      ],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        3,
+        5
+      ],
+      "vp": 2,
+      "artifact": 1,
+      "ancient": 1,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "304": {
+      "coordinates": [],
+      "name": "Theta Pegasi",
+      "ring": 3,
+      "disctile": 0,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [
+        "empty"
+      ],
+      "moneyadv1_snap": [
+        251,
+        221
+      ],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        285,
+        556
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        3
+      ],
+      "vp": 2,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "305": {
+      "coordinates": [],
+      "name": "Lambda Serpentis",
+      "ring": 3,
+      "disctile": 1,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        269,
+        174
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        513,
+        581
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3
+      ],
+      "vp": 1,
+      "artifact": 0,
+      "ancient": 1,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "306": {
+      "coordinates": [],
+      "name": "Beta Centauri",
+      "ring": 3,
+      "disctile": 0,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        560,
+        141
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        520,
+        570
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        1,
+        3
+      ],
+      "vp": 1,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "307": {
+      "coordinates": [],
+      "name": "Sigma Sagittarii",
+      "ring": 3,
+      "disctile": 0,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        326,
+        129
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [
+        "empty"
+      ],
+      "scienceadv1_snap": [
+        218,
+        473
+      ],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        2,
+        3
+      ],
+      "vp": 2,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "308": {
+      "coordinates": [],
+      "name": "Kappa Scorpii",
+      "ring": 3,
+      "disctile": 0,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        505,
+        153
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [
+        "empty"
+      ],
+      "materialadv1_snap": [
+        170,
+        408
+      ],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        2,
+        3,
+        5
+      ],
+      "vp": 2,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "309": {
+      "coordinates": [],
+      "name": "Phi Piscium",
+      "ring": 3,
+      "disctile": 0,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        518,
+        141
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [
+        "empty"
+      ],
+      "scienceadv1_snap": [
+        191,
+        429
+      ],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        3,
+        5
+      ],
+      "vp": 2,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "310": {
+      "coordinates": [],
+      "name": "Nu Phoenicis",
+      "ring": 3,
+      "disctile": 0,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        536,
+        136
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        298,
+        514
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        3
+      ],
+      "vp": 1,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "311": {
+      "coordinates": [],
+      "name": "Canopus",
+      "ring": 3,
+      "disctile": 1,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        511,
+        573
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        2,
+        3
+      ],
+      "vp": 1,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "312": {
+      "coordinates": [],
+      "name": "Antares",
+      "ring": 3,
+      "disctile": 1,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        455,
+        118
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3
+      ],
+      "vp": 1,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "313": {
+      "coordinates": [],
+      "name": "Alpha Ursae Minoris",
+      "ring": 3,
+      "disctile": 1,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [
+        "empty"
+      ],
+      "neutral1_snap": [
+        579,
+        135
+      ],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        3
+      ],
+      "vp": 1,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "314": {
+      "coordinates": [],
+      "name": "Spica",
+      "ring": 3,
+      "disctile": 1,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [
+        "empty"
+      ],
+      "neutral1_snap": [
+        258,
+        481
+      ],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        2,
+        3,
+        4
+      ],
+      "vp": 1,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "315": {
+      "coordinates": [],
+      "name": "Epsilon Aurigae",
+      "ring": 3,
+      "disctile": 1,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        3,
+        5
+      ],
+      "vp": 1,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "316": {
+      "coordinates": [],
+      "name": "iota Carinae",
+      "ring": 3,
+      "disctile": 1,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3
+      ],
+      "vp": 1,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "317": {
+      "coordinates": [],
+      "name": "Beta Crucius",
+      "ring": 3,
+      "disctile": 0,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        306,
+        589
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [
+        "empty"
+      ],
+      "moneyadv1_snap": [
+        306,
+        481
+      ],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        3,
+        4
+      ],
+      "vp": 2,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "standard"
+    }
+  },
+  {
+    "381": {
+      "coordinates": [],
+      "name": "Beta Sextantis",
+      "ring": 3,
+      "disctile": 1,
+      "money_pop": [
+        "empty"
+      ],
+      "money1_snap": [
+        527,
+        191
+      ],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        245,
+        162
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        3,
+        4
+      ],
+      "vp": 1,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 1,
+      "type": "standard"
+    }
+  },
+  {
+    "382": {
+      "coordinates": [],
+      "name": "Zeta Chamaeleontis",
+      "ring": 3,
+      "disctile": 1,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        226,
+        536
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        515,
+        582
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        2,
+        3
+      ],
+      "vp": 1,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 1,
+      "type": "standard"
+    }
+  },
+  {
+    "393": {
+      "coordinates": [],
+      "name": "Geminga",
+      "ring": 3,
+      "disctile": 0,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        320,
+        182
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3
+      ],
+      "vp": 1,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "pulsar"
+    }
+  },
+  {
+    "394": {
+      "coordinates": [],
+      "name": "Simeis 147",
+      "ring": 3,
+      "disctile": 0,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [
+        "empty"
+      ],
+      "material1_snap": [
+        326,
+        169
+      ],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        3,
+        5
+      ],
+      "vp": 1,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "pulsar"
+    }
+  },
+  {
+    "395": {
+      "coordinates": [],
+      "name": "NGC 1952",
+      "ring": 3,
+      "disctile": 2,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "vp": 0,
+      "artifact": 0,
+      "ancient": 1,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "nebula"
+    }
+  },
+  {
+    "396": {
+      "coordinates": [],
+      "name": "Cygnus X-1",
+      "ring": 3,
+      "disctile": 1,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        1,
+        2,
+        4,
+        5
+      ],
+      "vp": 0,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "bh1"
+    }
+  },
+  {
+    "397": {
+      "coordinates": [],
+      "name": "Betelgeuse",
+      "ring": 3,
+      "disctile": 0,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [
+        "empty"
+      ],
+      "moneyadv1_snap": [
+        245,
+        524
+      ],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        525,
+        204
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [
+        "empty"
+      ],
+      "materialadv1_snap": [
+        517,
+        575
+      ],
+      "materialadv2_snap": [],
+      "neutral_pop": [
+        "empty",
+        "empty"
+      ],
+      "neutral1_snap": [
+        291,
+        272
+      ],
+      "neutral2_snap": [
+        183,
+        272
+      ],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        1,
+        3
+      ],
+      "vp": 0,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "supernova"
+    }
+  },
+  {
+    "398": {
+      "coordinates": [],
+      "name": "Deneb",
+      "ring": 3,
+      "disctile": 0,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [
+        "empty"
+      ],
+      "moneyadv1_snap": [
+        543,
+        210
+      ],
+      "moneyadv2_snap": [],
+      "science_pop": [
+        "empty"
+      ],
+      "science1_snap": [
+        206,
+        431
+      ],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [
+        "empty"
+      ],
+      "materialadv1_snap": [
+        281,
+        228
+      ],
+      "materialadv2_snap": [],
+      "neutral_pop": [
+        "empty",
+        "empty"
+      ],
+      "neutral1_snap": [
+        455,
+        538
+      ],
+      "neutral2_snap": [
+        566,
+        538
+      ],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        0,
+        3,
+        5
+      ],
+      "vp": 0,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "supernova"
+    }
+  },
+  {
+    "399": {
+      "coordinates": [],
+      "name": "V616 MON",
+      "ring": 3,
+      "disctile": 1,
+      "money_pop": [],
+      "money1_snap": [],
+      "money2_snap": [],
+      "moneyadv_pop": [],
+      "moneyadv1_snap": [],
+      "moneyadv2_snap": [],
+      "science_pop": [],
+      "science1_snap": [],
+      "science2_snap": [],
+      "scienceadv_pop": [],
+      "scienceadv1_snap": [],
+      "scienceadv2_snap": [],
+      "material_pop": [],
+      "material1_snap": [],
+      "material2_snap": [],
+      "materialadv_pop": [],
+      "materialadv1_snap": [],
+      "materialadv2_snap": [],
+      "neutral_pop": [],
+      "neutral1_snap": [],
+      "neutral2_snap": [],
+      "neutral_adv_pop": [],
+      "neutraladv1_snap": [],
+      "neutraladv2_snap": [],
+      "wormholes": [
+        1,
+        2,
+        4,
+        5
+      ],
+      "vp": 0,
+      "artifact": 0,
+      "ancient": 0,
+      "guardian": 0,
+      "gcds": 0,
+      "warp": 0,
+      "type": "bhborder"
     }
   }
 ]
