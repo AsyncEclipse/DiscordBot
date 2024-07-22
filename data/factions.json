@@ -1,5 +1,4 @@
-[
-  {"hyd":{
+{"hyd":{
         "name": "Hydran Progress",
           "materials": 2,
           "science": 6,
@@ -46,9 +45,8 @@
           "cruiser_parts": ["elc","ioc", "empty", "nus", "hul", "nud"],
           "dread_parts": ["elc", "ioc", "ioc",  "empty", "nus", "hul", "hul", "nud"],  
           "starbase_parts": ["elc", "ioc", "hul", "empty", "hul"]
-          }
-  },
-  {"eri":{
+          },
+  "eri":{
         "name": "Eridani Empire",
           "materials": 4,
           "science": 2,
@@ -95,9 +93,8 @@
           "cruiser_parts": ["elc","ioc", "empty", "nus", "hul", "nud"],
           "dread_parts": ["elc", "ioc", "ioc",  "empty", "nus", "hul", "hul", "nud"],  
           "starbase_parts": ["elc", "ioc", "hul", "empty", "hul"]
-          }
-  },
-  {"ori":{
+          },
+  "ori":{
         "name": "Orion Hegemony",
           "materials": 4,
           "science": 3,
@@ -144,9 +141,8 @@
           "cruiser_parts": ["elc","ioc", "gas", "nus", "hul", "nud"],
           "dread_parts": ["elc", "ioc", "ioc",  "gas", "nus", "hul", "hul", "nud"],  
           "starbase_parts": ["elc", "ioc", "hul", "gas", "hul"]
-          }
-  },
-  {"dra":{
+          },
+  "dra":{
         "name": "Descendants of Draco",
           "materials": 3,
           "science": 4,
@@ -193,9 +189,8 @@
           "cruiser_parts": ["elc","ioc", "empty", "nus", "hul", "nud"],
           "dread_parts": ["elc", "ioc", "ioc",  "empty", "nus", "hul", "hul", "nud"],  
           "starbase_parts": ["elc", "ioc", "hul", "empty", "hul"]
-          }
-  },
-  {"mec":{
+          },
+  "mec":{
         "name": "Mechanema",
           "materials": 4,
           "science": 3,
@@ -242,9 +237,8 @@
           "cruiser_parts": ["elc","ioc", "empty", "nus", "hul", "nud"],
           "dread_parts": ["elc", "ioc", "ioc",  "empty", "nus", "hul", "hul", "nud"],  
           "starbase_parts": ["elc", "ioc", "hul", "empty", "hul"]
-          }
-  },
-  {"pla":{
+          },
+  "pla":{
         "name": "Planta",
           "materials": 4,
           "science": 3,
@@ -291,9 +285,8 @@
           "cruiser_parts": ["nus","ioc", "empty", "hul", "nud"],
           "dread_parts": ["nus", "ioc", "ioc",  "empty", "hul", "hul", "nud"],  
           "starbase_parts": ["elc", "hul", "ioc", "hul"]
-          }
-  },
-  {"ter1":{
+          },
+  "ter1":{
         "name": "Terran Alliance",
           "materials": 4,
           "science": 3,
@@ -340,9 +333,8 @@
           "cruiser_parts": ["elc","ioc", "empty", "nus", "hul", "nud"],
           "dread_parts": ["elc", "ioc", "ioc",  "empty", "nus", "hul", "hul", "nud"],  
           "starbase_parts": ["elc", "ioc", "hul", "empty", "hul"]
-          }
-  },
-  {"ter2":{
+          },
+  "ter2":{
         "name": "Terran Conglomerate",
           "materials": 4,
           "science": 3,
@@ -389,9 +381,8 @@
           "cruiser_parts": ["elc","ioc", "empty", "nus", "hul", "nud"],
           "dread_parts": ["elc", "ioc", "ioc",  "empty", "nus", "hul", "hul", "nud"],  
           "starbase_parts": ["elc", "ioc", "hul", "empty", "hul"]
-          }
-  },
-  {"ter3":{
+          },
+  "ter3":{
         "name": "Terran Directorarte",
           "materials": 4,
           "science": 3,
@@ -438,9 +429,8 @@
           "cruiser_parts": ["elc","ioc", "empty", "nus", "hul", "nud"],
           "dread_parts": ["elc", "ioc", "ioc",  "empty", "nus", "hul", "hul", "nud"],  
           "starbase_parts": ["elc", "ioc", "hul", "empty", "hul"]
-          }
-  },
-  {"ter4":{
+          },
+  "ter4":{
         "name": "Terran Federation",
           "materials": 4,
           "science": 3,
@@ -487,9 +477,8 @@
           "cruiser_parts": ["elc","ioc", "empty", "nus", "hul", "nud"],
           "dread_parts": ["elc", "ioc", "ioc",  "empty", "nus", "hul", "hul", "nud"],  
           "starbase_parts": ["elc", "ioc", "hul", "empty", "hul"]
-          }
-  },
-  {"ter5":{
+          },
+  "ter5":{
         "name": "Terran Republic",
           "materials": 4,
           "science": 3,
@@ -536,9 +525,8 @@
           "cruiser_parts": ["elc","ioc", "empty", "nus", "hul", "nud"],
           "dread_parts": ["elc", "ioc", "ioc",  "empty", "nus", "hul", "hul", "nud"],  
           "starbase_parts": ["elc", "ioc", "hul", "empty", "hul"]
-          }
-  },
-  {"ter6":{
+          },
+  "ter6":{
         "name": "Terran Union",
           "materials": 4,
           "science": 3,
@@ -587,4 +575,3 @@
           "starbase_parts": ["elc", "ioc", "hul", "empty", "hul"]
           }
   }
-]

@@ -1,5 +1,4 @@
-[
-  {"001":
+{"001":
     {
     "coordinates":[],
     "name":"Galactic Center",
@@ -37,9 +36,8 @@
     "gcds": 1,
     "warp": 0,
     "type": "ai"
-    }
-  },
-  {"271":
+    },
+  "271":
     {
     "coordinates":[],
     "name":"Omega Fornacis",
@@ -77,9 +75,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "ai"
-    }
-  },
-  {"272":
+    },
+  "272":
     {
     "coordinates":[],
     "name":"Sigma Hydrae",
@@ -117,9 +114,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "ai"
-    }
-  },
-  {"273":
+    },
+  "273":
     {
     "coordinates":[],
     "name":"Theta Ophiuchi",
@@ -157,9 +153,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "ai"
-    }
-  },
-  {"274":
+    },
+  "274":
     {
     "coordinates":[],
     "name":"Alpha Lyncis",
@@ -197,9 +192,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "ai"
-    }
-  },
-  {"221":
+    },
+  "221":
     {
     "coordinates":[],
     "name":"Procyon",
@@ -237,9 +231,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "home"
-    }
-  },
-  {"222":
+    },
+  "222":
     {
     "coordinates":[],
     "name":"Epsilon Eridani",
@@ -277,9 +270,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "home"
-    }
-  },
-  {"223":
+    },
+  "223":
     {
     "coordinates":[],
     "name":"Altair",
@@ -317,9 +309,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "home"
-    }
-  },
-  {"224":
+    },
+  "224":
     {
     "coordinates":[],
     "name":"Beta Hydri",
@@ -357,9 +348,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "home"
-    }
-  },
-  {"225":
+    },
+  "225":
     {
     "coordinates":[],
     "name":"Eta Cassiopeiae",
@@ -397,9 +387,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "home"
-    }
-  },
-  {"226":
+    },
+  "226":
     {
     "coordinates":[],
     "name":"61 Cygni",
@@ -437,9 +426,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "home"
-    }
-  },
-  {"227":
+    },
+  "227":
     {
     "coordinates":[],
     "name":"Sirius",
@@ -477,9 +465,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "home"
-    }
-  },
-  {"228":
+    },
+  "228":
     {
     "coordinates":[],
     "name":"Sigma Draconis",
@@ -517,9 +504,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "home"
-    }
-  },
-  {"229":
+    },
+  "229":
     {
     "coordinates":[],
     "name":"Tau Ceti",
@@ -557,9 +543,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "home"
-    }
-  },
-  {"230":
+    },
+  "230":
     {
     "coordinates":[],
     "name":"Lambda Aurigae",
@@ -597,9 +582,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "home"
-    }
-  },
-  {"231":
+    },
+  "231":
     {
     "coordinates":[],
     "name":"Delta Pavonis",
@@ -637,9 +621,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "home"
-    }
-  },
-  {"232":
+    },
+  "232":
     {
     "coordinates":[],
     "name":"Rigel",
@@ -677,9 +660,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "home"
-    }
-  },
-  {"101":
+    },
+  "101":
     {
     "coordinates":[],
     "name":"Castor",
@@ -717,9 +699,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"102":
+    },
+  "102":
     {
     "coordinates":[],
     "name":"Pollux",
@@ -757,9 +738,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"103":
+    },
+  "103":
     {
     "coordinates":[],
     "name":"Beta Leonis",
@@ -797,9 +777,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"104":
+    },
+  "104":
     {
     "coordinates":[],
     "name":"Arcturus",
@@ -837,9 +816,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"105":
+    },
+  "105":
     {
     "coordinates":[],
     "name":"Zeta Herculis",
@@ -877,9 +855,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"106":
+    },
+  "106":
     {
     "coordinates":[],
     "name":"Capella",
@@ -917,9 +894,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"107":
+    },
+  "107":
     {
     "coordinates":[],
     "name":"Aldebaran",
@@ -957,9 +933,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"108":
+    },
+  "108":
     {
     "coordinates":[],
     "name":"Mu Cassiopeiae",
@@ -997,9 +972,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"109":
+    },
+  "109":
     {
     "coordinates":[],
     "name":"Alpha Lacertae",
@@ -1037,9 +1011,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"110":
+    },
+  "110":
     {
     "coordinates":[],
     "name":"Iota Bootis",
@@ -1077,9 +1050,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"201":
+    },
+  "201":
     {
     "coordinates":[],
     "name":"Alpha Centauri",
@@ -1117,9 +1089,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"202":
+    },
+  "202":
     {
     "coordinates":[],
     "name":"Fomalhaut",
@@ -1157,9 +1128,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"203":
+    },
+  "203":
     {
     "coordinates":[],
     "name":"Chi Draconis",
@@ -1197,9 +1167,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"204":
+    },
+  "204":
     {
     "coordinates":[],
     "name":"Vega",
@@ -1237,9 +1206,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"205":
+    },
+  "205":
     {
     "coordinates":[],
     "name":"Mu Herculis",
@@ -1277,9 +1245,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"206":
+    },
+  "206":
     {
     "coordinates":[],
     "name":"Epsilon Indi",
@@ -1317,9 +1284,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"207":
+    },
+  "207":
     {
     "coordinates":[],
     "name":"Zeta Reticuli",
@@ -1357,9 +1323,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"208":
+    },
+  "208":
     {
     "coordinates":[],
     "name":"Iota Persei",
@@ -1397,9 +1362,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"209":
+    },
+  "209":
     {
     "coordinates":[],
     "name":"Delta Eridani",
@@ -1437,9 +1401,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"210":
+    },
+  "210":
     {
     "coordinates":[],
     "name":"Psi Capricorni",
@@ -1477,9 +1440,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"211":
+    },
+  "211":
     {
     "coordinates":[],
     "name":"Beta Aquilae",
@@ -1517,9 +1479,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"214":
+    },
+  "214":
     {
     "coordinates":[],
     "name":"Beta Monocerotis",
@@ -1557,9 +1518,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"281":
+    },
+  "281":
     {
     "coordinates":[],
     "name":"Delta Corvi",
@@ -1597,9 +1557,8 @@
     "gcds": 0,
     "warp": 1,
     "type": "standard"
-    }
-  },
-  {"295":
+    },
+  "295":
     {
     "coordinates":[],
     "name":"NGC 5189",
@@ -1637,9 +1596,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "nebula"
-    }
-  },
-  {"301":
+    },
+  "301":
     {
     "coordinates":[],
     "name":"Zeta Draconis",
@@ -1675,9 +1633,8 @@
     "ancient": 2,
     "guardian": 0,
     "gcds": 0
-    }
-  },
-  {"302":
+    },
+  "302":
     {
     "coordinates":[],
     "name":"Gammma Serpentis",
@@ -1715,9 +1672,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"303":
+    },
+  "303":
     {
     "coordinates":[],
     "name":"Eta Cephei",
@@ -1755,9 +1711,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"304":
+    },
+  "304":
     {
     "coordinates":[],
     "name":"Theta Pegasi",
@@ -1795,9 +1750,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"305":
+    },
+  "305":
     {
     "coordinates":[],
     "name":"Lambda Serpentis",
@@ -1835,9 +1789,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"306":
+    },
+  "306":
     {
     "coordinates":[],
     "name":"Beta Centauri",
@@ -1875,9 +1828,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"307":
+    },
+  "307":
     {
     "coordinates":[],
     "name":"Sigma Sagittarii",
@@ -1915,9 +1867,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"308":
+    },
+  "308":
     {
     "coordinates":[],
     "name":"Kappa Scorpii",
@@ -1955,9 +1906,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"309":
+    },
+  "309":
     {
     "coordinates":[],
     "name":"Phi Piscium",
@@ -1995,9 +1945,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"310":
+    },
+  "310":
     {
     "coordinates":[],
     "name":"Nu Phoenicis",
@@ -2035,9 +1984,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"311":
+    },
+  "311":
     {
     "coordinates":[],
     "name":"Canopus",
@@ -2075,9 +2023,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"312":
+    },
+  "312":
     {
     "coordinates":[],
     "name":"Antares",
@@ -2115,9 +2062,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"313":
+    },
+  "313":
     {
     "coordinates":[],
     "name":"Alpha Ursae Minoris",
@@ -2155,9 +2101,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"314":
+    },
+  "314":
     {
     "coordinates":[],
     "name":"Spica",
@@ -2195,9 +2140,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"315":
+    },
+  "315":
     {
     "coordinates":[],
     "name":"Epsilon Aurigae",
@@ -2235,9 +2179,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"316":
+    },
+  "316":
     {
     "coordinates":[],
     "name":"iota Carinae",
@@ -2275,9 +2218,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"317":
+    },
+  "317":
     {
     "coordinates":[],
     "name":"Beta Crucius",
@@ -2315,9 +2257,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    }
-  },
-  {"381":
+    },
+  "381":
     {
     "coordinates":[],
     "name":"Beta Sextantis",
@@ -2355,9 +2296,8 @@
     "gcds": 0,
     "warp": 1,
     "type": "standard"
-    }
-  },
-  {"382":
+    },
+  "382":
     {
     "coordinates":[],
     "name":"Zeta Chamaeleontis",
@@ -2395,9 +2335,8 @@
     "gcds": 0,
     "warp": 1,
     "type": "standard"
-    }
-  },
-  {"393":
+    },
+  "393":
     {
     "coordinates":[],
     "name":"Geminga",
@@ -2435,9 +2374,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "pulsar"
-    }
-  },
-  {"394":
+    },
+  "394":
     {
     "coordinates":[],
     "name":"Simeis 147",
@@ -2475,9 +2413,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "pulsar"
-    }
-  },
-  {"395":
+    },
+  "395":
     {
     "coordinates":[],
     "name":"NGC 1952",
@@ -2515,9 +2452,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "nebula"
-    }
-  },
-  {"396":
+    },
+  "396":
     {
     "coordinates":[],
     "name":"Cygnus X-1",
@@ -2555,9 +2491,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "bh1"
-    }
-  },
-  {"397":
+    },
+  "397":
     {
     "coordinates":[],
     "name":"Betelgeuse",
@@ -2595,9 +2530,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "supernova"
-    }
-  },
-  {"398":
+    },
+  "398":
     {
     "coordinates":[],
     "name":"Deneb",
@@ -2635,9 +2569,8 @@
     "gcds": 0,
     "warp": 0,
     "type": "supernova"
-    }
-  },
-  {"399":
+    },
+  "399":
     {
     "coordinates":[],
     "name":"V616 MON",
@@ -2677,4 +2610,3 @@
     "type": "bhborder"
     }
   }
-]
