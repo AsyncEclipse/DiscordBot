@@ -17,35 +17,67 @@ class GamestateHelper:
             gamestate = json.load(f)
         return gamestate
     
-    def drawTile(self, context, position, tileName):
+    def showTile(self, tileName):
+        filepath = "images/resources/hexes/sector1/"+tileName+".png"
+        if not os.path.exists(filepath):  
+            filepath = "images/resources/hexes/sector2/"+tileName+".png"
+        if not os.path.exists(filepath):  
+            filepath = "images/resources/hexes/sector3/"+tileName+".png"
+        if os.path.exists(filepath):  
+            tileImage = Image.open(filepath).convert("RGBA")
+            tileImage = tileImage.resize((345, 299))
+            return tileImage
+    
+    def retrieveTileFromList(self, ring):
+        tileList = self.gamestate["tile_deck_"+str(ring)+"00"]
+        random.shuffle(tileList)
+        tile = tileList.pop()
+        self.gamestate["tile_deck_"+str(ring)+"00"] = tileList
+        self.update()
+        return tile
+
+    
+    def drawTile(self, context, position, tileName, rotation):
         configs = Properties()
         with open("data/tileImageCoordinates.properties", "rb") as f:
             configs.load(f)
-        x = configs.get(position)[0].split(",")[0]
-        y = configs.get(position)[0].split(",")[1]
+        x = int(configs.get(position)[0].split(",")[0])
+        y = int(configs.get(position)[0].split(",")[1])
         filepath = "images/resources/hexes/defended/"+tileName+".png"
         if not os.path.exists(filepath):  
             filepath = "images/resources/hexes/homesystems/"+tileName+".png"
+        if not os.path.exists(filepath):  
+            filepath = "images/resources/hexes/backs/"+tileName+".png"
+        if not os.path.exists(filepath):
+            filepath = "images/resources/hexes/sector1/"+tileName+".png"
+        if not os.path.exists(filepath):  
+            filepath = "images/resources/hexes/sector2/"+tileName+".png"
+        if not os.path.exists(filepath):  
+            filepath = "images/resources/hexes/sector3/"+tileName+".png"
+        if os.path.exists(filepath):  
+            tileImage = Image.open(filepath).convert("RGBA")
+            tileImage = tileImage.rotate(rotation)
+            tileImage = tileImage.resize((345, 299))
+            
+            font = ImageFont.truetype("arial.ttf", size=45) 
+            text = str(position)
+            text_position = (255, 132) 
+            text_color = (255, 255, 255) 
+            textDrawableImage = ImageDraw.Draw(tileImage)
+            textDrawableImage.text(text_position,text,text_color,font=font)
+            context.paste(tileImage,(x,y),mask=tileImage)
 
-        tileImage = Image.open(filepath).convert("RGBA")
-        tileImage = GamestateHelper.remove_background(tileImage)
-        tileImage = tileImage.resize((345, 322))
-        context.paste(tileImage,(int(x),int(y)))
         return context
 
+    def updateTileList(self, tileList):
+        self.gamestate["board"] = tileList
+        self.update()
     
-    def remove_background(image):  
-        cv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGBA2BGRA)  
-        gray = cv2.cvtColor(cv_image, cv2.COLOR_BGRA2GRAY)  
-        _, mask = cv2.threshold(gray, 250, 255, cv2.THRESH_BINARY)  
-        mask = cv2.bitwise_not(mask)  
-        result = cv2.bitwise_and(cv_image, cv_image, mask=mask)  
-
-        b, g, r, a = cv2.split(result)  
-        result_rgba = cv2.merge((r, g, b, a))  # Reorder the channels to RGBA format  
-
-        result_pil = Image.fromarray(result_rgba, 'RGBA')  
-        return result_pil
+    def addTile(self, position, image, orientation):
+        tileList = self.gamestate["board"]
+        tileList[position] = (image, orientation)
+        self.gamestate["board"] = tileList
+        self.update()
 
     def player_setup(self, player_id, faction):
 
