@@ -1,5 +1,4 @@
-[
-  {"anc":{
+{"anc":{
         "name": "Antimatter Cannon",
           "range": 0,
           "speed": 0,
@@ -13,8 +12,8 @@
           "hull": 0,
           "repair": 0,
           "external":0
-    }},
-  {"ioc":{
+    },
+  "ioc":{
         "name": "Ion Cannon",
           "range": 0,
           "speed": 0,
@@ -28,8 +27,8 @@
           "hull": 0,
           "repair": 0,
           "external":0
-    }},
-  {"plc":{
+    },
+  "plc":{
         "name": "Plasma Cannon",
           "range": 0,
           "speed": 0,
@@ -43,8 +42,8 @@
           "hull": 0,
           "repair": 0,
           "external":0
-    }},
-  {"rican":{
+    },
+  "rican":{
         "name": "Rift Cannon",
           "range": 0,
           "speed": 0,
@@ -58,8 +57,8 @@
           "hull": 0,
           "repair": 0,
           "external":0
-    }},
-  {"socan":{
+    },
+  "socan":{
         "name": "Soliton Cannon",
           "range": 0,
           "speed": 0,
@@ -73,8 +72,8 @@
           "hull": 0,
           "repair": 0,
           "external":0
-    }},
-  {"elc":{
+    },
+  "elc":{
         "name": "Electron Computer",
           "range": 0,
           "speed": 0,
@@ -88,8 +87,8 @@
           "hull": 0,
           "repair": 0,
           "external":0
-    }},
-  {"poc":{
+    },
+  "poc":{
         "name": "Positron Computer",
           "range": 0,
           "speed": 0,
@@ -103,8 +102,8 @@
           "hull": 0,
           "repair": 0,
           "external":0
-    }},
-  {"glc":{
+    },
+  "glc":{
         "name": "Gluon Computer",
           "range": 0,
           "speed": 0,
@@ -118,8 +117,8 @@
           "hull": 0,
           "repair": 0,
           "external":0
-    }},
-  {"axc":{
+    },
+  "axc":{
         "name": "Axion Computer",
           "range": 0,
           "speed": 1,
@@ -133,8 +132,8 @@
           "hull": 0,
           "repair": 0,
           "external":0
-    }},
-  {"socan":{
+    },
+  "socan":{
         "name": "Soliton Charger",
           "range": 0,
           "speed": 0,
@@ -148,8 +147,8 @@
           "hull": 0,
           "repair": 0,
           "external":0
-    }},
-  {"iod":{
+    },
+  "iod":{
         "name": "Ion Disruptor",
           "range": 0,
           "speed": 3,
@@ -163,8 +162,8 @@
           "hull": 0,
           "repair": 0,
           "external":0
-    }},
-  {"cod":{
+    },
+  "cod":{
         "name": "Conformal Drive",
           "range": 4,
           "speed": 2,
@@ -178,8 +177,8 @@
           "hull": 0,
           "repair": 0,
           "external":0
-    }},
-  {"jud":{
+    },
+  "jud":{
         "name": "Jump Drive",
           "range": 1,
           "speed": 0,
@@ -193,8 +192,8 @@
           "hull": 0,
           "repair": 0,
           "external":0
-    }},
-  {"shd":{
+    },
+  "shd":{
         "name": "Shard Hull",
           "range": 0,
           "speed": 0,
@@ -208,8 +207,8 @@
           "hull": 3,
           "repair": 0,
           "external":0
-    }},
-  {"iot":{
+    },
+  "iot":{
         "name": "Ion Turret",
           "range": 0,
           "speed": 0,
@@ -223,8 +222,8 @@
           "hull": 0,
           "repair": 0,
           "external":0
-    }},
-  {"anm":{
+    },
+  "anm":{
         "name": "Antimatter Missile",
           "range": 0,
           "speed": 0,
@@ -238,8 +237,8 @@
           "hull": 0,
           "repair": 0,
           "external":0
-    }},
-  {"iom":{
+    },
+  "iom":{
         "name": "Ion Missile",
           "range": 0,
           "speed": 0,
@@ -253,8 +252,8 @@
           "hull": 0,
           "repair": 0,
           "external":0       
-    }},
-  {"som":{
+    },
+  "som":{
         "name": "Soliton Missile",
           "range": 0,
           "speed": 0,
@@ -268,8 +267,8 @@
           "hull": 0,
           "repair": 0,
           "external":0       
-    }},
-  {"ricon":{
+    },
+  "ricon":{
         "name": "Rift Conductor",
           "range": 0,
           "speed": 0,
@@ -283,8 +282,8 @@
           "hull": 1,
           "repair": 0,
           "external":0       
-    }},
-  {"fls":{
+    },
+  "fls":{
         "name": "Flux Shield",
           "range": 0,
           "speed": 1,
@@ -298,8 +297,8 @@
           "hull": 0,
           "repair": 0,
           "external":0      
-    }},
-  {"ins":{
+    },
+  "ins":{
         "name": "Inversion Shield",
           "range": 0,
           "speed": 0,
@@ -313,8 +312,8 @@
           "hull": 0,
           "repair": 0,
           "external":0       
-    }},
-  {"hyg":{
+    },
+  "hyg":{
         "name": "Hypergrid Source",
           "range": 0,
           "speed": 0,
@@ -328,8 +327,8 @@
           "hull": 0,
           "repair": 0,
           "external":0       
-    }},
-  {"mus":{
+    },
+  "mus":{
         "name": "Muon Source",
           "range": 0,
           "speed": 1,
@@ -343,8 +342,8 @@
           "hull": 0,
           "repair": 0,
           "external": 1
-    }},
-  {"plt":{
+    },
+  "plt":{
         "name": "Plasma Turret",
           "range": 0,
           "speed": 0,
@@ -358,8 +357,8 @@
           "hull": 0,
           "repair": 0,
           "external": 0
-    }},
-  {"fud":{
+    },
+  "fud":{
         "name": "Fusion Drive",
           "range": 2,
           "speed": 2,
@@ -373,8 +372,8 @@
           "hull": 0,
           "repair": 0,
           "external": 0
-    }},
-  {"nud":{
+    },
+  "nud":{
         "name": "Nuclear Drive",
           "range": 1,
           "speed": 1,
@@ -388,8 +387,8 @@
           "hull": 0,
           "repair": 0,
           "external": 0
-    }},
-  {"tad":{
+    },
+  "tad":{
         "name": "Tachyon Drive",
           "range": 3,
           "speed": 3,
@@ -403,8 +402,8 @@
           "hull": 0,
           "repair" : 0,
           "external":0
-    }},
-  {"trd":{
+    },
+  "trd":{
         "name": "Transition Drive",
           "range": 3,
           "speed": 0,
@@ -418,8 +417,8 @@
           "hull": 0,
           "repair": 0,
           "external": 0
-    }},
-  {"hul":{
+    },
+  "hul":{
         "name": "Hull",
           "range": 0,
           "speed": 0,
@@ -433,8 +432,8 @@
           "hull": 1,
           "repair": 0,
           "external": 0
-    }},
-  {"coh":{
+    },
+  "coh":{
         "name": "Conifold Hull",
           "range": 0,
           "speed": 0,
@@ -448,8 +447,8 @@
           "hull": 3,
           "repair": 0,
           "external": 0
-    }},
-  {"imh":{
+    },
+  "imh":{
         "name": "Improved Hull",
           "range": 0,
           "speed": 0,
@@ -463,8 +462,8 @@
           "hull": 2,
           "repair": 0,
           "external": 0
-    }},
-  {"seh":{
+    },
+  "seh":{
         "name": "Sentient Hull",
           "range": 0,
           "speed": 0,
@@ -478,8 +477,8 @@
           "hull": 1,
           "repair": 0,
           "external": 0
-    }},
-  {"flm":{
+    },
+  "flm":{
         "name": "Flux Missile",
           "range": 0,
           "speed": 1,
@@ -493,8 +492,8 @@
           "hull": 0,
           "repair": 0,
           "external": 0
-    }},
-  {"plm":{
+    },
+  "plm":{
         "name": "Plasma Missile",
           "range": 0,
           "speed": 0,
@@ -508,8 +507,8 @@
           "hull": 0,
           "repair": 0,
           "external": 0
-    }},
-  {"abs":{
+    },
+  "abs":{
         "name": "Absorption Shield",
           "range": 0,
           "speed": 0,
@@ -523,8 +522,8 @@
           "hull": 0,
           "repair": 0,
           "external": 0
-    }},
-  {"gas":{
+    },
+  "gas":{
         "name": "Gauss Shield",
           "range": 0,
           "speed": 0,
@@ -538,8 +537,8 @@
           "hull": 0,
           "repair": 0,
           "external": 0
-    }},
-  {"phs":{
+    },
+  "phs":{
         "name": "Phase Shield",
           "range": 0,
           "speed": 0,
@@ -553,8 +552,8 @@
           "hull": 0,
           "repair": 0,
           "external": 0
-    }},
-  {"fus":{
+    },
+  "fus":{
         "name": "Fusion Source",
           "range": 0,
           "speed": 0,
@@ -568,8 +567,8 @@
           "hull": 0,
           "repair": 0,
           "external": 0
-    }},
-  {"nus":{
+    },
+  "nus":{
         "name": "Nuclear Source",
           "range": 0,
           "speed": 0,
@@ -583,8 +582,8 @@
           "hull": 0,
           "repair": 0,
           "external": 0
-    }},
-  {"tas":{
+    },
+  "tas":{
         "name": "Tachyon Source",
           "range": 0,
           "speed": 0,
@@ -598,8 +597,8 @@
           "hull": 0,
           "repair": 0,
           "external": 0
-    }},
-  {"zes":{
+    },
+  "zes":{
         "name": "Zero-point Source",
           "range": 0,
           "speed": 0,
@@ -614,4 +613,3 @@
           "repair": 0,
           "external": 0
     }}
-]  
