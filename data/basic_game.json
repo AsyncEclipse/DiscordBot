@@ -22,5 +22,5 @@
             "orb", "orb", "orb", "wog", "wog", "wog", "abs", "anl", "ans", "clo", "con", "flm", "iml", "met", "rican",
             "seh", "socan", "trd", "zes", "pim", "nea", "wap"],
       "available_techs": [],
-      "board": []
+      "board": {}
 }
