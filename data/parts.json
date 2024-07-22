@@ -342,7 +342,7 @@
           "missile": [],
           "hull": 0,
           "repair": 0,
-          "external": 1,
+          "external": 1
     }},
   {"plt":{
         "name": "Plasma Turret",
