@@ -6,22 +6,22 @@
     "ring": 0,
     "disctile": 1,
     "money_pop": ["empty","empty"],
-    "money1_snap": [476,590],
-    "money2_snap": [584,590],
+    "money1_snap": [728,733],
+    "money2_snap": [590,733],
     "moneyadv_pop" : [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [574,140],
+    "science1_snap": [710,176],
     "science2_snap": [],
     "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [476,140],
+    "scienceadv1_snap": [576,176],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [163,420],
+    "material1_snap": [204,520],
     "material2_snap": [],
     "materialadv_pop": ["empty"],
-    "materialadv1_snap": [163,310],
+    "materialadv1_snap": [204,384],
     "materialadv2_snap": [],
     "neutral_pop": [],
     "neutral1_snap": [],
@@ -38,7 +38,7 @@
     "warp": 0,
     "type": "ai"
     }
-  }
+  },
   {"271":
     {
     "coordinates":[],
@@ -46,13 +46,13 @@
     "ring": 2,
     "disctile": 1,
     "money_pop": ["empty"],
-    "money1_snap": [580, 190],
+    "money1_snap": [720,238],
     "money2_snap": [],
     "moneyadv_pop" : [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [512,580],
+    "science1_snap": [640,722],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -61,7 +61,7 @@
     "material1_snap": [],
     "material2_snap": [],
     "materialadv_pop": ["empty"],
-    "materialadv1_snap": [205,245],
+    "materialadv1_snap": [250,302],
     "materialadv2_snap": [],
     "neutral_pop": [],
     "neutral1_snap": [],
@@ -78,7 +78,7 @@
     "warp": 0,
     "type": "ai"
     }
-  }
+  },
   {"272":
     {
     "coordinates":[],
@@ -86,7 +86,7 @@
     "ring": 2,
     "disctile": 1,
     "money_pop": ["empty"],
-    "money1_snap": [302,207],
+    "money1_snap": [376,254],
     "money2_snap": [],
     "moneyadv_pop" : [],
     "moneyadv1_snap": [],
@@ -95,10 +95,10 @@
     "science1_snap": [],
     "science2_snap": [],
     "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [247,545],
+    "scienceadv1_snap": [636,722],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [514,585],
+    "material1_snap": [304,672],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -118,7 +118,7 @@
     "warp": 0,
     "type": "ai"
     }
-  }
+  },
   {"273":
     {
     "coordinates":[],
@@ -126,7 +126,7 @@
     "ring": 2,
     "disctile": 1,
     "money_pop": ["empty"],
-    "money1_snap": [303,575],
+    "money1_snap": [376,706],
     "money2_snap": [],
     "moneyadv_pop" : [],
     "moneyadv1_snap": [],
@@ -138,11 +138,11 @@
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [352,157],
+    "material1_snap": [434,190],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": ["empty"],
-    "materialadv2_snap": [242,157],
+    "materialadv2_snap": [305,190],
     "neutral_pop": [],
     "neutral1_snap": [],
     "neutral2_snap": [],
@@ -158,7 +158,7 @@
     "warp": 0,
     "type": "ai"
     }
-  }
+  },
   {"274":
     {
     "coordinates":[],
@@ -166,16 +166,16 @@
     "ring": 2,
     "disctile": 1,
     "money_pop": ["empty"],
-    "money1_snap": [593,554],
+    "money1_snap": [736,686],
     "money2_snap": [],
     "moneyadv_pop" : [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [184,395],
+    "science1_snap": [232,492],
     "science2_snap": [],
     "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [184,290],
+    "scienceadv1_snap": [232,356],
     "scienceadv2_snap": [],
     "material_pop": [],
     "material1_snap": [],
@@ -198,7 +198,7 @@
     "warp": 0,
     "type": "ai"
     }
-  }
+  },
   {"221":
     {
     "coordinates":[],
@@ -206,19 +206,19 @@
     "ring": 2,
     "disctile": 0,
     "money_pop": ["empty"],
-    "money1_snap": [489,169],
+    "money1_snap": [605,206],
     "money2_snap": [],
     "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [380,169],
+    "moneyadv1_snap": [470,206],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [365,532],
+    "science1_snap": [456,660],
     "science2_snap": [],
     "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [258,532],
+    "scienceadv1_snap": [324,660],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [536,555],
+    "material1_snap": [662,689],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -238,7 +238,7 @@
     "warp": 0,
     "type": "home"
     }
-  }
+  },
   {"222":
     {
     "coordinates":[],
@@ -246,17 +246,17 @@
     "ring": 2,
     "disctile": 0,
     "money_pop": ["empty"],
-    "money1_snap": [474,184],
+    "money1_snap": [589,221],
     "money2_snap": [],
     "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [367,184],
+    "moneyadv1_snap": [454,221],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [600,529],
+    "science1_snap": [740,650],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": ["empty"],
-    "scienceadv2_snap": [495,529],
+    "scienceadv2_snap": [610,653],
     "material_pop": [],
     "material1_snap": [],
     "material2_snap": [],
@@ -278,7 +278,7 @@
     "warp": 0,
     "type": "home"
     }
-  }
+  },
   {"223":
     {
     "coordinates":[],
@@ -286,19 +286,19 @@
     "ring": 2,
     "disctile": 0,
     "money_pop": ["empty"],
-    "money1_snap": [529,169],
+    "money1_snap": [656,206],
     "money2_snap": [],
     "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [421,169],
+    "moneyadv1_snap": [524,206],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [259,338],
+    "science1_snap": [317,421],
     "science2_snap": [],
     "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [152,337],
+    "scienceadv1_snap": [185,421],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [493,571],
+    "material1_snap": [612,705],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -318,7 +318,7 @@
     "warp": 0,
     "type": "home"
     }
-  }
+  },
   {"224":
     {
     "coordinates":[],
@@ -326,7 +326,7 @@
     "ring": 2,
     "disctile": 0,
     "money_pop": ["empty"],
-    "money1_snap": [390,160],
+    "money1_snap": [488,200],
     "money2_snap": [],
     "moneyadv_pop" : [],
     "moneyadv1_snap": [],
@@ -335,13 +335,13 @@
     "science1_snap": [],
     "science2_snap": [],
     "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [180,368],
+    "scienceadv1_snap": [221,462],
     "scienceadv2_snap": [],
     "material_pop": [],
     "material1_snap": [],
     "material2_snap": [],
     "materialadv_pop": ["empty"],
-    "materialadv1_snap": [584,567],
+    "materialadv1_snap": [728,700],
     "materialadv2_snap": [],
     "neutral_pop": [],
     "neutral1_snap": [],
@@ -358,7 +358,7 @@
     "warp": 0,
     "type": "home"
     }
-  }
+  },
   {"225":
     {
     "coordinates":[],
@@ -366,19 +366,19 @@
     "ring": 2,
     "disctile": 0,
     "money_pop": ["empty"],
-    "money1_snap": [278,582],
+    "money1_snap": [341,733],
     "money2_snap": [],
     "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [278,486],
+    "moneyadv1_snap": [341,601],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [609,525],
+    "science1_snap": [752,648],
     "science2_snap": [],
     "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [501,525],
+    "scienceadv1_snap": [620,648],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [281,208],
+    "material1_snap": [346,257],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -398,7 +398,7 @@
     "warp": 0,
     "type": "home"
     }
-  }
+  },
   {"226":
     {
     "coordinates":[],
@@ -412,13 +412,13 @@
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [525,570],
+    "science1_snap": [396,688],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [319,564],
+    "material1_snap": [652,708],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -438,7 +438,7 @@
     "warp": 0,
     "type": "home"
     }
-  }
+  },
   {"227":
     {
     "coordinates":[],
@@ -446,19 +446,19 @@
     "ring": 2,
     "disctile": 0,
     "money_pop": ["empty"],
-    "money1_snap": [540,603],
+    "money1_snap": [672,748],
     "money2_snap": [],
     "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [540,493],
+    "moneyadv1_snap": [672,613],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [401,178],
+    "science1_snap": [498,220],
     "science2_snap": [],
     "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [295,178],
+    "scienceadv1_snap": [364,220],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [256,542],
+    "material1_snap": [318,670],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -478,7 +478,7 @@
     "warp": 0,
     "type": "home"
     }
-  }
+  },
   {"228":
     {
     "coordinates":[],
@@ -486,13 +486,13 @@
     "ring": 2,
     "disctile": 0,
     "money_pop": ["empty"],
-    "money1_snap": [426,160],
+    "money1_snap": [530,198],
     "money2_snap": [],
     "moneyadv_pop" : [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [317,539],
+    "science1_snap": [392,669],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -501,7 +501,7 @@
     "material1_snap": [],
     "material2_snap": [],
     "materialadv_pop": ["empty"],
-    "materialadv1_snap": [534,567],
+    "materialadv1_snap": [662,708],
     "materialadv2_snap": [],
     "neutral_pop": [],
     "neutral1_snap": [],
@@ -518,7 +518,7 @@
     "warp": 0,
     "type": "home"
     }
-  }
+  },
   {"229":
     {
     "coordinates":[],
@@ -526,19 +526,19 @@
     "ring": 2,
     "disctile": 0,
     "money_pop": ["empty"],
-    "money1_snap": [279,593],
+    "money1_snap": [346,736],
     "money2_snap": [],
     "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [279,487],
+    "moneyadv1_snap": [733,669],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [589,540],
+    "science1_snap": [597,669],
     "science2_snap": [],
     "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [486,540],
+    "scienceadv1_snap": [594,669],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [508,195],
+    "material1_snap": [622,245],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -558,7 +558,7 @@
     "warp": 0,
     "type": "home"
     }
-  }
+  },
   {"230":
     {
     "coordinates":[],
@@ -566,13 +566,13 @@
     "ring": 2,
     "disctile": 0,
     "money_pop": ["empty"],
-    "money1_snap": [438,183],
+    "money1_snap": [454,225],
     "money2_snap": [],
     "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [331,183],
+    "moneyadv1_snap": [410,225],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [270,576],
+    "science1_snap": [336,712],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -581,7 +581,7 @@
     "material1_snap": [],
     "material2_snap": [],
     "materialadv_pop": ["empty"],
-    "materialadv1_snap": [544,536],
+    "materialadv1_snap": [674,664],
     "materialadv2_snap": [],
     "neutral_pop": [],
     "neutral1_snap": [],
@@ -598,7 +598,7 @@
     "warp": 0,
     "type": "home"
     }
-  }
+  },
   {"231":
     {
     "coordinates":[],
@@ -606,19 +606,19 @@
     "ring": 2,
     "disctile": 0,
     "money_pop": ["empty"],
-    "money1_snap": [604,523],
+    "money1_snap": [749,646],
     "money2_snap": [],
     "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [494,523],
+    "moneyadv1_snap": [612,646],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [463,180],
+    "science1_snap": [576,226],
     "science2_snap": [],
     "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [357,180],
+    "scienceadv1_snap": [441,226],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [282,578],
+    "material1_snap": [342,716],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -638,7 +638,7 @@
     "warp": 0,
     "type": "home"
     }
-  }
+  },
   {"232":
     {
     "coordinates":[],
@@ -649,19 +649,19 @@
     "money1_snap": [],
     "money2_snap": [],
     "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [453,189],
+    "moneyadv1_snap": [560,234],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [196,348],
+    "science1_snap": [241,432],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [588,540],
+    "material1_snap": [724,672],
     "material2_snap": [],
     "materialadv_pop": ["empty"],
-    "materialadv1_snap": [480,540],
+    "materialadv1_snap": [589,672],
     "materialadv2_snap": [],
     "neutral_pop": [],
     "neutral1_snap": [],
@@ -678,7 +678,7 @@
     "warp": 0,
     "type": "home"
     }
-  }
+  },
   {"101":
     {
     "coordinates":[],
@@ -686,7 +686,7 @@
     "ring": 1,
     "disctile": 1,
     "money_pop": ["empty"],
-    "money1_snap": [596,195],
+    "money1_snap": [736,234],
     "money2_snap": [],
     "moneyadv_pop" : [],
     "moneyadv1_snap": [],
@@ -698,10 +698,10 @@
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [372,143],
+    "material1_snap": [454,178],
     "material2_snap": [],
     "materialadv_pop": ["empty"],
-    "materialadv1_snap": [263,143],
+    "materialadv1_snap": [325,174],
     "materialadv2_snap": [],
     "neutral_pop": [],
     "neutral1_snap": [],
@@ -718,7 +718,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"102":
     {
     "coordinates":[],
@@ -735,8 +735,8 @@
     "science1_snap": [],
     "science2_snap": [],
     "scienceadv_pop": ["empty","empty"],
-    "scienceadv1_snap": [251,547],
-    "scienceadv2_snap": [359,544],
+    "scienceadv1_snap": [445,673],
+    "scienceadv2_snap": [308,673],
     "material_pop": [],
     "material1_snap": [],
     "material2_snap": [],
@@ -758,7 +758,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"103":
     {
     "coordinates":[],
@@ -766,13 +766,13 @@
     "ring": 1,
     "disctile": 0,
     "money_pop": ["empty"],
-    "money1_snap": [311,524],
+    "money1_snap": [386,642],
     "money2_snap": [],
     "moneyadv_pop" : [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [492,186],
+    "science1_snap": [605,234],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -798,7 +798,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"104":
     {
     "coordinates":[],
@@ -806,16 +806,16 @@
     "ring": 1,
     "disctile": 1,
     "money_pop": ["empty"],
-    "money1_snap": [569,141],
+    "money1_snap": [702,170],
     "money2_snap": [],
     "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [459,141],
+    "moneyadv1_snap": [570,170],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [282,628],
+    "science1_snap": [360,768],
     "science2_snap": [],
     "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [282,515],
+    "scienceadv1_snap": [360,638],
     "scienceadv2_snap": [],
     "material_pop": [],
     "material1_snap": [],
@@ -838,7 +838,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"105":
     {
     "coordinates":[],
@@ -846,13 +846,13 @@
     "ring": 1,
     "disctile": 1,
     "money_pop": ["empty"],
-    "money1_snap": [535,127],
+    "money1_snap": [665,162],
     "money2_snap": [],
     "moneyadv_pop" : [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [146,380],
+    "science1_snap": [176,470],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -861,7 +861,7 @@
     "material1_snap": [],
     "material2_snap": [],
     "materialadv_pop": ["empty"],
-    "materialadv1_snap": [590,557],
+    "materialadv1_snap": [732,668],
     "materialadv2_snap": [],
     "neutral_pop": [],
     "neutral1_snap": [],
@@ -878,7 +878,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"106":
     {
     "coordinates":[],
@@ -892,13 +892,13 @@
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [287,226],
+    "science1_snap": [353,282],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [553,218],
+    "material1_snap": [681,268],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -918,7 +918,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"107":
     {
     "coordinates":[],
@@ -926,7 +926,7 @@
     "ring": 1,
     "disctile": 0,
     "money_pop": ["empty"],
-    "money1_snap": [226,462],
+    "money1_snap": [274,568],
     "money2_snap": [],
     "moneyadv_pop" : [],
     "moneyadv1_snap": [],
@@ -935,13 +935,13 @@
     "science1_snap": [],
     "science2_snap": [],
     "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [490,147],
+    "scienceadv1_snap": [604,184],
     "scienceadv2_snap": [],
     "material_pop": [],
     "material1_snap": [],
     "material2_snap": [],
     "materialadv_pop": ["empty"],
-    "materialadv1_snap": [575,542],
+    "materialadv1_snap": [706,673],
     "materialadv2_snap": [],
     "neutral_pop": [],
     "neutral1_snap": [],
@@ -958,7 +958,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"108":
     {
     "coordinates":[],
@@ -969,10 +969,10 @@
     "money1_snap": [],
     "money2_snap": [],
     "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [204,264],
+    "moneyadv1_snap": [253,325],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [487,132],
+    "science1_snap": [600,160],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -984,7 +984,7 @@
     "materialadv1_snap": [],
     "materialadv2_snap": [],
     "neutral_pop": ["empty"],
-    "neutral1_snap": [500,569],
+    "neutral1_snap": [616,702],
     "neutral2_snap": [],
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
@@ -998,7 +998,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"109":
     {
     "coordinates":[],
@@ -1006,7 +1006,7 @@
     "ring": 1,
     "disctile": 1,
     "money_pop": ["empty"],
-    "money1_snap": [522,149],
+    "money1_snap": [648,185],
     "money2_snap": [],
     "moneyadv_pop" : [],
     "moneyadv1_snap": [],
@@ -1018,7 +1018,7 @@
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [326,117],
+    "material1_snap": [404,145],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -1038,7 +1038,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"110":
     {
     "coordinates":[],
@@ -1049,7 +1049,7 @@
     "money1_snap": [],
     "money2_snap": [],
     "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [163,303],
+    "moneyadv1_snap": [201,376],
     "moneyadv2_snap": [],
     "science_pop": [],
     "science1_snap": [],
@@ -1068,7 +1068,7 @@
     "neutral2_snap": [],
     "neutral_adv_pop": [],
     "neutraladv1_snap": ["empty"],
-    "neutraladv2_snap": [498,594],
+    "neutraladv2_snap": [618,729],
     "wormholes": [0,2,3,4],
     "vp": 2,
     "artifact": 0,
@@ -1078,7 +1078,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"201":
     {
     "coordinates":[],
@@ -1086,7 +1086,7 @@
     "ring": 2,
     "disctile": 0,
     "money_pop": ["empty"],
-    "money1_snap": [256,490],
+    "money1_snap": [316,609],
     "money2_snap": [],
     "moneyadv_pop" : [],
     "moneyadv1_snap": [],
@@ -1098,7 +1098,7 @@
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [373,168],
+    "material1_snap": [461,204],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -1118,7 +1118,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"202":
     {
     "coordinates":[],
@@ -1132,10 +1132,10 @@
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [341,588],
+    "science1_snap": [424,732],
     "science2_snap": [],
     "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [341,481],
+    "scienceadv1_snap": [424,594],
     "scienceadv2_snap": [],
     "material_pop": [],
     "material1_snap": [],
@@ -1158,7 +1158,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"203":
     {
     "coordinates":[],
@@ -1169,16 +1169,16 @@
     "money1_snap": [],
     "money2_snap": [],
     "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [262,587],
+    "moneyadv1_snap": [326,726],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [565,492],
+    "science1_snap": [704,605],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [313,121],
+    "material1_snap": [385,154],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -1198,7 +1198,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"204":
     {
     "coordinates":[],
@@ -1209,7 +1209,7 @@
     "money1_snap": [],
     "money2_snap": [],
     "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [262,189],
+    "moneyadv1_snap": [326,229],
     "moneyadv2_snap": [],
     "science_pop": [],
     "science1_snap": [],
@@ -1221,10 +1221,10 @@
     "material1_snap": [],
     "material2_snap": [],
     "materialadv_pop": ["empty"],
-    "materialadv1_snap": [242,511],
+    "materialadv1_snap": [300,633],
     "materialadv2_snap": [],
     "neutral_pop": ["empty"],
-    "neutral1_snap": [594,207],
+    "neutral1_snap": [732,256],
     "neutral2_snap": [],
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
@@ -1238,7 +1238,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"205":
     {
     "coordinates":[],
@@ -1246,16 +1246,16 @@
     "ring": 2,
     "disctile": 0,
     "money_pop": ["empty"],
-    "money1_snap": [399,192],
+    "money1_snap": [494,237],
     "money2_snap": [],
     "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [292,192],
+    "moneyadv1_snap": [360,237],
     "moneyadv2_snap": [],
     "science_pop": [],
     "science1_snap": [],
     "science2_snap": [],
     "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [559,548],
+    "scienceadv1_snap": [688,677],
     "scienceadv2_snap": [],
     "material_pop": [],
     "material1_snap": [],
@@ -1278,7 +1278,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"206":
     {
     "coordinates":[],
@@ -1298,7 +1298,7 @@
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [261,198],
+    "material1_snap": [321,249],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -1318,7 +1318,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"207":
     {
     "coordinates":[],
@@ -1358,7 +1358,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"208":
     {
     "coordinates":[],
@@ -1398,7 +1398,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"209":
     {
     "coordinates":[],
@@ -1406,13 +1406,13 @@
     "ring": 2,
     "disctile": 0,
     "money_pop": ["empty"],
-    "money1_snap": [501,201],
+    "money1_snap": [624,248],
     "money2_snap": [],
     "moneyadv_pop" : [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [207,398],
+    "science1_snap": [257,497],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -1438,7 +1438,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"210":
     {
     "coordinates":[],
@@ -1446,7 +1446,7 @@
     "ring": 2,
     "disctile": 0,
     "money_pop": ["empty"],
-    "money1_snap": [354,140],
+    "money1_snap": [440,176],
     "money2_snap": [],
     "moneyadv_pop" : [],
     "moneyadv1_snap": [],
@@ -1458,7 +1458,7 @@
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [549,557],
+    "material1_snap": [676,688],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -1478,7 +1478,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"211":
     {
     "coordinates":[],
@@ -1486,7 +1486,7 @@
     "ring": 2,
     "disctile": 1,
     "money_pop": ["empty"],
-    "money1_snap": [504,137],
+    "money1_snap": [624,168],
     "money2_snap": [],
     "moneyadv_pop" : [],
     "moneyadv1_snap": [],
@@ -1501,10 +1501,10 @@
     "material1_snap": [],
     "material2_snap": [],
     "materialadv_pop": ["empty"],
-    "materialadv1_snap": [563,589],
+    "materialadv1_snap": [694,728],
     "materialadv2_snap": [],
     "neutral_pop": ["empty"],
-    "neutral1_snap": [260,515],
+    "neutral1_snap": [320,637],
     "neutral2_snap": [],
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
@@ -1518,7 +1518,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"214":
     {
     "coordinates":[],
@@ -1532,7 +1532,7 @@
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [570,608],
+    "science1_snap": [708,753],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -1541,13 +1541,13 @@
     "material1_snap": [],
     "material2_snap": [],
     "materialadv_pop": ["empty"],
-    "materialadv1_snap": [262,554],
+    "materialadv1_snap": [318,685],
     "materialadv2_snap": [],
     "neutral_pop": [],
     "neutral1_snap": [],
     "neutral2_snap": [],
     "neutral_adv_pop": ["empty"],
-    "neutraladv1_snap": [286,167],
+    "neutraladv1_snap": [352,208],
     "neutraladv2_snap": [],
     "wormholes": [0,1,2,4,5],
     "vp": 2,
@@ -1558,7 +1558,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"281":
     {
     "coordinates":[],
@@ -1566,13 +1566,13 @@
     "ring": 2,
     "disctile": 1,
     "money_pop": ["empty"],
-    "money1_snap": [257,594],
+    "money1_snap": [320,733],
     "money2_snap": [],
     "moneyadv_pop" : [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [520,133],
+    "science1_snap": [642,166],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -1598,7 +1598,7 @@
     "warp": 1,
     "type": "standard"
     }
-  }
+  },
   {"295":
     {
     "coordinates":[],
@@ -1638,7 +1638,7 @@
     "warp": 0,
     "type": "nebula"
     }
-  }
+  },
   {"301":
     {
     "coordinates":[],
@@ -1646,13 +1646,13 @@
     "ring": 3,
     "disctile": 1,
     "money_pop": ["empty"],
-    "money1_snap": [591,191],
+    "money1_snap": [733,232],
     "money2_snap": [],
     "moneyadv_pop" : [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [216,380],
+    "science1_snap": [265,472],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -1661,7 +1661,7 @@
     "material1_snap": [],
     "material2_snap": [],
     "materialadv_pop": ["empty"],
-    "materialadv1_snap": [545,593],
+    "materialadv1_snap": [673,730],
     "materialadv2_snap": [],
     "neutral_pop": [],
     "neutral1_snap": [],
@@ -1676,7 +1676,7 @@
     "guardian": 0,
     "gcds": 0
     }
-  }
+  },
   {"302":
     {
     "coordinates":[],
@@ -1687,16 +1687,16 @@
     "money1_snap": [],
     "money2_snap": [],
     "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [516,145],
+    "moneyadv1_snap": [638,178],
     "moneyadv2_snap": [],
     "science_pop": [],
     "science1_snap": [],
     "science2_snap": [],
     "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [233,218],
+    "scienceadv1_snap": [288,272],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [553,595],
+    "material1_snap": [684,737],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -1716,7 +1716,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"303":
     {
     "coordinates":[],
@@ -1727,13 +1727,13 @@
     "money1_snap": [],
     "money2_snap": [],
     "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [530,524],
+    "moneyadv1_snap": [657,646],
     "moneyadv2_snap": [],
     "science_pop": [],
     "science1_snap": [],
     "science2_snap": [],
     "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [302,525],
+    "scienceadv1_snap": [370,646],
     "scienceadv2_snap": [],
     "material_pop": [],
     "material1_snap": [],
@@ -1742,7 +1742,7 @@
     "materialadv1_snap": [],
     "materialadv2_snap": [],
     "neutral_pop": ["empty"],
-    "neutral1_snap": [546,115],
+    "neutral1_snap": [673,142],
     "neutral2_snap": [],
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
@@ -1756,7 +1756,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"304":
     {
     "coordinates":[],
@@ -1767,7 +1767,7 @@
     "money1_snap": [],
     "money2_snap": [],
     "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [251,221],
+    "moneyadv1_snap": [310,270],
     "moneyadv2_snap": [],
     "science_pop": [],
     "science1_snap": [],
@@ -1776,7 +1776,7 @@
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [285,556],
+    "material1_snap": [352,702],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -1796,7 +1796,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"305":
     {
     "coordinates":[],
@@ -1810,13 +1810,13 @@
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [269,174],
+    "science1_snap": [336,218],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [513,581],
+    "material1_snap": [636,718],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -1836,7 +1836,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"306":
     {
     "coordinates":[],
@@ -1844,7 +1844,7 @@
     "ring": 3,
     "disctile": 0,
     "money_pop": ["empty"],
-    "money1_snap": [560,141],
+    "money1_snap": [692,174],
     "money2_snap": [],
     "moneyadv_pop" : [],
     "moneyadv1_snap": [],
@@ -1856,7 +1856,7 @@
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [520,570],
+    "material1_snap": [644,705],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -1876,7 +1876,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"307":
     {
     "coordinates":[],
@@ -1884,7 +1884,7 @@
     "ring": 3,
     "disctile": 0,
     "money_pop": ["empty"],
-    "money1_snap": [326,129],
+    "money1_snap": [400,158],
     "money2_snap": [],
     "moneyadv_pop" : [],
     "moneyadv1_snap": [],
@@ -1893,7 +1893,7 @@
     "science1_snap": [],
     "science2_snap": [],
     "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [218,473],
+    "scienceadv1_snap": [274,581],
     "scienceadv2_snap": [],
     "material_pop": [],
     "material1_snap": [],
@@ -1916,7 +1916,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"308":
     {
     "coordinates":[],
@@ -1930,7 +1930,7 @@
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [505,153],
+    "science1_snap": [628,190],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -1939,7 +1939,7 @@
     "material1_snap": [],
     "material2_snap": [],
     "materialadv_pop": ["empty"],
-    "materialadv1_snap": [170,408],
+    "materialadv1_snap": [210,505],
     "materialadv2_snap": [],
     "neutral_pop": [],
     "neutral1_snap": [],
@@ -1956,7 +1956,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"309":
     {
     "coordinates":[],
@@ -1964,7 +1964,7 @@
     "ring": 3,
     "disctile": 0,
     "money_pop": ["empty"],
-    "money1_snap": [518,141],
+    "money1_snap": [641,173],
     "money2_snap": [],
     "moneyadv_pop" : [],
     "moneyadv1_snap": [],
@@ -1973,7 +1973,7 @@
     "science1_snap": [],
     "science2_snap": [],
     "scienceadv_pop": ["empty"],
-    "scienceadv1_snap": [191,429],
+    "scienceadv1_snap": [236,528],
     "scienceadv2_snap": [],
     "material_pop": [],
     "material1_snap": [],
@@ -1996,7 +1996,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"310":
     {
     "coordinates":[],
@@ -2010,13 +2010,13 @@
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [536,136],
+    "science1_snap": [660,168],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [298,514],
+    "material1_snap": [368,636],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -2036,7 +2036,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"311":
     {
     "coordinates":[],
@@ -2056,7 +2056,7 @@
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [511,573],
+    "material1_snap": [630,708],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -2076,7 +2076,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"312":
     {
     "coordinates":[],
@@ -2096,7 +2096,7 @@
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [455,118],
+    "material1_snap": [560,145],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -2116,7 +2116,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"313":
     {
     "coordinates":[],
@@ -2141,8 +2141,8 @@
     "materialadv_pop": [],
     "materialadv1_snap": [],
     "materialadv2_snap": [],
-    "neutral_pop": ["empty"579,135],
-    "neutral1_snap": [],
+    "neutral_pop": ["empty"],
+    "neutral1_snap": [717,165],
     "neutral2_snap": [],
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
@@ -2156,7 +2156,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"314":
     {
     "coordinates":[],
@@ -2182,7 +2182,7 @@
     "materialadv1_snap": [],
     "materialadv2_snap": [],
     "neutral_pop": ["empty"],
-    "neutral1_snap": [258,481],
+    "neutral1_snap": [318,596],
     "neutral2_snap": [],
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
@@ -2196,7 +2196,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"315":
     {
     "coordinates":[],
@@ -2236,7 +2236,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"316":
     {
     "coordinates":[],
@@ -2276,7 +2276,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"317":
     {
     "coordinates":[],
@@ -2284,10 +2284,10 @@
     "ring": 3,
     "disctile": 0,
     "money_pop": ["empty"],
-    "money1_snap": [306,589],
+    "money1_snap": [378,733],
     "money2_snap": [],
     "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [306,481],
+    "moneyadv1_snap": [378,598],
     "moneyadv2_snap": [],
     "science_pop": [],
     "science1_snap": [],
@@ -2316,7 +2316,7 @@
     "warp": 0,
     "type": "standard"
     }
-  }
+  },
   {"381":
     {
     "coordinates":[],
@@ -2324,7 +2324,7 @@
     "ring": 3,
     "disctile": 1,
     "money_pop": ["empty"],
-    "money1_snap": [527,191],
+    "money1_snap": [652,238],
     "money2_snap": [],
     "moneyadv_pop" : [],
     "moneyadv1_snap": [],
@@ -2336,7 +2336,7 @@
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [245,162],
+    "material1_snap": [297,204],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -2356,7 +2356,7 @@
     "warp": 1,
     "type": "standard"
     }
-  }
+  },
   {"382":
     {
     "coordinates":[],
@@ -2370,13 +2370,13 @@
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [226,536],
+    "science1_snap": [276,664],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [515,582],
+    "material1_snap": [636,724],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -2396,7 +2396,7 @@
     "warp": 1,
     "type": "standard"
     }
-  }
+  },
   {"393":
     {
     "coordinates":[],
@@ -2410,7 +2410,7 @@
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [320,182],
+    "science1_snap": [394,230],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -2436,7 +2436,7 @@
     "warp": 0,
     "type": "pulsar"
     }
-  }
+  },
   {"394":
     {
     "coordinates":[],
@@ -2456,7 +2456,7 @@
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
     "material_pop": ["empty"],
-    "material1_snap": [326,169],
+    "material1_snap": [402,209],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -2476,7 +2476,7 @@
     "warp": 0,
     "type": "pulsar"
     }
-  }
+  },
   {"395":
     {
     "coordinates":[],
@@ -2516,7 +2516,7 @@
     "warp": 0,
     "type": "nebula"
     }
-  }
+  },
   {"396":
     {
     "coordinates":[],
@@ -2556,7 +2556,7 @@
     "warp": 0,
     "type": "bh1"
     }
-  }
+  },
   {"397":
     {
     "coordinates":[],
@@ -2567,10 +2567,10 @@
     "money1_snap": [],
     "money2_snap": [],
     "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [245,524],
+    "moneyadv1_snap": [304,649],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [525,204],
+    "science1_snap": [649,256],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -2579,11 +2579,11 @@
     "material1_snap": [],
     "material2_snap": [],
     "materialadv_pop": ["empty"],
-    "materialadv1_snap": [517,575],
+    "materialadv1_snap": [644,713],
     "materialadv2_snap": [],
     "neutral_pop": ["empty","empty"],
-    "neutral1_snap": [291,272],
-    "neutral2_snap": [183,272],
+    "neutral1_snap": [217,336],
+    "neutral2_snap": [362,336],
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
@@ -2596,7 +2596,7 @@
     "warp": 0,
     "type": "supernova"
     }
-  }
+  },
   {"398":
     {
     "coordinates":[],
@@ -2607,10 +2607,10 @@
     "money1_snap": [],
     "money2_snap": [],
     "moneyadv_pop" : ["empty"],
-    "moneyadv1_snap": [543,210],
+    "moneyadv1_snap": [672,261],
     "moneyadv2_snap": [],
     "science_pop": ["empty"],
-    "science1_snap": [206,431],
+    "science1_snap": [252,534],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -2619,11 +2619,11 @@
     "material1_snap": [],
     "material2_snap": [],
     "materialadv_pop": ["empty"],
-    "materialadv1_snap": [281,228],
+    "materialadv1_snap": [350,285],
     "materialadv2_snap": [],
     "neutral_pop": ["empty","empty"],
-    "neutral1_snap": [455,538],
-    "neutral2_snap": [566,538],
+    "neutral1_snap": [560,664],
+    "neutral2_snap": [696,664],
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
@@ -2636,7 +2636,7 @@
     "warp": 0,
     "type": "supernova"
     }
-  }
+  },
   {"399":
     {
     "coordinates":[],
