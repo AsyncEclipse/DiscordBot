@@ -39,3 +39,34 @@ class PlayerHelper:
         before = self.stats["influence_discs"]
         self.stats["influence_discs"] += adjustment
         return (f"\n> Adjusted influence discs from {before} to {before + adjustment}")
+
+    def adjust_colony_ships(self, adjustement):
+        if self.stats["colony_ships"] <= 0:
+            return False
+        elif (self.stats["colony_ships"] - adjustement) < 0:
+            return False
+        else:
+            return(self.stats["colony_ships"] - adjustement)
+
+    def materials_income(self):
+        track = self.stats["population_track"]
+        cubes = self.stats["material_pop_cubes"]
+        return(track[-(cubes+1)])
+
+    def science_income(self):
+        track = self.stats["population_track"]
+        cubes = self.stats["science_pop_cubes"]
+        return(track[-(cubes+1)])
+
+    def money_income(self):
+        track = self.stats["population_track"]
+        cubes = self.stats["money_pop_cubes"]
+        return(track[-(cubes+1)])
+
+    def upkeep(self):
+        track = self.stats["influence_track"]
+        discs = self.stats["influence_discs"]
+        if discs >= 13:
+            return(0)
+        else:
+            return(track[-(discs+1)])
