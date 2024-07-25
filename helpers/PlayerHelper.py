@@ -51,17 +51,17 @@ class PlayerHelper:
     def materials_income(self):
         track = self.stats["population_track"]
         cubes = self.stats["material_pop_cubes"]
-        return(track[-(cubes+1)])
+        return(track[cubes])
 
     def science_income(self):
         track = self.stats["population_track"]
         cubes = self.stats["science_pop_cubes"]
-        return(track[-(cubes+1)])
+        return(track[cubes])
 
     def money_income(self):
         track = self.stats["population_track"]
         cubes = self.stats["money_pop_cubes"]
-        return(track[-(cubes+1)])
+        return(track[cubes])
 
     def upkeep(self):
         track = self.stats["influence_track"]
@@ -69,4 +69,4 @@ class PlayerHelper:
         if discs >= 13:
             return(0)
         else:
-            return(track[-(discs+1)])
+            return(track[discs])
