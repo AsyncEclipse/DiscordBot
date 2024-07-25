@@ -101,12 +101,16 @@ class SetupCommands(commands.GroupCog, name="setup"):
             rotDet = ((180 - (int(listOfTilesPos[5-i])-201)/2 * 60) + 360)%360
             game.add_tile(listOfTilesPos[5-i], rotDet, listDefended[i])
             #mappedSectorsToPos[listOfTilesPos[5-i]]=(listDefended[i],rotDet)
-        #for i in range(101, 107):
+        for i in range(101, 107):
+            game.add_tile(str(i), 0, "sector1back")
         #    mappedSectorsToPos[str(i)]=("sector1back",0)
-        #for i in range(201, 213):
+        for i in range(201, 213):
+            if str(i) not in listOfTilesPos:
+                game.add_tile(str(i), 0, "sector2back")
         #     if str(i) not in listOfTilesPos:
         #        mappedSectorsToPos[str(i)]=("sector2back",0)
-        #for i in range(301, 319):
+        for i in range(301, 319):
+            game.add_tile(str(i), 0, "sector3back")
         #    mappedSectorsToPos[str(i)]=("sector3back",0)
         #game.updateTileList(mappedSectorsToPos)
         #await interaction.response.send_message("done")

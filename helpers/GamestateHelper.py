@@ -82,9 +82,12 @@ class GamestateHelper:
     def add_tile(self, position, orientation, sector):
         with open("data/sectors.json") as f:
             tile_data = json.load(f)
-        tile = tile_data[sector]
-        tile.update({"sector": sector})
-        tile.update({"orientation": orientation})
+        try:
+            tile = tile_data[sector]
+            tile.update({"sector": sector})
+            tile.update({"orientation": orientation})
+        except KeyError:
+            tile = {"sector": sector, "orientation": orientation}
         self.gamestate["board"][position] = tile
         self.update()
 
