@@ -39,7 +39,8 @@ class PlayerCommands(commands.GroupCog, name="player"):
 
         if all(x is None for x in options):
             top_response = (f"{p1.name} player stats:")
-            response=(f"\n> Materials: {p1.stats["materials"]}"
+            response=(f"\n> Faction: {p1.stats["name"]}"
+                        f"\n> Materials: {p1.stats["materials"]}"
                         f"\n> Material income: {p1.materials_income()}"
                         f"\n> Science: {p1.stats["science"]}"
                         f"\n> Science income: {p1.science_income()}"

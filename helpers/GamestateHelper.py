@@ -79,11 +79,14 @@ class GamestateHelper:
         self.gamestate["board"] = tileList
         self.update()
 
-    def add_tile(self, position, orientation, sector):
+    def add_tile(self, position, orientation, sector, owner=None):
+
         with open("data/sectors.json") as f:
             tile_data = json.load(f)
         try:
             tile = tile_data[sector]
+            if owner != None:
+                tile["owner"] = owner
             tile.update({"sector": sector})
             tile.update({"orientation": orientation})
         except KeyError:
@@ -92,29 +95,26 @@ class GamestateHelper:
         self.update()
 
 
-    def player_setup(self, player_id, faction):
+    def player_setup(self, player_id, faction, color):
 
-        name = self.gamestate["players"][str(player_id)]["player_name"]
 
-        if self.gamestate["setup_finished"] == "True":
+        if self.gamestate["setup_finished"] == 1:
             return ("The game has already been setup!")
 
         with open("data/factions.json", "r") as f:
             faction_data = json.load(f)
 
-
+        self.gamestate["players"][str(player_id)].update({"color": color})
         self.gamestate["players"][str(player_id)].update(faction_data[faction])
         self.update()
         #return(f"{name} is now setup!")
 
     def setup_finished(self):
 
-        colors = ["blue", "red", "green", "yellow", "black", "white"]
         for i in self.gamestate["players"]:
             if len(self.gamestate["players"][i]) < 3:
                 return(f"{self.gamestate['players'][i]['player_name']} still needs to be setup!")
-            else:
-                self.gamestate["players"][i].update({"color": colors.pop(0)})
+
         self.gamestate["player_count"] = len(self.gamestate["players"])
         draw_count = {2: [5, 12], 3: [8, 14], 4: [14, 16], 5: [16, 18], 6: [18, 20]}
 

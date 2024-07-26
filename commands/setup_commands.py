@@ -69,6 +69,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
                                 player6: Optional[discord.Member]=None, faction6: Optional[app_commands.Choice[str]]=None):
         temp_player_list = [player1, player2, player3, player4, player5, player6]
         temp_faction_list = [faction1, faction2, faction3, faction4, faction5, faction6]
+        colors = ["blue", "red", "green", "yellow", "black", "white"]
         game = GamestateHelper(interaction.channel)
         count = 0
         listPlayerHomes=[]
@@ -78,9 +79,10 @@ class SetupCommands(commands.GroupCog, name="setup"):
             if i != None and temp_faction_list[x] != None:
                 player = i
                 faction = temp_faction_list[x]
-                game.player_setup(player.id, faction.value)
+                player_color = colors.pop(0)
+                game.player_setup(player.id, faction.value, player_color)
                 home = game.get_player(player.id)["home_planet"]
-                listPlayerHomes.append(home)
+                listPlayerHomes.append([home, player_color])
                 count = count + 1
         
         listOfTilesPos = ["201", "207","205","211","203","209"]
@@ -91,11 +93,11 @@ class SetupCommands(commands.GroupCog, name="setup"):
         listDefended = ["271","272","273","274"]
         random.shuffle(listDefended)
         game.add_tile("000", 0, "001")
-        mappedSectorsToPos = {}
+        #mappedSectorsToPos = {}
         #mappedSectorsToPos["000"] = ("001",0)
         for i in range(count):
             rotDet = ((180 - (int(listOfTilesPos[i])-201)/2 * 60) + 360)%360
-            game.add_tile(listOfTilesPos[i], rotDet, listPlayerHomes[i])
+            game.add_tile(listOfTilesPos[i], rotDet, listPlayerHomes[i][0], listPlayerHomes[i][1])
             #mappedSectorsToPos[listOfTilesPos[i]]=(listPlayerHomes[i],rotDet)
         for i in range(6-count):
             rotDet = ((180 - (int(listOfTilesPos[5-i])-201)/2 * 60) + 360)%360
