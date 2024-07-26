@@ -1,6 +1,7 @@
 import json
 import config
-import numpy as np  
+import numpy as np
+from helpers.PlayerHelper import PlayerHelper
 from PIL import Image, ImageDraw, ImageFont
 from jproperties import Properties
 import cv2
@@ -114,6 +115,15 @@ class GamestateHelper:
         for i in self.gamestate["players"]:
             if len(self.gamestate["players"][i]) < 3:
                 return(f"{self.gamestate['players'][i]['player_name']} still needs to be setup!")
+            else:
+                p1 = PlayerHelper(i, self.get_player(i))
+                home = self.get_system_coord(p1.stats["home_planet"])
+                if p1.stats["name"] == "Orion Hegemony":
+                    self.gamestate["board"][home]["player_ships"].append(p1.stats["color"]+"-cru")
+                else:
+                    self.gamestate["board"][home]["player_ships"].append(p1.stats["color"] + "-int")
+
+                #TODO reputation tiles for Eridani
 
         self.gamestate["player_count"] = len(self.gamestate["players"])
         draw_count = {2: [5, 12], 3: [8, 14], 4: [14, 16], 5: [16, 18], 6: [18, 20]}
@@ -158,3 +168,9 @@ class GamestateHelper:
         for ar in args:
             self.gamestate["players"][ar.player_id] = ar.stats
         self.update()
+
+    def get_system_coord(self, sector):
+        for i in (self.gamestate["board"]):
+            if self.gamestate["board"][i]["sector"] == sector:
+                return(i)
+        return(False)
