@@ -40,9 +40,11 @@ class SetupCommands(commands.GroupCog, name="setup"):
         await interaction.response.defer(thinking=True)  
         context = Image.new("RGBA",(4160,5100),(255,255,255,0))
         tileMap = game.get_gamestate()["board"]
-        for key,value in tileMap.items():
-            tile_image, rotation_value = value
-            context = game.drawTile(context,key, tile_image, rotation_value)
+        for i in tileMap:
+            context = game.drawTile(context, i, tileMap[i]["sector"], tileMap[i]["orientation"])
+        #for key,value in tileMap.items():
+        #    tile_image, rotation_value = value
+        #    context = game.drawTile(context,key, tile_image, rotation_value)
         bytes = BytesIO()
         context.save(bytes,format="PNG")
         bytes.seek(0)
@@ -67,6 +69,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
                                 player6: Optional[discord.Member]=None, faction6: Optional[app_commands.Choice[str]]=None):
         temp_player_list = [player1, player2, player3, player4, player5, player6]
         temp_faction_list = [faction1, faction2, faction3, faction4, faction5, faction6]
+        colors = ["blue", "red", "green", "yellow", "black", "white"]
         game = GamestateHelper(interaction.channel)
         count = 0
         listPlayerHomes=[]
@@ -76,9 +79,10 @@ class SetupCommands(commands.GroupCog, name="setup"):
             if i != None and temp_faction_list[x] != None:
                 player = i
                 faction = temp_faction_list[x]
-                game.player_setup(player.id, faction.value)
+                player_color = colors.pop(0)
+                game.player_setup(player.id, faction.value, player_color)
                 home = game.get_player(player.id)["home_planet"]
-                listPlayerHomes.append(home)
+                listPlayerHomes.append([home, player_color])
                 count = count + 1
         
         listOfTilesPos = ["201", "207","205","211","203","209"]
@@ -88,23 +92,31 @@ class SetupCommands(commands.GroupCog, name="setup"):
         random.shuffle(listPlayerHomes)
         listDefended = ["271","272","273","274"]
         random.shuffle(listDefended)
-        mappedSectorsToPos = {}
-        mappedSectorsToPos["000"] = ("001",0)
+        game.add_tile("000", 0, "001")
+        #mappedSectorsToPos = {}
+        #mappedSectorsToPos["000"] = ("001",0)
         for i in range(count):
             rotDet = ((180 - (int(listOfTilesPos[i])-201)/2 * 60) + 360)%360
-            mappedSectorsToPos[listOfTilesPos[i]]=(listPlayerHomes[i],rotDet)
+            game.add_tile(listOfTilesPos[i], rotDet, listPlayerHomes[i][0], listPlayerHomes[i][1])
+            #mappedSectorsToPos[listOfTilesPos[i]]=(listPlayerHomes[i],rotDet)
         for i in range(6-count):
             rotDet = ((180 - (int(listOfTilesPos[5-i])-201)/2 * 60) + 360)%360
-            mappedSectorsToPos[listOfTilesPos[5-i]]=(listDefended[i],rotDet)
-        for i in range(101, 107):  
-            mappedSectorsToPos[str(i)]=("sector1back",0)
-        for i in range(201, 213):  
-             if str(i) not in listOfTilesPos: 
-                mappedSectorsToPos[str(i)]=("sector2back",0)
-        for i in range(301, 319):  
-            mappedSectorsToPos[str(i)]=("sector3back",0)
-        game.updateTileList(mappedSectorsToPos)
-        await SetupCommands.showGame(interaction,game) 
+            game.add_tile(listOfTilesPos[5-i], rotDet, listDefended[i])
+            #mappedSectorsToPos[listOfTilesPos[5-i]]=(listDefended[i],rotDet)
+        for i in range(101, 107):
+            game.add_tile(str(i), 0, "sector1back")
+        #    mappedSectorsToPos[str(i)]=("sector1back",0)
+        for i in range(201, 213):
+            if str(i) not in listOfTilesPos:
+                game.add_tile(str(i), 0, "sector2back")
+        #     if str(i) not in listOfTilesPos:
+        #        mappedSectorsToPos[str(i)]=("sector2back",0)
+        for i in range(301, 319):
+            game.add_tile(str(i), 0, "sector3back")
+        #    mappedSectorsToPos[str(i)]=("sector3back",0)
+        #game.updateTileList(mappedSectorsToPos)
+        #await interaction.response.send_message("done")
+        await SetupCommands.showGame(interaction,game)
 
 
     @app_commands.command(name="new_game")

@@ -1,6 +1,7 @@
 import json
 import config
-import numpy as np  
+import numpy as np
+from helpers.PlayerHelper import PlayerHelper
 from PIL import Image, ImageDraw, ImageFont
 from jproperties import Properties
 import cv2
@@ -79,29 +80,51 @@ class GamestateHelper:
         self.gamestate["board"] = tileList
         self.update()
 
-    def player_setup(self, player_id, faction):
+    def add_tile(self, position, orientation, sector, owner=None):
 
-        name = self.gamestate["players"][str(player_id)]["player_name"]
+        with open("data/sectors.json") as f:
+            tile_data = json.load(f)
+        try:
+            tile = tile_data[sector]
+            if owner != None:
+                tile["owner"] = owner
+            tile.update({"sector": sector})
+            tile.update({"orientation": orientation})
+        except KeyError:
+            tile = {"sector": sector, "orientation": orientation}
+        self.gamestate["board"][position] = tile
+        self.update()
 
-        if self.gamestate["setup_finished"] == "True":
+
+    def player_setup(self, player_id, faction, color):
+
+
+        if self.gamestate["setup_finished"] == 1:
             return ("The game has already been setup!")
 
         with open("data/factions.json", "r") as f:
             faction_data = json.load(f)
 
-
+        self.gamestate["players"][str(player_id)].update({"color": color})
         self.gamestate["players"][str(player_id)].update(faction_data[faction])
         self.update()
         #return(f"{name} is now setup!")
 
     def setup_finished(self):
 
-        colors = ["blue", "red", "green", "yellow", "black", "white"]
         for i in self.gamestate["players"]:
             if len(self.gamestate["players"][i]) < 3:
                 return(f"{self.gamestate['players'][i]['player_name']} still needs to be setup!")
             else:
-                self.gamestate["players"][i].update({"color": colors.pop(0)})
+                p1 = PlayerHelper(i, self.get_player(i))
+                home = self.get_system_coord(p1.stats["home_planet"])
+                if p1.stats["name"] == "Orion Hegemony":
+                    self.gamestate["board"][home]["player_ships"].append(p1.stats["color"]+"-cru")
+                else:
+                    self.gamestate["board"][home]["player_ships"].append(p1.stats["color"] + "-int")
+
+                #TODO reputation tiles for Eridani
+
         self.gamestate["player_count"] = len(self.gamestate["players"])
         draw_count = {2: [5, 12], 3: [8, 14], 4: [14, 16], 5: [16, 18], 6: [18, 20]}
 
@@ -145,3 +168,9 @@ class GamestateHelper:
         for ar in args:
             self.gamestate["players"][ar.player_id] = ar.stats
         self.update()
+
+    def get_system_coord(self, sector):
+        for i in (self.gamestate["board"]):
+            if self.gamestate["board"][i]["sector"] == sector:
+                return(i)
+        return(False)
