@@ -38,7 +38,19 @@ class PlayerCommands(commands.GroupCog, name="player"):
         options = [materials, science, money, material_cubes, science_cubes, money_cubes, influence]
 
         if all(x is None for x in options):
-            pass
+            top_response = (f"{p1.name} player stats:")
+            response=(f"\n> Materials: {p1.stats["materials"]}"
+                        f"\n> Material income: {p1.materials_income()}"
+                        f"\n> Science: {p1.stats["science"]}"
+                        f"\n> Science income: {p1.science_income()}"
+                        f"\n> Money: {p1.stats["money"]}"
+                        f"\n> Money income: {p1.money_income()}"
+                        f"\n> Influence dics: {p1.stats["influence_discs"]}"
+                        f"\n> Upkeep: {p1.upkeep()}"
+                        f"\n> Colony Ships: {p1.stats["colony_ships"]}")
+            await interaction.response.send_message(top_response)
+            await interaction.channel.send(response)
+            return
         else:
             pass
 

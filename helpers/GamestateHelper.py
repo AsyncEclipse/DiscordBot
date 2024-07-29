@@ -96,15 +96,22 @@ class GamestateHelper:
 
     def setup_finished(self):
 
+        colors = ["blue", "red", "green", "yellow", "black", "white"]
         for i in self.gamestate["players"]:
             if len(self.gamestate["players"][i]) < 3:
                 return(f"{self.gamestate['players'][i]['player_name']} still needs to be setup!")
+            else:
+                self.gamestate["players"][i].update({"color": colors.pop(0)})
         self.gamestate["player_count"] = len(self.gamestate["players"])
         draw_count = {2: [5, 12], 3: [8, 14], 4: [14, 16], 5: [16, 18], 6: [18, 20]}
+
         third_sector_tiles = ["301", "302", "303", "304", "305", "306", "307", "308", "309", "310", "311", "312", "313", "314",
                               "315", "316", "317", "318", "381", "382"]
         sector_draws = draw_count[self.gamestate["player_count"]][0]
         tech_draws = draw_count[self.gamestate["player_count"]][1]
+
+        with open("data/techs.json", "r") as f:
+            tech_data = json.load(f)
 
         while sector_draws > 0:
             random.shuffle(third_sector_tiles)
@@ -113,12 +120,14 @@ class GamestateHelper:
 
         while tech_draws > 0:
             random.shuffle(self.gamestate["tech_deck"])
-            self.gamestate["available_techs"].append(self.gamestate["tech_deck"].pop(0))
+            picked_tech = self.gamestate["tech_deck"].pop(0)
 
-            # TODO: once tech tile JSON is complete, needs some logic to not decrement tech_draws if it's a rare tech
-            # TODO: Also add a read from the JSON file to add actual tech tile stats to available_techs board state
+            self.gamestate["available_techs"].append(tech_data[picked_tech])
 
-            tech_draws -= 1
+            if tech_data[picked_tech]["track"] == "any":
+                pass
+            else:
+                tech_draws -= 1
 
         self.gamestate["setup_finished"] = 1
         self.update()
