@@ -266,7 +266,11 @@ class GamestateHelper:
                 else:
                     self.gamestate["board"][home]["player_ships"].append(p1.stats["color"] + "-int")
 
-                #TODO reputation tiles for Eridani
+                if p1.stats["name"] == "Eridani Empire":
+                    random.shuffle(self.gamestats["reputation_deck"])
+                    p1.stats["reputation_track"][0] = self.gamestats["reputation_deck"].pop(0)
+                    p1.stats["reputation_track"][1] = self.gamestats["reputation_deck"].pop(0)
+                    self.update_player(p1)
 
         self.gamestate["player_count"] = len(self.gamestate["players"])
         draw_count = {2: [5, 12], 3: [8, 14], 4: [14, 16], 5: [16, 18], 6: [18, 20]}

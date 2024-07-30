@@ -22,5 +22,7 @@
             "orb", "orb", "orb", "wog", "wog", "wog", "abs", "anl", "ans", "clo", "con", "flm", "iml", "met", "rican",
             "seh", "socan", "trd", "zes", "pim", "nea", "wap"],
       "available_techs": [],
+      "reputation_tiles": [4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1],
       "board": {}
 }
