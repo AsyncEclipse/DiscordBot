@@ -122,34 +122,23 @@ class SetupCommands(commands.GroupCog, name="setup"):
         listOfTilesPos = ["201", "207","205","211","203","209"]
         if count == 3:
             listOfTilesPos = [ "201","205", "209","211","203","207",]
-       # listPlayerHomes = ["222","224","226","228","230","232"]
         random.shuffle(listPlayerHomes)
         listDefended = ["271","272","273","274"]
         random.shuffle(listDefended)
         game.add_tile("000", 0, "001")
-        #mappedSectorsToPos = {}
-        #mappedSectorsToPos["000"] = ("001",0)
         for i in range(count):
             rotDet = ((180 - (int(listOfTilesPos[i])-201)/2 * 60) + 360)%360
             game.add_tile(listOfTilesPos[i], rotDet, listPlayerHomes[i][0], listPlayerHomes[i][1])
-            #mappedSectorsToPos[listOfTilesPos[i]]=(listPlayerHomes[i],rotDet)
         for i in range(6-count):
             rotDet = ((180 - (int(listOfTilesPos[5-i])-201)/2 * 60) + 360)%360
             game.add_tile(listOfTilesPos[5-i], rotDet, listDefended[i])
-            #mappedSectorsToPos[listOfTilesPos[5-i]]=(listDefended[i],rotDet)
         for i in range(101, 107):
             game.add_tile(str(i), 0, "sector1back")
-        #    mappedSectorsToPos[str(i)]=("sector1back",0)
         for i in range(201, 213):
             if str(i) not in listOfTilesPos:
                 game.add_tile(str(i), 0, "sector2back")
-        #     if str(i) not in listOfTilesPos:
-        #        mappedSectorsToPos[str(i)]=("sector2back",0)
         for i in range(301, 319):
             game.add_tile(str(i), 0, "sector3back")
-        #    mappedSectorsToPos[str(i)]=("sector3back",0)
-        #game.updateTileList(mappedSectorsToPos)
-        #await interaction.response.send_message("done")
         await SetupCommands.showGame(interaction,game)
 
 
