@@ -8,6 +8,7 @@ from setup.GameInit import GameInit
 from helpers.GamestateHelper import GamestateHelper
 from PIL import Image, ImageDraw, ImageFont
 from io import  BytesIO
+from jproperties import Properties
 import random
 
 
@@ -19,7 +20,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
     factionChoices = [
         app_commands.Choice(name="Hydran Progress", value="hyd"),
         app_commands.Choice(name="Eridian Empire", value="eri"),
-        app_commands.Choice(name="Orian Hegemony", value="ori"),
+        app_commands.Choice(name="Orion Hegemony", value="ori"),
         app_commands.Choice(name="Descendants of Draco", value="dra"),
         app_commands.Choice(name="Mechanema", value="mec"),
         app_commands.Choice(name="Planta", value="pla"),
@@ -41,15 +42,48 @@ class SetupCommands(commands.GroupCog, name="setup"):
         context = Image.new("RGBA",(4160,5100),(255,255,255,0))
         tileMap = game.get_gamestate()["board"]
         for i in tileMap:
-            context = game.drawTile(context, i, tileMap[i]["sector"], tileMap[i]["orientation"])
-        #for key,value in tileMap.items():
-        #    tile_image, rotation_value = value
-        #    context = game.drawTile(context,key, tile_image, rotation_value)
+            tileImage = game.drawTile(context, i, tileMap[i]["sector"], tileMap[i]["orientation"])
+            configs = Properties()
+            with open("data/tileImageCoordinates.properties", "rb") as f:
+                configs.load(f)
+            x = int(configs.get(i)[0].split(",")[0])
+            y = int(configs.get(i)[0].split(",")[1])
+            context.paste(tileImage,(x,y),mask=tileImage)
+        
         bytes = BytesIO()
         context.save(bytes,format="PNG")
         bytes.seek(0)
         file = discord.File(bytes,filename="mapImage.png")
+        #await interaction.followup.send(file=file)
+
+        if(len(game.get_gamestate()["players"]) > 3):
+            length = 1200
+        else:
+            length = 600
+        context2 = Image.new("RGBA",(4160,length),(255,255,255,0))
+        count = 0
+        x = 100
+        y = 100
+        for player in game.get_gamestate()["players"]:
+            playerImage = game.drawPlayerArea(game.get_gamestate()["players"][str(player)])
+            context2.paste(playerImage,(x,y),mask=playerImage)
+            count = count + 1
+            if count%3 == 0:
+                x = x - 1350*3
+                y = y + 600
+            else:
+                x = x + 1350
+            
+
+        context3 = Image.new("RGBA",(4160,length+5100),(255,255,255,0))
+        context3.paste(context, (0,0))
+        context3.paste(context2, (0,5100))
+        bytes = BytesIO()
+        context3.save(bytes,format="PNG")
+        bytes.seek(0)
+        file = discord.File(bytes,filename="mapImage.png")
         await interaction.followup.send(file=file)
+
         view = View()
         button = Button(label="Show Game",style=discord.ButtonStyle.primary, custom_id="showGame")
         view.add_item(button)
@@ -62,7 +96,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
     @app_commands.choices(faction1=factionChoices,faction2=factionChoices,faction3=factionChoices,faction4=factionChoices,faction5=factionChoices,faction6=factionChoices)
     async def setup_game(self, interaction: discord.Interaction, 
                                 player1: discord.Member, faction1: app_commands.Choice[str], 
-                                player2: Optional[discord.Member]=None,faction2: Optional[app_commands.Choice[str]]=None, 
+                                player2: discord.Member,faction2: app_commands.Choice[str], 
                                 player3: Optional[discord.Member]=None,faction3: Optional[app_commands.Choice[str]]=None, 
                                 player4: Optional[discord.Member]=None, faction4: Optional[app_commands.Choice[str]]=None,
                                 player5: Optional[discord.Member]=None, faction5: Optional[app_commands.Choice[str]]=None,
@@ -139,27 +173,6 @@ class SetupCommands(commands.GroupCog, name="setup"):
 
         await interaction.guild.create_text_channel(f'aeb{config.game_number}')
         await interaction.response.send_message('New game created!')
-
-    @app_commands.command(name="explore_tile")
-    async def explore_tile(self, interaction: discord.Interaction, tileposition: int):
-        game = GamestateHelper(interaction.channel)
-        ring = int(tileposition/100)
-        tileName = game.retrieveTileFromList(ring)
-        await interaction.response.defer(thinking=True)  
-        context = Image.new("RGBA",(345, 299),(255,255,255,0))
-        tileImage = game.showTile(tileName)
-        context.paste(tileImage,(0,0),mask=tileImage)
-        bytes = BytesIO()
-        context.save(bytes,format="PNG")
-        bytes.seek(0)
-        file = discord.File(bytes,filename="tileImage.png")
-        await interaction.followup.send(file=file)
-        view = View()
-        button = Button(label="Place Tile",style=discord.ButtonStyle.success, custom_id="placeTile_"+str(tileposition)+"_"+tileName)
-        button2 = Button(label="Discard Tile",style=discord.ButtonStyle.danger, custom_id="discardTile")
-        view.add_item(button)
-        view.add_item(button2)
-        await interaction.channel.send(view=view)
 
 
     @app_commands.command(name="add_player")

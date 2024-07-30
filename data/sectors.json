@@ -1,27 +1,56 @@
-{"001":
-    {
-    "owner":0,
-    "name":"Galactic Center",
+{
+  "001": {
+    "owner": 0,
+    "name": "Galactic Center",
     "ring": 0,
     "disctile": 1,
     "player_ships": [],
-    "money_pop": [0,0],
-    "money1_snap": [728,733],
-    "money2_snap": [590,733],
-    "moneyadv_pop" : [],
+    "money_pop": [
+      0,
+      0
+    ],
+    "money1_snap": [
+      728,
+      733
+    ],
+    "money2_snap": [
+      590,
+      733
+    ],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
-    "science_pop": [0],
-    "science1_snap": [710,176],
+    "science_pop": [
+      0
+    ],
+    "science1_snap": [
+      710,
+      176
+    ],
     "science2_snap": [],
-    "scienceadv_pop": [0],
-    "scienceadv1_snap": [576,176],
+    "scienceadv_pop": [
+      0
+    ],
+    "scienceadv1_snap": [
+      576,
+      176
+    ],
     "scienceadv2_snap": [],
-    "material_pop": [0],
-    "material1_snap": [204,520],
+    "material_pop": [
+      0
+    ],
+    "material1_snap": [
+      204,
+      520
+    ],
     "material2_snap": [],
-    "materialadv_pop": [0],
-    "materialadv1_snap": [204,384],
+    "materialadv_pop": [
+      0
+    ],
+    "materialadv1_snap": [
+      204,
+      384
+    ],
     "materialadv2_snap": [],
     "neutral_pop": [],
     "neutral1_snap": [],
@@ -29,7 +58,14 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0, 1, 2, 3, 4, 5],
+    "wormholes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
     "vp": 4,
     "artifact": 1,
     "ancient": 0,
@@ -37,22 +73,31 @@
     "gcds": 1,
     "warp": 0,
     "type": "ai"
-    },
-  "271":
-    {
-    "owner":0,
-    "name":"Omega Fornacis",
+  },
+  "271": {
+    "owner": 0,
+    "name": "Omega Fornacis",
     "ring": 2,
     "disctile": 1,
     "player_ships": [],
-    "money_pop": [0],
-    "money1_snap": [720,238],
+    "money_pop": [
+      0
+    ],
+    "money1_snap": [
+      720,
+      238
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
-    "science_pop": [0],
-    "science1_snap": [640,722],
+    "science_pop": [
+      0
+    ],
+    "science1_snap": [
+      640,
+      722
+    ],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -60,8 +105,13 @@
     "material_pop": [],
     "material1_snap": [],
     "material2_snap": [],
-    "materialadv_pop": [0],
-    "materialadv1_snap": [250,302],
+    "materialadv_pop": [
+      0
+    ],
+    "materialadv1_snap": [
+      250,
+      302
+    ],
     "materialadv2_snap": [],
     "neutral_pop": [],
     "neutral1_snap": [],
@@ -69,7 +119,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 2,
     "artifact": 1,
     "ancient": 0,
@@ -77,28 +132,42 @@
     "gcds": 0,
     "warp": 0,
     "type": "ai"
-    },
-  "272":
-    {
-    "owner":0,
-    "name":"Sigma Hydrae",
+  },
+  "272": {
+    "owner": 0,
+    "name": "Sigma Hydrae",
     "ring": 2,
     "disctile": 1,
     "player_ships": [],
-    "money_pop": [0],
-    "money1_snap": [376,254],
+    "money_pop": [
+      0
+    ],
+    "money1_snap": [
+      376,
+      254
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
     "science1_snap": [],
     "science2_snap": [],
-    "scienceadv_pop": [0],
-    "scienceadv1_snap": [636,722],
+    "scienceadv_pop": [
+      0
+    ],
+    "scienceadv1_snap": [
+      636,
+      722
+    ],
     "scienceadv2_snap": [],
-    "material_pop": [0],
-    "material1_snap": [304,672],
+    "material_pop": [
+      0
+    ],
+    "material1_snap": [
+      304,
+      672
+    ],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -109,7 +178,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 2,
     "artifact": 1,
     "ancient": 0,
@@ -117,18 +191,22 @@
     "gcds": 0,
     "warp": 0,
     "type": "ai"
-    },
-  "273":
-    {
-    "owner":0,
-    "name":"Theta Ophiuchi",
+  },
+  "273": {
+    "owner": 0,
+    "name": "Theta Ophiuchi",
     "ring": 2,
     "disctile": 1,
     "player_ships": [],
-    "money_pop": [0],
-    "money1_snap": [376,706],
+    "money_pop": [
+      0
+    ],
+    "money1_snap": [
+      376,
+      706
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
@@ -137,19 +215,34 @@
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
-    "material_pop": [0],
-    "material1_snap": [434,190],
+    "material_pop": [
+      0
+    ],
+    "material1_snap": [
+      434,
+      190
+    ],
     "material2_snap": [],
     "materialadv_pop": [],
-    "materialadv1_snap": [0],
-    "materialadv2_snap": [305,190],
+    "materialadv1_snap": [
+      0
+    ],
+    "materialadv2_snap": [
+      305,
+      190
+    ],
     "neutral_pop": [],
     "neutral1_snap": [],
     "neutral2_snap": [],
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 2,
     "artifact": 1,
     "ancient": 0,
@@ -157,25 +250,39 @@
     "gcds": 0,
     "warp": 0,
     "type": "ai"
-    },
-  "274":
-    {
-    "owner":0,
-    "name":"Alpha Lyncis",
+  },
+  "274": {
+    "owner": 0,
+    "name": "Alpha Lyncis",
     "ring": 2,
     "disctile": 1,
     "player_ships": [],
-    "money_pop": [0],
-    "money1_snap": [736,686],
+    "money_pop": [
+      0
+    ],
+    "money1_snap": [
+      736,
+      686
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
-    "science_pop": [0],
-    "science1_snap": [232,492],
+    "science_pop": [
+      0
+    ],
+    "science1_snap": [
+      232,
+      492
+    ],
     "science2_snap": [],
-    "scienceadv_pop": [0],
-    "scienceadv1_snap": [232,356],
+    "scienceadv_pop": [
+      0
+    ],
+    "scienceadv1_snap": [
+      232,
+      356
+    ],
     "scienceadv2_snap": [],
     "material_pop": [],
     "material1_snap": [],
@@ -189,7 +296,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 2,
     "artifact": 1,
     "ancient": 0,
@@ -197,28 +309,52 @@
     "gcds": 0,
     "warp": 0,
     "type": "ai"
-    },
-  "221":
-    {
-    "owner":0,
-    "name":"Procyon",
+  },
+  "221": {
+    "owner": 0,
+    "name": "Procyon",
     "ring": 2,
     "disctile": 0,
     "player_ships": [],
-    "money_pop": [1],
-    "money1_snap": [605,206],
+    "money_pop": [
+      1
+    ],
+    "money1_snap": [
+      605,
+      206
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [0],
-    "moneyadv1_snap": [470,206],
+    "moneyadv_pop": [
+      0
+    ],
+    "moneyadv1_snap": [
+      470,
+      206
+    ],
     "moneyadv2_snap": [],
-    "science_pop": [1],
-    "science1_snap": [456,660],
+    "science_pop": [
+      1
+    ],
+    "science1_snap": [
+      456,
+      660
+    ],
     "science2_snap": [],
-    "scienceadv_pop": [0],
-    "scienceadv1_snap": [324,660],
+    "scienceadv_pop": [
+      0
+    ],
+    "scienceadv1_snap": [
+      324,
+      660
+    ],
     "scienceadv2_snap": [],
-    "material_pop": [1],
-    "material1_snap": [662,689],
+    "material_pop": [
+      1
+    ],
+    "material1_snap": [
+      662,
+      689
+    ],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -229,7 +365,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -237,25 +378,44 @@
     "gcds": 0,
     "warp": 0,
     "type": "home"
-    },
-  "222":
-    {
-    "owner":0,
-    "name":"Epsilon Eridani",
+  },
+  "222": {
+    "owner": 0,
+    "name": "Epsilon Eridani",
     "ring": 2,
     "disctile": 0,
     "player_ships": [],
-    "money_pop": [1],
-    "money1_snap": [589,221],
+    "money_pop": [
+      1
+    ],
+    "money1_snap": [
+      589,
+      221
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [0],
-    "moneyadv1_snap": [454,221],
+    "moneyadv_pop": [
+      0
+    ],
+    "moneyadv1_snap": [
+      454,
+      221
+    ],
     "moneyadv2_snap": [],
-    "science_pop": [1],
-    "science1_snap": [740,650],
+    "science_pop": [
+      1
+    ],
+    "science1_snap": [
+      740,
+      650
+    ],
     "science2_snap": [],
-    "scienceadv_pop": [0],
-    "scienceadv1_snap": [610,653],
+    "scienceadv_pop": [
+      0
+    ],
+    "scienceadv1_snap": [
+      610,
+      653
+    ],
     "scienceadv2_snap": [],
     "material_pop": [],
     "material1_snap": [],
@@ -269,7 +429,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -277,28 +442,52 @@
     "gcds": 0,
     "warp": 0,
     "type": "home"
-    },
-  "223":
-    {
-    "owner":0,
-    "name":"Altair",
+  },
+  "223": {
+    "owner": 0,
+    "name": "Altair",
     "ring": 2,
     "disctile": 0,
     "player_ships": [],
-    "money_pop": [1],
-    "money1_snap": [656,206],
+    "money_pop": [
+      1
+    ],
+    "money1_snap": [
+      656,
+      206
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [0],
-    "moneyadv1_snap": [524,206],
+    "moneyadv_pop": [
+      0
+    ],
+    "moneyadv1_snap": [
+      524,
+      206
+    ],
     "moneyadv2_snap": [],
-    "science_pop": [1],
-    "science1_snap": [317,421],
+    "science_pop": [
+      1
+    ],
+    "science1_snap": [
+      317,
+      421
+    ],
     "science2_snap": [],
-    "scienceadv_pop": [0],
-    "scienceadv1_snap": [185,421],
+    "scienceadv_pop": [
+      0
+    ],
+    "scienceadv1_snap": [
+      185,
+      421
+    ],
     "scienceadv2_snap": [],
-    "material_pop": [1],
-    "material1_snap": [612,705],
+    "material_pop": [
+      1
+    ],
+    "material1_snap": [
+      612,
+      705
+    ],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -309,7 +498,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -317,31 +511,45 @@
     "gcds": 0,
     "warp": 0,
     "type": "home"
-    },
-  "224":
-    {
-    "owner":0,
-    "name":"Beta Hydri",
+  },
+  "224": {
+    "owner": 0,
+    "name": "Beta Hydri",
     "ring": 2,
     "disctile": 0,
     "player_ships": [],
-    "money_pop": [1],
-    "money1_snap": [488,200],
+    "money_pop": [
+      1
+    ],
+    "money1_snap": [
+      488,
+      200
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
     "science1_snap": [],
     "science2_snap": [],
-    "scienceadv_pop": [1],
-    "scienceadv1_snap": [221,462],
+    "scienceadv_pop": [
+      1
+    ],
+    "scienceadv1_snap": [
+      221,
+      462
+    ],
     "scienceadv2_snap": [],
     "material_pop": [],
     "material1_snap": [],
     "material2_snap": [],
-    "materialadv_pop": [0],
-    "materialadv1_snap": [728,700],
+    "materialadv_pop": [
+      0
+    ],
+    "materialadv1_snap": [
+      728,
+      700
+    ],
     "materialadv2_snap": [],
     "neutral_pop": [],
     "neutral1_snap": [],
@@ -349,7 +557,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0, 1, 3, 4],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -357,28 +570,52 @@
     "gcds": 0,
     "warp": 0,
     "type": "home"
-    },
-  "225":
-    {
-    "owner":0,
-    "name":"Eta Cassiopeiae",
+  },
+  "225": {
+    "owner": 0,
+    "name": "Eta Cassiopeiae",
     "ring": 2,
     "disctile": 0,
     "player_ships": [],
-    "money_pop": [1],
-    "money1_snap": [341,733],
+    "money_pop": [
+      1
+    ],
+    "money1_snap": [
+      341,
+      733
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [0],
-    "moneyadv1_snap": [341,601],
+    "moneyadv_pop": [
+      0
+    ],
+    "moneyadv1_snap": [
+      341,
+      601
+    ],
     "moneyadv2_snap": [],
-    "science_pop": [1],
-    "science1_snap": [752,648],
+    "science_pop": [
+      1
+    ],
+    "science1_snap": [
+      752,
+      648
+    ],
     "science2_snap": [],
-    "scienceadv_pop": [0],
-    "scienceadv1_snap": [620,648],
+    "scienceadv_pop": [
+      0
+    ],
+    "scienceadv1_snap": [
+      620,
+      648
+    ],
     "scienceadv2_snap": [],
-    "material_pop": [1],
-    "material1_snap": [346,257],
+    "material_pop": [
+      1
+    ],
+    "material1_snap": [
+      346,
+      257
+    ],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -389,7 +626,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -397,28 +639,37 @@
     "gcds": 0,
     "warp": 0,
     "type": "home"
-    },
-  "226":
-    {
-    "owner":0,
-    "name":"61 Cygni",
+  },
+  "226": {
+    "owner": 0,
+    "name": "61 Cygni",
     "ring": 2,
     "disctile": 0,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
-    "science_pop": [1],
-    "science1_snap": [396,688],
+    "science_pop": [
+      1
+    ],
+    "science1_snap": [
+      396,
+      688
+    ],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
-    "material_pop": [1],
-    "material1_snap": [652,708],
+    "material_pop": [
+      1
+    ],
+    "material1_snap": [
+      652,
+      708
+    ],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -429,7 +680,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -437,28 +693,52 @@
     "gcds": 0,
     "warp": 0,
     "type": "home"
-    },
-  "227":
-    {
-    "owner":0,
-    "name":"Sirius",
+  },
+  "227": {
+    "owner": 0,
+    "name": "Sirius",
     "ring": 2,
     "disctile": 0,
     "player_ships": [],
-    "money_pop": [1],
-    "money1_snap": [672,748],
+    "money_pop": [
+      1
+    ],
+    "money1_snap": [
+      672,
+      748
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [0],
-    "moneyadv1_snap": [672,613],
+    "moneyadv_pop": [
+      0
+    ],
+    "moneyadv1_snap": [
+      672,
+      613
+    ],
     "moneyadv2_snap": [],
-    "science_pop": [1],
-    "science1_snap": [498,220],
+    "science_pop": [
+      1
+    ],
+    "science1_snap": [
+      498,
+      220
+    ],
     "science2_snap": [],
-    "scienceadv_pop": [0],
-    "scienceadv1_snap": [364,220],
+    "scienceadv_pop": [
+      0
+    ],
+    "scienceadv1_snap": [
+      364,
+      220
+    ],
     "scienceadv2_snap": [],
-    "material_pop": [1],
-    "material1_snap": [318,670],
+    "material_pop": [
+      1
+    ],
+    "material1_snap": [
+      318,
+      670
+    ],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -469,7 +749,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -477,22 +762,31 @@
     "gcds": 0,
     "warp": 0,
     "type": "home"
-    },
-  "228":
-    {
-    "owner":0,
-    "name":"Sigma Draconis",
+  },
+  "228": {
+    "owner": 0,
+    "name": "Sigma Draconis",
     "ring": 2,
     "disctile": 0,
     "player_ships": [],
-    "money_pop": [1],
-    "money1_snap": [530,198],
+    "money_pop": [
+      1
+    ],
+    "money1_snap": [
+      530,
+      198
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
-    "science_pop": [1],
-    "science1_snap": [392,669],
+    "science_pop": [
+      1
+    ],
+    "science1_snap": [
+      392,
+      669
+    ],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -500,8 +794,13 @@
     "material_pop": [],
     "material1_snap": [],
     "material2_snap": [],
-    "materialadv_pop": [0],
-    "materialadv1_snap": [662,708],
+    "materialadv_pop": [
+      0
+    ],
+    "materialadv1_snap": [
+      662,
+      708
+    ],
     "materialadv2_snap": [],
     "neutral_pop": [],
     "neutral1_snap": [],
@@ -509,7 +808,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -517,28 +821,52 @@
     "gcds": 0,
     "warp": 0,
     "type": "home"
-    },
-  "229":
-    {
-    "owner":0,
-    "name":"Tau Ceti",
+  },
+  "229": {
+    "owner": 0,
+    "name": "Tau Ceti",
     "ring": 2,
     "disctile": 0,
     "player_ships": [],
-    "money_pop": [1],
-    "money1_snap": [346,736],
+    "money_pop": [
+      1
+    ],
+    "money1_snap": [
+      346,
+      736
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [0],
-    "moneyadv1_snap": [733,669],
+    "moneyadv_pop": [
+      0
+    ],
+    "moneyadv1_snap": [
+      733,
+      669
+    ],
     "moneyadv2_snap": [],
-    "science_pop": [1],
-    "science1_snap": [597,669],
+    "science_pop": [
+      1
+    ],
+    "science1_snap": [
+      597,
+      669
+    ],
     "science2_snap": [],
-    "scienceadv_pop": [0],
-    "scienceadv1_snap": [594,669],
+    "scienceadv_pop": [
+      0
+    ],
+    "scienceadv1_snap": [
+      594,
+      669
+    ],
     "scienceadv2_snap": [],
-    "material_pop": [1],
-    "material1_snap": [622,245],
+    "material_pop": [
+      1
+    ],
+    "material1_snap": [
+      622,
+      245
+    ],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -549,7 +877,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -557,22 +890,36 @@
     "gcds": 0,
     "warp": 0,
     "type": "home"
-    },
-  "230":
-    {
-    "owner":0,
-    "name":"Lambda Aurigae",
+  },
+  "230": {
+    "owner": 0,
+    "name": "Lambda Aurigae",
     "ring": 2,
     "disctile": 0,
     "player_ships": [],
-    "money_pop": [1],
-    "money1_snap": [454,225],
+    "money_pop": [
+      1
+    ],
+    "money1_snap": [
+      454,
+      225
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [0],
-    "moneyadv1_snap": [410,225],
+    "moneyadv_pop": [
+      0
+    ],
+    "moneyadv1_snap": [
+      410,
+      225
+    ],
     "moneyadv2_snap": [],
-    "science_pop": [1],
-    "science1_snap": [336,712],
+    "science_pop": [
+      1
+    ],
+    "science1_snap": [
+      336,
+      712
+    ],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -580,8 +927,13 @@
     "material_pop": [],
     "material1_snap": [],
     "material2_snap": [],
-    "materialadv_pop": [0],
-    "materialadv1_snap": [674,664],
+    "materialadv_pop": [
+      0
+    ],
+    "materialadv1_snap": [
+      674,
+      664
+    ],
     "materialadv2_snap": [],
     "neutral_pop": [],
     "neutral1_snap": [],
@@ -589,7 +941,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -597,28 +954,52 @@
     "gcds": 0,
     "warp": 0,
     "type": "home"
-    },
-  "231":
-    {
-    "owner":0,
-    "name":"Delta Pavonis",
+  },
+  "231": {
+    "owner": 0,
+    "name": "Delta Pavonis",
     "ring": 2,
     "disctile": 0,
     "player_ships": [],
-    "money_pop": [1],
-    "money1_snap": [749,646],
+    "money_pop": [
+      1
+    ],
+    "money1_snap": [
+      749,
+      646
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [0],
-    "moneyadv1_snap": [612,646],
+    "moneyadv_pop": [
+      0
+    ],
+    "moneyadv1_snap": [
+      612,
+      646
+    ],
     "moneyadv2_snap": [],
-    "science_pop": [1],
-    "science1_snap": [576,226],
+    "science_pop": [
+      1
+    ],
+    "science1_snap": [
+      576,
+      226
+    ],
     "science2_snap": [],
-    "scienceadv_pop": [0],
-    "scienceadv1_snap": [441,226],
+    "scienceadv_pop": [
+      0
+    ],
+    "scienceadv1_snap": [
+      441,
+      226
+    ],
     "scienceadv2_snap": [],
-    "material_pop": [1],
-    "material1_snap": [342,716],
+    "material_pop": [
+      1
+    ],
+    "material1_snap": [
+      342,
+      716
+    ],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -629,7 +1010,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -637,31 +1023,50 @@
     "gcds": 0,
     "warp": 0,
     "type": "home"
-    },
-  "232":
-    {
-    "owner":0,
-    "name":"Rigel",
+  },
+  "232": {
+    "owner": 0,
+    "name": "Rigel",
     "ring": 2,
     "disctile": 0,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [0],
-    "moneyadv1_snap": [560,234],
+    "moneyadv_pop": [
+      0
+    ],
+    "moneyadv1_snap": [
+      560,
+      234
+    ],
     "moneyadv2_snap": [],
-    "science_pop": [1],
-    "science1_snap": [241,432],
+    "science_pop": [
+      1
+    ],
+    "science1_snap": [
+      241,
+      432
+    ],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
-    "material_pop": [1],
-    "material1_snap": [724,672],
+    "material_pop": [
+      1
+    ],
+    "material1_snap": [
+      724,
+      672
+    ],
     "material2_snap": [],
-    "materialadv_pop": [0],
-    "materialadv1_snap": [589,672],
+    "materialadv_pop": [
+      0
+    ],
+    "materialadv1_snap": [
+      589,
+      672
+    ],
     "materialadv2_snap": [],
     "neutral_pop": [],
     "neutral1_snap": [],
@@ -669,7 +1074,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -677,18 +1087,22 @@
     "gcds": 0,
     "warp": 0,
     "type": "home"
-    },
-  "101":
-    {
-    "owner":0,
-    "name":"Castor",
+  },
+  "101": {
+    "owner": 0,
+    "name": "Castor",
     "ring": 1,
     "disctile": 1,
     "player_ships": [],
-    "money_pop": [0],
-    "money1_snap": [736,234],
+    "money_pop": [
+      0
+    ],
+    "money1_snap": [
+      736,
+      234
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
@@ -697,11 +1111,21 @@
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
-    "material_pop": [0],
-    "material1_snap": [454,178],
+    "material_pop": [
+      0
+    ],
+    "material1_snap": [
+      454,
+      178
+    ],
     "material2_snap": [],
-    "materialadv_pop": [0],
-    "materialadv1_snap": [325,174],
+    "materialadv_pop": [
+      0
+    ],
+    "materialadv1_snap": [
+      325,
+      174
+    ],
     "materialadv2_snap": [],
     "neutral_pop": [],
     "neutral1_snap": [],
@@ -709,7 +1133,13 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [1, 2, 3, 4, 5],
+    "wormholes": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 1,
@@ -717,26 +1147,34 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "102":
-    {
-    "owner":0,
-    "name":"Pollux",
+  },
+  "102": {
+    "owner": 0,
+    "name": "Pollux",
     "ring": 1,
     "disctile": 0,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
     "science1_snap": [],
     "science2_snap": [],
-    "scienceadv_pop": [0,0],
-    "scienceadv1_snap": [445,673],
-    "scienceadv2_snap": [308,673],
+    "scienceadv_pop": [
+      0,
+      0
+    ],
+    "scienceadv1_snap": [
+      445,
+      673
+    ],
+    "scienceadv2_snap": [
+      308,
+      673
+    ],
     "material_pop": [],
     "material1_snap": [],
     "material2_snap": [],
@@ -749,7 +1187,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0, 2, 3, 5],
+    "wormholes": [
+      0,
+      2,
+      3,
+      5
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 0,
@@ -757,22 +1200,31 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "103":
-    {
-    "owner":0,
-    "name":"Beta Leonis",
+  },
+  "103": {
+    "owner": 0,
+    "name": "Beta Leonis",
     "ring": 1,
     "disctile": 0,
     "player_ships": [],
-    "money_pop": [0],
-    "money1_snap": [386,642],
+    "money_pop": [
+      0
+    ],
+    "money1_snap": [
+      386,
+      642
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
-    "science_pop": [0],
-    "science1_snap": [605,234],
+    "science_pop": [
+      0
+    ],
+    "science1_snap": [
+      605,
+      234
+    ],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -789,7 +1241,13 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0, 1, 2, 4, 5],
+    "wormholes": [
+      0,
+      1,
+      2,
+      4,
+      5
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 0,
@@ -797,25 +1255,44 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "104":
-    {
-    "owner":0,
-    "name":"Arcturus",
+  },
+  "104": {
+    "owner": 0,
+    "name": "Arcturus",
     "ring": 1,
     "disctile": 1,
     "player_ships": [],
-    "money_pop": [0],
-    "money1_snap": [702,170],
+    "money_pop": [
+      0
+    ],
+    "money1_snap": [
+      702,
+      170
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [0],
-    "moneyadv1_snap": [570,170],
+    "moneyadv_pop": [
+      0
+    ],
+    "moneyadv1_snap": [
+      570,
+      170
+    ],
     "moneyadv2_snap": [],
-    "science_pop": [0],
-    "science1_snap": [360,768],
+    "science_pop": [
+      0
+    ],
+    "science1_snap": [
+      360,
+      768
+    ],
     "science2_snap": [],
-    "scienceadv_pop": [0],
-    "scienceadv1_snap": [360,638],
+    "scienceadv_pop": [
+      0
+    ],
+    "scienceadv1_snap": [
+      360,
+      638
+    ],
     "scienceadv2_snap": [],
     "material_pop": [],
     "material1_snap": [],
@@ -829,7 +1306,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 2,
@@ -837,22 +1319,31 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "105":
-    {
-    "owner":0,
-    "name":"Zeta Herculis",
+  },
+  "105": {
+    "owner": 0,
+    "name": "Zeta Herculis",
     "ring": 1,
     "disctile": 1,
     "player_ships": [],
-    "money_pop": [0],
-    "money1_snap": [665,162],
+    "money_pop": [
+      0
+    ],
+    "money1_snap": [
+      665,
+      162
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
-    "science_pop": [0],
-    "science1_snap": [176,470],
+    "science_pop": [
+      0
+    ],
+    "science1_snap": [
+      176,
+      470
+    ],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -860,8 +1351,13 @@
     "material_pop": [],
     "material1_snap": [],
     "material2_snap": [],
-    "materialadv_pop": [0],
-    "materialadv1_snap": [732,668],
+    "materialadv_pop": [
+      0
+    ],
+    "materialadv1_snap": [
+      732,
+      668
+    ],
     "materialadv2_snap": [],
     "neutral_pop": [],
     "neutral1_snap": [],
@@ -869,7 +1365,13 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0, 1, 3, 4, 5],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4,
+      5
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 1,
@@ -877,28 +1379,37 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "106":
-    {
-    "owner":0,
-    "name":"Capella",
+  },
+  "106": {
+    "owner": 0,
+    "name": "Capella",
     "ring": 1,
     "disctile": 0,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
-    "science_pop": [0],
-    "science1_snap": [353,282],
+    "science_pop": [
+      0
+    ],
+    "science1_snap": [
+      353,
+      282
+    ],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
-    "material_pop": [0],
-    "material1_snap": [681,268],
+    "material_pop": [
+      0
+    ],
+    "material1_snap": [
+      681,
+      268
+    ],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -909,7 +1420,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,2,3],
+    "wormholes": [
+      0,
+      1,
+      2,
+      3
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 0,
@@ -917,31 +1433,45 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "107":
-    {
-    "owner":0,
-    "name":"Aldebaran",
+  },
+  "107": {
+    "owner": 0,
+    "name": "Aldebaran",
     "ring": 1,
     "disctile": 0,
     "player_ships": [],
-    "money_pop": [0],
-    "money1_snap": [274,568],
+    "money_pop": [
+      0
+    ],
+    "money1_snap": [
+      274,
+      568
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
     "science1_snap": [],
     "science2_snap": [],
-    "scienceadv_pop": [0],
-    "scienceadv1_snap": [604,184],
+    "scienceadv_pop": [
+      0
+    ],
+    "scienceadv1_snap": [
+      604,
+      184
+    ],
     "scienceadv2_snap": [],
     "material_pop": [],
     "material1_snap": [],
     "material2_snap": [],
-    "materialadv_pop": [0],
-    "materialadv1_snap": [706,673],
+    "materialadv_pop": [
+      0
+    ],
+    "materialadv1_snap": [
+      706,
+      673
+    ],
     "materialadv2_snap": [],
     "neutral_pop": [],
     "neutral1_snap": [],
@@ -949,7 +1479,13 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0, 1, 2, 3, 5],
+    "wormholes": [
+      0,
+      1,
+      2,
+      3,
+      5
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -957,22 +1493,31 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "108":
-    {
-    "owner":0,
-    "name":"Mu Cassiopeiae",
+  },
+  "108": {
+    "owner": 0,
+    "name": "Mu Cassiopeiae",
     "ring": 1,
     "disctile": 1,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [0],
-    "moneyadv1_snap": [253,325],
+    "moneyadv_pop": [
+      0
+    ],
+    "moneyadv1_snap": [
+      253,
+      325
+    ],
     "moneyadv2_snap": [],
-    "science_pop": [0],
-    "science1_snap": [600,160],
+    "science_pop": [
+      0
+    ],
+    "science1_snap": [
+      600,
+      160
+    ],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -983,13 +1528,23 @@
     "materialadv_pop": [],
     "materialadv1_snap": [],
     "materialadv2_snap": [],
-    "neutral_pop": [0],
-    "neutral1_snap": [616,702],
+    "neutral_pop": [
+      0
+    ],
+    "neutral1_snap": [
+      616,
+      702
+    ],
     "neutral2_snap": [],
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3,4],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 1,
@@ -997,18 +1552,22 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "109":
-    {
-    "owner":0,
-    "name":"Alpha Lacertae",
+  },
+  "109": {
+    "owner": 0,
+    "name": "Alpha Lacertae",
     "ring": 1,
     "disctile": 1,
     "player_ships": [],
-    "money_pop": [0],
-    "money1_snap": [648,185],
+    "money_pop": [
+      0
+    ],
+    "money1_snap": [
+      648,
+      185
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
@@ -1017,8 +1576,13 @@
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
-    "material_pop": [0],
-    "material1_snap": [404,145],
+    "material_pop": [
+      0
+    ],
+    "material1_snap": [
+      404,
+      145
+    ],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -1029,7 +1593,13 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [1, 2, 3, 4, 5],
+    "wormholes": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
     "vp": 4,
     "artifact": 1,
     "ancient": 2,
@@ -1037,19 +1607,23 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "110":
-    {
-    "owner":0,
-    "name":"Iota Bootis",
+  },
+  "110": {
+    "owner": 0,
+    "name": "Iota Bootis",
     "ring": 1,
     "disctile": 1,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [0],
-    "moneyadv1_snap": [201,376],
+    "moneyadv_pop": [
+      0
+    ],
+    "moneyadv1_snap": [
+      201,
+      376
+    ],
     "moneyadv2_snap": [],
     "science_pop": [],
     "science1_snap": [],
@@ -1066,10 +1640,20 @@
     "neutral_pop": [],
     "neutral1_snap": [],
     "neutral2_snap": [],
-    "neutral_adv_pop": [0],
-    "neutraladv1_snap": [618,729],
+    "neutral_adv_pop": [
+      0
+    ],
+    "neutraladv1_snap": [
+      618,
+      729
+    ],
     "neutraladv2_snap": [],
-    "wormholes": [0,2,3,4],
+    "wormholes": [
+      0,
+      2,
+      3,
+      4
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 0,
@@ -1077,18 +1661,22 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "201":
-    {
-    "owner":0,
-    "name":"Alpha Centauri",
+  },
+  "201": {
+    "owner": 0,
+    "name": "Alpha Centauri",
     "ring": 2,
     "disctile": 0,
     "player_ships": [],
-    "money_pop": [0],
-    "money1_snap": [316,609],
+    "money_pop": [
+      0
+    ],
+    "money1_snap": [
+      316,
+      609
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
@@ -1097,8 +1685,13 @@
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
-    "material_pop": [0],
-    "material1_snap": [461,204],
+    "material_pop": [
+      0
+    ],
+    "material1_snap": [
+      461,
+      204
+    ],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -1109,7 +1702,11 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [1,3,5],
+    "wormholes": [
+      1,
+      3,
+      5
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -1117,25 +1714,34 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "202":
-    {
-    "owner":0,
-    "name":"Fomalhaut",
+  },
+  "202": {
+    "owner": 0,
+    "name": "Fomalhaut",
     "ring": 2,
     "disctile": 0,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
-    "science_pop": [0],
-    "science1_snap": [424,732],
+    "science_pop": [
+      0
+    ],
+    "science1_snap": [
+      424,
+      732
+    ],
     "science2_snap": [],
-    "scienceadv_pop": [0],
-    "scienceadv1_snap": [424,594],
+    "scienceadv_pop": [
+      0
+    ],
+    "scienceadv1_snap": [
+      424,
+      594
+    ],
     "scienceadv2_snap": [],
     "material_pop": [],
     "material1_snap": [],
@@ -1149,7 +1755,11 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [1,3,5],
+    "wormholes": [
+      1,
+      3,
+      5
+    ],
     "vp": 2,
     "artifact": 1,
     "ancient": 0,
@@ -1157,28 +1767,42 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "203":
-    {
-    "owner":0,
-    "name":"Chi Draconis",
+  },
+  "203": {
+    "owner": 0,
+    "name": "Chi Draconis",
     "ring": 2,
     "disctile": 1,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [0],
-    "moneyadv1_snap": [326,726],
+    "moneyadv_pop": [
+      0
+    ],
+    "moneyadv1_snap": [
+      326,
+      726
+    ],
     "moneyadv2_snap": [],
-    "science_pop": [0],
-    "science1_snap": [704,605],
+    "science_pop": [
+      0
+    ],
+    "science1_snap": [
+      704,
+      605
+    ],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
-    "material_pop": [0],
-    "material1_snap": [385,154],
+    "material_pop": [
+      0
+    ],
+    "material1_snap": [
+      385,
+      154
+    ],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -1189,7 +1813,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3,5],
+    "wormholes": [
+      0,
+      1,
+      3,
+      5
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 2,
@@ -1197,19 +1826,23 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "204":
-    {
-    "owner":0,
-    "name":"Vega",
+  },
+  "204": {
+    "owner": 0,
+    "name": "Vega",
     "ring": 2,
     "disctile": 1,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [0],
-    "moneyadv1_snap": [326,229],
+    "moneyadv_pop": [
+      0
+    ],
+    "moneyadv1_snap": [
+      326,
+      229
+    ],
     "moneyadv2_snap": [],
     "science_pop": [],
     "science1_snap": [],
@@ -1220,16 +1853,31 @@
     "material_pop": [],
     "material1_snap": [],
     "material2_snap": [],
-    "materialadv_pop": [0],
-    "materialadv1_snap": [300,633],
+    "materialadv_pop": [
+      0
+    ],
+    "materialadv1_snap": [
+      300,
+      633
+    ],
     "materialadv2_snap": [],
-    "neutral_pop": [0],
-    "neutral1_snap": [732,256],
+    "neutral_pop": [
+      0
+    ],
+    "neutral1_snap": [
+      732,
+      256
+    ],
     "neutral2_snap": [],
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3,5],
+    "wormholes": [
+      0,
+      1,
+      3,
+      5
+    ],
     "vp": 2,
     "artifact": 1,
     "ancient": 1,
@@ -1237,25 +1885,39 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "205":
-    {
-    "owner":0,
-    "name":"Mu Herculis",
+  },
+  "205": {
+    "owner": 0,
+    "name": "Mu Herculis",
     "ring": 2,
     "disctile": 0,
     "player_ships": [],
-    "money_pop": [0],
-    "money1_snap": [494,237],
+    "money_pop": [
+      0
+    ],
+    "money1_snap": [
+      494,
+      237
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [0],
-    "moneyadv1_snap": [360,237],
+    "moneyadv_pop": [
+      0
+    ],
+    "moneyadv1_snap": [
+      360,
+      237
+    ],
     "moneyadv2_snap": [],
     "science_pop": [],
     "science1_snap": [],
     "science2_snap": [],
-    "scienceadv_pop": [0],
-    "scienceadv1_snap": [688,677],
+    "scienceadv_pop": [
+      0
+    ],
+    "scienceadv1_snap": [
+      688,
+      677
+    ],
     "scienceadv2_snap": [],
     "material_pop": [],
     "material1_snap": [],
@@ -1269,7 +1931,11 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [2,3,4],
+    "wormholes": [
+      2,
+      3,
+      4
+    ],
     "vp": 1,
     "artifact": 1,
     "ancient": 0,
@@ -1277,18 +1943,17 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "206":
-    {
-    "owner":0,
-    "name":"Epsilon Indi",
+  },
+  "206": {
+    "owner": 0,
+    "name": "Epsilon Indi",
     "ring": 2,
     "disctile": 1,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
@@ -1297,8 +1962,13 @@
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
-    "material_pop": [0],
-    "material1_snap": [321,249],
+    "material_pop": [
+      0
+    ],
+    "material1_snap": [
+      321,
+      249
+    ],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -1309,7 +1979,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [1,2,3,5],
+    "wormholes": [
+      1,
+      2,
+      3,
+      5
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -1317,18 +1992,17 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "207":
-    {
-    "owner":0,
-    "name":"Zeta Reticuli",
+  },
+  "207": {
+    "owner": 0,
+    "name": "Zeta Reticuli",
     "ring": 2,
     "disctile": 1,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
@@ -1349,7 +2023,11 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3],
+    "wormholes": [
+      0,
+      1,
+      3
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 0,
@@ -1357,18 +2035,17 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "208":
-    {
-    "owner":0,
-    "name":"Iota Persei",
+  },
+  "208": {
+    "owner": 0,
+    "name": "Iota Persei",
     "ring": 2,
     "disctile": 1,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
@@ -1389,7 +2066,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,2,3,5],
+    "wormholes": [
+      0,
+      2,
+      3,
+      5
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 0,
@@ -1397,22 +2079,31 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "209":
-    {
-    "owner":0,
-    "name":"Delta Eridani",
+  },
+  "209": {
+    "owner": 0,
+    "name": "Delta Eridani",
     "ring": 2,
     "disctile": 0,
     "player_ships": [],
-    "money_pop": [0],
-    "money1_snap": [624,248],
+    "money_pop": [
+      0
+    ],
+    "money1_snap": [
+      624,
+      248
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
-    "science_pop": [0],
-    "science1_snap": [257,497],
+    "science_pop": [
+      0
+    ],
+    "science1_snap": [
+      257,
+      497
+    ],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -1429,7 +2120,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3,5],
+    "wormholes": [
+      0,
+      1,
+      3,
+      5
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -1437,18 +2133,22 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "210":
-    {
-    "owner":0,
-    "name":"Psi Capricorni",
+  },
+  "210": {
+    "owner": 0,
+    "name": "Psi Capricorni",
     "ring": 2,
     "disctile": 0,
     "player_ships": [],
-    "money_pop": [0],
-    "money1_snap": [440,176],
+    "money_pop": [
+      0
+    ],
+    "money1_snap": [
+      440,
+      176
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
@@ -1457,8 +2157,13 @@
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
-    "material_pop": [0],
-    "material1_snap": [676,688],
+    "material_pop": [
+      0
+    ],
+    "material1_snap": [
+      676,
+      688
+    ],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -1469,7 +2174,11 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,3,5],
+    "wormholes": [
+      0,
+      3,
+      5
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -1477,18 +2186,22 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "211":
-    {
-    "owner":0,
-    "name":"Beta Aquilae",
+  },
+  "211": {
+    "owner": 0,
+    "name": "Beta Aquilae",
     "ring": 2,
     "disctile": 1,
     "player_ships": [],
-    "money_pop": [0],
-    "money1_snap": [624,168],
+    "money_pop": [
+      0
+    ],
+    "money1_snap": [
+      624,
+      168
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
@@ -1500,16 +2213,31 @@
     "material_pop": [],
     "material1_snap": [],
     "material2_snap": [],
-    "materialadv_pop": [0],
-    "materialadv1_snap": [694,728],
+    "materialadv_pop": [
+      0
+    ],
+    "materialadv1_snap": [
+      694,
+      728
+    ],
     "materialadv2_snap": [],
-    "neutral_pop": [0],
-    "neutral1_snap": [320,637],
+    "neutral_pop": [
+      0
+    ],
+    "neutral1_snap": [
+      320,
+      637
+    ],
     "neutral2_snap": [],
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,2,3],
+    "wormholes": [
+      0,
+      1,
+      2,
+      3
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 1,
@@ -1517,22 +2245,26 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "214":
-    {
-    "owner":0,
-    "name":"Beta Monocerotis",
+  },
+  "214": {
+    "owner": 0,
+    "name": "Beta Monocerotis",
     "ring": 2,
     "disctile": 1,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
-    "science_pop": [0],
-    "science1_snap": [708,753],
+    "science_pop": [
+      0
+    ],
+    "science1_snap": [
+      708,
+      753
+    ],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -1540,16 +2272,32 @@
     "material_pop": [],
     "material1_snap": [],
     "material2_snap": [],
-    "materialadv_pop": [0],
-    "materialadv1_snap": [318,685],
+    "materialadv_pop": [
+      0
+    ],
+    "materialadv1_snap": [
+      318,
+      685
+    ],
     "materialadv2_snap": [],
     "neutral_pop": [],
     "neutral1_snap": [],
     "neutral2_snap": [],
-    "neutral_adv_pop": [0],
-    "neutraladv1_snap": [352,208],
+    "neutral_adv_pop": [
+      0
+    ],
+    "neutraladv1_snap": [
+      352,
+      208
+    ],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,2,4,5],
+    "wormholes": [
+      0,
+      1,
+      2,
+      4,
+      5
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 1,
@@ -1557,22 +2305,31 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "281":
-    {
-    "owner":0,
-    "name":"Delta Corvi",
+  },
+  "281": {
+    "owner": 0,
+    "name": "Delta Corvi",
     "ring": 2,
     "disctile": 1,
     "player_ships": [],
-    "money_pop": [0],
-    "money1_snap": [320,733],
+    "money_pop": [
+      0
+    ],
+    "money1_snap": [
+      320,
+      733
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
-    "science_pop": [0],
-    "science1_snap": [642,166],
+    "science_pop": [
+      0
+    ],
+    "science1_snap": [
+      642,
+      166
+    ],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -1589,7 +2346,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,2,3,5],
+    "wormholes": [
+      0,
+      2,
+      3,
+      5
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 0,
@@ -1597,18 +2359,17 @@
     "gcds": 0,
     "warp": 1,
     "type": "standard"
-    },
-  "295":
-    {
-    "owner":0,
-    "name":"NGC 5189",
+  },
+  "295": {
+    "owner": 0,
+    "name": "NGC 5189",
     "ring": 2,
     "disctile": 2,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
@@ -1629,7 +2390,14 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0, 1, 2, 3, 4, 5],
+    "wormholes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
     "vp": 0,
     "artifact": 0,
     "ancient": 1,
@@ -1637,22 +2405,31 @@
     "gcds": 0,
     "warp": 0,
     "type": "nebula"
-    },
-  "301":
-    {
-    "owner":0,
-    "name":"Zeta Draconis",
+  },
+  "301": {
+    "owner": 0,
+    "name": "Zeta Draconis",
     "ring": 3,
     "disctile": 1,
     "player_ships": [],
-    "money_pop": [0],
-    "money1_snap": [733,232],
+    "money_pop": [
+      0
+    ],
+    "money1_snap": [
+      733,
+      232
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
-    "science_pop": [0],
-    "science1_snap": [265,472],
+    "science_pop": [
+      0
+    ],
+    "science1_snap": [
+      265,
+      472
+    ],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -1660,8 +2437,13 @@
     "material_pop": [],
     "material1_snap": [],
     "material2_snap": [],
-    "materialadv_pop": [0],
-    "materialadv1_snap": [673,730],
+    "materialadv_pop": [
+      0
+    ],
+    "materialadv1_snap": [
+      673,
+      730
+    ],
     "materialadv2_snap": [],
     "neutral_pop": [],
     "neutral1_snap": [],
@@ -1669,34 +2451,52 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,2,3],
+    "wormholes": [
+      0,
+      2,
+      3
+    ],
     "vp": 2,
     "artifact": 1,
     "ancient": 2,
     "guardian": 0,
     "gcds": 0
-    },
-  "302":
-    {
-    "owner":0,
-    "name":"Gammma Serpentis",
+  },
+  "302": {
+    "owner": 0,
+    "name": "Gammma Serpentis",
     "ring": 3,
     "disctile": 1,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [0],
-    "moneyadv1_snap": [638,178],
+    "moneyadv_pop": [
+      0
+    ],
+    "moneyadv1_snap": [
+      638,
+      178
+    ],
     "moneyadv2_snap": [],
     "science_pop": [],
     "science1_snap": [],
     "science2_snap": [],
-    "scienceadv_pop": [0],
-    "scienceadv1_snap": [288,272],
+    "scienceadv_pop": [
+      0
+    ],
+    "scienceadv1_snap": [
+      288,
+      272
+    ],
     "scienceadv2_snap": [],
-    "material_pop": [0],
-    "material1_snap": [684,737],
+    "material_pop": [
+      0
+    ],
+    "material1_snap": [
+      684,
+      737
+    ],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -1707,7 +2507,11 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,3,4],
+    "wormholes": [
+      0,
+      3,
+      4
+    ],
     "vp": 2,
     "artifact": 1,
     "ancient": 1,
@@ -1715,25 +2519,34 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "303":
-    {
-    "owner":0,
-    "name":"Eta Cephei",
+  },
+  "303": {
+    "owner": 0,
+    "name": "Eta Cephei",
     "ring": 3,
     "disctile": 1,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [0],
-    "moneyadv1_snap": [657,646],
+    "moneyadv_pop": [
+      0
+    ],
+    "moneyadv1_snap": [
+      657,
+      646
+    ],
     "moneyadv2_snap": [],
     "science_pop": [],
     "science1_snap": [],
     "science2_snap": [],
-    "scienceadv_pop": [0],
-    "scienceadv1_snap": [370,646],
+    "scienceadv_pop": [
+      0
+    ],
+    "scienceadv1_snap": [
+      370,
+      646
+    ],
     "scienceadv2_snap": [],
     "material_pop": [],
     "material1_snap": [],
@@ -1741,13 +2554,21 @@
     "materialadv_pop": [],
     "materialadv1_snap": [],
     "materialadv2_snap": [],
-    "neutral_pop": [0],
-    "neutral1_snap": [673,142],
+    "neutral_pop": [
+      0
+    ],
+    "neutral1_snap": [
+      673,
+      142
+    ],
     "neutral2_snap": [],
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [3,5],
+    "wormholes": [
+      3,
+      5
+    ],
     "vp": 2,
     "artifact": 1,
     "ancient": 1,
@@ -1755,19 +2576,23 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "304":
-    {
-    "owner":0,
-    "name":"Theta Pegasi",
+  },
+  "304": {
+    "owner": 0,
+    "name": "Theta Pegasi",
     "ring": 3,
     "disctile": 0,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [0],
-    "moneyadv1_snap": [310,270],
+    "moneyadv_pop": [
+      0
+    ],
+    "moneyadv1_snap": [
+      310,
+      270
+    ],
     "moneyadv2_snap": [],
     "science_pop": [],
     "science1_snap": [],
@@ -1775,8 +2600,13 @@
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
-    "material_pop": [0],
-    "material1_snap": [352,702],
+    "material_pop": [
+      0
+    ],
+    "material1_snap": [
+      352,
+      702
+    ],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -1787,7 +2617,10 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,3],
+    "wormholes": [
+      0,
+      3
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 0,
@@ -1795,28 +2628,37 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "305":
-    {
-    "owner":0,
-    "name":"Lambda Serpentis",
+  },
+  "305": {
+    "owner": 0,
+    "name": "Lambda Serpentis",
     "ring": 3,
     "disctile": 1,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
-    "science_pop": [0],
-    "science1_snap": [336,218],
+    "science_pop": [
+      0
+    ],
+    "science1_snap": [
+      336,
+      218
+    ],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
-    "material_pop": [0],
-    "material1_snap": [636,718],
+    "material_pop": [
+      0
+    ],
+    "material1_snap": [
+      636,
+      718
+    ],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -1827,7 +2669,11 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3],
+    "wormholes": [
+      0,
+      1,
+      3
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 1,
@@ -1835,18 +2681,22 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "306":
-    {
-    "owner":0,
-    "name":"Beta Centauri",
+  },
+  "306": {
+    "owner": 0,
+    "name": "Beta Centauri",
     "ring": 3,
     "disctile": 0,
     "player_ships": [],
-    "money_pop": [0],
-    "money1_snap": [692,174],
+    "money_pop": [
+      0
+    ],
+    "money1_snap": [
+      692,
+      174
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
@@ -1855,8 +2705,13 @@
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
-    "material_pop": [0],
-    "material1_snap": [644,705],
+    "material_pop": [
+      0
+    ],
+    "material1_snap": [
+      644,
+      705
+    ],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -1867,7 +2722,10 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [1,3],
+    "wormholes": [
+      1,
+      3
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -1875,25 +2733,34 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "307":
-    {
-    "owner":0,
-    "name":"Sigma Sagittarii",
+  },
+  "307": {
+    "owner": 0,
+    "name": "Sigma Sagittarii",
     "ring": 3,
     "disctile": 0,
     "player_ships": [],
-    "money_pop": [0],
-    "money1_snap": [400,158],
+    "money_pop": [
+      0
+    ],
+    "money1_snap": [
+      400,
+      158
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
     "science1_snap": [],
     "science2_snap": [],
-    "scienceadv_pop": [0],
-    "scienceadv1_snap": [274,581],
+    "scienceadv_pop": [
+      0
+    ],
+    "scienceadv1_snap": [
+      274,
+      581
+    ],
     "scienceadv2_snap": [],
     "material_pop": [],
     "material1_snap": [],
@@ -1907,7 +2774,11 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,2,3],
+    "wormholes": [
+      0,
+      2,
+      3
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 0,
@@ -1915,22 +2786,26 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "308":
-    {
-    "owner":0,
-    "name":"Kappa Scorpii",
+  },
+  "308": {
+    "owner": 0,
+    "name": "Kappa Scorpii",
     "ring": 3,
     "disctile": 0,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
-    "science_pop": [0],
-    "science1_snap": [628,190],
+    "science_pop": [
+      0
+    ],
+    "science1_snap": [
+      628,
+      190
+    ],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -1938,8 +2813,13 @@
     "material_pop": [],
     "material1_snap": [],
     "material2_snap": [],
-    "materialadv_pop": [0],
-    "materialadv1_snap": [210,505],
+    "materialadv_pop": [
+      0
+    ],
+    "materialadv1_snap": [
+      210,
+      505
+    ],
     "materialadv2_snap": [],
     "neutral_pop": [],
     "neutral1_snap": [],
@@ -1947,7 +2827,11 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [2,3,5],
+    "wormholes": [
+      2,
+      3,
+      5
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 0,
@@ -1955,25 +2839,34 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "309":
-    {
-    "owner":0,
-    "name":"Phi Piscium",
+  },
+  "309": {
+    "owner": 0,
+    "name": "Phi Piscium",
     "ring": 3,
     "disctile": 0,
     "player_ships": [],
-    "money_pop": [0],
-    "money1_snap": [641,173],
+    "money_pop": [
+      0
+    ],
+    "money1_snap": [
+      641,
+      173
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
     "science1_snap": [],
     "science2_snap": [],
-    "scienceadv_pop": [0],
-    "scienceadv1_snap": [236,528],
+    "scienceadv_pop": [
+      0
+    ],
+    "scienceadv1_snap": [
+      236,
+      528
+    ],
     "scienceadv2_snap": [],
     "material_pop": [],
     "material1_snap": [],
@@ -1987,7 +2880,11 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,3,5],
+    "wormholes": [
+      0,
+      3,
+      5
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 0,
@@ -1995,28 +2892,37 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "310":
-    {
-    "owner":0,
-    "name":"Nu Phoenicis",
+  },
+  "310": {
+    "owner": 0,
+    "name": "Nu Phoenicis",
     "ring": 3,
     "disctile": 0,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
-    "science_pop": [0],
-    "science1_snap": [660,168],
+    "science_pop": [
+      0
+    ],
+    "science1_snap": [
+      660,
+      168
+    ],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
-    "material_pop": [0],
-    "material1_snap": [368,636],
+    "material_pop": [
+      0
+    ],
+    "material1_snap": [
+      368,
+      636
+    ],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -2027,7 +2933,10 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,3],
+    "wormholes": [
+      0,
+      3
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -2035,58 +2944,17 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "311":
-    {
-    "owner":0,
-    "name":"Canopus",
+  },
+  "311": {
+    "owner": 0,
+    "name": "Canopus",
     "ring": 3,
     "disctile": 1,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [0],
-    "material1_snap": [630,708],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,2,3],
-    "vp": 1,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    },
-  "312":
-    {
-    "owner":0,
-    "name":"Antares",
-    "ring": 3,
-    "disctile": 1,
-    "player_ships": [],
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
@@ -2095,8 +2963,13 @@
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
-    "material_pop": [0],
-    "material1_snap": [560,145],
+    "material_pop": [
+      0
+    ],
+    "material1_snap": [
+      630,
+      708
+    ],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -2107,7 +2980,11 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3],
+    "wormholes": [
+      0,
+      2,
+      3
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -2115,18 +2992,65 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "313":
-    {
-    "owner":0,
-    "name":"Alpha Ursae Minoris",
+  },
+  "312": {
+    "owner": 0,
+    "name": "Antares",
     "ring": 3,
     "disctile": 1,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
+    "moneyadv1_snap": [],
+    "moneyadv2_snap": [],
+    "science_pop": [],
+    "science1_snap": [],
+    "science2_snap": [],
+    "scienceadv_pop": [],
+    "scienceadv1_snap": [],
+    "scienceadv2_snap": [],
+    "material_pop": [
+      0
+    ],
+    "material1_snap": [
+      560,
+      145
+    ],
+    "material2_snap": [],
+    "materialadv_pop": [],
+    "materialadv1_snap": [],
+    "materialadv2_snap": [],
+    "neutral_pop": [],
+    "neutral1_snap": [],
+    "neutral2_snap": [],
+    "neutral_adv_pop": [],
+    "neutraladv1_snap": [],
+    "neutraladv2_snap": [],
+    "wormholes": [
+      0,
+      1,
+      3
+    ],
+    "vp": 1,
+    "artifact": 0,
+    "ancient": 0,
+    "guardian": 0,
+    "gcds": 0,
+    "warp": 0,
+    "type": "standard"
+  },
+  "313": {
+    "owner": 0,
+    "name": "Alpha Ursae Minoris",
+    "ring": 3,
+    "disctile": 1,
+    "player_ships": [],
+    "money_pop": [],
+    "money1_snap": [],
+    "money2_snap": [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
@@ -2141,13 +3065,21 @@
     "materialadv_pop": [],
     "materialadv1_snap": [],
     "materialadv2_snap": [],
-    "neutral_pop": [0],
-    "neutral1_snap": [717,165],
+    "neutral_pop": [
+      0
+    ],
+    "neutral1_snap": [
+      717,
+      165
+    ],
     "neutral2_snap": [],
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,3],
+    "wormholes": [
+      0,
+      3
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -2155,18 +3087,17 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "314":
-    {
-    "owner":0,
-    "name":"Spica",
+  },
+  "314": {
+    "owner": 0,
+    "name": "Spica",
     "ring": 3,
     "disctile": 1,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
@@ -2181,13 +3112,22 @@
     "materialadv_pop": [],
     "materialadv1_snap": [],
     "materialadv2_snap": [],
-    "neutral_pop": [0],
-    "neutral1_snap": [318,596],
+    "neutral_pop": [
+      0
+    ],
+    "neutral1_snap": [
+      318,
+      596
+    ],
     "neutral2_snap": [],
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [2,3,4],
+    "wormholes": [
+      2,
+      3,
+      4
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -2195,58 +3135,17 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "315":
-    {
-    "owner":0,
-    "name":"Epsilon Aurigae",
+  },
+  "315": {
+    "owner": 0,
+    "name": "Epsilon Aurigae",
     "ring": 3,
     "disctile": 1,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [],
-    "moneyadv1_snap": [],
-    "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [],
-    "scienceadv1_snap": [],
-    "scienceadv2_snap": [],
-    "material_pop": [],
-    "material1_snap": [],
-    "material2_snap": [],
-    "materialadv_pop": [],
-    "materialadv1_snap": [],
-    "materialadv2_snap": [],
-    "neutral_pop": [],
-    "neutral1_snap": [],
-    "neutral2_snap": [],
-    "neutral_adv_pop": [],
-    "neutraladv1_snap": [],
-    "neutraladv2_snap": [],
-    "wormholes": [0,3,5],
-    "vp": 1,
-    "artifact": 0,
-    "ancient": 0,
-    "guardian": 0,
-    "gcds": 0,
-    "warp": 0,
-    "type": "standard"
-    },
-  "316":
-    {
-    "owner":0,
-    "name":"iota Carinae",
-    "ring": 3,
-    "disctile": 1,
-    "player_ships": [],
-    "money_pop": [],
-    "money1_snap": [],
-    "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
@@ -2267,7 +3166,11 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3],
+    "wormholes": [
+      0,
+      3,
+      5
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -2275,19 +3178,71 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "317":
-    {
-    "owner":0,
-    "name":"Beta Crucius",
+  },
+  "316": {
+    "owner": 0,
+    "name": "iota Carinae",
+    "ring": 3,
+    "disctile": 1,
+    "player_ships": [],
+    "money_pop": [],
+    "money1_snap": [],
+    "money2_snap": [],
+    "moneyadv_pop": [],
+    "moneyadv1_snap": [],
+    "moneyadv2_snap": [],
+    "science_pop": [],
+    "science1_snap": [],
+    "science2_snap": [],
+    "scienceadv_pop": [],
+    "scienceadv1_snap": [],
+    "scienceadv2_snap": [],
+    "material_pop": [],
+    "material1_snap": [],
+    "material2_snap": [],
+    "materialadv_pop": [],
+    "materialadv1_snap": [],
+    "materialadv2_snap": [],
+    "neutral_pop": [],
+    "neutral1_snap": [],
+    "neutral2_snap": [],
+    "neutral_adv_pop": [],
+    "neutraladv1_snap": [],
+    "neutraladv2_snap": [],
+    "wormholes": [
+      0,
+      1,
+      3
+    ],
+    "vp": 1,
+    "artifact": 0,
+    "ancient": 0,
+    "guardian": 0,
+    "gcds": 0,
+    "warp": 0,
+    "type": "standard"
+  },
+  "317": {
+    "owner": 0,
+    "name": "Beta Crucius",
     "ring": 3,
     "disctile": 0,
     "player_ships": [],
-    "money_pop": [0],
-    "money1_snap": [378,733],
+    "money_pop": [
+      0
+    ],
+    "money1_snap": [
+      378,
+      733
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [0],
-    "moneyadv1_snap": [378,598],
+    "moneyadv_pop": [
+      0
+    ],
+    "moneyadv1_snap": [
+      378,
+      598
+    ],
     "moneyadv2_snap": [],
     "science_pop": [],
     "science1_snap": [],
@@ -2307,7 +3262,10 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [3,4],
+    "wormholes": [
+      3,
+      4
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 0,
@@ -2315,18 +3273,22 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "381":
-    {
-    "owner":0,
-    "name":"Beta Sextantis",
+  },
+  "381": {
+    "owner": 0,
+    "name": "Beta Sextantis",
     "ring": 3,
     "disctile": 1,
     "player_ships": [],
-    "money_pop": [0],
-    "money1_snap": [652,238],
+    "money_pop": [
+      0
+    ],
+    "money1_snap": [
+      652,
+      238
+    ],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
@@ -2335,8 +3297,13 @@
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
-    "material_pop": [0],
-    "material1_snap": [297,204],
+    "material_pop": [
+      0
+    ],
+    "material1_snap": [
+      297,
+      204
+    ],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -2347,7 +3314,11 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,3,4],
+    "wormholes": [
+      0,
+      3,
+      4
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -2355,28 +3326,37 @@
     "gcds": 0,
     "warp": 1,
     "type": "standard"
-    },
-  "382":
-    {
-    "owner":0,
-    "name":"Zeta Chamaeleontis",
+  },
+  "382": {
+    "owner": 0,
+    "name": "Zeta Chamaeleontis",
     "ring": 3,
     "disctile": 1,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
-    "science_pop": [0],
-    "science1_snap": [276,664],
+    "science_pop": [
+      0
+    ],
+    "science1_snap": [
+      276,
+      664
+    ],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
-    "material_pop": [0],
-    "material1_snap": [636,724],
+    "material_pop": [
+      0
+    ],
+    "material1_snap": [
+      636,
+      724
+    ],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -2387,7 +3367,11 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,2,3],
+    "wormholes": [
+      0,
+      2,
+      3
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -2395,22 +3379,26 @@
     "gcds": 0,
     "warp": 1,
     "type": "standard"
-    },
-  "393":
-    {
-    "owner":0,
-    "name":"Geminga",
+  },
+  "393": {
+    "owner": 0,
+    "name": "Geminga",
     "ring": 3,
     "disctile": 0,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
-    "science_pop": [0],
-    "science1_snap": [394,230],
+    "science_pop": [
+      0
+    ],
+    "science1_snap": [
+      394,
+      230
+    ],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -2427,7 +3415,11 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3],
+    "wormholes": [
+      0,
+      1,
+      3
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -2435,18 +3427,17 @@
     "gcds": 0,
     "warp": 0,
     "type": "pulsar"
-    },
-  "394":
-    {
-    "owner":0,
-    "name":"Simeis 147",
+  },
+  "394": {
+    "owner": 0,
+    "name": "Simeis 147",
     "ring": 3,
     "disctile": 0,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
@@ -2455,8 +3446,13 @@
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
     "scienceadv2_snap": [],
-    "material_pop": [0],
-    "material1_snap": [402,209],
+    "material_pop": [
+      0
+    ],
+    "material1_snap": [
+      402,
+      209
+    ],
     "material2_snap": [],
     "materialadv_pop": [],
     "materialadv1_snap": [],
@@ -2467,7 +3463,11 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,3,5],
+    "wormholes": [
+      0,
+      3,
+      5
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -2475,18 +3475,17 @@
     "gcds": 0,
     "warp": 0,
     "type": "pulsar"
-    },
-  "395":
-    {
-    "owner":0,
-    "name":"NGC 1952",
+  },
+  "395": {
+    "owner": 0,
+    "name": "NGC 1952",
     "ring": 3,
     "disctile": 2,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
@@ -2507,7 +3506,14 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0, 1, 2, 3, 4, 5],
+    "wormholes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
     "vp": 0,
     "artifact": 0,
     "ancient": 1,
@@ -2515,18 +3521,17 @@
     "gcds": 0,
     "warp": 0,
     "type": "nebula"
-    },
-  "396":
-    {
-    "owner":0,
-    "name":"Cygnus X-1",
+  },
+  "396": {
+    "owner": 0,
+    "name": "Cygnus X-1",
     "ring": 3,
     "disctile": 1,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
@@ -2547,7 +3552,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [1, 2, 4, 5],
+    "wormholes": [
+      1,
+      2,
+      4,
+      5
+    ],
     "vp": 0,
     "artifact": 0,
     "ancient": 0,
@@ -2555,22 +3565,31 @@
     "gcds": 0,
     "warp": 0,
     "type": "bh1"
-    },
-  "397":
-    {
-    "owner":0,
-    "name":"Betelgeuse",
+  },
+  "397": {
+    "owner": 0,
+    "name": "Betelgeuse",
     "ring": 3,
     "disctile": 0,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [0],
-    "moneyadv1_snap": [304,649],
+    "moneyadv_pop": [
+      0
+    ],
+    "moneyadv1_snap": [
+      304,
+      649
+    ],
     "moneyadv2_snap": [],
-    "science_pop": [0],
-    "science1_snap": [649,256],
+    "science_pop": [
+      0
+    ],
+    "science1_snap": [
+      649,
+      256
+    ],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -2578,16 +3597,34 @@
     "material_pop": [],
     "material1_snap": [],
     "material2_snap": [],
-    "materialadv_pop": [0],
-    "materialadv1_snap": [644,713],
+    "materialadv_pop": [
+      0
+    ],
+    "materialadv1_snap": [
+      644,
+      713
+    ],
     "materialadv2_snap": [],
-    "neutral_pop": [0,0],
-    "neutral1_snap": [217,336],
-    "neutral2_snap": [362,336],
+    "neutral_pop": [
+      0,
+      0
+    ],
+    "neutral1_snap": [
+      217,
+      336
+    ],
+    "neutral2_snap": [
+      362,
+      336
+    ],
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,1,3],
+    "wormholes": [
+      0,
+      1,
+      3
+    ],
     "vp": 0,
     "artifact": 0,
     "ancient": 0,
@@ -2595,22 +3632,31 @@
     "gcds": 0,
     "warp": 0,
     "type": "supernova"
-    },
-  "398":
-    {
-    "owner":0,
-    "name":"Deneb",
+  },
+  "398": {
+    "owner": 0,
+    "name": "Deneb",
     "ring": 3,
     "disctile": 0,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [0],
-    "moneyadv1_snap": [672,261],
+    "moneyadv_pop": [
+      0
+    ],
+    "moneyadv1_snap": [
+      672,
+      261
+    ],
     "moneyadv2_snap": [],
-    "science_pop": [0],
-    "science1_snap": [252,534],
+    "science_pop": [
+      0
+    ],
+    "science1_snap": [
+      252,
+      534
+    ],
     "science2_snap": [],
     "scienceadv_pop": [],
     "scienceadv1_snap": [],
@@ -2618,16 +3664,34 @@
     "material_pop": [],
     "material1_snap": [],
     "material2_snap": [],
-    "materialadv_pop": [0],
-    "materialadv1_snap": [350,285],
+    "materialadv_pop": [
+      0
+    ],
+    "materialadv1_snap": [
+      350,
+      285
+    ],
     "materialadv2_snap": [],
-    "neutral_pop": [0,0],
-    "neutral1_snap": [560,664],
-    "neutral2_snap": [696,664],
+    "neutral_pop": [
+      0,
+      0
+    ],
+    "neutral1_snap": [
+      560,
+      664
+    ],
+    "neutral2_snap": [
+      696,
+      664
+    ],
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [0,3,5],
+    "wormholes": [
+      0,
+      3,
+      5
+    ],
     "vp": 0,
     "artifact": 0,
     "ancient": 0,
@@ -2635,18 +3699,17 @@
     "gcds": 0,
     "warp": 0,
     "type": "supernova"
-    },
-  "399":
-    {
-    "owner":0,
-    "name":"V616 MON",
+  },
+  "399": {
+    "owner": 0,
+    "name": "V616 MON",
     "ring": 3,
     "disctile": 1,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
     "money2_snap": [],
-    "moneyadv_pop" : [],
+    "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
     "science_pop": [],
@@ -2667,7 +3730,12 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "wormholes": [1, 2, 4, 5],
+    "wormholes": [
+      1,
+      2,
+      4,
+      5
+    ],
     "vp": 0,
     "artifact": 0,
     "ancient": 0,
@@ -2675,5 +3743,5 @@
     "gcds": 0,
     "warp": 0,
     "type": "bhborder"
-    }
   }
+}
