@@ -43,7 +43,7 @@ class GamestateHelper:
             return "interceptor"
         elif shipAbbreviation == "cru": 
             return "cruiser"
-        elif shipAbbreviation == "dre": 
+        elif shipAbbreviation == "drd":
             return "dreadnought"
         elif shipAbbreviation == "sta": 
             return "starbase"
@@ -184,6 +184,19 @@ class GamestateHelper:
     def removeControl(self, position):
         self.gamestate["board"][position]["owner"]= 0
         self.update()
+
+    def add_units(self, unit_list, position):
+        for i in unit_list:
+            self.gamestate["board"][position]["player_ships"].append(i)
+        self.update()
+            #TODO remove ships from player stock
+
+    def remove_units(self, unit_list, position):
+        for i in unit_list:
+            if i in self.gamestate["board"][position]["player_ships"]:
+                self.gamestate["board"][position]["player_ships"].remove(i)
+        self.update()
+                #TODO return ships to player stock
 
     def addUnits(self, color, unitList, position):
         result = unitList.strip().split(',')

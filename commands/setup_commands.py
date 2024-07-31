@@ -103,7 +103,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
                                 player6: Optional[discord.Member]=None, faction6: Optional[app_commands.Choice[str]]=None):
         temp_player_list = [player1, player2, player3, player4, player5, player6]
         temp_faction_list = [faction1, faction2, faction3, faction4, faction5, faction6]
-        colors = ["blue", "red", "green", "yellow", "black", "white"]
+        colors = ["blue", "red", "green", "yellow", "purple", "white"]
         game = GamestateHelper(interaction.channel)
         count = 0
         listPlayerHomes=[]

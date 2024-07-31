@@ -1,10 +1,9 @@
-from helpers.ViewHelper import ViewHelper
+unit_list = ["blue"]
+x = ["blue", "blue", "blue"]
 
-#view = ViewHelper()
+for i in unit_list:
+    if i in x:
+        x.remove(i)
 
-#view.base_tile("301")
 
-tile = {"player_ships": []}
-
-if "player_ships" in tile:
-    print("cool beans")
+print(x)
