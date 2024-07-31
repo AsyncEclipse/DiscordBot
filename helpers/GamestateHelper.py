@@ -176,13 +176,14 @@ class GamestateHelper:
         self.gamestate["board"][position] = tile
         self.update()
 
-
-    def addControl(self, color, position):
-        self.gamestate["board"][position]["owner"]= color
+    def add_control(self, color, position):
+        self.gamestate["board"][position]["owner"] = color
+        self.gamestate["players"][self.get_player_from_color(color)]["influence_discs"] -= 1
         self.update()
-    
-    def removeControl(self, position):
-        self.gamestate["board"][position]["owner"]= 0
+
+    def remove_control(self, color, position):
+        self.gamestate["board"][position]["owner"] = 0
+        self.gamestate["players"][self.get_player_from_color(color)]["influence_discs"] += 1
         self.update()
 
     def add_units(self, unit_list, position):
@@ -198,61 +199,6 @@ class GamestateHelper:
         self.update()
                 #TODO return ships to player stock
 
-    def addUnits(self, color, unitList, position):
-        result = unitList.strip().split(',')
-        for unit in result:
-            amount = 1
-            unit = unit.strip()
-            ship = unit
-
-            if " " in unit:
-                amount = unit.split(" ")[0]
-                ship = unit.split(" ")[1]
-            for x in range(int(amount)):
-                if ship == "interceptor" or ship == "inter" or ship == "intercepter" or ship == "i":
-                    ship = "int"
-                if ship == "dread" or ship == "dreadnought" or ship == "dreadnaught" or ship == "d":
-                    ship = "dre"
-                if ship == "cruiser" or ship == "cruise" or ship == "cruis" or ship == "c":
-                    ship = "cru"
-                if ship == "star" or ship == "s" or ship == "starbase" or ship == "base":
-                    ship = "sta"
-                if ship != "sta" and ship != "dre" and ship != "cru" and ship != "int":
-                    continue
-                unitName = color+"-"+ship
-                
-                if "player_ships" in self.gamestate["board"][position]:
-                    self.gamestate["board"][position]["player_ships"].append(unitName)
-                    
-                else:
-                    self.gamestate["board"][position]["player_ships"]= [unitName]
-        self.update()
-
-    def removeUnits(self, color, unitList, position):
-        result = unitList.strip().split(',')
-        for unit in result:
-            amount = 1
-            unit = unit.strip()
-            ship = unit
-            if " " in unit:
-                amount = unit.split(" ")[0]
-                ship = unit.split(" ")[1]
-            for x in range(int(amount)):
-                if ship == "interceptor" or ship == "inter" or ship == "intercepter" or ship == "i":
-                    ship = "int"
-                if ship == "dread" or ship == "dreadnought" or ship == "dreadnaught" or ship == "d":
-                    ship = "dre"
-                if ship == "cruiser" or ship == "cruise" or ship == "cruis" or ship == "c":
-                    ship = "cru"
-                if ship == "star" or ship == "s" or ship == "starbase" or ship == "base":
-                    ship = "sta"
-                if ship != "sta" and ship != "dre" and ship != "cru" and ship != "int":
-                    continue
-                unitName = color+"-"+ship
-                if "player_ships" in self.gamestate["board"][position]:
-                    self.gamestate["board"][position]["player_ships"].remove(unitName)
-                
-        self.update()
 
     def player_setup(self, player_id, faction, color):
         if self.gamestate["setup_finished"] == 1:
@@ -322,6 +268,11 @@ class GamestateHelper:
 
     def get_player(self, player_id):
         return self.gamestate["players"][str(player_id)]
+
+    def get_player_from_color(self, color):
+        for i in self.gamestate["players"]:
+            if self.gamestate["players"][i]["color"] == color:
+                return i
 
     def update_player(self, *args):
 

@@ -25,9 +25,9 @@ class TileCommands(commands.GroupCog, name="tile"):
         app_commands.Choice(name="White", value="white")
     ]
 
-    @app_commands.command(name="units", description="add or remove units from a tile")
+    @app_commands.command(name="manage_units", description="add or remove units from a tile")
     @app_commands.choices(color=color_choices)
-    async def units(self, interaction: discord.Interaction, tile_position: str,
+    async def manage_units(self, interaction: discord.Interaction, tile_position: str,
                         interceptors: Optional[int],
                         cruisers: Optional[int],
                         dreadnoughts: Optional[int],
@@ -98,6 +98,32 @@ class TileCommands(commands.GroupCog, name="tile"):
         image = drawing.board_tile_image(tile_position)
         await interaction.followup.send(file=drawing.show_single_tile(image))
 
+    @app_commands.command(name="add_influence")
+    @app_commands.choices(color=color_choices)
+    async def add_influence(self, interaction: discord.Interaction, tile_position: str, color: app_commands.Choice[
+        str]):
+        game = GamestateHelper(interaction.channel)
+        if game.gamestate["board"][tile_position]["owner"] != 0:
+            await interaction.response.send_message("Please remove the current influence disc first")
+            return
+        game.add_control(color.value, tile_position)
+        await interaction.response.defer(thinking=True)
+        drawing = DrawHelper(game.gamestate)
+        image = drawing.board_tile_image(tile_position)
+        await interaction.followup.send(file=drawing.show_single_tile(image))
+    @app_commands.command(name="remove_influence")
+    @app_commands.choices(color=color_choices)
+    async def remove_influence(self, interaction: discord.Interaction, tile_position: str, color: app_commands.Choice[
+        str]):
+        game = GamestateHelper(interaction.channel)
+        if game.gamestate["board"][tile_position]["owner"] == 0:
+            await interaction.response.send_message("This tile already has no influence.")
+            return
+        game.remove_control(color.value, tile_position)
+        await interaction.response.defer(thinking=True)
+        drawing = DrawHelper(game.gamestate)
+        image = drawing.board_tile_image(tile_position)
+        await interaction.followup.send(file=drawing.show_single_tile(image))
     #@app_commands.command(name="add_units")
     #async def add_units(self, interaction: discord.Interaction, tileposition: int, unit_list: str, color: Optional[
     # str]="none"):
@@ -117,37 +143,39 @@ class TileCommands(commands.GroupCog, name="tile"):
     #    file = discord.File(bytes,filename="tileImage.png")
     #    await interaction.followup.send(file=file)
     
-    @app_commands.command(name="add_influence")
-    async def add_influence(self, interaction: discord.Interaction, tileposition: int, color: Optional[str]="none"):
-        game = GamestateHelper(interaction.channel)
-        if(color == "none"):
-            color = game.get_player(str(interaction.user.id))["color"]
-        game.addControl(color,str(tileposition))
-        await interaction.response.defer(thinking=True)  
-        tileMap = game.get_gamestate()["board"]
-        context = Image.new("RGBA",(345, 299),(255,255,255,0))
-        tileImage = game.drawTile(context, str(tileposition),tileMap[str(tileposition)]["sector"], tileMap[str(tileposition)]["orientation"])
-        context.paste(tileImage,(0,0),mask=tileImage)
-        bytes = BytesIO()
-        context.save(bytes,format="PNG")
-        bytes.seek(0)
-        file = discord.File(bytes,filename="tileImage.png")
-        await interaction.followup.send(file=file)
+    #@app_commands.command(name="add_influence")
+    #async def add_influence(self, interaction: discord.Interaction, tileposition: int, color: Optional[str]="none"):
+    #    game = GamestateHelper(interaction.channel)
+    #    if(color == "none"):
+    #        color = game.get_player(str(interaction.user.id))["color"]
+    #    game.addControl(color,str(tileposition))
+    #    await interaction.response.defer(thinking=True)
+    #    tileMap = game.get_gamestate()["board"]
+    #    context = Image.new("RGBA",(345, 299),(255,255,255,0))
+    #    tileImage = game.drawTile(context, str(tileposition),tileMap[str(tileposition)]["sector"], tileMap[str(
+    #    #    tileposition)]["orientation"])
+    #    context.paste(tileImage,(0,0),mask=tileImage)
+    #    bytes = BytesIO()
+    #    context.save(bytes,format="PNG")
+    #    bytes.seek(0)
+    #    file = discord.File(bytes,filename="tileImage.png")
+    #    await interaction.followup.send(file=file)
 
-    @app_commands.command(name="remove_influence")
-    async def remove_influence(self, interaction: discord.Interaction, tileposition: int):
-        game = GamestateHelper(interaction.channel)
-        game.removeControl(str(tileposition))
-        await interaction.response.defer(thinking=True)  
-        tileMap = game.get_gamestate()["board"]
-        context = Image.new("RGBA",(345, 299),(255,255,255,0))
-        tileImage = game.drawTile(context, str(tileposition),tileMap[str(tileposition)]["sector"], tileMap[str(tileposition)]["orientation"])
-        context.paste(tileImage,(0,0),mask=tileImage)
-        bytes = BytesIO()
-        context.save(bytes,format="PNG")
-        bytes.seek(0)
-        file = discord.File(bytes,filename="tileImage.png")
-        await interaction.followup.send(file=file)
+    #@app_commands.command(name="remove_influence")
+    #async def remove_influence(self, interaction: discord.Interaction, tileposition: int):
+    #    game = GamestateHelper(interaction.channel)
+    #    game.removeControl(str(tileposition))
+    #    await interaction.response.defer(thinking=True)
+    #    tileMap = game.get_gamestate()["board"]
+    #    context = Image.new("RGBA",(345, 299),(255,255,255,0))
+    #    tileImage = game.drawTile(context, str(tileposition),tileMap[str(tileposition)]["sector"], tileMap[str(
+    #    #    tileposition)]["orientation"])
+    #    context.paste(tileImage,(0,0),mask=tileImage)
+    #    bytes = BytesIO()
+    #    context.save(bytes,format="PNG")
+    #    bytes.seek(0)
+    #    file = discord.File(bytes,filename="tileImage.png")
+    #   await interaction.followup.send(file=file)
 
     #@app_commands.command(name="remove_units")
     #async def remove_units(self, interaction: discord.Interaction, tileposition: int, unit_list: str,
