@@ -107,13 +107,13 @@ class TileCommands(commands.GroupCog, name="tile"):
     @app_commands.command(name="tile_test")
     async def tile_test(self, interaction: discord.Interaction, tile_position: str):
         game = GamestateHelper(interaction.channel)
-        await interaction.response.defer(thinking=True)
+        #await interaction.response.defer(thinking=True)
         drawing = DrawHelper(game.gamestate)
         try:
             image = drawing.board_tile_image(tile_position)
-            await interaction.followup.send(file=drawing.show_single_tile(image))
+            await interaction.response.send_message(file=drawing.show_single_tile(image))
         except KeyError:
-            await interaction.followup.send("This tile does not exist!")
+            await interaction.response.send_message("This tile does not exist!")
 
     @app_commands.command(name="show_sector")
     async def show_sector(self, interaction: discord.Interaction, sector: str):
