@@ -6,7 +6,7 @@ from discord.ui import View, Button
 from typing import Optional, List
 from setup.GameInit import GameInit
 from helpers.GamestateHelper import GamestateHelper
-from helpers.PictureHelper import PictureHelper
+from helpers.DrawHelper import DrawHelper
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 import random
@@ -108,8 +108,20 @@ class TileCommands(commands.GroupCog, name="tile"):
     async def tile_test(self, interaction: discord.Interaction, tile_position: str):
         game = GamestateHelper(interaction.channel)
         await interaction.response.defer(thinking=True)
-        picture = PictureHelper(game.gamestate)
+        drawing = DrawHelper(game.gamestate)
         try:
-            await interaction.followup.send(file=picture.board_tile(tile_position))
+            image = drawing.board_tile_image(tile_position)
+            await interaction.followup.send(file=drawing.show_single_tile(image))
         except KeyError:
+            await interaction.followup.send("This tile does not exist!")
+
+    @app_commands.command(name="show_sector")
+    async def show_sector(self, interaction: discord.Interaction, sector: str):
+        game = GamestateHelper(interaction.channel)
+        await interaction.response.defer(thinking=True)
+        drawing = DrawHelper(game.gamestate)
+        try:
+            image = drawing.base_tile_image(sector)
+            await interaction.followup.send(file=drawing.show_single_tile(image))
+        except ValueError:
             await interaction.followup.send("This tile does not exist!")

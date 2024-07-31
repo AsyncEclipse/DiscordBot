@@ -6,19 +6,18 @@ from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 import os
 
-class PictureHelper:
+class DrawHelper:
     def __init__(self, gamestate):
         self.gamestate = gamestate
 
-    def show_tile(self, sector):
+    def base_tile_image(self, sector):
         filepath = f"images/resources/hexes/{str(sector)}.png"
         if os.path.exists(filepath):
             tile_image = Image.open(filepath).convert("RGBA")
             tile_image = tile_image.resize((345, 299))
             return tile_image
 
-    def board_tile(self, position):
-        context = Image.new("RGBA", (345, 299), (255, 255, 255, 0))
+    def board_tile_image(self, position):
         sector = self.gamestate["board"][position]["sector"]
         filepath = f"images/resources/hexes/{sector}.png"
 
@@ -52,10 +51,13 @@ class PictureHelper:
             textDrawableImage = ImageDraw.Draw(tile_image)
             textDrawableImage.text(text_position, text, text_color, font=font)
             return tile_image
-            context.paste(tile_image, (0, 0), mask=tile_image)
-            bytes = BytesIO()
-            context.save(bytes, format="PNG")
-            bytes.seek(0)
-            file = discord.File(bytes, filename="tile_image.png")
-            return file
 
+
+    def show_single_tile(self, tile_image):
+        context = Image.new("RGBA", (345, 299), (255, 255, 255, 0))
+        context.paste(tile_image, (0, 0), mask=tile_image)
+        bytes = BytesIO()
+        context.save(bytes, format="PNG")
+        bytes.seek(0)
+        file = discord.File(bytes, filename="tile_image.png")
+        return file
