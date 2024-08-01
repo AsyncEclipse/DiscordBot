@@ -84,7 +84,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
                 game.add_tile(str(i), 0, "sector2back")
         for i in range(301, 319):
             game.add_tile(str(i), 0, "sector3back")
-        await interacton.response.send_message("done")
+        await interaction.response.send_message("done")
 
 
     @app_commands.command(name="new_game")

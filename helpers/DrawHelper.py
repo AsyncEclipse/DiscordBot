@@ -24,7 +24,7 @@ class DrawHelper:
             return "hydran"
         elif full_name == "Eridian Empire":
             return "eridani"
-        elif "terran" in full_name:
+        elif "Terran" in full_name:
             return full_name.lower().replace(" ","_")
 
     def base_tile_image(self, sector):
