@@ -14,12 +14,7 @@ class GamestateHelper:
         with open(f"{config.gamestate_path}/{self.game_id}.json", "r") as f:
             gamestate = json.load(f)
         return gamestate
-    
-    def showTile(self, tileName):
-        filepath = "images/resources/hexes/"+tileName+".png"
-        tileImage = Image.open(filepath).convert("RGBA")
-        tileImage = tileImage.resize((345, 299))
-        return tileImage
+
 
     def tile_draw(self, ring):
         if int(ring) <= 3:
@@ -46,54 +41,7 @@ class GamestateHelper:
             return "dreadnought"
         elif shipAbbreviation == "sta": 
             return "starbase"
-    
-    def drawTile(self, context, position, tileName, rotation):
-        filepath = "images/resources/hexes/defended/"+tileName+".png"
-        if not os.path.exists(filepath):  
-            filepath = "images/resources/hexes/homesystems/"+tileName+".png"
-        if not os.path.exists(filepath):  
-            filepath = "images/resources/hexes/backs/"+tileName+".png"
-        if not os.path.exists(filepath):
-            filepath = "images/resources/hexes/sector1/"+tileName+".png"
-        if not os.path.exists(filepath):  
-            filepath = "images/resources/hexes/sector2/"+tileName+".png"
-        if not os.path.exists(filepath):  
-            filepath = "images/resources/hexes/sector3/"+tileName+".png"
-        if os.path.exists(filepath):  
-            tileImage = Image.open(filepath).convert("RGBA")
-            
-            tileImage = tileImage.resize((345, 299))
-            tile = self.gamestate["board"][position]
-            if "player_ships" in tile:
-                ships = tile["player_ships"]
-                count = 0
-                for ship in ships:  
-                    result = ship.split('-')
-                    color = result[0]
-                    type = self.getShipFullName(result[1])
-                    shippath = "images/resources/components/basic_ships/"+type+"_basic_"+color+".png"
-                    shipImage = Image.open(shippath).convert("RGBA")
-                    shipImage = shipImage.resize((70,70))
-                    tileImage.paste(shipImage, (125+count,32+count),mask=shipImage)
-                    count = count + 20
-                    
-            if "owner" in tile and tile["owner"] != 0:
-                color = tile["owner"]
-                influencepath = "images/resources/components/all_boards/influence_disc_"+color+".png"
-                influenceImage = Image.open(influencepath).convert("RGBA")
-                influenceImage = influenceImage.resize((50,50))
-                tileImage.paste(influenceImage, (148,125),mask=influenceImage)
 
-            tileImage = tileImage.rotate(rotation)
-            font = ImageFont.truetype("arial.ttf", size=45) 
-            text = str(position)
-            text_position = (255, 132) 
-            text_color = (255, 255, 255) 
-            textDrawableImage = ImageDraw.Draw(tileImage)
-            textDrawableImage.text(text_position,text,text_color,font=font)
-            return tileImage
-
-        return context
     
     def getShortFactionNameFromFull(self, fullName):
         if fullName == "Descendants of Draco":  
@@ -108,47 +56,8 @@ class GamestateHelper:
             return "hydran"
         elif fullName == "Eridian Empire": 
             return "eridani"
-        elif "terran" in fullName: 
+        elif "Terran" in fullName:
             return fullName.lower().replace(" ","_")
-
-    def drawPlayerArea(self, player):
-        faction = player["name"]
-        faction = self.getShortFactionNameFromFull(faction)
-        filepath = "images/resources/components/factions/"+faction+"_board.png"
-        context = Image.new("RGBA",(1200,500),(255,255,255,0))
-        boardImage = Image.open(filepath).convert("RGBA")
-        boardImage = boardImage.resize((895, 500))
-        context.paste(boardImage, (0,0))
-        x = 925
-        y = 50
-        font = ImageFont.truetype("arial.ttf", size=90) 
-        stroke_color=(0, 0, 0)
-        stroke_width=2
-
-        moneyImage = Image.open("images/resources/components/resourcesymbols/money.png").convert("RGBA")
-        moneyImage = moneyImage.resize((100, 100))
-        context.paste(moneyImage, (x,y))
-        text_color = (255, 255, 0) 
-        textDrawableImage = ImageDraw.Draw(context)
-        textDrawableImage.text((x+120, y),str(player["money"]),text_color,font=font,stroke_width=stroke_width,stroke_fill=stroke_color)
-
-        y = y+100
-        scienceImage = Image.open("images/resources/components/resourcesymbols/science.png").convert("RGBA")
-        scienceImage = scienceImage.resize((100, 100))
-        context.paste(scienceImage, (x,y))
-        text_color = (255,192,203) 
-        textDrawableImage = ImageDraw.Draw(context)
-        textDrawableImage.text((x+120, y),str(player["science"]),text_color,font=font,stroke_width=stroke_width,stroke_fill=stroke_color)
-
-        y = y+100
-        materialImage = Image.open("images/resources/components/resourcesymbols/material.png").convert("RGBA")
-        materialImage = materialImage.resize((100, 100))
-        context.paste(materialImage, (x,y))
-        text_color = (101, 67, 33) 
-        textDrawableImage = ImageDraw.Draw(context)
-        textDrawableImage.text((x+120, y),str(player["materials"]),text_color,font=font,stroke_width=stroke_width,stroke_fill=stroke_color)
-
-        return context
 
 
     def add_tile(self, position, orientation, sector, owner=None):

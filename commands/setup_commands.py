@@ -6,6 +6,7 @@ from discord.ui import View, Button
 from typing import Optional, List
 from setup.GameInit import GameInit
 from helpers.GamestateHelper import GamestateHelper
+from helpers.DrawHelper import DrawHelper
 from PIL import Image, ImageDraw, ImageFont
 from io import  BytesIO
 from jproperties import Properties
@@ -32,58 +33,6 @@ class SetupCommands(commands.GroupCog, name="setup"):
         app_commands.Choice(name="Terran Union", value="ter6"),
     ]
 
-    @staticmethod 
-    async def showGame(interaction, game):
-        await interaction.response.defer(thinking=True)  
-        context = Image.new("RGBA",(4160,5100),(255,255,255,0))
-        tileMap = game.get_gamestate()["board"]
-        for i in tileMap:
-            tileImage = game.drawTile(context, i, tileMap[i]["sector"], tileMap[i]["orientation"])
-            configs = Properties()
-            with open("data/tileImageCoordinates.properties", "rb") as f:
-                configs.load(f)
-            x = int(configs.get(i)[0].split(",")[0])
-            y = int(configs.get(i)[0].split(",")[1])
-            context.paste(tileImage,(x,y),mask=tileImage)
-        
-        bytes = BytesIO()
-        context.save(bytes,format="PNG")
-        bytes.seek(0)
-        file = discord.File(bytes,filename="mapImage.png")
-        #await interaction.followup.send(file=file)
-
-        if(len(game.get_gamestate()["players"]) > 3):
-            length = 1200
-        else:
-            length = 600
-        context2 = Image.new("RGBA",(4160,length),(255,255,255,0))
-        count = 0
-        x = 100
-        y = 100
-        for player in game.get_gamestate()["players"]:
-            playerImage = game.drawPlayerArea(game.get_gamestate()["players"][str(player)])
-            context2.paste(playerImage,(x,y),mask=playerImage)
-            count = count + 1
-            if count%3 == 0:
-                x = x - 1350*3
-                y = y + 600
-            else:
-                x = x + 1350
-            
-
-        context3 = Image.new("RGBA",(4160,length+5100),(255,255,255,0))
-        context3.paste(context, (0,0))
-        context3.paste(context2, (0,5100))
-        bytes = BytesIO()
-        context3.save(bytes,format="PNG")
-        bytes.seek(0)
-        file = discord.File(bytes,filename="mapImage.png")
-        await interaction.followup.send(file=file)
-
-        view = View()
-        button = Button(label="Show Game",style=discord.ButtonStyle.primary, custom_id="showGame")
-        view.add_item(button)
-        await interaction.channel.send(view=view)
     
 
 
@@ -135,7 +84,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
                 game.add_tile(str(i), 0, "sector2back")
         for i in range(301, 319):
             game.add_tile(str(i), 0, "sector3back")
-        await SetupCommands.showGame(interaction,game)
+        await interacton.response.send_message("done")
 
 
     @app_commands.command(name="new_game")
@@ -163,4 +112,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
     @app_commands.command(name="complete")
     async def complete(self, interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)
-        await interaction.response.send_message(game.setup_finished())
+        game.setup_finished()
+        await interaction.response.defer(thinking=True)
+        drawing = DrawHelper(game.gamestate)
+        await interaction.followup.send(file=drawing.show_game())

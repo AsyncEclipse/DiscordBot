@@ -4,6 +4,7 @@ from discord import app_commands
 from discord.ui import View, Button
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
+from jproperties import Properties
 import os
 
 class DrawHelper:
@@ -109,6 +110,45 @@ class DrawHelper:
                                  stroke_width=stroke_width,
                                  stroke_fill=stroke_color)
         return context
+
+    def show_game(self):
+        context = Image.new("RGBA", (4160,5100), (255, 255, 255, 0))
+        tile_map = self.gamestate["board"]
+        for i in tile_map:
+            tile_image = self.board_tile_image(i)
+            configs = Properties()
+            with open("data/tileImageCoordinates.properties", "rb") as f:
+                configs.load(f)
+            x = int(configs.get(i)[0].split(",")[0])
+            y = int(configs.get(i)[0].split(",")[1])
+            context.paste(tile_image, (x,y), mask=tile_image)
+
+        if len(self.gamestate["players"]) > 3:
+            length = 1200
+        else:
+            length = 600
+        context2 = Image.new("RGBA",(4160,length),(255,255,255,0))
+        count = 0
+        x = 100
+        y = 100
+        for player in self.gamestate["players"]:
+            player_image = self.player_area(self.gamestate["players"][player])
+            context2.paste(player_image, (x, y), mask=player_image)
+            count = count + 1
+            if count % 3 == 0:
+                x = x - 1350 * 3
+                y = y + 600
+            else:
+                x = x + 1350
+
+        context3 = Image.new("RGBA",(4160,length+5100),(255,255,255,0))
+        context3.paste(context, (0,0))
+        context3.paste(context2, (0,5100))
+        bytes = BytesIO()
+        context3.save(bytes,format="PNG")
+        bytes.seek(0)
+        file = discord.File(bytes,filename="map_image.png")
+        return file
 
     def show_single_tile(self, tile_image):
         context = Image.new("RGBA", (345, 299), (255, 255, 255, 0))
