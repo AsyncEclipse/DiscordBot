@@ -1,9 +1,3 @@
-unit_list = ["blue"]
-x = ["blue", "blue", "blue"]
+x = "23004"
 
-for i in unit_list:
-    if i in x:
-        x.remove(i)
-
-
-print(x)
+print(x[0])

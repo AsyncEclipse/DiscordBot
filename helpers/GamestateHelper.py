@@ -19,24 +19,22 @@ class GamestateHelper:
         return gamestate
     
     def showTile(self, tileName):
-        filepath = "images/resources/hexes/sector1/"+tileName+".png"
-        if not os.path.exists(filepath):  
-            filepath = "images/resources/hexes/sector2/"+tileName+".png"
-        if not os.path.exists(filepath):  
-            filepath = "images/resources/hexes/sector3/"+tileName+".png"
-        if os.path.exists(filepath):  
-            tileImage = Image.open(filepath).convert("RGBA")
-            tileImage = tileImage.resize((345, 299))
-            return tileImage
-    
-    def retrieveTileFromList(self, ring):
-        tileList = self.gamestate["tile_deck_"+str(ring)+"00"]
-        random.shuffle(tileList)
-        tile = tileList.pop()
-        self.gamestate["tile_deck_"+str(ring)+"00"] = tileList
-        self.update()
-        return tile
+        filepath = "images/resources/hexes/"+tileName+".png"
+        tileImage = Image.open(filepath).convert("RGBA")
+        tileImage = tileImage.resize((345, 299))
+        return tileImage
 
+    def tile_draw(self, ring):
+        if int(ring) <= 3:
+            random.shuffle(self.gamestate[f"tile_deck_{ring}00"])
+            tile = self.gamestate[f"tile_deck_{ring}00"].pop(0)
+            self.update()
+            return tile
+        else:
+            random.shuffle(self.gamestate[f"tile_deck_300"])
+            tile = self.gamestate[f"tile_deck_300"].pop(0)
+            self.update()
+            return tile
 
     def getShipFullName(self, shipAbbreviation):
         if shipAbbreviation == "int":  
@@ -151,15 +149,6 @@ class GamestateHelper:
 
         return context
 
-    def updateTileList(self, tileList):
-        self.gamestate["board"] = tileList
-        self.update()
-    
-    def addTile(self, position, image, orientation):
-        tileList = self.gamestate["board"]
-        tileList[position] = (image, orientation)
-        self.gamestate["board"] = tileList
-        self.update()
 
     def add_tile(self, position, orientation, sector, owner=None):
 
