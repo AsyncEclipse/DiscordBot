@@ -1,7 +1,5 @@
 import discord
 from discord.ext import commands
-from discord import app_commands
-from discord.ui import View, Button
 from helpers.GamestateHelper import GamestateHelper
 from commands.setup_commands import SetupCommands
 

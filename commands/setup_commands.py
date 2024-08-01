@@ -31,10 +31,6 @@ class SetupCommands(commands.GroupCog, name="setup"):
         app_commands.Choice(name="Terran Republic", value="ter5"),
         app_commands.Choice(name="Terran Union", value="ter6"),
     ]
-   
-    async def on_interaction(interaction):
-        if interaction.custom_id == "showGame":
-            await interaction.response.send_message("Button clicked!")
 
     @staticmethod 
     async def showGame(interaction, game):
@@ -163,16 +159,6 @@ class SetupCommands(commands.GroupCog, name="setup"):
         await interaction.guild.create_text_channel(f'aeb{config.game_number}')
         await interaction.response.send_message('New game created!')
 
-
-    @app_commands.command(name="add_player")
-    @app_commands.choices(faction=factionChoices)
-    async def add_player(self, interaction: discord.Interaction, player: discord.Member, faction: app_commands.Choice[str]):
-
-        game = GamestateHelper(interaction.channel)
-       #try:
-        await interaction.response.send_message(game.player_setup(player.id, faction.value))
-        #except KeyError:
-        #    await interaction.response.send_message("That player is not in this game.")
 
     @app_commands.command(name="complete")
     async def complete(self, interaction: discord.Interaction):

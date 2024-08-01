@@ -1,10 +1,7 @@
 import json
 import config
-import numpy as np
 from helpers.PlayerHelper import PlayerHelper
 from PIL import Image, ImageDraw, ImageFont
-from jproperties import Properties
-import cv2
 import os
 import random
 
@@ -215,9 +212,9 @@ class GamestateHelper:
                     self.gamestate["board"][home]["player_ships"].append(p1.stats["color"] + "-int")
 
                 if p1.stats["name"] == "Eridani Empire":
-                    random.shuffle(self.gamestats["reputation_deck"])
-                    p1.stats["reputation_track"][0] = self.gamestats["reputation_deck"].pop(0)
-                    p1.stats["reputation_track"][1] = self.gamestats["reputation_deck"].pop(0)
+                    random.shuffle(self.gamestate["reputation_deck"])
+                    p1.stats["reputation_track"][0] = self.gamestate["reputation_deck"].pop(0)
+                    p1.stats["reputation_track"][1] = self.gamestate["reputation_deck"].pop(0)
                     self.update_player(p1)
 
         self.gamestate["player_count"] = len(self.gamestate["players"])
