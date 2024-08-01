@@ -18,7 +18,10 @@ class ButtonListener(commands.Cog):
                 game.add_tile(msg[2], 0, msg[3])
                 await interaction.followup.send(f"Tile added to position {msg[2]}")
                 await interaction.message.delete()
-            if interaction.data['custom_id'] == "discard_tile":
+            if interaction.data['custom_id'].startswith("discard_tile"):
+                game = GamestateHelper(interaction.channel)
+                msg = interaction.data["custom_id"].split("_")
+                game.tile_discard(msg[2])
                 await interaction.channel.send("Tile discarded")
                 await interaction.message.delete()
 #        if interaction.type == discord.InteractionType.component:

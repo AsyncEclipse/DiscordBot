@@ -33,6 +33,10 @@ class GamestateHelper:
             self.update()
             return tile
 
+    def tile_discard(self, sector):
+        self.gamestate["tile_discard"].append(sector)
+        self.update()
+
     def getShipFullName(self, shipAbbreviation):
         if shipAbbreviation == "int":  
             return "interceptor"

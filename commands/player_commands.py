@@ -4,12 +4,12 @@ from discord import app_commands
 from typing import Optional, List
 from helpers.PlayerHelper import PlayerHelper
 from helpers.GamestateHelper import GamestateHelper
+from helpers.DrawHelper import DrawHelper
 
 
 class PlayerCommands(commands.GroupCog, name="player"):
     def __init__(self, bot):
         self.bot = bot
-
 
 
     @app_commands.command(name="stats", description="Anything to do with player stats")
@@ -78,4 +78,11 @@ class PlayerCommands(commands.GroupCog, name="player"):
         await interaction.response.send_message(top_response)
         await interaction.channel.send(response)
 
-
+    @app_commands.command(name="show_player_area")
+    async def show_player_area(self, interaction: discord.Interaction, player: discord.Member):
+        game = GamestateHelper(interaction.channel)
+        p1 = game.get_player(player.id)
+        drawing = DrawHelper(game.gamestate)
+        image = drawing.player_area(p1)
+        await interaction.response.defer(thinking=True)
+        await interaction.followup.send(file=drawing.show_player_area(image))

@@ -228,7 +228,7 @@ class TileCommands(commands.GroupCog, name="tile"):
         await interaction.followup.send(file=drawing.show_single_tile(image))
         view = View()
         button = Button(label="Place Tile",style=discord.ButtonStyle.success, custom_id=f"place_tile_{tile_position}_{tile}")
-        button2 = Button(label="Discard Tile",style=discord.ButtonStyle.danger, custom_id="discard_tile")
+        button2 = Button(label="Discard Tile",style=discord.ButtonStyle.danger, custom_id=f"discard_tile_{tile}")
         view.add_item(button)
         view.add_item(button2)
         await interaction.channel.send(view=view)
@@ -254,3 +254,4 @@ class TileCommands(commands.GroupCog, name="tile"):
             await interaction.followup.send(file=drawing.show_single_tile(image))
         except ValueError:
             await interaction.followup.send("This tile does not exist!")
+
