@@ -399,7 +399,7 @@
           "starbase_parts": ["elc", "ioc", "hul", "empty", "hul"]
           },
   "ter3":{
-        "name": "Terran Directorarte",
+        "name": "Terran Directorate",
           "materials": 4,
           "science": 3,
           "money": 3,

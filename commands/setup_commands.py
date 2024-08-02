@@ -6,6 +6,7 @@ from discord.ui import View, Button
 from typing import Optional, List
 from setup.GameInit import GameInit
 from helpers.GamestateHelper import GamestateHelper
+from helpers.DrawHelper import DrawHelper
 from PIL import Image, ImageDraw, ImageFont
 from io import  BytesIO
 from jproperties import Properties
@@ -31,63 +32,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         app_commands.Choice(name="Terran Republic", value="ter5"),
         app_commands.Choice(name="Terran Union", value="ter6"),
     ]
-   
-    async def on_interaction(interaction):
-        if interaction.custom_id == "showGame":
-            await interaction.response.send_message("Button clicked!")
 
-    @staticmethod 
-    async def showGame(interaction, game):
-        await interaction.response.defer(thinking=True)  
-        context = Image.new("RGBA",(4160,5100),(255,255,255,0))
-        tileMap = game.get_gamestate()["board"]
-        for i in tileMap:
-            tileImage = game.drawTile(context, i, tileMap[i]["sector"], tileMap[i]["orientation"])
-            configs = Properties()
-            with open("data/tileImageCoordinates.properties", "rb") as f:
-                configs.load(f)
-            x = int(configs.get(i)[0].split(",")[0])
-            y = int(configs.get(i)[0].split(",")[1])
-            context.paste(tileImage,(x,y),mask=tileImage)
-        
-        bytes = BytesIO()
-        context.save(bytes,format="PNG")
-        bytes.seek(0)
-        file = discord.File(bytes,filename="mapImage.png")
-        #await interaction.followup.send(file=file)
-
-        if(len(game.get_gamestate()["players"]) > 3):
-            length = 1200
-        else:
-            length = 600
-        context2 = Image.new("RGBA",(4160,length),(255,255,255,0))
-        count = 0
-        x = 100
-        y = 100
-        for player in game.get_gamestate()["players"]:
-            playerImage = game.drawPlayerArea(game.get_gamestate()["players"][str(player)])
-            context2.paste(playerImage,(x,y),mask=playerImage)
-            count = count + 1
-            if count%3 == 0:
-                x = x - 1350*3
-                y = y + 600
-            else:
-                x = x + 1350
-            
-
-        context3 = Image.new("RGBA",(4160,length+5100),(255,255,255,0))
-        context3.paste(context, (0,0))
-        context3.paste(context2, (0,5100))
-        bytes = BytesIO()
-        context3.save(bytes,format="PNG")
-        bytes.seek(0)
-        file = discord.File(bytes,filename="mapImage.png")
-        await interaction.followup.send(file=file)
-
-        view = View()
-        button = Button(label="Show Game",style=discord.ButtonStyle.primary, custom_id="showGame")
-        view.add_item(button)
-        await interaction.channel.send(view=view)
     
 
 
@@ -103,7 +48,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
                                 player6: Optional[discord.Member]=None, faction6: Optional[app_commands.Choice[str]]=None):
         temp_player_list = [player1, player2, player3, player4, player5, player6]
         temp_faction_list = [faction1, faction2, faction3, faction4, faction5, faction6]
-        colors = ["blue", "red", "green", "yellow", "black", "white"]
+        colors = ["blue", "red", "green", "yellow", "purple", "white"]
         game = GamestateHelper(interaction.channel)
         count = 0
         listPlayerHomes=[]
@@ -122,35 +67,24 @@ class SetupCommands(commands.GroupCog, name="setup"):
         listOfTilesPos = ["201", "207","205","211","203","209"]
         if count == 3:
             listOfTilesPos = [ "201","205", "209","211","203","207",]
-       # listPlayerHomes = ["222","224","226","228","230","232"]
         random.shuffle(listPlayerHomes)
         listDefended = ["271","272","273","274"]
         random.shuffle(listDefended)
         game.add_tile("000", 0, "001")
-        #mappedSectorsToPos = {}
-        #mappedSectorsToPos["000"] = ("001",0)
         for i in range(count):
             rotDet = ((180 - (int(listOfTilesPos[i])-201)/2 * 60) + 360)%360
             game.add_tile(listOfTilesPos[i], rotDet, listPlayerHomes[i][0], listPlayerHomes[i][1])
-            #mappedSectorsToPos[listOfTilesPos[i]]=(listPlayerHomes[i],rotDet)
         for i in range(6-count):
             rotDet = ((180 - (int(listOfTilesPos[5-i])-201)/2 * 60) + 360)%360
             game.add_tile(listOfTilesPos[5-i], rotDet, listDefended[i])
-            #mappedSectorsToPos[listOfTilesPos[5-i]]=(listDefended[i],rotDet)
         for i in range(101, 107):
             game.add_tile(str(i), 0, "sector1back")
-        #    mappedSectorsToPos[str(i)]=("sector1back",0)
         for i in range(201, 213):
             if str(i) not in listOfTilesPos:
                 game.add_tile(str(i), 0, "sector2back")
-        #     if str(i) not in listOfTilesPos:
-        #        mappedSectorsToPos[str(i)]=("sector2back",0)
         for i in range(301, 319):
             game.add_tile(str(i), 0, "sector3back")
-        #    mappedSectorsToPos[str(i)]=("sector3back",0)
-        #game.updateTileList(mappedSectorsToPos)
-        #await interaction.response.send_message("done")
-        await SetupCommands.showGame(interaction,game)
+        await interaction.response.send_message("done")
 
 
     @app_commands.command(name="new_game")
@@ -175,17 +109,10 @@ class SetupCommands(commands.GroupCog, name="setup"):
         await interaction.response.send_message('New game created!')
 
 
-    @app_commands.command(name="add_player")
-    @app_commands.choices(faction=factionChoices)
-    async def add_player(self, interaction: discord.Interaction, player: discord.Member, faction: app_commands.Choice[str]):
-
-        game = GamestateHelper(interaction.channel)
-       #try:
-        await interaction.response.send_message(game.player_setup(player.id, faction.value))
-        #except KeyError:
-        #    await interaction.response.send_message("That player is not in this game.")
-
     @app_commands.command(name="complete")
     async def complete(self, interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)
-        await interaction.response.send_message(game.setup_finished())
+        game.setup_finished()
+        await interaction.response.defer(thinking=True)
+        drawing = DrawHelper(game.gamestate)
+        await interaction.followup.send(file=drawing.show_game())
