@@ -17,7 +17,8 @@ class GamestateHelper:
 
 
     def tile_draw(self, ring):
-        if int(ring) <= 3:
+        ring = int(int(ring)/100)
+        if ring <= 3:
             random.shuffle(self.gamestate[f"tile_deck_{ring}00"])
             tile = self.gamestate[f"tile_deck_{ring}00"].pop(0)
             self.update()
@@ -54,7 +55,7 @@ class GamestateHelper:
             return "orion"
         elif fullName == "Hydran Progress": 
             return "hydran"
-        elif fullName == "Eridian Empire": 
+        elif fullName == "Eridani Empire": 
             return "eridani"
         elif "Terran" in fullName:
             return fullName.lower().replace(" ","_")
@@ -90,6 +91,16 @@ class GamestateHelper:
             self.gamestate["board"][position]["player_ships"].append(i)
         self.update()
             #TODO remove ships from player stock
+    def add_pop(self, pop_list, position, playerID):
+        for i in pop_list:
+            self.gamestate["board"][position][i][0] = self.gamestate["board"][position][i][0]+1
+            self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] = self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"]-1
+        self.update()
+    def remove_pop(self, pop_list, position, playerID):
+        for i in pop_list:
+            self.gamestate["board"][position][i][0] = self.gamestate["board"][position][i][0]-1
+            self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] = self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"]+1
+        self.update()
 
     def remove_units(self, unit_list, position):
         for i in unit_list:
@@ -125,9 +136,9 @@ class GamestateHelper:
                     self.gamestate["board"][home]["player_ships"].append(p1.stats["color"] + "-int")
 
                 if p1.stats["name"] == "Eridani Empire":
-                    random.shuffle(self.gamestate["reputation_deck"])
-                    p1.stats["reputation_track"][0] = self.gamestate["reputation_deck"].pop(0)
-                    p1.stats["reputation_track"][1] = self.gamestate["reputation_deck"].pop(0)
+                    random.shuffle(self.gamestate["reputation_tiles"])
+                    p1.stats["reputation_track"][0] = self.gamestate["reputation_tiles"].pop(0)
+                    p1.stats["reputation_track"][1] = self.gamestate["reputation_tiles"].pop(0)
                     self.update_player(p1)
 
         self.gamestate["player_count"] = len(self.gamestate["players"])
@@ -150,7 +161,7 @@ class GamestateHelper:
             random.shuffle(self.gamestate["tech_deck"])
             picked_tech = self.gamestate["tech_deck"].pop(0)
 
-            self.gamestate["available_techs"].append(tech_data[picked_tech])
+            self.gamestate["available_techs"].append(picked_tech)
 
             if tech_data[picked_tech]["track"] == "any":
                 pass
