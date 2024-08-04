@@ -83,7 +83,7 @@ class TileCommands(commands.GroupCog, name="tile"):
 
     @app_commands.command(name="manage_population", description="add or remove population cubes (using positive or negative numbers) from a tile")
     @app_commands.choices(color=color_choices)
-    async def manage_units(self, interaction: discord.Interaction, tile_position: str,
+    async def manage_population(self, interaction: discord.Interaction, tile_position: str,
                         money: Optional[int],
                         science: Optional[int],
                         material: Optional[int],

@@ -89,7 +89,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         await interaction.followup.send(file=drawing.show_player_area(image))
     
     @app_commands.command(name="start_turn")
-    async def show_player_area(self, interaction: discord.Interaction, player: discord.Member):
+    async def start_turn(self, interaction: discord.Interaction, player: discord.Member):
         game = GamestateHelper(interaction.channel)  
         p1 = game.get_player(player.id)  
 
