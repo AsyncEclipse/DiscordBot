@@ -44,59 +44,99 @@ class TileCommands(commands.GroupCog, name="tile"):
         :param color: Choose player color. Default is your own color
         :return:
         """
+        game = GamestateHelper(interaction.channel)  
+        player_color = color.value if color else game.get_player(str(interaction.user.id))["color"]  
+        
+        added_units, removed_units = [], []  
+        
+        def process_units(unit_type, count):  
+            unit_code = f"{player_color}-{unit_type}"  
+            if count:  
+                units_list = added_units if count > 0 else removed_units  
+                for x in range(abs(count)):  
+                    units_list.append(unit_code)  
 
-        game = GamestateHelper(interaction.channel)
-        added_units = []
-        removed_units = []
-        if color == None:
-            player_color = game.get_player(str(interaction.user.id))["color"]
-        else:
-            player_color = color.value
+        process_units("int", interceptors)  
+        process_units("cru", cruisers)  
+        process_units("drd", dreadnoughts)  
+        process_units("sb", starbase)  
 
-        if interceptors:
-            if interceptors > 0:
-                while interceptors > 0:
-                    added_units.append(f"{player_color}-int")
-                    interceptors -= 1
+        if added_units:  
+            game.add_units(added_units, tile_position)  
+        if removed_units:  
+            game.remove_units(removed_units, tile_position)  
+        
+        if influence != None:
+            if influence:
+                if game.gamestate["board"][tile_position]["owner"] != 0:
+                    game.remove_control(game.gamestate["board"][tile_position]["owner"], tile_position)
+                game.add_control(player_color, tile_position)
             else:
-                while interceptors < 0:
-                    removed_units.append(f"{player_color}-int")
-                    interceptors += 1
-        if cruisers:
-            if cruisers > 0:
-                while cruisers > 0:
-                    added_units.append(f"{player_color}-cru")
-                    cruisers -= 1
+                game.remove_control(player_color, tile_position)
+
+        await interaction.response.defer(thinking=True)  
+        drawing = DrawHelper(game.gamestate)  
+        image = drawing.board_tile_image(tile_position)  
+        await interaction.followup.send(file=drawing.show_single_tile(image)) 
+
+
+
+    @app_commands.command(name="manage_population", description="add or remove population cubes (using positive or negative numbers) from a tile")
+    @app_commands.choices(color=color_choices)
+    async def manage_population(self, interaction: discord.Interaction, tile_position: str,
+                        money: Optional[int],
+                        science: Optional[int],
+                        material: Optional[int],
+                        neutral: Optional[int],
+                        advanced_money: Optional[int],
+                        advanced_science: Optional[int],
+                        advanced_material: Optional[int],
+                        advanced_neutral: Optional[int],
+                        influence: Optional[bool],
+                        color: Optional[app_commands.Choice[str]]=None):
+        """
+        :param influence: Use True/False to add or remove your influence disc from this tile
+        :param color: Choose player color. Default is your own color
+        :return:
+        """
+        game = GamestateHelper(interaction.channel)  
+        player_color = color.value if color else game.get_player(str(interaction.user.id))["color"]  
+        playerID = game.get_player_from_color(player_color)
+        added_pop, removed_pop = [], []  
+        
+        def process_pop(pop_type, count):  
+            pop_code = f"{pop_type}_{"pop"}"  
+            if count:  
+                pop_list = added_pop if count > 0 else removed_pop  
+                for x in range(abs(count)):  
+                    pop_list.append(pop_code)  
+
+        process_pop("money", money)  
+        process_pop("science", science)  
+        process_pop("neutral", neutral)  
+        process_pop("material", material)
+        process_pop("moneyadv", advanced_money)  
+        process_pop("scienceadv", advanced_science)  
+        process_pop("neutraladv", advanced_neutral)  
+        process_pop("materialadv", advanced_material)    
+
+        if added_pop:  
+            game.add_pop(added_pop, tile_position,playerID)  
+        if removed_pop:  
+            game.remove_pop(removed_pop, tile_position,playerID)  
+
+        if influence != None:
+            if influence:
+                if game.gamestate["board"][tile_position]["owner"] != 0:
+                    game.remove_control(game.gamestate["board"][tile_position]["owner"], tile_position)
+                game.add_control(player_color, tile_position)
             else:
-                while cruisers < 0:
-                    removed_units.append(f"{player_color}-cru")
-                    cruisers += 1
-        if dreadnoughts:
-            if dreadnoughts > 0:
-                while dreadnoughts > 0:
-                    added_units.append(f"{player_color}-drd")
-                    dreadnoughts -= 1
-            else:
-                while dreadnoughts < 0:
-                    removed_units.append(f"{player_color}-drd")
-                    dreadnoughts += 1
-        if starbase:
-            if starbase > 0:
-                while starbase > 0:
-                    added_units.append(f"{player_color}-sb")
-                    starbase -= 1
-            else:
-                while starbase < 0:
-                    removed_units.append(f"{player_color}-sb")
-                    starbase += 1
-        if len(added_units) > 0:
-            game.add_units(added_units, tile_position)
-        if len(removed_units) > 0:
-            game.remove_units(removed_units, tile_position)
-        await interaction.response.defer(thinking=True)
-        drawing = DrawHelper(game.gamestate)
-        image = drawing.board_tile_image(tile_position)
-        await interaction.followup.send(file=drawing.show_single_tile(image))
+                game.remove_control(player_color, tile_position)
+
+        await interaction.response.defer(thinking=True)  
+        drawing = DrawHelper(game.gamestate)  
+        image = drawing.board_tile_image(tile_position)  
+        await interaction.followup.send(file=drawing.show_single_tile(image)) 
 
     @app_commands.command(name="add_influence")
     @app_commands.choices(color=color_choices)
@@ -128,7 +168,7 @@ class TileCommands(commands.GroupCog, name="tile"):
     @app_commands.command(name="explore")
     async def explore(self, interaction: discord.Interaction, tile_position: str):
         game = GamestateHelper(interaction.channel)
-        tile = game.tile_draw(tile_position[0])
+        tile = game.tile_draw(tile_position)
         drawing = DrawHelper(game.gamestate)
         await interaction.response.defer(thinking=True)
         image = drawing.base_tile_image(tile)
@@ -168,3 +208,7 @@ class TileCommands(commands.GroupCog, name="tile"):
         await interaction.response.defer(thinking=True)
         drawing = DrawHelper(game.gamestate)
         await interaction.followup.send(file=drawing.show_game())
+        view = View()
+        button = Button(label="Show Game",style=discord.ButtonStyle.primary, custom_id="showGame")
+        view.add_item(button)
+        await interaction.channel.send(view=view)

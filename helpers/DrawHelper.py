@@ -5,6 +5,7 @@ from discord.ui import View, Button
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 from jproperties import Properties
+import json
 import os
 
 class DrawHelper:
@@ -22,7 +23,7 @@ class DrawHelper:
             return "orion"
         elif full_name == "Hydran Progress":
             return "hydran"
-        elif full_name == "Eridian Empire":
+        elif full_name == "Eridani Empire":
             return "eridani"
         elif "Terran" in full_name:
             return full_name.lower().replace(" ","_")
@@ -45,20 +46,38 @@ class DrawHelper:
             tile = self.gamestate["board"][position]
             rotation = tile["orientation"]
 
-            if "player_ships" in tile and len(tile["player_ships"]) > 0:
-                count = 0
-                for ship in tile["player_ships"]:
-                    ship_image = Image.open(f"images/resources/components/basic_ships/{ship}.png").convert("RGBA")
-                    ship_image = ship_image.resize((70, 70))
-                    tile_image.paste(ship_image, (125 + count, 32 + count), mask=ship_image)
-                    count += 20
+            if "player_ships" in tile and len(tile["player_ships"]) > 0:  
+                counts = {}  # To track counts for each ship type  
+                for ship in tile["player_ships"]:  
+                    ship_type = ship.split("-")[1]  # Extract ship type  
+                    ship_image = Image.open(f"images/resources/components/basic_ships/{ship}.png").convert("RGBA").resize((70, 70))  
+                    coords = tile[f"{ship_type}_snap"]  
+                     
+                    if ship_type not in counts:  
+                        counts[ship_type] = 0  
+                    
+                    tile_image.paste(ship_image,   
+                                    (int(345 / 1024 * coords[0] + counts[ship_type]-35),   
+                                    int(345 / 1024 * coords[1] + counts[ship_type]-35)),   
+                                    mask=ship_image)  
+                    
+                    counts[ship_type] += 10 
 
-            if "owner" in tile and tile["owner"] != 0:
-                color = tile["owner"]
-                inf_path = "images/resources/components/all_boards/influence_disc_"+color+".png"
-                inf_image = Image.open(inf_path).convert("RGBA")
-                inf_image = inf_image.resize((50, 50))
-                tile_image.paste(inf_image, (148, 125), mask=inf_image)
+            def paste_resourcecube(tile, tile_image, resource_type, color):  
+                if f"{resource_type}_pop" in tile and tile[f"{resource_type}_pop"] != 0 and tile[f"{resource_type}_pop"]:  
+                    for x in range(tile[f"{resource_type}_pop"][0]):  
+                        pop_path = f"images/resources/components/all_boards/popcube_{color}.png"  
+                        pop_image = Image.open(pop_path).convert("RGBA").resize((30, 30))  
+                        coords = tile[f"{resource_type}{x+1}_snap"]  
+                        tile_image.paste(pop_image, (int(345 / 1024 * coords[0] - 15), int(345 / 1024 * coords[1] - 15)), mask=pop_image)  
+
+            if "owner" in tile and tile["owner"] != 0:  
+                color = tile["owner"]  
+                inf_path = f"images/resources/components/all_boards/influence_disc_{color}.png"  
+                inf_image = Image.open(inf_path).convert("RGBA").resize((50, 50))  
+                tile_image.paste(inf_image, (148, 125), mask=inf_image)    
+                for resource in ["money", "moneyadv", "science","scienceadv", "material","materialadv"]:  
+                    paste_resourcecube(tile, tile_image, resource, color)  
 
             tile_image = tile_image.rotate(rotation)
             font = ImageFont.truetype("arial.ttf", size=45)
@@ -71,84 +90,155 @@ class DrawHelper:
 
     def player_area(self, player):
         faction = self.get_short_faction_name(player["name"])
-        filepath = "images/resources/components/factions/"+faction+"_board.png"
-        context = Image.new("RGBA", (1200, 500), (255, 255, 255, 0))
+        filepath = "images/resources/components/factions/"+str(faction)+"_board.png"
+        context = Image.new("RGBA", (1300, 500), (255, 255, 255, 0))
         board_image = Image.open(filepath).convert("RGBA")
         board_image = board_image.resize((895, 500))
         context.paste(board_image, (0,0))
-        x = 925
-        y = 50
-        font = ImageFont.truetype("arial.ttf", size=90)
-        stroke_color=(0, 0, 0)
-        stroke_width=2
 
-        money_image = Image.open("images/resources/components/resourcesymbols/money.png").convert("RGBA")
-        money_image = money_image.resize((100,100))
-        science_image = Image.open("images/resources/components/resourcesymbols/science.png").convert("RGBA")
-        science_image = science_image.resize((100, 100))
-        material_image = Image.open("images/resources/components/resourcesymbols/material.png").convert("RGBA")
-        material_image = material_image.resize((100, 100))
+        for x in range(player["influence_discs"]):
+            inf_path = "images/resources/components/all_boards/influence_disc_"+player["color"]+".png"
+            inf_image = Image.open(inf_path).convert("RGBA")
+            inf_image = inf_image.resize((40, 40))
+            context.paste(inf_image, (764-(int(x*38.5)), 450), mask=inf_image)
 
-        context.paste(money_image, (x,y))
-        text_color = (255, 255, 0)
-        text_drawable_image = ImageDraw.Draw(context)
-        text_drawable_image.text((x+120,y), str(player["money"]), text_color, font=font, stroke_width=stroke_width,
-                                 stroke_fill=stroke_color)
+        with open("data/techs.json", "r") as f:
+                tech_data = json.load(f)
 
-        y = y+100
-        context.paste(science_image, (x, y))
-        text_color = (255, 192, 203)
-        text_drawable_image = ImageDraw.Draw(context)
-        text_drawable_image.text((x+120, y), str(player["science"]), text_color, font=font, stroke_width=stroke_width,
-                                 stroke_fill=stroke_color)
+        def process_tech(tech_list, tech_type, start_y):  
+            for counter, tech in enumerate(tech_list):  
+                tech_details = tech_data.get(tech)   
+                techName = tech_details["name"].lower().replace(" ", "_") if tech_details else tech  
+                tech_path = f"images/resources/components/technology/{tech_type}/tech_{techName}.png"  
+                tech_image = Image.open(tech_path).convert("RGBA").resize((68, 68))  
+                context.paste(tech_image, (299 + (counter * 71), start_y), mask=tech_image)  
 
-        y = y + 100
-        context.paste(material_image, (x, y))
-        text_color = (101, 67, 33)
-        text_drawable_image = ImageDraw.Draw(context)
-        text_drawable_image.text((x + 120, y), str(player["materials"]), text_color, font=font,
-                                 stroke_width=stroke_width,
-                                 stroke_fill=stroke_color)
+        process_tech(player["nano_tech"], "nano", 360)  
+        process_tech(player["grid_tech"], "grid", 285)  
+        process_tech(player["military_tech"], "military", 203)  
+
+
+        interceptCoord = [ (74, 39),(16, 86), (74, 97), (132, 86)] 
+        cruiserCoord = [(221, 63), (279, 39),(337, 63),(221, 121), (279, 97),(337, 121)]  
+        dreadCoord = [(435, 64), (493, 40),(551, 40),(609, 64),(435, 122), (493, 98),(551, 98),(609, 122)]   
+        sbCoord = [(697, 39),(813, 39),(697, 97),(755, 66), (814, 97)]  
+
+        if player["name"]=="Planta":
+            interceptCoord.pop(2)
+            cruiserCoord.pop(3)
+            dreadCoord.pop(4)
+            sbCoord.pop(2)
+
+        with open("data/parts.json", "r") as f:
+                part_data = json.load(f)
+        def process_parts(parts, coords):  
+            for counter, part in enumerate(parts):  
+                if part == "empty":  
+                    continue  
+                part_details = part_data.get(part)  
+                partName = part_details["name"].lower().replace(" ", "_") if part_details else part  
+                part_path = f"images/resources/components/upgrades/{partName}.png"  
+                part_image = Image.open(part_path).convert("RGBA").resize((58, 58))  
+                context.paste(part_image, coords[counter], mask=part_image)  
+
+        process_parts(player["interceptor_parts"], interceptCoord)  
+        process_parts(player["cruiser_parts"], cruiserCoord)  
+        process_parts(player["dread_parts"], dreadCoord)  
+        process_parts(player["starbase_parts"], sbCoord)  
+            
+
+
+        x = 925  
+        y = 50  
+        font = ImageFont.truetype("arial.ttf", size=90)  
+        stroke_color = (0, 0, 0)  
+        stroke_width = 2  
+
+        # Resource details: [(image_path, text_color, player_key, amount_key)]  
+        resources = [  
+            ("images/resources/components/resourcesymbols/money.png", (255, 255, 0), "money", "money_pop_cubes"),  
+            ("images/resources/components/resourcesymbols/science.png", (255, 192, 203), "science", "science_pop_cubes"),  
+            ("images/resources/components/resourcesymbols/material.png", (101, 67, 33), "materials", "material_pop_cubes")  
+        ]  
+
+        def draw_resource(context, img_path, color, player_key, amount_key, position):  
+            image = Image.open(img_path).convert("RGBA").resize((100, 100))  
+            context.paste(image, position)  
+            amountIncrease = player["population_track"][player[amount_key]-1] - (player["influence_track"][player["influence_discs"]] if player_key == "money" else 0)
+            if amountIncrease > -1:
+                amountIncrease = "+"+str(amountIncrease)
+            else:
+                amountIncrease = "-"+str(amountIncrease)  
+            text_drawable_image = ImageDraw.Draw(context)  
+            text_drawable_image.text((position[0] + 120, position[1]), f"{player[player_key]}({amountIncrease})", color, font=font,  
+                                    stroke_width=stroke_width, stroke_fill=stroke_color)  
+
+        for img_path, text_color, player_key, amount_key in resources:  
+            draw_resource(context, img_path, text_color, player_key, amount_key, (x, y))  
+            y += 100 
+        
         return context
 
-    def show_game(self):
-        context = Image.new("RGBA", (4160,5100), (255, 255, 255, 0))
-        tile_map = self.gamestate["board"]
-        for i in tile_map:
-            tile_image = self.board_tile_image(i)
-            configs = Properties()
-            with open("data/tileImageCoordinates.properties", "rb") as f:
-                configs.load(f)
-            x = int(configs.get(i)[0].split(",")[0])
-            y = int(configs.get(i)[0].split(",")[1])
-            context.paste(tile_image, (x,y), mask=tile_image)
+    def show_game(self):  
+        def load_tile_coordinates():  
+            configs = Properties()  
+            with open("data/tileImageCoordinates.properties", "rb") as f:  
+                configs.load(f)  
+            return configs  
 
-        if len(self.gamestate["players"]) > 3:
-            length = 1200
-        else:
-            length = 600
-        context2 = Image.new("RGBA",(4160,length),(255,255,255,0))
-        count = 0
-        x = 100
-        y = 100
-        for player in self.gamestate["players"]:
-            player_image = self.player_area(self.gamestate["players"][player])
-            context2.paste(player_image, (x, y), mask=player_image)
-            count = count + 1
-            if count % 3 == 0:
-                x = x - 1350 * 3
-                y = y + 600
-            else:
-                x = x + 1350
+        def paste_tiles(context, tile_map):  
+            configs = load_tile_coordinates()  
 
-        context3 = Image.new("RGBA",(4160,length+5100),(255,255,255,0))
-        context3.paste(context, (0,0))
-        context3.paste(context2, (0,5100))
-        bytes = BytesIO()
-        context3.save(bytes,format="PNG")
-        bytes.seek(0)
-        file = discord.File(bytes,filename="map_image.png")
-        return file
+            min_x = float('inf')  
+            min_y = float('inf')  
+            max_x = float('-inf')  
+            max_y = float('-inf')  
+            for tile in tile_map:  
+                tile_image = self.board_tile_image(tile)  
+                x, y = map(int, configs.get(tile)[0].split(","))  
+                context.paste(tile_image, (x, y), mask=tile_image)  
+                # Update bounding box coordinates  
+                min_x = min(min_x, x)  
+                min_y = min(min_y, y)  
+                max_x = max(max_x, x + tile_image.width)  
+                max_y = max(max_y, y + tile_image.height)
+            return min_x, min_y, max_x, max_y
+
+        def create_player_area():  
+            player_area_length = 1200 if len(self.gamestate["players"]) > 3 else 600  
+            context2 = Image.new("RGBA", (4160, player_area_length), (255, 255, 255, 0))  
+            x, y, count = 100, 100, 0  
+            for player in self.gamestate["players"]:  
+                player_image = self.player_area(self.gamestate["players"][player])  
+                context2.paste(player_image, (x, y), mask=player_image)  
+                count += 1  
+                if count % 3 == 0:  
+                    x = 100  # Reset x back to the starting position  
+                    y += 600  
+                else:  
+                    x += 1350  
+            return context2  
+
+        # Create context for the main board  
+        context = Image.new("RGBA", (4160, 5100), (255, 255, 255, 0))  
+        min_x, min_y, max_x, max_y = paste_tiles(context, self.gamestate["board"]) 
+
+        board_width = max_x - min_x  
+        board_height = max_y - min_y  
+        cropped_context = context.crop((0, min_y, 4160, max_y)) 
+        # Create context for players  
+        context2 = create_player_area()  
+
+        # Combine both contexts  
+        final_context = Image.new("RGBA", (4160, board_height + context2.size[1]), (255, 255, 255, 0))  
+        final_context.paste(cropped_context, (0, 0))  
+        final_context.paste(context2, (0, board_height))  
+
+        bytes_io = BytesIO()  
+        final_context.save(bytes_io, format="PNG")  
+        bytes_io.seek(0)  
+
+        return discord.File(bytes_io, filename="map_image.png") 
 
     def show_single_tile(self, tile_image):
         context = Image.new("RGBA", (345, 299), (255, 255, 255, 0))
