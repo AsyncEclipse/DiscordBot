@@ -93,21 +93,9 @@ class PlayerCommands(commands.GroupCog, name="player"):
         game = GamestateHelper(interaction.channel)  
         p1 = game.get_player(player.id)  
 
-        view = View()  
-        button = Button(label=f"Explore ({p1['explore_apt']})", style=discord.ButtonStyle.success, custom_id="startExplore")  
-        button2 = Button(label=f"Research ({p1['research_apt']})", style=discord.ButtonStyle.primary, custom_id="startResearch")  
-        button3 = Button(label=f"Build ({p1['build_apt']})", style=discord.ButtonStyle.success, custom_id="startBuild")  
-        button4 = Button(label=f"Upgrade ({p1['upgrade_apt']})", style=discord.ButtonStyle.primary, custom_id="startUpgrade")  
-        button5 = Button(label=f"Move ({p1['move_apt']})", style=discord.ButtonStyle.success, custom_id="startMove")  
-        button6 = Button(label=f"Influence ({p1['influence_apt']})", style=discord.ButtonStyle.secondary, custom_id="startInfluence")  
-        button7 = Button(label="Pass", style=discord.ButtonStyle.danger, custom_id="Pass")  
+        view = PlayerHelper.getStartTurnButtons(p1)
 
-        view.add_item(button)  
-        view.add_item(button2)  
-        view.add_item(button3)  
-        view.add_item(button4)  
-        view.add_item(button5)  
-        view.add_item(button6)  
-        view.add_item(button7)  
 
         await interaction.response.send_message(f"{player.mention} use these buttons to do your turn. The number of activations you have for each action is listed in ()", view=view)
+    
+    
