@@ -34,6 +34,24 @@ class DrawHelper:
             tile_image = Image.open(filepath).convert("RGBA")
             tile_image = tile_image.resize((345, 299))
             return tile_image
+    def base_tile_image_with_rotation(self, sector, rotation, wormholes):
+        wormholeCode = ""
+        filepath = f"images/resources/hexes/{str(sector)}.png"
+        if os.path.exists(filepath):
+            tile_image = Image.open(filepath).convert("RGBA")
+            tile_image = tile_image.resize((345, 299))
+        closed_mask = Image.open(f"images/resources/masks/closed_wh_mask.png").convert("RGBA").resize((42, 22))
+        open_mask = Image.open(f"images/resources/masks/open_wh_mask.png").convert("RGBA").resize((42, 22))
+        for wormhole in wormholes:
+            wormholeCode = wormholeCode+str(wormhole)
+        for i in range(6):
+            tile_orientation_index = (i + 6 + int(rotation / 60)) % 6
+            if tile_orientation_index in wormholes:
+                tile_image.paste(open_mask, (154, 0), mask=open_mask)
+            else:
+                tile_image.paste(closed_mask, (154, 0), mask=closed_mask)
+            tile_image = tile_image.rotate(60)
+        return tile_image
 
     def board_tile_image(self, position):
         sector = self.gamestate["board"][position]["sector"]
@@ -79,10 +97,39 @@ class DrawHelper:
                 for resource in ["money", "moneyadv", "science","scienceadv", "material","materialadv"]:  
                     paste_resourcecube(tile, tile_image, resource, color)  
 
-            tile_image = tile_image.rotate(rotation)
-            font = ImageFont.truetype("arial.ttf", size=45)
+            wormholeCode = ""
+            closed_mask = Image.open(f"images/resources/masks/closed_wh_mask.png").convert("RGBA").resize((42, 22))
+            open_mask = Image.open(f"images/resources/masks/open_wh_mask.png").convert("RGBA").resize((42, 22))
+            if "wormholes" in tile:
+                for wormhole in tile["wormholes"]:
+                    wormholeCode = wormholeCode+str(wormhole)
+                for i in range(6):
+                    tile_orientation_index = (i + 6 + int(rotation / 60)) % 6
+                    if tile_orientation_index in tile["wormholes"]:
+                        tile_image.paste(open_mask, (154, 0), mask=open_mask)
+                    else:
+                        tile_image.paste(closed_mask, (154, 0), mask=closed_mask)
+                    tile_image = tile_image.rotate(60)
+                  #345, 299
+
+            if "disctile" in tile and tile["disctile"] > 0:
+                discTile = Image.open(f"images/resources/components/discovery_tiles/discovery_2ptback.png").convert("RGBA").resize((90, 90))
+                discTile = discTile.rotate(315,expand=True)
+                tile_image.paste(discTile, (112, 88), mask=discTile)
+
+
+
+            text_position = (268, 132)
+            banner = Image.open(f"images/resources/masks/banner.png").convert("RGBA").resize((98, 48))
+            tile_image.paste(banner, (247, 126), mask=banner)
+
+
+
+
+
+            font = ImageFont.truetype("arial.ttf", size=30)
             text = str(position)
-            text_position = (255, 132)
+            
             text_color = (255, 255, 255)
             textDrawableImage = ImageDraw.Draw(tile_image)
             textDrawableImage.text(text_position, text, text_color, font=font)
@@ -95,12 +142,27 @@ class DrawHelper:
         board_image = Image.open(filepath).convert("RGBA")
         board_image = board_image.resize((895, 500))
         context.paste(board_image, (0,0))
+        inf_path = "images/resources/components/all_boards/influence_disc_"+player["color"]+".png"
+        inf_image = Image.open(inf_path).convert("RGBA")
+        inf_image = inf_image.resize((40, 40))
 
         for x in range(player["influence_discs"]):
-            inf_path = "images/resources/components/all_boards/influence_disc_"+player["color"]+".png"
-            inf_image = Image.open(inf_path).convert("RGBA")
-            inf_image = inf_image.resize((40, 40))
             context.paste(inf_image, (764-(int(x*38.5)), 450), mask=inf_image)
+
+        for x,action in enumerate(["explore","research","upgrade","build","move","influence"]):  
+            if action+"_action_counters" in player:
+                num = player[action+"_action_counters"]
+                if num > 0:
+                    context.paste(inf_image, (12+(int(x*47)), 422), mask=inf_image)
+                if num > 1:
+                    font = ImageFont.truetype("arial.ttf", size=25)  
+                    stroke_color = (0, 0, 0)
+                    color = (255, 255, 255)  
+                    stroke_width = 2
+                    text_drawable_image = ImageDraw.Draw(context)  
+                    text_drawable_image.text((17+(int(x*47)), 426), "x"+str(num), color, font=font,  
+                                    stroke_width=stroke_width, stroke_fill=stroke_color)
+
 
         with open("data/techs.json", "r") as f:
                 tech_data = json.load(f)
@@ -110,6 +172,8 @@ class DrawHelper:
                 tech_details = tech_data.get(tech)   
                 techName = tech_details["name"].lower().replace(" ", "_") if tech_details else tech  
                 tech_path = f"images/resources/components/technology/{tech_type}/tech_{techName}.png"  
+                if not os.path.exists(tech_path):
+                    tech_path = f"images/resources/components/technology/rare/tech_{techName}.png"  
                 tech_image = Image.open(tech_path).convert("RGBA").resize((68, 68))  
                 context.paste(tech_image, (299 + (counter * 71), start_y), mask=tech_image)  
 
@@ -168,7 +232,7 @@ class DrawHelper:
             if amountIncrease > -1:
                 amountIncrease = "+"+str(amountIncrease)
             else:
-                amountIncrease = "-"+str(amountIncrease)  
+                amountIncrease = str(amountIncrease)  
             text_drawable_image = ImageDraw.Draw(context)  
             text_drawable_image.text((position[0] + 120, position[1]), f"{player[player_key]}({amountIncrease})", color, font=font,  
                                     stroke_width=stroke_width, stroke_fill=stroke_color)  
@@ -178,6 +242,13 @@ class DrawHelper:
             y += 100 
         
         return context
+
+
+    def show_tile_in_context(tile_map, tile, position, rotation, context):
+        for tile in tile_map:  
+            tile_image = self.board_tile_image(tile)  
+            x, y = map(int, configs.get(tile)[0].split(","))  
+            context.paste(tile_image, (x, y), mask=tile_image)
 
     def show_game(self):  
         def load_tile_coordinates():  
