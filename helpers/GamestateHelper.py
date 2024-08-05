@@ -195,3 +195,12 @@ class GamestateHelper:
             if self.gamestate["board"][i]["sector"] == sector:
                 return(i)
         return(False)
+
+    def get_owned_tiles(self, player):
+        tile_map = self.gamestate["board"]
+        color = self.gamestate["players"][str(player)]["color"]
+        tiles = []
+        for tile in tile_map:
+            if "owner" in tile_map[tile] and tile_map[tile]["owner"] == color:
+                tiles.append(tile)
+        return tiles

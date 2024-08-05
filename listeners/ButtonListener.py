@@ -140,3 +140,33 @@ class ButtonListener(commands.Cog):
                             displayedTechs.append(tech)
                             view.add_item(Button(label=f"{tech_name} ({cost})", style=buttonStyle, custom_id=f"getTech_{tech}"))  
                 await interaction.response.send_message(f"{interaction.user.mention}, select the tech you would like to acquire. The discounted cost is in parentheses.", view=view)  
+            if interaction.data["custom_id"] == "startBuild":
+                game = GamestateHelper(interaction.channel)
+                tiles = game.get_owned_tiles(interaction.user.id)
+                tiles.sort()
+                view = View()
+                for tile in tiles:
+                    view.add_item(Button(label=tile, style=discord.ButtonStyle.primary, custom_id=f"build_in_{tile}"))
+                await interaction.response.send_message(f"{interaction.user.mention}, choose which tile you would like to build in.", view=view)
+            if interaction.data["custom_id"].startswith("build_in_"):
+                game = GamestateHelper(interaction.channel)
+                p1 = game.get_player(interaction.user.id)
+                build_actions = p1["build_apt"]
+                msg = interaction.data["custom_id"].split("_")
+                view = View()
+                view.add_item(Button(label="Interceptor", style=discord.ButtonStyle.primary, custom_id=f"build_unit_int_{msg[2]}"))
+                view.add_item(Button(label="Cruiser", style=discord.ButtonStyle.primary, custom_id=f"build_unit_cru_{msg[2]}"))
+                view.add_item(Button(label="Dreadnought", style=discord.ButtonStyle.primary, custom_id=f"build_unit_drd_{msg[2]}"))
+                if "stb" in p1["military_tech"]:
+                    view.add_item(Button(label="Starbase", style=discord.ButtonStyle.success,
+                                         custom_id=f"build_unit_sb_{msg[2]}"))
+                if "orb" in p1["nano_tech"]:
+                    view.add_item(Button(label="Orbital", style=discord.ButtonStyle.success,
+                                         custom_id=f"build_unit_orb_{msg[2]}"))
+                if "mon" in p1["nano_tech"]:
+                    view.add_item(Button(label="Monolith", style=discord.ButtonStyle.success,
+                                         custom_id=f"build_unit_mon_{msg[2]}"))
+                view.add_item(Button(label="Done", style=discord.ButtonStyle.danger,
+                                     custom_id=f"build_finished_{msg[2]}"))
+                await interaction.response.send_message(f"{interaction.user.mention}, you can build {build_actions} "
+                                                        f"objects in this system.", view=view)
