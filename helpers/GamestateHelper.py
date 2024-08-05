@@ -3,6 +3,7 @@ import config
 from helpers.PlayerHelper import PlayerHelper
 from PIL import Image, ImageDraw, ImageFont
 import os
+from jproperties import Properties
 import random
 
 class GamestateHelper:
@@ -74,6 +75,15 @@ class GamestateHelper:
         except KeyError:
             tile = {"sector": sector, "orientation": orientation}
         self.gamestate["board"][position] = tile
+
+        configs = Properties()  
+        with open("data/tileAdjacencies.properties", "rb") as f:  
+            configs.load(f)  
+        if position != None and sector != "sector3back":
+            tiles = configs.get(position)[0].split(",")
+            for adjTile in tiles:  
+                if adjTile not in self.gamestate["board"]:
+                    self.add_tile(adjTile, 0, "sector3back")
         self.update()
 
     def add_control(self, color, position):
@@ -172,6 +182,10 @@ class GamestateHelper:
         self.update()
         return("Game setup complete")
 
+    def playerResearchTech(self, playerid, tech, type):
+        self.gamestate["available_techs"].remove(tech)
+        self.gamestate["players"][playerid][type+"_tech"].append(tech)
+        self.update()
     def update(self):
         with open(f"{config.gamestate_path}/{self.game_id}.json", "w") as f:
             json.dump(self.gamestate, f)
