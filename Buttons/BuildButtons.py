@@ -17,13 +17,18 @@ class Build(discord.ui.View):
         self.orbital.label = f"Orbital ({self.p1["cost_orbital"]})"
         self.monolith.label = f"Monolith ({self.p1["cost_monolith"]})"
 
-        #if "stb" not in self.p1["military_tech"]:
-        #    self.remove_item(self.starbase)
+        if "stb" not in self.p1["military_tech"]:
+            self.remove_item(self.starbase)
+        if "orb" not in self.p1["nano_tech"]:
+            self.remove_item(self.orbital)
+        if "mon" not in self.p1["nano_tech"]:
+            self.remove_item(self.monolith)
 
     @discord.ui.button(style=discord.ButtonStyle.primary)
     async def interceptor(self, interaction: discord.Interaction, button: discord.ui.Button):
         if len(self.build) == self.p1["build_apt"]:
-            await interaction.response.edit_message(content="You cannot build any more units.")
+            await interaction.response.edit_message(content=f"You cannot build any more units. Current build is:"
+                                                            f"\n {self.build} for {self.cost} materials.")
             return
         self.build.append([f"{self.p1["color"]}_int"])
         self.cost += self.p1["cost_interceptor"]
@@ -33,7 +38,8 @@ class Build(discord.ui.View):
     @discord.ui.button(style=discord.ButtonStyle.primary)
     async def cruiser(self, interaction: discord.Interaction, button: discord.ui.Button):
         if len(self.build) == self.p1["build_apt"]:
-            await interaction.response.edit_message(content="You cannot build any more units.")
+            await interaction.response.edit_message(content=f"You cannot build any more units. Current build is:"
+                                                            f"\n {self.build} for {self.cost} materials.")
             return
         self.build.append([f"{self.p1["color"]}_cru"])
         self.cost += self.p1["cost_cruiser"]
@@ -43,7 +49,8 @@ class Build(discord.ui.View):
     @discord.ui.button(style=discord.ButtonStyle.primary)
     async def dreadnought(self, interaction: discord.Interaction, button: discord.ui.Button):
         if len(self.build) == self.p1["build_apt"]:
-            await interaction.response.edit_message(content="You cannot build any more units.")
+            await interaction.response.edit_message(content=f"You cannot build any more units. Current build is:"
+                                                            f"\n {self.build} for {self.cost} materials.")
             return
         self.build.append([f"{self.p1["color"]}_drd"])
         self.cost += self.p1["cost_dread"]
@@ -53,7 +60,8 @@ class Build(discord.ui.View):
     @discord.ui.button(style=discord.ButtonStyle.success)
     async def starbase(self, interaction: discord.Interaction, button: discord.ui.Button):
         if len(self.build) == self.p1["build_apt"]:
-            await interaction.response.edit_message(content="You cannot build any more units.")
+            await interaction.response.edit_message(content=f"You cannot build any more units. Current build is:"
+                                                            f"\n {self.build} for {self.cost} materials.")
             return
         self.build.append([f"{self.p1["color"]}_sb"])
         self.cost += self.p1["cost_starbase"]
@@ -63,7 +71,8 @@ class Build(discord.ui.View):
     @discord.ui.button(style=discord.ButtonStyle.success)
     async def orbital(self, interaction: discord.Interaction, button: discord.ui.Button):
         if len(self.build) == self.p1["build_apt"]:
-            await interaction.response.edit_message(content="You cannot build any more units.")
+            await interaction.response.edit_message(content=f"You cannot build any more units. Current build is:"
+                                                            f"\n {self.build} for {self.cost} materials.")
             return
         self.build.append([f"{self.p1["color"]}_orb"])
         self.cost += self.p1["cost_orbital"]
@@ -73,7 +82,8 @@ class Build(discord.ui.View):
     @discord.ui.button(style=discord.ButtonStyle.success)
     async def monolith(self, interaction: discord.Interaction, button: discord.ui.Button):
         if len(self.build) == self.p1["build_apt"]:
-            await interaction.response.edit_message(content="You cannot build any more units.")
+            await interaction.response.edit_message(content=f"You cannot build any more units. Current build is:"
+                                                            f"\n {self.build} for {self.cost} materials.")
             return
         self.build.append([f"{self.p1["color"]}_mon"])
         self.cost += self.p1["cost_monolith"]
