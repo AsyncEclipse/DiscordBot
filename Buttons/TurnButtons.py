@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from discord.ui import View
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 from Buttons.BuildButtons import Build, BuildLocation
@@ -12,9 +13,15 @@ class Turn(discord.ui.View):
 
     @discord.ui.button(label=f"Build", style=discord.ButtonStyle.success)
     async def build (self, interaction: discord.Interaction, button: discord.ui.Button):
-        view = Build(interaction, [], 0)
-        #view = BuildLocation(interaction)
-        await interaction.response.send_message(f"Build up to {self.p1["build_apt"]} ships.", view=view)
+        game = GamestateHelper(interaction.channel)
+        tiles = game.get_owned_tiles(interaction.user.id)
+        tiles.sort()
+        view=View()
+        for i in tiles:
+            button2 = BuildLocation(i, discord.ButtonStyle.primary)
+            view.add_item(button2)
+
+        await interaction.response.send_message(f"{interaction.user.mention}, choose which tile you would like to build in.", view=view)
 
 
     @discord.ui.button(label="Research", style=discord.ButtonStyle.primary)

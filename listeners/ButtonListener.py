@@ -112,7 +112,7 @@ class ButtonListener(commands.Cog):
                 await interaction.response.defer(thinking=True)
                 game = GamestateHelper(interaction.channel)
                 msg = interaction.data["custom_id"].split("_")
-                game.add_tile(msg[2], int(msg[4]), msg[3])
+                game.add_tile(msg[2], 0, msg[3])
                 await interaction.followup.send(f"Tile added to position {msg[2]}")
                 await interaction.message.delete()
             if interaction.data['custom_id'].startswith("discard_tile"):

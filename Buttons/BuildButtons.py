@@ -1,26 +1,29 @@
 import discord
 from discord.ext import commands
+from discord.ui import Button
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 
-class BuildLocation(discord.ui.View):
-    def __init__(self, interaction):
-        super().__init__()
-        self.game = GamestateHelper(interaction.channel)
-        self.tiles = self.game.get_owned_tiles(interaction.user.id)
-        self.tiles.sort()
+class BuildLocation(Button):
+    def __init__(self, label, style:discord.ButtonStyle.primary):
+        super().__init__(label=label, style=style)
 
-        for tile in self.tiles:
-            button = discord.ui.Button(label=tile, style=discord.ButtonStyle.primary)
-            self.add_item(button)
+    async def callback(self, interaction: discord.Interaction):
+        game = GamestateHelper(interaction.channel)
+        p1 = game.get_player(interaction.user.id)
+        view = Build(interaction, [], 0, self.label)
+        await interaction.response.send_message(f"{interaction.user.mention}, you have {p1["materials"]} materials to "
+                                                f"spend on up to {p1["build_apt"]} units in this system.", view=view)
+
 
 class Build(discord.ui.View):
-    def __init__(self, interaction, build, cost):
+    def __init__(self, interaction: discord.Interaction, build, cost, build_loc):
         super().__init__()
         self.game = GamestateHelper(interaction.channel)
         self.p1 = self.game.get_player(interaction.user.id)
         self.build = build
         self.cost = cost
+        self.build_loc = build_loc
         self.interceptor.label = f"Interceptor ({self.p1["cost_interceptor"]})"
         self.cruiser.label = f"Cruiser ({self.p1["cost_cruiser"]})"
         self.dreadnought.label = f"Dreadnought ({self.p1["cost_dread"]})"
@@ -43,7 +46,7 @@ class Build(discord.ui.View):
             return
         self.build.append([f"{self.p1["color"]}_int"])
         self.cost += self.p1["cost_interceptor"]
-        view = Build(interaction, self.build, self.cost)
+        view = Build(interaction, self.build, self.cost, self.build_loc)
         await interaction.response.edit_message(content= f"Total cost so far of {self.cost}", view=view)
 
     @discord.ui.button(style=discord.ButtonStyle.primary)
@@ -54,7 +57,7 @@ class Build(discord.ui.View):
             return
         self.build.append([f"{self.p1["color"]}_cru"])
         self.cost += self.p1["cost_cruiser"]
-        view = Build(interaction, self.build, self.cost)
+        view = Build(interaction, self.build, self.cost, self.build_loc)
         await interaction.response.edit_message(content= f"Total cost so far of {self.cost}", view=view)
 
     @discord.ui.button(style=discord.ButtonStyle.primary)
@@ -65,7 +68,7 @@ class Build(discord.ui.View):
             return
         self.build.append([f"{self.p1["color"]}_drd"])
         self.cost += self.p1["cost_dread"]
-        view = Build(interaction, self.build, self.cost)
+        view = Build(interaction, self.build, self.cost, self.build_loc)
         await interaction.response.edit_message(content=f"Total cost so far of {self.cost}", view=view)
 
     @discord.ui.button(style=discord.ButtonStyle.success)
@@ -76,7 +79,7 @@ class Build(discord.ui.View):
             return
         self.build.append([f"{self.p1["color"]}_sb"])
         self.cost += self.p1["cost_starbase"]
-        view = Build(interaction, self.build, self.cost)
+        view = Build(interaction, self.build, self.cost, self.build_loc)
         await interaction.response.edit_message(content=f"Total cost so far of {self.cost}", view=view)
 
     @discord.ui.button(style=discord.ButtonStyle.success)
@@ -87,7 +90,7 @@ class Build(discord.ui.View):
             return
         self.build.append([f"{self.p1["color"]}_orb"])
         self.cost += self.p1["cost_orbital"]
-        view = Build(interaction, self.build, self.cost)
+        view = Build(interaction, self.build, self.cost, self.build_loc)
         await interaction.response.edit_message(content=f"Total cost so far of {self.cost}", view=view)
 
     @discord.ui.button(style=discord.ButtonStyle.success)
@@ -98,7 +101,7 @@ class Build(discord.ui.View):
             return
         self.build.append([f"{self.p1["color"]}_mon"])
         self.cost += self.p1["cost_monolith"]
-        view = Build(interaction, self.build, self.cost)
+        view = Build(interaction, self.build, self.cost, self.build_loc)
         await interaction.response.edit_message(content=f"Total cost so far of {self.cost}", view=view)
 
     @discord.ui.button(label="Finished", style=discord.ButtonStyle.danger)
