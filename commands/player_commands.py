@@ -89,7 +89,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
 
     @app_commands.command(name="start_turn")
     async def start_turn(self, interaction: discord.Interaction, player: discord.Member):
-        view = Turn(interaction)
+        view = Turn(interaction, player.id)
         #view = PlayerHelper.getStartTurnButtons(p1)
 
         await interaction.response.send_message(f"{player.mention} use these buttons to do your turn. The number of activations you have for each action is listed in ()", view=view)

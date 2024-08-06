@@ -1,5 +1,3 @@
-listy = ["203", "103", "204", "304", "311"]
+x = 1/2
 
-listy.sort()
-
-print(listy)
+print(int(x))

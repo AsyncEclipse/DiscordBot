@@ -6,10 +6,10 @@ from helpers.PlayerHelper import PlayerHelper
 from Buttons.BuildButtons import Build, BuildLocation
 
 class Turn(discord.ui.View):
-    def __init__(self, interaction):
+    def __init__(self, interaction, player_id):
         super().__init__()
         self.game = GamestateHelper(interaction.channel)
-        self.p1 = self.game.get_player(interaction.user.id)
+        self.player = self.game.get_player(str(player_id))
 
     @discord.ui.button(label=f"Build", style=discord.ButtonStyle.success)
     async def build (self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -20,7 +20,7 @@ class Turn(discord.ui.View):
         for i in tiles:
             button2 = BuildLocation(i, discord.ButtonStyle.primary)
             view.add_item(button2)
-
+        await interaction.message.delete()
         await interaction.response.send_message(f"{interaction.user.mention}, choose which tile you would like to build in.", view=view)
 
 
