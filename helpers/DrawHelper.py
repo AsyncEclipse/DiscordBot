@@ -67,7 +67,7 @@ class DrawHelper:
             if "player_ships" in tile and len(tile["player_ships"]) > 0:  
                 counts = {}  # To track counts for each ship type  
                 for ship in tile["player_ships"]:  
-                    ship_type = ship.split("-")[1]  # Extract ship type  
+                    ship_type = ship.split("-")[1]  # Extract ship type
                     ship_image = Image.open(f"images/resources/components/basic_ships/{ship}.png").convert("RGBA").resize((70, 70))  
                     coords = tile[f"{ship_type}_snap"]  
                      
