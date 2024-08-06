@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
-from Buttons.BuildButtons import Build
+from Buttons.BuildButtons import Build, BuildLocation
 
 class Turn(discord.ui.View):
     def __init__(self, interaction):
@@ -13,6 +13,7 @@ class Turn(discord.ui.View):
     @discord.ui.button(label=f"Build", style=discord.ButtonStyle.success)
     async def build (self, interaction: discord.Interaction, button: discord.ui.Button):
         view = Build(interaction, [], 0)
+        #view = BuildLocation(interaction)
         await interaction.response.send_message(f"Build up to {self.p1["build_apt"]} ships.", view=view)
 
 

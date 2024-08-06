@@ -3,6 +3,17 @@ from discord.ext import commands
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 
+class BuildLocation(discord.ui.View):
+    def __init__(self, interaction):
+        super().__init__()
+        self.game = GamestateHelper(interaction.channel)
+        self.tiles = self.game.get_owned_tiles(interaction.user.id)
+        self.tiles.sort()
+
+        for tile in self.tiles:
+            button = discord.ui.Button(label=tile, style=discord.ButtonStyle.primary)
+            self.add_item(button)
+
 class Build(discord.ui.View):
     def __init__(self, interaction, build, cost):
         super().__init__()
