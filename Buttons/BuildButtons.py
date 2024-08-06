@@ -212,9 +212,10 @@ class BuildPay(discord.ui.View):
         self.game.update()
         #TODO make sure player ship stock is reduced somehow. Risky to do it directly with add_units
         # because self.p1 will not be changed and will overwrite.
-        view = Buttons.TurnButtons.Turn(interaction, self.author)
+        next_player = self.game.get_next_player(self.p1)
+        view = Buttons.TurnButtons.Turn(interaction, next_player)
         await interaction.message.delete()
-        await interaction.response.send_message(f"{interaction.user.mention} use these buttons to do your turn. "
+        await interaction.response.send_message(f"<@{next_player}> use these buttons to do your turn. "
                                                 f"The number of activations you have for each action is listed in ()", view=view)
 
     async def interaction_check(self, interaction: discord.Interaction):

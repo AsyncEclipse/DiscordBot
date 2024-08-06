@@ -219,3 +219,16 @@ class GamestateHelper:
             if "owner" in tile_map[tile] and tile_map[tile]["owner"] == color:
                 tiles.append(tile)
         return tiles
+
+    def get_next_player(self, player):
+        player_systems = []
+        player_home = player["home_planet"]
+        for i in ["201", "203", "205", "207", "209", "211"]:
+            if "owner" in self.gamestate["board"][i] and self.gamestate["board"][i]["owner"] != 0:
+                player_systems.append(i)
+        tile = self.get_system_coord(player_home)
+        index = player_systems.index(tile) + 1
+        index = index % len(player_systems)
+        new_player_color = self.gamestate["board"][player_systems[index]]["owner"]
+        return self.get_player_from_color(new_player_color)
+
