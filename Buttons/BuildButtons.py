@@ -19,7 +19,7 @@ class BuildLocation(Button):
         await interaction.response.send_message(f"{interaction.user.mention}, you have {p1['materials']} materials to "
                                                 f"spend on up to {p1['build_apt']} units in this system.", view=view)
     async def interaction_check(self, interaction: discord.Interaction):
-        if interaction.user.id != self.author:
+        if str(interaction.user.id) != str(self.author):
             await interaction.response.send_message("These buttons are not for you.")
         else:
             return True
@@ -128,6 +128,12 @@ class Build(discord.ui.View):
         await interaction.message.delete()
         await interaction.response.send_message(f"Total cost so far of 0", view=view)
 
+    async def interaction_check(self, interaction: discord.Interaction):
+        if str(interaction.user.id) != str(self.author):
+            await interaction.response.send_message("These buttons are not for you.")
+        else:
+            return True
+
 class BuildPay(discord.ui.View):
     def __init__(self, interaction: discord.Interaction, build, cost, build_loc, resources, spent, author):
         super().__init__()
@@ -220,7 +226,7 @@ class BuildPay(discord.ui.View):
                                                 f"The number of activations you have for each action is listed in ()", view=view)
 
     async def interaction_check(self, interaction: discord.Interaction):
-        if interaction.user.id != self.author:
+        if str(interaction.user.id) != str(self.author):
             await interaction.response.send_message("These buttons are not for you.")
         else:
             return True

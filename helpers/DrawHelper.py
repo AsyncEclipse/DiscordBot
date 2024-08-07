@@ -326,3 +326,11 @@ class DrawHelper:
         bytes.seek(0)
         file = discord.File(bytes, filename="player_area.png")
         return file
+
+    def show_player_ship_area(self, player_area):
+        player_area = player_area.crop((0,0,895, 196))
+        bytes = BytesIO()
+        player_area.save(bytes, format="PNG")
+        bytes.seek(0)
+        file = discord.File(bytes, filename="player_area.png")
+        return file

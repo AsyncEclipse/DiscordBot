@@ -87,11 +87,22 @@ class PlayerCommands(commands.GroupCog, name="player"):
         await interaction.response.defer(thinking=True)
         await interaction.followup.send(file=drawing.show_player_area(image))
 
+    @app_commands.command(name="show_player_ships")
+    async def show_player_ships(self, interaction: discord.Interaction, player: discord.Member):
+        game = GamestateHelper(interaction.channel)
+        p1 = game.get_player(player.id)
+        drawing = DrawHelper(game.gamestate)
+        image = drawing.player_area(p1)
+        await interaction.response.defer(thinking=True)
+        await interaction.followup.send(file=drawing.show_player_ship_area(image))
+
     @app_commands.command(name="start_turn")
     async def start_turn(self, interaction: discord.Interaction, player: discord.Member):
         view = Turn(interaction, player.id)
         #view = PlayerHelper.getStartTurnButtons(p1)
 
-        await interaction.response.send_message(f"{player.mention} use these buttons to do your turn. The number of activations you have for each action is listed in ()", view=view)
+        await interaction.response.send_message((f"{player.mention} use these buttons to do your turn. The "
+                                                        "number ofctivations you have for each action is listed in ("
+                                                  ")"), view=view)
     
     
