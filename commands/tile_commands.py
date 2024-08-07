@@ -105,7 +105,7 @@ class TileCommands(commands.GroupCog, name="tile"):
         added_pop, removed_pop = [], []  
         
         def process_pop(pop_type, count):  
-            pop_code = f"{pop_type}_{"pop"}"  
+            pop_code = f"{pop_type}_{'pop'}"
             if count:  
                 pop_list = added_pop if count > 0 else removed_pop  
                 for x in range(abs(count)):  

@@ -16,8 +16,8 @@ class BuildLocation(Button):
         p1 = game.get_player(interaction.user.id)
         view = Build(interaction, [], 0, self.label, self.author)
         await interaction.message.delete()
-        await interaction.response.send_message(f"{interaction.user.mention}, you have {p1["materials"]} materials to "
-                                                f"spend on up to {p1["build_apt"]} units in this system.", view=view)
+        await interaction.response.send_message(f"{interaction.user.mention}, you have {p1['materials']} materials to "
+                                                f"spend on up to {p1['build_apt']} units in this system.", view=view)
     async def interaction_check(self, interaction: discord.Interaction):
         if interaction.user.id != self.author:
             await interaction.response.send_message("These buttons are not for you.")
@@ -33,12 +33,12 @@ class Build(discord.ui.View):
         self.cost = cost
         self.build_loc = build_loc
         self.author = author
-        self.interceptor.label = f"Interceptor ({self.p1["cost_interceptor"]})"
-        self.cruiser.label = f"Cruiser ({self.p1["cost_cruiser"]})"
-        self.dreadnought.label = f"Dreadnought ({self.p1["cost_dread"]})"
-        self.starbase.label = f"Starbase ({self.p1["cost_starbase"]})"
-        self.orbital.label = f"Orbital ({self.p1["cost_orbital"]})"
-        self.monolith.label = f"Monolith ({self.p1["cost_monolith"]})"
+        self.interceptor.label = f"Interceptor ({self.p1['cost_interceptor']})"
+        self.cruiser.label = f"Cruiser ({self.p1['cost_cruiser']})"
+        self.dreadnought.label = f"Dreadnought ({self.p1['cost_dread']})"
+        self.starbase.label = f"Starbase ({self.p1['cost_starbase']})"
+        self.orbital.label = f"Orbital ({self.p1['cost_orbital']})"
+        self.monolith.label = f"Monolith ({self.p1['cost_monolith']})"
 
         if "stb" not in self.p1["military_tech"]:
             self.remove_item(self.starbase)
@@ -53,7 +53,7 @@ class Build(discord.ui.View):
             await interaction.response.edit_message(content=f"You cannot build any more units. Current build is:"
                                                             f"\n {self.build} for {self.cost} materials.")
             return
-        self.build.append(f"{self.p1["color"]}-int")
+        self.build.append(f"{self.p1['color']}-int")
         self.cost += self.p1["cost_interceptor"]
         view = Build(interaction, self.build, self.cost, self.build_loc, self.author)
         await interaction.response.edit_message(content= f"Total cost so far of {self.cost}", view=view)
@@ -64,7 +64,7 @@ class Build(discord.ui.View):
             await interaction.response.edit_message(content=f"You cannot build any more units. Current build is:"
                                                             f"\n {self.build} for {self.cost} materials.")
             return
-        self.build.append(f"{self.p1["color"]}-cru")
+        self.build.append(f"{self.p1['color']}-cru")
         self.cost += self.p1["cost_cruiser"]
         view = Build(interaction, self.build, self.cost, self.build_loc, self.author)
         await interaction.response.edit_message(content= f"Total cost so far of {self.cost}", view=view)
@@ -75,7 +75,7 @@ class Build(discord.ui.View):
             await interaction.response.edit_message(content=f"You cannot build any more units. Current build is:"
                                                             f"\n {self.build} for {self.cost} materials.")
             return
-        self.build.append(f"{self.p1["color"]}-drd")
+        self.build.append(f"{self.p1['color']}-drd")
         self.cost += self.p1["cost_dread"]
         view = Build(interaction, self.build, self.cost, self.build_loc, self.author)
         await interaction.response.edit_message(content=f"Total cost so far of {self.cost}", view=view)
@@ -86,7 +86,7 @@ class Build(discord.ui.View):
             await interaction.response.edit_message(content=f"You cannot build any more units. Current build is:"
                                                             f"\n {self.build} for {self.cost} materials.")
             return
-        self.build.append(f"{self.p1["color"]}-sb")
+        self.build.append(f"{self.p1['color']}-sb")
         self.cost += self.p1["cost_starbase"]
         view = Build(interaction, self.build, self.cost, self.build_loc, self.author)
         await interaction.response.edit_message(content=f"Total cost so far of {self.cost}", view=view)
@@ -97,7 +97,7 @@ class Build(discord.ui.View):
             await interaction.response.edit_message(content=f"You cannot build any more units. Current build is:"
                                                             f"\n {self.build} for {self.cost} materials.")
             return
-        self.build.append(f"{self.p1["color"]}-orb")
+        self.build.append(f"{self.p1['color']}-orb")
         self.cost += self.p1["cost_orbital"]
         view = Build(interaction, self.build, self.cost, self.build_loc, self.author)
         await interaction.response.edit_message(content=f"Total cost so far of {self.cost}", view=view)
@@ -108,7 +108,7 @@ class Build(discord.ui.View):
             await interaction.response.edit_message(content=f"You cannot build any more units. Current build is:"
                                                             f"\n {self.build} for {self.cost} materials.")
             return
-        self.build.append(f"{self.p1["color"]}-mon")
+        self.build.append(f"{self.p1['color']}-mon")
         self.cost += self.p1["cost_monolith"]
         view = Build(interaction, self.build, self.cost, self.build_loc, self.author)
         await interaction.response.edit_message(content=f"Total cost so far of {self.cost}", view=view)
@@ -120,7 +120,7 @@ class Build(discord.ui.View):
                         spent=0, author=self.author)
         await interaction.message.delete()
         await interaction.response.send_message(f"Total cost: {self.cost}"
-                    f"\nAvailable resources: Materials-{self.p1["materials"]} Science-{self.p1["science"]} Money-{self.p1["money"]}", view=view)
+                    f"\nAvailable resources: Materials-{self.p1['materials']} Science-{self.p1['science']} Money-{self.p1['money']}", view=view)
 
     @discord.ui.button(label="Reset", style=discord.ButtonStyle.danger)
     async def reset(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -138,8 +138,8 @@ class BuildPay(discord.ui.View):
         self.build_loc = build_loc
         self.material, self.science, self.money = resources
         self.spent = spent
-        self.convert_science.label = f"Science ({self.p1["trade_value"]}:1)"
-        self.convert_money.label = f"Money ({self.p1["trade_value"]}:1)"
+        self.convert_science.label = f"Science ({self.p1['trade_value']}:1)"
+        self.convert_money.label = f"Money ({self.p1['trade_value']}:1)"
         self.author = author
         if self.material == 0:
             self.remove_item(self.one_material)
@@ -216,6 +216,7 @@ class BuildPay(discord.ui.View):
         view = Buttons.TurnButtons.Turn(interaction, next_player)
         await interaction.message.delete()
         await interaction.response.send_message(f"<@{next_player}> use these buttons to do your turn. "
+                                                
                                                 f"The number of activations you have for each action is listed in ()", view=view)
 
     async def interaction_check(self, interaction: discord.Interaction):

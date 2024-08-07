@@ -22,5 +22,5 @@ class GameInit:
         for i in self.player_list:
             self.gamestate["players"].update({i[0]: {"player_name": f"<@{str(i[0])}>"}})
 
-        with open(f"{config.gamestate_path}/{self.gamestate["game_id"]}.json", "w") as f:
+        with open(f"{config.gamestate_path}/{self.gamestate['game_id']}.json", "w") as f:
             json.dump(self.gamestate, f)

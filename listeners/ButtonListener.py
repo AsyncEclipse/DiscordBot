@@ -358,23 +358,23 @@ class ButtonListener(commands.Cog):
                 ship_list = []
                 total_cost = 0
                 view = View()
-                view.add_item(Button(label=f"Interceptor ({p1["cost_interceptor"]})", style=discord.ButtonStyle.primary,
+                view.add_item(Button(label=f"Interceptor ({p1['cost_interceptor']})", style=discord.ButtonStyle.primary,
                                      custom_id=f"build_unit_int_{msg[2]}"))
-                view.add_item(Button(label=f"Cruiser ({p1["cost_cruiser"]})", style=discord.ButtonStyle.primary,
+                view.add_item(Button(label=f"Cruiser ({p1['cost_cruiser']})", style=discord.ButtonStyle.primary,
                                      custom_id=f"build_unit_cru_{msg[2]}"))
-                view.add_item(Button(label=f"Dreadnought ({p1["cost_dread"]})", style=discord.ButtonStyle.primary,
+                view.add_item(Button(label=f"Dreadnought ({p1['cost_dread']})", style=discord.ButtonStyle.primary,
                                      custom_id=f"build_unit_drd_{msg[2]}"))
                 if "stb" in p1["military_tech"]:
-                    view.add_item(Button(label=f"Starbase ({p1["cost_starbase"]})", style=discord.ButtonStyle.success,
+                    view.add_item(Button(label=f"Starbase ({p1['cost_starbase']})", style=discord.ButtonStyle.success,
                                          custom_id=f"build_unit_sb_{msg[2]}"))
                 if "orb" in p1["nano_tech"]:
-                    view.add_item(Button(label=f"Orbital ({p1["cost_orbital"]})", style=discord.ButtonStyle.success,
+                    view.add_item(Button(label=f"Orbital ({p1['cost_orbital']})", style=discord.ButtonStyle.success,
                                          custom_id=f"build_unit_orb_{msg[2]}"))
                 if "mon" in p1["nano_tech"]:
-                    view.add_item(Button(label=f"Monolith ({p1["cost_monolith"]})", style=discord.ButtonStyle.success,
+                    view.add_item(Button(label=f"Monolith ({p1['cost_monolith']})", style=discord.ButtonStyle.success,
                                          custom_id=f"build_unit_mon_{msg[2]}"))
                 view.add_item(Button(label="Done", style=discord.ButtonStyle.danger,
                                      custom_id=f"build_finished_{msg[2]}"))
-                await interaction.response.send_message(f"{interaction.user.mention}, you have {p1["materials"]} materials to spend"
-                                                        f" on up to {p1["build_apt"]} objects in this system.", view=view)
+                await interaction.response.send_message(f"{interaction.user.mention}, you have {p1['materials']} materials to spend"
+                                                        f" on up to {p1['build_apt']} objects in this system.", view=view)
                 
