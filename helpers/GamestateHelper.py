@@ -98,10 +98,20 @@ class GamestateHelper:
         self.update()
 
     def add_units(self, unit_list, position):
+        color = unit_list[0].split("-")[0]
+        player = self.get_player_from_color(color)
         for i in unit_list:
+            if "int" in i:
+                self.gamestate["players"][player]["ship_stock"][0] -= 1
+            if "cru" in i:
+                self.gamestate["players"][player]["ship_stock"][1] -= 1
+            if "drd" in i:
+                self.gamestate["players"][player]["ship_stock"][2] -= 1
+            if "sb" in i:
+                self.gamestate["players"][player]["ship_stock"][3] -= 1
             self.gamestate["board"][position]["player_ships"].append(i)
         self.update()
-            #TODO remove ships from player stock
+
     def add_pop(self, pop_list, position, playerID):
         for i in pop_list:
             self.gamestate["board"][position][i][0] = self.gamestate["board"][position][i][0]+1
@@ -114,11 +124,20 @@ class GamestateHelper:
         self.update()
 
     def remove_units(self, unit_list, position):
+        color = unit_list[0].split("-")[0]
+        player = self.get_player_from_color(color)
         for i in unit_list:
             if i in self.gamestate["board"][position]["player_ships"]:
+                if "int" in i:
+                    self.gamestate["players"][player]["ship_stock"][0] += 1
+                if "cru" in i:
+                    self.gamestate["players"][player]["ship_stock"][1] += 1
+                if "drd" in i:
+                    self.gamestate["players"][player]["ship_stock"][2] += 1
+                if "sb" in i:
+                    self.gamestate["players"][player]["ship_stock"][3] += 1
                 self.gamestate["board"][position]["player_ships"].remove(i)
         self.update()
-                #TODO return ships to player stock
 
 
     def player_setup(self, player_id, faction, color):

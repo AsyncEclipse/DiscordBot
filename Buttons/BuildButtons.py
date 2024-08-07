@@ -216,8 +216,6 @@ class BuildPay(discord.ui.View):
         self.p1["science"], self.p1["materials"], self.p1["money"] = self.science, self.material, self.money
         self.game.gamestate["players"][str(self.author)] = self.p1
         self.game.update()
-        #TODO make sure player ship stock is reduced somehow. Risky to do it directly with add_units
-        # because self.p1 will not be changed and will overwrite.
         next_player = self.game.get_next_player(self.p1)
         view = Buttons.TurnButtons.Turn(interaction, next_player)
         await interaction.message.delete()
