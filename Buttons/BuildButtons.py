@@ -213,9 +213,10 @@ class BuildPay(discord.ui.View):
     @discord.ui.button(label="Finish Build", style=discord.ButtonStyle.danger)
     async def finish_build(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.game.add_units(self.build, self.build_loc)
-        self.p1["science"], self.p1["materials"], self.p1["money"] = self.science, self.material, self.money
-        self.game.gamestate["players"][str(self.author)] = self.p1
-        self.game.update()
+        player = PlayerHelper(self.author, self.p1)
+        player.stats["science"], player.stats["materials"], player.stats["money"] = self.science, self.material, self.money
+        player.spend_influence_on_action("build")
+        self.game.update_player(player)
         next_player = self.game.get_next_player(self.p1)
         view = Buttons.TurnButtons.Turn(interaction, next_player)
         await interaction.message.delete()

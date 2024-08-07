@@ -6,5 +6,5 @@ for i in ships:
     else:
         print("boo")
 
-color = ships[0].split("-")[0]
-print(color)
+for i in enumerate(ships):
+    print(i)

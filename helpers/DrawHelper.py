@@ -244,7 +244,7 @@ class DrawHelper:
         return context
 
 
-    def show_tile_in_context(tile_map, tile, position, rotation, context):
+    def show_tile_in_context(self, tile_map, tile, position, rotation, context):
         for tile in tile_map:  
             tile_image = self.board_tile_image(tile)  
             x, y = map(int, configs.get(tile)[0].split(","))  
