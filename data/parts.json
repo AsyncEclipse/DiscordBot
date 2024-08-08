@@ -612,4 +612,20 @@
           "hull": 0,
           "repair": 0,
           "external": 0
-    }}
+    },
+  "empty": {
+    "name": "Empty",
+    "range": 0,
+    "speed": 0,
+    "nrg_use": 0,
+    "nrg_src" : 0,
+    "tech_req": "none",
+    "dice": [],
+    "comp": 0,
+    "shield": 0,
+    "missile": [],
+    "hull": 0,
+    "repair": 0,
+    "external": 0
+  }
+}

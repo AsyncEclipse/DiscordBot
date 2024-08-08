@@ -34,7 +34,7 @@ class Turn(discord.ui.View):
     async def upgrade(self, interaction: discord.Interaction, button: discord.ui.Button):
         drawing = DrawHelper(self.game.gamestate)
         image = drawing.player_area(self.player)
-        view = UpgradeShip(interaction, self.author)
+        view = UpgradeShip(interaction, self.author, self.player['upgrade_apt'])
         await interaction.message.delete()
         await interaction.response.send_message(
             f"{interaction.user.mention}, choose which ship you would like to upgrade.",

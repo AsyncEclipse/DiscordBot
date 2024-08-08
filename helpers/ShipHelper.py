@@ -90,6 +90,7 @@ class PlayerShip:
 
     def take_damage(self, damage):
         self.hull -= damage
+        return self.hull
 
     def is_destroyed(self):
         if self.hull < 0:
