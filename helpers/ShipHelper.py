@@ -87,3 +87,11 @@ class PlayerShip:
             return False
         else:
             return True
+
+    def take_damage(self, damage):
+        self.hull -= damage
+
+    def is_destroyed(self):
+        if self.hull <= 0:
+            return True
+        return False
