@@ -92,6 +92,6 @@ class PlayerShip:
         self.hull -= damage
 
     def is_destroyed(self):
-        if self.hull <= 0:
+        if self.hull < 0:
             return True
         return False
