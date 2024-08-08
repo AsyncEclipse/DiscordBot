@@ -6,6 +6,7 @@ from discord.ui import Button, View
 import Buttons.TurnButtons
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
+from helpers.ShipHelper import PlayerShip
 import json
 
 class UpgradeShip(discord.ui.View):
@@ -32,10 +33,12 @@ class UpgradeShip(discord.ui.View):
         view = View()
         for i in self.p1.stats["interceptor_parts"]:
             button2 = ShowParts(label=self.part_stats[i]["name"], style=discord.ButtonStyle.primary,
-                                author=self.author, player=self.p1, ship="interceptor", part=i)
+                                actions=self.actions, author=self.author, player=self.p1,
+                                ship="interceptor", old_part=i)
             view.add_item(button2)
 
-        await interaction.response.edit_message(content=f"{interaction.user.mention}, pick which part to replace",
+        await interaction.response.edit_message(content=f"{interaction.user.mention}, pick which part to replace or "
+                                                        f"remove.",
                                                 view=view)
 
     @discord.ui.button(label="Cruiser", style=discord.ButtonStyle.primary)
@@ -43,10 +46,12 @@ class UpgradeShip(discord.ui.View):
         view = View()
         for i in self.p1.stats["cruiser_parts"]:
             button2 = ShowParts(label=self.part_stats[i]["name"], style=discord.ButtonStyle.primary,
-                                author=self.author, player=self.p1, ship="cruiser", part=i)
+                                actions=self.actions, author=self.author, player=self.p1,
+                                ship="cruiser", old_part=i)
             view.add_item(button2)
 
-        await interaction.response.edit_message(content=f"{interaction.user.mention}, pick which part to replace",
+        await interaction.response.edit_message(content=f"{interaction.user.mention}, pick which part to replace or "
+                                                        f"remove.",
                                                 view=view)
 
     @discord.ui.button(label="Dreadnought", style=discord.ButtonStyle.primary)
@@ -54,10 +59,12 @@ class UpgradeShip(discord.ui.View):
         view = View()
         for i in self.p1.stats["dread_parts"]:
             button2 = ShowParts(label=self.part_stats[i]["name"], style=discord.ButtonStyle.primary,
-                                author=self.author, player=self.p1, ship="dread", part=i)
+                                actions=self.actions, author=self.author, player=self.p1,
+                                ship="dread", old_part=i)
             view.add_item(button2)
 
-        await interaction.response.edit_message(content=f"{interaction.user.mention}, pick which part to replace",
+        await interaction.response.edit_message(content=f"{interaction.user.mention}, pick which part to replace or "
+                                                        f"remove.",
                                                 view=view)
 
     @discord.ui.button(label="Starbase", style=discord.ButtonStyle.primary)
@@ -65,10 +72,12 @@ class UpgradeShip(discord.ui.View):
         view = View()
         for i in self.p1.stats["starbase_parts"]:
             button2 = ShowParts(label=self.part_stats[i]["name"], style=discord.ButtonStyle.primary,
-                                author=self.author, player=self.p1, ship="starbase", part=i)
+                                actions=self.actions, author=self.author, player=self.p1,
+                                ship="starbase", old_part=i)
             view.add_item(button2)
 
-        await interaction.response.edit_message(content=f"{interaction.user.mention}, pick which part to replace",
+        await interaction.response.edit_message(content=f"{interaction.user.mention}, pick which part to replace or "
+                                                        f"remove.",
                                                 view=view)
 
 
@@ -86,6 +95,13 @@ class ShowParts(Button):
         self.player = player
         self.ship = ship
         self.old_part = old_part
+        self.available_techs = ["empty", "ioc", "elc", "nud", "hul", "gas", "nus"]
+        with open("data/parts.json", "r") as f:
+            self.part_stats = json.load(f)
+        for tech in self.part_stats:
+            if tech in (self.player.stats["military_tech"] or self.player.stats["grid_tech"] or self.player.stats["nano_tech"]):
+                self.available_techs.append(tech)
+
     """
     Parameters
     ----------
@@ -99,8 +115,16 @@ class ShowParts(Button):
             String matching the part to change in the ship part list
     """
 
-    async def callback(self, intraction: discord.Interaction):
-        pass
+    async def callback(self, interaction: discord.Interaction):
+        view = View()
+        for i in self.available_techs:
+            button2 = ChooseUpgrade(label=self.part_stats[i]["name"],style=discord.ButtonStyle.primary,
+                                    author=self.author, actions=self.actions,
+                                    player=self.player, ship=self.ship, old_part=self.old_part, new_part=i)
+            view.add_item(button2)
+        await interaction.response.edit_message(content=f"{interaction.user.mention}, replace "
+                                                        f"{self.part_stats[self.old_part]['name']} with "
+                                                        f"which part? Remove as a free action with Empty.", view=view)
 
     async def interaction_check(self, interaction: discord.Interaction):
         if str(interaction.user.id) != str(self.author):
@@ -108,4 +132,27 @@ class ShowParts(Button):
         else:
             return True
 
-class ChooseUpgrade(Button)
+class ChooseUpgrade(Button):
+    def __init__(self, label, style:discord.ButtonStyle.primary, author, actions, player, ship, old_part, new_part):
+        super().__init__(label=label, style=style)
+        self.author = author
+        self.actions = actions
+        self.player = player
+        self.ship = ship
+        self.old_part = old_part
+        self.new_part = new_part
+
+    async def callback(self, interaction: discord.Interaction):
+        for i,part in enumerate(self.player.stats[f"{self.ship}_parts"]):
+            if part == self.old_part:
+                self.player.stats[f"{self.ship}_parts"][i] = self.new_part
+        ship = PlayerShip(self.player.stats, self.ship)
+        if ship.check_valid_ship():
+            await interaction.response.send_message(f'{self.new_part}, {self.player.stats["cruiser_parts"]}')
+        else:
+            await interaction.response.send_message("That is not a valid ship configuration!")
+    async def interaction_check(self, interaction: discord.Interaction):
+        if str(interaction.user.id) != str(self.author):
+            await interaction.response.send_message("These buttons are not for you.")
+        else:
+            return True
