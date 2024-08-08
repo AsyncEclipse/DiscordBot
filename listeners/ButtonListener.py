@@ -113,6 +113,7 @@ class ButtonListener(commands.Cog):
                 game = GamestateHelper(interaction.channel)
                 msg = interaction.data["custom_id"].split("_")
                 game.add_tile(msg[2], 0, msg[3])
+                #TODO CHANGED THIS DUE TO BREAKING SOME TILE_COMMANDS (EXPLORE). NEEDS TO BE CHANGED BACK AND FIX EXPLORE COMMAND
                 await interaction.followup.send(f"Tile added to position {msg[2]}")
                 await interaction.message.delete()
             if interaction.data['custom_id'].startswith("discard_tile"):
