@@ -67,7 +67,7 @@ class DrawHelper:
             if "player_ships" in tile and len(tile["player_ships"]) > 0:  
                 counts = {}  # To track counts for each ship type  
                 for ship in tile["player_ships"]:  
-                    ship_type = ship.split("-")[1]  # Extract ship type  
+                    ship_type = ship.split("-")[1]  # Extract ship type
                     ship_image = Image.open(f"images/resources/components/basic_ships/{ship}.png").convert("RGBA").resize((70, 70))  
                     coords = tile[f"{ship_type}_snap"]  
                      
@@ -244,7 +244,7 @@ class DrawHelper:
         return context
 
 
-    def show_tile_in_context(tile_map, tile, position, rotation, context):
+    def show_tile_in_context(self, tile_map, tile, position, rotation, context):
         for tile in tile_map:  
             tile_image = self.board_tile_image(tile)  
             x, y = map(int, configs.get(tile)[0].split(","))  
@@ -321,6 +321,14 @@ class DrawHelper:
         return file
 
     def show_player_area(self, player_area):
+        bytes = BytesIO()
+        player_area.save(bytes, format="PNG")
+        bytes.seek(0)
+        file = discord.File(bytes, filename="player_area.png")
+        return file
+
+    def show_player_ship_area(self, player_area):
+        player_area = player_area.crop((0,0,895, 196))
         bytes = BytesIO()
         player_area.save(bytes, format="PNG")
         bytes.seek(0)

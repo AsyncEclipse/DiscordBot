@@ -60,7 +60,7 @@ class ButtonListener(commands.Cog):
         return tiles
 
 
-    def calculate_cost(tech_details, tech_type,player):  
+    def calculate_cost(self, tech_details, tech_type,player):
         prev_tech_count = (  
             len(player[f"{tech_type}_tech"]) if tech_type != "any"  
             else max(len(player["nano_tech"]), len(player["grid_tech"]), len(player["military_tech"]))  
@@ -68,7 +68,7 @@ class ButtonListener(commands.Cog):
         discount = player["tech_track"][6 - prev_tech_count]  
         return max(tech_details["base_cost"] + discount, tech_details["min_cost"])  
 
-    async def handle_wild_tech_selection(view, tech_details, tech,player):  
+    async def handle_wild_tech_selection(self, view, tech_details, tech,player):
         for tech_type, button_style in [("grid", discord.ButtonStyle.success),   
                                         ("nano", discord.ButtonStyle.primary),   
                                         ("military", discord.ButtonStyle.danger)]:  
@@ -78,7 +78,7 @@ class ButtonListener(commands.Cog):
                                 custom_id=f"getTech_{tech}_{tech_type}"))  
         return view
 
-    async def handle_specific_tech_selection(interaction, game, player, tech_details, tech_type, tech):  
+    async def handle_specific_tech_selection(self, interaction, game, player, tech_details, tech_type, tech):
         cost = ButtonListener.calculate_cost(tech_details, tech_type,player)  
         game.playerResearchTech(str(interaction.user.id), tech, tech_type)  
         player = game.get_player(interaction.user.id)  
@@ -112,7 +112,8 @@ class ButtonListener(commands.Cog):
                 await interaction.response.defer(thinking=True)
                 game = GamestateHelper(interaction.channel)
                 msg = interaction.data["custom_id"].split("_")
-                game.add_tile(msg[2], int(msg[4]), msg[3])
+                game.add_tile(msg[2], 0, msg[3])
+                #TODO CHANGED THIS DUE TO BREAKING SOME TILE_COMMANDS (EXPLORE). NEEDS TO BE CHANGED BACK AND FIX EXPLORE COMMAND
                 await interaction.followup.send(f"Tile added to position {msg[2]}")
                 await interaction.message.delete()
             if interaction.data['custom_id'].startswith("discard_tile"):
@@ -298,7 +299,7 @@ class ButtonListener(commands.Cog):
                             else:
                                 view2.add_item(Button(label=f"{tech_name} ({cost})", style=buttonStyle, custom_id=f"getTech_{tech}_{tech_type}"))
                             buttonCount+=1
-                await interaction.response.send_message(f"{interaction.user.mention}, select the tech you would like to acquire. The discounted cost is in parentheses.", view=view)  
+                await interaction.response.send_message(f"{interaction.user.mention}, select the tech you would like to acquire. The discounted cost is in parentheses.", view=view)
                 if buttonCount > 26:
                     await interaction.channel.send(view=view2)
                 if player["research_apt"] > 1:
@@ -342,3 +343,39 @@ class ButtonListener(commands.Cog):
                 view = View() 
                 await interaction.response.send_message(msg)  
 
+            if interaction.data["custom_id"] == "startBuild":
+                game = GamestateHelper(interaction.channel)
+                tiles = game.get_owned_tiles(interaction.user.id)
+                tiles.sort()
+                view = View()
+                for tile in tiles:
+                    view.add_item(Button(label=tile, style=discord.ButtonStyle.primary, custom_id=f"build_in_{tile}"))
+                await interaction.response.send_message(f"{interaction.user.mention}, choose which tile you would like to build in.", view=view)
+            if interaction.data["custom_id"].startswith("build_in_"):
+                game = GamestateHelper(interaction.channel)
+                p1 = game.get_player(interaction.user.id)
+                msg = interaction.data["custom_id"].split("_")
+                build_actions = p1["build_apt"]
+                ship_list = []
+                total_cost = 0
+                view = View()
+                view.add_item(Button(label=f"Interceptor ({p1['cost_interceptor']})", style=discord.ButtonStyle.primary,
+                                     custom_id=f"build_unit_int_{msg[2]}"))
+                view.add_item(Button(label=f"Cruiser ({p1['cost_cruiser']})", style=discord.ButtonStyle.primary,
+                                     custom_id=f"build_unit_cru_{msg[2]}"))
+                view.add_item(Button(label=f"Dreadnought ({p1['cost_dread']})", style=discord.ButtonStyle.primary,
+                                     custom_id=f"build_unit_drd_{msg[2]}"))
+                if "stb" in p1["military_tech"]:
+                    view.add_item(Button(label=f"Starbase ({p1['cost_starbase']})", style=discord.ButtonStyle.success,
+                                         custom_id=f"build_unit_sb_{msg[2]}"))
+                if "orb" in p1["nano_tech"]:
+                    view.add_item(Button(label=f"Orbital ({p1['cost_orbital']})", style=discord.ButtonStyle.success,
+                                         custom_id=f"build_unit_orb_{msg[2]}"))
+                if "mon" in p1["nano_tech"]:
+                    view.add_item(Button(label=f"Monolith ({p1['cost_monolith']})", style=discord.ButtonStyle.success,
+                                         custom_id=f"build_unit_mon_{msg[2]}"))
+                view.add_item(Button(label="Done", style=discord.ButtonStyle.danger,
+                                     custom_id=f"build_finished_{msg[2]}"))
+                await interaction.response.send_message(f"{interaction.user.mention}, you have {p1['materials']} materials to spend"
+                                                        f" on up to {p1['build_apt']} objects in this system.", view=view)
+                

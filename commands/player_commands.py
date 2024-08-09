@@ -1,12 +1,11 @@
 import discord
 from discord.ext import commands
 from discord import app_commands
-from typing import Optional, List
+from typing import Optional
 from helpers.PlayerHelper import PlayerHelper
 from helpers.GamestateHelper import GamestateHelper
 from helpers.DrawHelper import DrawHelper
-from discord.ui import View, Button
-
+from Buttons.TurnButtons import Turn
 
 class PlayerCommands(commands.GroupCog, name="player"):
     def __init__(self, bot):
@@ -40,16 +39,16 @@ class PlayerCommands(commands.GroupCog, name="player"):
 
         if all(x is None for x in options):
             top_response = (f"{p1.name} player stats:")
-            response=(f"\n> Faction: {p1.stats["name"]}"
-                        f"\n> Materials: {p1.stats["materials"]}"
+            response=(f"\n> Faction: {p1.stats['name']}"
+                        f"\n> Materials: {p1.stats['materials']}"
                         f"\n> Material income: {p1.materials_income()}"
-                        f"\n> Science: {p1.stats["science"]}"
+                        f"\n> Science: {p1.stats['science']}"
                         f"\n> Science income: {p1.science_income()}"
-                        f"\n> Money: {p1.stats["money"]}"
+                        f"\n> Money: {p1.stats['money']}"
                         f"\n> Money income: {p1.money_income()}"
-                        f"\n> Influence dics: {p1.stats["influence_discs"]}"
+                        f"\n> Influence dics: {p1.stats['influence_discs']}"
                         f"\n> Upkeep: {p1.upkeep()}"
-                        f"\n> Colony Ships: {p1.stats["colony_ships"]}")
+                        f"\n> Colony Ships: {p1.stats['colony_ships']}")
             await interaction.response.send_message(top_response)
             await interaction.channel.send(response)
             return
@@ -87,15 +86,23 @@ class PlayerCommands(commands.GroupCog, name="player"):
         image = drawing.player_area(p1)
         await interaction.response.defer(thinking=True)
         await interaction.followup.send(file=drawing.show_player_area(image))
-    
+
+    @app_commands.command(name="show_player_ships")
+    async def show_player_ships(self, interaction: discord.Interaction, player: discord.Member):
+        game = GamestateHelper(interaction.channel)
+        p1 = game.get_player(player.id)
+        drawing = DrawHelper(game.gamestate)
+        image = drawing.player_area(p1)
+        await interaction.response.defer(thinking=True)
+        await interaction.followup.send(file=drawing.show_player_ship_area(image))
+
     @app_commands.command(name="start_turn")
     async def start_turn(self, interaction: discord.Interaction, player: discord.Member):
-        game = GamestateHelper(interaction.channel)  
-        p1 = game.get_player(player.id)  
+        view = Turn(interaction, player.id)
+        #view = PlayerHelper.getStartTurnButtons(p1)
 
-        view = PlayerHelper.getStartTurnButtons(p1)
-
-
-        await interaction.response.send_message(f"{player.mention} use these buttons to do your turn. The number of activations you have for each action is listed in ()", view=view)
+        await interaction.response.send_message((f"{player.mention} use these buttons to do your turn. The "
+                                                        "number ofctivations you have for each action is listed in ("
+                                                  ")"), view=view)
     
     
