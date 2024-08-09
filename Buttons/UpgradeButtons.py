@@ -7,22 +7,29 @@ import Buttons.TurnButtons
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 from helpers.ShipHelper import PlayerShip
+from helpers.DrawHelper import DrawHelper
 import json
 
 class UpgradeShip(discord.ui.View):
-    def __init__(self, interaction: discord.Interaction, author, actions):
+    def __init__(self, interaction: discord.Interaction, author, actions, player):
         super().__init__()
         self.author = author
         self.actions = actions
-        self.game = GamestateHelper(interaction.channel)
-        self.p1 = PlayerHelper(self.author, self.game.get_player(self.author))
+        self.p1 = player
         with open("data/parts.json", "r") as f:
             self.part_stats = json.load(f)
+        if self.actions <= 0:
+            self.remove_item(self.interceptor)
+            self.remove_item(self.cruiser)
+            self.remove_item(self.dreadnought)
+            self.remove_item(self.starbase)
     """
     Parameters
     ----------
         author : str
             discord member id (converted to string) to track button author for protection
+        player : PlayerHelper() class object
+            This will serve as the temporary changes before saving this game to the gamestate when finished
         actions: int
             number of upgrade actions per turn. Will decrement to 0 over the course or upgrading
             and stop the player from doing more actions than possible
@@ -80,10 +87,40 @@ class UpgradeShip(discord.ui.View):
                                                         f"remove.",
                                                 view=view)
 
+    @discord.ui.button(label="Finish Upgrade", style=discord.ButtonStyle.danger)
+    async def finish_upgrade(self, interaction: discord.Interaction, button: discord.ui.Button):
+        ships = ["interceptor", "cruiser", "dread", "starbase"]
+        for i in ships:
+            ship = PlayerShip(self.p1.stats, i)
+            if not ship.check_valid_ship():
+                await interaction.response.send_message("One of your ships is not valid! Please reset and try again", ephemeral=True)
+                return
+        game = GamestateHelper(interaction.channel)
+        self.p1.spend_influence_on_action("research")
+        game.update_player(self.p1)
+        next_player = game.get_next_player(self.p1.stats)
+        view = Buttons.TurnButtons.Turn(interaction, next_player)
+        await interaction.message.delete()
+        await interaction.channel.send(f"{interaction.user.mention} you have upgraded your ships!")
+
+
+        await interaction.response.send_message(f"<@{next_player}> use these buttons to do your turn. "
+
+                                                f"The number of activations you have for each action is listed in ()",
+                                                view=view)
+
+    @discord.ui.button(label="Reset", style=discord.ButtonStyle.danger)
+    async def reset(self, interaction: discord.Interaction, button: discord.ui.Button):
+        view = Buttons.TurnButtons.Turn(interaction, self.author)
+        await interaction.message.delete()
+        await interaction.response.send_message(f"{interaction.user.mention} use these buttons to do your turn. "
+                                                f"The number of activations you have for each action is listed in ()",
+                                                view=view)
+
 
     async def interaction_check(self, interaction: discord.Interaction):
         if str(interaction.user.id) != str(self.author):
-           await interaction.response.send_message("These buttons are not for you.")
+            await interaction.response.send_message("These buttons are not for you.")
         else:
             return True
 
@@ -99,9 +136,14 @@ class ShowParts(Button):
         with open("data/parts.json", "r") as f:
             self.part_stats = json.load(f)
         for tech in self.part_stats:
-            if tech in (self.player.stats["military_tech"] or self.player.stats["grid_tech"] or self.player.stats["nano_tech"]):
+            if tech in self.player.stats["military_tech"]:
                 self.available_techs.append(tech)
-
+            if tech in self.player.stats["grid_tech"]:
+                self.available_techs.append(tech)
+            if tech in self.player.stats["nano_tech"]:
+                self.available_techs.append(tech)
+            if tech in self.player.stats["ancient_parts"]:
+                self.available_techs.append(tech)
     """
     Parameters
     ----------
@@ -143,14 +185,25 @@ class ChooseUpgrade(Button):
         self.new_part = new_part
 
     async def callback(self, interaction: discord.Interaction):
+        if self.new_part != "empty":
+            self.actions -= 1
+        if self.new_part in ["anm", "axc", "cod", "fls", "hyg", "ins", "iod", "iom", "iot", "jud", "mus", "ricon", "shd", "som", "socha"]:
+            self.player.stats["ancient_parts"].remove(self.new_part)
+
         for i,part in enumerate(self.player.stats[f"{self.ship}_parts"]):
             if part == self.old_part:
                 self.player.stats[f"{self.ship}_parts"][i] = self.new_part
-        ship = PlayerShip(self.player.stats, self.ship)
-        if ship.check_valid_ship():
-            await interaction.response.send_message(f'{self.new_part}, {self.player.stats["cruiser_parts"]}')
-        else:
-            await interaction.response.send_message("That is not a valid ship configuration!")
+                break
+
+        view = UpgradeShip(interaction, self.author, self.actions, self.player)
+        game = GamestateHelper(interaction.channel)
+        drawing = DrawHelper(game.gamestate)
+        image = drawing.player_area(self.player.stats)
+        await interaction.message.delete()
+        await interaction.response.send_message(content=f"{interaction.user.mention}, choose which ship you would like to upgrade.",
+            file=drawing.show_player_ship_area(image), view=view)
+
+
     async def interaction_check(self, interaction: discord.Interaction):
         if str(interaction.user.id) != str(self.author):
             await interaction.response.send_message("These buttons are not for you.")

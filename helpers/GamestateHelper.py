@@ -240,6 +240,11 @@ class GamestateHelper:
         return tiles
 
     def get_next_player(self, player):
+        """
+
+        :param player: takes in a players stats in dict form. NOT a PlayerHelper object!
+        :return:
+        """
         player_systems = []
         player_home = player["home_planet"]
         for i in ["201", "203", "205", "207", "209", "211"]:

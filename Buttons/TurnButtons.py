@@ -34,11 +34,12 @@ class Turn(discord.ui.View):
     async def upgrade(self, interaction: discord.Interaction, button: discord.ui.Button):
         drawing = DrawHelper(self.game.gamestate)
         image = drawing.player_area(self.player)
-        view = UpgradeShip(interaction, self.author, self.player['upgrade_apt'])
+        p1 = PlayerHelper(self.author, self.game.get_player(self.author))
+        view = UpgradeShip(interaction, self.author, self.player['upgrade_apt'], p1)
         await interaction.message.delete()
         await interaction.response.send_message(
             f"{interaction.user.mention}, choose which ship you would like to upgrade.",
-            file=drawing.show_player_ship_area(image), view=view, ephemeral=True)
+            file=drawing.show_player_ship_area(image), view=view)
 
     @discord.ui.button(style=discord.ButtonStyle.success)
     async def build (self, interaction: discord.Interaction, button: discord.ui.Button):
