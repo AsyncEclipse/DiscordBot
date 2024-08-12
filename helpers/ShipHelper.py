@@ -6,7 +6,7 @@ class PlayerShip:
     Function was originally created to have an is_ship_valid function to make sure upgrades are possible
 
     """
-    def __init__(self, player, ship_type):
+    def __init__(self, player=None, ship_type=None):
         self.player = player
         self.color = player["color"]
         self.ship_type = self.ship_type_fixer(ship_type)
@@ -21,8 +21,8 @@ class PlayerShip:
         self.hull = 0
         self.repair = 0
         self.external = 0
-
         self.build_ship_stats(self.ship_parts)
+
 
     '''
     Parameters
