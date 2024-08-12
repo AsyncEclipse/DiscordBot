@@ -110,21 +110,32 @@ class PlayerShip(Ship):
             return True
 
 class AI_Ship(Ship):
-    def __init__(self, ship_type):
+    def __init__(self, ship_type, advanced=False):
         super().__init__()
         with open("data/AI_ships.json", "r") as f:
             AI_parts = json.load(f)
-        ship_parts = AI_parts[ship_type]
+        if advanced == True:
+            ship_parts = AI_parts[ship_type + "adv"]
+        else:
+            ship_parts = AI_parts[ship_type]
         self.dice = ship_parts["dice"]
         self.missile = ship_parts["missile"]
         self.speed = ship_parts["speed"]
         self.computer = ship_parts["computer"]
         self.hull = ship_parts["hull"]
 
+    '''
+    Parameters
+    ----------
+        ship_type : string
+            Takes in an ai ship type. Options are "ai-anc", "ai-grd", and "ai-gcds"
+        advanced : bool
+            Decides if the AI ships are of the advanced form or not. Set to True for advanced stats, default is False.
+    '''
 
 
 
-x = AI_Ship("ai-gcds")
+x = AI_Ship("ai-gcds", True)
 
 print(x.dice)
 print(x.missile)
