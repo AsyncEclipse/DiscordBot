@@ -42,9 +42,23 @@ class GamestateHelper:
             return "cruiser"
         elif shipAbbreviation == "drd":
             return "dreadnought"
-        elif shipAbbreviation == "sta": 
+        elif shipAbbreviation == "sb": 
             return "starbase"
-
+    @staticmethod
+    def getShipShortName(shipName:str):
+        shipName = shipName.lower()
+        if shipName == "interceptor":  
+            return "int"
+        elif shipName == "cruiser": 
+            return "cru"
+        elif shipName == "dreadnought":
+            return "drd"
+        elif shipName == "starbase": 
+            return "sb"
+        elif shipName == "orbitol": 
+            return "orb"
+        elif shipName == "monolith": 
+            return "mon"
     
     def getShortFactionNameFromFull(self, fullName):
         if fullName == "Descendants of Draco":  
@@ -110,6 +124,11 @@ class GamestateHelper:
             if "sb" in i:
                 self.gamestate["players"][player]["ship_stock"][3] -= 1
             self.gamestate["board"][position]["player_ships"].append(i)
+        self.update()
+    def add_pop_specific(self, type:str, number:int, position:str, playerID):
+        self.gamestate["board"][position][f"{type}_pop"][number] = self.gamestate["board"][position][f"{type}_pop"][number]+1
+        self.gamestate["players"][playerID][type+"_pop_cubes"] = self.gamestate["players"][playerID][type+"_pop_cubes"]-1
+        self.gamestate["players"][playerID]["colony_ships"] = self.gamestate["players"][playerID]["colony_ships"]-1
         self.update()
 
     def add_pop(self, pop_list, position, playerID):
@@ -232,7 +251,7 @@ class GamestateHelper:
 
     def get_owned_tiles(self, player):
         tile_map = self.gamestate["board"]
-        color = self.gamestate["players"][str(player)]["color"]
+        color = player["color"]
         tiles = []
         for tile in tile_map:
             if "owner" in tile_map[tile] and tile_map[tile]["owner"] == color:

@@ -1,0 +1,155 @@
+import json
+import discord
+from discord.ext import commands
+from discord.ui import View
+from helpers.GamestateHelper import GamestateHelper
+from helpers.PlayerHelper import PlayerHelper
+from helpers.DrawHelper import DrawHelper
+from discord.ui import View, Button
+from discord.ext import commands
+from commands import tile_commands
+from commands.setup_commands import SetupCommands
+from io import BytesIO
+from PIL import Image, ImageDraw, ImageFont
+from jproperties import Properties
+
+class ResearchButtons:
+
+    @staticmethod  
+    async def handle_wild_tech_selection(view, tech_details, tech,player):
+        for tech_type, button_style in [("grid", discord.ButtonStyle.success),   
+                                        ("nano", discord.ButtonStyle.primary),   
+                                        ("military", discord.ButtonStyle.danger)]:  
+            cost = ResearchButtons.calculate_cost(tech_details, tech_type,player)  
+            view.add_item(Button(label=f"{tech_type.capitalize()} ({cost})",   
+                                style=button_style,   
+                                custom_id=f"getTech_{tech}_{tech_type}"))  
+        return view
+    @staticmethod  
+    async def handle_specific_tech_selection(interaction, game: GamestateHelper, player, tech_details, tech_type, tech):
+        cost = ResearchButtons.calculate_cost(tech_details, tech_type,player)  
+        game.playerResearchTech(str(interaction.user.id), tech, tech_type)  
+        player = game.get_player(interaction.user.id)  
+        player_helper = PlayerHelper(interaction.user.id, player)  
+
+        if player["science"] >= cost:  
+            msg = player_helper.adjust_science(-cost)  
+            game.update_player(player_helper)  
+            await interaction.response.send_message(msg)  
+        else:  
+            paid = min(cost, player["science"])  
+            msg = player_helper.adjust_science(-paid)  
+            game.update_player(player_helper)  
+            view = View()
+            trade_value = player['trade_value']
+            for resource_type, button_style in [("materials", discord.ButtonStyle.secondary),   
+                                        ("money", discord.ButtonStyle.primary)]: 
+                if(player[resource_type] >= trade_value):
+                    view.add_item(Button(label=f"Pay {trade_value} {resource_type.capitalize()}",   
+                                    style=button_style,   
+                                    custom_id=f"payAtRatio_{resource_type}")) 
+            view.add_item(Button(label="Done Paying", style=discord.ButtonStyle.danger, custom_id="deleteMsg"))  
+            await interaction.response.send_message(  
+                f"Attempted to pay a cost of {str(cost)}\n{msg}\n Please pay the rest of the cost by trading other resources at your trade ratio ({trade_value}:1)",view=view  
+            )  
+
+    @staticmethod  
+    def calculate_cost( tech_details, tech_type,player):
+        prev_tech_count = (  
+            len(player[f"{tech_type}_tech"]) if tech_type != "any"  
+            else max(len(player["nano_tech"]), len(player["grid_tech"]), len(player["military_tech"]))  
+        )  
+        discount = player["tech_track"][6 - prev_tech_count]  
+        return max(tech_details["base_cost"] + discount, tech_details["min_cost"])  
+
+    @staticmethod  
+    async def startResearch(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction):
+        game = GamestateHelper(interaction.channel)
+        player = game.get_player(interaction.user.id)  
+        player_helper = PlayerHelper(interaction.user.id, player)  
+        player_helper.spend_influence_on_action("research")
+        game.update_player(player_helper)
+        player = game.get_player(interaction.user.id) 
+        view = View()
+        view2 = View()
+        techsAvailable = game.get_gamestate()["available_techs"]  
+        with open("data/techs.json", "r") as f:
+            tech_data = json.load(f)  
+
+        tech_groups = {  
+            "nano": [],  
+            "grid": [],  
+            "military": [],  
+            "any": []  
+        }  
+        # Group techs by type and calculate their costs  
+        for tech in techsAvailable:  
+            tech_details = tech_data.get(tech)  
+            if tech_details:  
+                tech_type = tech_details["track"]  
+                cost = ResearchButtons.calculate_cost(tech_details,tech_type,player)   
+                tech_groups[tech_type].append((tech, tech_details["name"], cost))  
+        displayedTechs = [] 
+        buttonCount = 1
+        for tech_type in tech_groups:  
+            sorted_techs = sorted(tech_groups[tech_type], key=lambda x: x[2])  # Sort by cost  
+            for tech, tech_name, cost in sorted_techs:  
+                buttonStyle = discord.ButtonStyle.danger  
+                if tech_type == "grid":  
+                    buttonStyle = discord.ButtonStyle.success  
+                elif tech_type == "nano":  
+                    buttonStyle = discord.ButtonStyle.primary  
+                elif tech_type == "any":  
+                    buttonStyle = discord.ButtonStyle.secondary  
+                if(tech not in displayedTechs):
+                    displayedTechs.append(tech)
+                    if buttonCount < 26:
+                        view.add_item(Button(label=f"{tech_name} ({cost})", style=buttonStyle, custom_id=f"getTech_{tech}_{tech_type}"))  
+                    else:
+                        view2.add_item(Button(label=f"{tech_name} ({cost})", style=buttonStyle, custom_id=f"getTech_{tech}_{tech_type}"))
+                    buttonCount+=1
+        await interaction.response.send_message(f"{interaction.user.mention}, select the tech you would like to acquire. The discounted cost is in parentheses.", view=view)
+        if buttonCount > 26:
+            await interaction.channel.send(view=view2)
+        if player["research_apt"] > 1:
+            view.add_item(Button(label="Decline 2nd Tech", style=discord.ButtonStyle.danger, custom_id="deleteMsg"))  
+            await interaction.channel.send(f"{interaction.user.mention}, select the second tech you would like to acquire. The discounted cost is in parentheses.", view=view)
+            if buttonCount > 26:
+                await interaction.channel.send(view=view2)
+        view = View()
+        view.add_item(Button(label="End Turn", style=discord.ButtonStyle.danger, custom_id="endTurn"))
+        await interaction.channel.send(f"{interaction.user.mention} when you're finished resolving your action, you may end turn with this button.", view=view)
+
+    @staticmethod  
+    async def getTech(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction):
+        await interaction.message.delete()  
+        game = GamestateHelper(interaction.channel)  
+        buttonID = interaction.data["custom_id"].split("_")  
+        tech = buttonID[1]  
+        tech_type = buttonID[2]  
+        view = View()   
+        player = game.get_player(interaction.user.id) 
+        with open("data/techs.json", "r") as f:  
+            tech_data = json.load(f)  
+        tech_details = tech_data.get(tech)  
+        if tech_type == "any":  
+            view = ResearchButtons.handle_wild_tech_selection(view, tech_details, tech, player)  
+            await interaction.response.send_message(  
+                f"{interaction.user.mention}, select the row of tech you would like to place this wild tech in. The discounted cost is in parentheses.",   
+                view=view  
+            )  
+        else:  
+            await ResearchButtons.handle_specific_tech_selection(interaction, game, player, tech_details, tech_type,tech)
+            
+    @staticmethod  
+    async def payAtRatio(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction):
+        game = GamestateHelper(interaction.channel)  
+        buttonID = interaction.data["custom_id"].split("_")   
+        resource_type = buttonID[1]  
+        player = game.get_player(interaction.user.id)
+        trade_value = player["trade_value"]
+        paid = min(trade_value, player[resource_type])  
+        player_helper = PlayerHelper(interaction.user.id, player) 
+        msg = player_helper.adjust_resource(resource_type,-paid)  
+        game.update_player(player_helper)  
+        await interaction.response.send_message(msg)  

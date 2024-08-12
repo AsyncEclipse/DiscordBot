@@ -1,29 +1,103 @@
 import discord
+import re
 from discord import Interaction
 from discord._types import ClientT
 from discord.ext import commands
-from discord.ui import Button
-import Buttons.TurnButtons
+from discord.ui import View, Button
+import Buttons.TurnButtonsOld
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 
-class BuildLocation(Button):
-    def __init__(self, label, style:discord.ButtonStyle.primary, author):
-        super().__init__(label=label, style=style)
+class BuildLocation(discord.ui.DynamicItem[discord.ui.Button], template=r'location:(?P<location>[0-9]+)'):
+    def __init__(self, location, style:discord.ButtonStyle.primary, author):
+        super().__init__(
+            discord.ui.Button(
+                label=location,
+                style=style,
+                custom_id=f'location:{str(location)}',
+            )
+        )
         self.author = author
-    async def callback(self, interaction: discord.Interaction):
+    @classmethod
+    async def from_custom_id(self, interaction: discord.Interaction, item: discord.ui.Button, match: re.Match[str], /):
+        await interaction.response.defer(thinking=True)
         game = GamestateHelper(interaction.channel)
         p1 = game.get_player(interaction.user.id)
-        view = Build(interaction, [], 0, self.label, self.author)
+        loc = match['location']
+        view = View()
+        view = BuildButton.buildButtonsView(interaction,"",0,loc,view)
         await interaction.message.delete()
-        await interaction.response.send_message(f"{interaction.user.mention}, you have {p1['materials']} materials to "
+        await interaction.followup.send(f"{interaction.user.mention}, you have {p1['materials']} materials to "
                                                 f"spend on up to {p1['build_apt']} units in this system.", view=view)
+    
+
+    # async def callback(self, interaction: discord.Interaction):
+    #     game = GamestateHelper(interaction.channel)
+    #     p1 = game.get_player(interaction.user.id)
+    #     view = Build(interaction, [], 0, self.label, self.author)
+    #     await interaction.message.delete()
+    #     await interaction.response.send_message(f"{interaction.user.mention}, you have {p1['materials']} materials to "
+    #                                             f"spend on up to {p1['build_apt']} units in this system.", view=view)
     async def interaction_check(self, interaction: discord.Interaction):
         if str(interaction.user.id) != str(self.author):
             await interaction.response.send_message("These buttons are not for you.")
         else:
             return True
 
+class BuildButton(discord.ui.DynamicItem[discord.ui.Button], template=r'b:(?P<build>[a-zA-Z]+):c:(?P<cost>[0-9]+):l:(?P<location>[0-9]+)'):
+    def __init__(self, interaction: discord.Interaction, ship: str, build: str, loc: str, cost: int = 0) -> None:
+        game = GamestateHelper(interaction.channel)
+        p1 = game.get_player(interaction.user.id)
+        key = f"cost_{ship.lower()}"
+        if ship.lower() == "dreadnought":
+            key = f"cost_dread"
+        super().__init__(
+            discord.ui.Button(
+                label=f"{ship} ({p1[f'{key}']})",
+                style=discord.ButtonStyle.primary,
+                custom_id=f'b:{build}:c:{str(cost)}:l:{loc}:s:{ship}',
+            )
+        )
+    @staticmethod
+    def buildButtonsView(interaction: discord.Interaction, build: str, cost, build_loc, view: View):
+        ships = ["Interceptor","Cruiser","Dreadnought","Starbase","Orbital","Monolith"]
+        if build == "":
+            build = "none"
+        game = GamestateHelper(interaction.channel)
+        p1 = game.get_player(interaction.user.id)
+        if "stb" not in p1["military_tech"]:
+            ships.remove("Starbase")
+        if "orb" not in p1["nano_tech"]:
+            ships.remove("Orbital")
+        if "mon" not in p1["nano_tech"]:
+            ships.remove("Monolith")
+        for ship in ships:
+            button = BuildButton(interaction, ship, build, build_loc, cost)  
+            view.add_item(button)  
+        return view
+    @classmethod
+    async def from_custom_id(self, interaction: discord.Interaction, item: discord.ui.Button, match: re.Match[str], /):
+        game = GamestateHelper(interaction.channel)
+        p1 = game.get_player(interaction.user.id)
+        build = match['build'].replace("none","").split(f';')
+        
+        cost = int(match['cost'])
+        loc = match['location']
+        ship = str(match['ship'])
+        if len(build) == p1["build_apt"]:
+            await interaction.response.edit_message(content=f"You cannot build any more units. Current build is:"
+                                                            f"\n {build} for {cost} materials.")
+            return
+        build.append(f"{p1['color']}-{GamestateHelper.getShipFullName(ship)}")
+        key = f"cost_{ship.lower()}"
+        if ship.lower() == "dreadnought":
+            key = f"cost_dread"
+        cost += p1[key]
+        build.append(ship)
+        view = View()
+        view = BuildButton.buildButtonsView(interaction,";".join(build),cost,loc,view)
+        await interaction.response.edit_message(content=f"Total cost so far of {cost}", view=view)
+    
 class Build(discord.ui.View):
     def __init__(self, interaction: discord.Interaction, build, cost, build_loc, author):
         super().__init__()
@@ -206,7 +280,7 @@ class BuildPay(discord.ui.View):
 
     @discord.ui.button(label="Reset", style=discord.ButtonStyle.danger)
     async def reset(self, interaction: discord.Interaction, button: discord.ui.Button):
-        view = Buttons.TurnButtons.Turn(interaction, interaction.user.id)
+        view = Buttons.TurnButtonsOld.Turn(interaction, interaction.user.id)
         await interaction.message.delete()
         await interaction.response.send_message(f"{interaction.user.mention} use these buttons to do your turn. "
                                                 f"The number of activations you have for each action is listed in ()", view=view)
@@ -218,7 +292,7 @@ class BuildPay(discord.ui.View):
         player.spend_influence_on_action("build")
         self.game.update_player(player)
         next_player = self.game.get_next_player(self.p1)
-        view = Buttons.TurnButtons.Turn(interaction, next_player)
+        view = Buttons.TurnButtonsOld.Turn(interaction, next_player)
         await interaction.message.delete()
         await interaction.response.send_message(f"<@{next_player}> use these buttons to do your turn. "
                                                 

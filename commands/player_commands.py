@@ -2,10 +2,11 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 from typing import Optional
+from Buttons.Turn import TurnButtons
 from helpers.PlayerHelper import PlayerHelper
 from helpers.GamestateHelper import GamestateHelper
 from helpers.DrawHelper import DrawHelper
-from Buttons.TurnButtons import Turn
+from Buttons.TurnButtonsOld import Turn
 
 class PlayerCommands(commands.GroupCog, name="player"):
     def __init__(self, bot):
@@ -97,12 +98,16 @@ class PlayerCommands(commands.GroupCog, name="player"):
         await interaction.followup.send(file=drawing.show_player_ship_area(image))
 
     @app_commands.command(name="start_turn")
-    async def start_turn(self, interaction: discord.Interaction, player: discord.Member):
-        view = Turn(interaction, player.id)
-        #view = PlayerHelper.getStartTurnButtons(p1)
+    async def start_turn(self, interaction: discord.Interaction, player: Optional[discord.Member]=None):
+        if player == None:
+            player = interaction.user
+        #view = Turn(interaction, player.id)
+        game = GamestateHelper(interaction.channel)
+        p1 = game.get_player(player.id)
+        view = TurnButtons.getStartTurnButtons(game,p1)
 
         await interaction.response.send_message((f"{player.mention} use these buttons to do your turn. The "
-                                                        "number ofctivations you have for each action is listed in ("
+                                                        "number of activations you have for each action is listed in ("
                                                   ")"), view=view)
     
     
