@@ -3,7 +3,7 @@ from discord import Interaction
 from discord._types import ClientT
 from discord.ext import commands
 from discord.ui import Button, View
-import Buttons.TurnButtons
+import Buttons.TurnButtonsOld
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 from helpers.ShipHelper import PlayerShip
@@ -96,10 +96,10 @@ class UpgradeShip(discord.ui.View):
                 await interaction.response.send_message("One of your ships is not valid! Please reset and try again", ephemeral=True)
                 return
         game = GamestateHelper(interaction.channel)
-        self.p1.spend_influence_on_action("research")
+        self.p1.spend_influence_on_action("upgrade")
         game.update_player(self.p1)
         next_player = game.get_next_player(self.p1.stats)
-        view = Buttons.TurnButtons.Turn(interaction, next_player)
+        view = Buttons.TurnButtonsOld.Turn(interaction, next_player)
         await interaction.message.delete()
         await interaction.channel.send(f"{interaction.user.mention} you have upgraded your ships!")
 
@@ -111,7 +111,7 @@ class UpgradeShip(discord.ui.View):
 
     @discord.ui.button(label="Reset", style=discord.ButtonStyle.danger)
     async def reset(self, interaction: discord.Interaction, button: discord.ui.Button):
-        view = Buttons.TurnButtons.Turn(interaction, self.author)
+        view = Buttons.TurnButtonsOld.Turn(interaction, self.author)
         await interaction.message.delete()
         await interaction.response.send_message(f"{interaction.user.mention} use these buttons to do your turn. "
                                                 f"The number of activations you have for each action is listed in ()",
@@ -142,7 +142,7 @@ class ShowParts(Button):
                 self.available_techs.append(tech)
             if tech in self.player.stats["nano_tech"]:
                 self.available_techs.append(tech)
-            if tech in self.player.stats["ancient_parts"]:
+            if "ancient_parts" in self.player.stats and tech in self.player.stats["ancient_parts"]:
                 self.available_techs.append(tech)
     """
     Parameters

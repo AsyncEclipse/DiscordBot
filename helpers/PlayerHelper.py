@@ -52,6 +52,9 @@ class PlayerHelper:
         if action+"_action_counters" not in self.stats:
             self.stats[action+"_action_counters"] = 0
         self.stats[action+"_action_counters"] = self.stats[action+"_action_counters"]+1
+    def setOldShipParts(self, ship):
+        if f"old_{ship}_parts" not in self.stats:
+            self.stats[f"old_{ship}_parts"] = self.stats[f"{ship}_parts"]
         
     def passTurn(self):
         self.stats["passed"] = True
@@ -63,17 +66,6 @@ class PlayerHelper:
             return False
         else:
             return(self.stats["colony_ships"] - adjustement)
-    @staticmethod  
-    def getStartTurnButtons(p1):
-        view = View()  
-        view.add_item(Button(label=f"Explore ({p1['explore_apt']})", style=discord.ButtonStyle.success, custom_id="startExplore"))  
-        view.add_item(Button(label=f"Research ({p1['research_apt']})", style=discord.ButtonStyle.primary, custom_id="startResearch"))  
-        view.add_item(Button(label=f"Build ({p1['build_apt']})", style=discord.ButtonStyle.success, custom_id="startBuild"))  
-        view.add_item(Button(label=f"Upgrade ({p1['upgrade_apt']})", style=discord.ButtonStyle.primary, custom_id="startUpgrade"))  
-        view.add_item(Button(label=f"Move ({p1['move_apt']})", style=discord.ButtonStyle.success, custom_id="startMove"))  
-        view.add_item(Button(label=f"Influence ({p1['influence_apt']})", style=discord.ButtonStyle.secondary, custom_id="startInfluence"))  
-        view.add_item(Button(label="Pass", style=discord.ButtonStyle.danger, custom_id="passForRound"))  
-        return view
     
     def materials_income(self):
         track = self.stats["population_track"]

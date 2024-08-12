@@ -62,7 +62,7 @@ class DrawHelper:
             tile_image = Image.open(filepath).convert("RGBA")
             tile_image = tile_image.resize((345, 299))
             tile = self.gamestate["board"][position]
-            rotation = tile["orientation"]
+            rotation = int(tile["orientation"])
 
             if "player_ships" in tile and len(tile["player_ships"]) > 0:  
                 counts = {}  # To track counts for each ship type  
@@ -104,7 +104,7 @@ class DrawHelper:
                 for wormhole in tile["wormholes"]:
                     wormholeCode = wormholeCode+str(wormhole)
                 for i in range(6):
-                    tile_orientation_index = (i + 6 + int(rotation / 60)) % 6
+                    tile_orientation_index = (i + 6 + int(int(rotation) / 60)) % 6
                     if tile_orientation_index in tile["wormholes"]:
                         tile_image.paste(open_mask, (154, 0), mask=open_mask)
                     else:
@@ -118,6 +118,15 @@ class DrawHelper:
                 tile_image.paste(discTile, (112, 88), mask=discTile)
 
 
+
+
+            if int(int(position) /100) == 2 and int(position) %2 == 1:
+                hsMask = Image.open(f"images/resources/masks/hsmask.png").convert("RGBA").resize((60, 60))
+                tile_image.paste(hsMask, (143, 120), mask=hsMask)
+                hsMask2 = Image.open(f"images/resources/masks/hsmask.png").convert("RGBA").resize((70, 70))
+                tile_image.paste(hsMask2, (138, 115), mask=hsMask2)
+                hsMask3 = Image.open(f"images/resources/masks/hsmask.png").convert("RGBA").resize((54, 54))
+                tile_image.paste(hsMask3, (146, 123), mask=hsMask3)
 
             text_position = (268, 132)
             banner = Image.open(f"images/resources/masks/banner.png").convert("RGBA").resize((98, 48))
@@ -212,11 +221,20 @@ class DrawHelper:
             
 
 
+
+
         x = 925  
         y = 50  
         font = ImageFont.truetype("arial.ttf", size=90)  
         stroke_color = (0, 0, 0)  
         stroke_width = 2  
+
+        if "passed" in player and player["passed"] == True:
+            text_image = Image.new('RGBA', (500,500), (0, 0, 0, 0))  
+            text_drawable = ImageDraw.Draw(text_image)  
+            text_drawable.text((0, 50), "Passed", fill=(255, 0, 0), font=font, stroke_width=stroke_width, stroke_fill=stroke_color)
+            text_image = text_image.rotate(45, expand=True)  
+            context.paste(text_image, (0, 0), text_image)
 
         # Resource details: [(image_path, text_color, player_key, amount_key)]  
         resources = [  
@@ -244,11 +262,7 @@ class DrawHelper:
         return context
 
 
-    def show_tile_in_context(self, tile_map, tile, position, rotation, context):
-        for tile in tile_map:  
-            tile_image = self.board_tile_image(tile)  
-            x, y = map(int, configs.get(tile)[0].split(","))  
-            context.paste(tile_image, (x, y), mask=tile_image)
+
 
     def show_game(self):  
         def load_tile_coordinates():  

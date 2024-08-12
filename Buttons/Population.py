@@ -1,0 +1,95 @@
+import json
+import discord
+from discord.ext import commands
+from discord.ui import View
+from helpers.GamestateHelper import GamestateHelper
+from helpers.PlayerHelper import PlayerHelper
+from helpers.DrawHelper import DrawHelper
+from discord.ui import View, Button
+from discord.ext import commands
+from commands import tile_commands
+from commands.setup_commands import SetupCommands
+from io import BytesIO
+from PIL import Image, ImageDraw, ImageFont
+from jproperties import Properties
+
+
+class PopulationButtons:
+    
+    @staticmethod  
+    def findEmptyPopulation(game: GamestateHelper, player):  
+        tiles = game.get_owned_tiles(player)
+        tiles.sort()
+        emptyPlanets = []
+        for tile in tiles:
+            tileState = game.get_gamestate()["board"][tile]
+            planetTypes = ["money","science","material","neutral","moneyadv","scienceadv","materialadv","neutraladv"]
+            for planetT in planetTypes:
+                if f"{planetT}_pop" in tileState:
+                    for i,val in enumerate(tileState[f"{planetT}_pop"]):
+                        if val == 0:
+                            emptyPlanets.append(f"{tile}_{planetT}_{str(i)}")
+        allPlayerTechs =  player["military_tech"] + player["grid_tech"] + player["nano_tech"]
+        if "met" not in allPlayerTechs:
+            if "adl" not in allPlayerTechs:
+                emptyPlanets = [s for s in emptyPlanets if "scienceadv" not in s] 
+            if "adm" not in allPlayerTechs:
+                emptyPlanets = [s for s in emptyPlanets if "materialadv" not in s] 
+            if "ade" not in allPlayerTechs:
+                emptyPlanets = [s for s in emptyPlanets if "moneyadv" not in s] 
+            if "adl" not in allPlayerTechs and "adm" not in allPlayerTechs and "ade" not in allPlayerTechs:
+                emptyPlanets = [s for s in emptyPlanets if "neutraladv" not in s] 
+        return emptyPlanets
+    @staticmethod 
+    async def startPopDrop(game: GamestateHelper, player, interaction: discord.Interaction): 
+        view = View()
+        for pop in PopulationButtons.findEmptyPopulation(game, player):
+            tile = pop.split("_")[0]
+            planetT = pop.split("_")[1]
+            buttonID = f"FCID{player["color"]}_fillPopulation_"+pop
+            adv = "adv" in planetT
+            planetT = planetT.replace("adv","")
+            label = planetT.capitalize()
+            if adv:
+                label = "Advanced " + label
+            label = label + f" (tile {tile})" 
+            view.add_item(Button(label=label, style=discord.ButtonStyle.blurple, custom_id=buttonID))
+        await interaction.response.send_message( f"{interaction.user.mention}, choose which planet you would like to put a population cube on.", view=view)
+    @staticmethod 
+    async def fillPopulation(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str): 
+        tile = buttonID.split("_")[1]
+        planetT = buttonID.split("_")[2]
+        num = buttonID.split("_")[3]
+        typeOfPop = planetT.replace("adv","")
+        if "neutral" in planetT:
+            if len(buttonID.split("_")) < 5:
+                allPlayerTechs =  player["military_tech"] + player["grid_tech"] + player["nano_tech"]
+                optionsForPop = ["money","science","material"]
+                if "met" not in allPlayerTechs:
+                    if "adl" not in allPlayerTechs:
+                        optionsForPop.remove("science") 
+                    if "adm" not in allPlayerTechs:
+                        optionsForPop.remove("material") 
+                    if "ade" not in allPlayerTechs:
+                        optionsForPop.remove("money")
+                if len(optionsForPop > 1):
+                    view = View()
+                    for typeP in typeOfPop:
+                        view.add_item(Button(label=typeP.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player["color"]}_buttonID_{typeP}"))
+                    await interaction.message.delete()
+                    await interaction.response.send_message(f"{interaction.user.mention}, choose which type of resource the population should be.", view=view)
+                    return
+                else:
+                    typeOfPop = optionsForPop[0]
+            else:
+                typeOfPop = buttonID.split("_")[4]
+        game.add_pop_specific(typeOfPop,int(num),tile,game.get_player_from_color(player["color"]))
+        await interaction.message.delete()
+        await interaction.response.send_message(f"Successfully added {typeOfPop} pop to tile {tile}")
+        drawing = DrawHelper(game.gamestate)
+        await interaction.channel.send(file=drawing.show_game(), ephemeral=True)
+        
+
+                
+
+                

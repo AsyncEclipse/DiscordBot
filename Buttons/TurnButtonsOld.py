@@ -3,8 +3,8 @@ from discord.ext import commands
 from discord.ui import View
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
-from Buttons.BuildButtons import Build, BuildLocation
-from Buttons.UpgradeButtons import UpgradeShip
+from Buttons.BuildButtonsOld import Build, BuildLocation
+from Buttons.UpgradeButtonsOld import UpgradeShip
 from helpers.DrawHelper import DrawHelper
 
 class Turn(discord.ui.View):
