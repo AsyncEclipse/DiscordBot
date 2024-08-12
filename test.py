@@ -55,20 +55,22 @@ class Ship:
     def take_damage(self, damage):
         self.hull -= damage
         return self.hull
+
     def is_destroyed(self):
         if self.hull < 0:
             return True
         return False
 
 class PlayerShip(Ship):
-    def __init__(self, player, ship_type):
+    def __init__(self, player, ship_type, hull=None):
         super().__init__()
         self.player = player
         self.color = player["color"]
         self.ship_type = self.ship_type_fixer(ship_type)
         self.ship_parts = player[f"{self.ship_type}_parts"]
         self.build_ship_stats(self.ship_parts)
-
+        if hull:
+            self.hull = hull
     '''
     Parameters
     ----------
@@ -76,6 +78,9 @@ class PlayerShip(Ship):
             Takes in a player dictionary to pull out the ship stats
         ship_type : str
             Choose which ship type to create from the player. interceptor, cruiser, dread, starbase
+        hull : int
+            allows you to set a ships starting health if it has been damaged already. Default is None which will 
+            pull base stats. I think this will be necessary for button logic
     '''
 
     def ship_type_fixer(self, ship_type):
@@ -110,7 +115,7 @@ class PlayerShip(Ship):
             return True
 
 class AI_Ship(Ship):
-    def __init__(self, ship_type, advanced=False):
+    def __init__(self, ship_type, advanced=False, hull=None):
         super().__init__()
         with open("data/AI_ships.json", "r") as f:
             AI_parts = json.load(f)
@@ -122,7 +127,10 @@ class AI_Ship(Ship):
         self.missile = ship_parts["missile"]
         self.speed = ship_parts["speed"]
         self.computer = ship_parts["computer"]
-        self.hull = ship_parts["hull"]
+        if hull:
+            self.hull = hull
+        else:
+            self.hull = ship_parts["hull"]
 
     '''
     Parameters
@@ -131,11 +139,14 @@ class AI_Ship(Ship):
             Takes in an ai ship type. Options are "ai-anc", "ai-grd", and "ai-gcds"
         advanced : bool
             Decides if the AI ships are of the advanced form or not. Set to True for advanced stats, default is False.
+        hull : int
+            allows you to set a ships starting health if it has been damaged already. Default is None which will 
+            pull base stats. I think this will be necessary for button logic
     '''
 
 
 
-x = AI_Ship("ai-gcds", True)
+x = AI_Ship("ai-gcds", True, 1)
 
 print(x.dice)
 print(x.missile)
