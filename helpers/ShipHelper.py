@@ -1,19 +1,5 @@
 import json
 
-p1 = {"player_name": "<@265561667293675521>", "color": "blue", "name": "Hydran Progress", "materials": 6, "science": 28, "money": 45, "colony_ships": 3,
-      "base_colony_ships": 3, "home_planet": "224", "owned_tiles": [], "explore_apt": 1, "research_apt": 2, "upgrade_apt": 2, "build_apt": 2, "move_apt": 2,
-      "influence_apt": 2, "trade_value": 3, "influence_discs": 3, "influence_track": [30, 25, 21, 17, 13, 10, 7, 5, 3, 2, 1, 0, 0], "money_pop_cubes": 11,
-      "material_pop_cubes": 12, "science_pop_cubes": 11, "population_track": [28, 24, 21, 18, 15, 12, 10, 8, 6, 4, 3, 2, 0],
-      "military_tech": ["plm"], "grid_tech": ["fus", "ade"], "nano_tech": ["adl", "adl", "flm"], "ancient_parts": ["socha"],
-      "tech_track": [-8, -5, -4, -3, -2, -1, 0, 0], "reputation_track": ["amb", "mixed", "mixed", "mixed"], "cost_orbital": 4,
-      "cost_monolith": 10, "cost_interceptor": 3, "cost_cruiser": 5, "cost_dread": 8, "cost_starbase": 3, "ship_stock": [5, 1, 1, 4],
-      "explore_action_counters": 0, "research_action_counters": 1, "upgrade_action_counters": 0, "build_action_counters": 3, "move_action_counters": 0,
-      "influence_action_counters": 0, "base_interceptor_speed": 2, "base_interceptor_nrg": 0, "base_interceptor_comp": 0, "base_cruiser_speed": 1,
-      "base_cruiser_nrg": 0, "base_cruiser_comp": 0, "base_dread_speed": 0, "base_dread_nrg": 0, "base_dread_comp": 0, "base_starbase_speed": 4,
-      "base_starbase_nrg": 3, "base_starbase_comp": 0,
-      "interceptor_parts": ["elc", "nus", "nud", "ioc"], "cruiser_parts": ["elc", "flm", "flm", "nus", "hul", "nud"],
-      "dread_parts": ["elc", "ioc", "ioc", "empty", "nus", "hul", "hul", "nud"], "starbase_parts": ["elc", "ioc", "hul", "elc", "hul"]}
-
 class Ship:
     def __init__(self):
         self.range = 0
@@ -132,13 +118,3 @@ class AI_Ship(Ship):
         advanced : bool
             Decides if the AI ships are of the advanced form or not. Set to True for advanced stats, default is False.
     '''
-
-
-
-x = AI_Ship("ai-gcds", True)
-
-print(x.dice)
-print(x.missile)
-print(x.speed)
-print(x.computer)
-print(x.hull)
