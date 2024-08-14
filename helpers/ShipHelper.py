@@ -52,6 +52,9 @@ class PlayerShip(Ship):
         self.player = player
         self.color = player["color"]
         self.ship_type = self.ship_type_fixer(ship_type)
+        self.speed = player[f"base_{self.ship_type}_speed"]
+        self.energy = player[f"base_{self.ship_type}_nrg"]
+        self.computer = player[f"base_{self.ship_type}_comp"]
         self.ship_parts = player[f"{self.ship_type}_parts"]
         self.build_ship_stats(self.ship_parts)
 
