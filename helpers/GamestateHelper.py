@@ -85,6 +85,17 @@ class GamestateHelper:
             tile = tile_data[sector]
             if owner != None:
                 tile["owner"] = owner
+            if tile["ancient"] or tile["guardian"] or tile["gcds"]:
+                adv = ""
+                if self.gamestate["advanced_ai"]:
+                    adv = "adv"
+                anc, grd, gcds = tile["ancient"],tile["guardian"], tile["gcds"]
+                if anc:
+                    tile["player_ships"].append("ai-anc"+adv)
+                if grd:
+                    tile["player_ships"].append("ai-grd" + adv)
+                if gcds:
+                    tile["player_ships"].append("ai-gcds" + adv)
             tile.update({"sector": sector})
             tile.update({"orientation": orientation})
         except KeyError:
