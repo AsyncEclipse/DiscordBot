@@ -4,7 +4,13 @@
     "speed": 2,
     "computer": 1,
     "hull": 1},
-  "ai-ancadv":{
+  "ai-ancadv1":{
+    "dice": ["yellow"],
+    "missile": [],
+    "speed": 3,
+    "computer": 2,
+    "hull": 1},  
+  "ai-ancadv2":{
     "dice": ["orange"],
     "missile": [],
     "speed": 1,
@@ -16,7 +22,14 @@
     "speed": 3,
     "computer": 2,
     "hull": 2},
-  "ai-grdadv": {
+  "ai-grdadv1": {
+    "dice": ["orange", "orange"],
+    "missile": [],
+    "speed": 2,
+    "computer": 1,
+    "shield": 1,
+    "hull": 3},
+  "ai-grdadv2": {
     "dice": ["red"],
     "missile": ["orange", "orange"],
     "speed": 1,
@@ -28,10 +41,17 @@
     "speed": 0,
     "computer": 2,
     "hull": 7},
-  "ai-gcdsadv": {
+  "ai-gcdsadv1": {
     "dice": ["red"],
     "missile": ["yellow", "yellow", "yellow", "yellow"],
     "speed": 2,
     "computer": 2,
-    "hull": 3}
+    "hull": 3},
+  "ai-gcdsadv2": {
+    "dice": [],
+    "missile": ["orange","orange"],
+    "speed": 3,
+    "computer": 2,
+    "shield": 2,
+    "hull": 4}
 }
