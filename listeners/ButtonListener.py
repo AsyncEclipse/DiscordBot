@@ -3,6 +3,7 @@ from discord.ext import commands
 from Buttons import Explore
 from Buttons.Build import BuildButtons
 from Buttons.Explore import ExploreButtons
+from Buttons.Influence import InfluenceButtons
 from Buttons.Population import PopulationButtons
 from Buttons.Research import ResearchButtons
 from Buttons.Turn import TurnButtons
@@ -48,12 +49,12 @@ class ButtonListener(commands.Cog):
                 await TurnButtons.endTurn(player, game, interaction)
             if customID == "restartTurn":
                 await TurnButtons.restartTurn(player, game, interaction)
-            if customID == "startExplore":
-                await ExploreButtons.startExplore(game, player, player_helper, interaction)
+            if customID.startswith("startExplore"):
+                await ExploreButtons.startExplore(game, player, player_helper, interaction,customID)
             if customID.startswith("exploreTile_"):
                 await ExploreButtons.exploreTile(game, player, interaction)
             if customID.startswith("placeTile"):
-                await ExploreButtons.placeTile(game,  interaction)
+                await ExploreButtons.placeTile(game,  interaction, player)
             if customID.startswith("discardTile"):
                 await ExploreButtons.discardTile(game, interaction)
             if customID == "startResearch":
@@ -88,5 +89,22 @@ class ButtonListener(commands.Cog):
                 await PopulationButtons.startPopDrop(game, player, interaction)
             if customID.startswith("fillPopulation"):
                 await PopulationButtons.fillPopulation(game, player, interaction, customID)
+            if customID.startswith("startInfluence"):
+                await InfluenceButtons.startInfluence(game, player, interaction)
+            if customID.startswith("addInfluenceStart"):
+                await InfluenceButtons.addInfluenceStart(game, player, interaction)
+            if customID.startswith("addInfluenceFinish"):
+                await InfluenceButtons.addInfluenceFinish(game, player, interaction,customID)
+            if customID.startswith("removeInfluenceStart"):
+                await InfluenceButtons.removeInfluenceStart(game, player, interaction)
+            if customID.startswith("removeInfluenceFinish"):
+                await InfluenceButtons.removeInfluenceFinish(game, player, interaction,customID)
+            if customID.startswith("addCubeToTrack"):
+                await InfluenceButtons.addCubeToTrack(game, player, interaction,customID)
+            if customID.startswith("refreshPopShips"):
+                await InfluenceButtons.refreshPopShips(game, player, interaction, customID)
+            if customID.startswith("finishInfluenceAction"):
+                await InfluenceButtons.finishInfluenceAction(game, player, interaction,player_helper)
+
             
                 

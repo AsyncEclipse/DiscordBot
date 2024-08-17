@@ -142,7 +142,7 @@
             "science": 1,
             "money": 1,
             "base_colony_ships": 3,
-            "colony_ships": 2,
+            "colony_ships": 0,
             "home_planet": "225",
             "owned_tiles": [],
             "explore_apt": 1,
@@ -170,7 +170,7 @@
             ],
             "money_pop_cubes": 11,
             "material_pop_cubes": 10,
-            "science_pop_cubes": 10,
+            "science_pop_cubes": 8,
             "population_track": [
                 28,
                 24,
@@ -292,7 +292,8 @@
                 "empty",
                 "hul"
             ],
-            "passed": true
+            "passed": true,
+            "influence_action_counters": 1
         },
         "708810586011467826": {
             "player_name": "<@708810586011467826>",
@@ -1117,7 +1118,7 @@
             "moneyadv1_snap": [],
             "moneyadv2_snap": [],
             "science_pop": [
-                0
+                1
             ],
             "science1_snap": [
                 353,
@@ -1244,7 +1245,7 @@
             ],
             "science2_snap": [],
             "scienceadv_pop": [
-                0
+                1
             ],
             "scienceadv1_snap": [
                 620,

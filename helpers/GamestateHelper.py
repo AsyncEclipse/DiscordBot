@@ -130,6 +130,13 @@ class GamestateHelper:
         self.gamestate["players"][playerID][type+"_pop_cubes"] = self.gamestate["players"][playerID][type+"_pop_cubes"]-1
         self.gamestate["players"][playerID]["colony_ships"] = self.gamestate["players"][playerID]["colony_ships"]-1
         self.update()
+    
+    def refresh_two_colony_ships(self,  playerID):
+        #"base_colony_ships"
+        minNum = min(self.gamestate["players"][playerID]["colony_ships"]+2, self.gamestate["players"][playerID]["base_colony_ships"])
+        self.gamestate["players"][playerID]["colony_ships"] = minNum
+        self.update()
+        return minNum
 
     def add_pop(self, pop_list, position, playerID):
         for i in pop_list:
@@ -138,8 +145,13 @@ class GamestateHelper:
         self.update()
     def remove_pop(self, pop_list, position, playerID):
         for i in pop_list:
-            self.gamestate["board"][position][i][0] = self.gamestate["board"][position][i][0]-1
-            self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] = self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"]+1
+            if position != "dummy":
+                for val,num in enumerate(self.gamestate["board"][position][i]):
+                    if(num > 0):
+                        self.gamestate["board"][position][i][val] = num-1
+                        break
+            if "neutral" not in i:
+                self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] = self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"]+1
         self.update()
 
     def remove_units(self, unit_list, position):
