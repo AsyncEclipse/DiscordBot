@@ -4,13 +4,13 @@
     "speed": 2,
     "computer": 1,
     "hull": 1},
-  "ai-ancadv1":{
+  "ai-ancawa":{
     "dice": ["yellow"],
     "missile": [],
     "speed": 3,
     "computer": 2,
     "hull": 1},  
-  "ai-ancadv2":{
+  "ai-ancadv":{
     "dice": ["orange"],
     "missile": [],
     "speed": 1,
@@ -22,14 +22,14 @@
     "speed": 3,
     "computer": 2,
     "hull": 2},
-  "ai-grdadv1": {
+  "ai-grdwa": {
     "dice": ["orange", "orange"],
     "missile": [],
     "speed": 2,
     "computer": 1,
     "shield": 1,
     "hull": 3},
-  "ai-grdadv2": {
+  "ai-grdadv": {
     "dice": ["red"],
     "missile": ["orange", "orange"],
     "speed": 1,
@@ -41,13 +41,13 @@
     "speed": 0,
     "computer": 2,
     "hull": 7},
-  "ai-gcdsadv1": {
+  "ai-gcdsadv": {
     "dice": ["red"],
     "missile": ["yellow", "yellow", "yellow", "yellow"],
     "speed": 2,
     "computer": 2,
     "hull": 3},
-  "ai-gcdsadv2": {
+  "ai-gcdswa": {
     "dice": [],
     "missile": ["orange","orange"],
     "speed": 3,
