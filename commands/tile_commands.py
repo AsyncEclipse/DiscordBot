@@ -170,11 +170,13 @@ class TileCommands(commands.GroupCog, name="tile"):
         game = GamestateHelper(interaction.channel)
         tile = game.tile_draw(tile_position)
         drawing = DrawHelper(game.gamestate)
+        orientation = 0
         await interaction.response.defer(thinking=True)
         image = drawing.base_tile_image(tile)
         await interaction.followup.send(file=drawing.show_single_tile(image))
         view = View()
-        button = Button(label="Place Tile",style=discord.ButtonStyle.success, custom_id=f"placeTile_{tile_position}_{tile}")
+        button = Button(label="Place Tile",style=discord.ButtonStyle.success, custom_id=f"placeTile_"
+                                                                                        f"{tile_position}_{tile}_{orientation}")
         button2 = Button(label="Discard Tile",style=discord.ButtonStyle.danger, custom_id=f"discardTile_{tile}")
         view.add_item(button)
         view.add_item(button2)

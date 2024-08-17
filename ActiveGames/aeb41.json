@@ -1003,8 +1003,8 @@
             "owner": 0,
             "name": "Galactic Center",
             "ring": 0,
-            "disctile": 1,
-            "player_ships": [],
+            "disctile": 0,
+            "player_ships": ["ai-anc"],
             "money_pop": [
                 0,
                 0
