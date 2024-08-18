@@ -97,6 +97,7 @@ class PlayerHelper:
         self.adjust_money(self.money_income()-self.upkeep())
         self.adjust_materials(self.materials_income())
         self.adjust_science(self.science_income())
+        self.stats["colony_ships"] = self.stats["base_colony_ships"]
         self.stats["passed"] = False
         actions = ["influence","build","move","upgrade","explore","research"]
         for action in actions:
