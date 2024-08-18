@@ -58,6 +58,9 @@ class PlayerShip(Ship):
         self.ship_parts = player[f"{self.ship_type}_parts"]
         self.build_ship_stats(self.ship_parts)
 
+
+    def getRange(self):
+        return self.range
     '''
     Parameters
     ----------

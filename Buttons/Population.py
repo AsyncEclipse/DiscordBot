@@ -1,17 +1,9 @@
 import json
 import discord
-from discord.ext import commands
 from discord.ui import View
 from helpers.GamestateHelper import GamestateHelper
-from helpers.PlayerHelper import PlayerHelper
 from helpers.DrawHelper import DrawHelper
 from discord.ui import View, Button
-from discord.ext import commands
-from commands import tile_commands
-from commands.setup_commands import SetupCommands
-from io import BytesIO
-from PIL import Image, ImageDraw, ImageFont
-from jproperties import Properties
 
 
 class PopulationButtons:
@@ -40,6 +32,18 @@ class PopulationButtons:
             if "adl" not in allPlayerTechs and "adm" not in allPlayerTechs and "ade" not in allPlayerTechs:
                 emptyPlanets = [s for s in emptyPlanets if "neutraladv" not in s] 
         return emptyPlanets
+
+    @staticmethod  
+    def findFullPopulation(game: GamestateHelper, player, tile :str):  
+        fullPlanets = []
+        tileState = game.get_gamestate()["board"][tile]
+        planetTypes = ["money","science","material","neutral","moneyadv","scienceadv","materialadv","neutraladv"]
+        for planetT in planetTypes:
+            if f"{planetT}_pop" in tileState:
+                for i,val in enumerate(tileState[f"{planetT}_pop"]):
+                    if val > 0:
+                        fullPlanets.append(f"{planetT}")
+        return fullPlanets
     @staticmethod 
     async def startPopDrop(game: GamestateHelper, player, interaction: discord.Interaction): 
         view = View()
@@ -60,7 +64,6 @@ class PopulationButtons:
         tile = buttonID.split("_")[1]
         planetT = buttonID.split("_")[2]
         num = buttonID.split("_")[3]
-        typeOfPop = planetT.replace("adv","")
         if "neutral" in planetT:
             if len(buttonID.split("_")) < 5:
                 allPlayerTechs =  player["military_tech"] + player["grid_tech"] + player["nano_tech"]
@@ -75,7 +78,7 @@ class PopulationButtons:
                 if len(optionsForPop > 1):
                     view = View()
                     for typeP in typeOfPop:
-                        view.add_item(Button(label=typeP.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player["color"]}_buttonID_{typeP}"))
+                        view.add_item(Button(label=typeP.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player["color"]}_fillPopulation_{typeP}"))
                     await interaction.message.delete()
                     await interaction.response.send_message(f"{interaction.user.mention}, choose which type of resource the population should be.", view=view)
                     return
@@ -83,11 +86,14 @@ class PopulationButtons:
                     typeOfPop = optionsForPop[0]
             else:
                 typeOfPop = buttonID.split("_")[4]
-        game.add_pop_specific(typeOfPop,int(num),tile,game.get_player_from_color(player["color"]))
+        if not game.add_pop_specific(typeOfPop,int(num),tile,game.get_player_from_color(player["color"])):
+            await interaction.channel.send(f"Did not have enough colony ships so failed to add {typeOfPop} pop to tile {tile}")
+            return
         await interaction.message.delete()
-        await interaction.response.send_message(f"Successfully added {typeOfPop} pop to tile {tile}")
+        await interaction.channel.send(f"Successfully added {typeOfPop} pop to tile {tile}")
         drawing = DrawHelper(game.gamestate)
-        await interaction.channel.send(file=drawing.show_game(), ephemeral=True)
+        await interaction.response.defer(thinking=True,ephemeral=True)
+        await interaction.followup.send(file=drawing.show_game(), ephemeral=True)
         
 
                 

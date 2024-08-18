@@ -1,4 +1,5 @@
 import discord
+from Buttons.Turn import TurnButtons
 import config
 from discord.ext import commands
 from discord import app_commands
@@ -86,6 +87,10 @@ class SetupCommands(commands.GroupCog, name="setup"):
             game.add_tile(str(i), 0, "sector3back")
         await interaction.response.send_message("done")
 
+    @app_commands.command(name="cleanup")
+    async def cleanup(self,interaction: discord.Interaction):
+        game = GamestateHelper(interaction.channel)
+        await TurnButtons.runCleanup(game, interaction)
 
     @app_commands.command(name="new_game")
     async def new_game(self, interaction: discord.Interaction, game_name: str,

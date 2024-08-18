@@ -1,5 +1,4 @@
 import discord
-from discord.ext import commands
 from discord.ui import View
 from Buttons.Population import PopulationButtons
 from helpers.GamestateHelper import GamestateHelper
@@ -17,6 +16,14 @@ class TurnButtons:
     def getLocationFromID(game, id):  
         return next((tile for tile in game.get_gamestate()["board"] if game.get_gamestate()["board"][tile]["sector"] == str(id)), None)
     
+
+    @staticmethod
+    def noOneElsePassed(player, game: GamestateHelper):
+        for p2 in game.get_gamestate()["players"]:
+            if "passed" in game.get_gamestate()["players"][p2] and game.get_gamestate()["players"][p2]["passed"] == False:
+                return False
+        return True
+        
     @staticmethod
     def getNextPlayer(player, game: GamestateHelper):
         listHS = [201,203,205,207,209,211]
@@ -29,6 +36,14 @@ class TurnButtons:
         for number in newList:
             nextPlayer = TurnButtons.getPlayerFromHSLocation(game, str(number))
             if nextPlayer is not None and not game.get_gamestate()["players"].get(nextPlayer, {}).get("passed", False):  
+                return game.get_gamestate()["players"][nextPlayer]
+        return None
+    @staticmethod
+    def getFirstPlayer(game: GamestateHelper):
+        listHS = [201,203,205,207,209,211]
+        for number in listHS:
+            nextPlayer = TurnButtons.getPlayerFromHSLocation(game, str(number))
+            if nextPlayer is not None and game.get_gamestate()["players"].get(nextPlayer, {}).get("firstPlayer", False):  
                 return game.get_gamestate()["players"][nextPlayer]
         return None
     
@@ -50,6 +65,16 @@ class TurnButtons:
 
     @staticmethod
     async def passForRound(player, game: GamestateHelper, interaction: discord.Interaction, player_helper : PlayerHelper):
+        if TurnButtons.noOneElsePassed(player,game):
+            player_helper.adjust_money(2)
+            await interaction.channel.send(f"{interaction.user.mention} you gained 2 money and the first player marker for next round for passing first")
+            player_helper.setFirstPlayer(True)
+            for p2 in game.get_gamestate()["players"]:
+                if game.get_gamestate()["players"][p2]["color"] == player["color"]:
+                    continue
+                player_helper2 = PlayerHelper(p2, game.get_gamestate()["players"][p2])
+                player_helper2.setFirstPlayer(False)
+                game.update_player(player_helper2)
         player_helper.passTurn()
         game.update_player(player_helper)
         nextPlayer = TurnButtons.getNextPlayer(player,game)
@@ -57,19 +82,29 @@ class TurnButtons:
             view = TurnButtons.getStartTurnButtons(game,nextPlayer)
             await interaction.response.send_message(nextPlayer["player_name"]+ " use buttons to do your turn",view=view)
         else:
-            await interaction.response.send_message("All players have passed")
+            view = View()
+            view.add_item(Button(label="Run Cleanup",style=discord.ButtonStyle.primary, custom_id="runCleanup"))
+            await interaction.response.send_message("All players have passed, you can use this button to start the next round after all battles are resolved", view=view)
         await interaction.message.delete()
     
+    @staticmethod
+    async def runCleanup(game: GamestateHelper, interaction: discord.Interaction):
+        game.cleanUp()
+        nextPlayer = TurnButtons.getFirstPlayer(game)
+        if nextPlayer != None:
+            view = TurnButtons.getStartTurnButtons(game,nextPlayer)
+            await interaction.response.send_message(nextPlayer["player_name"]+ " use buttons to do the first turn of the round",view=view)
+        else:
+            await interaction.response.send_message("Could not find first player, someone run /player start_turn")
+
 
     @staticmethod
     async def showGame(game: GamestateHelper, interaction: discord.Interaction):
-        await interaction.response.defer(thinking=True)
+        await interaction.response.defer(thinking=True,ephemeral=True,)
         drawing = DrawHelper(game.gamestate)
-        await interaction.followup.send(file=drawing.show_game())
         view = View()
-        button = Button(label="Show Game",style=discord.ButtonStyle.primary, custom_id="showGame")
-        view.add_item(button)
-        await interaction.channel.send(view=view)
+        view.add_item(Button(label="Show Game",style=discord.ButtonStyle.primary, custom_id="showGame"))
+        await interaction.followup.send(file=drawing.show_game(),ephemeral=True, view=view)
 
     @staticmethod  
     def getStartTurnButtons(game: GamestateHelper,p1):
@@ -81,6 +116,7 @@ class TurnButtons:
         view.add_item(Button(label=f"Move ({p1['move_apt']})", style=discord.ButtonStyle.success, custom_id="startMove"))  
         view.add_item(Button(label=f"Influence ({p1['influence_apt']})", style=discord.ButtonStyle.secondary, custom_id="startInfluence"))  
         view.add_item(Button(label="Pass", style=discord.ButtonStyle.red, custom_id=f"FCID{p1["color"]}_passForRound"))
+        view.add_item(Button(label="Show Game",style=discord.ButtonStyle.gray, custom_id="showGame"))
         if len(PopulationButtons.findEmptyPopulation(game,p1)) > 0 and p1["colony_ships"] > 0:
             view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{p1["color"]}_startPopDrop"))
         return view
