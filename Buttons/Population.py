@@ -1,17 +1,9 @@
 import json
 import discord
-from discord.ext import commands
 from discord.ui import View
 from helpers.GamestateHelper import GamestateHelper
-from helpers.PlayerHelper import PlayerHelper
 from helpers.DrawHelper import DrawHelper
 from discord.ui import View, Button
-from discord.ext import commands
-from commands import tile_commands
-from commands.setup_commands import SetupCommands
-from io import BytesIO
-from PIL import Image, ImageDraw, ImageFont
-from jproperties import Properties
 
 
 class PopulationButtons:
@@ -86,7 +78,7 @@ class PopulationButtons:
                 if len(optionsForPop > 1):
                     view = View()
                     for typeP in typeOfPop:
-                        view.add_item(Button(label=typeP.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player["color"]}_buttonID_{typeP}"))
+                        view.add_item(Button(label=typeP.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player["color"]}_fillPopulation_{typeP}"))
                     await interaction.message.delete()
                     await interaction.response.send_message(f"{interaction.user.mention}, choose which type of resource the population should be.", view=view)
                     return

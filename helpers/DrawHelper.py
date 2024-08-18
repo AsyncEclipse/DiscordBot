@@ -1,7 +1,4 @@
 import discord
-from discord.ext import commands
-from discord import app_commands
-from discord.ui import View, Button
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 from jproperties import Properties
@@ -100,8 +97,8 @@ class DrawHelper:
                     paste_resourcecube(tile, tile_image, resource, color)  
 
             wormholeCode = ""
-            closed_mask = Image.open(f"images/resources/masks/closed_wh_mask.png").convert("RGBA").resize((42, 22))
-            open_mask = Image.open(f"images/resources/masks/open_wh_mask.png").convert("RGBA").resize((42, 22))
+            closed_mask = Image.open(f"images/resources/masks/closed_wh_mask.png").convert("RGBA").resize((42, 22)).rotate(180)
+            open_mask = Image.open(f"images/resources/masks/open_wh_mask.png").convert("RGBA").resize((42, 22)).rotate(180)
             if "wormholes" in tile:
                 for wormhole in tile["wormholes"]:
                     wormholeCode = wormholeCode+str(wormhole)
@@ -145,6 +142,69 @@ class DrawHelper:
             textDrawableImage = ImageDraw.Draw(tile_image)
             textDrawableImage.text(text_position, text, text_color, font=font)
             return tile_image
+
+    def display_techs(self):
+        context = Image.new("RGBA", (1500, 600), (255, 255, 255, 0))
+        techsAvailable = self.gamestate["available_techs"]  
+        with open("data/techs.json", "r") as f:
+            tech_data = json.load(f)  
+
+        tech_groups = {  
+            "nano": [],  
+            "grid": [],  
+            "military": [],  
+            "any": []  
+        }  
+        # Group techs by type and calculate their costs  
+        for tech in techsAvailable:  
+            tech_details = tech_data.get(tech)  
+            if tech_details:  
+                tech_type = tech_details["track"]  
+                cost = tech_details["base_cost"]   
+                tech_groups[tech_type].append((tech, tech_details["name"], cost))  
+        x1=0
+        x2=0
+        x3=0
+        x4=0
+        ultimateX = 0
+        text_drawable_image = ImageDraw.Draw(context)  
+        font = ImageFont.truetype("arial.ttf", size=90)  
+        stroke_color = (0, 0, 0)  
+        stroke_width = 2  
+        text_drawable_image.text((120, 50), f"Available Techs", (255, 0, 0), font=font,  
+                                    stroke_width=stroke_width, stroke_fill=stroke_color)  
+        for tech_type in tech_groups:  
+            sorted_techs = sorted(tech_groups[tech_type], key=lambda x: x[2])  # Sort by cost  
+            size = 80
+            for tech, tech_name, cost in sorted_techs:  
+                if tech_type == "military":
+                    y=size*1  
+                    x1+=1
+                    ultimateX = x1*size
+                if tech_type == "grid":  
+                    y=size*2
+                    x2+=1  
+                    ultimateX = x2*size
+                elif tech_type == "nano":  
+                    y=size*3  
+                    x3+=1  
+                    ultimateX = x3*size
+                elif tech_type == "any":  
+                    y=size*4  
+                    x4+=1  
+                    ultimateX = x4*size
+                
+                ultimateX += 200
+                y +=100
+                tech_details = tech_data.get(tech)   
+                techName = tech_details["name"].lower().replace(" ", "_") if tech_details else tech  
+                tech_path = f"images/resources/components/technology/{tech_type}/tech_{techName}.png"  
+                if not os.path.exists(tech_path):
+                    tech_path = f"images/resources/components/technology/rare/tech_{techName}.png"  
+                tech_image = Image.open(tech_path).convert("RGBA").resize((size, size))  
+                context.paste(tech_image, (ultimateX,y), mask=tech_image)
+        return context
+
 
     def player_area(self, player):
         faction = self.get_short_faction_name(player["name"])
@@ -260,7 +320,17 @@ class DrawHelper:
         for img_path, text_color, player_key, amount_key in resources:  
             draw_resource(context, img_path, text_color, player_key, amount_key, (x, y))  
             y += 100 
-        
+        colonyShip = Image.open("images/resources/components/all_boards/colony_ship.png").convert("RGBA").resize((100, 100))  
+        for i in range(player["colony_ships"]):
+            context.paste(colonyShip, (x+i*50,y),colonyShip)  
+        y += 70
+        ships = ["int","cru","drd","sb"]
+        ultimateC = 0
+        for counter,ship in enumerate(ships):
+            ship_image = Image.open(f"images/resources/components/basic_ships/{player["color"]}-{ship}.png").convert("RGBA").resize((70, 70))
+            for shipCounter in range(player["ship_stock"][counter]):
+                context.paste(ship_image, (x+ultimateC*10+counter*50,y),ship_image)
+                ultimateC +=1
         return context
 
 
@@ -315,11 +385,12 @@ class DrawHelper:
         cropped_context = context.crop((0, min_y, 4160, max_y)) 
         # Create context for players  
         context2 = create_player_area()  
-
+        context3 = self.display_techs()
         # Combine both contexts  
-        final_context = Image.new("RGBA", (4160, board_height + context2.size[1]), (255, 255, 255, 0))  
+        final_context = Image.new("RGBA", (4160, board_height + context2.size[1]+context3.size[1]), (255, 255, 255, 0))  
         final_context.paste(cropped_context, (0, 0))  
         final_context.paste(context2, (0, board_height))  
+        final_context.paste(context3, (0, board_height+context2.size[1]))  
 
         bytes_io = BytesIO()  
         final_context.save(bytes_io, format="PNG")  

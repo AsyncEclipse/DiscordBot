@@ -1,17 +1,9 @@
 import json
 import discord
-from discord.ext import commands
 from discord.ui import View
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
-from helpers.DrawHelper import DrawHelper
 from discord.ui import View, Button
-from discord.ext import commands
-from commands import tile_commands
-from commands.setup_commands import SetupCommands
-from io import BytesIO
-from PIL import Image, ImageDraw, ImageFont
-from jproperties import Properties
 
 class ResearchButtons:
 

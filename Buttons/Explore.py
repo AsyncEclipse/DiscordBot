@@ -1,14 +1,10 @@
 import json
 import discord
-from discord.ext import commands
 from discord.ui import View
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 from helpers.DrawHelper import DrawHelper
 from discord.ui import View, Button
-from discord.ext import commands
-from commands import tile_commands
-from commands.setup_commands import SetupCommands
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 from jproperties import Properties
@@ -24,16 +20,16 @@ class ExploreButtons:
         return tiles
     @staticmethod 
     def doesPlayerHaveUnpinnedShips(player, playerShips):
-        playerShips = 0
+        playerShipsCount = 0
         opponentShips = 0
-        if playerShips == 0:
+        if len(playerShips) == 0:
             return False
         for ship in playerShips:
-            if ship.contains(player["color"]):
-                playerShips = playerShips +1
+            if player["color"] in ship:
+                playerShipsCount = playerShipsCount +1
             else:
                 opponentShips = opponentShips +1
-        return playerShips > opponentShips  
+        return playerShipsCount > opponentShips  
     
     @staticmethod  
     async def startExplore(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction, buttonID:str):  
@@ -48,7 +44,7 @@ class ExploreButtons:
         playerTiles = ExploreButtons.getListOfTilesPlayerIsIn(game, player)  
         for tile in playerTiles:  
             for index, adjTile in enumerate(configs.get(tile)[0].split(",")):  
-                tile_orientation_index = (index + 6 + int(game.get_gamestate()["board"][tile]["orientation"] / 60)) % 6  
+                tile_orientation_index = (index + 6 + int(int(game.get_gamestate()["board"][tile]["orientation"]) / 60)) % 6  
                 if (  
                     adjTile not in tilesViewed and  
                     tile_orientation_index in game.get_gamestate()["board"][tile]["wormholes"] and  

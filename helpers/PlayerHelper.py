@@ -58,6 +58,9 @@ class PlayerHelper:
         
     def passTurn(self):
         self.stats["passed"] = True
+    
+    def setFirstPlayer(self, firstPlayerBool : bool):
+        self.stats["firstPlayer"] = firstPlayerBool
 
     def adjust_colony_ships(self, adjustement):
         if self.stats["colony_ships"] <= 0:
@@ -70,17 +73,17 @@ class PlayerHelper:
     def materials_income(self):
         track = self.stats["population_track"]
         cubes = self.stats["material_pop_cubes"]
-        return(track[cubes])
+        return(track[cubes-1])
 
     def science_income(self):
         track = self.stats["population_track"]
         cubes = self.stats["science_pop_cubes"]
-        return(track[cubes])
+        return(track[cubes-1])
 
     def money_income(self):
         track = self.stats["population_track"]
         cubes = self.stats["money_pop_cubes"]
-        return(track[cubes])
+        return(track[cubes-1])
 
     def upkeep(self):
         track = self.stats["influence_track"]
@@ -89,3 +92,17 @@ class PlayerHelper:
             return(0)
         else:
             return(track[discs])
+    
+    def cleanUp(self):
+        self.adjust_money(self.money_income()-self.upkeep())
+        self.adjust_materials(self.materials_income())
+        self.adjust_science(self.science_income())
+        self.stats["passed"] = False
+        actions = ["influence","build","move","upgrade","explore","research"]
+        for action in actions:
+            if action+"_action_counters" not in self.stats:
+                self.stats[action+"_action_counters"] = 0
+            else:
+                count = self.stats[action+"_action_counters"]
+                self.stats[action+"_action_counters"] = 0
+                self.adjust_influence(count)

@@ -1,22 +1,15 @@
 import discord
 from discord.ext import commands
-from Buttons import Explore
 from Buttons.Build import BuildButtons
 from Buttons.Explore import ExploreButtons
 from Buttons.Influence import InfluenceButtons
+from Buttons.Move import MoveButtons
 from Buttons.Population import PopulationButtons
 from Buttons.Research import ResearchButtons
 from Buttons.Turn import TurnButtons
 from Buttons.Upgrade import UpgradeButtons
-from commands import tile_commands
-from helpers.DrawHelper import DrawHelper
 from helpers.GamestateHelper import GamestateHelper
-from commands.setup_commands import SetupCommands
-from discord.ui import View, Button
-from io import BytesIO
-from PIL import Image, ImageDraw, ImageFont
-from jproperties import Properties
-import json
+
 
 from helpers.PlayerHelper import PlayerHelper
 
@@ -49,6 +42,8 @@ class ButtonListener(commands.Cog):
                 await TurnButtons.endTurn(player, game, interaction)
             if customID == "restartTurn":
                 await TurnButtons.restartTurn(player, game, interaction)
+            if customID == "runCleanup":
+                await TurnButtons.runCleanup(game, interaction)
             if customID.startswith("startExplore"):
                 await ExploreButtons.startExplore(game, player, player_helper, interaction,customID)
             if customID.startswith("exploreTile_"):
@@ -105,6 +100,14 @@ class ButtonListener(commands.Cog):
                 await InfluenceButtons.refreshPopShips(game, player, interaction, customID)
             if customID.startswith("finishInfluenceAction"):
                 await InfluenceButtons.finishInfluenceAction(game, player, interaction,player_helper)
+            if customID.startswith("startMove"):
+                await MoveButtons.startMove(game, player, interaction,customID,player_helper)
+            if customID.startswith("moveFrom"):
+                await MoveButtons.moveFrom(game, player, interaction,customID)
+            if customID.startswith("moveThisShip"):
+                await MoveButtons.moveThisShip(game, player, interaction,customID)
+            if customID.startswith("moveTo"):
+                await MoveButtons.moveTo(game, player, interaction,customID,player_helper)
 
             
                 

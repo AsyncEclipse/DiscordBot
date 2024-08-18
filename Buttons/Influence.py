@@ -1,15 +1,11 @@
 import discord
-from discord.ext import commands
 from discord.ui import View
 from Buttons.Explore import ExploreButtons
 from Buttons.Population import PopulationButtons
 from Buttons.Turn import TurnButtons
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
-from helpers.DrawHelper import DrawHelper
 from discord.ui import View, Button
-from io import BytesIO
-from PIL import Image, ImageDraw, ImageFont
 from jproperties import Properties
 
 class InfluenceButtons:
