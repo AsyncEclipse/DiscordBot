@@ -1,4 +1,5 @@
 import discord
+from Buttons.DiscoveryTile import DiscoveryTileButtons
 import config
 from discord.ext import commands
 from discord import app_commands
@@ -181,6 +182,13 @@ class TileCommands(commands.GroupCog, name="tile"):
         view.add_item(button)
         view.add_item(button2)
         await interaction.channel.send(view=view)
+    
+    @app_commands.command(name="resolve_discovery_tile")
+    async def resolve_discovery_tile(self, interaction: discord.Interaction, tile_position: str):
+        game = GamestateHelper(interaction.channel)
+        tile = game.tile_draw(tile_position)
+        await interaction.response.defer()
+        await DiscoveryTileButtons.exploreDiscoveryTile(game, tile, interaction)
 
     @app_commands.command(name="show_tile")
     async def show_tile(self, interaction: discord.Interaction, tile_position: str):
