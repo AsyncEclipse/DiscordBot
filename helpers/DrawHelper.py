@@ -37,8 +37,8 @@ class DrawHelper:
         if os.path.exists(filepath):
             tile_image = Image.open(filepath).convert("RGBA")
             tile_image = tile_image.resize((345, 299))
-        closed_mask = Image.open(f"images/resources/masks/closed_wh_mask.png").convert("RGBA").resize((42, 22))
-        open_mask = Image.open(f"images/resources/masks/open_wh_mask.png").convert("RGBA").resize((42, 22))
+        closed_mask = Image.open(f"images/resources/masks/closed_wh_mask.png").convert("RGBA").resize((42, 22)).rotate(180)
+        open_mask = Image.open(f"images/resources/masks/open_wh_mask.png").convert("RGBA").resize((42, 22)).rotate(180)
         for wormhole in wormholes:
             wormholeCode = wormholeCode+str(wormhole)
         for i in range(6):
@@ -405,6 +405,16 @@ class DrawHelper:
         context.save(bytes, format="PNG")
         bytes.seek(0)
         file = discord.File(bytes, filename="tile_image.png")
+        return file
+
+    def show_disc_tile(self, disc_tile_name:str):
+        context = Image.new("RGBA", (260, 260), (255, 255, 255, 0))
+        tile_image = Image.open(f"images/resources/components/discovery_tiles/discovery_{disc_tile_name.replace(" ","_").lower()}.png").convert("RGBA").resize((260, 260))
+        context.paste(tile_image, (0,0), mask=tile_image)
+        bytes = BytesIO()
+        context.save(bytes, format="PNG")
+        bytes.seek(0)
+        file = discord.File(bytes, filename="disc_tile_image.png")
         return file
 
     def show_player_area(self, player_area):

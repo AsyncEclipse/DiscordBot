@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from Buttons.Build import BuildButtons
+from Buttons.DiscoveryTile import DiscoveryTileButtons
 from Buttons.Explore import ExploreButtons
 from Buttons.Influence import InfluenceButtons
 from Buttons.Move import MoveButtons
@@ -52,6 +53,10 @@ class ButtonListener(commands.Cog):
                 await ExploreButtons.placeTile(game,  interaction, player)
             if customID.startswith("discardTile"):
                 await ExploreButtons.discardTile(game, interaction)
+            if customID.startswith("keepDiscForPoint"):
+                await DiscoveryTileButtons.keepDiscForPoint(game, player_helper, interaction)
+            if customID.startswith("usedDiscForAbility"):
+                await DiscoveryTileButtons.usedDiscForAbility(game, player_helper, interaction, customID,player)
             if customID == "startResearch":
                 await ResearchButtons.startResearch(game, player, player_helper, interaction)
             if customID.startswith("getTech_"):

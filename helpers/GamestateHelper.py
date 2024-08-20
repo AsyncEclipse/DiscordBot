@@ -122,6 +122,10 @@ class GamestateHelper:
         self.gamestate["players"][self.get_player_from_color(color)]["influence_discs"] += 1
         self.update()
 
+    def add_warp(self, position):
+        self.gamestate["board"][position]["warp"]=1
+        self.update()
+    
     def add_units(self, unit_list, position):
         color = unit_list[0].split("-")[0]
         player = self.get_player_from_color(color)
@@ -281,6 +285,23 @@ class GamestateHelper:
             if self.gamestate["players"][i]["color"] == color:
                 return i
 
+    def fillInDiscTiles(self):
+        listOfDisc = []
+        with open("data/discoverytiles.json") as f:
+            discTile_data = json.load(f)
+        for tile in discTile_data:
+            for x in range(discTile_data[tile]["num"]):
+                listOfDisc.append(tile)
+        random.shuffle(listOfDisc)
+        self.gamestate["discTiles"]= listOfDisc
+        self.update()
+    
+    def getNextDiscTile(self, tile:str):
+        nextTile = self.gamestate["discTiles"].pop()
+        self.gamestate["board"][tile]["disctile"]=0
+        self.update()
+        return nextTile
+    
     def update_player(self, *args):
 
         for ar in args:

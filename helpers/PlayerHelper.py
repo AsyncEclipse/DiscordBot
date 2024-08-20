@@ -12,6 +12,7 @@ class PlayerHelper:
         self.stats["materials"] += adjustment
         return(f"\n> Adjusted materials from {before} to {before+adjustment}")
 
+
     def adjust_science(self, adjustment):
         before = self.stats["science"]
         self.stats["science"] += adjustment
@@ -47,11 +48,17 @@ class PlayerHelper:
         before = self.stats["influence_discs"]
         self.stats["influence_discs"] += adjustment
         return (f"\n> Adjusted influence discs from {before} to {before + adjustment}")
-    def spend_influence_on_action(self, action):
+    def spend_influence_on_action(self, action:str):
         self.adjust_influence(-1)
         if action+"_action_counters" not in self.stats:
             self.stats[action+"_action_counters"] = 0
         self.stats[action+"_action_counters"] = self.stats[action+"_action_counters"]+1
+    
+    def acquire_disc_tile_for_points(self):
+        self.adjust_influence(-1)
+        if "disc_tiles_for_points" not in self.stats:
+            self.stats["disc_tiles_for_points"] = 0
+        self.stats["disc_tiles_for_points"] = self.stats["disc_tiles_for_points"]+1
     def setOldShipParts(self, ship):
         if f"old_{ship}_parts" not in self.stats:
             self.stats[f"old_{ship}_parts"] = self.stats[f"{ship}_parts"]

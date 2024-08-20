@@ -1,6 +1,7 @@
 import json
 import discord
 from discord.ui import View
+from Buttons.DiscoveryTile import DiscoveryTileButtons
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 from helpers.DrawHelper import DrawHelper
@@ -140,11 +141,12 @@ class ExploreButtons:
             view.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple, custom_id=f"FCID{player["color"]}_addInfluenceFinish_"+msg[1]))
             view.add_item(Button(label="Decline Influence Placement", style=discord.ButtonStyle.danger, custom_id="deleteMsg"))  
             await interaction.channel.send(f"{interaction.user.mention} choose whether or not to place influence in the tile", view = view)
-
+            if game.get_gamestate()["board"][msg[1]]["ancient"] == 0 and game.get_gamestate()["board"][msg[1]]["disctile"] > 0:
+                await DiscoveryTileButtons.exploreDiscoveryTile(game, msg[1],interaction)
         await interaction.message.delete()
     @staticmethod  
     async def discardTile(game: GamestateHelper, interaction: discord.Interaction):
         msg = interaction.data["custom_id"].split("_")
         game.tile_discard(msg[2])
-        await interaction.channel.send("Tile discarded")
+        await interaction.response.send_message("Tile discarded")
         await interaction.message.delete()
