@@ -186,9 +186,8 @@ class TileCommands(commands.GroupCog, name="tile"):
     @app_commands.command(name="resolve_discovery_tile")
     async def resolve_discovery_tile(self, interaction: discord.Interaction, tile_position: str):
         game = GamestateHelper(interaction.channel)
-        tile = game.tile_draw(tile_position)
-        await interaction.response.defer()
-        await DiscoveryTileButtons.exploreDiscoveryTile(game, tile, interaction)
+        await interaction.response.defer(thinking=False)
+        await DiscoveryTileButtons.exploreDiscoveryTile(game, tile_position, interaction)
 
     @app_commands.command(name="show_tile")
     async def show_tile(self, interaction: discord.Interaction, tile_position: str):
