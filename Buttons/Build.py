@@ -10,10 +10,13 @@ from discord.ui import View, Button
 class BuildButtons:
     
     @staticmethod  
-    async def startBuild(game: GamestateHelper, player, interaction: discord.Interaction):  
+    async def startBuild(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str, player_helper:PlayerHelper):  
         tiles = game.get_owned_tiles(player)
         tiles.sort()
         view = View()
+        if "2" not in buttonID:
+            player_helper.spend_influence_on_action("build")
+            game.update_player(player_helper)
         for tile in tiles:
             view.add_item(Button(label=tile, style=discord.ButtonStyle.primary, custom_id=f"FCID{player["color"]}_buildIn_{tile}"))
         await interaction.response.send_message(f"{interaction.user.mention}, choose which tile you would like to build in.", view=view)
@@ -24,8 +27,11 @@ class BuildButtons:
         view = View()
         view = BuildButtons.buildBuildButtonsView(interaction,"",0,loc,view,player)
         await interaction.message.delete()
+        buildApt = player["build_apt"]
+        if player["passed"]== True:
+            buildApt = 1
         await interaction.response.send_message(f"{interaction.user.mention}, you have {player['materials']} materials to "
-                                                f"spend on up to {player['build_apt']} units in this system.", view=view)
+                                                f"spend on up to {str(buildApt)} units in this system.", view=view)
         
     @staticmethod  
     async def buildShip(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
@@ -35,7 +41,10 @@ class BuildButtons:
         cost = int(buttonID.split("_")[2])
         loc = buttonID.split("_")[3]
         ship = str(buttonID.split("_")[4])
-        if len(build) == player["build_apt"]:
+        buildApt = player["build_apt"]
+        if player["passed"]== True:
+            buildApt = 1
+        if len(build) == buildApt:
             await interaction.response.edit_message(content=f"You cannot build any more units. Current build is:"
                                                             f"\n {build} for {cost} materials.")
             return
@@ -67,7 +76,7 @@ class BuildButtons:
             buttonElements = [f"FCID{player["color"]}","buildShip", build, str(cost), build_loc, ship]
             view.add_item(Button(label=f"{ship} ({player[f'{key}']})", style=discord.ButtonStyle.primary, custom_id="_".join(buttonElements))) 
         buttonElements = [f"FCID{player["color"]}","finishBuild", build, str(cost), build_loc]
-        view.add_item(Button(label="Finished", style=discord.ButtonStyle.red, custom_id="_".join(buttonElements))) 
+        view.add_item(Button(label="Finished In This System", style=discord.ButtonStyle.red, custom_id="_".join(buttonElements))) 
         view.add_item(Button(label="Reset", style=discord.ButtonStyle.gray, custom_id=f"buildIn_{build_loc}")) 
         return view
     
@@ -159,10 +168,18 @@ class BuildButtons:
         money = int(buttonID.split("_")[5])
         game.add_units(build, loc)
         player_helper.stats["science"], player_helper.stats["materials"], player_helper.stats["money"] = science, material, money
-        player_helper.spend_influence_on_action("build")
         game.update_player(player_helper)
-        next_player = game.get_next_player(player)
-        view = TurnButtons.getStartTurnButtons(game, game.get_player(next_player))
-        await interaction.message.delete()
-        await interaction.response.send_message(f"<@{next_player}> use these buttons to do your turn. ",view=view)
+        buildApt = player["build_apt"]
+        if player["passed"]== True:
+            buildApt = 1
+        if len(build) == buildApt:
+            next_player = game.get_next_player(player)
+            view = TurnButtons.getStartTurnButtons(game, game.get_player(next_player))
+            await interaction.message.delete()
+            await interaction.response.send_message(f"<@{next_player}> use these buttons to do your turn. ",view=view)
+        else:
+            view2 = View()
+            view2.add_item(Button(label="Build Somewhere Else", style=discord.ButtonStyle.danger, custom_id="startBuild2"))  
+            view2.add_item(Button(label="End Turn", style=discord.ButtonStyle.danger, custom_id="endTurn"))  
+            await interaction.channel.send(f"{interaction.user.mention} you could potentially build somewhere else.", view=view2)
         

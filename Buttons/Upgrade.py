@@ -10,7 +10,7 @@ from helpers.ShipHelper import PlayerShip
 class UpgradeButtons:
     
     @staticmethod  
-    async def startUpgrade(game: GamestateHelper, player, interaction: discord.Interaction):  
+    async def startUpgrade(game: GamestateHelper, player, interaction: discord.Interaction, button:bool):  
         ships = ["interceptor","cruiser","dread","starbase"]
         drawing = DrawHelper(game.gamestate)
         image = drawing.player_area(player)
@@ -18,9 +18,11 @@ class UpgradeButtons:
         actions = str(player['upgrade_apt'])
         for ship in ships:
             view.add_item(Button(label=ship.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player["color"]}_upgradeShip_{actions}_{ship}"))
-        view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id="endTurn"))
-        view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player["color"]}_restartTurn")) 
-        await interaction.message.delete()
+        
+        if button:
+            view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id="endTurn"))
+            view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player["color"]}_restartTurn")) 
+            await interaction.message.delete()
         await interaction.response.send_message(file=drawing.show_player_ship_area(image),ephemeral=True)
         await interaction.followup.send(
             f"{interaction.user.mention}, choose which ship you would like to upgrade.", view=view)
@@ -59,7 +61,7 @@ class UpgradeButtons:
         for i in available_techs:
             view.add_item(Button(label=part_stats[i]["name"], style=discord.ButtonStyle.blurple, custom_id=f"FCID{player["color"]}_chooseUpgrade_{actions}_{ship}_{oldPart}_{i}"))
         await interaction.response.edit_message(content=f"{interaction.user.mention}, replace "
-                                                        f"{part_stats[oldPart]['name']} with which part? Remove as a free action with Empty.", view=view)
+                                                        f"{part_stats[oldPart]['name']} with which part? Remove as a free action by selecting 'Empty'.", view=view)
     @staticmethod  
     async def chooseUpgrade(game: GamestateHelper, player, interaction: discord.Interaction, customID : str,player_helper : PlayerHelper):
         actions = int(customID.split("_")[1])

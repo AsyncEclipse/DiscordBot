@@ -53,6 +53,15 @@ class PlayerHelper:
         if action+"_action_counters" not in self.stats:
             self.stats[action+"_action_counters"] = 0
         self.stats[action+"_action_counters"] = self.stats[action+"_action_counters"]+1
+
+    def adjust_influence_on_action(self, action:str, amount:int):
+        self.adjust_influence(-amount)
+        if action+"_action_counters" not in self.stats:
+            self.stats[action+"_action_counters"] = 0
+        if self.stats[action+"_action_counters"]+amount > -1:
+            self.stats[action+"_action_counters"] = self.stats[action+"_action_counters"]+amount
+        else:
+            self.stats[action+"_action_counters"] = 0
     
     def acquire_disc_tile_for_points(self):
         self.adjust_influence(-1)

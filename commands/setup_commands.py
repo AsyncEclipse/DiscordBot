@@ -38,9 +38,9 @@ class SetupCommands(commands.GroupCog, name="setup"):
 
 
 
-    @app_commands.command(name="setup_game")
+    @app_commands.command(name="game")
     @app_commands.choices(faction1=factionChoices,faction2=factionChoices,faction3=factionChoices,faction4=factionChoices,faction5=factionChoices,faction6=factionChoices)
-    async def setup_game(self, interaction: discord.Interaction, 
+    async def game(self, interaction: discord.Interaction, 
                                 player1: discord.Member, faction1: app_commands.Choice[str], 
                                 player2: discord.Member,faction2: app_commands.Choice[str], 
                                 player3: Optional[discord.Member]=None,faction3: Optional[app_commands.Choice[str]]=None, 
@@ -85,7 +85,13 @@ class SetupCommands(commands.GroupCog, name="setup"):
                 game.add_tile(str(i), 0, "sector2back")
         for i in range(301, 319):
             game.add_tile(str(i), 0, "sector3back")
-        await interaction.response.send_message("done")
+        game.setup_finished()
+        game.fillInDiscTiles()
+        await interaction.response.send_message("Done With Setup!")
+        
+        await game.showUpdate("Start of Game",interaction)
+        view = TurnButtons.getStartTurnButtons(game, game.get_player(player1.id))
+        await interaction.response.send_message(f"<@{player1.id}> use these buttons to do your turn. ",view=view)
 
     @app_commands.command(name="cleanup")
     async def cleanup(self,interaction: discord.Interaction):
@@ -109,15 +115,57 @@ class SetupCommands(commands.GroupCog, name="setup"):
 
         new_game = GameInit(game_name, player_list)
         new_game.create_game()
+        MAX_CHANNELS_PER_CATEGORY = 20  # Number of channels allowed in each category  
+        async def get_or_create_category(guild:discord.Guild, category_name):  
+            """Get an existing category or create a new one."""  
+            for category in guild.categories:  
+                if category.name == category_name:  
+                    return category  
+            # If category doesn't exist, create it  
+            overwrites = {  
+                interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False),  # Deny access to everyone else  
+            }  
+            return await guild.create_category(category_name, overwrites=overwrites)  
+        
+        async def get_or_create_role(guild:discord.Guild, role_name):  
+            for role in guild.roles:  
+                if role.name == role_name:  
+                    return role   
+            return await guild.create_role(name=role_name)
+        
+        if config.game_number <= 10:  
+            category_name = "Games #1-10"  
+        else:  
+            start = 10 * ((config.game_number - 1) // 10) + 1  
+            end = start + 9  
+            category_name = f"Games #{start}-{end}" 
+        category = await get_or_create_category(interaction.guild, category_name)  
 
-        await interaction.guild.create_text_channel(f'aeb{config.game_number}')
-        await interaction.response.send_message('New game created!')
+        role_name = f"aeb{config.game_number}"  
+        role = await get_or_create_role(interaction.guild, role_name)  
+        overwrites = {  
+            interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False),  
+            role: discord.PermissionOverwrite(read_messages=True, manage_messages=True)
+        }  
+        
 
+        for player_id in player_list:  
+            member = interaction.guild.get_member(player_id[0])  
+            if member:  
+                await member.add_roles(role) 
+                overwrites[member] = discord.PermissionOverwrite(read_messages=True, manage_messages=True)  # Grant access to the player  
 
-    @app_commands.command(name="complete")
-    async def complete(self, interaction: discord.Interaction):
-        game = GamestateHelper(interaction.channel)
-        game.setup_finished()
-        await interaction.response.defer(thinking=True)
-        drawing = DrawHelper(game.gamestate)
-        await interaction.followup.send(file=drawing.show_game())
+        # Create the text channels for the game  
+        tabletalk = await interaction.guild.create_text_channel(f'aeb{config.game_number}-{game_name}', category=category, overwrites=overwrites)  
+        actions = await interaction.guild.create_text_channel(f'aeb{config.game_number}-actions', category=category, overwrites=overwrites)  
+        thread_name = f'aeb{config.game_number}-bot-map-updates'  # Choose a name for your thread  
+        thread = await actions.create_thread(name=thread_name, auto_archive_duration=10080)  # Duration set to 60 minutes 
+        new_game.update_num() 
+        await thread.send(role.mention + " pinging you here")
+        actions.send("Draft factions and turn position in the manner of your choice, then setup the game with /setup game. Enter the players in the order they should take turns in (i.e. enter first player first)")
+        await interaction.response.send_message('New game created! Here are the channels: \n'+tabletalk.jump_url +"\n"+actions.jump_url)
+
+    
+    
+
+   

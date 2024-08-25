@@ -1,16 +1,25 @@
 import json
+
+import discord
 import config
+from helpers.DrawHelper import DrawHelper
 from helpers.PlayerHelper import PlayerHelper
-from PIL import Image, ImageDraw, ImageFont
 import os
 from jproperties import Properties
 import random
+from discord.ui import View, Button
 
 class GamestateHelper:
-    def __init__(self, game_id):
+    def __init__(self, game_id :discord.TextChannel):
+        if "-" in game_id.name:
+            game_id = game_id.name.split("-")[0]
         self.game_id = game_id
         self.gamestate = self.get_gamestate()
 
+
+    def getLocationFromID(self, id):
+        return next((tile for tile in self.gamestate["board"] if self.gamestate["board"][tile]["sector"] == str(id)), None)
+    
     def get_gamestate(self):
         with open(f"{config.gamestate_path}/{self.game_id}.json", "r") as f:
             gamestate = json.load(f)
@@ -85,6 +94,8 @@ class GamestateHelper:
             tile = tile_data[sector]
             if owner != None:
                 tile["owner"] = owner
+                self.gamestate["players"][self.get_player_from_color(owner)]["owned_tiles"].append(position)
+                
             if tile["ancient"] or tile["guardian"] or tile["gcds"]:
                 adv = ""
                 if self.gamestate["advanced_ai"]:
@@ -114,11 +125,13 @@ class GamestateHelper:
 
     def add_control(self, color, position):
         self.gamestate["board"][position]["owner"] = color
+        self.gamestate["players"][self.get_player_from_color(color)]["owned_tiles"].append(position)
         self.gamestate["players"][self.get_player_from_color(color)]["influence_discs"] -= 1
         self.update()
 
     def remove_control(self, color, position):
         self.gamestate["board"][position]["owner"] = 0
+        self.gamestate["players"][self.get_player_from_color(color)]["owned_tiles"].remove(position)
         self.gamestate["players"][self.get_player_from_color(color)]["influence_discs"] += 1
         self.update()
 
@@ -272,6 +285,14 @@ class GamestateHelper:
     def playerResearchTech(self, playerid, tech, type):
         self.gamestate["available_techs"].remove(tech)
         self.gamestate["players"][playerid][type+"_tech"].append(tech)
+        with open("data/techs.json", "r") as f:
+            tech_data = json.load(f)  
+        tech_details = tech_data.get(tech)
+        self.gamestate["players"][playerid]["influence_discs"] += tech_details["infdisk"]
+        if tech_details["activ1"] != 0:
+            self.gamestate["players"][playerid][f"{tech_details["activ1"]}_apt"] += 1
+            if tech_details["activ1"] == "upgrade":
+                self.gamestate["players"][playerid][f"{tech_details["activ1"]}_apt"] += 1
         self.update()
     def update(self):
         with open(f"{config.gamestate_path}/{self.game_id}.json", "w") as f:
@@ -314,6 +335,7 @@ class GamestateHelper:
                 return(i)
         return(False)
 
+    
     def get_owned_tiles(self, player):
         tile_map = self.gamestate["board"]
         color = player["color"]
@@ -322,6 +344,19 @@ class GamestateHelper:
             if "owner" in tile_map[tile] and tile_map[tile]["owner"] == color:
                 tiles.append(tile)
         return tiles
+    
+   
+    async def showUpdate(self, message:str, interaction: discord.Interaction):
+        if "-" in interaction.channel.name:
+            thread_name = interaction.channel.name.split("-")[0]+"-bot-map-updates"  
+            thread = discord.utils.get(interaction.channel.threads, name=thread_name)  
+            if thread is not None:  
+                # Sending a message to the thread  
+                drawing = DrawHelper(self.gamestate)
+                view = View()
+                view.add_item(Button(label="Show Game",style=discord.ButtonStyle.primary, custom_id="showGame"))
+                view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
+                await thread.send(message,file=drawing.show_game(), view=view)
 
     def get_next_player(self, player):
         """

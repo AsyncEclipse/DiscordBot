@@ -43,7 +43,7 @@ class DiscoveryTileButtons:
             discTile_data = json.load(f)
         discName = discTile_data[disc]["name"]
         await interaction.message.delete()
-        await interaction.response.send_message( f"{interaction.user.mention} chose to keep use "+discName+" for its ability")
+        await interaction.response.send_message( f"{interaction.user.mention} chose to keep use '"+discName+"' for its ability")
 
         if discTile_data[disc]["part"] != "":
             await interaction.channel.send( "Adding Parts is not yet implemented")

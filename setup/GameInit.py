@@ -10,8 +10,10 @@ class GameInit:
         self.gamestate = []
 
     def create_game(self):
+        
         game_id = "aeb"+str(config.game_number)
         update_game_number()
+        
 
         with open("data/basic_game.json", "r") as f:
             self.gamestate = json.load(f)
@@ -24,3 +26,5 @@ class GameInit:
 
         with open(f"{config.gamestate_path}/{self.gamestate['game_id']}.json", "w") as f:
             json.dump(self.gamestate, f)
+    def update_num(self):
+        config.game_number +=1

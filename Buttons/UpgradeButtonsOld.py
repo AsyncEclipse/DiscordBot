@@ -166,7 +166,7 @@ class ShowParts(Button):
             view.add_item(button2)
         await interaction.response.edit_message(content=f"{interaction.user.mention}, replace "
                                                         f"{self.part_stats[self.old_part]['name']} with "
-                                                        f"which part? Remove as a free action with Empty.", view=view)
+                                                        f"which part? Remove as a free action by selecting 'Empty'.", view=view)
 
     async def interaction_check(self, interaction: discord.Interaction):
         if str(interaction.user.id) != str(self.author):
