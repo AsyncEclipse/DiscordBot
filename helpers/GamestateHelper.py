@@ -358,20 +358,45 @@ class GamestateHelper:
                 view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
                 await thread.send(message,file=drawing.show_game(), view=view)
 
-    def get_next_player(self, player):
-        """
+    def getPlayerFromHSLocation(self, location):  
+        tileID = self.get_gamestate()["board"][location]["sector"]  
+        return next((player for player in self.get_gamestate()["players"] if str(self.get_gamestate()["players"][player]["home_planet"]) == tileID), None)  
+    
+    def is_everyone_passed(self):
+        listHS = [201,203,205,207,209,211]
+        for number in listHS:
+            nextPlayer = self.getPlayerFromHSLocation(str(number))
+            if nextPlayer is not None and not self.get_gamestate()["players"].get(nextPlayer, {}).get("passed", False):  
+                return False
+        return True
 
-        :param player: takes in a players stats in dict form. NOT a PlayerHelper object!
-        :return:
-        """
-        player_systems = []
-        player_home = player["home_planet"]
-        for i in ["201", "203", "205", "207", "209", "211"]:
-            if "owner" in self.gamestate["board"][i] and self.gamestate["board"][i]["owner"] != 0:
-                player_systems.append(i)
-        tile = self.get_system_coord(player_home)
-        index = player_systems.index(tile) + 1
-        index = index % len(player_systems)
-        new_player_color = self.gamestate["board"][player_systems[index]]["owner"]
-        return self.get_player_from_color(new_player_color)
+    def get_next_player(self, player):
+
+        listHS = [201,203,205,207,209,211]
+        playerHSID = player["home_planet"]
+        tileLocation = int(self.getLocationFromID(playerHSID))
+        index = listHS.index(tileLocation)  
+        if index is None:  
+            return None 
+        newList = listHS[index+1:] + listHS[:index] + [listHS[index]] 
+        for number in newList:
+            nextPlayer = self.getPlayerFromHSLocation(str(number))
+            if nextPlayer is not None and not self.get_gamestate()["players"].get(nextPlayer, {}).get("perma_passed", False):  
+                return self.get_gamestate()["players"][nextPlayer]
+        return None
+        # """
+
+        # :param player: takes in a players stats in dict form. NOT a PlayerHelper object!
+        # :return:
+        # """
+        # player_systems = []
+        # player_home = player["home_planet"]
+        # for i in ["201", "203", "205", "207", "209", "211"]:
+        #     if "owner" in self.gamestate["board"][i] and self.gamestate["board"][i]["owner"] != 0:
+        #         player_systems.append(i)
+        # tile = self.get_system_coord(player_home)
+        # index = player_systems.index(tile) + 1
+        # index = index % len(player_systems)
+        # new_player_color = self.gamestate["board"][player_systems[index]]["owner"]
+        # return self.get_player_from_color(new_player_color)
 

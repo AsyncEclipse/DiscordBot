@@ -199,6 +199,24 @@ class DrawHelper:
                 tech_image = Image.open(tech_path).convert("RGBA").resize((size, size))  
                 context.paste(tech_image, (ultimateX,y), mask=tech_image)
         return context
+    
+    def display_remaining_tiles(self):
+        context = Image.new("RGBA", (1000, 600), (255, 255, 255, 0))
+        
+        
+        filepath = f"images/resources/hexes/sector3back.png"
+        
+        tech_image = Image.open(filepath).convert("RGBA").resize((345, 299))  
+        context.paste(tech_image, (150,160), mask=tech_image)
+        text_drawable_image = ImageDraw.Draw(context)  
+        font = ImageFont.truetype("arial.ttf", size=90)  
+        stroke_color = (0, 0, 0)  
+        stroke_width = 2  
+        text_drawable_image.text((290, 200), str(len(self.gamestate["tile_deck_300"])), (255, 255, 255), font=font,  
+                                    stroke_width=stroke_width, stroke_fill=stroke_color)  
+        text_drawable_image.text((0, 50), "Remaining Tiles", (255, 255, 255), font=font,  
+                                    stroke_width=stroke_width, stroke_fill=stroke_color) 
+        return context
 
 
     def player_area(self, player):
@@ -279,9 +297,12 @@ class DrawHelper:
         sizeR = 58
         reputation_path = f"images/resources/components/all_boards/reputation.png"  
         reputation_image = Image.open(reputation_path).convert("RGBA").resize((sizeR, sizeR))  
+        mod = 0
         for x,reputation in enumerate(player["reputation_track"]):
             if reputation != "mixed" and reputation != "amb":
-                context.paste(reputation_image, (825,430-x*84), mask=reputation_image) 
+                context.paste(reputation_image, (825,430-(x-mod)*86), mask=reputation_image) 
+            if reputation == "amb":
+                mod +=1
 
 
 
@@ -347,6 +368,12 @@ class DrawHelper:
             for shipCounter in range(player["ship_stock"][counter]):
                 context.paste(ship_image, (x+ultimateC*10+counter*50,y),ship_image)
                 ultimateC +=1
+
+        discTile = Image.open(f"images/resources/components/discovery_tiles/discovery_2ptback.png").convert("RGBA").resize((40, 40))
+        discTile = discTile.rotate(315,expand=True)
+        if "disc_tiles_for_points" in player:
+            for discT in range(player["disc_tiles_for_points"]):
+                context.paste(discTile, (x+discT*25,y+50), mask=discTile)
         return context
 
 
@@ -370,6 +397,8 @@ class DrawHelper:
                     points += 5
                 else:
                     points += len(player[type])-3
+        if "disc_tiles_for_points" in player:
+            points += player["disc_tiles_for_points"]*2
         return points
 
     def show_game(self):  
@@ -422,17 +451,27 @@ class DrawHelper:
         # Create context for players  
         context2 = create_player_area()  
         context3 = self.display_techs()
+        context4 = self.display_remaining_tiles()
         # Combine both contexts  
         final_context = Image.new("RGBA", (4160, board_height + context2.size[1]+context3.size[1]), (255, 255, 255, 0))  
         final_context.paste(cropped_context, (0, 0))  
         final_context.paste(context2, (0, board_height))  
         final_context.paste(context3, (0, board_height+context2.size[1]))  
+        final_context.paste(context4, (1500, board_height+context2.size[1]))  
 
         bytes_io = BytesIO()  
         final_context.save(bytes_io, format="PNG")  
         bytes_io.seek(0)  
 
         return discord.File(bytes_io, filename="map_image.png") 
+    
+    def show_available_techs(self):
+        context = self.display_techs()
+        bytes_io = BytesIO()  
+        context.save(bytes_io, format="PNG")  
+        bytes_io.seek(0)  
+
+        return discord.File(bytes_io, filename="techs_image.png") 
 
     def show_single_tile(self, tile_image):
         context = Image.new("RGBA", (345, 299), (255, 255, 255, 0))

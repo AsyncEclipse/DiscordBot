@@ -41,6 +41,8 @@ class ButtonListener(commands.Cog):
                 await TurnButtons.showReputation(game, interaction,player)
             if customID == "passForRound":
                 await TurnButtons.passForRound(player, game, interaction,player_helper)
+            if customID == "permanentlyPass":
+                await TurnButtons.permanentlyPass(player, game, interaction,player_helper)
             if customID == "endTurn":
                 await TurnButtons.endTurn(player, game, interaction)
             if customID == "restartTurn":
@@ -55,8 +57,8 @@ class ButtonListener(commands.Cog):
                 await ExploreButtons.placeTile(game,  interaction, player)
             if customID.startswith("discardTile"):
                 await ExploreButtons.discardTile(game, interaction)
-            if customID.startswith("keepDiscForPoint"):
-                await DiscoveryTileButtons.keepDiscForPoint(game, player_helper, interaction)
+            if customID.startswith("keepDiscForPoints"):
+                await DiscoveryTileButtons.keepDiscForPoints(game, player_helper, interaction)
             if customID.startswith("usedDiscForAbility"):
                 await DiscoveryTileButtons.usedDiscForAbility(game, player_helper, interaction, customID,player)
             if customID.startswith("startResearch"):

@@ -64,7 +64,6 @@ class PlayerHelper:
             self.stats[action+"_action_counters"] = 0
     
     def acquire_disc_tile_for_points(self):
-        self.adjust_influence(-1)
         if "disc_tiles_for_points" not in self.stats:
             self.stats["disc_tiles_for_points"] = 0
         self.stats["disc_tiles_for_points"] = self.stats["disc_tiles_for_points"]+1
@@ -74,6 +73,8 @@ class PlayerHelper:
         
     def passTurn(self):
         self.stats["passed"] = True
+    def permanentlyPassTurn(self):
+        self.stats["perma_passed"] = True
     
     def setFirstPlayer(self, firstPlayerBool : bool):
         self.stats["firstPlayer"] = firstPlayerBool
@@ -115,6 +116,7 @@ class PlayerHelper:
         self.adjust_science(self.science_income())
         self.stats["colony_ships"] = self.stats["base_colony_ships"]
         self.stats["passed"] = False
+        self.stats["perma_passed"] = False
         actions = ["influence","build","move","upgrade","explore","research"]
         for action in actions:
             if action+"_action_counters" not in self.stats:

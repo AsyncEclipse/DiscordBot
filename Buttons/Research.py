@@ -2,6 +2,7 @@ import json
 import discord
 from discord.ui import View
 from Buttons.DiscoveryTile import DiscoveryTileButtons
+from helpers.DrawHelper import DrawHelper
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 from discord.ui import View, Button
@@ -80,6 +81,7 @@ class ResearchButtons:
         player_helper.spend_influence_on_action("research")
         game.update_player(player_helper)
         player = game.get_player(interaction.user.id) 
+        drawing = DrawHelper(game.gamestate)  
         view = View()
         view2 = View()
         techsAvailable = game.get_gamestate()["available_techs"]  
@@ -121,6 +123,7 @@ class ResearchButtons:
         await interaction.response.send_message(f"{interaction.user.mention}, select the tech you would like to acquire. The discounted cost is in parentheses.", view=view)
         if buttonCount > 26:
             await interaction.channel.send(view=view2)
+        await interaction.followup.send(file=drawing.show_available_techs(),ephemeral=True)
         if buttonCommand:
             if player["research_apt"] > 1:
                 view.add_item(Button(label="Decline 2nd Tech", style=discord.ButtonStyle.danger, custom_id="deleteMsg"))  

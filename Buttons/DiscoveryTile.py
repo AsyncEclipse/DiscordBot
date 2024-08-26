@@ -29,7 +29,7 @@ class DiscoveryTileButtons:
         await interaction.channel.send(msg, view=view,file=file)
 
     @staticmethod 
-    async def keepDiscForPoint(game: GamestateHelper, player_helper:PlayerHelper, interaction: discord.Interaction):
+    async def keepDiscForPoints(game: GamestateHelper, player_helper:PlayerHelper, interaction: discord.Interaction):
         player_helper.acquire_disc_tile_for_points()
         game.update_player(player_helper)
         await interaction.message.delete()

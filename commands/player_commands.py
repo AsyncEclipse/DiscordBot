@@ -3,6 +3,7 @@ from discord.ext import commands
 from discord import app_commands
 from typing import Optional
 from Buttons.Move import MoveButtons
+from Buttons.Reputation import ReputationButtons
 from Buttons.Research import ResearchButtons
 from Buttons.Turn import TurnButtons
 from Buttons.Upgrade import UpgradeButtons
@@ -132,6 +133,13 @@ class PlayerCommands(commands.GroupCog, name="player"):
         image = drawing.player_area(p1)
         await interaction.response.defer(thinking=True)
         await interaction.followup.send(file=drawing.show_player_area(image))
+    
+    @app_commands.command(name="draw_reputation")
+    async def draw_reputation(self, interaction: discord.Interaction, num_options: int):
+        game = GamestateHelper(interaction.channel)
+        player = game.get_player(interaction.user.id)  
+        player_helper = PlayerHelper(interaction.user.id, player)
+        await ReputationButtons.resolveGainingReputation(game, num_options,interaction, player_helper)
 
     @app_commands.command(name="show_player_ships")
     async def show_player_ships(self, interaction: discord.Interaction, player: discord.Member):
