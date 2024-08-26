@@ -220,4 +220,5 @@ class TileCommands(commands.GroupCog, name="tile"):
         view = View()
         button = Button(label="Show Game",style=discord.ButtonStyle.primary, custom_id="showGame")
         view.add_item(button)
+        view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
         await interaction.channel.send(view=view)

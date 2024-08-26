@@ -61,21 +61,36 @@ class DrawHelper:
             tile = self.gamestate["board"][position]
             rotation = int(tile["orientation"])
 
+            if int(int(position) /100) == 2 and int(position) %2 == 1:
+                hsMask = Image.open(f"images/resources/masks/hsmask.png").convert("RGBA").resize((60, 60))
+                tile_image.paste(hsMask, (143, 120), mask=hsMask)
+                hsMask2 = Image.open(f"images/resources/masks/hsmask.png").convert("RGBA").resize((70, 70))
+                tile_image.paste(hsMask2, (138, 115), mask=hsMask2)
+                hsMask3 = Image.open(f"images/resources/masks/hsmask.png").convert("RGBA").resize((54, 54))
+                tile_image.paste(hsMask3, (146, 123), mask=hsMask3)
+            if "disctile" in tile and tile["disctile"] > 0:
+                discTile = Image.open(f"images/resources/components/discovery_tiles/discovery_2ptback.png").convert("RGBA").resize((80, 80))
+                discTile = discTile.rotate(315,expand=True)
+                tile_image.paste(discTile, (108, 89), mask=discTile)
+
             if "player_ships" in tile and len(tile["player_ships"]) > 0:  
                 counts = {}  # To track counts for each ship type  
                 for ship in tile["player_ships"]:  
                     ship_type = ship.split("-")[1]  # Extract ship type
-                    ship_image = Image.open(f"images/resources/components/basic_ships/{ship}.png").convert("RGBA").resize((70, 70))
+                    size = 70
                     if ship_type in ["gcds", "gcdsadv", "anc", "ancadv", "grd", "grdadv"]:
                         ship_type = "ai"
+                        size = 110
+                    ship_image = Image.open(f"images/resources/components/basic_ships/{ship}.png").convert("RGBA").resize((size, size))
+                    
                     coords = tile[f"{ship_type}_snap"]  
                      
                     if ship_type not in counts:  
                         counts[ship_type] = 0  
                     
                     tile_image.paste(ship_image,   
-                                    (int(345 / 1024 * coords[0] + counts[ship_type]-35),   
-                                    int(345 / 1024 * coords[1] + counts[ship_type]-35)),   
+                                    (int(345 / 1024 * coords[0] + counts[ship_type]-size/2),   
+                                    int(345 / 1024 * coords[1] + counts[ship_type]-size/2)),   
                                     mask=ship_image)  
                     
                     counts[ship_type] += 10 
@@ -111,29 +126,9 @@ class DrawHelper:
                     tile_image = tile_image.rotate(60)
                   #345, 299
 
-            if "disctile" in tile and tile["disctile"] > 0:
-                discTile = Image.open(f"images/resources/components/discovery_tiles/discovery_2ptback.png").convert("RGBA").resize((90, 90))
-                discTile = discTile.rotate(315,expand=True)
-                tile_image.paste(discTile, (112, 88), mask=discTile)
-
-
-
-
-            if int(int(position) /100) == 2 and int(position) %2 == 1:
-                hsMask = Image.open(f"images/resources/masks/hsmask.png").convert("RGBA").resize((60, 60))
-                tile_image.paste(hsMask, (143, 120), mask=hsMask)
-                hsMask2 = Image.open(f"images/resources/masks/hsmask.png").convert("RGBA").resize((70, 70))
-                tile_image.paste(hsMask2, (138, 115), mask=hsMask2)
-                hsMask3 = Image.open(f"images/resources/masks/hsmask.png").convert("RGBA").resize((54, 54))
-                tile_image.paste(hsMask3, (146, 123), mask=hsMask3)
-
             text_position = (268, 132)
             banner = Image.open(f"images/resources/masks/banner.png").convert("RGBA").resize((98, 48))
             tile_image.paste(banner, (247, 126), mask=banner)
-
-
-
-
 
             font = ImageFont.truetype("arial.ttf", size=30)
             text = str(position)
@@ -203,6 +198,24 @@ class DrawHelper:
                     tech_path = f"images/resources/components/technology/rare/tech_{techName}.png"  
                 tech_image = Image.open(tech_path).convert("RGBA").resize((size, size))  
                 context.paste(tech_image, (ultimateX,y), mask=tech_image)
+        return context
+    
+    def display_remaining_tiles(self):
+        context = Image.new("RGBA", (1000, 600), (255, 255, 255, 0))
+        
+        
+        filepath = f"images/resources/hexes/sector3back.png"
+        
+        tech_image = Image.open(filepath).convert("RGBA").resize((345, 299))  
+        context.paste(tech_image, (150,160), mask=tech_image)
+        text_drawable_image = ImageDraw.Draw(context)  
+        font = ImageFont.truetype("arial.ttf", size=90)  
+        stroke_color = (0, 0, 0)  
+        stroke_width = 2  
+        text_drawable_image.text((290, 200), str(len(self.gamestate["tile_deck_300"])), (255, 255, 255), font=font,  
+                                    stroke_width=stroke_width, stroke_fill=stroke_color)  
+        text_drawable_image.text((0, 50), "Remaining Tiles", (255, 255, 255), font=font,  
+                                    stroke_width=stroke_width, stroke_fill=stroke_color) 
         return context
 
 
@@ -280,13 +293,21 @@ class DrawHelper:
         process_parts(player["cruiser_parts"], cruiserCoord)  
         process_parts(player["dread_parts"], dreadCoord)  
         process_parts(player["starbase_parts"], sbCoord)  
-            
-
+        
+        sizeR = 58
+        reputation_path = f"images/resources/components/all_boards/reputation.png"  
+        reputation_image = Image.open(reputation_path).convert("RGBA").resize((sizeR, sizeR))  
+        mod = 0
+        for x,reputation in enumerate(player["reputation_track"]):
+            if reputation != "mixed" and reputation != "amb":
+                context.paste(reputation_image, (825,430-(x-mod)*86), mask=reputation_image) 
+            if reputation == "amb":
+                mod +=1
 
 
 
         x = 925  
-        y = 50  
+        y = 0  
         font = ImageFont.truetype("arial.ttf", size=90)  
         stroke_color = (0, 0, 0)  
         stroke_width = 2  
@@ -321,9 +342,25 @@ class DrawHelper:
             draw_resource(context, img_path, text_color, player_key, amount_key, (x, y))  
             y += 100 
         colonyShip = Image.open("images/resources/components/all_boards/colony_ship.png").convert("RGBA").resize((100, 100))  
+        
         for i in range(player["colony_ships"]):
-            context.paste(colonyShip, (x+i*50,y),colonyShip)  
-        y += 70
+            context.paste(colonyShip, (x+i*50,y+10),colonyShip)  
+
+
+        publicPoints = self.get_public_points(player)
+        points = Image.open("images/resources/components/all_boards/points.png").convert("RGBA").resize((80, 80)) 
+        context.paste(points, (x+250,y+10),points)  
+        font = ImageFont.truetype("arial.ttf", size=50)  
+        stroke_color = (0, 0, 0)
+        color = (0, 0, 0)  
+        stroke_width = 2
+        text_drawable_image = ImageDraw.Draw(context)  
+        letX = x+250+25
+        if publicPoints > 9:
+            letX = x+250+12
+        text_drawable_image.text((letX,y+21), str(publicPoints), color, font=font,  
+                        stroke_width=stroke_width, stroke_fill=stroke_color)
+        y += 90
         ships = ["int","cru","drd","sb"]
         ultimateC = 0
         for counter,ship in enumerate(ships):
@@ -331,10 +368,38 @@ class DrawHelper:
             for shipCounter in range(player["ship_stock"][counter]):
                 context.paste(ship_image, (x+ultimateC*10+counter*50,y),ship_image)
                 ultimateC +=1
+
+        discTile = Image.open(f"images/resources/components/discovery_tiles/discovery_2ptback.png").convert("RGBA").resize((40, 40))
+        discTile = discTile.rotate(315,expand=True)
+        if "disc_tiles_for_points" in player:
+            for discT in range(player["disc_tiles_for_points"]):
+                context.paste(discTile, (x+discT*25,y+50), mask=discTile)
         return context
 
 
 
+    def get_public_points(self, player):
+        points = 0
+        tile_map = self.gamestate["board"]
+        color = player["color"]
+        tiles = []
+        for tile in tile_map:
+            if "owner" in tile_map[tile] and tile_map[tile]["owner"] == color:
+                points += tile_map[tile]["vp"]
+                if "player_ships" in tile_map[tile] and "mon" in tile_map[tile]["player_ships"]:
+                    points += 3
+                if player["name"] == "Planta":
+                    points +=1
+        techTypes =["military_tech","grid_tech","nano_tech"]
+        for type in techTypes:
+            if type in player and len(player[type]) > 4:
+                if len(player[type]) == 7:
+                    points += 5
+                else:
+                    points += len(player[type])-3
+        if "disc_tiles_for_points" in player:
+            points += player["disc_tiles_for_points"]*2
+        return points
 
     def show_game(self):  
         def load_tile_coordinates():  
@@ -386,17 +451,27 @@ class DrawHelper:
         # Create context for players  
         context2 = create_player_area()  
         context3 = self.display_techs()
+        context4 = self.display_remaining_tiles()
         # Combine both contexts  
         final_context = Image.new("RGBA", (4160, board_height + context2.size[1]+context3.size[1]), (255, 255, 255, 0))  
         final_context.paste(cropped_context, (0, 0))  
         final_context.paste(context2, (0, board_height))  
         final_context.paste(context3, (0, board_height+context2.size[1]))  
+        final_context.paste(context4, (1500, board_height+context2.size[1]))  
 
         bytes_io = BytesIO()  
         final_context.save(bytes_io, format="PNG")  
         bytes_io.seek(0)  
 
         return discord.File(bytes_io, filename="map_image.png") 
+    
+    def show_available_techs(self):
+        context = self.display_techs()
+        bytes_io = BytesIO()  
+        context.save(bytes_io, format="PNG")  
+        bytes_io.seek(0)  
+
+        return discord.File(bytes_io, filename="techs_image.png") 
 
     def show_single_tile(self, tile_image):
         context = Image.new("RGBA", (345, 299), (255, 255, 255, 0))

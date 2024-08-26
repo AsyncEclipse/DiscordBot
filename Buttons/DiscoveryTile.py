@@ -29,7 +29,7 @@ class DiscoveryTileButtons:
         await interaction.channel.send(msg, view=view,file=file)
 
     @staticmethod 
-    async def keepDiscForPoint(game: GamestateHelper, player_helper:PlayerHelper, interaction: discord.Interaction):
+    async def keepDiscForPoints(game: GamestateHelper, player_helper:PlayerHelper, interaction: discord.Interaction):
         player_helper.acquire_disc_tile_for_points()
         game.update_player(player_helper)
         await interaction.message.delete()
@@ -43,7 +43,7 @@ class DiscoveryTileButtons:
             discTile_data = json.load(f)
         discName = discTile_data[disc]["name"]
         await interaction.message.delete()
-        await interaction.response.send_message( f"{interaction.user.mention} chose to keep use "+discName+" for its ability")
+        await interaction.response.send_message( f"{interaction.user.mention} chose to keep use '"+discName+"' for its ability")
 
         if discTile_data[disc]["part"] != "":
             await interaction.channel.send( "Adding Parts is not yet implemented")

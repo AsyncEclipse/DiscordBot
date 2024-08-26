@@ -11,4 +11,6 @@ def update_game_number():
     with open("config.json", "w") as f:
         data["game_number"] += 1
         json.dump(data, f)
+        
+    
 
