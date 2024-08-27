@@ -75,7 +75,7 @@ class BuildButtons:
                 key = f"cost_dread"
             buttonElements = [f"FCID{player['color']}","buildShip", build, str(cost), build_loc, ship]
             view.add_item(Button(label=f"{ship} ({player[f'{key}']})", style=discord.ButtonStyle.primary, custom_id="_".join(buttonElements))) 
-        buttonElements = [f"FCID{player["color"]}","finishBuild", build, str(cost), build_loc]
+        buttonElements = [f"FCID{player['color']}","finishBuild", build, str(cost), build_loc]
         view.add_item(Button(label="Finished In This System", style=discord.ButtonStyle.red, custom_id="_".join(buttonElements))) 
         view.add_item(Button(label="Reset", style=discord.ButtonStyle.gray, custom_id=f"buildIn_{build_loc}")) 
         return view
