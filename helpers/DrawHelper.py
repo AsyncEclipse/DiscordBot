@@ -130,7 +130,7 @@ class DrawHelper:
             banner = Image.open(f"images/resources/masks/banner.png").convert("RGBA").resize((98, 48))
             tile_image.paste(banner, (247, 126), mask=banner)
 
-            font = ImageFont.truetype("arial.ttf", size=30)
+            font = ImageFont.truetype("roboto.ttf", size=30)
             text = str(position)
 
             text_color = (255, 255, 255)
@@ -163,7 +163,7 @@ class DrawHelper:
         x4=0
         ultimateX = 0
         text_drawable_image = ImageDraw.Draw(context)
-        font = ImageFont.truetype("arial.ttf", size=90)
+        font = ImageFont.truetype("roboto.ttf", size=90)
         stroke_color = (0, 0, 0)
         stroke_width = 2
         text_drawable_image.text((120, 50), f"Available Techs", (255, 0, 0), font=font,
@@ -209,7 +209,7 @@ class DrawHelper:
         tech_image = Image.open(filepath).convert("RGBA").resize((345, 299))
         context.paste(tech_image, (150,160), mask=tech_image)
         text_drawable_image = ImageDraw.Draw(context)
-        font = ImageFont.truetype("arial.ttf", size=90)
+        font = ImageFont.truetype("roboto.ttf", size=90)
         stroke_color = (0, 0, 0)
         stroke_width = 2
         text_drawable_image.text((290, 200), str(len(self.gamestate["tile_deck_300"])), (255, 255, 255), font=font,
@@ -239,7 +239,7 @@ class DrawHelper:
                 if num > 0:
                     context.paste(inf_image, (12+(int(x*47)), 422), mask=inf_image)
                 if num > 1:
-                    font = ImageFont.truetype("arial.ttf", size=25)
+                    font = ImageFont.truetype("roboto.ttf", size=25)
                     stroke_color = (0, 0, 0)
                     color = (255, 255, 255)
                     stroke_width = 2
@@ -308,7 +308,7 @@ class DrawHelper:
 
         x = 925
         y = 0
-        font = ImageFont.truetype("arial.ttf", size=90)
+        font = ImageFont.truetype("roboto.ttf", size=90)
         stroke_color = (0, 0, 0)
         stroke_width = 2
 
@@ -350,7 +350,7 @@ class DrawHelper:
         publicPoints = self.get_public_points(player)
         points = Image.open("images/resources/components/all_boards/points.png").convert("RGBA").resize((80, 80))
         context.paste(points, (x+250,y+10),points)
-        font = ImageFont.truetype("arial.ttf", size=50)
+        font = ImageFont.truetype("roboto.ttf", size=50)
         stroke_color = (0, 0, 0)
         color = (0, 0, 0)
         stroke_width = 2
