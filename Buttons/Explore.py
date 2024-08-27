@@ -116,7 +116,7 @@ class ExploreButtons:
                     if adjTile in game.get_gamestate()["board"]:
                         adjTileImage = drawing.board_tile_image(adjTile)
                         context.paste(adjTileImage,coords[index],mask=adjTileImage)
-                font = ImageFont.truetype("arial.ttf", size=50)
+                font = ImageFont.truetype("images/resources/arial.ttf", size=50)
                 ImageDraw.Draw(context).text((10, 10), f"Option #{count}", (255, 255, 255), font=font,
                                 stroke_width=2, stroke_fill=(0, 0, 0))
                 bytes = BytesIO()
