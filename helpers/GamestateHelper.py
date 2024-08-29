@@ -153,10 +153,34 @@ class GamestateHelper:
                 self.gamestate["players"][player]["ship_stock"][3] -= 1
             self.gamestate["board"][position]["player_ships"].append(i)
         self.update()
-
+    async def displayPlayerStats(self, player, interaction:discord.Interaction):
+        money = player["money"]
+        moneyIncrease = player["population_track"][player["money_pop_cubes"]-1] - player["influence_track"][player["influence_discs"]]
+        if  moneyIncrease > -1:
+            moneyIncrease = "+"+str( moneyIncrease)
+        else:
+            moneyIncrease = str( moneyIncrease)
+        science = player["science"]
+        scienceIncrease = player["population_track"][player["science_pop_cubes"]-1]
+        if  scienceIncrease > -1:
+            scienceIncrease = "+"+str(scienceIncrease)
+        else:
+            scienceIncrease = str(scienceIncrease)
+        materials = player["materials"]
+        materialsIncrease = player["population_track"][player["material_pop_cubes"]-1]
+        if  materialsIncrease > -1:
+            materialsIncrease = "+"+str(materialsIncrease)
+        else:
+            materialsIncrease = str(materialsIncrease)
+        msg = f"Your current economic situation is as follows:\nMoney: {money} ({moneyIncrease})\nScience: {science} ({scienceIncrease})\nMaterials: {materials} ({materialsIncrease})"
+        await interaction.followup.send(msg,ephemeral=True)
+            
+        
+            
     def add_pop_specific(self, type:str, number:int, position:str, playerID):
         if self.gamestate["players"][playerID]["colony_ships"] > 0:
             self.gamestate["players"][playerID]["colony_ships"] = self.gamestate["players"][playerID]["colony_ships"]-1
+        else:
             return False
         self.gamestate["board"][position][f"{type}_pop"][number] = self.gamestate["board"][position][f"{type}_pop"][number]+1
         self.gamestate["players"][playerID][type.replace("adv","")+"_pop_cubes"] = self.gamestate["players"][playerID][type.replace("adv","")+"_pop_cubes"]-1
@@ -218,6 +242,10 @@ class GamestateHelper:
                 pass
             else:
                 tech_draws -= 1
+        if "roundNum" in self.gamestate:
+            self.gamestate["roundNum"] += 1
+        else:
+            self.gamestate["roundNum"] = 2
         self.update()
 
     def player_setup(self, player_id, faction, color):
@@ -288,7 +316,7 @@ class GamestateHelper:
         with open("data/techs.json", "r") as f:
             tech_data = json.load(f)
         tech_details = tech_data.get(tech)
-        self.gamestate["players"][playerid]["influence_discs"] += tech_details["infdisk"]
+        self.gamestate["players"][playerid]["influence_discs"] += tech_details["infdisc"]
         if tech_details["activ1"] != 0:
             self.gamestate["players"][playerid][f"{tech_details['activ1']}_apt"] += 1
             if tech_details["activ1"] == "upgrade":

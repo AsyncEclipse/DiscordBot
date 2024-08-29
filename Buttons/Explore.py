@@ -59,17 +59,15 @@ class ExploreButtons:
             view2.add_item(Button(label="Start 2nd explore", style=discord.ButtonStyle.danger, custom_id="startExplore2"))
             view2.add_item(Button(label="Decline 2nd Explore", style=discord.ButtonStyle.danger, custom_id="deleteMsg"))
             await interaction.channel.send(f"{interaction.user.mention} after exploring the first time, you can use this button to explore again.", view=view2)
-        view = View()
-        view.add_item(Button(label="End Turn", style=discord.ButtonStyle.danger, custom_id="endTurn"))
-        await interaction.channel.send(f"{interaction.user.mention} when you're finished resolving your action, you may end turn with this button.", view=view)
         await interaction.message.delete()
     @staticmethod
-    async def exploreTile(game: GamestateHelper, player, interaction: discord.Interaction):
+    async def exploreTile(game: GamestateHelper, player, interaction: discord.Interaction, customID:str):
         await interaction.response.defer(thinking=True)
         drawing = DrawHelper(game.gamestate)
         view = View()
         player = game.get_player(interaction.user.id)
-        msg = interaction.data["custom_id"].split("_")
+        msg = customID.split("_")
+        position = msg[1]
         if len(msg) > 2:
             tileID = msg[2]
             game.tile_discard(msg[3])
@@ -79,10 +77,10 @@ class ExploreButtons:
                 tileID2 = game.tile_draw(msg[1])
                 image = drawing.base_tile_image(tileID)
                 image2 = drawing.base_tile_image(tileID2)
-                await interaction.followup.send("Option #1",file=drawing.show_single_tile(image), ephemeral = True)
-                await interaction.followup.send("Option #2",file=drawing.show_single_tile(image2), ephemeral = True)
-                view.add_item(Button(label="Option #1",style=discord.ButtonStyle.success, custom_id=f"exploreTile_{msg[1]}_{tileID}_{tileID2}"))
-                view.add_item(Button(label="Option #2",style=discord.ButtonStyle.success, custom_id=f"exploreTile_{msg[1]}_{tileID2}_{tileID}"))
+                await interaction.followup.send("Option #1",file=drawing.show_single_tile(image))
+                await interaction.followup.send("Option #2",file=drawing.show_single_tile(image2))
+                view.add_item(Button(label="Option #1",style=discord.ButtonStyle.success, custom_id=f"exploreTile_{position}_{tileID}_{tileID2}"))
+                view.add_item(Button(label="Option #2",style=discord.ButtonStyle.success, custom_id=f"exploreTile_{position}_{tileID2}_{tileID}"))
                 await interaction.channel.send(f"{interaction.user.mention} select the tile you wish to resolve.",view=view)
                 await interaction.message.delete()
                 return
@@ -94,6 +92,7 @@ class ExploreButtons:
         with open("data/sectors.json") as f:
             tile_data = json.load(f)
         tile = tile_data[tileID]
+        await interaction.followup.send("Tile explored",file=drawing.show_single_tile(image))
         playerTiles = ExploreButtons.getListOfTilesPlayerIsIn(game, player)
         count = 1
         for x in range(6):
@@ -102,38 +101,24 @@ class ExploreButtons:
             if wormholeString in wormholeStringsViewed: continue
             wormholeStringsViewed.append(wormholeString)
             rotationWorks = False
-            for index, adjTile in enumerate(configs.get(msg[1])[0].split(",")):
+            for index, adjTile in enumerate(configs.get(position)[0].split(",")):
                 tile_orientation_index = (index + 6 + x) % 6
                 if adjTile in playerTiles and tile_orientation_index in tile["wormholes"]:
                     rotationWorks = True
                     break
             if rotationWorks:
-                context = Image.new("RGBA", (345*3, 300*3), (255, 255, 255, 0))
-                image = drawing.base_tile_image_with_rotation(tileID,rotation,tile["wormholes"])
-                context.paste(image,(345, 300),mask=image)
-                coords = [(345, 0), (605, 150),(605, 450),(345, 600), (85, 450),(85, 150)]
-                for index, adjTile in enumerate(configs.get(msg[1])[0].split(",")):
-                    if adjTile in game.get_gamestate()["board"]:
-                        adjTileImage = drawing.board_tile_image(adjTile)
-                        context.paste(adjTileImage,coords[index],mask=adjTileImage)
-                font = ImageFont.truetype("images/resources/arial.ttf", size=50)
-                ImageDraw.Draw(context).text((10, 10), f"Option #{count}", (255, 255, 255), font=font,
-                                stroke_width=2, stroke_fill=(0, 0, 0))
-                bytes = BytesIO()
-                context.save(bytes, format="PNG")
-                bytes.seek(0)
-                file = discord.File(bytes, filename="tile_image.png")
-                view.add_item(Button(label="Option #"+str(count),style=discord.ButtonStyle.success, custom_id=f"placeTile_{msg[1]}_{tileID}_{rotation}"))
+                file = drawing.base_tile_image_with_rotation_in_context(rotation, tileID, tile, count, configs, position)
+                view.add_item(Button(label="Option #"+str(count),style=discord.ButtonStyle.success, custom_id=f"FCID{player['color']}_placeTile_{position}_{tileID}_{rotation}"))
                 count += 1
                 await interaction.followup.send(file=file, ephemeral = True)
 
-        view.add_item(Button(label="Discard Tile",style=discord.ButtonStyle.danger, custom_id=f"discardTile_{tileID}"))
+        view.add_item(Button(label="Discard Tile",style=discord.ButtonStyle.danger, custom_id=f"FCID{player['color']}_discardTile_{tileID}"))
         await interaction.followup.send(f"{interaction.user.mention} select the orientation you prefer or discard the tile.",view=view)
         await interaction.message.delete()
     @staticmethod
-    async def placeTile(game: GamestateHelper, interaction: discord.Interaction, player):
+    async def placeTile(game: GamestateHelper, interaction: discord.Interaction, player, customID):
         await interaction.response.defer(thinking=True)
-        msg = interaction.data["custom_id"].split("_")
+        msg = customID.split("_")
         game.add_tile(msg[1], int(msg[3]), msg[2])
         await interaction.followup.send(f"Tile added to position {msg[1]}")
         if game.get_gamestate()["board"][msg[1]]["ancient"] == 0 or player["name"]=="Descendants of Draco":
@@ -143,10 +128,18 @@ class ExploreButtons:
             await interaction.channel.send(f"{interaction.user.mention} choose whether or not to place influence in the tile", view = view)
             if game.get_gamestate()["board"][msg[1]]["ancient"] == 0 and game.get_gamestate()["board"][msg[1]]["disctile"] > 0:
                 await DiscoveryTileButtons.exploreDiscoveryTile(game, msg[1],interaction)
+        view = View()
+        view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
+        view.add_item(Button(label="End Turn", style=discord.ButtonStyle.danger, custom_id="endTurn"))
+        await interaction.channel.send(f"{interaction.user.mention} when you're finished resolving your action, you may end turn with this button.", view=view)
         await interaction.message.delete()
     @staticmethod
-    async def discardTile(game: GamestateHelper, interaction: discord.Interaction):
+    async def discardTile(game: GamestateHelper, interaction: discord.Interaction, player):
         msg = interaction.data["custom_id"].split("_")
         game.tile_discard(msg[2])
         await interaction.response.send_message("Tile discarded")
+        view = View()
+        view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
+        view.add_item(Button(label="End Turn", style=discord.ButtonStyle.danger, custom_id="endTurn"))
+        await interaction.channel.send(f"{interaction.user.mention} when you're finished resolving your action, you may end turn with this button.", view=view)
         await interaction.message.delete()

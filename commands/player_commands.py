@@ -158,8 +158,8 @@ class PlayerCommands(commands.GroupCog, name="player"):
         game = GamestateHelper(interaction.channel)
         p1 = game.get_player(player.id)
         view = TurnButtons.getStartTurnButtons(game,p1)
-
         await interaction.response.send_message((f"{player.mention} use these buttons to do your turn. The "
                                                         "number of activations you have for each action is listed in ()"), view=view)
+        await game.displayPlayerStats(p1, interaction)
     
     
