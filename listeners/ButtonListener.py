@@ -52,11 +52,11 @@ class ButtonListener(commands.Cog):
             if customID.startswith("startExplore"):
                 await ExploreButtons.startExplore(game, player, player_helper, interaction,customID)
             if customID.startswith("exploreTile_"):
-                await ExploreButtons.exploreTile(game, player, interaction)
+                await ExploreButtons.exploreTile(game, player, interaction, customID)
             if customID.startswith("placeTile"):
-                await ExploreButtons.placeTile(game,  interaction, player)
+                await ExploreButtons.placeTile(game,  interaction, player, customID)
             if customID.startswith("discardTile"):
-                await ExploreButtons.discardTile(game, interaction)
+                await ExploreButtons.discardTile(game, interaction, player)
             if customID.startswith("keepDiscForPoints"):
                 await DiscoveryTileButtons.keepDiscForPoints(game, player_helper, interaction)
             if customID.startswith("usedDiscForAbility"):
@@ -112,7 +112,7 @@ class ButtonListener(commands.Cog):
             if customID.startswith("finishInfluenceAction"):
                 await InfluenceButtons.finishInfluenceAction(game, player, interaction,player_helper)
             if customID.startswith("startMove"):
-                await MoveButtons.startMove(game, player, interaction,customID,player_helper, True)
+                await MoveButtons.startMove(game, player, interaction,customID, True)
             if customID.startswith("moveFrom"):
                 await MoveButtons.moveFrom(game, player, interaction,customID)
             if customID.startswith("moveThisShip"):

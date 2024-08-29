@@ -177,6 +177,8 @@ class BuildButtons:
             view = TurnButtons.getStartTurnButtons(game, game.get_player(next_player))
             await interaction.message.delete()
             await interaction.response.send_message(f"<@{next_player}> use these buttons to do your turn. ",view=view)
+            await game.displayPlayerStats(next_player, interaction)
+            
         else:
             view2 = View()
             view2.add_item(Button(label="Build Somewhere Else", style=discord.ButtonStyle.danger, custom_id="startBuild2"))  

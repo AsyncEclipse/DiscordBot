@@ -62,9 +62,9 @@ class PopulationButtons:
     @staticmethod
     async def fillPopulation(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str):
         tile = buttonID.split("_")[1]
-        planetT = buttonID.split("_")[2]
+        typeOfPop = buttonID.split("_")[2]
         num = buttonID.split("_")[3]
-        if "neutral" in planetT:
+        if "neutral" in typeOfPop:
             if len(buttonID.split("_")) < 5:
                 allPlayerTechs =  player["military_tech"] + player["grid_tech"] + player["nano_tech"]
                 optionsForPop = ["money","science","material"]

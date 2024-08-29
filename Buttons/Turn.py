@@ -13,7 +13,7 @@ class TurnButtons:
     @staticmethod
     def noOneElsePassed(player, game: GamestateHelper):
         for p2 in game.get_gamestate()["players"]:
-            if "passed" in game.get_gamestate()["players"][p2] and game.get_gamestate()["players"][p2]["passed"] == False:
+            if "passed" in game.get_gamestate()["players"][p2] and game.get_gamestate()["players"][p2]["passed"] == True:
                 return False
         return True
 
@@ -28,10 +28,11 @@ class TurnButtons:
         return None
 
     @staticmethod
-    async def restartTurn(player, game, interaction: discord.Interaction):
+    async def restartTurn(player, game:GamestateHelper, interaction: discord.Interaction):
         view = TurnButtons.getStartTurnButtons(game, player)
         await interaction.response.send_message(player["player_name"]+ " use buttons to do your turn",view=view)
         await interaction.message.delete()
+        await game.displayPlayerStats(player, interaction)
 
 
 
@@ -41,6 +42,7 @@ class TurnButtons:
         if nextPlayer != None and not game.is_everyone_passed():
             view = TurnButtons.getStartTurnButtons(game,nextPlayer)
             await interaction.response.send_message(nextPlayer["player_name"]+ " use buttons to do your turn",view=view)
+            await game.displayPlayerStats(nextPlayer, interaction)
         else:
             await interaction.response.send_message("All players have passed")
         await interaction.message.delete()
@@ -65,6 +67,7 @@ class TurnButtons:
         if nextPlayer != None and not game.is_everyone_passed():
             view = TurnButtons.getStartTurnButtons(game,nextPlayer)
             await interaction.response.send_message(nextPlayer["player_name"]+ " use buttons to do your turn",view=view)
+            await game.displayPlayerStats(nextPlayer, interaction)
 
             view2 = View()
             view2.add_item(Button(label=f"Permanently Pass", style=discord.ButtonStyle.green, custom_id="permanentlyPass"))
@@ -86,12 +89,14 @@ class TurnButtons:
     @staticmethod
     async def runCleanup(game: GamestateHelper, interaction: discord.Interaction):
         game.cleanUp()
+        await interaction.response.defer(thinking=False)
         nextPlayer = TurnButtons.getFirstPlayer(game)
         if nextPlayer != None:
             view = TurnButtons.getStartTurnButtons(game,nextPlayer)
-            await interaction.response.send_message(nextPlayer["player_name"]+ " use buttons to do the first turn of the round",view=view)
+            await interaction.followup.send(nextPlayer["player_name"]+ " use buttons to do the first turn of the round",view=view)
+            await game.displayPlayerStats(nextPlayer, interaction)
         else:
-            await interaction.response.send_message("Could not find first player, someone run /player start_turn")
+            await interaction.followup.send("Could not find first player, someone run /player start_turn")
 
 
     @staticmethod

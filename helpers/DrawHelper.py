@@ -50,6 +50,26 @@ class DrawHelper:
             tile_image = tile_image.rotate(60)
         return tile_image
 
+    def base_tile_image_with_rotation_in_context(self, rotation, tileID, tile, count, configs, position):
+        context = Image.new("RGBA", (345*3, 300*3), (255, 255, 255, 0))
+        image = self.base_tile_image_with_rotation(tileID,rotation,tile["wormholes"])
+        context.paste(image,(345, 300),mask=image)
+        coords = [(345, 0), (605, 150),(605, 450),(345, 600), (85, 450),(85, 150)]
+        for index, adjTile in enumerate(configs.get(position)[0].split(",")):
+            if adjTile in self.gamestate["board"]:
+                adjTileImage = self.board_tile_image(adjTile)
+                context.paste(adjTileImage,coords[index],mask=adjTileImage)
+        font = ImageFont.truetype("images/resources/arial.ttf", size=50)
+        ImageDraw.Draw(context).text((10, 10), f"Option #{count}", (255, 255, 255), font=font,
+                        stroke_width=2, stroke_fill=(0, 0, 0))
+        bytes = BytesIO()
+        context.save(bytes, format="PNG")
+        bytes.seek(0)
+        file = discord.File(bytes, filename="tile_image.png")
+        return file
+
+
+
     def board_tile_image(self, position):
         sector = self.gamestate["board"][position]["sector"]
         filepath = f"images/resources/hexes/{sector}.png"
@@ -201,7 +221,7 @@ class DrawHelper:
         return context
 
     def display_remaining_tiles(self):
-        context = Image.new("RGBA", (1000, 600), (255, 255, 255, 0))
+        context = Image.new("RGBA", (1300, 600), (255, 255, 255, 0))
 
 
         filepath = f"images/resources/hexes/sector3back.png"
@@ -212,9 +232,15 @@ class DrawHelper:
         font = ImageFont.truetype("images/resources/arial.ttf", size=90)
         stroke_color = (0, 0, 0)
         stroke_width = 2
-        text_drawable_image.text((290, 200), str(len(self.gamestate["tile_deck_300"])), (255, 255, 255), font=font,
+        text_drawable_image.text((292, 200), str(len(self.gamestate["tile_deck_300"])), (255, 255, 255), font=font,
                                     stroke_width=stroke_width, stroke_fill=stroke_color)
         text_drawable_image.text((0, 50), "Remaining Tiles", (255, 255, 255), font=font,
+                                    stroke_width=stroke_width, stroke_fill=stroke_color)
+        if "roundNum" in self.gamestate:
+            round = self.gamestate["roundNum"]
+        else:
+            round = 1
+        text_drawable_image.text((900, 50), "Round #"+str(round), (0, 255, 0), font=font,
                                     stroke_width=stroke_width, stroke_fill=stroke_color)
         return context
 

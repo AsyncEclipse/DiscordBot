@@ -92,6 +92,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         await game.showUpdate("Start of Game",interaction)
         view = TurnButtons.getStartTurnButtons(game, game.get_player(player1.id))
         await interaction.response.send_message(f"<@{player1.id}> use these buttons to do your turn. ",view=view)
+        await game.displayPlayerStats(game.get_player(player1.id), interaction)
 
     @app_commands.command(name="cleanup")
     async def cleanup(self,interaction: discord.Interaction):
