@@ -1,9 +1,9 @@
 import discord
-from commands.tile_commands import *
+from commands.tile_commands import TileCommands
 import config
-from commands.setup_commands import *
-from commands.player_commands import *
-from listeners.ButtonListener import *
+from commands.setup_commands import SetupCommands
+from commands.player_commands import PlayerCommands
+from listeners.ButtonListener import ButtonListener
 from discord.ext import commands
 
 

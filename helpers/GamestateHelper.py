@@ -19,7 +19,7 @@ class GamestateHelper:
 
     def getLocationFromID(self, id):
         return next((tile for tile in self.gamestate["board"] if self.gamestate["board"][tile]["sector"] == str(id)), None)
-    
+
     def get_gamestate(self):
         with open(f"{config.gamestate_path}/{self.game_id}.json", "r") as f:
             gamestate = json.load(f)
@@ -45,42 +45,42 @@ class GamestateHelper:
 
     @staticmethod
     def getShipFullName(shipAbbreviation):
-        if shipAbbreviation == "int":  
+        if shipAbbreviation == "int":
             return "interceptor"
-        elif shipAbbreviation == "cru": 
+        elif shipAbbreviation == "cru":
             return "cruiser"
         elif shipAbbreviation == "drd":
             return "dreadnought"
-        elif shipAbbreviation == "sb": 
+        elif shipAbbreviation == "sb":
             return "starbase"
     @staticmethod
     def getShipShortName(shipName:str):
         shipName = shipName.lower()
-        if shipName == "interceptor":  
+        if shipName == "interceptor":
             return "int"
-        elif shipName == "cruiser": 
+        elif shipName == "cruiser":
             return "cru"
         elif shipName == "dreadnought":
             return "drd"
-        elif shipName == "starbase": 
+        elif shipName == "starbase":
             return "sb"
-        elif shipName == "orbitol": 
+        elif shipName == "orbitol":
             return "orb"
-        elif shipName == "monolith": 
+        elif shipName == "monolith":
             return "mon"
-    
+
     def getShortFactionNameFromFull(self, fullName):
-        if fullName == "Descendants of Draco":  
+        if fullName == "Descendants of Draco":
             return "draco"
-        elif fullName == "Mechanema": 
+        elif fullName == "Mechanema":
             return "mechanema"
-        elif fullName == "Planta": 
+        elif fullName == "Planta":
             return "planta"
-        elif fullName == "Orian Hegemony" or fullName == "Orion Hegemony": 
+        elif fullName == "Orian Hegemony" or fullName == "Orion Hegemony":
             return "orion"
-        elif fullName == "Hydran Progress": 
+        elif fullName == "Hydran Progress":
             return "hydran"
-        elif fullName == "Eridani Empire": 
+        elif fullName == "Eridani Empire":
             return "eridani"
         elif "Terran" in fullName:
             return fullName.lower().replace(" ","_")
@@ -95,7 +95,7 @@ class GamestateHelper:
             if owner != None:
                 tile["owner"] = owner
                 self.gamestate["players"][self.get_player_from_color(owner)]["owned_tiles"].append(position)
-                
+
             if tile["ancient"] or tile["guardian"] or tile["gcds"]:
                 adv = ""
                 if self.gamestate["advanced_ai"]:
@@ -113,12 +113,12 @@ class GamestateHelper:
             tile = {"sector": sector, "orientation": orientation}
         self.gamestate["board"][position] = tile
 
-        configs = Properties()  
-        with open("data/tileAdjacencies.properties", "rb") as f:  
-            configs.load(f)  
+        configs = Properties()
+        with open("data/tileAdjacencies.properties", "rb") as f:
+            configs.load(f)
         if position != None and sector != "sector3back":
             tiles = configs.get(position)[0].split(",")
-            for adjTile in tiles:  
+            for adjTile in tiles:
                 if adjTile not in self.gamestate["board"]:
                     self.add_tile(adjTile, 0, "sector3back")
         self.update()
@@ -138,7 +138,7 @@ class GamestateHelper:
     def add_warp(self, position):
         self.gamestate["board"][position]["warp"]=1
         self.update()
-    
+
     def add_units(self, unit_list, position):
         color = unit_list[0].split("-")[0]
         player = self.get_player_from_color(color)
@@ -162,7 +162,7 @@ class GamestateHelper:
         self.gamestate["players"][playerID][type.replace("adv","")+"_pop_cubes"] = self.gamestate["players"][playerID][type.replace("adv","")+"_pop_cubes"]-1
         self.update()
         return True
-    
+
     def refresh_two_colony_ships(self,  playerID):
         #"base_colony_ships"
         minNum = min(self.gamestate["players"][playerID]["colony_ships"]+2, self.gamestate["players"][playerID]["base_colony_ships"])
@@ -286,13 +286,13 @@ class GamestateHelper:
         self.gamestate["available_techs"].remove(tech)
         self.gamestate["players"][playerid][type+"_tech"].append(tech)
         with open("data/techs.json", "r") as f:
-            tech_data = json.load(f)  
+            tech_data = json.load(f)
         tech_details = tech_data.get(tech)
         self.gamestate["players"][playerid]["influence_discs"] += tech_details["infdisk"]
         if tech_details["activ1"] != 0:
-            self.gamestate["players"][playerid][f"{tech_details["activ1"]}_apt"] += 1
+            self.gamestate["players"][playerid][f"{tech_details['activ1']}_apt"] += 1
             if tech_details["activ1"] == "upgrade":
-                self.gamestate["players"][playerid][f"{tech_details["activ1"]}_apt"] += 1
+                self.gamestate["players"][playerid][f"{tech_details['activ1']}_apt"] += 1
         self.update()
     def update(self):
         with open(f"{config.gamestate_path}/{self.game_id}.json", "w") as f:
@@ -316,13 +316,13 @@ class GamestateHelper:
         random.shuffle(listOfDisc)
         self.gamestate["discTiles"]= listOfDisc
         self.update()
-    
+
     def getNextDiscTile(self, tile:str):
         nextTile = self.gamestate["discTiles"].pop()
         self.gamestate["board"][tile]["disctile"]=0
         self.update()
         return nextTile
-    
+
     def update_player(self, *args):
 
         for ar in args:
@@ -335,7 +335,7 @@ class GamestateHelper:
                 return(i)
         return(False)
 
-    
+
     def get_owned_tiles(self, player):
         tile_map = self.gamestate["board"]
         color = player["color"]
@@ -344,29 +344,29 @@ class GamestateHelper:
             if "owner" in tile_map[tile] and tile_map[tile]["owner"] == color:
                 tiles.append(tile)
         return tiles
-    
-   
+
+
     async def showUpdate(self, message:str, interaction: discord.Interaction):
         if "-" in interaction.channel.name:
-            thread_name = interaction.channel.name.split("-")[0]+"-bot-map-updates"  
-            thread = discord.utils.get(interaction.channel.threads, name=thread_name)  
-            if thread is not None:  
-                # Sending a message to the thread  
+            thread_name = interaction.channel.name.split("-")[0]+"-bot-map-updates"
+            thread = discord.utils.get(interaction.channel.threads, name=thread_name)
+            if thread is not None:
+                # Sending a message to the thread
                 drawing = DrawHelper(self.gamestate)
                 view = View()
                 view.add_item(Button(label="Show Game",style=discord.ButtonStyle.primary, custom_id="showGame"))
                 view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
                 await thread.send(message,file=drawing.show_game(), view=view)
 
-    def getPlayerFromHSLocation(self, location):  
-        tileID = self.get_gamestate()["board"][location]["sector"]  
-        return next((player for player in self.get_gamestate()["players"] if str(self.get_gamestate()["players"][player]["home_planet"]) == tileID), None)  
-    
+    def getPlayerFromHSLocation(self, location):
+        tileID = self.get_gamestate()["board"][location]["sector"]
+        return next((player for player in self.get_gamestate()["players"] if str(self.get_gamestate()["players"][player]["home_planet"]) == tileID), None)
+
     def is_everyone_passed(self):
         listHS = [201,203,205,207,209,211]
         for number in listHS:
             nextPlayer = self.getPlayerFromHSLocation(str(number))
-            if nextPlayer is not None and not self.get_gamestate()["players"].get(nextPlayer, {}).get("passed", False):  
+            if nextPlayer is not None and not self.get_gamestate()["players"].get(nextPlayer, {}).get("passed", False):
                 return False
         return True
 
@@ -375,13 +375,13 @@ class GamestateHelper:
         listHS = [201,203,205,207,209,211]
         playerHSID = player["home_planet"]
         tileLocation = int(self.getLocationFromID(playerHSID))
-        index = listHS.index(tileLocation)  
-        if index is None:  
-            return None 
-        newList = listHS[index+1:] + listHS[:index] + [listHS[index]] 
+        index = listHS.index(tileLocation)
+        if index is None:
+            return None
+        newList = listHS[index+1:] + listHS[:index] + [listHS[index]]
         for number in newList:
             nextPlayer = self.getPlayerFromHSLocation(str(number))
-            if nextPlayer is not None and not self.get_gamestate()["players"].get(nextPlayer, {}).get("perma_passed", False):  
+            if nextPlayer is not None and not self.get_gamestate()["players"].get(nextPlayer, {}).get("perma_passed", False):
                 return self.get_gamestate()["players"][nextPlayer]
         return None
         # """

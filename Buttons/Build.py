@@ -18,7 +18,7 @@ class BuildButtons:
             player_helper.spend_influence_on_action("build")
             game.update_player(player_helper)
         for tile in tiles:
-            view.add_item(Button(label=tile, style=discord.ButtonStyle.primary, custom_id=f"FCID{player["color"]}_buildIn_{tile}"))
+            view.add_item(Button(label=tile, style=discord.ButtonStyle.primary, custom_id=f"FCID{player['color']}_buildIn_{tile}"))
         await interaction.response.send_message(f"{interaction.user.mention}, choose which tile you would like to build in.", view=view)
 
     @staticmethod  
@@ -73,9 +73,9 @@ class BuildButtons:
             key = f"cost_{ship.lower()}"
             if ship.lower() == "dreadnought":
                 key = f"cost_dread"
-            buttonElements = [f"FCID{player["color"]}","buildShip", build, str(cost), build_loc, ship]
+            buttonElements = [f"FCID{player['color']}","buildShip", build, str(cost), build_loc, ship]
             view.add_item(Button(label=f"{ship} ({player[f'{key}']})", style=discord.ButtonStyle.primary, custom_id="_".join(buttonElements))) 
-        buttonElements = [f"FCID{player["color"]}","finishBuild", build, str(cost), build_loc]
+        buttonElements = [f"FCID{player['color']}","finishBuild", build, str(cost), build_loc]
         view.add_item(Button(label="Finished In This System", style=discord.ButtonStyle.red, custom_id="_".join(buttonElements))) 
         view.add_item(Button(label="Reset", style=discord.ButtonStyle.gray, custom_id=f"buildIn_{build_loc}")) 
         return view
@@ -138,14 +138,14 @@ class BuildButtons:
     def buildBuildSpendButtonsView(game: GamestateHelper, interaction: discord.Interaction,player, build: str, cost:str, build_loc:str, view: View, material:str, science:str, money:str, spent:str):
         for i in range(2):
             x = i+1
-            buttonElements = [f"FCID{player["color"]}","spendMaterial", build, str(cost), build_loc, material, science, money, spent, str(x)]
+            buttonElements = [f"FCID{player['color']}","spendMaterial", build, str(cost), build_loc, material, science, money, spent, str(x)]
             if player['materials'] >= x:
                 view.add_item(Button(label=f"Materials ({str(x)})", style=discord.ButtonStyle.blurple, custom_id="_".join(buttonElements))) 
 
         elements = ["Science","Money"]
         tradeVal = player['trade_value']
         for resource in elements:
-            buttonElements = [f"FCID{player["color"]}","convertResource", build, str(cost), build_loc, material, science, money, spent, resource]
+            buttonElements = [f"FCID{player['color']}","convertResource", build, str(cost), build_loc, material, science, money, spent, resource]
             if resource == "Science":
                 if int(science) >= tradeVal:
                     view.add_item(Button(label=f"{resource} ({str(tradeVal)}:1)", style=discord.ButtonStyle.gray, custom_id="_".join(buttonElements))) 
@@ -153,10 +153,10 @@ class BuildButtons:
                 if int(money) >= tradeVal:
                     view.add_item(Button(label=f"{resource} ({str(tradeVal)}:1)", style=discord.ButtonStyle.gray, custom_id="_".join(buttonElements))) 
 
-        buttonElements = [f"FCID{player["color"]}","finishSpendForBuild", build, build_loc, material, science, money]
+        buttonElements = [f"FCID{player['color']}","finishSpendForBuild", build, build_loc, material, science, money]
         if int(spent) >= int(cost):
             view.add_item(Button(label="Finish Build", style=discord.ButtonStyle.red, custom_id="_".join(buttonElements))) 
-        view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player["color"]}_restartTurn")) 
+        view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
         return view
 
     @staticmethod  
