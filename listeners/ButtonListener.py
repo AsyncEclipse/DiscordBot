@@ -10,7 +10,7 @@ from Buttons.Research import ResearchButtons
 from Buttons.Turn import TurnButtons
 from Buttons.Upgrade import UpgradeButtons
 from helpers.GamestateHelper import GamestateHelper
-
+import time 
 
 from helpers.PlayerHelper import PlayerHelper
 
@@ -21,6 +21,8 @@ class ButtonListener(commands.Cog):
     @commands.Cog.listener()
     async def on_interaction(self, interaction : discord.Interaction):
         if interaction.type == discord.InteractionType.component:
+            start_time = time.perf_counter()  
+            print(f"Starting Button Press")  
             game = GamestateHelper(interaction.channel)
             player = game.get_player(interaction.user.id)  
             player_helper = PlayerHelper(interaction.user.id, player)
@@ -119,6 +121,9 @@ class ButtonListener(commands.Cog):
                 await MoveButtons.moveThisShip(game, player, interaction,customID)
             if customID.startswith("moveTo"):
                 await MoveButtons.moveTo(game, player, interaction,customID,player_helper)
+        end_time = time.perf_counter()  
+        elapsed_time = end_time - start_time  
+        print(f"Total elapsed time for button press: {elapsed_time:.6f} seconds")  
 
             
                 

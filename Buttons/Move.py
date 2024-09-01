@@ -16,14 +16,12 @@ class MoveButtons:
         tile_map = game.get_gamestate()["board"]
         tiles = []
         for tile in tile_map:
-            print(tile)
             if ("player_ships" in tile_map[tile] and ExploreButtons.doesPlayerHaveUnpinnedShips(player,tile_map[tile]["player_ships"])):
-                print("boop"+tile)
                 tiles.append(tile)
         return tiles
     @staticmethod
     async def startMove(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str, button : bool):
-        moveCount = 1;
+        moveCount = 1
         if "_" in buttonID:
             moveCount = buttonID.split("_")[1]
         view = View()

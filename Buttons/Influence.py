@@ -34,11 +34,15 @@ class InfluenceButtons:
             for adjTile in configs.get(tile)[0].split(","):
                 if adjTile not in tilesViewed and InfluenceButtons.areTwoTilesAdjacent(game, tile, adjTile, configs):
                     tilesViewed.append(adjTile)
-                    if "owner" in game.get_gamestate()["board"][adjTile] and game.get_gamestate()["board"][adjTile]["owner"]==0:
+                    playerShips =game.get_gamestate()["board"][adjTile]["player_ships"]
+                    playerShips.append(player["color"])
+                    if "owner" in game.get_gamestate()["board"][adjTile] and game.get_gamestate()["board"][adjTile]["owner"]==0 and ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips):
                         tilesToInfluence.append(adjTile)
             if tile not in tilesViewed:
                     tilesViewed.append(tile)
-                    if "owner" in game.get_gamestate()["board"][tile] and game.get_gamestate()["board"][tile]["owner"]==0:
+                    playerShips =game.get_gamestate()["board"][tile]["player_ships"]
+                    playerShips.append(player["color"])
+                    if "owner" in game.get_gamestate()["board"][tile] and game.get_gamestate()["board"][tile]["owner"]==0 and ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips):
                         tilesToInfluence.append(tile)
         return tilesToInfluence
     @staticmethod
@@ -82,7 +86,7 @@ class InfluenceButtons:
         player_helper.spend_influence_on_action("influence")
         game.update_player(player_helper)
         next_player = game.get_next_player(player)
-        view = TurnButtons.getStartTurnButtons(game, game.get_player(next_player))
+        view = TurnButtons.getStartTurnButtons(game, next_player)
         await interaction.message.delete()
         await interaction.response.send_message(f"<@{next_player}> use these buttons to do your turn. ",view=view)
         await game.displayPlayerStats(next_player, interaction)

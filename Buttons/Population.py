@@ -93,7 +93,7 @@ class PopulationButtons:
         await interaction.channel.send(f"Successfully added {typeOfPop} pop to tile {tile}")
         drawing = DrawHelper(game.gamestate)
         await interaction.response.defer(thinking=True,ephemeral=True)
-        await interaction.followup.send(file=drawing.show_game(), ephemeral=True)
+        await interaction.followup.send(file=drawing.board_tile_image_file(), ephemeral=True)
 
 
 
