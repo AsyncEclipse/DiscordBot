@@ -139,6 +139,11 @@ class GamestateHelper:
         self.gamestate["board"][position]["warp"]=1
         self.update()
 
+    def updateNames(self, interaction:discord.Interaction):
+        for player in self.gamestate["players"]:
+            if "username" not in self.gamestate["players"][player]:
+                self.gamestate["players"][player]["username"] = interaction.guild.get_member(int(player)).display_name
+        self.update()
     def add_units(self, unit_list, position):
         color = unit_list[0].split("-")[0]
         player = self.get_player_from_color(color)
@@ -173,7 +178,7 @@ class GamestateHelper:
         else:
             materialsIncrease = str(materialsIncrease)
         msg = f"Your current economic situation is as follows:\nMoney: {money} ({moneyIncrease})\nScience: {science} ({scienceIncrease})\nMaterials: {materials} ({materialsIncrease})"
-        await interaction.followup.send(msg,ephemeral=True)
+        await interaction.channel.send(msg)
             
         
             
@@ -375,6 +380,7 @@ class GamestateHelper:
 
 
     async def showUpdate(self, message:str, interaction: discord.Interaction):
+        self.updateNames(interaction)
         if "-" in interaction.channel.name:
             thread_name = interaction.channel.name.split("-")[0]+"-bot-map-updates"
             thread = discord.utils.get(interaction.channel.threads, name=thread_name)
@@ -384,7 +390,8 @@ class GamestateHelper:
                 view = View()
                 view.add_item(Button(label="Show Game",style=discord.ButtonStyle.primary, custom_id="showGame"))
                 view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
-                await thread.send(message,file=drawing.show_game(), view=view)
+                await thread.send(message,file=drawing.show_map())
+                await thread.send(message,file=drawing.show_stats(), view=view)
 
     def getPlayerFromHSLocation(self, location):
         tileID = self.get_gamestate()["board"][location]["sector"]

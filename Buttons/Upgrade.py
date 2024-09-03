@@ -68,6 +68,8 @@ class UpgradeButtons:
         ship = customID.split("_")[2]
         oldPart = customID.split("_")[3]
         newPart = customID.split("_")[4]
+        with open("data/parts.json", "r") as f:
+            part_stats = json.load(f)
         index = player[f"{ship}_parts"].index(oldPart)
         if newPart != "empty":
             if newPart != oldPart:
@@ -83,6 +85,7 @@ class UpgradeButtons:
         if not shipCheck.check_valid_ship():
             await interaction.response.send_message("Your ship is not valid! Please try a different part", ephemeral=True)
             return
+        
         game.update_player(player_helper)
         drawing = DrawHelper(game.gamestate)
         image = drawing.player_area(player_helper.stats)
@@ -93,7 +96,7 @@ class UpgradeButtons:
                 view.add_item(Button(label=ship2.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_upgradeShip_{str(actions)}_{ship2}"))
         view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id="endTurn"))
         await interaction.message.delete()
-        await interaction.response.send_message(file=drawing.show_player_ship_area(image),ephemeral=True)
+        await interaction.response.send_message(f"{interaction.user.mention} replaced {part_stats[oldPart]['name']} with {part_stats[newPart]['name']} on their {ship.capitalize()} which now look like this",file=drawing.show_player_ship_area(image))
         await interaction.followup.send(
             f"{interaction.user.mention}, choose which ship you would like to upgrade or end turn.", view=view)
 

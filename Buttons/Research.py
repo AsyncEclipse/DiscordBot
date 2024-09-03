@@ -10,7 +10,7 @@ from discord.ui import View, Button
 class ResearchButtons:
 
     @staticmethod  
-    async def handle_wild_tech_selection(view, tech_details, tech,player):
+    async def handle_wild_tech_selection(view:View, tech_details, tech,player):
         for tech_type, button_style in [("grid", discord.ButtonStyle.success),   
                                         ("nano", discord.ButtonStyle.primary),   
                                         ("military", discord.ButtonStyle.danger)]:  
@@ -147,7 +147,7 @@ class ResearchButtons:
             tech_data = json.load(f)  
         tech_details = tech_data.get(tech)  
         if tech_type == "any":  
-            view = ResearchButtons.handle_wild_tech_selection(view, tech_details, tech, player)  
+            view = await ResearchButtons.handle_wild_tech_selection(view, tech_details, tech, player)  
             await interaction.response.send_message(  
                 f"{interaction.user.mention}, select the row of tech you would like to place this wild tech in. The discounted cost is in parentheses.",   
                 view=view  

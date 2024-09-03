@@ -4,6 +4,7 @@ from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 from helpers.DrawHelper import DrawHelper
 from discord.ui import View, Button
+import time
 
 class TurnButtons:
 
@@ -109,12 +110,24 @@ class TurnButtons:
         await interaction.response.send_message(msg,ephemeral=True)
     @staticmethod
     async def showGame(game: GamestateHelper, interaction: discord.Interaction):
-        await interaction.response.defer(thinking=True,ephemeral=True,)
+        await interaction.response.defer(thinking=True,ephemeral=True)
+        game.updateNames(interaction)
         drawing = DrawHelper(game.gamestate)
         view = View()
         view.add_item(Button(label="Show Game",style=discord.ButtonStyle.primary, custom_id="showGame"))
         view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
-        await interaction.followup.send(file=drawing.show_game(),ephemeral=True, view=view)
+        start_time = time.perf_counter() 
+        
+        
+        await interaction.followup.send(file=drawing.show_map(),ephemeral=True)
+        end_time = time.perf_counter()  
+        elapsed_time = end_time - start_time  
+        print(f"Total elapsed time for showing map: {elapsed_time:.6f} seconds")
+        start_time = time.perf_counter() 
+        await interaction.followup.send(file=drawing.show_stats(),ephemeral=True, view=view)
+        end_time = time.perf_counter()  
+        elapsed_time = end_time - start_time  
+        print(f"Total elapsed time for showing stats: {elapsed_time:.6f} seconds")
 
     @staticmethod
     def getStartTurnButtons(game: GamestateHelper,p1):

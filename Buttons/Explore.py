@@ -1,6 +1,5 @@
 import json
 import discord
-from discord.ui import View
 from Buttons.DiscoveryTile import DiscoveryTileButtons
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
@@ -85,32 +84,11 @@ class ExploreButtons:
                 await interaction.message.delete()
                 return
         image = drawing.base_tile_image(tileID)
-        configs = Properties()
-        with open("data/tileAdjacencies.properties", "rb") as f:
-            configs.load(f)
-        wormholeStringsViewed = []
-        with open("data/sectors.json") as f:
-            tile_data = json.load(f)
-        tile = tile_data[tileID]
+        
         await interaction.followup.send("Tile explored",file=drawing.show_single_tile(image))
         playerTiles = ExploreButtons.getListOfTilesPlayerIsIn(game, player)
-        count = 1
-        for x in range(6):
-            rotation = x * 60
-            wormholeString = ''.join(str((wormhole + x) % 6) for wormhole in tile["wormholes"])
-            if wormholeString in wormholeStringsViewed: continue
-            wormholeStringsViewed.append(wormholeString)
-            rotationWorks = False
-            for index, adjTile in enumerate(configs.get(position)[0].split(",")):
-                tile_orientation_index = (index + 6 + x) % 6
-                if adjTile in playerTiles and tile_orientation_index in tile["wormholes"]:
-                    rotationWorks = True
-                    break
-            if rotationWorks:
-                file = drawing.base_tile_image_with_rotation_in_context(rotation, tileID, tile, count, configs, position)
-                view.add_item(Button(label="Option #"+str(count),style=discord.ButtonStyle.success, custom_id=f"FCID{player['color']}_placeTile_{position}_{tileID}_{rotation}"))
-                count += 1
-                await interaction.followup.send(file=file, ephemeral = True)
+        view, file = drawing.draw_possible_oritentations(tileID,position,playerTiles, view,player)
+        await interaction.followup.send(file=file, ephemeral = True)
 
         view.add_item(Button(label="Discard Tile",style=discord.ButtonStyle.danger, custom_id=f"FCID{player['color']}_discardTile_{tileID}"))
         await interaction.followup.send(f"{interaction.user.mention} select the orientation you prefer or discard the tile.",view=view)

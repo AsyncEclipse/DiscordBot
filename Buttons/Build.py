@@ -2,6 +2,7 @@
 import discord
 from discord.ui import View
 from Buttons.Turn import TurnButtons
+from helpers.DrawHelper import DrawHelper
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 from discord.ui import View, Button
@@ -139,7 +140,7 @@ class BuildButtons:
         for i in range(2):
             x = i+1
             buttonElements = [f"FCID{player['color']}","spendMaterial", build, str(cost), build_loc, material, science, money, spent, str(x)]
-            if player['materials'] >= x:
+            if player['materials'] >= x+material:
                 view.add_item(Button(label=f"Materials ({str(x)})", style=discord.ButtonStyle.blurple, custom_id="_".join(buttonElements))) 
 
         elements = ["Science","Money"]
@@ -147,10 +148,10 @@ class BuildButtons:
         for resource in elements:
             buttonElements = [f"FCID{player['color']}","convertResource", build, str(cost), build_loc, material, science, money, spent, resource]
             if resource == "Science":
-                if int(science) >= tradeVal:
+                if int(science) >= tradeVal+science:
                     view.add_item(Button(label=f"{resource} ({str(tradeVal)}:1)", style=discord.ButtonStyle.gray, custom_id="_".join(buttonElements))) 
             if resource == "Money":
-                if int(money) >= tradeVal:
+                if int(money) >= tradeVal+money:
                     view.add_item(Button(label=f"{resource} ({str(tradeVal)}:1)", style=discord.ButtonStyle.gray, custom_id="_".join(buttonElements))) 
 
         buttonElements = [f"FCID{player['color']}","finishSpendForBuild", build, build_loc, material, science, money]
@@ -169,19 +170,20 @@ class BuildButtons:
         game.add_units(build, loc)
         player_helper.stats["science"], player_helper.stats["materials"], player_helper.stats["money"] = science, material, money
         game.update_player(player_helper)
+        drawing = DrawHelper(game)
         buildApt = player["build_apt"]
+        await interaction.response.send_message(f"This is what the tile looks like after the build. ",file=drawing.board_tile_image_file(loc))
         if player["passed"]== True:
             buildApt = 1
         if len(build) == buildApt:
-            next_player = game.get_next_player(player)
-            view = TurnButtons.getStartTurnButtons(game, game.get_player(next_player))
-            await interaction.message.delete()
-            await interaction.response.send_message(f"<@{next_player}> use these buttons to do your turn. ",view=view)
+            next_player = game.get_next_player()
+            view = TurnButtons.getStartTurnButtons(game, next_player)
+            await interaction.followup.send(f"<@{next_player}> use these buttons to do your turn. ",view=view)
             await game.displayPlayerStats(next_player, interaction)
-            
         else:
             view2 = View()
             view2.add_item(Button(label="Build Somewhere Else", style=discord.ButtonStyle.danger, custom_id="startBuild2"))  
             view2.add_item(Button(label="End Turn", style=discord.ButtonStyle.danger, custom_id="endTurn"))  
-            await interaction.channel.send(f"{interaction.user.mention} you could potentially build somewhere else.", view=view2)
+            await interaction.followup.send(f"{interaction.user.mention} you could potentially build somewhere else.", view=view2)
+        await interaction.message.delete()
         
