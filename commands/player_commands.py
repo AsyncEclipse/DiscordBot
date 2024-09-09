@@ -18,14 +18,15 @@ class PlayerCommands(commands.GroupCog, name="player"):
 
 
     @app_commands.command(name="stats", description="Anything to do with player stats")
-    async def stats(self, interaction: discord.Interaction, player: discord.Member,
+    async def stats(self, interaction: discord.Interaction,
                     materials: Optional[int],
                     science: Optional[int],
                     money: Optional[int],
                     material_cubes: Optional[int],
                     science_cubes: Optional[int],
                     money_cubes: Optional[int],
-                    influence: Optional[int]):
+                    influence: Optional[int],
+                    colony_ships: Optional[int], player: Optional[discord.Member]=None):
         """
 
         :param materials: Materials resource count - can use +1/-1 to add/subtract
@@ -36,11 +37,14 @@ class PlayerCommands(commands.GroupCog, name="player"):
         :param science_cubes: Science cube count - can use +1/-1 to add/subtract
         :param money_cubes: Money cube count - can use +1/-1 to add/subtract
         :param influence: Influence disc count - can use +1/-1 to add/subtract
+        :param colony_ships: Ready colony ship count - can use +1/-1 to add/subtract
         :return:
         """
+        if player == None:
+            player = interaction.user
         gamestate = GamestateHelper(interaction.channel)
         p1 = PlayerHelper(player.id, gamestate.get_player(player.id))
-        options = [materials, science, money, material_cubes, science_cubes, money_cubes, influence]
+        options = [materials, science, money, material_cubes, science_cubes, money_cubes, influence, colony_ships]
 
         if all(x is None for x in options):
             top_response = (f"{p1.name} player stats:")
@@ -78,6 +82,10 @@ class PlayerCommands(commands.GroupCog, name="player"):
             response += (p1.adjust_money_cube(money_cubes))
         if influence:
             response += (p1.adjust_influence(influence))
+        if colony_ships:
+            before = p1.stats['colony_ships']
+            p1.adjust_colony_ships(-colony_ships)
+            response += f"\n> Adjusted colony ships from {str(before)} to {str(p1.stats['colony_ships'])}"
 
         gamestate.update_player(p1)
         await interaction.response.send_message(top_response)
@@ -118,7 +126,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
     async def upgrade(self, interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)
         player = game.get_player(interaction.user.id)  
-        await UpgradeButtons.startUpgrade(game, player, interaction, False)
+        await UpgradeButtons.startUpgrade(game, player, interaction, False,"dummy")
     @app_commands.command(name="move")
     async def move(self, interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)
@@ -126,13 +134,30 @@ class PlayerCommands(commands.GroupCog, name="player"):
         player_helper = PlayerHelper(interaction.user.id, player)
         await MoveButtons.startMove(game, player, interaction,"startMove_8",player_helper, True)
     @app_commands.command(name="show_player_area")
-    async def show_player_area(self, interaction: discord.Interaction, player: discord.Member):
+    async def show_player_area(self, interaction: discord.Interaction, player: Optional[discord.Member]=None):
+        if player == None:
+            player = interaction.user
         game = GamestateHelper(interaction.channel)
         p1 = game.get_player(player.id)
         drawing = DrawHelper(game.gamestate)
         image = drawing.player_area(p1)
         await interaction.response.defer(thinking=True)
         await interaction.followup.send(file=drawing.show_player_area(image))
+    
+    @app_commands.command(name="set_passed")
+    async def set_passed(self, interaction: discord.Interaction, passed:bool, permanent: Optional[bool]=None, player: Optional[discord.Member]=None):
+        if player == None:
+            player = interaction.user
+        if permanent == None:
+            permanent = passed
+        game = GamestateHelper(interaction.channel)
+        p1 = game.get_player(player.id)
+        player_helper = PlayerHelper(player.id, p1)
+        player_helper.permanentlyPassTurn(permanent)
+        player_helper.passTurn(passed)
+        game.update_player(player_helper)
+        await interaction.response.send_message(f"{player.mention} set passed status to "+str(passed))
+        
     
     @app_commands.command(name="draw_reputation")
     async def draw_reputation(self, interaction: discord.Interaction, num_options: int):
@@ -142,7 +167,9 @@ class PlayerCommands(commands.GroupCog, name="player"):
         await ReputationButtons.resolveGainingReputation(game, num_options,interaction, player_helper)
 
     @app_commands.command(name="show_player_ships")
-    async def show_player_ships(self, interaction: discord.Interaction, player: discord.Member):
+    async def show_player_ships(self, interaction: discord.Interaction, player: Optional[discord.Member]=None):
+        if player == None:
+            player = interaction.user
         game = GamestateHelper(interaction.channel)
         p1 = game.get_player(player.id)
         drawing = DrawHelper(game.gamestate)
@@ -159,7 +186,6 @@ class PlayerCommands(commands.GroupCog, name="player"):
         p1 = game.get_player(player.id)
         view = TurnButtons.getStartTurnButtons(game,p1)
         await interaction.response.send_message((f"{player.mention} use these buttons to do your turn. The "
-                                                        "number of activations you have for each action is listed in ()"), view=view)
-        await game.displayPlayerStats(p1, interaction)
+                                                        "number of activations you have for each action is listed in ()"+game.displayPlayerStats(p1)), view=view)
     
     

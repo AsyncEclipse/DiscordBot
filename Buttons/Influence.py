@@ -88,8 +88,7 @@ class InfluenceButtons:
         next_player = game.get_next_player(player)
         view = TurnButtons.getStartTurnButtons(game, next_player)
         await interaction.message.delete()
-        await interaction.response.send_message(f"<@{next_player}> use these buttons to do your turn. ",view=view)
-        await game.displayPlayerStats(next_player, interaction)
+        await interaction.response.send_message(f"<@{next_player["player_name"]}> use these buttons to do your turn. "+game.displayPlayerStats(next_player),view=view)
 
     @staticmethod
     async def removeInfluenceStart(game: GamestateHelper, player, interaction: discord.Interaction):

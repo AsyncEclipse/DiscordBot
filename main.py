@@ -22,10 +22,10 @@ async def on_ready():
     start_time = time.perf_counter()  
     print(f"Starting to load images")  
     imageCache = ImageCache.ImageCacheHelper("images/resources")
-    imageCache.load_images()
+    #imageCache.load_images()
     end_time = time.perf_counter()  
     elapsed_time = end_time - start_time  
-    print(f"Total elapsed time for image load: {elapsed_time:.6f} seconds")  
+    print(f"Total elapsed time for image load: {elapsed_time:.2f} seconds")  
     print("Bot is now ready.")
 
 

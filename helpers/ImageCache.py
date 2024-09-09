@@ -1,5 +1,7 @@
+import asyncio
 from PIL import Image  
 import os  
+import concurrent.futures
 
 class ImageCacheHelper:  
     _instance = None  
@@ -13,6 +15,7 @@ class ImageCacheHelper:
         return cls._instance
 
     def load_images(self):  
+        # def load_images_internal():  
         for root, dirs, files in os.walk(self.base_directory):  
             for filename in files:  
                 if filename.endswith(('.png')):
@@ -22,6 +25,8 @@ class ImageCacheHelper:
                         self.cache[filename] = Image.open(image_path).convert("RGBA").resize(size).rotate(180)
                     else:  
                         self.cache[filename] = Image.open(image_path).convert("RGBA").resize(size)
+        # with concurrent.futures.ThreadPoolExecutor() as executor:  
+        #     executor.submit(asyncio.run_coroutine_threadsafe,load_images_internal) 
     #any(substring in main_string for substring in substrings)
     def get_image_size(self, folder, filename):  
         if "hexes" in folder.lower():  

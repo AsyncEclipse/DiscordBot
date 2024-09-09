@@ -176,9 +176,9 @@ class TileCommands(commands.GroupCog, name="tile"):
         image = drawing.base_tile_image(tile)
         await interaction.followup.send(file=drawing.show_single_tile(image))
         view = View()
-        button = Button(label="Place Tile",style=discord.ButtonStyle.success, custom_id=f"placeTile_"
+        button = Button(label="Place Tile",style=discord.ButtonStyle.green, custom_id=f"placeTile_"
                                                                                         f"{tile_position}_{tile}_{orientation}")
-        button2 = Button(label="Discard Tile",style=discord.ButtonStyle.danger, custom_id=f"discardTile_{tile}")
+        button2 = Button(label="Discard Tile",style=discord.ButtonStyle.red, custom_id=f"discardTile_{tile}")
         view.add_item(button)
         view.add_item(button2)
         await interaction.channel.send(view=view)
@@ -187,16 +187,29 @@ class TileCommands(commands.GroupCog, name="tile"):
     async def resolve_discovery_tile(self, interaction: discord.Interaction, tile_position: str):
         game = GamestateHelper(interaction.channel)
         await interaction.response.defer(thinking=False)
-        await DiscoveryTileButtons.exploreDiscoveryTile(game, tile_position, interaction)
+        await DiscoveryTileButtons.exploreDiscoveryTile(game, tile_position, interaction,game.get_player(interaction.user.id))
 
-    @app_commands.command(name="show_tile")
-    async def show_tile(self, interaction: discord.Interaction, tile_position: str):
+    @app_commands.command(name="show")
+    async def show(self, interaction: discord.Interaction, tile_position: str):
         game = GamestateHelper(interaction.channel)
         await interaction.response.defer(thinking=True)
         drawing = DrawHelper(game.gamestate)
         try:
-            image = drawing.board_tile_image(tile_position)
-            await interaction.followup.send(file=drawing.show_single_tile(image))
+            await interaction.followup.send(file=drawing.board_tile_image_file(tile_position))
+        except KeyError:
+            await interaction.followup.send("This tile does not exist!")
+    
+    @app_commands.command(name="rotate")
+    async def rotate(self, interaction: discord.Interaction, tile_position: str, degrees_to_rotate: int):
+        game = GamestateHelper(interaction.channel)
+        await interaction.response.defer(thinking=True)
+        if degrees_to_rotate % 60 != 0:
+            await interaction.followup.send("Degrees to rotate should be in increments of 60")
+            return
+        game.rotate_tile(tile_position,degrees_to_rotate)
+        drawing = DrawHelper(game.gamestate)
+        try:
+            await interaction.followup.send(file=drawing.board_tile_image_file(tile_position))
         except KeyError:
             await interaction.followup.send("This tile does not exist!")
 
@@ -219,7 +232,7 @@ class TileCommands(commands.GroupCog, name="tile"):
         await interaction.followup.send(file=drawing.show_map())
         await interaction.followup.send(file=drawing.show_stats())
         view = View()
-        button = Button(label="Show Game",style=discord.ButtonStyle.primary, custom_id="showGame")
+        button = Button(label="Show Game",style=discord.ButtonStyle.blurple, custom_id="showGame")
         view.add_item(button)
         view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
         await interaction.channel.send(view=view)

@@ -1,3 +1,4 @@
+import asyncio
 import json
 
 import discord
@@ -8,6 +9,7 @@ import os
 from jproperties import Properties
 import random
 from discord.ui import View, Button
+import concurrent.futures
 
 class GamestateHelper:
     def __init__(self, game_id :discord.TextChannel):
@@ -86,6 +88,11 @@ class GamestateHelper:
             return fullName.lower().replace(" ","_")
 
 
+    def rotate_tile(self, position, orientation):
+        tile = self.gamestate["board"][position]
+        tile.update({"orientation": (tile["orientation"]+orientation) % 360})
+        self.gamestate["board"][position] = tile
+        self.update()
     def add_tile(self, position, orientation, sector, owner=None):
 
         with open("data/sectors.json") as f:
@@ -139,10 +146,18 @@ class GamestateHelper:
         self.gamestate["board"][position]["warp"]=1
         self.update()
 
-    def updateNames(self, interaction:discord.Interaction):
+    def updateNamesAndOutRimTiles(self, interaction:discord.Interaction):
         for player in self.gamestate["players"]:
             if "username" not in self.gamestate["players"][player]:
                 self.gamestate["players"][player]["username"] = interaction.guild.get_member(int(player)).display_name
+        if len(self.gamestate[f"tile_deck_300"]) == 0:
+            keysToRemove = []
+            for key,value in self.gamestate[f"board"].items():
+                if value["sector"] == "sector3back":
+                    keysToRemove.append(key)
+            for key in keysToRemove:
+                del self.gamestate[f"board"][key]
+
         self.update()
     def add_units(self, unit_list, position):
         color = unit_list[0].split("-")[0]
@@ -158,7 +173,7 @@ class GamestateHelper:
                 self.gamestate["players"][player]["ship_stock"][3] -= 1
             self.gamestate["board"][position]["player_ships"].append(i)
         self.update()
-    async def displayPlayerStats(self, player, interaction:discord.Interaction):
+    def displayPlayerStats(self, player):
         money = player["money"]
         moneyIncrease = player["population_track"][player["money_pop_cubes"]-1] - player["influence_track"][player["influence_discs"]]
         if  moneyIncrease > -1:
@@ -177,8 +192,8 @@ class GamestateHelper:
             materialsIncrease = "+"+str(materialsIncrease)
         else:
             materialsIncrease = str(materialsIncrease)
-        msg = f"Your current economic situation is as follows:\nMoney: {money} ({moneyIncrease})\nScience: {science} ({scienceIncrease})\nMaterials: {materials} ({materialsIncrease})"
-        await interaction.channel.send(msg)
+        msg = f"\nYour current economic situation is as follows:\nMoney: {money} ({moneyIncrease})\nScience: {science} ({scienceIncrease})\nMaterials: {materials} ({materialsIncrease})"
+        return msg
             
         
             
@@ -378,9 +393,12 @@ class GamestateHelper:
                 tiles.append(tile)
         return tiles
 
+    async def send_files(self, interaction, files, thread, message, view):
+        for file in files:
+            await thread.send(message,file=file,view=view)
 
-    async def showUpdate(self, message:str, interaction: discord.Interaction):
-        self.updateNames(interaction)
+    async def showUpdate(self, message:str, interaction: discord.Interaction, bot):
+        self.updateNamesAndOutRimTiles(interaction)
         if "-" in interaction.channel.name:
             thread_name = interaction.channel.name.split("-")[0]+"-bot-map-updates"
             thread = discord.utils.get(interaction.channel.threads, name=thread_name)
@@ -388,10 +406,14 @@ class GamestateHelper:
                 # Sending a message to the thread
                 drawing = DrawHelper(self.gamestate)
                 view = View()
-                view.add_item(Button(label="Show Game",style=discord.ButtonStyle.primary, custom_id="showGame"))
+                view.add_item(Button(label="Show Game",style=discord.ButtonStyle.blurple, custom_id="showGame"))
                 view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
-                await thread.send(message,file=drawing.show_map())
-                await thread.send(message,file=drawing.show_stats(), view=view)
+                map = drawing.show_map()
+                stats = drawing.show_stats()
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    future = executor.submit(asyncio.run_coroutine_threadsafe, self.send_files(interaction, [map,stats], thread, message, view),bot.loop)
+                # await thread.send(message,file=drawing.show_map())
+                # await thread.send(message,file=drawing.show_stats(), view=view)
 
     def getPlayerFromHSLocation(self, location):
         tileID = self.get_gamestate()["board"][location]["sector"]

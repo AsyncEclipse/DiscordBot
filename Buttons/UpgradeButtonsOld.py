@@ -35,11 +35,11 @@ class UpgradeShip(discord.ui.View):
             and stop the player from doing more actions than possible
     """
 
-    @discord.ui.button(label="Interceptor", style=discord.ButtonStyle.primary)
+    @discord.ui.button(label="Interceptor", style=discord.ButtonStyle.blurple)
     async def interceptor(self, interaction: discord.Interaction, button: discord.ui.Button):
         view = View()
         for i in self.p1.stats["interceptor_parts"]:
-            button2 = ShowParts(label=self.part_stats[i]["name"], style=discord.ButtonStyle.primary,
+            button2 = ShowParts(label=self.part_stats[i]["name"], style=discord.ButtonStyle.blurple,
                                 actions=self.actions, author=self.author, player=self.p1,
                                 ship="interceptor", old_part=i)
             view.add_item(button2)
@@ -48,11 +48,11 @@ class UpgradeShip(discord.ui.View):
                                                         f"remove.",
                                                 view=view)
 
-    @discord.ui.button(label="Cruiser", style=discord.ButtonStyle.primary)
+    @discord.ui.button(label="Cruiser", style=discord.ButtonStyle.blurple)
     async def cruiser(self, interaction: discord.Interaction, button: discord.ui.Button):
         view = View()
         for i in self.p1.stats["cruiser_parts"]:
-            button2 = ShowParts(label=self.part_stats[i]["name"], style=discord.ButtonStyle.primary,
+            button2 = ShowParts(label=self.part_stats[i]["name"], style=discord.ButtonStyle.blurple,
                                 actions=self.actions, author=self.author, player=self.p1,
                                 ship="cruiser", old_part=i)
             view.add_item(button2)
@@ -61,11 +61,11 @@ class UpgradeShip(discord.ui.View):
                                                         f"remove.",
                                                 view=view)
 
-    @discord.ui.button(label="Dreadnought", style=discord.ButtonStyle.primary)
+    @discord.ui.button(label="Dreadnought", style=discord.ButtonStyle.blurple)
     async def dreadnought(self, interaction: discord.Interaction, button: discord.ui.Button):
         view = View()
         for i in self.p1.stats["dread_parts"]:
-            button2 = ShowParts(label=self.part_stats[i]["name"], style=discord.ButtonStyle.primary,
+            button2 = ShowParts(label=self.part_stats[i]["name"], style=discord.ButtonStyle.blurple,
                                 actions=self.actions, author=self.author, player=self.p1,
                                 ship="dread", old_part=i)
             view.add_item(button2)
@@ -74,11 +74,11 @@ class UpgradeShip(discord.ui.View):
                                                         f"remove.",
                                                 view=view)
 
-    @discord.ui.button(label="Starbase", style=discord.ButtonStyle.primary)
+    @discord.ui.button(label="Starbase", style=discord.ButtonStyle.blurple)
     async def starbase(self, interaction: discord.Interaction, button: discord.ui.Button):
         view = View()
         for i in self.p1.stats["starbase_parts"]:
-            button2 = ShowParts(label=self.part_stats[i]["name"], style=discord.ButtonStyle.primary,
+            button2 = ShowParts(label=self.part_stats[i]["name"], style=discord.ButtonStyle.blurple,
                                 actions=self.actions, author=self.author, player=self.p1,
                                 ship="starbase", old_part=i)
             view.add_item(button2)
@@ -87,7 +87,7 @@ class UpgradeShip(discord.ui.View):
                                                         f"remove.",
                                                 view=view)
 
-    @discord.ui.button(label="Finish Upgrade", style=discord.ButtonStyle.danger)
+    @discord.ui.button(label="Finish Upgrade", style=discord.ButtonStyle.red)
     async def finish_upgrade(self, interaction: discord.Interaction, button: discord.ui.Button):
         ships = ["interceptor", "cruiser", "dread", "starbase"]
         for i in ships:
@@ -104,12 +104,12 @@ class UpgradeShip(discord.ui.View):
         await interaction.channel.send(f"{interaction.user.mention} you have upgraded your ships!")
 
 
-        await interaction.response.send_message(f"<@{next_player}> use these buttons to do your turn. "
+        await interaction.response.send_message(f"<@{next_player["player_name"]}> use these buttons to do your turn. "
 
                                                 f"The number of activations you have for each action is listed in ()",
                                                 view=view)
 
-    @discord.ui.button(label="Reset", style=discord.ButtonStyle.danger)
+    @discord.ui.button(label="Reset", style=discord.ButtonStyle.red)
     async def reset(self, interaction: discord.Interaction, button: discord.ui.Button):
         view = Buttons.TurnButtonsOld.Turn(interaction, self.author)
         await interaction.message.delete()
@@ -125,7 +125,7 @@ class UpgradeShip(discord.ui.View):
             return True
 
 class ShowParts(Button):
-    def __init__(self, label, style:discord.ButtonStyle.primary, author, actions, player, ship, old_part):
+    def __init__(self, label, style:discord.ButtonStyle.blurple, author, actions, player, ship, old_part):
         super().__init__(label=label, style=style)
         self.author = author
         self.actions = actions
@@ -160,7 +160,7 @@ class ShowParts(Button):
     async def callback(self, interaction: discord.Interaction):
         view = View()
         for i in self.available_techs:
-            button2 = ChooseUpgrade(label=self.part_stats[i]["name"],style=discord.ButtonStyle.primary,
+            button2 = ChooseUpgrade(label=self.part_stats[i]["name"],style=discord.ButtonStyle.blurple,
                                     author=self.author, actions=self.actions,
                                     player=self.player, ship=self.ship, old_part=self.old_part, new_part=i)
             view.add_item(button2)
@@ -175,7 +175,7 @@ class ShowParts(Button):
             return True
 
 class ChooseUpgrade(Button):
-    def __init__(self, label, style:discord.ButtonStyle.primary, author, actions, player, ship, old_part, new_part):
+    def __init__(self, label, style:discord.ButtonStyle.blurple, author, actions, player, ship, old_part, new_part):
         super().__init__(label=label, style=style)
         self.author = author
         self.actions = actions

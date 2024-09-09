@@ -9,7 +9,7 @@ from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 
 class BuildLocation(discord.ui.DynamicItem[discord.ui.Button], template=r'location:(?P<location>[0-9]+)'):
-    def __init__(self, location, style:discord.ButtonStyle.primary, author):
+    def __init__(self, location, style:discord.ButtonStyle.blurple, author):
         super().__init__(
             discord.ui.Button(
                 label=location,
@@ -54,7 +54,7 @@ class BuildButton(discord.ui.DynamicItem[discord.ui.Button], template=r'b:(?P<bu
         super().__init__(
             discord.ui.Button(
                 label=f"{ship} ({p1[f'{key}']})",
-                style=discord.ButtonStyle.primary,
+                style=discord.ButtonStyle.blurple,
                 custom_id=f'b:{build}:c:{str(cost)}:l:{loc}:s:{ship}',
             )
         )
@@ -121,7 +121,7 @@ class Build(discord.ui.View):
         if "mon" not in self.p1["nano_tech"]:
             self.remove_item(self.monolith)
 
-    @discord.ui.button(style=discord.ButtonStyle.primary)
+    @discord.ui.button(style=discord.ButtonStyle.blurple)
     async def interceptor(self, interaction: discord.Interaction, button: discord.ui.Button):
         if len(self.build) == self.p1["build_apt"]:
             await interaction.response.edit_message(content=f"You cannot build any more units. Current build is:"
@@ -132,7 +132,7 @@ class Build(discord.ui.View):
         view = Build(interaction, self.build, self.cost, self.build_loc, self.author)
         await interaction.response.edit_message(content= f"Total cost so far of {self.cost}", view=view)
 
-    @discord.ui.button(style=discord.ButtonStyle.primary)
+    @discord.ui.button(style=discord.ButtonStyle.blurple)
     async def cruiser(self, interaction: discord.Interaction, button: discord.ui.Button):
         if len(self.build) == self.p1["build_apt"]:
             await interaction.response.edit_message(content=f"You cannot build any more units. Current build is:"
@@ -143,7 +143,7 @@ class Build(discord.ui.View):
         view = Build(interaction, self.build, self.cost, self.build_loc, self.author)
         await interaction.response.edit_message(content= f"Total cost so far of {self.cost}", view=view)
 
-    @discord.ui.button(style=discord.ButtonStyle.primary)
+    @discord.ui.button(style=discord.ButtonStyle.blurple)
     async def dreadnought(self, interaction: discord.Interaction, button: discord.ui.Button):
         if len(self.build) == self.p1["build_apt"]:
             await interaction.response.edit_message(content=f"You cannot build any more units. Current build is:"
@@ -154,7 +154,7 @@ class Build(discord.ui.View):
         view = Build(interaction, self.build, self.cost, self.build_loc, self.author)
         await interaction.response.edit_message(content=f"Total cost so far of {self.cost}", view=view)
 
-    @discord.ui.button(style=discord.ButtonStyle.success)
+    @discord.ui.button(style=discord.ButtonStyle.green)
     async def starbase(self, interaction: discord.Interaction, button: discord.ui.Button):
         if len(self.build) == self.p1["build_apt"]:
             await interaction.response.edit_message(content=f"You cannot build any more units. Current build is:"
@@ -165,7 +165,7 @@ class Build(discord.ui.View):
         view = Build(interaction, self.build, self.cost, self.build_loc, self.author)
         await interaction.response.edit_message(content=f"Total cost so far of {self.cost}", view=view)
 
-    @discord.ui.button(style=discord.ButtonStyle.success)
+    @discord.ui.button(style=discord.ButtonStyle.green)
     async def orbital(self, interaction: discord.Interaction, button: discord.ui.Button):
         if len(self.build) == self.p1["build_apt"]:
             await interaction.response.edit_message(content=f"You cannot build any more units. Current build is:"
@@ -176,7 +176,7 @@ class Build(discord.ui.View):
         view = Build(interaction, self.build, self.cost, self.build_loc, self.author)
         await interaction.response.edit_message(content=f"Total cost so far of {self.cost}", view=view)
 
-    @discord.ui.button(style=discord.ButtonStyle.success)
+    @discord.ui.button(style=discord.ButtonStyle.green)
     async def monolith(self, interaction: discord.Interaction, button: discord.ui.Button):
         if len(self.build) == self.p1["build_apt"]:
             await interaction.response.edit_message(content=f"You cannot build any more units. Current build is:"
@@ -187,7 +187,7 @@ class Build(discord.ui.View):
         view = Build(interaction, self.build, self.cost, self.build_loc, self.author)
         await interaction.response.edit_message(content=f"Total cost so far of {self.cost}", view=view)
 
-    @discord.ui.button(label="Finished", style=discord.ButtonStyle.danger)
+    @discord.ui.button(label="Finished", style=discord.ButtonStyle.red)
     async def finished(self, interaction: discord.Interaction, button: discord.ui.Button):
         view = BuildPay(interaction, build=self.build, cost=self.cost, build_loc=self.build_loc,
                         resources=[self.p1["materials"], self.p1["science"], self.p1["money"]],
@@ -196,7 +196,7 @@ class Build(discord.ui.View):
         await interaction.response.send_message(f"Total cost: {self.cost}"
                     f"\nAvailable resources: Materials-{self.p1['materials']} Science-{self.p1['science']} Money-{self.p1['money']}", view=view)
 
-    @discord.ui.button(label="Reset", style=discord.ButtonStyle.danger)
+    @discord.ui.button(label="Reset", style=discord.ButtonStyle.red)
     async def reset(self, interaction: discord.Interaction, button: discord.ui.Button):
         view = Build(interaction, [], 0, self.build_loc, self.author)
         await interaction.message.delete()
@@ -232,7 +232,7 @@ class BuildPay(discord.ui.View):
         if self.spent < self.cost:
             self.remove_item(self.finish_build)
 
-    @discord.ui.button(label="Material (1)",style=discord.ButtonStyle.primary)
+    @discord.ui.button(label="Material (1)",style=discord.ButtonStyle.blurple)
     async def one_material(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.spent += 1
         self.material -= 1
@@ -244,7 +244,7 @@ class BuildPay(discord.ui.View):
                     f"\nAvailable resources: Materials-{self.material} Science-{self.science} Money-{self.money}"
                     f"\nResources spent: {self.spent}", view=view)
 
-    @discord.ui.button(label="Materials (2)",style=discord.ButtonStyle.primary)
+    @discord.ui.button(label="Materials (2)",style=discord.ButtonStyle.blurple)
     async def two_material(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.spent += 2
         self.material -= 2
@@ -256,7 +256,7 @@ class BuildPay(discord.ui.View):
                     f"\nAvailable resources: Materials-{self.material} Science-{self.science} Money-{self.money}"
                     f"\nResources spent: {self.spent}", view=view)
 
-    @discord.ui.button(style=discord.ButtonStyle.secondary)
+    @discord.ui.button(style=discord.ButtonStyle.gray)
     async def convert_science(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.spent += 1
         self.science -= self.p1["trade_value"]
@@ -267,7 +267,7 @@ class BuildPay(discord.ui.View):
                     f"\nAvailable resources: Materials-{self.material} Science-{self.science} Money-{self.money}"
                     f"\nResources spent: {self.spent}", view=view)
 
-    @discord.ui.button(style=discord.ButtonStyle.secondary)
+    @discord.ui.button(style=discord.ButtonStyle.gray)
     async def convert_money(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.spent += 1
         self.money -= self.p1["trade_value"]
@@ -278,13 +278,13 @@ class BuildPay(discord.ui.View):
                     f"\nAvailable resources: Materials-{self.material} Science-{self.science} Money-{self.money}"
                     f"\nResources spent: {self.spent}", view=view)
 
-    @discord.ui.button(label="Reset", style=discord.ButtonStyle.danger)
+    @discord.ui.button(label="Reset", style=discord.ButtonStyle.red)
     async def reset(self, interaction: discord.Interaction, button: discord.ui.Button):
         view = Buttons.TurnButtonsOld.Turn(interaction, interaction.user.id)
         await interaction.message.delete()
         await interaction.response.send_message(f"{interaction.user.mention} use these buttons to do your turn. "
                                                 f"The number of activations you have for each action is listed in ()", view=view)
-    @discord.ui.button(label="Finish Build", style=discord.ButtonStyle.danger)
+    @discord.ui.button(label="Finish Build", style=discord.ButtonStyle.red)
     async def finish_build(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.game.add_units(self.build, self.build_loc)
         player = PlayerHelper(self.author, self.p1)
@@ -294,7 +294,7 @@ class BuildPay(discord.ui.View):
         next_player = self.game.get_next_player(self.p1)
         view = Buttons.TurnButtonsOld.Turn(interaction, next_player)
         await interaction.message.delete()
-        await interaction.response.send_message(f"<@{next_player}> use these buttons to do your turn. "
+        await interaction.response.send_message(f"<@{next_player["player_name"]}> use these buttons to do your turn. "
                                                 
                                                 f"The number of activations you have for each action is listed in ()", view=view)
 

@@ -71,10 +71,10 @@ class PlayerHelper:
         if f"old_{ship}_parts" not in self.stats:
             self.stats[f"old_{ship}_parts"] = self.stats[f"{ship}_parts"]
         
-    def passTurn(self):
-        self.stats["passed"] = True
-    def permanentlyPassTurn(self):
-        self.stats["perma_passed"] = True
+    def passTurn(self, passed:bool):
+        self.stats["passed"] = passed
+    def permanentlyPassTurn(self, passed:bool):
+        self.stats["perma_passed"] = passed
     
     def setFirstPlayer(self, firstPlayerBool : bool):
         self.stats["firstPlayer"] = firstPlayerBool
@@ -85,7 +85,8 @@ class PlayerHelper:
         elif (self.stats["colony_ships"] - adjustement) < 0:
             return False
         else:
-            return(self.stats["colony_ships"] - adjustement)
+            self.stats["colony_ships"] = self.stats["colony_ships"] - adjustement
+            return(self.stats["colony_ships"])
     
     def materials_income(self):
         track = self.stats["population_track"]
