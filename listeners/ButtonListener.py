@@ -22,7 +22,6 @@ class ButtonListener(commands.Cog):
     async def on_interaction(self, interaction : discord.Interaction):
         if interaction.type == discord.InteractionType.component:
             start_time = time.perf_counter()  
-            print(f"Starting Button Press")  
             game = GamestateHelper(interaction.channel)
             player = game.get_player(interaction.user.id)  
             player_helper = PlayerHelper(interaction.user.id, player)
@@ -38,15 +37,15 @@ class ButtonListener(commands.Cog):
             if customID == "deleteMsg":
                 await interaction.message.delete()
             if customID == "showGame":  
-                await TurnButtons.showGame(game, interaction)
+                await TurnButtons.showGame(game, interaction, self.bot)
             if customID == "showReputation":  
                 await TurnButtons.showReputation(game, interaction,player)
             if customID == "passForRound":
-                await TurnButtons.passForRound(player, game, interaction,player_helper)
+                await TurnButtons.passForRound(player, game, interaction,player_helper, self.bot)
             if customID == "permanentlyPass":
                 await TurnButtons.permanentlyPass(player, game, interaction,player_helper)
             if customID == "endTurn":
-                await TurnButtons.endTurn(player, game, interaction)
+                await TurnButtons.endTurn(player, game, interaction, self.bot)
             if customID == "restartTurn":
                 await TurnButtons.restartTurn(player, game, interaction)
             if customID == "runCleanup":
@@ -58,11 +57,13 @@ class ButtonListener(commands.Cog):
             if customID.startswith("placeTile"):
                 await ExploreButtons.placeTile(game,  interaction, player, customID)
             if customID.startswith("discardTile"):
-                await ExploreButtons.discardTile(game, interaction, player)
+                await ExploreButtons.discardTile(game, interaction, player, customID)
             if customID.startswith("keepDiscForPoints"):
                 await DiscoveryTileButtons.keepDiscForPoints(game, player_helper, interaction)
             if customID.startswith("usedDiscForAbility"):
                 await DiscoveryTileButtons.usedDiscForAbility(game, player_helper, interaction, customID,player)
+            if customID.startswith("getFreeTech"):
+                await DiscoveryTileButtons.getFreeTech(game, interaction, customID)
             if customID.startswith("startResearch"):
                 await ResearchButtons.startResearch(game, player, player_helper, interaction,True)
             if customID.startswith("getTech_"):
@@ -86,11 +87,11 @@ class ButtonListener(commands.Cog):
             if customID.startswith("finishSpendForBuild"):
                 await BuildButtons.finishSpendForBuild(game, player, interaction, customID, player_helper)
             if customID.startswith("startUpgrade"):
-                await UpgradeButtons.startUpgrade(game, player, interaction, True)
+                await UpgradeButtons.startUpgrade(game, player, interaction, True,"dummy")
             if customID.startswith("upgradeShip"):
                 await UpgradeButtons.upgradeShip(game, player, interaction, customID, player_helper)
             if customID.startswith("selectOldPart"):
-                await UpgradeButtons.selectOldPart(game, player, interaction, customID)
+                await UpgradeButtons.selectOldPart(game, player, interaction, customID,player_helper)
             if customID.startswith("chooseUpgrade"):
                 await UpgradeButtons.chooseUpgrade(game, player, interaction, customID, player_helper)
             if customID.startswith("startPopDrop"):
@@ -120,10 +121,11 @@ class ButtonListener(commands.Cog):
             if customID.startswith("moveThisShip"):
                 await MoveButtons.moveThisShip(game, player, interaction,customID)
             if customID.startswith("moveTo"):
-                await MoveButtons.moveTo(game, player, interaction,customID,player_helper)
-        end_time = time.perf_counter()  
-        elapsed_time = end_time - start_time  
-        print(f"Total elapsed time for button press: {elapsed_time:.6f} seconds")  
+                await MoveButtons.moveTo(game, player, interaction,customID,player_helper,self.bot)
+            end_time = time.perf_counter()  
+            elapsed_time = end_time - start_time  
+            if(elapsed_time > 2):
+                print(f"Total elapsed time for {customID} button press: {elapsed_time:.2f} seconds")  
 
             
                 

@@ -3,6 +3,7 @@ from discord.ui import View
 from Buttons.Explore import ExploreButtons
 from Buttons.Influence import InfluenceButtons
 from Buttons.Turn import TurnButtons
+from helpers.DrawHelper import DrawHelper
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 from discord.ui import View, Button
@@ -81,7 +82,7 @@ class MoveButtons:
         await interaction.message.delete()
         await interaction.response.send_message( f"{interaction.user.mention} Select the tile you would like to move a {shipType} from {originT} to", view=view)
     @staticmethod
-    async def moveTo(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str, player_helper:PlayerHelper):
+    async def moveTo(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str, player_helper:PlayerHelper, bot):
         originT = buttonID.split("_")[1]
         shipType = buttonID.split("_")[2]
         destination = buttonID.split("_")[3]
@@ -90,17 +91,18 @@ class MoveButtons:
         shipName = f"{player_color}-{game.getShipShortName(shipType)}"
         game.remove_units([shipName],originT)
         game.add_units([shipName],destination)
+        drawing = DrawHelper(game.gamestate)
         await interaction.message.delete()
-        await interaction.response.send_message( f"{interaction.user.mention} Moved a {shipType} from {originT} to {destination}")
+        await interaction.channel.send( f"{interaction.user.mention} Moved a {shipType} from {originT} to {destination}.", file=drawing.board_tile_image_file(destination))
         if moveCount == 1:
             player_helper.spend_influence_on_action("move")
             game.update_player(player_helper)
         if player["move_apt"] > moveCount:
             view = View()
-            view.add_item(Button(label="Move an additional ship", style=discord.ButtonStyle.green, custom_id="startMove_"+str(moveCount+1)))
-            view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id="endTurn"))
-            await interaction.channel.send(f"{interaction.user.mention} you can move an additional ship or end turn.", view=view)
+            view.add_item(Button(label="Move an additional ship", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startMove_"+str(moveCount+1)))
+            view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
+            await interaction.response.send_message(f"{interaction.user.mention} you can move an additional ship or end turn.", view=view)
         else:
             if player["move_apt"] == moveCount:
-                await TurnButtons.endTurn(player, game, interaction)
+                await TurnButtons.endTurn(player, game, interaction, bot)
 

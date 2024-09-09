@@ -89,10 +89,9 @@ class SetupCommands(commands.GroupCog, name="setup"):
         game.fillInDiscTiles()
         await interaction.response.send_message("Done With Setup!")
         
-        await game.showUpdate("Start of Game",interaction)
+        await game.showUpdate("Start of Game",interaction, self.bot)
         view = TurnButtons.getStartTurnButtons(game, game.get_player(player1.id))
-        await interaction.response.send_message(f"<@{player1.id}> use these buttons to do your turn. ",view=view)
-        await game.displayPlayerStats(game.get_player(player1.id), interaction)
+        await interaction.response.send_message(f"<@{player1.id}> use these buttons to do your turn. "+ game.displayPlayerStats(player1.id),view=view)
 
     @app_commands.command(name="cleanup")
     async def cleanup(self,interaction: discord.Interaction):

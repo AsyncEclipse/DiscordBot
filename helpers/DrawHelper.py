@@ -5,6 +5,7 @@ from jproperties import Properties
 import json
 import os
 from discord.ui import View, Button
+
 import time
 
 from helpers.ImageCache import ImageCacheHelper
@@ -69,7 +70,7 @@ class DrawHelper:
 
     def draw_possible_oritentations(self, tileID, position, playerTiles, view:View, player):
         count = 1
-        context = Image.new("RGBA", (345*3*3, 300*3*2), (255, 255, 255, 0))
+        context = Image.new("RGBA", (345*3*3, 300*3*2+10), (255, 255, 255, 0))
         configs = Properties()
         with open("data/tileAdjacencies.properties", "rb") as f:
             configs.load(f)
@@ -94,10 +95,12 @@ class DrawHelper:
                                 break
             if rotationWorks:
                 context2 = self.base_tile_image_with_rotation_in_context(rotation, tileID, tile, count, configs, position)
-                context.paste(context2, (345*3*((count-1)%3),900*(int((count-1)/3))),mask=context2)
-                view.add_item(Button(label="Option #"+str(count),style=discord.ButtonStyle.success, custom_id=f"FCID{player['color']}_placeTile_{position}_{tileID}_{rotation}"))
+                context.paste(context2, (345*3*((count-1)%3),910*(int((count-1)/3))),mask=context2)
+                view.add_item(Button(label="Option #"+str(count),style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_placeTile_{position}_{tileID}_{rotation}"))
                 count += 1
         bytes = BytesIO()
+        if count < 5:
+            context = context.crop((0,0,345*3*(count-1),300*3))
         context.save(bytes, format="PNG")
         bytes.seek(0)
         file = discord.File(bytes, filename="tile_image.png")
@@ -115,7 +118,7 @@ class DrawHelper:
             if adjTile in self.gamestate["board"]:
                 adjTileImage = self.board_tile_image(adjTile)
                 context.paste(adjTileImage,coords[index],mask=adjTileImage)
-        font = ImageFont.truetype("images/resources/arial.ttf", size=100)
+        font = ImageFont.truetype("images/resources/arial.ttf", size=80)
         ImageDraw.Draw(context).text((10, 10), f"Option #{count}", (255, 255, 255), font=font,
                         stroke_width=2, stroke_fill=(0, 0, 0))
         return context
@@ -125,8 +128,24 @@ class DrawHelper:
         bytes_io = BytesIO()
         final_context.save(bytes_io, format="PNG")
         bytes_io.seek(0)
-        end_time = time.perf_counter()  
         return discord.File(bytes_io, filename="tile_image.png")
+    
+    def availablePartsFile(self,available_parts):
+        available_parts.discard("empty")
+        context = Image.new("RGBA", (68*(len(available_parts)), 68), (255, 255, 255, 0))
+        with open("data/parts.json", "r") as f:
+                part_data = json.load(f)
+        for x,part in enumerate(available_parts):
+            part_details = part_data.get(part)
+            partName = part_details["name"].lower().replace(" ", "_") if part_details else part
+            part_path = f"images/resources/components/upgrades/{partName}.png"
+            part_image = self.use_image(part_path)
+            context.paste(part_image,(x*68, 0),mask=part_image)
+        
+        bytes_io = BytesIO()
+        context.save(bytes_io, format="PNG")
+        bytes_io.seek(0)
+        return discord.File(bytes_io, filename="parts.png")
 
     def board_tile_image(self, position):
         sector = self.gamestate["board"][position]["sector"]
@@ -156,6 +175,8 @@ class DrawHelper:
                     if ship_type in ["gcds", "gcdsadv", "anc", "ancadv", "grd", "grdadv"]:
                         ship_type = "ai"
                         size = 110
+                    if ship_type == "orb" or ship_type =="mon":
+                        ship = ship_type
                     filepathShip = f"images/resources/components/basic_ships/{ship}.png"
                     ship_image = self.use_image(filepathShip)
 
@@ -542,7 +563,7 @@ class DrawHelper:
         context4 = self.display_remaining_tiles()
         end_time = time.perf_counter()  
         elapsed_time = end_time - start_time  
-        print(f"Total elapsed time for generating all contexts: {elapsed_time:.6f} seconds")
+        print(f"Total elapsed time for generating all contexts: {elapsed_time:.2f} seconds")
         start_time = time.perf_counter() 
         final_context = Image.new("RGBA", (4160, board_height + context2.size[1]+context3.size[1]), (255, 255, 255, 0))
         final_context.paste(cropped_context, (0, 0))
@@ -555,7 +576,7 @@ class DrawHelper:
         bytes_io.seek(0)
         end_time = time.perf_counter()  
         elapsed_time = end_time - start_time  
-        print(f"Total elapsed time for pasting all together: {elapsed_time:.6f} seconds")
+        print(f"Total elapsed time for pasting all together: {elapsed_time:.2f} seconds")
         return discord.File(bytes_io, filename="map_image.png")
     
     def show_map(self):
@@ -626,6 +647,24 @@ class DrawHelper:
         return discord.File(bytes_io, filename="stats_image.png")
 
 
+    def show_specific_tech(self, tech):
+        context = Image.new("RGBA", (68, 68), (255, 255, 255, 0))
+        techsAvailable = self.gamestate["available_techs"]
+        with open("data/techs.json", "r") as f:
+            tech_data = json.load(f)
+        tech_details = tech_data.get(tech)
+        tech_type = tech_details["track"]
+        techName = tech_details["name"].lower().replace(" ", "_") if tech_details else tech
+        tech_path = f"images/resources/components/technology/{tech_type}/tech_{techName}.png"
+        if not os.path.exists(tech_path):
+            tech_path = f"images/resources/components/technology/rare/tech_{techName}.png"
+        tech_image = self.use_image(tech_path)
+        context.paste(tech_image, (0,0), mask=tech_image)
+        bytes_io = BytesIO()
+        context.save(bytes_io, format="PNG")
+        bytes_io.seek(0)
+
+        return discord.File(bytes_io, filename="techs_image.png")
 
     def show_available_techs(self):
         context = self.display_techs()
