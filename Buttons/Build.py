@@ -178,7 +178,7 @@ class BuildButtons:
         if len(build) == buildApt:
             next_player = game.get_next_player(player)
             view = TurnButtons.getStartTurnButtons(game, next_player)
-            await interaction.followup.send(f"<@{next_player["player_name"]}> use these buttons to do your turn. "+game.displayPlayerStats(next_player),view=view)
+            await interaction.followup.send(f"<@{next_player['player_name']}> use these buttons to do your turn. "+game.displayPlayerStats(next_player),view=view)
         else:
             view2 = View()
             view2.add_item(Button(label="Build Somewhere Else", style=discord.ButtonStyle.red, custom_id="startBuild2"))  
