@@ -10,7 +10,6 @@ from Buttons.Upgrade import UpgradeButtons
 from helpers.PlayerHelper import PlayerHelper
 from helpers.GamestateHelper import GamestateHelper
 from helpers.DrawHelper import DrawHelper
-from Buttons.TurnButtonsOld import Turn
 
 class PlayerCommands(commands.GroupCog, name="player"):
     def __init__(self, bot):
