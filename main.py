@@ -1,6 +1,5 @@
 import discord
 import time
-import asyncio
 from commands.tile_commands import TileCommands
 import config
 from commands.setup_commands import SetupCommands
