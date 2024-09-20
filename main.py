@@ -31,5 +31,5 @@ class DiscordBot(commands.Bot):
         print("Bot is now ready.")
 
 bot = DiscordBot(command_prefix="$", intents=discord.Intents.all())
-asyncio.run(bot.start(config.token))
+bot.run(config.token)
 
