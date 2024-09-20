@@ -88,7 +88,7 @@ class InfluenceButtons:
         next_player = game.get_next_player(player)
         view = TurnButtons.getStartTurnButtons(game, next_player)
         await interaction.message.delete()
-        await interaction.response.send_message(f"<@{next_player["player_name"]}> use these buttons to do your turn. "+game.displayPlayerStats(next_player),view=view)
+        await interaction.response.send_message(f"<@{next_player['player_name']}> use these buttons to do your turn. "+game.displayPlayerStats(next_player),view=view)
 
     @staticmethod
     async def removeInfluenceStart(game: GamestateHelper, player, interaction: discord.Interaction):
@@ -116,5 +116,5 @@ class InfluenceButtons:
     async def addCubeToTrack(game: GamestateHelper, p1, interaction: discord.Interaction, buttonID:str):
         pop = buttonID.split("_")[1]
         game.remove_pop([pop+"_pop"],"dummy",game.get_player_from_color(p1["color"]))
-        await interaction.response.send_message( f"Added 1 "+pop.replace("adv","")+" population back to the relevant track")
+        await interaction.response.send_message( f"Added 1 "+pop.replace('adv','')+" population back to the relevant track")
         await interaction.message.delete()
