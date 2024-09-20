@@ -30,9 +30,6 @@ class DiscordBot(commands.Bot):
         print(f"Total elapsed time for image load: {elapsed_time:.2f} seconds")
         print("Bot is now ready.")
 
-async def main():
-    async with DiscordBot(command_prefix="$", intents=discord.Intents.all()) as bot:
-        await bot.start(config.token)
-
-asyncio.run(main())
+bot = DiscordBot(command_prefix="$", intents=discord.Intents.all())
+asyncio.run(bot.start(config.token))
 
