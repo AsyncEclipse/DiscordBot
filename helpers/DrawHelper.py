@@ -195,10 +195,11 @@ class DrawHelper:
             def paste_resourcecube(tile, tile_image, resource_type, color):
                 if f"{resource_type}_pop" in tile and tile[f"{resource_type}_pop"] != 0 and tile[f"{resource_type}_pop"]:
                     for x in range(tile[f"{resource_type}_pop"][0]):
-                        pop_path = f"images/resources/components/all_boards/popcube_{color}.png"
-                        pop_image = self.use_image(pop_path)
-                        coords = tile[f"{resource_type}{x+1}_snap"]
-                        tile_image.paste(pop_image, (int(345 / 1024 * coords[0] - 15), int(345 / 1024 * coords[1] - 15)), mask=pop_image)
+                        if tile[f"{resource_type}_pop"][0] != 0 and x <= len(tile[f"{resource_type}_pop"]):
+                            pop_path = f"images/resources/components/all_boards/popcube_{color}.png"
+                            pop_image = self.use_image(pop_path)
+                            coords = tile[f"{resource_type}{x+1}_snap"]
+                            tile_image.paste(pop_image, (int(345 / 1024 * coords[0] - 15), int(345 / 1024 * coords[1] - 15)), mask=pop_image)
 
             if "owner" in tile and tile["owner"] != 0:
                 color = tile["owner"]
@@ -433,7 +434,20 @@ class DrawHelper:
         def draw_resource(context, img_path, color, player_key, amount_key, position):
             image = self.use_image(img_path)
             context.paste(image, position)
-            amountIncrease = player["population_track"][player[amount_key]-1] - (player["influence_track"][player["influence_discs"]] if player_key == "money" else 0)
+            population_track = player["population_track"]  
+            influence_track = player["influence_track"]  
+            amount_index = player[amount_key] - 1  
+            influence_index = player["influence_discs"]  
+            if 0 <= amount_index < len(population_track):  
+                population_value = population_track[amount_index]  
+            else:  
+                population_value = 0  # or some default value or handle the error appropriately  
+            if 0 <= influence_index < len(influence_track):  
+                influence_value = influence_track[influence_index]  
+            else:  
+                influence_value = 0 
+            
+            amountIncrease = population_value - (influence_value if player_key == "money" else 0)  
             if amountIncrease > -1:
                 amountIncrease = "+"+str(amountIncrease)
             else:
@@ -605,7 +619,6 @@ class DrawHelper:
         context = Image.new("RGBA", (4160, 5100), (255, 255, 255, 0))
         min_x, min_y, max_x, max_y = paste_tiles(context, self.gamestate["board"])
         cropped_context = context.crop((min_x, min_y, max_x, max_y))
-        cropped_context = cropped_context.resize((int(cropped_context.width/2),int(cropped_context.height/2)))
         bytes_io = BytesIO()
         cropped_context.save(bytes_io, format="PNG")
         bytes_io.seek(0)

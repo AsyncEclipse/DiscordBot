@@ -58,14 +58,42 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [397,122],
-    "cru_snap": [821,373],
-    "drd_snap": [765,557],
-    "sb_snap": [342,320],
-    "mon_snap": [285,653],
-    "orb_snap": [393,753],
-    "ai_snap": [513,450],
-    "wormholes": [0, 1, 2, 3, 4, 5],
+    "int_snap": [
+      397,
+      122
+    ],
+    "cru_snap": [
+      821,
+      373
+    ],
+    "drd_snap": [
+      765,
+      557
+    ],
+    "sb_snap": [
+      342,
+      320
+    ],
+    "mon_snap": [
+      285,
+      653
+    ],
+    "orb_snap": [
+      393,
+      753
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
     "vp": 4,
     "artifact": 1,
     "ancient": 0,
@@ -119,14 +147,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [461,115],
-    "cru_snap": [842,465],
-    "drd_snap": [457,789],
-    "sb_snap": [421,620],
-    "mon_snap": [234,610],
-    "orb_snap": [146,442],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3,4],
+    "int_snap": [
+      461,
+      115
+    ],
+    "cru_snap": [
+      842,
+      465
+    ],
+    "drd_snap": [
+      457,
+      789
+    ],
+    "sb_snap": [
+      421,
+      620
+    ],
+    "mon_snap": [
+      234,
+      610
+    ],
+    "orb_snap": [
+      146,
+      442
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 2,
     "artifact": 1,
     "ancient": 0,
@@ -180,14 +234,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [502,161],
-    "cru_snap": [729,264],
-    "drd_snap": [798,576],
-    "sb_snap": [468,765],
-    "mon_snap": [513,450],
-    "orb_snap": [200,445],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3,4],
+    "int_snap": [
+      502,
+      161
+    ],
+    "cru_snap": [
+      729,
+      264
+    ],
+    "drd_snap": [
+      798,
+      576
+    ],
+    "sb_snap": [
+      468,
+      765
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      200,
+      445
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 2,
     "artifact": 1,
     "ancient": 0,
@@ -241,14 +321,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [670,126],
-    "cru_snap": [732,302],
-    "drd_snap": [761,600],
-    "sb_snap": [565,716],
-    "mon_snap": [513,450],
-    "orb_snap": [212,440],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3,4],
+    "int_snap": [
+      670,
+      126
+    ],
+    "cru_snap": [
+      732,
+      302
+    ],
+    "drd_snap": [
+      761,
+      600
+    ],
+    "sb_snap": [
+      565,
+      716
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      212,
+      440
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 2,
     "artifact": 1,
     "ancient": 0,
@@ -302,14 +408,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [308,213],
-    "cru_snap": [525,170],
-    "drd_snap": [756,286],
-    "sb_snap": [509,754],
-    "mon_snap": [513,450],
-    "orb_snap": [305,672],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3,4],
+    "int_snap": [
+      308,
+      213
+    ],
+    "cru_snap": [
+      525,
+      170
+    ],
+    "drd_snap": [
+      756,
+      286
+    ],
+    "sb_snap": [
+      509,
+      754
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      305,
+      672
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 2,
     "artifact": 1,
     "ancient": 0,
@@ -373,14 +505,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [310,98],
-    "cru_snap": [725,129],
-    "drd_snap": [830,537],
-    "sb_snap": [149,466],
-    "mon_snap": [513,450],
-    "orb_snap": [358,366],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3,4],
+    "int_snap": [
+      310,
+      98
+    ],
+    "cru_snap": [
+      725,
+      129
+    ],
+    "drd_snap": [
+      830,
+      537
+    ],
+    "sb_snap": [
+      149,
+      466
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      358,
+      366
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -439,14 +597,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [329,106],
-    "cru_snap": [693,110],
-    "drd_snap": [422,740],
-    "sb_snap": [177,456],
-    "mon_snap": [513,450],
-    "orb_snap": [374,416],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3,4],
+    "int_snap": [
+      329,
+      106
+    ],
+    "cru_snap": [
+      693,
+      110
+    ],
+    "drd_snap": [
+      422,
+      740
+    ],
+    "sb_snap": [
+      177,
+      456
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      374,
+      416
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -510,14 +694,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [337,114],
-    "cru_snap": [784,290],
-    "drd_snap": [792,614],
-    "sb_snap": [380,805],
-    "mon_snap": [346,678],
-    "orb_snap": [300,232],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3,4],
+    "int_snap": [
+      337,
+      114
+    ],
+    "cru_snap": [
+      784,
+      290
+    ],
+    "drd_snap": [
+      792,
+      614
+    ],
+    "sb_snap": [
+      380,
+      805
+    ],
+    "mon_snap": [
+      346,
+      678
+    ],
+    "orb_snap": [
+      300,
+      232
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -571,14 +781,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [341,130],
-    "cru_snap": [681,114],
-    "drd_snap": [550,748],
-    "sb_snap": [321,649],
-    "mon_snap": [513,450],
-    "orb_snap": [298,265],
-    "ai_snap": [513,450],
-    "wormholes": [0, 1, 3, 4],
+    "int_snap": [
+      341,
+      130
+    ],
+    "cru_snap": [
+      681,
+      114
+    ],
+    "drd_snap": [
+      550,
+      748
+    ],
+    "sb_snap": [
+      321,
+      649
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      298,
+      265
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -642,14 +878,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [548,118],
-    "cru_snap": [729,168],
-    "drd_snap": [477,678],
-    "sb_snap": [142,434],
-    "mon_snap": [513,450],
-    "orb_snap": [356,433],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3,4],
+    "int_snap": [
+      548,
+      118
+    ],
+    "cru_snap": [
+      729,
+      168
+    ],
+    "drd_snap": [
+      477,
+      678
+    ],
+    "sb_snap": [
+      142,
+      434
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      356,
+      433
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -698,14 +960,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [338,132],
-    "cru_snap": [654,132],
-    "drd_snap": [750,281],
-    "sb_snap": [160,449],
-    "mon_snap": [513,450],
-    "orb_snap": [421,260],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3,4],
+    "int_snap": [
+      338,
+      132
+    ],
+    "cru_snap": [
+      654,
+      132
+    ],
+    "drd_snap": [
+      750,
+      281
+    ],
+    "sb_snap": [
+      160,
+      449
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      421,
+      260
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -769,14 +1057,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [677,114],
-    "cru_snap": [752,312],
-    "drd_snap": [482,726],
-    "sb_snap": [157,436],
-    "mon_snap": [513,450],
-    "orb_snap": [362,417],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3,4],
+    "int_snap": [
+      677,
+      114
+    ],
+    "cru_snap": [
+      752,
+      312
+    ],
+    "drd_snap": [
+      482,
+      726
+    ],
+    "sb_snap": [
+      157,
+      436
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      362,
+      417
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -830,14 +1144,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [326,141],
-    "cru_snap": [710,133],
-    "drd_snap": [761,313],
-    "sb_snap": [154,448],
-    "mon_snap": [513,450],
-    "orb_snap": [336,429],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3,4],
+    "int_snap": [
+      326,
+      141
+    ],
+    "cru_snap": [
+      710,
+      133
+    ],
+    "drd_snap": [
+      761,
+      313
+    ],
+    "sb_snap": [
+      154,
+      448
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      336,
+      429
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -901,14 +1241,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [268,218],
-    "cru_snap": [480,134],
-    "drd_snap": [792,310],
-    "sb_snap": [153,440],
-    "mon_snap": [513,450],
-    "orb_snap": [349,377],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3,4],
+    "int_snap": [
+      268,
+      218
+    ],
+    "cru_snap": [
+      480,
+      134
+    ],
+    "drd_snap": [
+      792,
+      310
+    ],
+    "sb_snap": [
+      153,
+      440
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      349,
+      377
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -927,7 +1293,7 @@
       1
     ],
     "money1_snap": [
-      454,
+      550,
       225
     ],
     "money2_snap": [],
@@ -967,14 +1333,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [238,257],
-    "cru_snap": [697,138],
-    "drd_snap": [506,686],
-    "sb_snap": [158,450],
-    "mon_snap": [513,450],
-    "orb_snap": [356,434],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3,4],
+    "int_snap": [
+      238,
+      257
+    ],
+    "cru_snap": [
+      697,
+      138
+    ],
+    "drd_snap": [
+      506,
+      686
+    ],
+    "sb_snap": [
+      158,
+      450
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      356,
+      434
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -1038,14 +1430,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [261,238],
-    "cru_snap": [717,125],
-    "drd_snap": [797,358],
-    "sb_snap": [118,502],
-    "mon_snap": [513,450],
-    "orb_snap": [334,392],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3,4],
+    "int_snap": [
+      261,
+      238
+    ],
+    "cru_snap": [
+      717,
+      125
+    ],
+    "drd_snap": [
+      797,
+      358
+    ],
+    "sb_snap": [
+      118,
+      502
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      334,
+      392
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -1104,14 +1522,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [348,148],
-    "cru_snap": [705,109],
-    "drd_snap": [800,328],
-    "sb_snap": [396,762],
-    "mon_snap": [513,450],
-    "orb_snap": [321,576],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3,4],
+    "int_snap": [
+      348,
+      148
+    ],
+    "cru_snap": [
+      705,
+      109
+    ],
+    "drd_snap": [
+      800,
+      328
+    ],
+    "sb_snap": [
+      396,
+      762
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      321,
+      576
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -1165,14 +1609,41 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [618,94],
-    "cru_snap": [760,613],
-    "drd_snap": [526,748],
-    "sb_snap": [268,625],
-    "mon_snap": [513,450],
-    "orb_snap": [284,373],
-    "ai_snap": [513,450],
-    "wormholes": [1, 2, 3, 4, 5],
+    "int_snap": [
+      618,
+      94
+    ],
+    "cru_snap": [
+      760,
+      613
+    ],
+    "drd_snap": [
+      526,
+      748
+    ],
+    "sb_snap": [
+      268,
+      625
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      284,
+      373
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 1,
@@ -1193,18 +1664,18 @@
     "moneyadv_pop": [],
     "moneyadv1_snap": [],
     "moneyadv2_snap": [],
-    "science_pop": [],
-    "science1_snap": [],
-    "science2_snap": [],
-    "scienceadv_pop": [
+    "scienceadv_pop": [],
+    "science1adv1_snap": [],
+    "science2adv2_snap": [],
+    "science_pop": [
       0,
       0
     ],
-    "scienceadv1_snap": [
+    "science_snap": [
       445,
       673
     ],
-    "scienceadv2_snap": [
+    "science2_snap": [
       308,
       673
     ],
@@ -1220,14 +1691,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [338,200],
-    "cru_snap": [668,226],
-    "drd_snap": [665,650],
-    "sb_snap": [201,436],
-    "mon_snap": [513,450],
-    "orb_snap": [404,317],
-    "ai_snap": [513,450],
-    "wormholes": [0, 2, 3, 5],
+    "int_snap": [
+      338,
+      200
+    ],
+    "cru_snap": [
+      668,
+      226
+    ],
+    "drd_snap": [
+      665,
+      650
+    ],
+    "sb_snap": [
+      201,
+      436
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      404,
+      317
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      2,
+      3,
+      5
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 0,
@@ -1276,14 +1773,41 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [368,173],
-    "cru_snap": [764,593],
-    "drd_snap": [574,748],
-    "sb_snap": [160,437],
-    "mon_snap": [513,450],
-    "orb_snap": [417,334],
-    "ai_snap": [513,450],
-    "wormholes": [0, 1, 2, 4, 5],
+    "int_snap": [
+      368,
+      173
+    ],
+    "cru_snap": [
+      764,
+      593
+    ],
+    "drd_snap": [
+      574,
+      748
+    ],
+    "sb_snap": [
+      160,
+      437
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      417,
+      334
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      2,
+      4,
+      5
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 0,
@@ -1342,14 +1866,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [346,165],
-    "cru_snap": [786,581],
-    "drd_snap": [569,729],
-    "sb_snap": [189,421],
-    "mon_snap": [513,450],
-    "orb_snap": [393,281],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3,4],
+    "int_snap": [
+      346,
+      165
+    ],
+    "cru_snap": [
+      786,
+      581
+    ],
+    "drd_snap": [
+      569,
+      729
+    ],
+    "sb_snap": [
+      189,
+      421
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      393,
+      281
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 2,
@@ -1403,14 +1953,41 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [412,140],
-    "cru_snap": [788,278],
-    "drd_snap": [501,725],
-    "sb_snap": [261,626],
-    "mon_snap": [513,450],
-    "orb_snap": [357,288],
-    "ai_snap": [513,450],
-    "wormholes": [0, 1, 3, 4, 5],
+    "int_snap": [
+      412,
+      140
+    ],
+    "cru_snap": [
+      788,
+      278
+    ],
+    "drd_snap": [
+      501,
+      725
+    ],
+    "sb_snap": [
+      261,
+      626
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      357,
+      288
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4,
+      5
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 1,
@@ -1459,14 +2036,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [506,156],
-    "cru_snap": [782,584],
-    "drd_snap": [581,732],
-    "sb_snap": [278,718],
-    "mon_snap": [513,450],
-    "orb_snap": [330,484],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,2,3],
+    "int_snap": [
+      506,
+      156
+    ],
+    "cru_snap": [
+      782,
+      584
+    ],
+    "drd_snap": [
+      581,
+      732
+    ],
+    "sb_snap": [
+      278,
+      718
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      330,
+      484
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      2,
+      3
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 0,
@@ -1520,14 +2123,41 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [372,160],
-    "cru_snap": [741,293],
-    "drd_snap": [482,720],
-    "sb_snap": [150,421],
-    "mon_snap": [513,450],
-    "orb_snap": [384,336],
-    "ai_snap": [513,450],
-    "wormholes": [0, 1, 2, 3, 5],
+    "int_snap": [
+      372,
+      160
+    ],
+    "cru_snap": [
+      741,
+      293
+    ],
+    "drd_snap": [
+      482,
+      720
+    ],
+    "sb_snap": [
+      150,
+      421
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      384,
+      336
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      2,
+      3,
+      5
+    ],
     "vp": 3,
     "artifact": 1,
     "ancient": 0,
@@ -1581,14 +2211,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [378,130],
-    "cru_snap": [740,270],
-    "drd_snap": [772,612],
-    "sb_snap": [376,733],
-    "mon_snap": [513,450],
-    "orb_snap": [278,524],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3,4],
+    "int_snap": [
+      378,
+      130
+    ],
+    "cru_snap": [
+      740,
+      270
+    ],
+    "drd_snap": [
+      772,
+      612
+    ],
+    "sb_snap": [
+      376,
+      733
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      278,
+      524
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 1,
@@ -1637,14 +2293,41 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [249,308],
-    "cru_snap": [782,584],
-    "drd_snap": [592,733],
-    "sb_snap": [364,757],
-    "mon_snap": [513,450],
-    "orb_snap": [168,493],
-    "ai_snap": [513,450],
-    "wormholes": [1, 2, 3, 4, 5],
+    "int_snap": [
+      249,
+      308
+    ],
+    "cru_snap": [
+      782,
+      584
+    ],
+    "drd_snap": [
+      592,
+      733
+    ],
+    "sb_snap": [
+      364,
+      757
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      168,
+      493
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
     "vp": 4,
     "artifact": 1,
     "ancient": 2,
@@ -1685,17 +2368,48 @@
     "neutral_pop": [],
     "neutral1_snap": [],
     "neutral2_snap": [],
-    "neutral_adv_pop": [0],
-    "int_snap": [373,176],
-    "cru_snap": [673,165],
-    "drd_snap": [762,588],
-    "sb_snap": [370,743],
-    "mon_snap": [513,450],
-    "orb_snap": [290,553],
-    "ai_snap": [513,450],
-    "neutraladv1_snap": [618,729],
+    "neutral_adv_pop": [
+      0
+    ],
+    "int_snap": [
+      373,
+      176
+    ],
+    "cru_snap": [
+      673,
+      165
+    ],
+    "drd_snap": [
+      762,
+      588
+    ],
+    "sb_snap": [
+      370,
+      743
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      290,
+      553
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "neutraladv1_snap": [
+      618,
+      729
+    ],
     "neutraladv2_snap": [],
-    "wormholes": [0,2,3,4],
+    "wormholes": [
+      0,
+      2,
+      3,
+      4
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 0,
@@ -1744,14 +2458,39 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [305,140],
-    "cru_snap": [645,134],
-    "drd_snap": [782,604],
-    "sb_snap": [508,710],
-    "mon_snap": [513,450],
-    "orb_snap": [266,380],
-    "ai_snap": [513,450],
-    "wormholes": [1,3,5],
+    "int_snap": [
+      305,
+      140
+    ],
+    "cru_snap": [
+      645,
+      134
+    ],
+    "drd_snap": [
+      782,
+      604
+    ],
+    "sb_snap": [
+      508,
+      710
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      266,
+      380
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      1,
+      3,
+      5
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -1800,14 +2539,39 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [305,170],
-    "cru_snap": [696,209],
-    "drd_snap": [737,672],
-    "sb_snap": [158,444],
-    "mon_snap": [513,450],
-    "orb_snap": [376,381],
-    "ai_snap": [513,450],
-    "wormholes": [1,3,5],
+    "int_snap": [
+      305,
+      170
+    ],
+    "cru_snap": [
+      696,
+      209
+    ],
+    "drd_snap": [
+      737,
+      672
+    ],
+    "sb_snap": [
+      158,
+      444
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      376,
+      381
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      1,
+      3,
+      5
+    ],
     "vp": 2,
     "artifact": 1,
     "ancient": 0,
@@ -1861,14 +2625,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [549,134],
-    "cru_snap": [709,248],
-    "drd_snap": [506,730],
-    "sb_snap": [150,457],
-    "mon_snap": [513,450],
-    "orb_snap": [389,346],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3,5],
+    "int_snap": [
+      549,
+      134
+    ],
+    "cru_snap": [
+      709,
+      248
+    ],
+    "drd_snap": [
+      506,
+      730
+    ],
+    "sb_snap": [
+      150,
+      457
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      389,
+      346
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      5
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 2,
@@ -1922,14 +2712,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [493,160],
-    "cru_snap": [793,573],
-    "drd_snap": [626,709],
-    "sb_snap": [148,454],
-    "mon_snap": [513,450],
-    "orb_snap": [346,433],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3,5],
+    "int_snap": [
+      493,
+      160
+    ],
+    "cru_snap": [
+      793,
+      573
+    ],
+    "drd_snap": [
+      626,
+      709
+    ],
+    "sb_snap": [
+      148,
+      454
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      346,
+      433
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      5
+    ],
     "vp": 2,
     "artifact": 1,
     "ancient": 1,
@@ -1983,14 +2799,39 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [613,98],
-    "cru_snap": [784,304],
-    "drd_snap": [497,701],
-    "sb_snap": [188,473],
-    "mon_snap": [513,450],
-    "orb_snap": [384,496],
-    "ai_snap": [513,450],
-    "wormholes": [2,3,4],
+    "int_snap": [
+      613,
+      98
+    ],
+    "cru_snap": [
+      784,
+      304
+    ],
+    "drd_snap": [
+      497,
+      701
+    ],
+    "sb_snap": [
+      188,
+      473
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      384,
+      496
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      2,
+      3,
+      4
+    ],
     "vp": 1,
     "artifact": 1,
     "ancient": 0,
@@ -2034,14 +2875,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [520,122],
-    "cru_snap": [721,154],
-    "drd_snap": [734,618],
-    "sb_snap": [294,738],
-    "mon_snap": [513,450],
-    "orb_snap": [232,500],
-    "ai_snap": [513,450],
-    "wormholes": [1,2,3,5],
+    "int_snap": [
+      520,
+      122
+    ],
+    "cru_snap": [
+      721,
+      154
+    ],
+    "drd_snap": [
+      734,
+      618
+    ],
+    "sb_snap": [
+      294,
+      738
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      232,
+      500
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      1,
+      2,
+      3,
+      5
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -2080,14 +2947,39 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [372,168],
-    "cru_snap": [701,233],
-    "drd_snap": [690,677],
-    "sb_snap": [276,668],
-    "mon_snap": [513,450],
-    "orb_snap": [233,369],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3],
+    "int_snap": [
+      372,
+      168
+    ],
+    "cru_snap": [
+      701,
+      233
+    ],
+    "drd_snap": [
+      690,
+      677
+    ],
+    "sb_snap": [
+      276,
+      668
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      233,
+      369
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 0,
@@ -2126,14 +3018,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [372,168],
-    "cru_snap": [701,233],
-    "drd_snap": [690,677],
-    "sb_snap": [276,668],
-    "mon_snap": [513,450],
-    "orb_snap": [233,369],
-    "ai_snap": [513,450],
-    "wormholes": [0,2,3,5],
+    "int_snap": [
+      372,
+      168
+    ],
+    "cru_snap": [
+      701,
+      233
+    ],
+    "drd_snap": [
+      690,
+      677
+    ],
+    "sb_snap": [
+      276,
+      668
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      233,
+      369
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      2,
+      3,
+      5
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 0,
@@ -2182,14 +3100,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [360,188],
-    "cru_snap": [788,605],
-    "drd_snap": [514,713],
-    "sb_snap": [260,696],
-    "mon_snap": [513,450],
-    "orb_snap": [429,316],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3,5],
+    "int_snap": [
+      360,
+      188
+    ],
+    "cru_snap": [
+      788,
+      605
+    ],
+    "drd_snap": [
+      514,
+      713
+    ],
+    "sb_snap": [
+      260,
+      696
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      429,
+      316
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      5
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -2238,14 +3182,39 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [300,169],
-    "cru_snap": [729,228],
-    "drd_snap": [493,698],
-    "sb_snap": [197,556],
-    "mon_snap": [513,450],
-    "orb_snap": [356,373],
-    "ai_snap": [513,450],
-    "wormholes": [0,3,5],
+    "int_snap": [
+      300,
+      169
+    ],
+    "cru_snap": [
+      729,
+      228
+    ],
+    "drd_snap": [
+      493,
+      698
+    ],
+    "sb_snap": [
+      197,
+      556
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      356,
+      373
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      3,
+      5
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -2299,14 +3268,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [373,162],
-    "cru_snap": [798,530],
-    "drd_snap": [488,716],
-    "sb_snap": [176,414],
-    "mon_snap": [513,450],
-    "orb_snap": [402,300],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,2,3],
+    "int_snap": [
+      373,
+      162
+    ],
+    "cru_snap": [
+      798,
+      530
+    ],
+    "drd_snap": [
+      488,
+      716
+    ],
+    "sb_snap": [
+      176,
+      414
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      402,
+      300
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      2,
+      3
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 1,
@@ -2352,17 +3347,49 @@
     "neutral_pop": [],
     "neutral1_snap": [],
     "neutral2_snap": [],
-    "neutral_adv_pop": [0],
-    "neutraladv1_snap": [352,208],
+    "neutral_adv_pop": [
+      0
+    ],
+    "neutraladv1_snap": [
+      352,
+      208
+    ],
     "neutraladv2_snap": [],
-    "int_snap": [585,140],
-    "cru_snap": [745,290],
-    "drd_snap": [496,736],
-    "sb_snap": [176,464],
-    "mon_snap": [513,450],
-    "orb_snap": [406,345],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,2,4,5],
+    "int_snap": [
+      585,
+      140
+    ],
+    "cru_snap": [
+      745,
+      290
+    ],
+    "drd_snap": [
+      496,
+      736
+    ],
+    "sb_snap": [
+      176,
+      464
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      406,
+      345
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      2,
+      4,
+      5
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 1,
@@ -2411,14 +3438,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [388,112],
-    "cru_snap": [777,566],
-    "drd_snap": [604,744],
-    "sb_snap": [269,230],
-    "mon_snap": [513,450],
-    "orb_snap": [421,324],
-    "ai_snap": [513,450],
-    "wormholes": [0,2,3,5],
+    "int_snap": [
+      388,
+      112
+    ],
+    "cru_snap": [
+      777,
+      566
+    ],
+    "drd_snap": [
+      604,
+      744
+    ],
+    "sb_snap": [
+      269,
+      230
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      421,
+      324
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      2,
+      3,
+      5
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 0,
@@ -2461,10 +3514,23 @@
     "cru_snap": [],
     "drd_snap": [],
     "sb_snap": [],
-    "mon_snap": [513,450],
+    "mon_snap": [
+      513,
+      450
+    ],
     "orb_snap": [],
-    "ai_snap": [630,444],
-    "wormholes": [0, 1, 2, 3, 4, 5],
+    "ai_snap": [
+      630,
+      444
+    ],
+    "wormholes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
     "vp": 0,
     "artifact": 0,
     "ancient": 1,
@@ -2518,14 +3584,39 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [389,129],
-    "cru_snap": [774,565],
-    "drd_snap": [436,734],
-    "sb_snap": [230,666],
-    "mon_snap": [513,450],
-    "orb_snap": [313,264],
-    "ai_snap": [513,450],
-    "wormholes": [0,2,3],
+    "int_snap": [
+      389,
+      129
+    ],
+    "cru_snap": [
+      774,
+      565
+    ],
+    "drd_snap": [
+      436,
+      734
+    ],
+    "sb_snap": [
+      230,
+      666
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      313,
+      264
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      2,
+      3
+    ],
     "vp": 2,
     "artifact": 1,
     "ancient": 2,
@@ -2577,14 +3668,39 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [320,109],
-    "cru_snap": [805,576],
-    "drd_snap": [445,737],
-    "sb_snap": [156,473],
-    "mon_snap": [513,450],
-    "orb_snap": [373,457],
-    "ai_snap": [513,450],
-    "wormholes": [0,3,4],
+    "int_snap": [
+      320,
+      109
+    ],
+    "cru_snap": [
+      805,
+      576
+    ],
+    "drd_snap": [
+      445,
+      737
+    ],
+    "sb_snap": [
+      156,
+      473
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      373,
+      457
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      3,
+      4
+    ],
     "vp": 2,
     "artifact": 1,
     "ancient": 1,
@@ -2638,14 +3754,38 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [321,110],
-    "cru_snap": [812,577],
-    "drd_snap": [501,746],
-    "sb_snap": [148,481],
-    "mon_snap": [513,450],
-    "orb_snap": [366,330],
-    "ai_snap": [513,450],
-    "wormholes": [3,5],
+    "int_snap": [
+      321,
+      110
+    ],
+    "cru_snap": [
+      812,
+      577
+    ],
+    "drd_snap": [
+      501,
+      746
+    ],
+    "sb_snap": [
+      148,
+      481
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      366,
+      330
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      3,
+      5
+    ],
     "vp": 2,
     "artifact": 1,
     "ancient": 1,
@@ -2694,14 +3834,38 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [494,158],
-    "cru_snap": [748,266],
-    "drd_snap": [656,684],
-    "sb_snap": [174,498],
-    "mon_snap": [513,450],
-    "orb_snap": [534,333],
-    "ai_snap": [513,450],
-    "wormholes": [0,3],
+    "int_snap": [
+      494,
+      158
+    ],
+    "cru_snap": [
+      748,
+      266
+    ],
+    "drd_snap": [
+      656,
+      684
+    ],
+    "sb_snap": [
+      174,
+      498
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      534,
+      333
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      3
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 0,
@@ -2750,14 +3914,39 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [517,144],
-    "cru_snap": [728,254],
-    "drd_snap": [765,609],
-    "sb_snap": [168,526],
-    "mon_snap": [513,450],
-    "orb_snap": [639,462],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3],
+    "int_snap": [
+      517,
+      144
+    ],
+    "cru_snap": [
+      728,
+      254
+    ],
+    "drd_snap": [
+      765,
+      609
+    ],
+    "sb_snap": [
+      168,
+      526
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      639,
+      462
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 1,
@@ -2806,14 +3995,38 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [369,154],
-    "cru_snap": [785,597],
-    "drd_snap": [404,708],
-    "sb_snap": [189,488],
-    "mon_snap": [513,450],
-    "orb_snap": [430,317],
-    "ai_snap": [513,450],
-    "wormholes": [1,3],
+    "int_snap": [
+      369,
+      154
+    ],
+    "cru_snap": [
+      785,
+      597
+    ],
+    "drd_snap": [
+      404,
+      708
+    ],
+    "sb_snap": [
+      189,
+      488
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      430,
+      317
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      1,
+      3
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -2862,14 +4075,39 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [601,134],
-    "cru_snap": [741,289],
-    "drd_snap": [704,636],
-    "sb_snap": [453,718],
-    "mon_snap": [513,450],
-    "orb_snap": [185,381],
-    "ai_snap": [513,450],
-    "wormholes": [0,2,3],
+    "int_snap": [
+      601,
+      134
+    ],
+    "cru_snap": [
+      741,
+      289
+    ],
+    "drd_snap": [
+      704,
+      636
+    ],
+    "sb_snap": [
+      453,
+      718
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      185,
+      381
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      2,
+      3
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 0,
@@ -2918,14 +4156,39 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [388,162],
-    "cru_snap": [769,552],
-    "drd_snap": [577,720],
-    "sb_snap": [265,688],
-    "mon_snap": [513,450],
-    "orb_snap": [382,328],
-    "ai_snap": [513,450],
-    "wormholes": [2,3,5],
+    "int_snap": [
+      388,
+      162
+    ],
+    "cru_snap": [
+      769,
+      552
+    ],
+    "drd_snap": [
+      577,
+      720
+    ],
+    "sb_snap": [
+      265,
+      688
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      382,
+      328
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      2,
+      3,
+      5
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 0,
@@ -2974,14 +4237,39 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [385,179],
-    "cru_snap": [785,277],
-    "drd_snap": [745,617],
-    "sb_snap": [394,710],
-    "mon_snap": [513,450],
-    "orb_snap": [364,334],
-    "ai_snap": [513,450],
-    "wormholes": [0,3,5],
+    "int_snap": [
+      385,
+      179
+    ],
+    "cru_snap": [
+      785,
+      277
+    ],
+    "drd_snap": [
+      745,
+      617
+    ],
+    "sb_snap": [
+      394,
+      710
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      364,
+      334
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      3,
+      5
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 0,
@@ -3030,14 +4318,38 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [370,153],
-    "cru_snap": [778,588],
-    "drd_snap": [568,708],
-    "sb_snap": [177,437],
-    "mon_snap": [513,450],
-    "orb_snap": [424,352],
-    "ai_snap": [513,450],
-    "wormholes": [0,3],
+    "int_snap": [
+      370,
+      153
+    ],
+    "cru_snap": [
+      778,
+      588
+    ],
+    "drd_snap": [
+      568,
+      708
+    ],
+    "sb_snap": [
+      177,
+      437
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      424,
+      352
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      3
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -3081,14 +4393,39 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [320,197],
-    "cru_snap": [612,152],
-    "drd_snap": [442,716],
-    "sb_snap": [166,521],
-    "mon_snap": [513,450],
-    "orb_snap": [357,329],
-    "ai_snap": [513,450],
-    "wormholes": [0,2,3],
+    "int_snap": [
+      320,
+      197
+    ],
+    "cru_snap": [
+      612,
+      152
+    ],
+    "drd_snap": [
+      442,
+      716
+    ],
+    "sb_snap": [
+      166,
+      521
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      357,
+      329
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      2,
+      3
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -3132,14 +4469,39 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [325,169],
-    "cru_snap": [726,258],
-    "drd_snap": [685,681],
-    "sb_snap": [397,732],
-    "mon_snap": [513,450],
-    "orb_snap": [186,520],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3],
+    "int_snap": [
+      325,
+      169
+    ],
+    "cru_snap": [
+      726,
+      258
+    ],
+    "drd_snap": [
+      685,
+      681
+    ],
+    "sb_snap": [
+      397,
+      732
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      186,
+      520
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -3183,14 +4545,38 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [382,156],
-    "cru_snap": [772,160],
-    "drd_snap": [494,720],
-    "sb_snap": [245,588],
-    "mon_snap": [513,450],
-    "orb_snap": [346,356],
-    "ai_snap": [513,450],
-    "wormholes": [0,3],
+    "int_snap": [
+      382,
+      156
+    ],
+    "cru_snap": [
+      772,
+      160
+    ],
+    "drd_snap": [
+      494,
+      720
+    ],
+    "sb_snap": [
+      245,
+      588
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      346,
+      356
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      3
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -3234,14 +4620,39 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [297,161],
-    "cru_snap": [672,158],
-    "drd_snap": [712,665],
-    "sb_snap": [213,350],
-    "mon_snap": [513,450],
-    "orb_snap": [458,270],
-    "ai_snap": [513,450],
-    "wormholes": [2,3,4],
+    "int_snap": [
+      297,
+      161
+    ],
+    "cru_snap": [
+      672,
+      158
+    ],
+    "drd_snap": [
+      712,
+      665
+    ],
+    "sb_snap": [
+      213,
+      350
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      458,
+      270
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      2,
+      3,
+      4
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -3280,14 +4691,39 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [356,156],
-    "cru_snap": [680,198],
-    "drd_snap": [713,656],
-    "sb_snap": [344,704],
-    "mon_snap": [513,450],
-    "orb_snap": [180,458],
-    "ai_snap": [513,450],
-    "wormholes": [0,3,5],
+    "int_snap": [
+      356,
+      156
+    ],
+    "cru_snap": [
+      680,
+      198
+    ],
+    "drd_snap": [
+      713,
+      656
+    ],
+    "sb_snap": [
+      344,
+      704
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      180,
+      458
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      3,
+      5
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -3326,14 +4762,39 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [372,168],
-    "cru_snap": [701,233],
-    "drd_snap": [690,677],
-    "sb_snap": [276,668],
-    "mon_snap": [513,450],
-    "orb_snap": [233,369],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3],
+    "int_snap": [
+      372,
+      168
+    ],
+    "cru_snap": [
+      701,
+      233
+    ],
+    "drd_snap": [
+      690,
+      677
+    ],
+    "sb_snap": [
+      276,
+      668
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      233,
+      369
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -3341,11 +4802,10 @@
     "gcds": 0,
     "warp": 0,
     "type": "standard"
-    },
-  "317":
-    {
-    "owner":0,
-    "name":"Beta Crucis",
+  },
+  "317": {
+    "owner": 0,
+    "name": "Beta Crucis",
     "ring": 3,
     "disctile": 0,
     "player_ships": [],
@@ -3383,14 +4843,38 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [308,172],
-    "cru_snap": [650,176],
-    "drd_snap": [702,658],
-    "sb_snap": [169,440],
-    "mon_snap": [513,450],
-    "orb_snap": [432,305],
-    "ai_snap": [513,450],
-    "wormholes": [3,4],
+    "int_snap": [
+      308,
+      172
+    ],
+    "cru_snap": [
+      650,
+      176
+    ],
+    "drd_snap": [
+      702,
+      658
+    ],
+    "sb_snap": [
+      169,
+      440
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      432,
+      305
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      3,
+      4
+    ],
     "vp": 2,
     "artifact": 0,
     "ancient": 0,
@@ -3439,14 +4923,39 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [504,182],
-    "cru_snap": [773,608],
-    "drd_snap": [581,752],
-    "sb_snap": [329,710],
-    "mon_snap": [513,450],
-    "orb_snap": [326,521],
-    "ai_snap": [513,450],
-    "wormholes": [0,3,4],
+    "int_snap": [
+      504,
+      182
+    ],
+    "cru_snap": [
+      773,
+      608
+    ],
+    "drd_snap": [
+      581,
+      752
+    ],
+    "sb_snap": [
+      329,
+      710
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      326,
+      521
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      3,
+      4
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -3495,14 +5004,39 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [248,260],
-    "cru_snap": [494,144],
-    "drd_snap": [761,262],
-    "sb_snap": [188,270],
-    "mon_snap": [513,450],
-    "orb_snap": [452,297],
-    "ai_snap": [513,450],
-    "wormholes": [0,2,3],
+    "int_snap": [
+      248,
+      260
+    ],
+    "cru_snap": [
+      494,
+      144
+    ],
+    "drd_snap": [
+      761,
+      262
+    ],
+    "sb_snap": [
+      188,
+      270
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      452,
+      297
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      2,
+      3
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -3546,14 +5080,39 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [504,117],
-    "cru_snap": [470,377],
-    "drd_snap": [466,701],
-    "sb_snap": [140,410],
-    "mon_snap": [513,450],
-    "orb_snap": [214,257],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3],
+    "int_snap": [
+      504,
+      117
+    ],
+    "cru_snap": [
+      470,
+      377
+    ],
+    "drd_snap": [
+      466,
+      701
+    ],
+    "sb_snap": [
+      140,
+      410
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      214,
+      257
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -3597,14 +5156,39 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [504,308],
-    "cru_snap": [640,434],
-    "drd_snap": [460,674],
-    "sb_snap": [148,417],
-    "mon_snap": [513,450],
-    "orb_snap": [401,353],
-    "ai_snap": [513,450],
-    "wormholes": [0,3,5],
+    "int_snap": [
+      504,
+      308
+    ],
+    "cru_snap": [
+      640,
+      434
+    ],
+    "drd_snap": [
+      460,
+      674
+    ],
+    "sb_snap": [
+      148,
+      417
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      401,
+      353
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      3,
+      5
+    ],
     "vp": 1,
     "artifact": 0,
     "ancient": 0,
@@ -3647,10 +5231,23 @@
     "cru_snap": [],
     "drd_snap": [],
     "sb_snap": [],
-    "mon_snap": [513,450],
+    "mon_snap": [
+      513,
+      450
+    ],
     "orb_snap": [],
-    "ai_snap": [628,446],
-    "wormholes": [0, 1, 2, 3, 4, 5],
+    "ai_snap": [
+      628,
+      446
+    ],
+    "wormholes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
     "vp": 0,
     "artifact": 0,
     "ancient": 1,
@@ -3689,14 +5286,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [372,168],
-    "cru_snap": [701,233],
-    "drd_snap": [690,677],
-    "sb_snap": [276,668],
-    "mon_snap": [513,450],
-    "orb_snap": [233,369],
-    "ai_snap": [513,450],
-    "wormholes": [1, 2, 4, 5],
+    "int_snap": [
+      372,
+      168
+    ],
+    "cru_snap": [
+      701,
+      233
+    ],
+    "drd_snap": [
+      690,
+      677
+    ],
+    "sb_snap": [
+      276,
+      668
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      233,
+      369
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      1,
+      2,
+      4,
+      5
+    ],
     "vp": 0,
     "artifact": 0,
     "ancient": 0,
@@ -3736,23 +5359,62 @@
     "material_pop": [],
     "material1_snap": [],
     "material2_snap": [],
-    "materialadv_pop": [0],
-    "materialadv1_snap": [644,713],
+    "materialadv_pop": [
+      0
+    ],
+    "materialadv1_snap": [
+      644,
+      713
+    ],
     "materialadv2_snap": [],
-    "neutral_pop": [0,0],
-    "neutral1_snap": [217,336],
-    "neutral2_snap": [362,336],
+    "neutral_pop": [
+      0,
+      0
+    ],
+    "neutral1_snap": [
+      217,
+      336
+    ],
+    "neutral2_snap": [
+      362,
+      336
+    ],
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [382,141],
-    "cru_snap": [550,126],
-    "drd_snap": [772,553],
-    "sb_snap": [457,696],
-    "mon_snap": [513,450],
-    "orb_snap": [244,505],
-    "ai_snap": [513,450],
-    "wormholes": [0,1,3],
+    "int_snap": [
+      382,
+      141
+    ],
+    "cru_snap": [
+      550,
+      126
+    ],
+    "drd_snap": [
+      772,
+      553
+    ],
+    "sb_snap": [
+      457,
+      696
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      244,
+      505
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3
+    ],
     "vp": 0,
     "artifact": 0,
     "ancient": 0,
@@ -3792,23 +5454,62 @@
     "material_pop": [],
     "material1_snap": [],
     "material2_snap": [],
-    "materialadv_pop": [0],
-    "materialadv1_snap": [350,285],
+    "materialadv_pop": [
+      0
+    ],
+    "materialadv1_snap": [
+      350,
+      285
+    ],
     "materialadv2_snap": [],
-    "neutral_pop": [0,0],
-    "neutral1_snap": [560,664],
-    "neutral2_snap": [696,664],
+    "neutral_pop": [
+      0,
+      0
+    ],
+    "neutral1_snap": [
+      560,
+      664
+    ],
+    "neutral2_snap": [
+      696,
+      664
+    ],
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [358,117],
-    "cru_snap": [526,290],
-    "drd_snap": [626,802],
-    "sb_snap": [286,714],
-    "mon_snap": [513,450],
-    "orb_snap": [158,417],
-    "ai_snap": [513,450],
-    "wormholes": [0,3,5],
+    "int_snap": [
+      358,
+      117
+    ],
+    "cru_snap": [
+      526,
+      290
+    ],
+    "drd_snap": [
+      626,
+      802
+    ],
+    "sb_snap": [
+      286,
+      714
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      158,
+      417
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      3,
+      5
+    ],
     "vp": 0,
     "artifact": 0,
     "ancient": 0,
@@ -3847,14 +5548,40 @@
     "neutral_adv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [372,168],
-    "cru_snap": [701,233],
-    "drd_snap": [690,677],
-    "sb_snap": [276,668],
-    "mon_snap": [513,450],
-    "orb_snap": [233,369],
-    "ai_snap": [513,450],
-    "wormholes": [1, 2, 4, 5],
+    "int_snap": [
+      372,
+      168
+    ],
+    "cru_snap": [
+      701,
+      233
+    ],
+    "drd_snap": [
+      690,
+      677
+    ],
+    "sb_snap": [
+      276,
+      668
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      233,
+      369
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      1,
+      2,
+      4,
+      5
+    ],
     "vp": 0,
     "artifact": 0,
     "ancient": 0,

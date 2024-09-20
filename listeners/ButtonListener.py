@@ -31,7 +31,7 @@ class ButtonListener(commands.Cog):
             if customID.startswith("FCID"):
                 check = customID.split("_")[0]
                 if player["color"] != check.replace("FCID",""):
-                    await interaction.response.send_message(interaction.user.mention+" These buttons are not for you.")
+                    await interaction.response.send_message(interaction.user.mention+" These buttons are not for you.", ephemeral=True)
                     return
                 customID = customID.replace(check+"_","")
             if customID == "deleteMsg":
@@ -67,7 +67,7 @@ class ButtonListener(commands.Cog):
             if customID.startswith("startResearch"):
                 await ResearchButtons.startResearch(game, player, player_helper, interaction,True)
             if customID.startswith("getTech_"):
-                await ResearchButtons.getTech(game, player, player_helper, interaction)
+                await ResearchButtons.getTech(game, player, player_helper, interaction, customID)
             if customID.startswith("payAtRatio_"):
                 await ResearchButtons.payAtRatio(game, player, player_helper, interaction, customID)
             if customID.startswith("gain5resource_"):

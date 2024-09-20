@@ -32,22 +32,27 @@ class PlayerHelper:
 
     def adjust_material_cube(self, adjustment):
         before = self.stats["material_pop_cubes"]
-        self.stats["material_pop_cubes"] += adjustment
-        return (f"\n> Adjusted material cubes from {before} to {before + adjustment}")
+        amount = min(self.stats["material_pop_cubes"] + adjustment, 11)
+        self.stats["material_pop_cubes"] = amount
+        return (f"\n> Adjusted material cubes from {before} to {amount}")
 
     def adjust_science_cube(self, adjustment):
         before = self.stats["science_pop_cubes"]
-        self.stats["science_pop_cubes"] += adjustment
-        return (f"\n> Adjusted science cubes from {before} to {before + adjustment}")
+        amount = min(self.stats["science_pop_cubes"] + adjustment, 11)
+        self.stats["science_pop_cubes"] = amount
+        return (f"\n> Adjusted science cubes from {before} to {amount}")
 
     def adjust_money_cube(self, adjustment):
         before = self.stats["money_pop_cubes"]
-        self.stats["money_pop_cubes"] += adjustment
-        return (f"\n> Adjusted money cubes from {before} to {before + adjustment}")
+        amount = min(self.stats["money_pop_cubes"] + adjustment, 11)
+        self.stats["money_pop_cubes"] = amount
+        return (f"\n> Adjusted money cubes from {before} to {amount}")
     def adjust_influence(self, adjustment):
         before = self.stats["influence_discs"]
-        self.stats["influence_discs"] += adjustment
-        return (f"\n> Adjusted influence discs from {before} to {before + adjustment}")
+        amount = max(0, self.stats["influence_discs"]+adjustment)
+        amount = min(15, amount)
+        self.stats["influence_discs"] = amount
+        return (f"\n> Adjusted influence discs from {before} to {amount}")
     def spend_influence_on_action(self, action:str):
         self.adjust_influence(-1)
         if action+"_action_counters" not in self.stats:

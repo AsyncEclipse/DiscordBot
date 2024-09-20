@@ -133,13 +133,15 @@ class GamestateHelper:
     def add_control(self, color, position):
         self.gamestate["board"][position]["owner"] = color
         self.gamestate["players"][self.get_player_from_color(color)]["owned_tiles"].append(position)
-        self.gamestate["players"][self.get_player_from_color(color)]["influence_discs"] -= 1
+        amount = max(0, self.gamestate["players"][self.get_player_from_color(color)]["influence_discs"] - 1)
+        self.gamestate["players"][self.get_player_from_color(color)]["influence_discs"] = amount
         self.update()
 
     def remove_control(self, color, position):
         self.gamestate["board"][position]["owner"] = 0
         self.gamestate["players"][self.get_player_from_color(color)]["owned_tiles"].remove(position)
-        self.gamestate["players"][self.get_player_from_color(color)]["influence_discs"] += 1
+        amount = min(15, self.gamestate["players"][self.get_player_from_color(color)]["influence_discs"] + 1)
+        self.gamestate["players"][self.get_player_from_color(color)]["influence_discs"] = amount
         self.update()
 
     def add_warp(self, position):
@@ -216,8 +218,10 @@ class GamestateHelper:
 
     def add_pop(self, pop_list, position, playerID):
         for i in pop_list:
-            self.gamestate["board"][position][i][0] = self.gamestate["board"][position][i][0]+1
-            self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] = self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"]-1
+            length = len(self.gamestate["board"][position][i])
+            if self.gamestate["board"][position][i][0]+1 <= length:
+                self.gamestate["board"][position][i][0] = self.gamestate["board"][position][i][0]+1
+                self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] = self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"]-1
         self.update()
     def remove_pop(self, pop_list, position, playerID):
         for i in pop_list:
@@ -318,7 +322,8 @@ class GamestateHelper:
         while tech_draws > 0:
             random.shuffle(self.gamestate["tech_deck"])
             picked_tech = self.gamestate["tech_deck"].pop(0)
-
+            if picked_tech == "clo":
+                picked_tech ="cld"
             self.gamestate["available_techs"].append(picked_tech)
 
             if tech_data[picked_tech]["track"] == "any":
