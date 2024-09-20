@@ -67,8 +67,9 @@ class InfluenceButtons:
     @staticmethod
     async def addInfluenceFinish(game: GamestateHelper, p1, interaction: discord.Interaction, buttonID:str):
         tileLoc = buttonID.split("_")[1]
+        await interaction.response.defer(thinking=False)
         game.add_control(p1["color"],tileLoc)
-        await interaction.response.send_message( f"{interaction.user.mention} acquired control of "+tileLoc)
+        await interaction.channel.send( f"{interaction.user.mention} acquired control of "+tileLoc)
         await interaction.message.delete()
 
     @staticmethod

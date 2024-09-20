@@ -24,7 +24,17 @@ class ImageCacheHelper:
                     if "wh_mask" in filename:
                         self.cache[filename] = Image.open(image_path).convert("RGBA").resize(size).rotate(180)
                     else:  
-                        self.cache[filename] = Image.open(image_path).convert("RGBA").resize(size)
+                        if "popcube" in filename:
+                            self.cache[filename] = Image.open(image_path).convert("RGBA").resize(size)  
+                            image_with_opacity = self.cache[filename]  
+                            datas = image_with_opacity.getdata()  
+                            new_data = []  
+                            for item in datas:  
+                                new_data.append((item[0], item[1], item[2], 170))  
+                            image_with_opacity.putdata(new_data)  
+                            self.cache[filename] = image_with_opacity 
+                        else:
+                            self.cache[filename] = Image.open(image_path).convert("RGBA").resize(size)
         # with concurrent.futures.ThreadPoolExecutor() as executor:  
         #     executor.submit(asyncio.run_coroutine_threadsafe,load_images_internal) 
     #any(substring in main_string for substring in substrings)

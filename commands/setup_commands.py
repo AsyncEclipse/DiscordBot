@@ -85,30 +85,31 @@ class SetupCommands(commands.GroupCog, name="setup"):
                 game.add_tile(str(i), 0, "sector2back")
         for i in range(301, 319):
             game.add_tile(str(i), 0, "sector3back")
-        game.setup_finished()
+        if game.gamestate["setup_finished"] != 1:
+            game.setup_finished()
         game.fillInDiscTiles()
         await interaction.response.send_message("Done With Setup!")
         
         await game.showUpdate("Start of Game",interaction, self.bot)
         view = TurnButtons.getStartTurnButtons(game, game.get_player(player1.id))
-        await interaction.response.send_message(f"<@{player1.id}> use these buttons to do your turn. "+ game.displayPlayerStats(player1.id),view=view)
+        await interaction.response.send_message(f"<@{player1.id}> use these buttons to do your turn. "+ game.displayPlayerStats(game.get_player(player1.id)),view=view)
 
     @app_commands.command(name="cleanup")
     async def cleanup(self,interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)
         await TurnButtons.runCleanup(game, interaction)
 
-    @app_commands.command(name="new_game")
-    async def new_game(self, interaction: discord.Interaction, game_name: str,
+    @app_commands.command(name="create_new_game")
+    async def create_new_game(self, interaction: discord.Interaction, game_name: str,
                             player1: discord.Member,
-                            player2: Optional[discord.Member]=None,
+                            player2: discord.Member,
                             player3: Optional[discord.Member]=None,
                             player4: Optional[discord.Member]=None,
                             player5: Optional[discord.Member]=None,
                             player6: Optional[discord.Member]=None):
         temp_player_list = [player1, player2, player3, player4, player5, player6]
         player_list = []
-
+        await interaction.response.defer(thinking=True)
         for i in temp_player_list:
             if i != None:
                 player_list.append([i.id, i.name])
@@ -162,8 +163,8 @@ class SetupCommands(commands.GroupCog, name="setup"):
         thread = await actions.create_thread(name=thread_name, auto_archive_duration=10080)  # Duration set to 60 minutes 
         new_game.update_num() 
         await thread.send(role.mention + " pinging you here")
-        actions.send("Draft factions and turn position in the manner of your choice, then setup the game with /setup game. Enter the players in the order they should take turns in (i.e. enter first player first)")
-        await interaction.response.send_message('New game created! Here are the channels: \n'+tabletalk.jump_url +"\n"+actions.jump_url)
+        await actions.send("Draft factions and turn position in the manner of your choice, then setup the game with /setup game. Enter the players in the order they should take turns in (i.e. enter first player first)")
+        await interaction.followup.send('New game created! Here are the channels: \n'+tabletalk.jump_url +"\n"+actions.jump_url)
 
     
     

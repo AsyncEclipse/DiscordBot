@@ -15,6 +15,7 @@ class BuildButtons:
         tiles = game.get_owned_tiles(player)
         tiles.sort()
         view = View()
+        await interaction.channel.send(f"{interaction.user.mention} is using their turn to build")
         if "2" not in buttonID:
             player_helper.spend_influence_on_action("build")
             game.update_player(player_helper)

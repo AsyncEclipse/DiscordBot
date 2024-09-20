@@ -35,6 +35,7 @@ class ExploreButtons:
     async def startExplore(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction, buttonID:str):
         if "2" not in buttonID:
             player_helper.spend_influence_on_action("explore")
+        await interaction.channel.send(f"{interaction.user.mention} is using their turn to explore")
         game.update_player(player_helper)
         configs = Properties()
         with open("data/tileAdjacencies.properties", "rb") as f:
@@ -63,7 +64,7 @@ class ExploreButtons:
         await interaction.message.delete()
     @staticmethod
     async def exploreTile(game: GamestateHelper, player, interaction: discord.Interaction, customID:str):
-        await interaction.response.defer(thinking=True)
+        await interaction.response.defer(thinking=False)
         drawing = DrawHelper(game.gamestate)
         view = View()
         player = game.get_player(interaction.user.id)
@@ -87,7 +88,7 @@ class ExploreButtons:
                 return
         image = drawing.base_tile_image(tileID)
         
-        await interaction.followup.send("Tile explored",file=drawing.show_single_tile(image))
+        await interaction.channel.send("Tile explored",file=drawing.show_single_tile(image))
         playerTiles = ExploreButtons.getListOfTilesPlayerIsIn(game, player)
         view, file = drawing.draw_possible_oritentations(tileID,position,playerTiles, view,player)
         await interaction.followup.send(file=file, ephemeral = True)
@@ -97,10 +98,10 @@ class ExploreButtons:
         await interaction.message.delete()
     @staticmethod
     async def placeTile(game: GamestateHelper, interaction: discord.Interaction, player, customID):
-        await interaction.response.defer(thinking=True)
+        await interaction.response.defer(thinking=False)
         msg = customID.split("_")
         game.add_tile(msg[1], int(msg[3]), msg[2])
-        await interaction.followup.send(f"Tile added to position {msg[1]}")
+        await interaction.channel.send(f"Tile added to position {msg[1]}")
         if game.get_gamestate()["board"][msg[1]]["ancient"] == 0 or player["name"]=="Descendants of Draco":
             view = View()
             view.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_addInfluenceFinish_"+msg[1]))

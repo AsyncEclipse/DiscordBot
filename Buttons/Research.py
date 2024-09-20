@@ -79,6 +79,7 @@ class ResearchButtons:
     async def startResearch(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction, buttonCommand:bool):
         game = GamestateHelper(interaction.channel)
         player = game.get_player(interaction.user.id)  
+        await interaction.channel.send(f"{interaction.user.mention} is using their turn to research")
         player_helper = PlayerHelper(interaction.user.id, player)  
         player_helper.spend_influence_on_action("research")
         game.update_player(player_helper)
@@ -137,12 +138,11 @@ class ResearchButtons:
             await interaction.channel.send(f"{interaction.user.mention} when you're finished resolving your action, you may end turn with this button.", view=view)
 
     @staticmethod  
-    async def getTech(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction):
+    async def getTech(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction, buttonID:str):
         await interaction.message.delete()  
         game = GamestateHelper(interaction.channel)  
-        buttonID = interaction.data["custom_id"].split("_")  
-        tech = buttonID[1]  
-        tech_type = buttonID[2]  
+        tech = buttonID.split("_")[1]  
+        tech_type = buttonID.split("_")[2]  
         view = View()   
         player = game.get_player(interaction.user.id) 
         with open("data/techs.json", "r") as f:  
