@@ -1,5 +1,6 @@
 import discord
 import time
+import asyncio
 from commands.tile_commands import TileCommands
 import config
 from commands.setup_commands import SetupCommands
@@ -9,26 +10,29 @@ from listeners.ButtonListener import ButtonListener
 from discord.ext import commands
 
 
-bot = commands.Bot(command_prefix="$", intents=discord.Intents.all())
+class DiscordBot(commands.Bot):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
+    async def setup_hook(self) -> None:
+        print("Bot is starting")
+        await self.add_cog(SetupCommands(self))
+        await self.add_cog(TileCommands(self))
+        await self.add_cog(PlayerCommands(self))
+        await self.add_cog(ButtonListener(self))
+        await self.tree.sync()
+        start_time = time.perf_counter()
+        print(f"Starting to load images")
+        imageCache = ImageCache.ImageCacheHelper("images/resources")
+        # imageCache.load_images()
+        end_time = time.perf_counter()
+        elapsed_time = end_time - start_time
+        print(f"Total elapsed time for image load: {elapsed_time:.2f} seconds")
+        print("Bot is now ready.")
 
-@bot.event
-async def on_ready():
-    await bot.add_cog(SetupCommands(bot))
-    await bot.add_cog(TileCommands(bot))
-    await bot.add_cog(PlayerCommands(bot))
-    await bot.add_cog(ButtonListener(bot))
-    await bot.tree.sync()
-    start_time = time.perf_counter()  
-    print(f"Starting to load images")  
-    imageCache = ImageCache.ImageCacheHelper("images/resources")
-    #imageCache.load_images()
-    end_time = time.perf_counter()  
-    elapsed_time = end_time - start_time  
-    print(f"Total elapsed time for image load: {elapsed_time:.2f} seconds")  
-    print("Bot is now ready.")
+async def main():
+    async with DiscordBot(command_prefix="$", intents=discord.Intents.all()) as bot:
+        await bot.start(config.token)
 
-
-bot.run(config.token)
-
+asyncio.run(main())
 
