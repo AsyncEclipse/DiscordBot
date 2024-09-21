@@ -188,3 +188,9 @@ class PlayerCommands(commands.GroupCog, name="player"):
                                                         "number of activations you have for each action is listed in ()"+game.displayPlayerStats(p1)), view=view)
     
     
+    @app_commands.command(name="show_upgrade_reference")
+    async def show_upgrade_reference(self, interaction: discord.Interaction):
+        await interaction.response.defer(thinking=True, ephemeral=True)
+        image = DrawHelper.show_ref("upgrade")
+        await interaction.followup.send(file=image, ephemeral=True)
+
