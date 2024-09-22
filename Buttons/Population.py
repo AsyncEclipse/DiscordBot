@@ -25,6 +25,7 @@ class PopulationButtons:
                 if "orbital_pop" not in tileState or tileState["orbital_pop"]==0:
                     emptyPlanets.append(f"{tile}_orbital_0")
         allPlayerTechs =  player["military_tech"] + player["grid_tech"] + player["nano_tech"]
+        print(allPlayerTechs)
         if "met" not in allPlayerTechs:
             if "adl" not in allPlayerTechs:
                 emptyPlanets = [s for s in emptyPlanets if "scienceadv" not in s]
@@ -98,7 +99,7 @@ class PopulationButtons:
             return
         await interaction.message.delete()
         drawing = DrawHelper(game.gamestate)
-        await interaction.response.defer
+        await interaction.response.defer(thinking=False)
         await interaction.channel.send(f"Successfully added a {typeOfPop.replace('adv','')} population to tile {tile}", file=drawing.board_tile_image_file(tile))
 
 

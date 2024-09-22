@@ -12,11 +12,17 @@ from discord.ui import View, Button
 import concurrent.futures
 
 class GamestateHelper:
-    def __init__(self, game_id :discord.TextChannel):
-        if "-" in game_id.name:
-            game_id = game_id.name.split("-")[0]
+    def __init__(self, game_id :discord.TextChannel= None, nameID:str =None):
+        if game_id is not None:
+            nameID = game_id.name
+        if "-" in nameID:
+            game_id = nameID.split("-")[0]
+        else:
+            game_id = nameID
         self.game_id = game_id
         self.gamestate = self.get_gamestate()
+    
+  
 
 
     def getLocationFromID(self, id):
@@ -27,6 +33,11 @@ class GamestateHelper:
             gamestate = json.load(f)
         return gamestate
 
+    def addPlayers(self, list):
+        for i in list:
+            if i[0] not in self.gamestate["players"]:
+                self.gamestate["players"].update({i[0]: {"player_name": f"<@{str(i[0])}>"}})
+        self.update()
 
     def tile_draw(self, ring):
         ring = int(int(ring)/100)
@@ -261,7 +272,8 @@ class GamestateHelper:
         while tech_draws > 0:
             random.shuffle(self.gamestate["tech_deck"])
             picked_tech = self.gamestate["tech_deck"].pop(0)
-
+            if picked_tech == "clo":
+                picked_tech ="cld"
             self.gamestate["available_techs"].append(picked_tech)
             with open("data/techs.json", "r") as f:
                 tech_data = json.load(f)
@@ -306,7 +318,11 @@ class GamestateHelper:
                     p1.stats["reputation_track"][1] = self.gamestate["reputation_tiles"].pop(0)
                     self.update_player(p1)
 
-        self.gamestate["player_count"] = len(self.gamestate["players"])
+        self.gamestate["setup_finished"] = 1
+        self.update()
+    
+    def setup_techs_and_outer_rim(self, count:int):
+        self.gamestate["player_count"] = count
         draw_count = {2: [5, 12], 3: [8, 14], 4: [14, 16], 5: [16, 18], 6: [18, 20]}
 
         third_sector_tiles = ["301", "302", "303", "304", "305", "306", "307", "308", "309", "310", "311", "312", "313", "314",
@@ -333,10 +349,9 @@ class GamestateHelper:
                 pass
             else:
                 tech_draws -= 1
-
-        self.gamestate["setup_finished"] = 1
         self.update()
-        return("Game setup complete")
+
+
 
     def playerResearchTech(self, playerid, tech, type):
         self.gamestate["available_techs"].remove(tech)
@@ -391,6 +406,9 @@ class GamestateHelper:
         self.gamestate["board"][tile]["disctile"]=0
         self.update()
         return nextTile
+    def setTurnOrder(self, order):
+        self.gamestate["turn_order"]=order
+        self.update()
 
     def update_player(self, *args):
 
@@ -439,6 +457,8 @@ class GamestateHelper:
     def getPlayerFromHSLocation(self, location):
         tileID = self.get_gamestate()["board"][location]["sector"]
         return next((player for player in self.get_gamestate()["players"] if str(self.get_gamestate()["players"][player]["home_planet"]) == tileID), None)
+    def getPlayerFromPlayerName(self, player_name):
+        return next((player for player in self.get_gamestate()["players"] if str(self.get_gamestate()["players"][player]["player_name"]) == player_name), None)
 
     def is_everyone_passed(self):
         listHS = [201,203,205,207,209,211]
@@ -450,18 +470,28 @@ class GamestateHelper:
 
     def get_next_player(self, player):
 
-        listHS = [201,203,205,207,209,211]
-        playerHSID = player["home_planet"]
-        tileLocation = int(self.getLocationFromID(playerHSID))
-        index = listHS.index(tileLocation)
-        if index is None:
+        if "turn_order" not in self.get_gamestate() or player["player_name"] not in self.get_gamestate()["turn_order"]:
+            listHS = [201,203,205,207,209,211]
+            playerHSID = player["home_planet"]
+            tileLocation = int(self.getLocationFromID(playerHSID))
+            index = listHS.index(tileLocation)
+            if index is None:
+                return None
+            newList = listHS[index+1:] + listHS[:index] + [listHS[index]]
+            for number in newList:
+                nextPlayer = self.getPlayerFromHSLocation(str(number))
+                if nextPlayer is not None and not self.get_gamestate()["players"].get(nextPlayer, {}).get("perma_passed", False):
+                    return self.get_gamestate()["players"][nextPlayer]
             return None
-        newList = listHS[index+1:] + listHS[:index] + [listHS[index]]
-        for number in newList:
-            nextPlayer = self.getPlayerFromHSLocation(str(number))
-            if nextPlayer is not None and not self.get_gamestate()["players"].get(nextPlayer, {}).get("perma_passed", False):
-                return self.get_gamestate()["players"][nextPlayer]
-        return None
+        else:
+            listPlayers = self.get_gamestate()["turn_order"]
+            index = listPlayers.index(player["player_name"])
+            newList = listPlayers[index+1:] + listPlayers[:index] + [listPlayers[index]]
+            for player_name in newList:
+                nextPlayer = self.getPlayerFromPlayerName(player_name)
+                if nextPlayer is not None and not self.get_gamestate()["players"].get(nextPlayer, {}).get("perma_passed", False):
+                    return self.get_gamestate()["players"][nextPlayer]
+            return None
         # """
 
         # :param player: takes in a players stats in dict form. NOT a PlayerHelper object!

@@ -39,7 +39,7 @@ class ButtonListener(commands.Cog):
             logger = logging.getLogger(__name__)  
             log_channel = discord.utils.get(interaction.guild.channels, name="bot-log")  
             if log_channel is not None and isinstance(log_channel, discord.TextChannel):  
-                await log_channel.send(f'Button with ID {customID} pressed here: '+interaction.message.jump_url)  
+                await log_channel.send(f'{customID} pressed: '+interaction.message.jump_url)  
             if customID == "deleteMsg":
                 await interaction.message.delete()
             if customID == "showGame":  
@@ -55,7 +55,7 @@ class ButtonListener(commands.Cog):
             if customID == "restartTurn":
                 await TurnButtons.restartTurn(player, game, interaction)
             if customID == "runCleanup":
-                await TurnButtons.runCleanup(game, interaction)
+                await TurnButtons.runCleanup(game, interaction,self.bot)
             if customID.startswith("startExplore"):
                 await ExploreButtons.startExplore(game, player, player_helper, interaction,customID)
             if customID.startswith("exploreTile_"):
