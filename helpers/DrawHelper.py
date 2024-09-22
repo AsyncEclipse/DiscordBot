@@ -793,3 +793,15 @@ class DrawHelper:
         bytes.seek(0)
         file = discord.File(bytes, filename="player_area.png")
         return file
+
+    @staticmethod
+    def show_ref(ref_type):
+        filepath = f"images/resources/components/reference_sheets/{ref_type}_reference.png"
+        ref_image = Image.open(filepath)
+        context = Image.new("RGBA", (1600, 2919), (255, 255, 255, 0))
+        context.paste(ref_image, (0,0), mask=ref_image)
+        bytes = BytesIO()
+        context.save(bytes, format="PNG")
+        bytes.seek(0)
+        file = discord.File(bytes, filename="reference_image.png")
+        return file
