@@ -18,12 +18,12 @@ class DrawHelper:
         image_cache = ImageCacheHelper("images/resources")  # Get the singleton instance  
         image = image_cache.get_image(filename)  
         if image:  
-            return image  
+            return image.copy()  
         else:  
             filename = filename.split(f"/")[len(filename.split(f"/"))-1] 
             image = image_cache.get_image(filename)  
             if image:  
-                return image  
+                return image.copy()    
             else:  
                 print(filename)
 
@@ -167,6 +167,20 @@ class DrawHelper:
                 discTile = discTile.rotate(315,expand=True)
                 tile_image.paste(discTile, (108, 89), mask=discTile)
 
+
+
+            text_position = (268, 132)
+            bannerPath = f"images/resources/masks/banner.png"
+            banner = self.use_image(bannerPath)
+            tile_image.paste(banner, (247, 126), mask=banner)
+
+            font = ImageFont.truetype("images/resources/arial.ttf", size=30)
+            text = str(position)
+
+            text_color = (255, 255, 255)
+            textDrawableImage = ImageDraw.Draw(tile_image)
+            textDrawableImage.text(text_position, text, text_color, font=font)
+
             if "player_ships" in tile and len(tile["player_ships"]) > 0:
                 counts = {}  # To track counts for each ship type
                 for ship in tile["player_ships"]:
@@ -178,6 +192,8 @@ class DrawHelper:
                     if ship_type == "orb" or ship_type =="mon":
                         ship = ship_type
                     filepathShip = f"images/resources/components/basic_ships/{ship}.png"
+                    if ship_type == "None":
+                        continue
                     ship_image = self.use_image(filepathShip)
 
                     coords = tile[f"{ship_type}_snap"]
@@ -198,7 +214,10 @@ class DrawHelper:
                         if tile[f"{resource_type}_pop"][0] != 0 and x <= len(tile[f"{resource_type}_pop"]):
                             pop_path = f"images/resources/components/all_boards/popcube_{color}.png"
                             pop_image = self.use_image(pop_path)
-                            coords = tile[f"{resource_type}{x+1}_snap"]
+                            if resource_type == "orbital":
+                                coords = tile[f"orb_snap"]
+                            else:
+                                coords = tile[f"{resource_type}{x+1}_snap"]
                             tile_image.paste(pop_image, (int(345 / 1024 * coords[0] - 15), int(345 / 1024 * coords[1] - 15)), mask=pop_image)
 
             if "owner" in tile and tile["owner"] != 0:
@@ -206,7 +225,7 @@ class DrawHelper:
                 inf_path = f"images/resources/components/all_boards/influence_disc_{color}.png"
                 inf_image = self.use_image(inf_path)
                 tile_image.paste(inf_image, (153, 130), mask=inf_image)
-                for resource in ["money", "moneyadv", "science","scienceadv", "material","materialadv"]:
+                for resource in ["money", "moneyadv", "science","scienceadv", "material","materialadv","orbital"]:
                     paste_resourcecube(tile, tile_image, resource, color)
 
             wormholeCode = ""
@@ -226,17 +245,7 @@ class DrawHelper:
                     tile_image = tile_image.rotate(60)
                   #345, 299
 
-            text_position = (268, 132)
-            bannerPath = f"images/resources/masks/banner.png"
-            banner = self.use_image(bannerPath)
-            tile_image.paste(banner, (247, 126), mask=banner)
-
-            font = ImageFont.truetype("images/resources/arial.ttf", size=30)
-            text = str(position)
-
-            text_color = (255, 255, 255)
-            textDrawableImage = ImageDraw.Draw(tile_image)
-            textDrawableImage.text(text_position, text, text_color, font=font)
+            
             return tile_image
 
     def display_techs(self):

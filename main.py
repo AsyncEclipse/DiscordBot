@@ -7,7 +7,7 @@ from commands.player_commands import PlayerCommands
 from helpers import ImageCache
 from listeners.ButtonListener import ButtonListener
 from discord.ext import commands
-
+import logging
 
 class DiscordBot(commands.Bot):
     def __init__(self, *args, **kwargs):
@@ -29,6 +29,25 @@ class DiscordBot(commands.Bot):
         print(f"Total elapsed time for image load: {elapsed_time:.2f} seconds")
         print("Bot is now ready.")
 
+logging.basicConfig(level=logging.INFO)  
+logger = logging.getLogger(__name__)  
+
+intents = discord.Intents.default()  
+intents.messages = True  
+intents.message_content = True  # Make sure to request the appropriate intent  
 bot = DiscordBot(command_prefix="$", intents=discord.Intents.all())
+
+@bot.event  
+async def on_command_error(ctx, error):  
+    # Log the error to the console  
+    logger.error(f'Error in command {ctx.command}: {error}')  
+    
+    log_channel = discord.utils.get(ctx.guild.channels, name="bot-log")  
+    
+    if log_channel is not None and isinstance(log_channel, discord.TextChannel):  
+        await log_channel.send(f'Error in command {ctx.command}: {error}')  
+    else:  
+        logger.warning(f'Log channel "bot-log" not found.') 
+
 bot.run(config.token)
 

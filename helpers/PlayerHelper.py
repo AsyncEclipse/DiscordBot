@@ -29,6 +29,18 @@ class PlayerHelper:
         before = self.stats["money"]
         self.stats["money"] += adjustment
         return(f"\n> Adjusted money from {before} to {before+adjustment}")
+    def getTechs(self):
+        return self.stats["military_tech"] + self.stats["grid_tech"] + self.stats["nano_tech"]
+    def getTechType(self, tech:str):
+        if tech in self.stats["nano_tech"]:
+            return "nano"
+        if tech in self.stats["grid_tech"]:
+            return "grid"
+        if tech in self.stats["military_tech"]:
+            return "military"
+        else:
+            return None
+    
 
     def adjust_material_cube(self, adjustment):
         before = self.stats["material_pop_cubes"]

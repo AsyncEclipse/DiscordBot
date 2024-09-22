@@ -66,10 +66,12 @@ class GamestateHelper:
             return "drd"
         elif shipName == "starbase":
             return "sb"
-        elif shipName == "orbitol":
+        elif shipName == "orbital":
             return "orb"
         elif shipName == "monolith":
             return "mon"
+        else:
+            return shipName
 
     def getShortFactionNameFromFull(self, fullName):
         if fullName == "Descendants of Draco":
@@ -177,34 +179,35 @@ class GamestateHelper:
         self.update()
     def displayPlayerStats(self, player):
         money = player["money"]
-        moneyIncrease = player["population_track"][player["money_pop_cubes"]-1] - player["influence_track"][player["influence_discs"]]
-        if  moneyIncrease > -1:
-            moneyIncrease = "+"+str( moneyIncrease)
-        else:
-            moneyIncrease = str( moneyIncrease)
+        moneyIncrease = "+"+str(player["population_track"][player["money_pop_cubes"]-1]) 
+        moneyIncrease2 = "Error"
+        if player["money_pop_cubes"]-2 > -1:
+            moneyIncrease2 = "+"+str(player["population_track"][player["money_pop_cubes"]-2])
+        moneyDecrease = str(player["influence_track"][player["influence_discs"]])
+        moneyDecrease2 = "Error"
+        if player["influence_discs"]-1 > -1:
+            moneyDecrease2 = str(player["influence_track"][player["influence_discs"]-1])
         science = player["science"]
         scienceIncrease = player["population_track"][player["science_pop_cubes"]-1]
-        if  scienceIncrease > -1:
-            scienceIncrease = "+"+str(scienceIncrease)
-        else:
-            scienceIncrease = str(scienceIncrease)
+        scienceIncrease = "+"+str(scienceIncrease)
         materials = player["materials"]
         materialsIncrease = player["population_track"][player["material_pop_cubes"]-1]
-        if  materialsIncrease > -1:
-            materialsIncrease = "+"+str(materialsIncrease)
-        else:
-            materialsIncrease = str(materialsIncrease)
-        msg = f"\nYour current economic situation is as follows:\nMoney: {money} ({moneyIncrease})\nScience: {science} ({scienceIncrease})\nMaterials: {materials} ({materialsIncrease})"
+        materialsIncrease = "+"+str(materialsIncrease)
+        msg = f"\nYour current economic situation is as follows:\nMoney: {money} ({moneyIncrease} - {moneyDecrease})\nScience: {science} ({scienceIncrease})\nMaterials: {materials} ({materialsIncrease})\nIf you take another action, your maintenance cost will go from -{moneyDecrease} to -{moneyDecrease2}. If you drop another money cube, your income will go from {moneyIncrease} to {moneyIncrease2}"
         return msg
             
         
             
-    def add_pop_specific(self, type:str, number:int, position:str, playerID):
-        if self.gamestate["players"][playerID]["colony_ships"] > 0:
-            self.gamestate["players"][playerID]["colony_ships"] = self.gamestate["players"][playerID]["colony_ships"]-1
+    def add_pop_specific(self, originalType:str, type:str, number:int, position:str, playerID):
+        if "orbital" not in originalType:
+            if self.gamestate["players"][playerID]["colony_ships"] > 0:
+                self.gamestate["players"][playerID]["colony_ships"] = self.gamestate["players"][playerID]["colony_ships"]-1
+            else:
+                return False
+        if  f"{originalType}_pop" in self.gamestate["board"][position]:
+            self.gamestate["board"][position][f"{originalType}_pop"][number] = self.gamestate["board"][position][f"{originalType}_pop"][number]+1
         else:
-            return False
-        self.gamestate["board"][position][f"{type}_pop"][number] = self.gamestate["board"][position][f"{type}_pop"][number]+1
+            self.gamestate["board"][position][f"{originalType}_pop"] = [1]
         self.gamestate["players"][playerID][type.replace("adv","")+"_pop_cubes"] = self.gamestate["players"][playerID][type.replace("adv","")+"_pop_cubes"]-1
         self.update()
         return True
@@ -346,6 +349,19 @@ class GamestateHelper:
             self.gamestate["players"][playerid][f"{tech_details['activ1']}_apt"] += 1
             if tech_details["activ1"] == "upgrade":
                 self.gamestate["players"][playerid][f"{tech_details['activ1']}_apt"] += 1
+        self.update()
+    
+    def playerReturnTech(self, playerid, tech, type):
+        self.gamestate["available_techs"].append(tech)
+        self.gamestate["players"][playerid][type+"_tech"].remove(tech)
+        with open("data/techs.json", "r") as f:
+            tech_data = json.load(f)
+        tech_details = tech_data.get(tech)
+        self.gamestate["players"][playerid]["influence_discs"] -= tech_details["infdisc"]
+        if tech_details["activ1"] != 0:
+            self.gamestate["players"][playerid][f"{tech_details['activ1']}_apt"] -= 1
+            if tech_details["activ1"] == "upgrade":
+                self.gamestate["players"][playerid][f"{tech_details['activ1']}_apt"] -= 1
         self.update()
     def update(self):
         with open(f"{config.gamestate_path}/{self.game_id}.json", "w") as f:

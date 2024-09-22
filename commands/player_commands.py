@@ -1,4 +1,5 @@
 import discord
+import json
 from discord.ext import commands
 from discord import app_commands
 from typing import Optional
@@ -90,12 +91,25 @@ class PlayerCommands(commands.GroupCog, name="player"):
         await interaction.response.send_message(top_response)
         await interaction.channel.send(response)
 
-    @app_commands.command(name="research")
-    async def research(self, interaction: discord.Interaction):
+    @app_commands.command(name="remove_tech")
+    async def remove_tech(self, interaction: discord.Interaction, tech:str):
+        """:param tech: The ID of the tech to be removed. Type help to get a list of your tech IDs"""
         game = GamestateHelper(interaction.channel)
         player = game.get_player(interaction.user.id)  
         player_helper = PlayerHelper(interaction.user.id, player)
-        await ResearchButtons.startResearch(game, player, player_helper,interaction,False)
+        with open("data/techs.json", "r") as f:  
+            tech_data = json.load(f)  
+        tech_details = tech_data.get(tech)
+        if tech_details == None:
+            msg = "Your tech ids are the following: \n"
+            for tech2 in player_helper.getTechs():
+                msg = msg + tech2 +" = "+ tech_data.get(tech2)["name"] +"\n"
+            await interaction.response.send_message(msg)
+            return
+        else:
+            game.playerReturnTech(str(interaction.user.id),tech,player_helper.getTechType(tech))
+            await interaction.response.send_message("Successfully returned "+tech_details["name"])
+        
     
     actionChoices = [
         app_commands.Choice(name="Explore", value="explore"),
