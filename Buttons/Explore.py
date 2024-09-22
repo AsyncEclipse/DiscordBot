@@ -91,10 +91,9 @@ class ExploreButtons:
         await interaction.channel.send("Tile explored",file=drawing.show_single_tile(image))
         playerTiles = ExploreButtons.getListOfTilesPlayerIsIn(game, player)
         view, file = drawing.draw_possible_oritentations(tileID,position,playerTiles, view,player)
-        await interaction.followup.send(file=file, ephemeral = True)
 
         view.add_item(Button(label="Discard Tile",style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_discardTile_{tileID}"))
-        await interaction.followup.send(f"{interaction.user.mention} select the orientation you prefer or discard the tile.",view=view)
+        await interaction.followup.send(f"{interaction.user.mention} select the orientation you prefer or discard the tile.",view=view, file=file)
         await interaction.message.delete()
     @staticmethod
     async def placeTile(game: GamestateHelper, interaction: discord.Interaction, player, customID):

@@ -36,6 +36,20 @@ class SetupCommands(commands.GroupCog, name="setup"):
 
     
 
+    def getColor(self, faction:str):
+        if faction == "ter6" or faction == "pla":
+            return "green"
+        if faction == "ter3" or faction == "eri":
+            return "red"
+        if faction == "ter1" or faction == "ori":
+            return "black"
+        if faction == "ter2" or faction == "mec":
+            return "white"
+        if faction == "ter5" or faction == "dra":
+            return "yellow"
+        if faction == "ter4" or faction == "hyd":
+            return "blue"
+        return "green"
 
 
     @app_commands.command(name="game")
@@ -59,16 +73,26 @@ class SetupCommands(commands.GroupCog, name="setup"):
             if i != None and temp_faction_list[x] != None:
                 player = i
                 faction = temp_faction_list[x]
-                player_color = colors.pop(0)
+                player_color = self.getColor(faction.value)
+                if player_color in colors:
+                    colors.remove(player_color)
+                else:
+                    player_color = colors.pop(0)
                 game.player_setup(player.id, faction.value, player_color)
                 home = game.get_player(player.id)["home_planet"]
                 listPlayerHomes.append([home, player_color])
                 count = count + 1
         
-        listOfTilesPos = ["201", "207","205","211","203","209"]
-        if count == 3:
-            listOfTilesPos = [ "201","205", "209","211","203","207",]
-        random.shuffle(listPlayerHomes)
+        listOfTilesPos = ["201", "207", "205", "211", "203", "209"]  
+        tile_mapping = {  
+            3: ["201", "205", "209", "211", "203", "207"],  
+            4: ["201", "205", "207", "211", "203", "209"],  
+            5: ["201", "203", "205", "209", "211", "209"],  
+            6: ["201", "203", "205", "207", "209", "211"]  
+        }  
+        if count in tile_mapping:  
+            listOfTilesPos = tile_mapping[count]  
+        
         listDefended = ["271","272","273","274"]
         random.shuffle(listDefended)
         game.add_tile("000", 0, "001")
@@ -92,17 +116,72 @@ class SetupCommands(commands.GroupCog, name="setup"):
         
         await game.showUpdate("Start of Game",interaction, self.bot)
         view = TurnButtons.getStartTurnButtons(game, game.get_player(player1.id))
-        await interaction.response.send_message(f"<@{player1.id}> use these buttons to do your turn. "+ game.displayPlayerStats(game.get_player(player1.id)),view=view)
+        await interaction.channel.send(f"<@{player1.id}> use these buttons to do your turn. "+ game.displayPlayerStats(game.get_player(player1.id)),view=view)
 
     @app_commands.command(name="cleanup")
     async def cleanup(self,interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)
-        await TurnButtons.runCleanup(game, interaction)
+        await TurnButtons.runCleanup(game, interaction,self.bot)
+
+
+    @app_commands.command(name="set_turn_order")
+    async def set_turn_order(self, interaction: discord.Interaction,
+                            player1: discord.Member,
+                            player2: discord.Member,
+                            player3: Optional[discord.Member]=None,
+                            player4: Optional[discord.Member]=None,
+                            player5: Optional[discord.Member]=None,
+                            player6: Optional[discord.Member]=None):
+        temp_player_list = [player1, player2, player3, player4, player5, player6]
+        game = GamestateHelper(interaction.channel)
+        player_list = []
+        for i in temp_player_list:
+            if i != None:
+                player_list.append(i.mention)
+        game.setTurnOrder(player_list)
+        await interaction.response.send_message("Successfully set turn order")
+
+
+    @app_commands.command(name="add_players")
+    async def add_players(self, interaction: discord.Interaction, game_aeb_name: str,
+                            player1: discord.Member,
+                            player2: Optional[discord.Member]=None,
+                            player3: Optional[discord.Member]=None,
+                            player4: Optional[discord.Member]=None,
+                            player5: Optional[discord.Member]=None):
+        temp_player_list = [player1, player2, player3, player4, player5]
+        player_list = []
+        await interaction.response.defer(thinking=False)
+        for i in temp_player_list:
+            if i != None:
+                player_list.append([i.id, i.name])
+        if "aeb" not in game_aeb_name:
+            await interaction.channel.send("Please provide a valid game name, it will have the format of aebXXX, where XXX is a number")
+            return
+        game = GamestateHelper(None,game_aeb_name)
+        game.addPlayers(player_list)
+        async def get_or_create_role(guild:discord.Guild, role_name):  
+            for role in guild.roles:  
+                if role.name == role_name:  
+                    return role   
+            return await guild.create_role(name=role_name,mentionable=True)
+        role = await get_or_create_role(interaction.guild, game_aeb_name)  
+
+        for player_id in player_list:  
+            member = interaction.guild.get_member(player_id[0])  
+            if member:  
+                await member.add_roles(role) 
+        await interaction.channel.send("Successfully Added Players")
+        
+
+
+        
 
     @app_commands.command(name="create_new_game")
     async def create_new_game(self, interaction: discord.Interaction, game_name: str,
                             player1: discord.Member,
-                            player2: discord.Member,
+                            player_count:int,
+                            player2: Optional[discord.Member]=None,
                             player3: Optional[discord.Member]=None,
                             player4: Optional[discord.Member]=None,
                             player5: Optional[discord.Member]=None,
@@ -132,7 +211,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
             for role in guild.roles:  
                 if role.name == role_name:  
                     return role   
-            return await guild.create_role(name=role_name)
+            return await guild.create_role(name=role_name,mentionable=True)
         
         if config.game_number <= 10:  
             category_name = "Games #1-10"  
@@ -159,11 +238,15 @@ class SetupCommands(commands.GroupCog, name="setup"):
         # Create the text channels for the game  
         tabletalk = await interaction.guild.create_text_channel(f'aeb{config.game_number}-{game_name}', category=category, overwrites=overwrites)  
         actions = await interaction.guild.create_text_channel(f'aeb{config.game_number}-actions', category=category, overwrites=overwrites)  
-        thread_name = f'aeb{config.game_number}-bot-map-updates'  # Choose a name for your thread  
-        thread = await actions.create_thread(name=thread_name, auto_archive_duration=10080)  # Duration set to 60 minutes 
+        thread_name = f'aeb{config.game_number}-bot-map-updates'    
+        thread = await actions.create_thread(name=thread_name, auto_archive_duration=10080)  
         new_game.update_num() 
+        game = GamestateHelper(actions)
+        game.setup_techs_and_outer_rim(player_count)
+        drawing = DrawHelper(game.gamestate)  
         await thread.send(role.mention + " pinging you here")
         await actions.send("Draft factions and turn position in the manner of your choice, then setup the game with /setup game. Enter the players in the order they should take turns in (i.e. enter first player first)")
+        await actions.send("Initial tech draw is as follows",file=drawing.show_available_techs())
         await interaction.followup.send('New game created! Here are the channels: \n'+tabletalk.jump_url +"\n"+actions.jump_url)
 
     

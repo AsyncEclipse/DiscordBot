@@ -51,9 +51,16 @@ class ImageCacheHelper:
                 return (100,100)
             elif "points" in filename.lower():
                 return (80,80)
+            elif "yellow_square" in filename.lower():
+                return (60,60)
+            else:
+                return (80,80)
         elif "basic_ships" in folder.lower():  
             if any(substring in filename.lower() for substring in ["gcds", "gcdsadv", "anc", "ancadv", "grd", "grdadv"]):
-                return (110,110)
+                if "ai" in filename.lower():
+                    return (140,140)
+                else:
+                    return (110,110)
             else:
                 return (70,70) 
         elif "discovery_tiles" in folder.lower():  

@@ -187,6 +187,7 @@ class DrawHelper:
                     ship_type = ship.split("-")[1]  # Extract ship type
                     size = 70
                     if ship_type in ["gcds", "gcdsadv", "anc", "ancadv", "grd", "grdadv"]:
+                        ship = ship_type.replace("adv","")
                         ship_type = "ai"
                         size = 110
                     if ship_type == "orb" or ship_type =="mon":
@@ -207,6 +208,8 @@ class DrawHelper:
                                     mask=ship_image)
 
                     counts[ship_type] += 10
+                    if ship_type == "ai":
+                        counts[ship_type] += 20
 
             def paste_resourcecube(tile, tile_image, resource_type, color):
                 if f"{resource_type}_pop" in tile and tile[f"{resource_type}_pop"] != 0 and tile[f"{resource_type}_pop"]:
@@ -225,7 +228,7 @@ class DrawHelper:
                 inf_path = f"images/resources/components/all_boards/influence_disc_{color}.png"
                 inf_image = self.use_image(inf_path)
                 tile_image.paste(inf_image, (153, 130), mask=inf_image)
-                for resource in ["money", "moneyadv", "science","scienceadv", "material","materialadv","orbital"]:
+                for resource in ["neutral", "neutraladv","money", "moneyadv", "science","scienceadv", "material","materialadv","orbital"]:
                     paste_resourcecube(tile, tile_image, resource, color)
 
             wormholeCode = ""
@@ -249,7 +252,7 @@ class DrawHelper:
             return tile_image
 
     def display_techs(self):
-        context = Image.new("RGBA", (1500, 600), (255, 255, 255, 0))
+        context = Image.new("RGBA", (1500, 470), (255, 255, 255, 0))
         techsAvailable = self.gamestate["available_techs"]
         with open("data/techs.json", "r") as f:
             tech_data = json.load(f)
@@ -271,6 +274,7 @@ class DrawHelper:
         x2=0
         x3=0
         x4=0
+        largestX = 760
         ultimateX = 0
         text_drawable_image = ImageDraw.Draw(context)
         font = ImageFont.truetype("images/resources/arial.ttf", size=90)
@@ -299,7 +303,7 @@ class DrawHelper:
                     x4+=1
                     ultimateX = x4*size
 
-                ultimateX += 200
+                ultimateX += 100
                 y +=100
                 tech_details = tech_data.get(tech)
                 techName = tech_details["name"].lower().replace(" ", "_") if tech_details else tech
@@ -307,7 +311,10 @@ class DrawHelper:
                 if not os.path.exists(tech_path):
                     tech_path = f"images/resources/components/technology/rare/tech_{techName}.png"
                 tech_image = self.use_image(tech_path)
+                tech_image = tech_image.resize((73,73))
                 context.paste(tech_image, (ultimateX,y), mask=tech_image)
+                largestX = max(largestX,ultimateX+73)
+        context = context.crop((0, 0,largestX,470))
         return context
 
     def display_remaining_tiles(self):
@@ -330,8 +337,46 @@ class DrawHelper:
             round = self.gamestate["roundNum"]
         else:
             round = 1
-        text_drawable_image.text((900, 50), "Round #"+str(round), (0, 255, 0), font=font,
+        text_drawable_image.text((850, 50), "Round #"+str(round), (0, 255, 0), font=font,
                                     stroke_width=stroke_width, stroke_fill=stroke_color)
+        
+        x=0
+        for ship_type in ["anc", "grd", "gcds"]:
+            adv = ""
+            if self.gamestate["advanced_ai"]:
+                adv = "adv"
+            ship = "ai-"+ship_type+adv  
+            filepathShip = f"images/resources/components/basic_ships/{ship}.png"
+            ship_image = self.use_image(filepathShip)
+            context.paste(ship_image, (850+x,160), mask=ship_image)
+            x+=145
+        return context
+    
+    def display_cube_track_reference(self):
+        context = Image.new("RGBA", (1600, 60), (255, 255, 255, 0))
+
+        spaces = [28,24,21,18,15,12,10,8,6,4,3,2]
+        filepath = f"images/resources/components/all_boards/yellow_square.png"
+        font = ImageFont.truetype("images/resources/arial.ttf", size=50)
+        stroke_color = (0, 0, 0)
+        color = (0, 0, 0)
+        stroke_width = 2
+        square_image = self.use_image(filepath)
+        for count in range(5):
+            xVal=  50+count*60
+            context.paste(square_image, (xVal,0), mask=square_image)
+        text_drawable_image = ImageDraw.Draw(context)
+        text_drawable_image.text((65,5), "Cube Track:", color, font=font,
+                            stroke_width=stroke_width, stroke_fill=stroke_color)
+        
+        for count,num in enumerate(spaces):
+            x=  280+960 - count*80
+            context.paste(square_image, (x,0), mask=square_image)
+            mod = 0
+            if num > 9:
+                mod = 12
+            text_drawable_image.text((x+15-mod,5), str(num), color, font=font,
+                            stroke_width=stroke_width, stroke_fill=stroke_color)
         return context
 
 
@@ -559,14 +604,19 @@ class DrawHelper:
             return min_x, min_y, max_x, max_y
 
         def create_player_area():
-            player_area_length = 1200 if len(self.gamestate["players"]) > 3 else 600
-            context2 = Image.new("RGBA", (4160, player_area_length), (255, 255, 255, 0))
+            pCount = len(self.gamestate["players"])
+            player_area_length = 1200 if pCount > 3 else 600
+            width = 4150 if (pCount != 2 and pCount != 4) else 2810
+            context2 = Image.new("RGBA", (width, player_area_length), (255, 255, 255, 0))
             x, y, count = 100, 100, 0
             for player in self.gamestate["players"]:
                 player_image = self.player_area(self.gamestate["players"][player])
                 context2.paste(player_image, (x, y), mask=player_image)
                 count += 1
-                if count % 3 == 0:
+                if count % 2 == 0 and pCount == 4:
+                    x = 100  # Reset x back to the starting position
+                    y += 600
+                elif count % 3 == 0 and pCount != 4:
                     x = 100  # Reset x back to the starting position
                     y += 600
                 else:
@@ -584,6 +634,7 @@ class DrawHelper:
         context2 = create_player_area()
         context3 = self.display_techs()
         context4 = self.display_remaining_tiles()
+        context5 = self.display_cube_track_reference()
         end_time = time.perf_counter()  
         elapsed_time = end_time - start_time  
         print(f"Total elapsed time for generating all contexts: {elapsed_time:.2f} seconds")
@@ -592,7 +643,9 @@ class DrawHelper:
         final_context.paste(cropped_context, (0, 0))
         final_context.paste(context2, (0, board_height))
         final_context.paste(context3, (0, board_height+context2.size[1]))
+        final_context.paste(context5, (50, board_height+context2.size[1]-20))
         final_context.paste(context4, (1500, board_height+context2.size[1]))
+        
         final_context = final_context.resize((int(final_context.width/1.5),int(final_context.height/1.5)))
         bytes_io = BytesIO()
         final_context.save(bytes_io, format="PNG")
@@ -628,6 +681,7 @@ class DrawHelper:
         context = Image.new("RGBA", (4160, 5100), (255, 255, 255, 0))
         min_x, min_y, max_x, max_y = paste_tiles(context, self.gamestate["board"])
         cropped_context = context.crop((min_x, min_y, max_x, max_y))
+        cropped_context=cropped_context.resize([int((max_x-min_x)/2),int((max_y-min_y)/2)])
         bytes_io = BytesIO()
         cropped_context.save(bytes_io, format="PNG")
         bytes_io.seek(0)
@@ -635,8 +689,10 @@ class DrawHelper:
 
     def show_stats(self):
         def create_player_area():
-            player_area_length = 1300 if len(self.gamestate["players"]) > 3 else 650
-            context2 = Image.new("RGBA", (4150, player_area_length), (255, 255, 255, 0))
+            pCount = len(self.gamestate["players"])
+            player_area_length = 1300 if pCount > 3 else 650
+            width = 4150 if (pCount != 2 and pCount != 4) else 2800
+            context2 = Image.new("RGBA", (width, player_area_length), (255, 255, 255, 0))
             x, y, count = 100, 50, 0
             for player in self.gamestate["players"]:
                 player_image = self.player_area(self.gamestate["players"][player])
@@ -650,8 +706,11 @@ class DrawHelper:
                                     stroke_width=stroke_width, stroke_fill=stroke_color)
                 context2.paste(player_image, (x, y+50), mask=player_image)
                 count += 1
-                if count % 3 == 0:
-                    x = 100  # Reset x back to the starting position
+                if count % 2 == 0 and pCount == 4:
+                    x = 100  
+                    y += 650
+                elif count % 3 == 0 and pCount != 4:
+                    x = 100 
                     y += 650
                 else:
                     x += 1350
@@ -659,10 +718,15 @@ class DrawHelper:
         context2 = create_player_area()
         context3 = self.display_techs()
         context4 = self.display_remaining_tiles()
-        final_context = Image.new("RGBA", (4150, context2.size[1]+context3.size[1]), (255, 255, 255, 0))
+        context5 = self.display_cube_track_reference()
+        pCount = len(self.gamestate["players"])
+        width = 4150 if (pCount != 2 and pCount != 4) else 2800
+        final_context = Image.new("RGBA", (width, context2.size[1]+context3.size[1]), (255, 255, 255, 0))
         final_context.paste(context2, (0, 0))
         final_context.paste(context3, (0, context2.size[1]))
+        final_context.paste(context5, (50, context2.size[1]-20))
         final_context.paste(context4, (1500, context2.size[1]))
+        
         bytes_io = BytesIO()
         final_context.save(bytes_io, format="PNG")
         bytes_io.seek(0)

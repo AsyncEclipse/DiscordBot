@@ -97,9 +97,7 @@ class PlayerHelper:
         self.stats["firstPlayer"] = firstPlayerBool
 
     def adjust_colony_ships(self, adjustement):
-        if self.stats["colony_ships"] <= 0:
-            return False
-        elif (self.stats["colony_ships"] - adjustement) < 0:
+        if (self.stats["colony_ships"] - adjustement) < 0:
             return False
         else:
             self.stats["colony_ships"] = self.stats["colony_ships"] - adjustement

@@ -88,15 +88,18 @@ class TurnButtons:
         await interaction.followup.send("You permanently passed", ephemeral=True)
 
     @staticmethod
-    async def runCleanup(game: GamestateHelper, interaction: discord.Interaction):
+    async def runCleanup(game: GamestateHelper, interaction: discord.Interaction,bot):
         game.cleanUp()
         await interaction.response.defer(thinking=False)
+        drawing = DrawHelper(game.gamestate)
+        await interaction.channel.send("Tech At Start Of New Round",file=drawing.show_available_techs())
         nextPlayer = TurnButtons.getFirstPlayer(game)
         if nextPlayer != None:
             view = TurnButtons.getStartTurnButtons(game,nextPlayer)
             await interaction.followup.send(nextPlayer["player_name"]+ " use buttons to do the first turn of the round"+game.displayPlayerStats(nextPlayer),view=view)
         else:
             await interaction.followup.send("Could not find first player, someone run /player start_turn")
+        await game.showUpdate(f"Start of new round",interaction, bot)
 
 
     @staticmethod
