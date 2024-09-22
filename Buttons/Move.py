@@ -92,12 +92,12 @@ class MoveButtons:
         game.remove_units([shipName],originT)
         game.add_units([shipName],destination)
         drawing = DrawHelper(game.gamestate)
-        await interaction.message.delete()
         await interaction.channel.send( f"{interaction.user.mention} Moved a {shipType} from {originT} to {destination}.", file=drawing.board_tile_image_file(destination))
         if moveCount == 1:
             player_helper.spend_influence_on_action("move")
             game.update_player(player_helper)
         if player["move_apt"] > moveCount:
+            await interaction.message.delete()
             view = View()
             view.add_item(Button(label="Move an additional ship", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startMove_"+str(moveCount+1)))
             view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))

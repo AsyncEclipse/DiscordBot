@@ -11,6 +11,7 @@ from Buttons.Turn import TurnButtons
 from Buttons.Upgrade import UpgradeButtons
 from helpers.GamestateHelper import GamestateHelper
 import time 
+import logging
 
 from helpers.PlayerHelper import PlayerHelper
 
@@ -34,6 +35,11 @@ class ButtonListener(commands.Cog):
                     await interaction.response.send_message(interaction.user.mention+" These buttons are not for you.", ephemeral=True)
                     return
                 customID = customID.replace(check+"_","")
+            logging.basicConfig(level=logging.INFO)  
+            logger = logging.getLogger(__name__)  
+            log_channel = discord.utils.get(interaction.guild.channels, name="bot-log")  
+            if log_channel is not None and isinstance(log_channel, discord.TextChannel):  
+                await log_channel.send(f'Button with ID {customID} pressed here: '+interaction.message.jump_url)  
             if customID == "deleteMsg":
                 await interaction.message.delete()
             if customID == "showGame":  

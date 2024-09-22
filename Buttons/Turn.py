@@ -84,7 +84,8 @@ class TurnButtons:
     async def permanentlyPass(player, game: GamestateHelper, interaction: discord.Interaction, player_helper : PlayerHelper):
         player_helper.permanentlyPassTurn(True)
         game.update_player(player_helper)
-        await interaction.response.edit_message(content="You permanently passed", view=None)
+        await interaction.response.defer()
+        await interaction.followup.send("You permanently passed", ephemeral=True)
 
     @staticmethod
     async def runCleanup(game: GamestateHelper, interaction: discord.Interaction):

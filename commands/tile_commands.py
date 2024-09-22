@@ -33,6 +33,11 @@ class TileCommands(commands.GroupCog, name="tile"):
                         cruisers: Optional[int],
                         dreadnoughts: Optional[int],
                         starbase: Optional[int],
+                        orbitals: Optional[int],
+                        monoliths: Optional[int],
+                        guardians: Optional[int],
+                        ancients: Optional[int],
+                        gcds: Optional[int],
                         influence: Optional[bool],
                         color: Optional[app_commands.Choice[str]]=None):
         """
@@ -51,7 +56,10 @@ class TileCommands(commands.GroupCog, name="tile"):
         added_units, removed_units = [], []  
         
         def process_units(unit_type, count):  
-            unit_code = f"{player_color}-{unit_type}"  
+            if unit_type in ["gcds", "gcdsadv", "anc", "ancadv", "grd", "grdadv"]:
+                unit_code = f"ai-{unit_type}"  
+            else:
+                unit_code = f"{player_color}-{unit_type}"  
             if count:  
                 units_list = added_units if count > 0 else removed_units  
                 for x in range(abs(count)):  
@@ -61,6 +69,14 @@ class TileCommands(commands.GroupCog, name="tile"):
         process_units("cru", cruisers)  
         process_units("drd", dreadnoughts)  
         process_units("sb", starbase)  
+        process_units("orb", orbitals)  
+        process_units("mon", monoliths)  
+        adv = ""
+        if game.gamestate["advanced_ai"]:
+            adv = "adv"
+        process_units("gcds"+adv, gcds)  
+        process_units("anc"+adv, ancients)  
+        process_units("grd"+adv, guardians)  
 
         if added_units:  
             game.add_units(added_units, tile_position)  
