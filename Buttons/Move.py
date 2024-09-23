@@ -37,7 +37,7 @@ class MoveButtons:
         view = View()
         originT = buttonID.split("_")[1]
         moveCount = buttonID.split("_")[2]
-        shipTypes = ["interceptor","cruiser","dread"]
+        shipTypes = ["interceptor","cruiser","dreadnought"]
         for shipType in shipTypes:
             player_color = player["color"]
             if f"{player_color}-{game.getShipShortName(shipType)}" in game.get_gamestate()["board"][originT]["player_ships"]:

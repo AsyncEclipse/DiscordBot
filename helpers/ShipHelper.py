@@ -88,7 +88,7 @@ class PlayerShip(Ship):
             return "interceptor"
         elif ship == "cru":
             return "cruiser"
-        elif ship == "drd":
+        elif ship == "drd" or ship == "dreadnought":
             return "dread"
         elif ship == "sb":
             return "starbase"
