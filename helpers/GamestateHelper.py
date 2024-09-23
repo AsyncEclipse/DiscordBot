@@ -296,6 +296,8 @@ class GamestateHelper:
 
         self.gamestate["players"][str(player_id)].update({"color": color})
         self.gamestate["players"][str(player_id)].update(faction_data[faction])
+        self.gamestate["players"][str(player_id)].update({"passed": False})
+        self.gamestate["players"][str(player_id)].update({"perma_passed": False})
         self.update()
         #return(f"{name} is now setup!")
 
