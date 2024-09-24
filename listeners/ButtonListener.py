@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from Buttons.Build import BuildButtons
+from Buttons.DiplomaticRelations import DiplomaticRelationsButtons
 from Buttons.DiscoveryTile import DiscoveryTileButtons
 from Buttons.Explore import ExploreButtons
 from Buttons.Influence import InfluenceButtons
@@ -120,6 +121,16 @@ class ButtonListener(commands.Cog):
                 await InfluenceButtons.refreshPopShips(game, player, interaction, customID)
             if customID.startswith("finishInfluenceAction"):
                 await InfluenceButtons.finishInfluenceAction(game, player, interaction,player_helper)
+            if customID.startswith("startDiplomaticRelations"):
+                await DiplomaticRelationsButtons.startDiplomaticRelations(game, player, interaction)
+            if customID.startswith("offerRelationsTo"):
+                await DiplomaticRelationsButtons.offerRelationsTo(game, player, interaction,customID)
+            if customID.startswith("declineRelationsWith"):
+                await DiplomaticRelationsButtons.declineRelationsWith(game, player, interaction,customID)
+            if customID.startswith("acceptRelationsWith"):
+                await DiplomaticRelationsButtons.acceptRelationsWith(game, player, interaction,customID)
+            if customID.startswith("reducePopFor"):
+                await DiplomaticRelationsButtons.reducePopFor(game, player_helper, interaction,customID)
             if customID.startswith("startMove"):
                 await MoveButtons.startMove(game, player, interaction,customID, True)
             if customID.startswith("moveFrom"):

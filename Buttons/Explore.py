@@ -55,7 +55,7 @@ class ExploreButtons:
                         continue
                     tilesViewed.append(adjTile)
                     view.add_item(Button(label=str(adjTile), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_exploreTile_" + str(adjTile)))
-        await interaction.response.send_message(f"{interaction.user.mention} select the tile you would like to explore",view=view)
+        await interaction.channel.send(f"{interaction.user.mention} select the tile you would like to explore",view=view)
         if player["explore_apt"] > 1:
             view2 = View()
             view2.add_item(Button(label="Start 2nd explore", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_startExplore2"))
@@ -79,8 +79,8 @@ class ExploreButtons:
                 tileID2 = game.tile_draw(msg[1])
                 image = drawing.base_tile_image(tileID)
                 image2 = drawing.base_tile_image(tileID2)
-                await interaction.followup.send("Option #1",file=drawing.show_single_tile(image))
-                await interaction.followup.send("Option #2",file=drawing.show_single_tile(image2))
+                await interaction.channel.send("Option #1",file=drawing.show_single_tile(image))
+                await interaction.channel.send("Option #2",file=drawing.show_single_tile(image2))
                 view.add_item(Button(label="Option #1",style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_exploreTile_{position}_{tileID}_{tileID2}"))
                 view.add_item(Button(label="Option #2",style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_exploreTile_{position}_{tileID2}_{tileID}"))
                 await interaction.channel.send(f"{interaction.user.mention} select the tile you wish to resolve.",view=view)
@@ -93,7 +93,7 @@ class ExploreButtons:
         view, file = drawing.draw_possible_oritentations(tileID,position,playerTiles, view,player)
 
         view.add_item(Button(label="Discard Tile",style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_discardTile_{tileID}"))
-        await interaction.followup.send(f"{interaction.user.mention} select the orientation you prefer or discard the tile.",view=view, file=file)
+        await interaction.channel.send(f"{interaction.user.mention} select the orientation you prefer or discard the tile.",view=view, file=file)
         await interaction.message.delete()
     @staticmethod
     async def placeTile(game: GamestateHelper, interaction: discord.Interaction, player, customID):
@@ -117,7 +117,7 @@ class ExploreButtons:
     async def discardTile(game: GamestateHelper, interaction: discord.Interaction, player, customID:str):
         msg = customID.split("_")
         game.tile_discard(msg[1])
-        await interaction.response.send_message("Tile discarded")
+        await interaction.channel.send("Tile discarded")
         view = View()
         view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
         view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))

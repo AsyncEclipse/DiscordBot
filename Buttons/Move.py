@@ -30,7 +30,7 @@ class MoveButtons:
             view.add_item(Button(label=tile.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_moveFrom_{tile}_{moveCount}"))
         if button:
             await interaction.message.delete()
-        await interaction.response.send_message( f"{interaction.user.mention} Select the tile you would like to move from", view=view)
+        await interaction.channel.send( f"{interaction.user.mention} Select the tile you would like to move from", view=view)
 
     @staticmethod
     async def moveFrom(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str):
@@ -43,7 +43,7 @@ class MoveButtons:
             if f"{player_color}-{game.getShipShortName(shipType)}" in game.get_gamestate()["board"][originT]["player_ships"]:
                 view.add_item(Button(label=shipType.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_moveThisShip_{originT}_{shipType}_{moveCount}"))
         await interaction.message.delete()
-        await interaction.response.send_message( f"{interaction.user.mention} Select the ship you would like to move from {originT}", view=view)
+        await interaction.channel.send( f"{interaction.user.mention} Select the ship you would like to move from {originT}", view=view)
     @staticmethod
     def getTilesInRange(game: GamestateHelper, player, origin:str, shipRange : int):
         configs = Properties()
@@ -80,7 +80,7 @@ class MoveButtons:
         for destination in MoveButtons.getTilesInRange(game, player, originT, shipRange):
             view.add_item(Button(label=destination, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_moveTo_{originT}_{shipType}_{destination}_{moveCount}"))
         await interaction.message.delete()
-        await interaction.response.send_message( f"{interaction.user.mention} Select the tile you would like to move a {shipType} from {originT} to", view=view)
+        await interaction.channel.send( f"{interaction.user.mention} Select the tile you would like to move a {shipType} from {originT} to", view=view)
     @staticmethod
     async def moveTo(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str, player_helper:PlayerHelper, bot):
         originT = buttonID.split("_")[1]
@@ -101,7 +101,7 @@ class MoveButtons:
             view = View()
             view.add_item(Button(label="Move an additional ship", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startMove_"+str(moveCount+1)))
             view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
-            await interaction.response.send_message(f"{interaction.user.mention} you can move an additional ship or end turn.", view=view)
+            await interaction.channel.send(f"{interaction.user.mention} you can move an additional ship or end turn.", view=view)
         else:
             if player["move_apt"] == moveCount:
                 await TurnButtons.endTurn(player, game, interaction, bot)

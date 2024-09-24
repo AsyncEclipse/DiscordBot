@@ -56,14 +56,14 @@ class InfluenceButtons:
         view.add_item(Button(label="Conclude Influence Action", style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_finishInfluenceAction"))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{p1['color']}_restartTurn"))
         await interaction.message.delete()
-        await interaction.response.send_message( f"{interaction.user.mention} you can remove up to two disks and influence up to 2 spaces. You can also refresh 2 colony ships or put down population at any time during this resolution", view=view)
+        await interaction.channel.send( f"{interaction.user.mention} you can remove up to two disks and influence up to 2 spaces. You can also refresh 2 colony ships or put down population at any time during this resolution", view=view)
 
     @staticmethod
     async def addInfluenceStart(game: GamestateHelper, p1, interaction: discord.Interaction):
         view = View()
         for tile in InfluenceButtons.getTilesToInfluence(game, p1):
             view.add_item(Button(label=tile, style=discord.ButtonStyle.blurple, custom_id=f"FCID{p1['color']}_addInfluenceFinish_"+tile))
-        await interaction.response.send_message( f"{interaction.user.mention} choose the tile you would like to influence", view=view)
+        await interaction.channel.send( f"{interaction.user.mention} choose the tile you would like to influence", view=view)
     @staticmethod
     async def addInfluenceFinish(game: GamestateHelper, p1, interaction: discord.Interaction, buttonID:str):
         tileLoc = buttonID.split("_")[1]
@@ -79,7 +79,7 @@ class InfluenceButtons:
         for button in view.children:
             if buttonID in button.custom_id:
                 view.remove_item(button)
-        await interaction.response.send_message( f"{interaction.user.mention} now has "+str(numShips)+" colony ships available to use")
+        await interaction.channel.send( f"{interaction.user.mention} now has "+str(numShips)+" colony ships available to use")
         await interaction.message.edit(view=view)
 
     @staticmethod
@@ -89,19 +89,19 @@ class InfluenceButtons:
         next_player = game.get_next_player(player)
         view = TurnButtons.getStartTurnButtons(game, next_player)
         await interaction.message.delete()
-        await interaction.response.send_message(f"{next_player['player_name']} use these buttons to do your turn. "+game.displayPlayerStats(next_player),view=view)
+        await interaction.channel.send(f"{next_player['player_name']} use these buttons to do your turn. "+game.displayPlayerStats(next_player),view=view)
 
     @staticmethod
     async def removeInfluenceStart(game: GamestateHelper, player, interaction: discord.Interaction):
         view = View()
         for tile in game.get_owned_tiles(player):
             view.add_item(Button(label=tile, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_removeInfluenceFinish_"+tile))
-        await interaction.response.send_message( f"{interaction.user.mention} choose the tile you would like to remove influence from", view=view)
+        await interaction.channel.send( f"{interaction.user.mention} choose the tile you would like to remove influence from", view=view)
     @staticmethod
     async def removeInfluenceFinish(game: GamestateHelper, p1, interaction: discord.Interaction, buttonID:str):
         tileLoc = buttonID.split("_")[1]
         game.remove_control(p1["color"],tileLoc)
-        await interaction.response.send_message( f"{interaction.user.mention} relinquished control of "+tileLoc)
+        await interaction.channel.send( f"{interaction.user.mention} relinquished control of "+tileLoc)
         for pop in PopulationButtons.findFullPopulation(game, p1, tileLoc):
             game.remove_pop([pop+"_pop"],tileLoc,game.get_player_from_color(p1["color"]))
             if "neutral" in pop:
@@ -117,5 +117,5 @@ class InfluenceButtons:
     async def addCubeToTrack(game: GamestateHelper, p1, interaction: discord.Interaction, buttonID:str):
         pop = buttonID.split("_")[1]
         game.remove_pop([pop+"_pop"],"dummy",game.get_player_from_color(p1["color"]))
-        await interaction.response.send_message( f"Added 1 "+pop.replace('adv','')+" population back to the relevant track")
+        await interaction.channel.send( f"Added 1 "+pop.replace('adv','')+" population back to the relevant track")
         await interaction.message.delete()
