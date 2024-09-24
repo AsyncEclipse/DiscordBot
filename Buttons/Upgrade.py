@@ -24,7 +24,7 @@ class UpgradeButtons:
             view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
             await interaction.message.delete()
         if discTileUpgrade == "dummy":
-            await interaction.channel.send(file=drawing.show_player_ship_area(image),ephemeral=True)
+            await interaction.response.send_message(file=drawing.show_player_ship_area(image),ephemeral=True)
         else:
             await interaction.response.send_message(file=drawing.show_player_ship_area(image),ephemeral=True)
             view.add_item(Button(label="Save For Future Upgrade Action", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))
