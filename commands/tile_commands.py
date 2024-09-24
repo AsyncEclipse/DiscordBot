@@ -134,7 +134,7 @@ class TileCommands(commands.GroupCog, name="tile"):
         process_pop("material", material)
         process_pop("moneyadv", advanced_money)  
         process_pop("scienceadv", advanced_science)  
-        process_pop("neutraladv", advanced_neutral)  
+        process_pop("neutral_adv", advanced_neutral)
         process_pop("materialadv", advanced_material)    
 
         if added_pop:  
