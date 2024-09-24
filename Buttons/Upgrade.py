@@ -58,7 +58,7 @@ class UpgradeButtons:
             return
 
 
-        available_parts = ["ioc", "elc", "nud", "hul", "gas", "nus","empty"]
+        available_parts = ["ioc", "elc", "nud", "hul", "nus","empty"]
         drawing = DrawHelper(game.gamestate)
         with open("data/parts.json", "r") as f:
             part_stats = json.load(f)
