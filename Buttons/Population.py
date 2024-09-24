@@ -25,7 +25,6 @@ class PopulationButtons:
                 if "orbital_pop" not in tileState or tileState["orbital_pop"]==0:
                     emptyPlanets.append(f"{tile}_orbital_0")
         allPlayerTechs =  player["military_tech"] + player["grid_tech"] + player["nano_tech"]
-        print(allPlayerTechs)
         if "met" not in allPlayerTechs:
             if "adl" not in allPlayerTechs:
                 emptyPlanets = [s for s in emptyPlanets if "scienceadv" not in s]
@@ -62,7 +61,7 @@ class PopulationButtons:
                 label = "Advanced " + label
             label = label + f" (tile {tile})"
             view.add_item(Button(label=label, style=discord.ButtonStyle.blurple, custom_id=buttonID))
-        await interaction.response.send_message( f"{interaction.user.mention}, choose which planet you would like to put a population cube on.", view=view)
+        await interaction.channel.send( f"{interaction.user.mention}, choose which planet you would like to put a population cube on.", view=view)
     @staticmethod
     async def fillPopulation(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str):
         tile = buttonID.split("_")[1]
@@ -88,7 +87,7 @@ class PopulationButtons:
                     for typeP in optionsForPop:
                         view.add_item(Button(label=typeP.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_fillPopulation_{tile}_{originalPop}_{num}_{typeP}"))
                     await interaction.message.delete()
-                    await interaction.response.send_message(f"{interaction.user.mention}, choose which type of resource the population should be.", view=view)
+                    await interaction.channel.send(f"{interaction.user.mention}, choose which type of resource the population should be.", view=view)
                     return
                 else:
                     typeOfPop = optionsForPop[0]

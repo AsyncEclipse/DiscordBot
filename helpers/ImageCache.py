@@ -39,7 +39,10 @@ class ImageCacheHelper:
             else:
                 return (42,22)  
         elif "factions" in folder.lower():  
-            return (895, 500)
+            if "ambassador" in filename.lower():
+                return (58,58)
+            else:
+                return (895, 500)
         elif "all_boards" in folder.lower():  
             if "popcube" in filename.lower():
                 return (30,30)

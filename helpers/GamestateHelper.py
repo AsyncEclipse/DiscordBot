@@ -123,6 +123,8 @@ class GamestateHelper:
                 anc, grd, gcds = tile["ancient"],tile["guardian"], tile["gcds"]
                 if anc:
                     tile["player_ships"].append("ai-anc"+adv)
+                    if tile["ancient"] > 1:
+                        tile["player_ships"].append("ai-anc"+adv)
                 if grd:
                     tile["player_ships"].append("ai-grd" + adv)
                 if gcds:
@@ -403,6 +405,34 @@ class GamestateHelper:
         self.gamestate["discTiles"]= listOfDisc
         self.update()
 
+    def get_short_faction_name(self, full_name):
+        if full_name == "Descendants of Draco":
+            return "draco"
+        elif full_name == "Mechanema":
+            return "mechanema"
+        elif full_name == "Planta":
+            return "planta"
+        elif full_name == "Orian Hegemony" or full_name == "Orion Hegemony":
+            return "orion"
+        elif full_name == "Hydran Progress":
+            return "hydran"
+        elif full_name == "Eridani Empire":
+            return "eridani"
+        elif "Terran" in full_name:
+            return full_name.lower().replace(" ","_")
+    
+    def formRelationsBetween(self, player1, player2):
+        for x,tile in enumerate(player1["reputation_track"]):
+            if tile == "amb" or tile == "mixed":
+                player1["reputation_track"][x]=tile+"-"+self.get_short_faction_name(player2["name"])+"-"+player2["color"]
+                break
+        for x,tile in enumerate(player2["reputation_track"]):
+            if tile == "amb" or tile == "mixed":
+                player1["reputation_track"][x]=tile+"-"+self.get_short_faction_name(player1["name"])+"-"+player1["color"]
+                break
+
+        self.update()
+
     def getNextDiscTile(self, tile:str):
         nextTile = self.gamestate["discTiles"].pop()
         self.gamestate["board"][tile]["disctile"]=0
@@ -461,6 +491,9 @@ class GamestateHelper:
         return next((player for player in self.get_gamestate()["players"] if str(self.get_gamestate()["players"][player]["home_planet"]) == tileID), None)
     def getPlayerFromPlayerName(self, player_name):
         return next((player for player in self.get_gamestate()["players"] if str(self.get_gamestate()["players"][player]["player_name"]) == player_name), None)
+    
+
+
 
     def is_everyone_passed(self):
         listHS = [201,203,205,207,209,211]

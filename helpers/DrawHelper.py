@@ -213,8 +213,11 @@ class DrawHelper:
 
             def paste_resourcecube(tile, tile_image, resource_type, color):
                 if f"{resource_type}_pop" in tile and tile[f"{resource_type}_pop"] != 0 and tile[f"{resource_type}_pop"]:
-                    for x in range(tile[f"{resource_type}_pop"][0]):
-                        if tile[f"{resource_type}_pop"][0] != 0 and x <= len(tile[f"{resource_type}_pop"]):
+                    popSize = tile[f"{resource_type}_pop"][0]
+                    if len(tile[f"{resource_type}_pop"]) > 1:
+                        popSize += tile[f"{resource_type}_pop"][1]
+                    for x in range(popSize):
+                        if tile[f"{resource_type}_pop"][0] != 0 and (x+1) <= len(tile[f"{resource_type}_pop"]):
                             pop_path = f"images/resources/components/all_boards/popcube_{color}.png"
                             pop_image = self.use_image(pop_path)
                             if resource_type == "orbital":
@@ -459,11 +462,16 @@ class DrawHelper:
         mod = 0
         for x,reputation in enumerate(player["reputation_track"]):
             if reputation != "mixed" and reputation != "amb":
-                context.paste(reputation_image, (825,430-(x-mod)*86), mask=reputation_image)
-            if reputation == "amb":
-                mod +=1
-
-
+                context.paste(reputation_image, (825,172+x*86), mask=reputation_image)
+            if "-" in reputation:
+                faction = reputation.split("-")[1]
+                color =  reputation.split("-")[2]
+                pop_path = f"images/resources/components/all_boards/popcube_{color}.png"
+                pop_image = self.use_image(pop_path)
+                amb_tile_path = f"images/resources/components/factions/{faction}_ambassador.png"
+                amb_tile_image = self.use_image(amb_tile_path)
+                context.paste(amb_tile_image, (825,172+x*86), mask=amb_tile_image)
+                context.paste(pop_image, (825+20,172+x*86+25), mask=pop_image)
 
         x = 925
         y = 0

@@ -33,7 +33,7 @@ class ResearchButtons:
         if player["science"] >= cost:  
             msg = player_helper.adjust_science(-cost)  
             game.update_player(player_helper)  
-            await interaction.response.send_message(msg)  
+            await interaction.channel.send(msg)  
         else:  
             paid = min(cost, player["science"])  
             msg = player_helper.adjust_science(-paid)  
@@ -47,7 +47,7 @@ class ResearchButtons:
                                     style=button_style,   
                                     custom_id=f"FCID{player['color']}_payAtRatio_{resource_type}")) 
             view.add_item(Button(label="Done Paying", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))  
-            await interaction.response.send_message(  
+            await interaction.channel.send(  
                 f"Attempted to pay a cost of {str(cost)}\n{msg}\n Please pay the rest of the cost by trading other resources at your trade ratio ({trade_value}:1)",view=view  
             )  
         
@@ -55,12 +55,11 @@ class ResearchButtons:
             view = View()
             for resource_type, button_style in [("materials", discord.ButtonStyle.gray),   
                                         ("money", discord.ButtonStyle.blurple), ("science", discord.ButtonStyle.green)]: 
-                if(player[resource_type] >= trade_value):
-                    view.add_item(Button(label=f"Gain 5 {resource_type.capitalize()}",   
-                                    style=button_style,   
-                                    custom_id=f"gain5resource_{resource_type}")) 
+                view.add_item(Button(label=f"Gain 5 {resource_type.capitalize()}",   
+                                style=button_style,   
+                                custom_id=f"gain5resource_{resource_type}")) 
             view.add_item(Button(label="Done Gaining", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))  
-            await interaction.response.send_message(  
+            await interaction.channel.send(  
                 f"You can gain 5 of any type of resource for each artifact you have",view=view  
             )  
         if tech_details["dtile"] != 0:
@@ -123,15 +122,18 @@ class ResearchButtons:
                     else:
                         view2.add_item(Button(label=f"{tech_name} ({cost})", style=buttonStyle, custom_id=f"FCID{player['color']}_getTech_{tech}_{tech_type}"))
                     buttonCount+=1
-        await interaction.response.send_message(f"{interaction.user.mention}, select the tech you would like to acquire. The discounted cost is in parentheses.", view=view)
+        await interaction.channel.send(f"{interaction.user.mention}, select the tech you would like to acquire. The discounted cost is in parentheses.", view=view)
         if buttonCount > 26:
             await interaction.channel.send(view=view2)
-        await interaction.followup.send(file=drawing.show_available_techs(),ephemeral=True)
+        await interaction.response.send_message(file=drawing.show_available_techs(),ephemeral=True)
         if buttonCommand:
             if player["research_apt"] > 1:
-                view.add_item(Button(label="Decline 2nd Tech", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))  
+                if buttonCount > 25:
+                    view.add_item(Button(label="Decline 2nd Tech", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))  
+                else:
+                    view2.add_item(Button(label="Decline 2nd Tech", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))  
                 await interaction.channel.send(f"{interaction.user.mention}, select the second tech you would like to acquire. The discounted cost is in parentheses.", view=view)
-                if buttonCount > 26:
+                if buttonCount > 25:
                     await interaction.channel.send(view=view2)
             view = View()
             view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
@@ -150,7 +152,7 @@ class ResearchButtons:
         tech_details = tech_data.get(tech)  
         if tech_type == "any":  
             view = await ResearchButtons.handle_wild_tech_selection(view, tech_details, tech, player)  
-            await interaction.response.send_message(  
+            await interaction.channel.send(  
                 f"{interaction.user.mention}, select the row of tech you would like to place this wild tech in. The discounted cost is in parentheses.",   
                 view=view  
             )  
@@ -165,7 +167,7 @@ class ResearchButtons:
         paid = min(trade_value, player[resource_type])  
         msg = player_helper.adjust_resource(resource_type,-paid)  
         game.update_player(player_helper)  
-        await interaction.response.send_message(msg)  
+        await interaction.channel.send(msg)  
 
     @staticmethod  
     async def gain5resource(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction, buttonID:str):
@@ -173,4 +175,4 @@ class ResearchButtons:
         resource_type = buttonID.split("_")[1]   
         msg = player_helper.adjust_resource(resource_type,5)  
         game.update_player(player_helper)  
-        await interaction.response.send_message(msg)  
+        await interaction.channel.send(msg)  

@@ -24,11 +24,11 @@ class UpgradeButtons:
             view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
             await interaction.message.delete()
         if discTileUpgrade == "dummy":
-            await interaction.response.send_message(file=drawing.show_player_ship_area(image),ephemeral=True)
+            await interaction.channel.send(file=drawing.show_player_ship_area(image),ephemeral=True)
         else:
-            await interaction.followup.send(file=drawing.show_player_ship_area(image),ephemeral=True)
+            await interaction.response.send_message(file=drawing.show_player_ship_area(image),ephemeral=True)
             view.add_item(Button(label="Save For Future Upgrade Action", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))
-        await interaction.followup.send(
+        await interaction.channel.send(
             f"{interaction.user.mention}, choose which ship you would like to upgrade.", view=view)
 
     @staticmethod
@@ -99,7 +99,7 @@ class UpgradeButtons:
         player_helper.stats[f"{ship}_parts"][index] = newPart
         shipCheck = PlayerShip(player_helper.stats, ship)
         if not shipCheck.check_valid_ship():
-            await interaction.response.send_message("Your ship is not valid! Please try a different part", ephemeral=True)
+            await interaction.channel.send("Your ship is not valid! Please try a different part", ephemeral=True)
             return
         
         game.update_player(player_helper)
@@ -112,9 +112,9 @@ class UpgradeButtons:
                 view.add_item(Button(label=ship2.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_upgradeShip_{str(actions)}_{ship2}_dummy"))
         view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
         await interaction.message.delete()
-        await interaction.response.send_message(f"{interaction.user.mention} replaced {part_stats[oldPart]['name']} with {part_stats[newPart]['name']} on their {ship.capitalize()} which now looks like this",file=drawing.show_player_ship_area(image))
+        await interaction.channel.send(f"{interaction.user.mention} replaced {part_stats[oldPart]['name']} with {part_stats[newPart]['name']} on their {ship.capitalize()} which now looks like this",file=drawing.show_player_ship_area(image))
         if discTileUpgrade == "dummy":
-            await interaction.followup.send(
+            await interaction.channel.send(
                 f"{interaction.user.mention}, choose which ship you would like to upgrade or end turn.", view=view)
 
 

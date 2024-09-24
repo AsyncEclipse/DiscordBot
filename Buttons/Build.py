@@ -21,7 +21,7 @@ class BuildButtons:
             game.update_player(player_helper)
         for tile in tiles:
             view.add_item(Button(label=tile, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_buildIn_{tile}"))
-        await interaction.response.send_message(f"{interaction.user.mention}, choose which tile you would like to build in.", view=view)
+        await interaction.channel.send(f"{interaction.user.mention}, choose which tile you would like to build in.", view=view)
 
     @staticmethod  
     async def buildIn(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
@@ -32,7 +32,7 @@ class BuildButtons:
         buildApt = player["build_apt"]
         if player["passed"]== True:
             buildApt = 1
-        await interaction.response.send_message(f"{interaction.user.mention}, you have {player['materials']} materials to "
+        await interaction.channel.send(f"{interaction.user.mention}, you have {player['materials']} materials to "
                                                 f"spend on up to {str(buildApt)} units in this system.", view=view)
         
     @staticmethod  
@@ -91,7 +91,7 @@ class BuildButtons:
         view = View()
         view = BuildButtons.buildBuildSpendButtonsView(game, interaction,player, ";".join(build),cost,loc,view,str(player['materials']),str(player['science']),str(player['money']),"0" )
         await interaction.message.delete()
-        await interaction.response.send_message(f"Total cost: {cost}"
+        await interaction.channel.send(f"Total cost: {cost}"
                     f"\nAvailable resources: Materials-{player['materials']} Science-{player['science']} Money-{player['money']}", view=view)
 
     @staticmethod  
@@ -173,17 +173,17 @@ class BuildButtons:
         game.update_player(player_helper)
         drawing = DrawHelper(game.gamestate)
         buildApt = player["build_apt"]
-        await interaction.response.send_message(f"This is what the tile looks like after the build. ",file=drawing.board_tile_image_file(loc))
+        await interaction.channel.send(f"This is what the tile looks like after the build. ",file=drawing.board_tile_image_file(loc))
         if player["passed"]== True:
             buildApt = 1
         if len(build) == buildApt:
             next_player = game.get_next_player(player)
             view = TurnButtons.getStartTurnButtons(game, next_player)
-            await interaction.followup.send(f"{next_player['player_name']} use these buttons to do your turn. "+game.displayPlayerStats(next_player),view=view)
+            await interaction.channel.send(f"{next_player['player_name']} use these buttons to do your turn. "+game.displayPlayerStats(next_player),view=view)
         else:
             view2 = View()
             view2.add_item(Button(label="Build Somewhere Else", style=discord.ButtonStyle.red, custom_id="startBuild2"))  
             view2.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id="endTurn"))  
-            await interaction.followup.send(f"{interaction.user.mention} you could potentially build somewhere else.", view=view2)
+            await interaction.channel.send(f"{interaction.user.mention} you could potentially build somewhere else.", view=view2)
         await interaction.message.delete()
         

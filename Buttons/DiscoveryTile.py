@@ -34,7 +34,7 @@ class DiscoveryTileButtons:
         player_helper.acquire_disc_tile_for_points()
         game.update_player(player_helper)
         await interaction.message.edit(view=None)
-        await interaction.response.send_message( f"{interaction.user.mention} chose to keep the tile for 2 points")
+        await interaction.channel.send( f"{interaction.user.mention} chose to keep the tile for 2 points")
     
     @staticmethod 
     async def usedDiscForAbility(game: GamestateHelper, player_helper:PlayerHelper, interaction: discord.Interaction, buttonID:str,player):
@@ -44,7 +44,7 @@ class DiscoveryTileButtons:
             discTile_data = json.load(f)
         discName = discTile_data[disc]["name"]
         await interaction.message.edit(view=None)
-        await interaction.response.send_message( f"{interaction.user.mention} chose to keep use '"+discName+"' for its ability")
+        await interaction.channel.send( f"{interaction.user.mention} chose to keep use '"+discName+"' for its ability")
 
         if discTile_data[disc]["part"] != "":
             player_helper.stats["ancient_parts"].append(discTile_data[disc]["part"])
@@ -105,5 +105,5 @@ class DiscoveryTileButtons:
             await interaction.channel.send(f"{interaction.user.mention} acquired the tech "+tech_details["name"],file=drawing.show_specific_tech(tech))
         else:
             await interaction.message.delete()
-            await interaction.response.send_message( f"{interaction.user.mention} acquired the tech "+tech_details["name"],file=drawing.show_specific_tech(tech))
+            await interaction.channel.send( f"{interaction.user.mention} acquired the tech "+tech_details["name"],file=drawing.show_specific_tech(tech))
     

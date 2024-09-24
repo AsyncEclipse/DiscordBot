@@ -32,7 +32,7 @@ class TurnButtons:
     @staticmethod
     async def restartTurn(player, game:GamestateHelper, interaction: discord.Interaction):
         view = TurnButtons.getStartTurnButtons(game, player)
-        await interaction.response.send_message(player["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(player),view=view)
+        await interaction.channel.send(player["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(player),view=view)
         await interaction.message.delete()
         
 
@@ -43,9 +43,9 @@ class TurnButtons:
         nextPlayer = game.get_next_player(player)
         if nextPlayer != None and not game.is_everyone_passed():
             view = TurnButtons.getStartTurnButtons(game,nextPlayer)
-            await interaction.response.send_message(nextPlayer["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(nextPlayer),view=view)
+            await interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(nextPlayer),view=view)
         else:
-            await interaction.response.send_message("All players have passed")
+            await interaction.channel.send("All players have passed")
         await interaction.message.delete()
         await game.showUpdate(f"End of {interaction.user.name}'s turn",interaction, bot)
 
@@ -67,15 +67,15 @@ class TurnButtons:
         nextPlayer = game.get_next_player(player)
         if nextPlayer != None and not game.is_everyone_passed():
             view = TurnButtons.getStartTurnButtons(game,nextPlayer)
-            await interaction.response.send_message(nextPlayer["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(nextPlayer),view=view)
+            await interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(nextPlayer),view=view)
 
             view2 = View()
             view2.add_item(Button(label=f"Permanently Pass", style=discord.ButtonStyle.green, custom_id="permanentlyPass"))
-            await interaction.followup.send(interaction.user.mention+ " you can use this button to permanently pass on reactions if you want.",view=view2,ephemeral=True)
+            await interaction.response.send_message(interaction.user.mention+ " you can use this button to permanently pass on reactions if you want.",view=view2,ephemeral=True)
         else:
             view = View()
             view.add_item(Button(label="Run Cleanup",style=discord.ButtonStyle.blurple, custom_id="runCleanup"))
-            await interaction.response.send_message("All players have passed, you can use this button to start the next round after all battles are resolved", view=view)
+            await interaction.channel.send("All players have passed, you can use this button to start the next round after all battles are resolved", view=view)
         await interaction.message.delete()
         await game.showUpdate(f"{interaction.user.name} Passing",interaction, bot)
 
@@ -90,15 +90,14 @@ class TurnButtons:
     @staticmethod
     async def runCleanup(game: GamestateHelper, interaction: discord.Interaction,bot):
         game.cleanUp()
-        await interaction.response.defer(thinking=False)
         drawing = DrawHelper(game.gamestate)
         await interaction.channel.send("Tech At Start Of New Round",file=drawing.show_available_techs())
         nextPlayer = TurnButtons.getFirstPlayer(game)
         if nextPlayer != None:
             view = TurnButtons.getStartTurnButtons(game,nextPlayer)
-            await interaction.followup.send(nextPlayer["player_name"]+ " use buttons to do the first turn of the round"+game.displayPlayerStats(nextPlayer),view=view)
+            await interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do the first turn of the round"+game.displayPlayerStats(nextPlayer),view=view)
         else:
-            await interaction.followup.send("Could not find first player, someone run /player start_turn")
+            await interaction.channel.send("Could not find first player, someone run /player start_turn")
         await game.showUpdate(f"Start of new round",interaction, bot)
 
 
@@ -106,7 +105,7 @@ class TurnButtons:
     async def showReputation(game: GamestateHelper,interaction: discord.Interaction, player):
         msg = f"{interaction.user.mention} Your reputation tiles hold the following values: "
         for reputation in player["reputation_track"]:
-            if reputation != "mixed" and reputation != "amb":
+            if reputation != "mixed" and reputation != "amb" and "-" not in reputation:
                 msg = msg + str(reputation)+" "
 
         await interaction.response.send_message(msg,ephemeral=True)
@@ -131,15 +130,6 @@ class TurnButtons:
         stats = drawing.show_stats()
         with concurrent.futures.ThreadPoolExecutor() as executor:
             future = executor.submit(asyncio.run_coroutine_threadsafe, TurnButtons.send_files(interaction, [map,stats]),bot.loop)
-        #await interaction.followup.send(file=drawing.show_map(),ephemeral=True)
-        # end_time = time.perf_counter()  
-        # elapsed_time = end_time - start_time  
-        # print(f"Total elapsed time for showing map: {elapsed_time:.2f} seconds")
-        # start_time = time.perf_counter() 
-        # await interaction.followup.send(file=drawing.show_stats(),ephemeral=True, view=view)
-        # end_time = time.perf_counter()  
-        # elapsed_time = end_time - start_time  
-        # print(f"Total elapsed time for showing stats: {elapsed_time:.2f} seconds")
 
     @staticmethod
     def getStartTurnButtons(game: GamestateHelper,p1):
@@ -162,4 +152,6 @@ class TurnButtons:
         view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
         if len(PopulationButtons.findEmptyPopulation(game,p1)) > 0 and p1["colony_ships"] > 0:
             view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{p1['color']}_startPopDrop"))
+        if game.get_gamestate()["player_count"] > 3:
+            view.add_item(Button(label="Initiate Diplomatic Relations", style=discord.ButtonStyle.gray, custom_id=f"FCID{p1['color']}_startDiplomaticRelations"))
         return view
