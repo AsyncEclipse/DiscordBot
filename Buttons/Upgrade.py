@@ -99,7 +99,8 @@ class UpgradeButtons:
         player_helper.stats[f"{ship}_parts"][index] = newPart
         shipCheck = PlayerShip(player_helper.stats, ship)
         if not shipCheck.check_valid_ship():
-            await interaction.channel.send("Your ship is not valid! Please try a different part", ephemeral=True)
+            await interaction.response.send_message("Your ship is not valid! Please try a different part",
+                                                   ephemeral=True)
             return
         
         game.update_player(player_helper)
