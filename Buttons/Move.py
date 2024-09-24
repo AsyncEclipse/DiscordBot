@@ -78,6 +78,8 @@ class MoveButtons:
         ship = PlayerShip(player, shipType)
         shipRange = ship.getRange()
         for destination in MoveButtons.getTilesInRange(game, player, originT, shipRange):
+            if destination == originT:
+                continue
             view.add_item(Button(label=destination, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_moveTo_{originT}_{shipType}_{destination}_{moveCount}"))
         await interaction.message.delete()
         await interaction.channel.send( f"{interaction.user.mention} Select the tile you would like to move a {shipType} from {originT} to", view=view)

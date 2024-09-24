@@ -105,7 +105,7 @@ class TurnButtons:
     async def showReputation(game: GamestateHelper,interaction: discord.Interaction, player):
         msg = f"{interaction.user.mention} Your reputation tiles hold the following values: "
         for reputation in player["reputation_track"]:
-            if reputation != "mixed" and reputation != "amb" and "-" not in reputation:
+            if reputation != "mixed" and reputation != "amb" and isinstance(reputation, int):
                 msg = msg + str(reputation)+" "
 
         await interaction.response.send_message(msg,ephemeral=True)

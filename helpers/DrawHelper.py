@@ -463,7 +463,7 @@ class DrawHelper:
         for x,reputation in enumerate(player["reputation_track"]):
             if reputation != "mixed" and reputation != "amb":
                 context.paste(reputation_image, (825,172+x*86), mask=reputation_image)
-            if "-" in reputation:
+            if not isinstance(reputation, int) and "-" in reputation:
                 faction = reputation.split("-")[1]
                 color =  reputation.split("-")[2]
                 pop_path = f"images/resources/components/all_boards/popcube_{color}.png"
