@@ -30,7 +30,9 @@ class ImageCacheHelper:
     #any(substring in main_string for substring in substrings)
     def get_image_size(self, folder, filename):  
         if "hexes" in folder.lower():  
-            return (345,299)  
+            return (345,299)
+        elif "upgrade_reference1" in filename.lower() or "upgrade_reference2" in filename.lower():  
+            return (310,300)  
         elif "masks" in folder.lower():  
             if "banner" in filename.lower():
                 return (98, 48)  
@@ -55,7 +57,7 @@ class ImageCacheHelper:
             elif "points" in filename.lower():
                 return (80,80)
             elif "yellow_square" in filename.lower():
-                return (60,60)
+                return (65,65)
             else:
                 return (80,80)
         elif "basic_ships" in folder.lower():  
