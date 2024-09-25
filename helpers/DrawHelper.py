@@ -408,7 +408,7 @@ class DrawHelper:
                 population_value = population_track[amount_index]  
             else:  
                 population_value = 2   
-            ind = spaces.index(population_value) -1
+            ind = spaces.index(population_value) +1
             context.paste(image, (position[0]+1160 - ind*80,position[1]))
 
         for img_path, amount_key, position in resources:
