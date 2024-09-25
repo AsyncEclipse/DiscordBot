@@ -145,7 +145,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         game = GamestateHelper(interaction.channel)
         player = game.get_player(interaction.user.id)  
         player_helper = PlayerHelper(interaction.user.id, player)
-        await MoveButtons.startMove(game, player, interaction,"startMove_8",player_helper, True)
+        await MoveButtons.startMove(game, player, interaction,"startMove_8", True)
     @app_commands.command(name="show_player_area")
     async def show_player_area(self, interaction: discord.Interaction, player: Optional[discord.Member]=None):
         if player == None:
