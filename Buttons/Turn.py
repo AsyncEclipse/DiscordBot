@@ -9,9 +9,6 @@ import time
 import asyncio
 class TurnButtons:
 
-
-
-
     @staticmethod
     def noOneElsePassed(player, game: GamestateHelper):
         for p2 in game.get_gamestate()["players"]:
@@ -155,3 +152,13 @@ class TurnButtons:
         if game.get_gamestate()["player_count"] > 3:
             view.add_item(Button(label="Initiate Diplomatic Relations", style=discord.ButtonStyle.gray, custom_id=f"FCID{p1['color']}_startDiplomaticRelations"))
         return view
+
+    @staticmethod
+    async def finishAction(player, game:GamestateHelper, interaction: discord.Interaction):
+        view = View()
+        view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
+        if len(PopulationButtons.findEmptyPopulation(game, player)) > 0 and player["colony_ships"] > 0:
+            view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
+        await interaction.response.send_message(f"Colony ships available: {player['colony_ships']}"
+                                                f"\nPlace population or end your turn.", view=view)
+        await interaction.message.delete()

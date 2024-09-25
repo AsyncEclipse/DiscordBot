@@ -79,17 +79,24 @@ class InfluenceButtons:
         for button in view.children:
             if buttonID in button.custom_id:
                 view.remove_item(button)
-        await interaction.channel.send( f"{interaction.user.mention} now has "+str(numShips)+" colony ships available to use")
+        await interaction.response.send_message( f"{interaction.user.mention} now has "+str(numShips)+" colony ships "
+                                                                                               "available to use")
         await interaction.message.edit(view=view)
 
     @staticmethod
     async def finishInfluenceAction(game: GamestateHelper, player, interaction: discord.Interaction, player_helper:PlayerHelper):
         player_helper.spend_influence_on_action("influence")
         game.update_player(player_helper)
-        next_player = game.get_next_player(player)
-        view = TurnButtons.getStartTurnButtons(game, next_player)
+        view = View()
+        #next_player = game.get_next_player(player)
+        #view = TurnButtons.getStartTurnButtons(game, next_player)
         await interaction.message.delete()
-        await interaction.channel.send(f"{next_player['player_name']} use these buttons to do your turn. "+game.displayPlayerStats(next_player),view=view)
+        view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
+                             custom_id=f"FCID{player['color']}_finishAction"))
+        await interaction.channel.send(f"{interaction.user.mention} when finished you may resolve your action "
+                                       f"with this button.", view=view)
+        #await interaction.channel.send(f"{next_player['player_name']} use these buttons to do your turn.
+        # "+game.displayPlayerStats(next_player),view=view)
 
     @staticmethod
     async def removeInfluenceStart(game: GamestateHelper, player, interaction: discord.Interaction):

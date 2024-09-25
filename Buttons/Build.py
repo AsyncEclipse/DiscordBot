@@ -183,7 +183,9 @@ class BuildButtons:
         else:
             view2 = View()
             view2.add_item(Button(label="Build Somewhere Else", style=discord.ButtonStyle.red, custom_id="startBuild2"))  
-            view2.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id="endTurn"))  
+            #view2.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id="endTurn"))
+            view2.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
+                                 custom_id=f"FCID{player['color']}_finishAction"))
             await interaction.channel.send(f"{interaction.user.mention} you could potentially build somewhere else.", view=view2)
         await interaction.message.delete()
         

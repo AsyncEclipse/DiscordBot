@@ -143,6 +143,7 @@ class ButtonListener(commands.Cog):
             elapsed_time = end_time - start_time  
             if(elapsed_time > 2):
                 print(f"Total elapsed time for {customID} button press: {elapsed_time:.2f} seconds")  
-
+            if customID.startswith("finishAction"):
+                await TurnButtons.finishAction(player, game, interaction)
             
                 
