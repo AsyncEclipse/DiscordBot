@@ -102,8 +102,11 @@ class MoveButtons:
             await interaction.message.delete()
             view = View()
             view.add_item(Button(label="Move an additional ship", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startMove_"+str(moveCount+1)))
-            view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
-            await interaction.channel.send(f"{interaction.user.mention} you can move an additional ship or end turn.", view=view)
+            view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
+                                 custom_id=f"FCID{player['color']}_finishAction"))
+            #view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
+            await interaction.channel.send(f"{interaction.user.mention} you can move an additional ship or end your "
+                                           f"action.", view=view)
         else:
             if player["move_apt"] == moveCount:
                 await TurnButtons.endTurn(player, game, interaction, bot)

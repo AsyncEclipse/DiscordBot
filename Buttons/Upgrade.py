@@ -111,11 +111,14 @@ class UpgradeButtons:
             ships = ["interceptor","cruiser","dread","starbase"]
             for ship2 in ships:
                 view.add_item(Button(label=ship2.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_upgradeShip_{str(actions)}_{ship2}_dummy"))
-        view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
+        #view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
+        view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
+                             custom_id=f"FCID{player['color']}_finishAction"))
         await interaction.message.delete()
         await interaction.channel.send(f"{interaction.user.mention} replaced {part_stats[oldPart]['name']} with {part_stats[newPart]['name']} on their {ship.capitalize()} which now looks like this",file=drawing.show_player_ship_area(image))
         if discTileUpgrade == "dummy":
             await interaction.channel.send(
-                f"{interaction.user.mention}, choose which ship you would like to upgrade or end turn.", view=view)
+                f"{interaction.user.mention}, choose which ship you would like to upgrade or finish your action.",
+                view=view)
 
 

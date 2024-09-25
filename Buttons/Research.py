@@ -136,8 +136,11 @@ class ResearchButtons:
                 if buttonCount > 25:
                     await interaction.channel.send(view=view2)
             view = View()
-            view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
-            await interaction.channel.send(f"{interaction.user.mention} when you're finished resolving your action, you may end turn with this button.", view=view)
+            #view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
+            view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
+                                 custom_id=f"FCID{player['color']}_finishAction"))
+            await interaction.channel.send(f"{interaction.user.mention} when finished you may resolve your action "
+                                           f"with this button.", view=view)
 
     @staticmethod  
     async def getTech(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction, buttonID:str):

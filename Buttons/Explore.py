@@ -110,7 +110,8 @@ class ExploreButtons:
                 await DiscoveryTileButtons.exploreDiscoveryTile(game, msg[1],interaction,player)
         view = View()
         view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
-        view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
+        #view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
+        view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_finishAction"))
         await interaction.channel.send(f"{interaction.user.mention} when you're finished resolving your action, you may end turn with this button.", view=view)
         await interaction.message.delete()
     @staticmethod
@@ -120,6 +121,9 @@ class ExploreButtons:
         await interaction.channel.send("Tile discarded")
         view = View()
         view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
-        view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
-        await interaction.channel.send(f"{interaction.user.mention} when you're finished resolving your action, you may end turn with this button.", view=view)
+        #view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
+        view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
+                             custom_id=f"FCID{player['color']}_finishAction"))
+        await interaction.channel.send(f"{interaction.user.mention} when finished you may resolve your action "
+                                           f"with this button.", view=view)
         await interaction.message.delete()
