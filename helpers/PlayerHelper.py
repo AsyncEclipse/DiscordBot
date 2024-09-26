@@ -84,6 +84,12 @@ class PlayerHelper:
         if "disc_tiles_for_points" not in self.stats:
             self.stats["disc_tiles_for_points"] = 0
         self.stats["disc_tiles_for_points"] = self.stats["disc_tiles_for_points"]+1
+    
+    def modify_disc_tile_for_points(self, modification: int):
+        if "disc_tiles_for_points" not in self.stats:
+            self.stats["disc_tiles_for_points"] = 0
+        result = max(0, self.stats["disc_tiles_for_points"]+modification)
+        self.stats["disc_tiles_for_points"] = result
     def setOldShipParts(self, ship):
         if f"old_{ship}_parts" not in self.stats:
             self.stats[f"old_{ship}_parts"] = self.stats[f"{ship}_parts"]

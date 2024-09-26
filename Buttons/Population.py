@@ -98,7 +98,6 @@ class PopulationButtons:
             return
         await interaction.message.delete()
         drawing = DrawHelper(game.gamestate)
-        await interaction.response.defer(thinking=False)
         await interaction.channel.send(f"Successfully added a {typeOfPop.replace('adv','')} population to tile {tile}", file=drawing.board_tile_image_file(tile))
 
 

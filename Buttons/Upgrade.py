@@ -24,9 +24,9 @@ class UpgradeButtons:
             view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
             await interaction.message.delete()
         if discTileUpgrade == "dummy":
-            await interaction.response.send_message(file=drawing.show_player_ship_area(image),ephemeral=True)
+            await interaction.followup.send(file=drawing.show_player_ship_area(image),ephemeral=True)
         else:
-            await interaction.response.send_message(file=drawing.show_player_ship_area(image),ephemeral=True)
+            await interaction.followup.send(file=drawing.show_player_ship_area(image),ephemeral=True)
             view.add_item(Button(label="Save For Future Upgrade Action", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))
         await interaction.channel.send(
             f"{interaction.user.mention}, choose which ship you would like to upgrade.", view=view)
@@ -43,7 +43,7 @@ class UpgradeButtons:
             part_stats = json.load(f)
         for i in set(player[f"{ship}_parts"]):
             view.add_item(Button(label=part_stats[i]["name"], style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_selectOldPart_{actions}_{ship}_{i}_{discTileUpgrade}"))
-        await interaction.response.edit_message(content=f"{interaction.user.mention}, pick which part to replace or remove.",
+        await interaction.message.edit(content=f"{interaction.user.mention}, pick which part to replace or remove.",
                                                 view=view)
     @staticmethod
     async def selectOldPart(game: GamestateHelper, player, interaction: discord.Interaction, customID : str, player_helper:PlayerHelper):
@@ -74,7 +74,7 @@ class UpgradeButtons:
         available_parts = set(available_parts)
         for i in available_parts:
             view.add_item(Button(label=part_stats[i]["name"], style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_chooseUpgrade_{actions}_{ship}_{oldPart}_{i}_{discTileUpgrade}"))
-        await interaction.response.edit_message(content=f"{interaction.user.mention}, replace "
+        await interaction.message.edit(content=f"{interaction.user.mention}, replace "
                                                         f"{part_stats[oldPart]['name']} with which part? Remove as a free action by selecting 'Empty'.", view=view)
         await interaction.followup.send("Available parts", file=drawing.availablePartsFile(available_parts),ephemeral=True)
     @staticmethod
@@ -99,7 +99,7 @@ class UpgradeButtons:
         player_helper.stats[f"{ship}_parts"][index] = newPart
         shipCheck = PlayerShip(player_helper.stats, ship)
         if not shipCheck.check_valid_ship():
-            await interaction.response.send_message("Your ship is not valid! Please try a different part",
+            await interaction.followup.send("Your ship is not valid! Please try a different part",
                                                    ephemeral=True)
             return
         

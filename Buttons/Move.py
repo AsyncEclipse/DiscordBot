@@ -54,10 +54,8 @@ class MoveButtons:
         def recursive_search(pos, distance, visited):
             if distance >  shipRange:
                 return
-            if pos in visited:
-                return
             visited.add(pos)
-            player_ships = tile_map[pos]["player_ships"]
+            player_ships = tile_map[pos]["player_ships"][:]
             player_ships.append(f"{player['color']}-cruiser") #adding phantom ship so I can reuse a method
             if not ExploreButtons.doesPlayerHaveUnpinnedShips(player, player_ships):
                 return
