@@ -26,7 +26,8 @@ class ButtonListener(commands.Cog):
         if interaction.type == discord.InteractionType.component:
             logging.basicConfig(level=logging.INFO)  
             logger = logging.getLogger(__name__)  
-            log_channel = discord.utils.get(interaction.guild.channels, name="bot-log")  
+            log_channel = discord.utils.get(interaction.guild.channels, name="bot-log") 
+            button_log_channel = discord.utils.get(interaction.guild.channels, name="button-log") 
             try:
                 await interaction.response.defer(thinking=False)
                 start_time = time.perf_counter()  
@@ -43,12 +44,12 @@ class ButtonListener(commands.Cog):
                     if customID.startswith("FCID"):
                         check = customID.split("_")[0]
                         if player["color"] != check.replace("FCID",""):
-                            await interaction.response.send_message(interaction.user.mention+" These buttons are not for you.", ephemeral=True)
+                            await interaction.followup.send(interaction.user.mention+" These buttons are not for you.", ephemeral=True)
                             return
                         customID = customID.replace(check+"_","")
                 
-                if log_channel is not None and isinstance(log_channel, discord.TextChannel):  
-                    await log_channel.send(f'{customID} pressed: '+interaction.message.jump_url)  
+                if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):  
+                    await button_log_channel.send(f'{customID} pressed: '+interaction.message.jump_url)  
                 if customID == "deleteMsg":
                     await interaction.message.delete()
                 if customID == "showGame":  

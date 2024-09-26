@@ -51,9 +51,9 @@ class DiplomaticRelationsButtons:
 
         for p in [player,p2]:
             view = View()
-            view.add_item(Button(label="Material", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_reducePopFor_material"))
-            view.add_item(Button(label="Science", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_reducePopFor_science"))
-            view.add_item(Button(label="Money", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_reducePopFor_money"))
+            view.add_item(Button(label="Material", style=discord.ButtonStyle.gray, custom_id=f"FCID{p['color']}_reducePopFor_material"))
+            view.add_item(Button(label="Science", style=discord.ButtonStyle.gray, custom_id=f"FCID{p['color']}_reducePopFor_science"))
+            view.add_item(Button(label="Money", style=discord.ButtonStyle.gray, custom_id=f"FCID{p['color']}_reducePopFor_money"))
             await interaction.channel.send( f"{p['player_name']} choose what type of cube to put on the ambassador", view=view)
 
         await interaction.message.delete()
@@ -68,7 +68,7 @@ class DiplomaticRelationsButtons:
         if type == "material":
             player_helper.adjust_material_cube(-1)
         game.update_player(player_helper)
-        await interaction.channel.send( f"{interaction.user.mention} put a {type} cube on his ambassador")
+        await interaction.channel.send( f"{interaction.user.mention} put a {type} cube on the ambassador")
         await interaction.message.delete()
     
    
