@@ -138,21 +138,20 @@ class BuildButtons:
 
     @staticmethod
     def buildBuildSpendButtonsView(game: GamestateHelper, interaction: discord.Interaction,player, build: str, cost:str, build_loc:str, view: View, material:str, science:str, money:str, spent:str):
-        for i in range(2):
-            x = i+1
-            buttonElements = [f"FCID{player['color']}","spendMaterial", build, str(cost), build_loc, material, science, money, spent, str(x)]
-            if player['materials'] >= x:
-                view.add_item(Button(label=f"Materials ({str(x)})", style=discord.ButtonStyle.blurple, custom_id="_".join(buttonElements))) 
+        num = min(int(cost),int(material))
+        buttonElements = [f"FCID{player['color']}","spendMaterial", build, str(cost), build_loc, material, science, money, spent, str(num)]
+        if num > 0 and int(spent) < int(cost):
+            view.add_item(Button(label=f"Materials ({str(num)})", style=discord.ButtonStyle.blurple, custom_id="_".join(buttonElements))) 
 
         elements = ["Science","Money"]
         tradeVal = player['trade_value']
         for resource in elements:
             buttonElements = [f"FCID{player['color']}","convertResource", build, str(cost), build_loc, material, science, money, spent, resource]
             if resource == "Science":
-                if int(science) >= tradeVal:
+                if int(science) >= tradeVal and int(spent) < int(cost):
                     view.add_item(Button(label=f"{resource} ({str(tradeVal)}:1)", style=discord.ButtonStyle.gray, custom_id="_".join(buttonElements))) 
             if resource == "Money":
-                if int(money) >= tradeVal:
+                if int(money) >= tradeVal and int(spent) < int(cost):
                     view.add_item(Button(label=f"{resource} ({str(tradeVal)}:1)", style=discord.ButtonStyle.gray, custom_id="_".join(buttonElements))) 
 
         buttonElements = [f"FCID{player['color']}","finishSpendForBuild", build, build_loc, material, science, money]
