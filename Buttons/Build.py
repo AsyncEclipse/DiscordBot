@@ -47,7 +47,7 @@ class BuildButtons:
         if player["passed"]== True:
             buildApt = 1
         if len(build) == buildApt:
-            await interaction.response.edit_message(content=f"You cannot build any more units. Current build is:"
+            await interaction.message.edit(content=f"You cannot build any more units. Current build is:"
                                                             f"\n {build} for {cost} materials.")
             return
         build.append(f"{player['color']}-{GamestateHelper.getShipShortName(ship)}")
@@ -57,7 +57,7 @@ class BuildButtons:
         cost += player[key]
         view = View()
         view = BuildButtons.buildBuildButtonsView(interaction,";".join(build),cost,loc,view,player)
-        await interaction.response.edit_message(content=f"Total cost so far of {cost}", view=view)
+        await interaction.message.edit(content=f"Total cost so far of {cost}", view=view)
 
     @staticmethod
     def buildBuildButtonsView(interaction: discord.Interaction, build: str, cost, build_loc, view: View,player):
@@ -110,7 +110,7 @@ class BuildButtons:
         spent = str(spent)
         view = View()
         view = BuildButtons.buildBuildSpendButtonsView(game, interaction,player,build,cost,loc,view, material, science, money, spent)
-        await interaction.response.edit_message(content=f"Total cost: {cost}"
+        await interaction.message.edit(content=f"Total cost: {cost}"
                     f"\nAvailable resources: Materials-{material} Science-{science} Money-{money}"
                     f"\nResources spent: {spent}", view=view)
     async def convertResource(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
@@ -132,7 +132,7 @@ class BuildButtons:
         spent = str(spent)
         view = View()
         view = BuildButtons.buildBuildSpendButtonsView(game, interaction,player,build,cost,loc,view, material, science, money, spent)
-        await interaction.response.edit_message(content=f"Total cost: {cost}"
+        await interaction.message.edit(content=f"Total cost: {cost}"
                     f"\nAvailable resources: Materials-{material} Science-{science} Money-{money}"
                     f"\nResources spent: {spent}", view=view)
 

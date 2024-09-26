@@ -68,7 +68,7 @@ class TurnButtons:
 
             view2 = View()
             view2.add_item(Button(label=f"Permanently Pass", style=discord.ButtonStyle.green, custom_id="permanentlyPass"))
-            await interaction.response.send_message(interaction.user.mention+ " you can use this button to permanently pass on reactions if you want.",view=view2,ephemeral=True)
+            await interaction.followup.send(interaction.user.mention+ " you can use this button to permanently pass on reactions if you want.",view=view2,ephemeral=True)
         else:
             view = View()
             view.add_item(Button(label="Run Cleanup",style=discord.ButtonStyle.blurple, custom_id="runCleanup"))
@@ -81,7 +81,6 @@ class TurnButtons:
     async def permanentlyPass(player, game: GamestateHelper, interaction: discord.Interaction, player_helper : PlayerHelper):
         player_helper.permanentlyPassTurn(True)
         game.update_player(player_helper)
-        await interaction.response.defer()
         await interaction.followup.send("You permanently passed", ephemeral=True)
 
     @staticmethod
@@ -105,7 +104,7 @@ class TurnButtons:
             if reputation != "mixed" and reputation != "amb" and isinstance(reputation, int):
                 msg = msg + str(reputation)+" "
 
-        await interaction.response.send_message(msg,ephemeral=True)
+        await interaction.followup.send(msg,ephemeral=True)
     @staticmethod
     async def send_files(interaction, files):
         for file in files:
@@ -117,7 +116,6 @@ class TurnButtons:
 
     @staticmethod
     async def showGame(game: GamestateHelper, interaction: discord.Interaction, bot):
-        await interaction.response.defer(thinking=True,ephemeral=True)
         game.updateNamesAndOutRimTiles(interaction)
         drawing = DrawHelper(game.gamestate)
         view = View()
@@ -159,6 +157,6 @@ class TurnButtons:
         view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
         if len(PopulationButtons.findEmptyPopulation(game, player)) > 0 and player["colony_ships"] > 0:
             view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
-        await interaction.response.send_message(f"Colony ships available: {player['colony_ships']}"
+        await interaction.channel.send(f"Colony ships available: {player['colony_ships']}"
                                                 f"\nPlace population or end your turn.", view=view)
         await interaction.message.delete()

@@ -25,10 +25,11 @@ class ExploreButtons:
         if len(playerShips) == 0:
             return False
         for ship in playerShips:
-            if player["color"] in ship:
-                playerShipsCount = playerShipsCount +1
-            else:
-                opponentShips = opponentShips +1
+            if "orb" not in ship:
+                if player["color"] in ship:
+                    playerShipsCount = playerShipsCount +1
+                else:
+                    opponentShips = opponentShips +1
         return playerShipsCount > opponentShips
 
     @staticmethod
@@ -64,7 +65,6 @@ class ExploreButtons:
         await interaction.message.delete()
     @staticmethod
     async def exploreTile(game: GamestateHelper, player, interaction: discord.Interaction, customID:str):
-        await interaction.response.defer(thinking=False)
         drawing = DrawHelper(game.gamestate)
         view = View()
         player = game.get_player(interaction.user.id)
@@ -97,7 +97,6 @@ class ExploreButtons:
         await interaction.message.delete()
     @staticmethod
     async def placeTile(game: GamestateHelper, interaction: discord.Interaction, player, customID):
-        await interaction.response.defer(thinking=False)
         msg = customID.split("_")
         game.add_tile(msg[1], int(msg[3]), msg[2])
         await interaction.channel.send(f"Tile added to position {msg[1]}")

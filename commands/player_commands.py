@@ -25,6 +25,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
                     material_cubes: Optional[int],
                     science_cubes: Optional[int],
                     money_cubes: Optional[int],
+                    discovery_tiles_kept: Optional[int],
                     influence: Optional[int],
                     colony_ships: Optional[int], player: Optional[discord.Member]=None):
         """
@@ -44,7 +45,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
             player = interaction.user
         gamestate = GamestateHelper(interaction.channel)
         p1 = PlayerHelper(player.id, gamestate.get_player(player.id))
-        options = [materials, science, money, material_cubes, science_cubes, money_cubes, influence, colony_ships]
+        options = [materials, science, money, material_cubes, science_cubes, money_cubes, influence, colony_ships, discovery_tiles_kept]
 
         if all(x is None for x in options):
             top_response = (f"{p1.name} player stats:")
@@ -57,7 +58,8 @@ class PlayerCommands(commands.GroupCog, name="player"):
                         f"\n> Money income: {p1.money_income()}"
                         f"\n> Influence dics: {p1.stats['influence_discs']}"
                         f"\n> Upkeep: {p1.upkeep()}"
-                        f"\n> Colony Ships: {p1.stats['colony_ships']}")
+                        f"\n> Colony Ships: {p1.stats['colony_ships']}"
+                        f"\n> Discovert Tiles Kept For Points: {p1.stats['disc_tiles_for_points']}")
             await interaction.response.send_message(top_response)
             await interaction.channel.send(response)
             return
@@ -86,6 +88,10 @@ class PlayerCommands(commands.GroupCog, name="player"):
             before = p1.stats['colony_ships']
             p1.adjust_colony_ships(-colony_ships)
             response += f"\n> Adjusted colony ships from {str(before)} to {str(p1.stats['colony_ships'])}"
+        if discovery_tiles_kept:
+            before = p1.stats['disc_tiles_for_points']
+            p1.modify_disc_tile_for_points(discovery_tiles_kept)
+            response += f"\n> Adjusted the number of discovery tiles kept for points from {str(before)} to {str(p1.stats['disc_tiles_for_points'])}"
 
         gamestate.update_player(p1)
         await interaction.response.send_message(top_response)
@@ -134,18 +140,21 @@ class PlayerCommands(commands.GroupCog, name="player"):
         game = GamestateHelper(interaction.channel)
         player = game.get_player(interaction.user.id)  
         player_helper = PlayerHelper(interaction.user.id, player)
+        await interaction.response.defer(thinking=False)
         await ResearchButtons.startResearch(game, player, player_helper,interaction,False)
     @app_commands.command(name="upgrade")
     async def upgrade(self, interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)
         player = game.get_player(interaction.user.id)  
+        await interaction.response.defer(thinking=False)
         await UpgradeButtons.startUpgrade(game, player, interaction, False,"dummy")
     @app_commands.command(name="move")
     async def move(self, interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)
         player = game.get_player(interaction.user.id)  
         player_helper = PlayerHelper(interaction.user.id, player)
-        await MoveButtons.startMove(game, player, interaction,"startMove_8",player_helper, True)
+        await interaction.response.defer(thinking=False)
+        await MoveButtons.startMove(game, player, interaction,"startMove_8", True)
     @app_commands.command(name="show_player_area")
     async def show_player_area(self, interaction: discord.Interaction, player: Optional[discord.Member]=None):
         if player == None:

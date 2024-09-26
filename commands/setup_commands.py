@@ -42,7 +42,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         if faction == "ter3" or faction == "eri":
             return "red"
         if faction == "ter1" or faction == "ori":
-            return "black"
+            return "purple"
         if faction == "ter2" or faction == "mec":
             return "white"
         if faction == "ter5" or faction == "dra":

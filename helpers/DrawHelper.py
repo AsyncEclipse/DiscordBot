@@ -371,26 +371,30 @@ class DrawHelper:
         context = Image.new("RGBA", (1600, 125), (255, 255, 255, 0))
 
         spaces = [28,24,21,18,15,12,10,8,6,4,3,2]
-        filepath = f"images/resources/components/all_boards/yellow_square.png"
+        pop_path = f"images/resources/components/all_boards/popcube_{player['color']}.png"
+        
         font = ImageFont.truetype("images/resources/arial.ttf", size=50)
         stroke_color = (0, 0, 0)
-        color = (0, 0, 0)
+
+        if player['color'] == "purple" or player['color'] == "blue":
+            color = (255, 255, 255)
+        else:
+            color = (0, 0, 0)
         stroke_width = 1
-        square_image = self.use_image(filepath)
-        for count in range(3):
-            xVal=  count*65
-            context.paste(square_image, (xVal,30), mask=square_image)
+        pop_image = self.use_image(pop_path).resize((220,75))
+        context.paste(pop_image, (0,25), mask=pop_image)
         text_drawable_image = ImageDraw.Draw(context)
-        text_drawable_image.text((5,35), "Income:", color, font=font,
+        text_drawable_image.text((15,35), "Income:", color, font=font,
                             stroke_width=stroke_width, stroke_fill=stroke_color)
         
+        pop_image = self.use_image(pop_path).resize((75,75))
         for count,num in enumerate(spaces):
-            x=  1080 - count*80
-            context.paste(square_image, (x,30), mask=square_image)
+            x=  1100 - count*80
+            context.paste(pop_image, (x,25), mask=pop_image)
             mod = 0
             if num > 9:
                 mod = 12
-            text_drawable_image.text((x+15-mod,35), str(num), color, font=font,
+            text_drawable_image.text((x+20-mod,35), str(num), color, font=font,
                             stroke_width=stroke_width, stroke_fill=stroke_color)
             
          # Resource details: [(image_path, text_color, player_key, amount_key)]
@@ -409,7 +413,7 @@ class DrawHelper:
             else:  
                 population_value = 2   
             ind = spaces.index(population_value) +1
-            context.paste(image, (position[0]+1160 - ind*80,position[1]))
+            context.paste(image, (position[0]+1185 - ind*80,position[1]))
 
         for img_path, amount_key, position in resources:
             draw_resource(context, img_path, amount_key, position)

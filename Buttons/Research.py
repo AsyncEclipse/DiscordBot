@@ -125,15 +125,15 @@ class ResearchButtons:
         await interaction.channel.send(f"{interaction.user.mention}, select the tech you would like to acquire. The discounted cost is in parentheses.", view=view)
         if buttonCount > 26:
             await interaction.channel.send(view=view2)
-        await interaction.response.send_message(file=drawing.show_available_techs(),ephemeral=True)
+        await interaction.followup.send(file=drawing.show_available_techs(),ephemeral=True)
         if buttonCommand:
             if player["research_apt"] > 1:
-                if buttonCount > 25:
+                if buttonCount > 24:
                     view.add_item(Button(label="Decline 2nd Tech", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))  
                 else:
                     view2.add_item(Button(label="Decline 2nd Tech", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))  
                 await interaction.channel.send(f"{interaction.user.mention}, select the second tech you would like to acquire. The discounted cost is in parentheses.", view=view)
-                if buttonCount > 25:
+                if buttonCount > 24:
                     await interaction.channel.send(view=view2)
             view = View()
             #view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))

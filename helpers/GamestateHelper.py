@@ -147,7 +147,8 @@ class GamestateHelper:
 
     def add_control(self, color, position):
         self.gamestate["board"][position]["owner"] = color
-        self.gamestate["players"][self.get_player_from_color(color)]["owned_tiles"].append(position)
+        if position not in self.gamestate["players"][self.get_player_from_color(color)]["owned_tiles"]:
+            self.gamestate["players"][self.get_player_from_color(color)]["owned_tiles"].append(position)
         amount = max(0, self.gamestate["players"][self.get_player_from_color(color)]["influence_discs"] - 1)
         self.gamestate["players"][self.get_player_from_color(color)]["influence_discs"] = amount
         self.update()
@@ -387,6 +388,8 @@ class GamestateHelper:
             json.dump(self.gamestate, f)
 
     def get_player(self, player_id):
+        if str(player_id) not in self.gamestate["players"]:
+            return None
         return self.gamestate["players"][str(player_id)]
 
     def get_player_from_color(self, color):
