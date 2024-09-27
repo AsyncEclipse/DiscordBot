@@ -457,7 +457,7 @@
   },
   {
     "alias": "zes",
-    "name": "Zero-point Source",
+    "name": "Zero Point Source",
     "base_cost": 15,
     "min_cost": 10,
     "track": "any",
