@@ -40,6 +40,6 @@ class ReputationButtons:
                 msg += " It was lower or equal to your highest value reputation tile, so you put it back in the bag."
         game.update_player(player_helper)
         game.update()
-        await interaction.followup.send(msg, ephemeral=True)
+        await interaction.followup.send(msg,ephemeral=True)
         
 
