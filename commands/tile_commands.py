@@ -157,13 +157,13 @@ class TileCommands(commands.GroupCog, name="tile"):
 
     @app_commands.command(name="add_influence")
     @app_commands.choices(color=color_choices)
-    async def add_influence(self, interaction: discord.Interaction, tile_position: str, color: app_commands.Choice[
-        str]):
+    async def add_influence(self, interaction: discord.Interaction, tile_position: str, color : Optional[app_commands.Choice[str]]=None):
         game = GamestateHelper(interaction.channel)
+        player_color = color.value if color else game.get_player(str(interaction.user.id))["color"]
         if game.gamestate["board"][tile_position]["owner"] != 0:
             await interaction.response.send_message("Please remove the current influence disc first")
             return
-        game.add_control(color.value, tile_position)
+        game.add_control(player_color, tile_position)
         await interaction.response.defer(thinking=True)
         drawing = DrawHelper(game.gamestate)
         image = drawing.board_tile_image(tile_position)
