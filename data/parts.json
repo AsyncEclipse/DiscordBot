@@ -458,13 +458,13 @@
     "repair": 0,
     "external": 0
   },
-  "coh": {
-    "name": "Conifold Hull",
+  "cof": {
+    "name": "Conifold Field",
     "range": 0,
     "speed": 0,
     "nrg_use": 2,
     "nrg_src": 0,
-    "tech_req": "coh",
+    "tech_req": "cof",
     "dice": [],
     "comp": 0,
     "shield": 0,
