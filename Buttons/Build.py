@@ -156,7 +156,7 @@ class BuildButtons:
 
         buttonElements = [f"FCID{player['color']}","finishSpendForBuild", build, build_loc, material, science, money]
         if int(spent) >= int(cost):
-            view.add_item(Button(label="Finish Build", style=discord.ButtonStyle.red, custom_id="_".join(buttonElements))) 
+            view.add_item(Button(label="Finish Build In This System", style=discord.ButtonStyle.red, custom_id="_".join(buttonElements))) 
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
         return view
 

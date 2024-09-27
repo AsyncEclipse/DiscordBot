@@ -186,7 +186,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         game = GamestateHelper(interaction.channel)
         player = game.get_player(interaction.user.id)  
         player_helper = PlayerHelper(interaction.user.id, player)
-        await interaction.response.defer(thinking=False)
+        await interaction.response.defer(thinking=True, ephemeral=True)
         await ReputationButtons.resolveGainingReputation(game, num_options,interaction, player_helper)
 
     @app_commands.command(name="show_player_ships")
