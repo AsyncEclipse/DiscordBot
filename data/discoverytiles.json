@@ -352,7 +352,7 @@
   },
   "tec": {
     "name": "Tech Gain",
-    "part": "tec",
+    "part": "",
     "money": 0,
     "material": 0,
     "science": 0,
