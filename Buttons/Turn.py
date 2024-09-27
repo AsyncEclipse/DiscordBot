@@ -49,16 +49,21 @@ class TurnButtons:
 
     @staticmethod
     async def passForRound(player, game: GamestateHelper, interaction: discord.Interaction, player_helper : PlayerHelper, bot):
-        if TurnButtons.noOneElsePassed(player,game):
-            player_helper.adjust_money(2)
-            await interaction.channel.send(f"{interaction.user.mention} you gained 2 money and the first player marker for next round for passing first")
-            player_helper.setFirstPlayer(True)
-            for p2 in game.get_gamestate()["players"]:
-                if game.get_gamestate()["players"][p2]["color"] == player["color"]:
-                    continue
-                player_helper2 = PlayerHelper(p2, game.get_gamestate()["players"][p2])
-                player_helper2.setFirstPlayer(False)
-                game.update_player(player_helper2)
+        if "passed" in player and player["passed"]== True:
+            await interaction.channel.send(f"{interaction.user.mention} passed on their reaction window.")
+        else:
+            if TurnButtons.noOneElsePassed(player,game):
+                player_helper.adjust_money(2)
+                await interaction.channel.send(f"{interaction.user.mention} you gained 2 money and the first player marker for next round for passing first")
+                player_helper.setFirstPlayer(True)
+                for p2 in game.get_gamestate()["players"]:
+                    if game.get_gamestate()["players"][p2]["color"] == player["color"]:
+                        continue
+                    player_helper2 = PlayerHelper(p2, game.get_gamestate()["players"][p2])
+                    player_helper2.setFirstPlayer(False)
+                    game.update_player(player_helper2)
+            else:
+                await interaction.channel.send(f"{interaction.user.mention} passed.")
         player_helper.passTurn(True)
         game.update_player(player_helper)
         nextPlayer = game.get_next_player(player)
@@ -134,7 +139,7 @@ class TurnButtons:
             view.add_item(Button(label=f"Build (1)", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startBuild"))
             view.add_item(Button(label=f"Upgrade (1)", style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_startUpgrade"))
             view.add_item(Button(label=f"Move (1)", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startMove"))
-            view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
+            view.add_item(Button(label="Pass On Reaction", style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_passForRound"))
         else:
             view.add_item(Button(label=f"Explore ({p1['explore_apt']})", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startExplore"))
             view.add_item(Button(label=f"Research ({p1['research_apt']})", style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_startResearch"))
