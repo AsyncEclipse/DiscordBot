@@ -105,6 +105,7 @@ class TileCommands(commands.GroupCog, name="tile"):
                         science: Optional[int],
                         material: Optional[int],
                         neutral: Optional[int],
+                        orbital: Optional[int],
                         advanced_money: Optional[int],
                         advanced_science: Optional[int],
                         advanced_material: Optional[int],
@@ -135,12 +136,20 @@ class TileCommands(commands.GroupCog, name="tile"):
         process_pop("moneyadv", advanced_money)  
         process_pop("scienceadv", advanced_science)  
         process_pop("neutraladv", advanced_neutral)
-        process_pop("materialadv", advanced_material)    
+        process_pop("materialadv", advanced_material)  
+        process_pop("orbital", orbital)  
 
         if added_pop:  
             game.add_pop(added_pop, tile_position,playerID)  
         if removed_pop:  
-            game.remove_pop(removed_pop, tile_position,playerID)  
+            neutralPop = game.remove_pop(removed_pop, tile_position,playerID)  
+            if neutralPop > 0:
+                for x in range(neutralPop):
+                    view=View()
+                    planetTypes = ["money","science","material"]
+                    for planetT in planetTypes:
+                        view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{color}_addCubeToTrack_"+planetT))
+                    await interaction.channel.send( f"A cube with no set track was removed, please tell the bot what track it should go back to", view=view)
 
         if influence != None:
             if influence:
@@ -240,15 +249,4 @@ class TileCommands(commands.GroupCog, name="tile"):
         except ValueError:
             await interaction.followup.send("This tile does not exist!")
 
-    @app_commands.command(name="show_game")
-    async def show_game(self, interaction: discord.Interaction):
-        game = GamestateHelper(interaction.channel)
-        await interaction.response.defer(thinking=True)
-        drawing = DrawHelper(game.gamestate)
-        await interaction.followup.send(file=drawing.show_map())
-        await interaction.followup.send(file=drawing.show_stats())
-        view = View()
-        button = Button(label="Show Game",style=discord.ButtonStyle.blurple, custom_id="showGame")
-        view.add_item(button)
-        view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
-        await interaction.channel.send(view=view)
+   

@@ -59,6 +59,7 @@ class ButtonListener(commands.Cog):
                 if customID == "showReputation":  
                     await TurnButtons.showReputation(game, interaction,player)
                 if customID == "passForRound":
+                    game.updateSaveFile()
                     await TurnButtons.passForRound(player, game, interaction,player_helper, self.bot)
                 if customID == "permanentlyPass":
                     await TurnButtons.permanentlyPass(player, game, interaction,player_helper)
@@ -66,9 +67,13 @@ class ButtonListener(commands.Cog):
                     await TurnButtons.endTurn(player, game, interaction, self.bot)
                 if customID == "restartTurn":
                     await TurnButtons.restartTurn(player, game, interaction)
-                if customID == "runCleanup":
-                    await TurnButtons.runCleanup(game, interaction,self.bot)
+                if customID == "undoLastTurn":
+                    await TurnButtons.undoLastTurn(player, game, interaction)
+                if customID == "runUpkeep":
+                    await TurnButtons.runUpkeep(game, interaction,self.bot)
                 if customID.startswith("startExplore"):
+                    if "2" not in customID:
+                        game.updateSaveFile()
                     await ExploreButtons.startExplore(game, player, player_helper, interaction,customID)
                 if customID.startswith("exploreTile_"):
                     await ExploreButtons.exploreTile(game, player, interaction, customID)
@@ -83,6 +88,7 @@ class ButtonListener(commands.Cog):
                 if customID.startswith("getFreeTech"):
                     await DiscoveryTileButtons.getFreeTech(game, interaction, customID)
                 if customID.startswith("startResearch"):
+                    game.updateSaveFile()
                     await ResearchButtons.startResearch(game, player, player_helper, interaction,True)
                 if customID.startswith("getTech_"):
                     await ResearchButtons.getTech(game, player, player_helper, interaction, customID)
@@ -91,6 +97,8 @@ class ButtonListener(commands.Cog):
                 if customID.startswith("gain5resource_"):
                     await ResearchButtons.gain5resource(game, player, player_helper, interaction, customID)
                 if customID.startswith("startBuild"):
+                    if "2" not in customID:
+                        game.updateSaveFile()
                     await BuildButtons.startBuild(game, player, interaction,customID,player_helper)
                 if customID.startswith("buildIn"):
                     await BuildButtons.buildIn(game, player, interaction, customID)
@@ -105,6 +113,7 @@ class ButtonListener(commands.Cog):
                 if customID.startswith("finishSpendForBuild"):
                     await BuildButtons.finishSpendForBuild(game, player, interaction, customID, player_helper)
                 if customID.startswith("startUpgrade"):
+                    game.updateSaveFile()
                     await UpgradeButtons.startUpgrade(game, player, interaction, True,"dummy")
                 if customID.startswith("upgradeShip"):
                     await UpgradeButtons.upgradeShip(game, player, interaction, customID, player_helper)
@@ -117,6 +126,7 @@ class ButtonListener(commands.Cog):
                 if customID.startswith("fillPopulation"):
                     await PopulationButtons.fillPopulation(game, player, interaction, customID)
                 if customID.startswith("startInfluence"):
+                    game.updateSaveFile()
                     await InfluenceButtons.startInfluence(game, player, interaction)
                 if customID.startswith("addInfluenceStart"):
                     await InfluenceButtons.addInfluenceStart(game, player, interaction)
@@ -143,6 +153,8 @@ class ButtonListener(commands.Cog):
                 if customID.startswith("reducePopFor"):
                     await DiplomaticRelationsButtons.reducePopFor(game, player_helper, interaction,customID)
                 if customID.startswith("startMove"):
+                    if customID == "startMove":
+                        game.updateSaveFile()
                     await MoveButtons.startMove(game, player, interaction,customID, True)
                 if customID.startswith("moveFrom"):
                     await MoveButtons.moveFrom(game, player, interaction,customID)
@@ -150,6 +162,8 @@ class ButtonListener(commands.Cog):
                     await MoveButtons.moveThisShip(game, player, interaction,customID)
                 if customID.startswith("moveTo"):
                     await MoveButtons.moveTo(game, player, interaction,customID,player_helper,self.bot)
+                if customID.startswith("endGame"):
+                    await game.endGame(interaction)
                 end_time = time.perf_counter()  
                 elapsed_time = end_time - start_time  
                 if(elapsed_time > 2):

@@ -3,6 +3,7 @@ import json
 from discord.ext import commands
 from discord import app_commands
 from typing import Optional
+from Buttons.DiplomaticRelations import DiplomaticRelationsButtons
 from Buttons.Move import MoveButtons
 from Buttons.Reputation import ReputationButtons
 from Buttons.Research import ResearchButtons
@@ -155,6 +156,29 @@ class PlayerCommands(commands.GroupCog, name="player"):
         player_helper = PlayerHelper(interaction.user.id, player)
         await interaction.response.defer(thinking=False)
         await MoveButtons.startMove(game, player, interaction,"startMove_8", True)
+
+
+    color_choices = [
+        app_commands.Choice(name="Blue", value="blue"),
+        app_commands.Choice(name="Red", value="red"),
+        app_commands.Choice(name="Yellow", value="yellow"),
+        app_commands.Choice(name="Purple", value="purple"),
+        app_commands.Choice(name="Green", value="green"),
+        app_commands.Choice(name="White", value="white")
+    ]
+
+    @app_commands.command(name="break_relations")
+    @app_commands.choices(color=color_choices)
+    async def break_relations(self, interaction: discord.Interaction, color:app_commands.Choice[str]):
+        player = interaction.user
+        await interaction.response.defer()
+        game = GamestateHelper(interaction.channel)
+        p1 = game.get_player(player.id)
+        p2 = game.get_player_from_color(color.value)
+        await DiplomaticRelationsButtons.breakRelationsWith(game, p1, game.get_gamestate()['players'][p2], interaction)
+
+
+
     @app_commands.command(name="show_player_area")
     async def show_player_area(self, interaction: discord.Interaction, player: Optional[discord.Member]=None):
         if player == None:

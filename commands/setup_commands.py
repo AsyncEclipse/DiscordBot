@@ -118,11 +118,6 @@ class SetupCommands(commands.GroupCog, name="setup"):
         view = TurnButtons.getStartTurnButtons(game, game.get_player(player1.id))
         await interaction.channel.send(f"<@{player1.id}> use these buttons to do your turn. "+ game.displayPlayerStats(game.get_player(player1.id)),view=view)
 
-    @app_commands.command(name="cleanup")
-    async def cleanup(self,interaction: discord.Interaction):
-        game = GamestateHelper(interaction.channel)
-        await TurnButtons.runCleanup(game, interaction,self.bot)
-
 
     @app_commands.command(name="set_turn_order")
     async def set_turn_order(self, interaction: discord.Interaction,
