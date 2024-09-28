@@ -28,7 +28,10 @@ class TurnButtons:
 
     @staticmethod
     async def restartTurn(player, game:GamestateHelper, interaction: discord.Interaction):
+        game.backUpToLastSaveFile()
+        game = GamestateHelper(interaction.channel)
         view = TurnButtons.getStartTurnButtons(game, player)
+        await interaction.channel.send(interaction.user.mention+" has chosen to back up to last start of turn.")
         await interaction.channel.send(player["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(player),view=view)
         await interaction.message.delete()
         
@@ -46,6 +49,8 @@ class TurnButtons:
         await interaction.message.delete()
         await game.showUpdate(f"End of {interaction.user.name}'s turn",interaction, bot)
 
+
+    
 
     @staticmethod
     async def passForRound(player, game: GamestateHelper, interaction: discord.Interaction, player_helper : PlayerHelper, bot):
@@ -76,7 +81,7 @@ class TurnButtons:
             await interaction.followup.send(interaction.user.mention+ " you can use this button to permanently pass on reactions if you want.",view=view2,ephemeral=True)
         else:
             view = View()
-            view.add_item(Button(label="Run Cleanup",style=discord.ButtonStyle.blurple, custom_id="runCleanup"))
+            view.add_item(Button(label="Run Upkeep",style=discord.ButtonStyle.blurple, custom_id="runUpkeep"))
             await interaction.channel.send("All players have passed, you can use this button to start the next round after all battles are resolved", view=view)
         await interaction.message.delete()
         await game.showUpdate(f"{interaction.user.name} Passing",interaction, bot)
@@ -89,16 +94,27 @@ class TurnButtons:
         await interaction.followup.send("You permanently passed", ephemeral=True)
 
     @staticmethod
-    async def runCleanup(game: GamestateHelper, interaction: discord.Interaction,bot):
-        game.cleanUp()
+    async def runUpkeep(game: GamestateHelper, interaction: discord.Interaction,bot):
+        for player in game.gamestate["players"]:
+            p1 = PlayerHelper(player, game.get_player(player))
+            if p1.checkBankrupt():
+                await interaction.channel.send("It appears that "+p1.name + " would be bankrupt (negative money). Please adjust the money or systems controlled so that upkeep can be run without the player entering negative money")
+                return
+
+        game.upkeep()
         drawing = DrawHelper(game.gamestate)
-        await interaction.channel.send("Tech At Start Of New Round",file=drawing.show_available_techs())
-        nextPlayer = TurnButtons.getFirstPlayer(game)
-        if nextPlayer != None:
-            view = TurnButtons.getStartTurnButtons(game,nextPlayer)
-            await interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do the first turn of the round"+game.displayPlayerStats(nextPlayer),view=view)
+        if game.gamestate["roundNum"] < 9:
+            await interaction.channel.send("Tech At Start Of New Round",file=drawing.show_available_techs())
+            nextPlayer = TurnButtons.getFirstPlayer(game)
+            if nextPlayer != None:
+                view = TurnButtons.getStartTurnButtons(game,nextPlayer)
+                await interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do the first turn of the round"+game.displayPlayerStats(nextPlayer),view=view)
+            else:
+                await interaction.channel.send("Could not find first player, someone run /player start_turn")
         else:
-            await interaction.channel.send("Could not find first player, someone run /player start_turn")
+            view = View()
+            view.add_item(Button(label="End Game",style=discord.ButtonStyle.blurple, custom_id="endGame"))
+            await interaction.channel.send("It seems like the game should be ended, hit this button to cleanup the channels.", view=view)
         await game.showUpdate(f"Start of new round",interaction, bot)
 
 
@@ -135,6 +151,7 @@ class TurnButtons:
     def getStartTurnButtons(game: GamestateHelper,p1):
         view = View()
         player = p1
+        player_helper = PlayerHelper(game.getPlayersID(player), player)
         if "passed" in p1 and p1["passed"]== True:
             view.add_item(Button(label=f"Build (1)", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startBuild"))
             view.add_item(Button(label=f"Upgrade (1)", style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_startUpgrade"))
@@ -152,9 +169,18 @@ class TurnButtons:
         view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
         if len(PopulationButtons.findEmptyPopulation(game,p1)) > 0 and p1["colony_ships"] > 0:
             view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{p1['color']}_startPopDrop"))
-        if game.get_gamestate()["player_count"] > 3:
+        if game.get_gamestate()["player_count"] > 3 and not player_helper.isTraitor():
             view.add_item(Button(label="Initiate Diplomatic Relations", style=discord.ButtonStyle.gray, custom_id=f"FCID{p1['color']}_startDiplomaticRelations"))
+        if game.getNumberOfSaveFiles() > 0:
+            view.add_item(Button(label="Undo Last Turn", style=discord.ButtonStyle.red, custom_id=f"undoLastTurn"))
         return view
+
+    @staticmethod
+    async def undoLastTurn(player, game:GamestateHelper, interaction: discord.Interaction):
+        view = View()
+        view.add_item(Button(label="Undo Last Turn", style=discord.ButtonStyle.red, custom_id=f"restartTurn"))
+        view.add_item(Button(label="Delete This Message", style=discord.ButtonStyle.gray, custom_id=f"deleteMsg"))
+        await interaction.channel.send("Please confirm you want to undo the last turn. The person who took the last turn should be the one pressing this button",view=view)
 
     @staticmethod
     async def finishAction(player, game:GamestateHelper, interaction: discord.Interaction):

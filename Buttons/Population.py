@@ -40,7 +40,7 @@ class PopulationButtons:
     def findFullPopulation(game: GamestateHelper, player, tile :str):
         fullPlanets = []
         tileState = game.get_gamestate()["board"][tile]
-        planetTypes = ["money","science","material","neutral","moneyadv","scienceadv","materialadv","neutraladv"]
+        planetTypes = ["money","science","material","neutral","moneyadv","scienceadv","materialadv","neutraladv","orbital"]
         for planetT in planetTypes:
             if f"{planetT}_pop" in tileState:
                 for i,val in enumerate(tileState[f"{planetT}_pop"]):

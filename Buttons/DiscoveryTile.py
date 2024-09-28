@@ -63,7 +63,7 @@ class DiscoveryTileButtons:
                 tech_details = tech_data.get(tech)
                 if minCost == tech_details["base_cost"] and tech not in cheapestTechs:
                     cheapestTechs.append(tech)
-            if cheapestTechs.count > 1:
+            if len(cheapestTechs) > 1:
                 view = View()
                 for tech in cheapestTechs:
                     tech_details = tech_data.get(tech)

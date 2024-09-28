@@ -87,8 +87,7 @@ class ExploreButtons:
                 await interaction.message.delete()
                 return
         image = drawing.base_tile_image(tileID)
-        
-        await interaction.channel.send("Tile explored",file=drawing.show_single_tile(image))
+        await interaction.channel.send("Tile explored in position "+position+": Tile "+tileID,file=drawing.show_single_tile(image))
         playerTiles = ExploreButtons.getListOfTilesPlayerIsIn(game, player)
         view, file = drawing.draw_possible_oritentations(tileID,position,playerTiles, view,player)
 

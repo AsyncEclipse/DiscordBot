@@ -287,36 +287,50 @@ class DrawHelper:
                                     stroke_width=stroke_width, stroke_fill=stroke_color)
         for tech_type in tech_groups:
             sorted_techs = sorted(tech_groups[tech_type], key=lambda x: x[2])  # Sort by cost
-            size = 73
+            size = 76
+            last_tech = "bleh"
             for tech, tech_name, cost in sorted_techs:
+                tech_details = tech_data.get(tech)
+                techName = tech_details["name"].lower().replace(" ", "_") if tech_details else tech
                 if tech_type == "military":
                     y=size*1
                     x1+=1
-                    ultimateX = x1*size
+                    if techName == last_tech:
+                        x1-=.7
+                    ultimateX = int(x1*size)
                 if tech_type == "grid":
                     y=size*2
                     x2+=1
-                    ultimateX = x2*size
+                    if techName == last_tech:
+                        x2-=.7
+                    ultimateX = int(x2*size)
                 elif tech_type == "nano":
                     y=size*3
                     x3+=1
-                    ultimateX = x3*size
+                    if techName == last_tech:
+                        x3-=.7
+                    ultimateX = int(x3*size)
                 elif tech_type == "any":
                     y=size*4
                     x4+=1
-                    ultimateX = x4*size
+                    if techName == last_tech:
+                        x4-=.7
+                    ultimateX = int(x4*size)
+
+               
+                
+                tech_path = f"images/resources/components/technology/{tech_type}/tech_{techName}.png"
+                
 
                 ultimateX += 100
                 y +=50
-                tech_details = tech_data.get(tech)
-                techName = tech_details["name"].lower().replace(" ", "_") if tech_details else tech
-                tech_path = f"images/resources/components/technology/{tech_type}/tech_{techName}.png"
                 if not os.path.exists(tech_path):
                     tech_path = f"images/resources/components/technology/rare/tech_{techName}.png"
                 tech_image = self.use_image(tech_path)
                 tech_image = tech_image.resize((73,73))
                 context.paste(tech_image, (ultimateX,y), mask=tech_image)
                 largestX = max(largestX,ultimateX+73)
+                last_tech = techName
         context = context.crop((0, 0,largestX,470))
         return context
 
@@ -333,7 +347,7 @@ class DrawHelper:
         stroke_color = (0, 0, 0)
         stroke_width = 2
 
-        text_drawable_image.text((560, 140), str(len(self.gamestate["tile_deck_300"])), (0, 255, 0), font=font,
+        text_drawable_image.text((565, 140), str(len(self.gamestate["tile_deck_300"])), (0, 255, 0), font=font,
                                     stroke_width=stroke_width, stroke_fill=stroke_color)
         text_drawable_image.text((0, 140), "Remaining           :", (0, 255, 0), font=font,
                                     stroke_width=stroke_width, stroke_fill=stroke_color)
@@ -751,6 +765,7 @@ class DrawHelper:
         #context5 = self.display_cube_track_reference()
         pCount = len(self.gamestate["players"])
         width = 4150 if (pCount != 2 and pCount != 4) else 2800
+        width = max(context2.size[0],context3.size[0]+context4.size[0])
         final_context = Image.new("RGBA", (width, context2.size[1]+max(context3.size[1],context4.size[1])), (255, 255, 255, 0))
         final_context.paste(context2, (0, 0))
         final_context.paste(context3, (0, context2.size[1]))

@@ -6,6 +6,11 @@ class PlayerHelper:
         self.player_id = str(player_id)
         self.name = self.stats["player_name"]
 
+    def isTraitor(self):
+        if "passed" in self.stats and self.stats["passed"]== True:
+            return True
+        else:
+            return False
 
     def adjust_materials(self, adjustment):
         before = self.stats["materials"]
@@ -131,8 +136,11 @@ class PlayerHelper:
             return(0)
         else:
             return(track[discs])
+        
+    def checkBankrupt(self):
+        return self.money_income()-self.upkeep()+self.stats["money"] < 0
     
-    def cleanUp(self):
+    def upkeep(self):
         self.adjust_money(self.money_income()-self.upkeep())
         self.adjust_materials(self.materials_income())
         self.adjust_science(self.science_income())

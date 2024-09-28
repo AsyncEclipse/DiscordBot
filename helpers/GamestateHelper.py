@@ -22,7 +22,35 @@ class GamestateHelper:
         self.game_id = game_id
         self.gamestate = self.get_gamestate()
     
-  
+
+    def getPlayersID(self, player):
+        return player["player_name"].replace(">@","").replace(">","")
+    def setRound(self, round:int):
+         self.gamestate["roundNum"] = round
+         self.update()
+
+    async def endGame(self, interaction:discord.Interaction):
+        guild = interaction.guild
+        category = interaction.channel.category
+        role = discord.utils.get(guild.roles, name=self.game_id)  
+        for channel in guild.channels:  
+            if isinstance(channel, discord.TextChannel) and self.game_id in channel.name:  
+                await channel.delete()    
+        if len(category.channels) < 1:
+            await category.delete()
+        chronicles_channel = discord.utils.get(guild.channels, name='game-chronicles')  
+        if chronicles_channel and isinstance(chronicles_channel, discord.TextChannel):  
+            message_to_send = self.game_id+ ' has concluded!'  
+            message = await chronicles_channel.send(message_to_send)  
+            thread = await message.create_thread(name=self.game_id) 
+            drawing = DrawHelper(self.gamestate)
+            await thread.send(file=drawing.show_map())
+            await thread.send(file=drawing.show_stats())
+            await thread.send(role.mention + " final state here")
+        if role:  
+            await role.delete()  
+        if os.path.exists(f"{config.gamestate_path}/{self.game_id}_saveFile.json"):   
+            os.remove(f"{self.game_id}_saveFile.json")
 
 
     def getLocationFromID(self, id):
@@ -32,6 +60,18 @@ class GamestateHelper:
         with open(f"{config.gamestate_path}/{self.game_id}.json", "r") as f:
             gamestate = json.load(f)
         return gamestate
+    
+    def get_saveFile(self):
+        if not os.path.exists(f"{config.gamestate_path}/{self.game_id}_saveFile.json"):  
+            data = {  
+                "oldestSaveNum": 0,  
+                "newestSaveNum": 0  
+            }
+            with open(f"{config.gamestate_path}/{self.game_id}_saveFile.json", 'w') as json_file:  
+                json.dump(data, json_file, indent=4)  
+        with open(f"{config.gamestate_path}/{self.game_id}_saveFile.json", "r") as f:
+            saveFile = json.load(f)
+        return saveFile
 
     def addPlayers(self, list):
         for i in list:
@@ -241,15 +281,20 @@ class GamestateHelper:
                 self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] = self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"]-1
         self.update()
     def remove_pop(self, pop_list, position, playerID):
+        neutralPop = 0
         for i in pop_list:
             if position != "dummy":
                 for val,num in enumerate(self.gamestate["board"][position][i]):
                     if(num > 0):
                         self.gamestate["board"][position][i][val] = num-1
                         break
-            if "neutral" not in i:
+            if "neutral" not in i and "orbital" not in i:
                 self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] = self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"]+1
+            else:
+                neutralPop += 1
+
         self.update()
+        return neutralPop
 
     def remove_units(self, unit_list, position):
         color = unit_list[0].split("-")[0]
@@ -267,10 +312,10 @@ class GamestateHelper:
                 self.gamestate["board"][position]["player_ships"].remove(i)
         self.update()
 
-    def cleanUp(self):
+    def upkeep(self):
         for player in self.gamestate["players"]:
             p1 = PlayerHelper(player, self.get_player(player))
-            p1.cleanUp()
+            p1.upkeep()
         tech_draws = self.gamestate["player_count"]+3
         while tech_draws > 0:
             random.shuffle(self.gamestate["tech_deck"])
@@ -331,7 +376,7 @@ class GamestateHelper:
         draw_count = {2: [5, 12], 3: [8, 14], 4: [14, 16], 5: [16, 18], 6: [18, 20]}
 
         third_sector_tiles = ["301", "302", "303", "304", "305", "306", "307", "308", "309", "310", "311", "312", "313", "314",
-                              "315", "316", "317", "318", "381", "382"]
+                              "315", "316", "317","318", "381", "382"]
         sector_draws = draw_count[self.gamestate["player_count"]][0]
         tech_draws = draw_count[self.gamestate["player_count"]][1]
 
@@ -387,6 +432,39 @@ class GamestateHelper:
         with open(f"{config.gamestate_path}/{self.game_id}.json", "w") as f:
             json.dump(self.gamestate, f)
 
+    def getNumberOfSaveFiles(self):
+        saveFile = self.get_saveFile()
+        newSaveNum = saveFile["newestSaveNum"]
+        oldSaveNum = saveFile["oldestSaveNum"]
+        return newSaveNum - oldSaveNum + 1
+
+    def backUpToLastSaveFile(self):
+        saveFile = self.get_saveFile()
+        newSaveNum = str(saveFile["newestSaveNum"])
+        if newSaveNum in saveFile:
+            newestSave = saveFile[newSaveNum]
+            self.gamestate = newestSave
+            saveFile["newestSaveNum"] = saveFile["newestSaveNum"]-1
+            self.update()
+            del saveFile[newSaveNum]
+            with open(f"{config.gamestate_path}/{self.game_id}_saveFile.json", "w") as f:
+                json.dump(saveFile, f)
+            return True
+        else:
+            return False
+
+    def updateSaveFile(self):
+        saveFile = self.get_saveFile()
+        with open(f"{config.gamestate_path}/{self.game_id}_saveFile.json", "w") as f:
+            if saveFile["newestSaveNum"] > saveFile["oldestSaveNum"] + 3:
+                if str(saveFile["oldestSaveNum"]) in saveFile:
+                    del saveFile[str(saveFile["oldestSaveNum"])]
+                saveFile["oldestSaveNum"] = saveFile["oldestSaveNum"]+1
+
+            saveFile[str(saveFile["newestSaveNum"]+1)] = self.gamestate
+            saveFile["newestSaveNum"] = saveFile["newestSaveNum"]+1
+            json.dump(saveFile, f)
+
     def get_player(self, player_id):
         if str(player_id) not in self.gamestate["players"]:
             return None
@@ -431,7 +509,18 @@ class GamestateHelper:
                 break
         for x,tile in enumerate(player2["reputation_track"]):
             if tile == "amb" or tile == "mixed":
-                player1["reputation_track"][x]=tile+"-"+self.get_short_faction_name(player1["name"])+"-"+player1["color"]
+                player2["reputation_track"][x]=tile+"-"+self.get_short_faction_name(player1["name"])+"-"+player1["color"]
+                break
+
+        self.update()
+    def breakRelationsBetween(self, player1, player2):
+        for x,tile in enumerate(player1["reputation_track"]):
+            if player2["color"] in tile:
+                player1["reputation_track"][x]=tile.split("-")[0]
+                break
+        for x,tile in enumerate(player2["reputation_track"]):
+            if player1["color"] in tile:
+                player2["reputation_track"][x]=tile.split("-")[0]
                 break
 
         self.update()

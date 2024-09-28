@@ -57,6 +57,19 @@ class DiplomaticRelationsButtons:
             await interaction.channel.send( f"{p['player_name']} choose what type of cube to put on the ambassador", view=view)
 
         await interaction.message.delete()
+
+    @staticmethod
+    async def breakRelationsWith(game: GamestateHelper, player, p2, interaction: discord.Interaction):
+        
+        await interaction.channel.send( f"{p2['player_name']} your relations have been broken with {interaction.user.mention}")
+        game.breakRelationsBetween(player,p2)
+        for p in [player,p2]:
+            view=View()
+            planetTypes = ["money","science","material"]
+            for planetT in planetTypes:
+                view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{p['color']}_addCubeToTrack_"+planetT))
+            await interaction.channel.send( f"{p['player_name']} a cube with no set track was removed, please tell the bot what track it should go back to", view=view)
+
     
     @staticmethod
     async def reducePopFor(game: GamestateHelper, player_helper :PlayerHelper, interaction: discord.Interaction, buttonID:str):

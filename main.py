@@ -1,5 +1,6 @@
 import discord
 import time
+from commands.game_commands import GameCommands
 from commands.tile_commands import TileCommands
 import config
 from commands.setup_commands import SetupCommands
@@ -19,6 +20,7 @@ class DiscordBot(commands.Bot):
         await self.add_cog(TileCommands(self))
         await self.add_cog(PlayerCommands(self))
         await self.add_cog(ButtonListener(self))
+        await self.add_cog(GameCommands(self))
         await self.tree.sync()
         start_time = time.perf_counter()
         print(f"Starting to load images")
