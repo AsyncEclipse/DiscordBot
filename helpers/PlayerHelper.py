@@ -129,7 +129,7 @@ class PlayerHelper:
         cubes = self.stats["money_pop_cubes"]
         return(track[cubes-1])
 
-    def upkeep(self):
+    def upkeepCosts(self):
         track = self.stats["influence_track"]
         discs = self.stats["influence_discs"]
         if discs >= 13:
@@ -138,10 +138,10 @@ class PlayerHelper:
             return(track[discs])
         
     def checkBankrupt(self):
-        return self.money_income()-self.upkeep()+self.stats["money"] < 0
+        return self.money_income()-self.upkeepCosts()+self.stats["money"] < 0
     
     def upkeep(self):
-        self.adjust_money(self.money_income()-self.upkeep())
+        self.adjust_money(self.money_income()-self.upkeepCosts())
         self.adjust_materials(self.materials_income())
         self.adjust_science(self.science_income())
         self.stats["colony_ships"] = self.stats["base_colony_ships"]

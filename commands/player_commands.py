@@ -58,7 +58,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
                         f"\n> Money: {p1.stats['money']}"
                         f"\n> Money income: {p1.money_income()}"
                         f"\n> Influence dics: {p1.stats['influence_discs']}"
-                        f"\n> Upkeep: {p1.upkeep()}"
+                        f"\n> Upkeep: {p1.upkeepCosts()}"
                         f"\n> Colony Ships: {p1.stats['colony_ships']}"
                         f"\n> Discovert Tiles Kept For Points: {p1.stats['disc_tiles_for_points']}")
             await interaction.response.send_message(top_response)
