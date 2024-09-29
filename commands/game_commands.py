@@ -6,6 +6,7 @@ from discord.ext import commands
 from discord import app_commands
 from discord.ui import View, Button
 from typing import Optional, List
+from helpers.CombatHelper import Combat
 from setup.GameInit import GameInit
 from helpers.GamestateHelper import GamestateHelper
 from helpers.DrawHelper import DrawHelper
@@ -21,6 +22,12 @@ class GameCommands(commands.GroupCog, name="game"):
     async def end(self,interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)
         await game.endGame(interaction)
+
+    @app_commands.command(name="start_combats")
+    async def start_combats(self,interaction: discord.Interaction):
+        game = GamestateHelper(interaction.channel)
+        interaction.response.defer()
+        await Combat.startCombatThreads(game, interaction)
 
     @app_commands.command(name="upkeep")
     async def upkeep(self,interaction: discord.Interaction):
