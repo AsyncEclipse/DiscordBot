@@ -10,6 +10,7 @@ from Buttons.Population import PopulationButtons
 from Buttons.Research import ResearchButtons
 from Buttons.Turn import TurnButtons
 from Buttons.Upgrade import UpgradeButtons
+from helpers.CombatHelper import Combat
 from helpers.GamestateHelper import GamestateHelper
 import time 
 import logging
@@ -164,6 +165,16 @@ class ButtonListener(commands.Cog):
                     await MoveButtons.moveTo(game, player, interaction,customID,player_helper,self.bot)
                 if customID.startswith("endGame"):
                     await game.endGame(interaction)
+                if customID.startswith("rollDice"):
+                    await Combat.rollDice(game, customID,interaction)
+                if customID.startswith("rollMissiles"):
+                    await Combat.rollMissiles(game, customID,interaction)
+                if customID.startswith("refreshImage"):
+                    await Combat.refreshImage(game, customID,interaction)
+                if customID.startswith("removeUnits"):
+                    await Combat.removeUnits(game, customID,player, interaction)
+                if customID.startswith("removeThisUnit"):
+                    await Combat.removeThisUnit(game, customID,player, interaction)
                 end_time = time.perf_counter()  
                 elapsed_time = end_time - start_time  
                 if(elapsed_time > 2):

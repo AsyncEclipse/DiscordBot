@@ -730,6 +730,14 @@ class DrawHelper:
         cropped_context.save(bytes_io, format="PNG")
         bytes_io.seek(0)
         return discord.File(bytes_io, filename="map_image.png")
+    
+    def get_file(self, imageName:str):
+        bytes_io = BytesIO()
+        image = self.use_image(imageName)
+        image.save(bytes_io, format="PNG")
+        bytes_io.seek(0)
+        return discord.File(bytes_io, filename="image.png")
+
 
     def show_stats(self):
         def create_player_area():
