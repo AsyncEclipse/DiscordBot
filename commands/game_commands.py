@@ -26,12 +26,12 @@ class GameCommands(commands.GroupCog, name="game"):
     @app_commands.command(name="start_combats")
     async def start_combats(self,interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)
-        interaction.response.defer()
+        await interaction.response.defer(thinking=False)
         await Combat.startCombatThreads(game, interaction)
 
     @app_commands.command(name="upkeep")
     async def upkeep(self,interaction: discord.Interaction):
-        interaction.response.defer()
+        await interaction.response.defer(thinking=False)
         game = GamestateHelper(interaction.channel)
         await TurnButtons.runUpkeep(game, interaction,self.bot)
     

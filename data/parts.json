@@ -40,7 +40,9 @@
     "nrg_use": 2,
     "nrg_src": 0,
     "tech_req": "plc",
-    "dice": [],
+    "dice": [
+      "orange"
+    ],
     "comp": 0,
     "shield": 0,
     "missile": [],
@@ -149,7 +151,9 @@
     "nrg_use": 1,
     "nrg_src": 0,
     "tech_req": "none",
-    "dice": [],
+    "dice": [
+      "blue"
+    ],
     "comp": 0,
     "shield": 0,
     "missile": [],
