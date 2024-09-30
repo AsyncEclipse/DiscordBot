@@ -511,9 +511,13 @@ class DrawHelper:
         reputation_path = f"images/resources/components/all_boards/reputation.png"
         reputation_image = self.use_image(reputation_path)
         mod = 0
+        scaler = 86
+        if len(player["reputation_track"]) > 4:
+            scaler = 67
+            mod = 3
         for x,reputation in enumerate(player["reputation_track"]):
             if reputation != "mixed" and reputation != "amb":
-                context.paste(reputation_image, (825,172+x*86), mask=reputation_image)
+                context.paste(reputation_image, (825,172+x*scaler-mod), mask=reputation_image)
             if not isinstance(reputation, int) and "-" in reputation:
                 faction = reputation.split("-")[1]
                 color =  reputation.split("-")[2]
@@ -521,8 +525,8 @@ class DrawHelper:
                 pop_image = self.use_image(pop_path)
                 amb_tile_path = f"images/resources/components/factions/{faction}_ambassador.png"
                 amb_tile_image = self.use_image(amb_tile_path)
-                context.paste(amb_tile_image, (825,172+x*86), mask=amb_tile_image)
-                context.paste(pop_image, (825+20,172+x*86+25), mask=pop_image)
+                context.paste(amb_tile_image, (825,172+x*scaler-mod), mask=amb_tile_image)
+                context.paste(pop_image, (825+20,172+x*scaler+25-mod), mask=pop_image)
 
         x = 925
         y = 0
