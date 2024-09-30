@@ -15,9 +15,10 @@ class InfluenceButtons:
 
         def is_adjacent(tile_a, tile_b):
             for index, adjTile in enumerate(configs.get(tile_a)[0].split(",")):
-                tile_orientation_index = (index + 6 + int(int(game.get_gamestate()["board"][tile_a]["orientation"]) / 60)) % 6
-                if adjTile == tile_b and "wormholes" in game.get_gamestate()["board"][tile_a] and tile_orientation_index in game.get_gamestate()["board"][tile_a]["wormholes"]:
-                    return True
+                if tile_a in game.gamestate["board"]:
+                    tile_orientation_index = (index + 6 + int(int(game.gamestate["board"][tile_a]["orientation"]) / 60)) % 6
+                    if adjTile == tile_b and "wormholes" in game.gamestate["board"][tile_a] and tile_orientation_index in game.gamestate["board"][tile_a]["wormholes"]:
+                        return True
             return False
 
         return is_adjacent(tile1, tile2) and is_adjacent(tile2, tile1)
