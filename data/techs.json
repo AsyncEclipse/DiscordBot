@@ -69,7 +69,7 @@
     "infdisc": 0,
     "dtile": 0,
     "num": 3,
-    "description": "You may upgrade your Ship Blueprints with Tachyon Drive Ship Parts. Tachyon Drives allow ships to Move into up to 3 systems during a single Move Activation.  Each Tachyon Drive also adds +3 to the Ship's Initiative value during Combat; i.e., the ship also shoots faster. Each Tachyon Drive requires 3 Energy."
+    "description": "You may upgrade your Ship Blueprints with Tachyon Drive Ship Parts. Each Tachyon Drives allows ships to Move into up to 3 systems during a single Move Activation.  Each Tachyon Drive also adds +3 to the Ship's Initiative value during Combat; i.e., the ship also shoots faster. Each Tachyon Drive requires 3 Energy."
   },
   "anc": {
     "name": "Antimatter Cannon",
@@ -213,7 +213,7 @@
     "infdisc": 0,
     "dtile": 0,
     "num": 5,
-    "description": "You may upgrade your Ship Blueprints with Fusion Drive Ship Parts. Fusion Drives allow ships to Move into up to 2 systems during a single Move Activation. Each Fusion Drive also adds +2 to the Ship's Initiative value during Combat; i.e., the ship also shoots faster. Each Fusion Drive requires 2 Energy."
+    "description": "You may upgrade your Ship Blueprints with Fusion Drive Ship Parts. Each Fusion Drive allows ships to Move into up to 2 systems during a single Move Activation. Each Fusion Drive also adds +2 to the Ship's Initiative value during Combat; i.e., the ship also shoots faster. Each Fusion Drive requires 2 Energy."
   },
   "orb": {
     "name": "Orbital",
@@ -321,7 +321,7 @@
     "infdisc": 0,
     "dtile": 0,
     "num": 1,
-    "description": "You may upgrade your Ship Blueprints with Rift Cannon Ship Parts. During the Combat Phase, Rift Cannons deal are unaffected by both Computers and Shields. Full Direct Hits are assigned to enemy ships; Hollow Direct Hits are friendly fire: deal damage to your own ships that have Rift Weapons. If possible, the damage is assigned so that your ships with Rift Weapons are destroyed from larges to smallest. If none of your ships with Rift Weapons can be destroyed, the damage is assigned to inflict as much damage to them as possible, from largest to smallest. Each Rift Cannon requires 2 Energy. Basically, this thing is a railgun with black-hole bullets, what could go wrong?"
+    "description": "You may upgrade your Ship Blueprints with Rift Cannon Ship Parts. During the Combat Phase, Rift Cannons are unaffected by both Computers and Shields, and it rolls a single pink die during each Engagement Round. Full Direct Hits are assigned to enemy ships; Hollow Direct Hits are friendly fire: deal damage to your own ships that have Rift Weapons. If possible, the damage is assigned so that your ships with Rift Weapons are destroyed from larges to smallest. If none of your ships with Rift Weapons can be destroyed, the damage is assigned to inflict as much damage to them as possible, from largest to smallest. Each Rift Cannon requires 2 Energy. Basically, this thing is a railgun with black-hole bullets, what could go wrong?"
   },
   "socan": {
     "name": "Soliton Cannon",
@@ -333,7 +333,7 @@
     "infdisc": 0,
     "dtile": 0,
     "num": 1,
-    "description": "You may upgrade your Ship Blueprints with Soliton Cannon Ship Parts. During the Combat Phase, Soliton Cannons deal 3 hits to a single target if 1) the blue die rolls a Direct Hit, or 2) if the blue die result + total Computers - total Shields of the target ship is 6 or greater. Each Soliton Cannon requires 3 Energy"
+    "description": "You may upgrade your Ship Blueprints with Soliton Cannon Ship Parts. During the Combat Phase, Soliton Cannons deal 3 hits to a single target if 1) the blue die rolls a Direct Hit, or 2) if the blue die result + total Computers - total Shields of the target ship is 6 or greater. Each Soliton Cannon requires 3 Energy."
   },
   "cld": {
     "name": "Cloaking Device",
@@ -369,7 +369,7 @@
     "infdisc": 0,
     "dtile": 0,
     "num": 1,
-    "description": "You may upgrade your Ship Blueprints with Transition Drive Ship Parts. Transition Drives allow ships to Move into up to 3 systems during a single Move Activation. Transition Drives do not require Energy."
+    "description": "You may upgrade your Ship Blueprints with Transition Drive Ship Parts. Each Transition Drive allows ships to Move into up to 3 systems during a single Move Activation. Transition Drives do not require Energy."
   },
   "seh": {
     "name": "Sentient Hull",
@@ -381,7 +381,7 @@
     "infdisc": 0,
     "dtile": 0,
     "num": 1,
-    "description": "You may upgrade your Ship Blueprints with Sentient Hull Ship Parts. Sentient Hull panels can each absorb up to 1 hit during the Combat Phase. Sentient Hull panels also add +1 to the value of dice rolled during the Combat Phase (like an Ion Computer)."
+    "description": "You may upgrade your Ship Blueprints with Sentient Hull Ship Parts. Sentient Hull panels can each absorb up to 1 hit during the Combat Phase. Sentient Hull panels also add +1 to the value of dice rolled during the Combat Phase (like an Electron Computer)."
   },
   "iml": {
     "name": "Improved Logistics",
