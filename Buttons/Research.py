@@ -128,7 +128,7 @@ class ResearchButtons:
         await interaction.followup.send(file=drawing.show_available_techs(),ephemeral=True)
         if buttonCommand:
             if player["research_apt"] > 1:
-                if buttonCount > 24:
+                if buttonCount < 25:
                     view.add_item(Button(label="Decline 2nd Tech", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))  
                 else:
                     view2.add_item(Button(label="Decline 2nd Tech", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))  
