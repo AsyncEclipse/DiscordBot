@@ -38,6 +38,8 @@ class ImageCacheHelper:
                 return (98, 48)  
             elif "hsMask" in filename.lower():
                 return (70,70)
+            elif "line" in filename.lower():
+                return (174,3)
             else:
                 return (42,22)  
         elif "factions" in folder.lower():  

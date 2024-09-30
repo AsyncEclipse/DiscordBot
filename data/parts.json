@@ -417,6 +417,21 @@
     "repair": 0,
     "external": 0
   },
+  "nod": {
+    "name": "Nonlinear Drive",
+    "range": 2,
+    "speed": 0,
+    "nrg_use": 0,
+    "nrg_src": 2,
+    "tech_req": "none",
+    "dice": [],
+    "comp": 0,
+    "shield": 0,
+    "missile": [],
+    "hull": 0,
+    "repair": 0,
+    "external": 0
+  },
   "tad": {
     "name": "Tachyon Drive",
     "range": 3,
