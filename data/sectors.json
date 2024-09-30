@@ -1201,18 +1201,18 @@
     ],
     "money2_snap": [],
     "moneyadv_pop": [
-      0
+      1
     ],
     "moneyadv1_snap": [
-      733,
-      669
+      346,
+      602
     ],
     "moneyadv2_snap": [],
     "science_pop": [
       1
     ],
     "science1_snap": [
-      597,
+      729,
       669
     ],
     "science2_snap": [],
@@ -1220,7 +1220,7 @@
       0
     ],
     "scienceadv1_snap": [
-      594,
+      597,
       669
     ],
     "scienceadv2_snap": [],
@@ -4876,6 +4876,86 @@
       4
     ],
     "vp": 2,
+    "artifact": 0,
+    "ancient": 0,
+    "guardian": 0,
+    "gcds": 0,
+    "warp": 0,
+    "type": "standard"
+  },
+  "318": {
+    "owner": 0,
+    "name": "Gamma Valorum",
+    "ring": 3,
+    "disctile": 0,
+    "player_ships": [],
+    "money_pop": [],
+    "money1_snap": [],
+    "money2_snap": [],
+    "moneyadv_pop": [],
+    "moneyadv1_snap": [],
+    "moneyadv2_snap": [],
+    "science_pop": [],
+    "science1_snap": [],
+    "science2_snap": [],
+    "scienceadv_pop": [],
+    "scienceadv1_snap": [],
+    "scienceadv2_snap": [],
+    "material_pop": [],
+    "material1_snap": [],
+    "material2_snap": [],
+    "materialadv_pop": [
+      0
+    ],
+    "materialadv1_snap": [
+      299,
+      491
+    ],
+    "materialadv2_snap": [],
+    "neutral_pop": [
+      0
+    ],
+    "neutral1_snap": [
+      393,
+      133
+    ],
+    "neutral2_snap": [],
+    "neutraladv_pop": [],
+    "neutraladv1_snap": [],
+    "neutraladv2_snap": [],
+    "int_snap": [
+      228,
+      172
+    ],
+    "cru_snap": [
+      583,
+      103
+    ],
+    "drd_snap": [
+      558,
+      607
+    ],
+    "sb_snap": [
+      448,
+      504
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      292,
+      300
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      2,
+      3
+    ],
+    "vp": 1,
     "artifact": 0,
     "ancient": 0,
     "guardian": 0,
