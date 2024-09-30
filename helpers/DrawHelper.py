@@ -275,9 +275,10 @@ class DrawHelper:
 
         def is_adjacent(tile_a, tile_b):
             for index, adjTile in enumerate(configs.get(tile_a)[0].split(",")):
-                tile_orientation_index = (index + 6 + int(int(self.gamestate["board"][tile_a]["orientation"]) / 60)) % 6
-                if adjTile == tile_b and "wormholes" in self.gamestate["board"][tile_a] and tile_orientation_index in self.gamestate["board"][tile_a]["wormholes"]:
-                    return True
+                if tile_a in self.gamestate["board"]:
+                    tile_orientation_index = (index + 6 + int(int(self.gamestate["board"][tile_a]["orientation"]) / 60)) % 6
+                    if adjTile == tile_b and "wormholes" in self.gamestate["board"][tile_a] and tile_orientation_index in self.gamestate["board"][tile_a]["wormholes"]:
+                        return True
             return False
 
         return is_adjacent(tile1, tile2) and is_adjacent(tile2, tile1)
