@@ -8,7 +8,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 4
+    "num": 4,
+    "description": "You may upgrade your Ship Blueprints with Gauss Shield Ship Parts. This basic shield is a starting tech for the Orion species. Reduces die rolls against this ship by 1, with no effect on Direct Hits."
   },
   "fus": {
     "name": "Fusion Source",
@@ -19,7 +20,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 4
+    "num": 4,
+    "description": "You may upgrade your Ship Blueprints with Fusion Source Ship Parts. Fusion Source generates 6 Energy for the ship."
   },
   "imh": {
     "name": "Improved Hull",
@@ -30,7 +32,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 5
+    "num": 5,
+    "description": "You may upgrade your Ship Blueprints with Improved Hull Ship Parts. Improved Hull panels can each absorb up to 2 hits during the Combat phase."
   },
   "poc": {
     "name": "Positron Computer",
@@ -41,7 +44,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 4
+    "num": 4,
+    "description": "You may upgrade your Ship Blueprints with Positron Computer Ship Parts. Positron Computers add +2 to all non-Direct Hit (1-5) dice values rolled by this ship during the Combat Phase. Each Positron Computer requires 1 Energy."
   },
   "ade": {
     "name": "Advanced Economy",
@@ -52,7 +56,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 4
+    "num": 4,
+    "description": "You may place Population Cubes in Advanced Money (Yellow) or Neutral (White) Population Squares with your Colony Ships. Advanced Population Squares are indicated by a small starburst in the upper left corner."
   },
   "tad": {
     "name": "Tachyon Drive",
@@ -63,7 +68,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 3
+    "num": 3,
+    "description": "You may upgrade your Ship Blueprints with Tachyon Drive Ship Parts. Each Tachyon Drives allows ships to Move into up to 3 systems during a single Move Activation.  Each Tachyon Drive also adds +3 to the Ship's Initiative value during Combat; i.e., the ship also shoots faster. Each Tachyon Drive requires 3 Energy."
   },
   "anc": {
     "name": "Antimatter Cannon",
@@ -74,7 +80,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 3
+    "num": 3,
+    "description": "You may upgrade your Ship Blueprints with Antimatter Cannon Ship Parts. During the Combat Phase, Antimatter Cannons deal 4 hits to a single target if 1) the red die rolls a Direct Hit, or 2) if the red die result + total Computers - total Shields of the target ship = 6 or greater. Also see Antimass Splitter. Each Antimass Cannon requires 4 Energy."
   },
   "qug": {
     "name": "Quantum Grid",
@@ -85,7 +92,8 @@
     "art_pt": 0,
     "infdisc": 2,
     "dtile": 0,
-    "num": 3
+    "num": 3,
+    "description": "You receive two additional Influence Discs, placed immediately on your Influence Track."
   },
   "neb": {
     "name": "Neutron Bombs",
@@ -96,7 +104,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 5
+    "num": 5,
+    "description": "When Attacking Population during the Combat Phase, all Population Cubes in a Sector may be destroyed automatically."
   },
   "stb": {
     "name": "Star Base",
@@ -107,7 +116,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 5
+    "num": 5,
+    "description": "You may Build Starbases."
   },
   "plc": {
     "name": "Plasma Cannon",
@@ -118,7 +128,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 5
+    "num": 5,
+    "description": "You may upgrade your Ship Blueprints with Plasma Cannon Ship Parts. During the Combat Phase, Plasma Cannons deal 2 hits to a single target if 1) the orange die rolls a Direct Hit, or 2) if the orange die result + total Computers - total Shields of the target ship = 6 or greater. Each Plasma Cannon requires 2 Energy."
   },
   "phs": {
     "name": "Phase Shield",
@@ -129,7 +140,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 5
+    "num": 5,
+    "description": "You may upgrade your Ship Blueprints with Phase Shield Ship Parts. Reduces die rolls against this ship by 2, with no effect on Direct Hits. Each Phase Shield requires 1 Energy."
   },
   "adm": {
     "name": "Advanced Mining",
@@ -140,7 +152,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 4
+    "num": 4,
+    "description": "You may place Population Cubes in Advanced Materials (Brown) or Neutral (White) Population Squares with your Colony Ships. Advanced Population Squares are indicated by a small starburst in the upper left corner."
   },
   "tas": {
     "name": "Tachyon Source",
@@ -151,7 +164,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 3
+    "num": 3,
+    "description": "You may upgrade your Ship Blueprints with Tachyon Source Ship Parts. Tachyon Source generates 9 Energy for the ship."
   },
   "glc": {
     "name": "Gluon Computer",
@@ -162,7 +176,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 3
+    "num": 3,
+    "description": "You may upgrade your Ship Blueprints with Gluon Computer Ship Parts. Gluon Computers add +3 to all non-Direct Hit (1-5) dice values rolled by this ship during the Combat Phase. Each Gluon Computer requires 2 Energy."
   },
   "plm": {
     "name": "Plasma Missile",
@@ -173,7 +188,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 3
+    "num": 3,
+    "description": "You may upgrade your Ship Blueprints with Plasma Missile Ship Parts. A Plasma Missile box rolls two dice at the beginning of Combat Phase during the Fire Missiles step. Each Plasma Missile deals 2 hits if 1) the orange die rolls a Direct Hit, or 2) if the orange die result + total Computers - total Shields of the target ship = 6 or greater. Does not fire during the Repeated Engagement Rounds. Each Plasma Missile box requires 1 Energy."
   },
   "nar": {
     "name": "Nano Robots",
@@ -184,7 +200,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 5
+    "num": 5,
+    "description": "You have one extra Activation when taking the Build Action."
   },
   "fud": {
     "name": "Fusion Drive",
@@ -195,7 +212,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 5
+    "num": 5,
+    "description": "You may upgrade your Ship Blueprints with Fusion Drive Ship Parts. Each Fusion Drive allows ships to Move into up to 2 systems during a single Move Activation. Each Fusion Drive also adds +2 to the Ship's Initiative value during Combat; i.e., the ship also shoots faster. Each Fusion Drive requires 2 Energy."
   },
   "orb": {
     "name": "Orbital",
@@ -206,7 +224,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 5
+    "num": 5,
+    "description": "You may Build Orbitals."
   },
   "adr": {
     "name": "Advanced Robotics",
@@ -217,7 +236,8 @@
     "art_pt": 0,
     "infdisc": 1,
     "dtile": 0,
-    "num": 5
+    "num": 5,
+    "description": "You receive 1 additional Influence Disc, placed immmediately on your Influence Track."
   },
   "adl": {
     "name": "Advanced Labs",
@@ -228,7 +248,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 5
+    "num": 5,
+    "description": "You may place Population Cubes in Advanced Science (Pink) or Neutral (White) Population Squares with your Colony Ships. Advanced Population Squares are indicated by a small starburst in the upper left corner."
   },
   "mon": {
     "name": "Monolith",
@@ -239,7 +260,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 3
+    "num": 3,
+    "description": "You may Build Monoliths."
   },
   "wog": {
     "name": "Wormhole Generator",
@@ -250,7 +272,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 3
+    "num": 3,
+    "description": "You may Explore, Move to, and Influence adjacent Sectors if the edges connecting the Sectors contain 1 Wormhole."
   },
   "ark": {
     "name": "Artifact Key",
@@ -261,7 +284,8 @@
     "art_pt": 5,
     "infdisc": 0,
     "dtile": 0,
-    "num": 3
+    "num": 3,
+    "description": "For eaech Artifact on Sectors you control, immediately gain 5 Resources of a single type. Artifacts are indicated by a four-pointed silver star on the top-right corner of the VP tile (the gold numbered badge) in the Sector."
   },
   "anl": {
     "name": "Ancient Labs",
@@ -272,7 +296,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 1,
-    "num": 1
+    "num": 1,
+    "description": "Immediately draw and resolve one Discovery Tile."
   },
   "ans": {
     "name": "Antimatter Splitter",
@@ -283,7 +308,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 1
+    "num": 1,
+    "description": "Allows you to split damage from Antimatter Cannons freely over targets. See Antimatter Cannon."
   },
   "rican": {
     "name": "Rift Cannon",
@@ -294,7 +320,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 1
+    "num": 1,
+    "description": "You may upgrade your Ship Blueprints with Rift Cannon Ship Parts. During the Combat Phase, Rift Cannons are unaffected by both Computers and Shields, and it rolls a single pink die during each Engagement Round. Full Direct Hits are assigned to enemy ships; Hollow Direct Hits are friendly fire: deal damage to your own ships that have Rift Weapons. If possible, the damage is assigned so that your ships with Rift Weapons are destroyed from larges to smallest. If none of your ships with Rift Weapons can be destroyed, the damage is assigned to inflict as much damage to them as possible, from largest to smallest. Each Rift Cannon requires 2 Energy. Basically, this thing is a railgun with black-hole bullets, what could go wrong?"
   },
   "socan": {
     "name": "Soliton Cannon",
@@ -305,7 +332,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 1
+    "num": 1,
+    "description": "You may upgrade your Ship Blueprints with Soliton Cannon Ship Parts. During the Combat Phase, Soliton Cannons deal 3 hits to a single target if 1) the blue die rolls a Direct Hit, or 2) if the blue die result + total Computers - total Shields of the target ship is 6 or greater. Each Soliton Cannon requires 3 Energy."
   },
   "cld": {
     "name": "Cloaking Device",
@@ -316,7 +344,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 1
+    "num": 1,
+    "description": "This effect is applied to all of your ships: Two Ships are required to Pin each of your Ships (instead of the standard of 1). A single enemy ship is insufficient to Pin your ships. This does not apply to the Galactic Center Defense System (totally not a War Sun), which pins all ships."
   },
   "cof": {
     "name": "Conifold Field",
@@ -327,7 +356,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 1
+    "num": 1,
+    "description": "You may upgrade your Ship Blueprints with Conifold Field Ship Parts. Conifold field panels can each absorb up to 3 hits during the Combat phase. Each Conifold Field panel requires 2 Energy."
   },
   "trd": {
     "name": "Transition Drive",
@@ -338,7 +368,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 1
+    "num": 1,
+    "description": "You may upgrade your Ship Blueprints with Transition Drive Ship Parts. Each Transition Drive allows ships to Move into up to 3 systems during a single Move Activation. Transition Drives do not require Energy."
   },
   "seh": {
     "name": "Sentient Hull",
@@ -349,7 +380,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 1
+    "num": 1,
+    "description": "You may upgrade your Ship Blueprints with Sentient Hull Ship Parts. Sentient Hull panels can each absorb up to 1 hit during the Combat Phase. Sentient Hull panels also add +1 to the value of dice rolled during the Combat Phase (like an Electron Computer)."
   },
   "iml": {
     "name": "Improved Logistics",
@@ -360,7 +392,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 1
+    "num": 1,
+    "description": "Gain 1 additional Move Activation during each Move Action you take."
   },
   "met": {
     "name": "Metasynthesis",
@@ -371,7 +404,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 1
+    "num": 1,
+    "description": "You may place Population Cubes in any Advanced Population Squares (Money, Materials, and/or Science) with your Colony Ships. Advanced Population Squares are indicated by a small starburst in the upper left corner."
   },
   "flm": {
     "name": "Flux Missile",
@@ -382,7 +416,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 1
+    "num": 1,
+    "description": "You may upgrade your Ship Blueprints with Flux Missile Ship Parts. A Flux Missile box rolls two dice at the beginning of Combat Phase during the Fire Missiles step. Each Flux Missile deals 1 hit if 1) the yellow die rolls a Direct Hit, or 2) if the yellow die result + total Computers - total Shields of the target ship = 6 or greater. Does not fire during the Repeated Engagement Rounds."
   },
   "nea": {
     "name": "Neutron Absorber",
@@ -393,7 +428,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 1
+    "num": 1,
+    "description": "Enemy Neutron Bombs have no effect on you. Note: this does NOT affect or negate Planta's Species weakness."
   },
   "pim": {
     "name": "Pico Modulator",
@@ -404,7 +440,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 1
+    "num": 1,
+    "description": "Gain 2 additional Upgrade Activations during each Upgrade Action you take."
   },
   "abs": {
     "name": "Absorption Shield",
@@ -415,7 +452,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 1
+    "num": 1,
+    "description": "You may upgrade your Ship Blueprints with Absorption Shield Ship Parts. Reduces die rolls against this ship by 1, with no effect on Direct Hits. This shield also generates 4 Energy for the ship."
   },
   "zes": {
     "name": "Zero Point Source",
@@ -426,7 +464,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 1
+    "num": 1,
+    "description": "You may upgrade your Ship Blueprints with Zero Point Source Ship Parts. Zero Point Source generates 12 Energy for the ship."
   },
   "wap": {
     "name": "Warp Portal",
@@ -437,6 +476,7 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 1
+    "num": 1,
+    "description": "Immediately place the Warp Portal token on any Sector you Control. The Warp Portal Tile connects this Sector to all other Warp Portal Sectors and is worth 1 VP if Controlled at the end of the game."
   }
 }

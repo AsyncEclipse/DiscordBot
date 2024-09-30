@@ -1,6 +1,7 @@
 {
   "anc": {
     "name": "Antimatter Cannon",
+    "description": "Requires Antimatter Cannon Technology. During the Combat Phase, Antimatter Cannons deal 4 hits to a single target if 1) the red die rolls a Direct Hit, or 2) if the red die result + total Computers - total Shields of the target ship = 6 or greater. Also see Antimass Splitter. Each Antimass Cannon requires 4 Energy.",
     "range": 0,
     "speed": 0,
     "nrg_use": 4,
@@ -18,6 +19,7 @@
   },
   "ioc": {
     "name": "Ion Cannon",
+    "description": "Basic ship part available to all species. During the Combat Phase, Ion Cannons deal 1 hit to a single target if 1) the yellow die rolls a Direct Hit, or 2) if the yellow die result + total Computers - total Shields of the target ship = 6 or greater. Each Ion Cannon requires 1 Energy.",
     "range": 0,
     "speed": 0,
     "nrg_use": 1,
@@ -35,6 +37,7 @@
   },
   "plc": {
     "name": "Plasma Cannon",
+    "description": "Requires Plasma Cannon Technology. During the Combat Phase, Plasma Cannons deal 2 hits to a single target if 1) the orange die rolls a Direct Hit, or 2) if the orange die result + total Computers - total Shields of the target ship = 6 or greater. Each Plasma Cannon requires 2 Energy.",
     "range": 0,
     "speed": 0,
     "nrg_use": 2,
@@ -52,6 +55,7 @@
   },
   "rican": {
     "name": "Rift Cannon",
+    "description": "Requires Rift Cannon Technology (Rare). During the Combat Phase, Rift Cannons deal are unaffected by both Computers and Shields. Full Direct Hits are assigned to enemy ships; Hollow Direct Hits are friendly fire: deal damage to your own ships that have Rift Weapons. If possible, the damage is assigned so that your ships with Rift Weapons are destroyed from larges to smallest. If none of your ships with Rift Weapons can be destroyed, the damage is assigned to inflict as much damage to them as possible, from largest to smallest. Each Rift Cannon requires 2 Energy. Basically, this thing is a railgun with black-hole bullets, what could go wrong?",
     "range": 0,
     "speed": 0,
     "nrg_use": 2,
@@ -69,6 +73,7 @@
   },
   "socan": {
     "name": "Soliton Cannon",
+    "description": "Requires Soliton Cannon Technology. During the Combat Phase, Soliton Cannons deal 3 hits to a single target if 1) the blue die rolls a Direct Hit, or 2) if the blue die result + total Computers - total Shields of the target ship is 6 or greater. Each Soliton Cannon requires 3 Energy.",
     "range": 0,
     "speed": 0,
     "nrg_use": 3,
@@ -86,6 +91,7 @@
   },
   "elc": {
     "name": "Electron Computer",
+    "description": "Basic ship part available to all species. Positron Computers add +1 to all non-Direct Hit (1-5) dice values rolled by this ship during the Combat Phase. Each Electron Computer requires 0 Energy.",
     "range": 0,
     "speed": 0,
     "nrg_use": 0,
@@ -101,6 +107,7 @@
   },
   "poc": {
     "name": "Positron Computer",
+    "description": "Requires Positron Computer Technology.  Positron Computers add +2 to all non-Direct Hit (1-5) dice values rolled by this ship during the Combat Phase. Each Positron Computer requires 1 Energy.",
     "range": 0,
     "speed": 0,
     "nrg_use": 1,
@@ -116,6 +123,7 @@
   },
   "glc": {
     "name": "Gluon Computer",
+    "description": "Requires Gluon Computer Technology. Gluon Computers add +3 to all non-Direct Hit (1-5) dice values rolled by this ship during the Combat Phase. Each Gluon Computer requires 2 Energy.",
     "range": 0,
     "speed": 0,
     "nrg_use": 2,
@@ -131,6 +139,7 @@
   },
   "axc": {
     "name": "Axion Computer",
+    "description": "This is an Ancient Tech; it can only be added to a single Ship Blueprint slot, and then it is exhausted. The Axion Computer increases Initiative (Combat Speed) by 1, and adds +2 to all non-Direct Hit (1-5) dice values rolled by this ship during the Combat Phase. The Axion Computer requires 0 Energy.",
     "range": 0,
     "speed": 1,
     "nrg_use": 0,
@@ -146,6 +155,7 @@
   },
   "socha": {
     "name": "Soliton Charger",
+    "description": "This is an Ancient Tech; it can only be added to a single Ship Blueprint slot, and then it is exhausted. During the Combat Phase, the Soliton Charger deals 3 hits to a single target if 1) the blue die rolls a Direct Hit, or 2) if the blue die result + total Computers - total Shields of the target ship is 6 or greater. The Soliton Charger requires 1 Energy.",
     "range": 0,
     "speed": 0,
     "nrg_use": 1,
@@ -163,6 +173,7 @@
   },
   "iod": {
     "name": "Ion Disruptor",
+    "description": "This is an Ancient Tech; it can only be added to a single Ship Blueprint slot, and then it is exhausted. During the Combat Phase, the Ion Disruptor adds +3 to the ship's Initiative (Combat Speed) and deals 1 hit to a single target if 1) the yellow die rolls a Direct Hit, or 2) if the yellow die result + total Computers - total Shields of the target ship = 6 or greater. Each Ion Cannon requires 0 Energy.", 
     "range": 0,
     "speed": 3,
     "nrg_use": 0,
@@ -178,6 +189,7 @@
   },
   "cod": {
     "name": "Conformal Drive",
+    "description": "This is an Ancient Tech; it can only be added to a single Ship Blueprint slot, and then it is exhausted. The Conformal Drive allows the ship to move into 4 Sectors during a single Move Activation. The Conformal Drive requires 2 Energy.",
     "range": 4,
     "speed": 2,
     "nrg_use": 2,
@@ -193,6 +205,7 @@
   },
   "jud": {
     "name": "Jump Drive",
+    "description": "This is an Ancient Tech; it can only be added to a single Ship Blueprint slot, and then it is exhausted. One per Move Activation, Ships with the Jump Drive may Move to any adjacent Sector, regardless of Wormholes.",
     "range": 1,
     "speed": 0,
     "nrg_use": 2,
@@ -208,6 +221,7 @@
   },
   "shd": {
     "name": "Shard Hull",
+    "description": "This is an Ancient Tech; it can only be added to a single Ship Blueprint slot, and then it is exhausted. The Shard Hull can absorb 3 hits during the Combat Phase.",
     "range": 0,
     "speed": 0,
     "nrg_use": 0,
@@ -223,6 +237,7 @@
   },
   "iot": {
     "name": "Ion Turret",
+    "description": "This is an Ancient Tech; it can only be added to a single Ship Blueprint slot, and then it is exhausted. During the Combat Phase, the Ion Turret rolls 2 yellow dice and deals 1 hits to a single target if 1) a yellow die rolls a Direct Hit, or 2) if a yellow die result + total Computers - total Shields of the target ship = 6 or greater. The Ion Turret requires 0 Energy. ",
     "range": 0,
     "speed": 0,
     "nrg_use": 0,
@@ -241,6 +256,7 @@
   },
   "anm": {
     "name": "Antimatter Missile",
+    "description": "This is an Ancient Tech; it can only be added to a single Ship Blueprint slot, and then it is exhausted. The Antimatter Missile box rolls 1 die at the beginning of Combat Phase during the Fire Missiles step. The Antimatter Missile deals 4 hits if 1) the red die rolls a Direct Hit, or 2) if the red die result + total Computers - total Shields of the target ship = 6 or greater. Does not fire during the Repeated Engagement Rounds. Each Antimatter Missile box requires 0 Energy. See Technology Antimatter Splitter.",
     "range": 0,
     "speed": 0,
     "nrg_use": 0,
@@ -258,6 +274,7 @@
   },
   "iom": {
     "name": "Ion Missile",
+    "description": "This is an Ancient Tech; it can only be added to a single Ship Blueprint slot, and then it is exhausted.  An Ion Missile box rolls three dice at the beginning of Combat Phase during the Fire Missiles step. Each Ion Missile deals 1 hits if 1) the yellow die rolls a Direct Hit, or 2) if the yellow die result + total Computers - total Shields of the target ship = 6 or greater. Does not fire during the Repeated Engagement Rounds. Each Ion Missile box requires 0 Energy.",
     "range": 0,
     "speed": 0,
     "nrg_use": 0,
@@ -277,6 +294,7 @@
   },
   "som": {
     "name": "Soliton Missile",
+    "description": "This is an Ancient Tech; it can only be added to a single Ship Blueprint slot, and then it is exhausted.  A Soliton Missile box rolls 1 die at the beginning of Combat Phase during the Fire Missiles step. The Soliton Missile deals 3 hits to a single target if 1) the blue die rolls a Direct Hit, or 2) if the blue die result + total Computers - total Shields of the target ship = 6 or greater. Does not fire during the Repeated Engagement Rounds. Each Soliton Missile box requires 0 Energy.",
     "range": 0,
     "speed": 0,
     "nrg_use": 0,
@@ -294,6 +312,7 @@
   },
   "ricon": {
     "name": "Rift Conductor",
+    "description": "This is an Ancient Tech; it can only be added to a single Ship Blueprint slot, and then it is exhausted. The Rift Conductor can absorb 1 hit during the Combat Phase. During the Combat Phase, Rift Conductors are unaffected by both Computers and Shields, and it rolls a single pink die during each Engagement Round. Full Direct Hits are assigned to enemy ships; Hollow Direct Hits are friendly fire: deal damage to your own ships that have Rift Weapons. If possible, the damage is assigned so that your ships with Rift Weapons are destroyed from larges to smallest. If none of your ships with Rift Weapons can be destroyed, the damage is assigned to inflict as much damage to them as possible, from largest to smallest. Each Rift Conductor requires 0 Energy. Basically, this thing is an ANCIENT railgun with black-hole bullets, what could go wrong? ",
     "range": 0,
     "speed": 0,
     "nrg_use": 1,
@@ -311,6 +330,7 @@
   },
   "fls": {
     "name": "Flux Shield",
+    "description": "This is an Ancient Tech; it can only be added to a single Ship Blueprint slot, and then it is exhausted. The Flux Shield increases the ship's Initiative (Combat Speed) by 1, and reduces die rolls against this ship by 3, with no effect on Direct Hits. The Flux Shield requires 2 Energy.",
     "range": 0,
     "speed": 1,
     "nrg_use": 2,
@@ -326,6 +346,7 @@
   },
   "ins": {
     "name": "Inversion Shield",
+    "description": "This is an Ancient Tech; it can only be added to a single Ship Blueprint slot, and then it is exhausted. The Inversion Shield reduces die rolls against this ship by 2, with no effect on Direct Hits. The Inversion Shield generates 2 Energy.",
     "range": 0,
     "speed": 0,
     "nrg_use": 0,
@@ -341,6 +362,7 @@
   },
   "hyg": {
     "name": "Hypergrid Source",
+    "description": "This is an Ancient Tech; it can only be added to a single Ship Blueprint slot, and then it is exhausted. The Hypergrid Source Generates 11 Energy.",
     "range": 0,
     "speed": 0,
     "nrg_use": 0,
@@ -356,6 +378,7 @@
   },
   "mus": {
     "name": "Muon Source",
+    "description": "This is an Ancient Tech; it is a one-time upgrade for a single Ship Blueprint type, and then it is exhausted. The Muon Source is an external part: it does not occupy a space in the Ship Blueprint. The Muon Source Generates 2 Energy and increases the Ship's Initiative (Combat Speed) by 1.",
     "range": 0,
     "speed": 1,
     "nrg_use": 0,
@@ -371,6 +394,7 @@
   },
   "plt": {
     "name": "Plasma Turret",
+    "description": "This is an Ancient Tech; it can only be added to a single Ship Blueprint slot, and then it is exhausted. During the Combat Phase, Plasma Turrets roll 2 orange dice. Each die deals 2 hits to a single target if 1) the orange die rolls a Direct Hit, or 2) if the orange die result + total Computers - total Shields of the target ship = 6 or greater. Each Plasma Turret requires 3 Energy. ",
     "range": 0,
     "speed": 0,
     "nrg_use": 3,
@@ -389,6 +413,7 @@
   },
   "fud": {
     "name": "Fusion Drive",
+    "description": "Requires Fusion Drive Technology. Each Fusion Drive allows ships to Move into up to 2 systems during a single Move Activation. Each Fusion Drive also adds +2 to the Ship's Initiative value during Combat; i.e., the ship also shoots faster. Each Fusion Drive requires 2 Energy.",
     "range": 2,
     "speed": 2,
     "nrg_use": 2,
@@ -404,6 +429,7 @@
   },
   "nud": {
     "name": "Nuclear Drive",
+    "description": "This is a basic ship part available to all species. Each Nuclear Drive allows ships to Move into 1 systems during a single Move Activation. Each Nuclear Drive also adds +1 to the Ship's Initiative value during Combat; i.e., the ship also shoots faster. Each Nuclear Drive requires 1 Energy.",
     "range": 1,
     "speed": 1,
     "nrg_use": 1,
@@ -434,6 +460,7 @@
   },
   "tad": {
     "name": "Tachyon Drive",
+    "description": "Requires Tachyon Drive Technology. Each Tachyon Drives allows ships to Move into up to 3 systems during a single Move Activation. Each Tachyon Drive also adds +3 to the Ship's Initiative value during Combat; i.e., the ship also shoots faster. Each Tachyon Drive requires 3 Energy.",
     "range": 3,
     "speed": 3,
     "nrg_use": 3,
@@ -449,6 +476,7 @@
   },
   "trd": {
     "name": "Transition Drive",
+    "description": "Requires Transition Drive Technology. Each Transition Drive allows ships to Move into up to 3 systems during a single Move Activation. Transition Drives do not require Energy.",
     "range": 3,
     "speed": 0,
     "nrg_use": 0,
@@ -464,6 +492,7 @@
   },
   "hul": {
     "name": "Hull",
+    "description": "This is a basic ship part available to all species. A Hull panel can absorb 1 hit during the Combat Phase.",
     "range": 0,
     "speed": 0,
     "nrg_use": 0,
@@ -479,6 +508,7 @@
   },
   "cof": {
     "name": "Conifold Field",
+    "description": "Requires Conifold Field Technology. Conifold field panels can each absorb up to 3 hits during the Combat phase. Each Conifold Field panel requires 2 Energy.",
     "range": 0,
     "speed": 0,
     "nrg_use": 2,
@@ -494,6 +524,7 @@
   },
   "imh": {
     "name": "Improved Hull",
+    "description": "Requires Improved Hull Technology. Improved Hull panels can each absorb up to 2 hits during the Combat phase.",
     "range": 0,
     "speed": 0,
     "nrg_use": 0,
@@ -509,6 +540,7 @@
   },
   "seh": {
     "name": "Sentient Hull",
+    "description": "Requires Sentient Hull Technology. Sentient Hull panels can each absorb up to 1 hit during the Combat Phase. Sentient Hull panels also add +1 to the value of dice rolled during the Combat Phase (like an Electron Computer).",
     "range": 0,
     "speed": 0,
     "nrg_use": 0,
@@ -524,6 +556,7 @@
   },
   "flm": {
     "name": "Flux Missile",
+    "description": "Requires Flux Missile Technology. A Flux Missile box rolls two dice at the beginning of Combat Phase during the Fire Missiles step. Each Flux Missile deals 1 hit if 1) the yellow die rolls a Direct Hit, or 2) if the yellow die result + total Computers - total Shields of the target ship = 6 or greater. Does not fire during the Repeated Engagement Rounds.",
     "range": 0,
     "speed": 1,
     "nrg_use": 0,
@@ -542,6 +575,7 @@
   },
   "plm": {
     "name": "Plasma Missile",
+    "description": "A Plasma Missile box rolls two dice at the beginning of Combat Phase during the Fire Missiles step. Each Plasma Missile deals 2 hits if 1) the orange die rolls a Direct Hit, or 2) if the orange die result + total Computers - total Shields of the target ship = 6 or greater. Does not fire during the Repeated Engagement Rounds. Each Plasma Missile box requires 1 Energy.",
     "range": 0,
     "speed": 0,
     "nrg_use": 1,
@@ -560,6 +594,7 @@
   },
   "abs": {
     "name": "Absorption Shield",
+    "description": "Requires Absorption Shield Technology. Reduces die rolls against this ship by 1, with no effect on Direct Hits. This shield also generates 4 Energy for the ship.",
     "range": 0,
     "speed": 0,
     "nrg_use": 0,
@@ -575,6 +610,7 @@
   },
   "gas": {
     "name": "Gauss Shield",
+    "description": "Requires Gauss Shield Technology. Reduces die rolls against this ship by 1, with no effect on Direct Hits.",
     "range": 0,
     "speed": 0,
     "nrg_use": 0,
@@ -590,6 +626,7 @@
   },
   "phs": {
     "name": "Phase Shield",
+    "description": "Requires Phase Shield Technology. Reduces die rolls against this ship by 2, with no effect on Direct Hits. Each Phase Shield requires 1 Energy.",
     "range": 0,
     "speed": 0,
     "nrg_use": 1,
@@ -605,6 +642,7 @@
   },
   "fus": {
     "name": "Fusion Source",
+    "description": "Requires Fusion Source Technology. Fusion Source generates 6 Energy for the ship.",
     "range": 0,
     "speed": 0,
     "nrg_use": 0,
@@ -620,6 +658,7 @@
   },
   "nus": {
     "name": "Nuclear Source",
+    "description": "This is a basic ship part available to all species. Nuclear Source generates 3 Energy for the ship.",
     "range": 0,
     "speed": 0,
     "nrg_use": 0,
@@ -635,6 +674,7 @@
   },
   "tas": {
     "name": "Tachyon Source",
+    "description": "Requires Tachyon Source Technology. Tachyon Source generates 9 Energy for the ship.",
     "range": 0,
     "speed": 0,
     "nrg_use": 0,
@@ -650,6 +690,7 @@
   },
   "zes": {
     "name": "Zero Point Source",
+    "description": "Requires Zero Point Source Technology. Zero Point Source generates 12 Energy for the ship.",
     "range": 0,
     "speed": 0,
     "nrg_use": 0,
