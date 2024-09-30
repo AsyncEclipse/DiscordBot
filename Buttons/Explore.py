@@ -50,6 +50,8 @@ class ExploreButtons:
                 if (
                     adjTile not in tilesViewed and
                     tile_orientation_index in game.get_gamestate()["board"][tile]["wormholes"] and
+                    str(adjTile) in game.get_gamestate()["board"] and
+                    "sector" in game.get_gamestate()["board"][str(adjTile)] and
                     "back" in game.get_gamestate()["board"][str(adjTile)]["sector"]
                 ):
                     if int(adjTile) > 299 and len(game.get_gamestate()[f"tile_deck_300"]) == 0:

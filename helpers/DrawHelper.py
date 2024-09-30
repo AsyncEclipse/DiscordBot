@@ -237,22 +237,50 @@ class DrawHelper:
             wormholeCode = ""
             closedpath = f"images/resources/masks/closed_wh_mask.png"
             openpath = f"images/resources/masks/open_wh_mask.png"
+            greenpath = f"images/resources/masks/green_open_wh_mask2.png"
+            blackpath = f"images/resources/masks/black_line.png"
             closed_mask = self.use_image(closedpath)
             open_mask = self.use_image(openpath)
+            green = self.use_image(greenpath)
+            black = self.use_image(blackpath)
+            configs = Properties()
+            with open("data/tileAdjacencies.properties", "rb") as f:
+                configs.load(f)
             if "wormholes" in tile:
                 for wormhole in tile["wormholes"]:
                     wormholeCode = wormholeCode+str(wormhole)
                 for i in range(6):
                     tile_orientation_index = (i + 6 + int(int(rotation) / 60)) % 6
                     if tile_orientation_index in tile["wormholes"]:
-                        tile_image.paste(open_mask, (154, 0), mask=open_mask)
+                        found = False
+                        for x,adjTile in enumerate(configs.get(position)[0].split(",")):
+                            if x==i and self.areTwoTilesAdjacent(position, adjTile, configs):
+                                tile_image.paste(green, (152, 0), mask=green)
+                                found = True
+                                break
+                        if not found:
+                            tile_image.paste(open_mask, (152, 0), mask=open_mask)
+                        
                     else:
-                        tile_image.paste(closed_mask, (154, 0), mask=closed_mask)
+                        tile_image.paste(closed_mask, (152, 0), mask=closed_mask)
+                        tile_image.paste(black, (80, 0), mask=black)
                     tile_image = tile_image.rotate(60)
                   #345, 299
 
             
             return tile_image
+    
+   
+    def areTwoTilesAdjacent(self, tile1, tile2, configs):
+
+        def is_adjacent(tile_a, tile_b):
+            for index, adjTile in enumerate(configs.get(tile_a)[0].split(",")):
+                tile_orientation_index = (index + 6 + int(int(self.gamestate["board"][tile_a]["orientation"]) / 60)) % 6
+                if adjTile == tile_b and "wormholes" in self.gamestate["board"][tile_a] and tile_orientation_index in self.gamestate["board"][tile_a]["wormholes"]:
+                    return True
+            return False
+
+        return is_adjacent(tile1, tile2) and is_adjacent(tile2, tile1)
 
     def display_techs(self):
         context = Image.new("RGBA", (2500, 470), (255, 255, 255, 0))

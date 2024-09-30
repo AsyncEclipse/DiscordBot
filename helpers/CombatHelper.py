@@ -63,7 +63,18 @@ class Combat:
                     ship = PlayerShip(game.gamestate["players"][player], type)
                     ships.append((ship.speed, type))
         sorted_ships = sorted(ships, key=lambda x: x[0], reverse=True)  
-        return sorted_ships
+        sorted_ships_grouped = []
+        seen_ships = []
+        for ship in sorted_ships:
+            if ship[1] not in seen_ships:
+                seen_ships.append(ship[1])
+                amount = 0
+                for ship2 in sorted_ships:
+                    if ship[1]==ship2[1]:
+                        amount += 1
+                sorted_ships_grouped.append((ship[0], ship[1], amount))
+            
+        return sorted_ships_grouped
     
     @staticmethod
     def doesCombatantHaveMissiles(game:GamestateHelper, colorOrAI:str, playerShipsList):
@@ -174,14 +185,16 @@ class Combat:
                     player = game.get_player_from_color(colorOrAI)
                     shipModel = PlayerShip(game.gamestate["players"][player], ship[1])
                 dice = shipModel.dice
-                msg = name + " rolled the following with their "+Combat.translateShipAbrToName(ship[1])+":\n"
+                msg = name + " rolled the following with their "+str(ship[2])+" "+Combat.translateShipAbrToName(ship[1])+"(s):\n"
                 dieFiles = []
-                for die in dice:
-                    random_number = random.randint(1, 6)
-                    msg +=str(random_number)+" "
-                    dieFiles.append(drawing.get_file("images/resources/components/dice_faces/dice_"+Combat.translateColorToName(die)+"_"+str(random_number)+".png"))
+                for x in range(ship[2]):
+                    for die in dice:
+                        random_number = random.randint(1, 6)
+                        num = str(random_number).replace("1","Miss").replace("6",":boom:")
+                        msg +=num+" "
+                        dieFiles.append(drawing.get_file("images/resources/components/dice_faces/dice_"+Combat.translateColorToName(die)+"_"+str(random_number)+".png"))
                 if shipModel.computer > 0:
-                    msg = msg + "\nThe ship has a +"+str(shipModel.computer)+" computer"
+                    msg = msg + "\nThis ship type has a +"+str(shipModel.computer)+" computer"
                 await interaction.channel.send(msg,files=dieFiles)
     @staticmethod
     async def rollMissiles(game:GamestateHelper, buttonID:str, interaction:discord.Interaction):

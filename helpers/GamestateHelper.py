@@ -274,12 +274,17 @@ class GamestateHelper:
         return minNum
 
     def add_pop(self, pop_list, position, playerID):
+        neutralPop = 0
         for i in pop_list:
             length = len(self.gamestate["board"][position][i])
             if self.gamestate["board"][position][i][0]+1 <= length:
                 self.gamestate["board"][position][i][0] = self.gamestate["board"][position][i][0]+1
+            if "neutral" not in i and "orbital" not in i:    
                 self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] = self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"]-1
+            else: 
+                neutralPop += 1
         self.update()
+        return neutralPop
     def remove_pop(self, pop_list, position, playerID):
         neutralPop = 0
         for i in pop_list:

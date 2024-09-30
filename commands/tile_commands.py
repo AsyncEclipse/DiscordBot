@@ -140,7 +140,13 @@ class TileCommands(commands.GroupCog, name="tile"):
         process_pop("orbital", orbital)  
 
         if added_pop:  
-            game.add_pop(added_pop, tile_position,playerID)  
+            neutralPop = game.add_pop(added_pop, tile_position,playerID)  
+            for x in range(neutralPop):
+                view = View()
+                view.add_item(Button(label="Material", style=discord.ButtonStyle.gray, custom_id=f"FCID{p['color']}_reducePopFor_material"))
+                view.add_item(Button(label="Science", style=discord.ButtonStyle.gray, custom_id=f"FCID{p['color']}_reducePopFor_science"))
+                view.add_item(Button(label="Money", style=discord.ButtonStyle.gray, custom_id=f"FCID{p['color']}_reducePopFor_money"))
+                await interaction.channel.send( f"{p['player_name']} choose what type of cube to put on the neutral planet", view=view)
         if removed_pop:  
             neutralPop = game.remove_pop(removed_pop, tile_position,playerID)  
             if neutralPop > 0:
