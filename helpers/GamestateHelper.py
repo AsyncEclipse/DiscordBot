@@ -509,11 +509,11 @@ class GamestateHelper:
     
     def formRelationsBetween(self, player1, player2):
         for x,tile in enumerate(player1["reputation_track"]):
-            if tile == "amb" or tile == "mixed":
+            if isinstance(tile, str) and (tile == "amb" or tile == "mixed"):
                 player1["reputation_track"][x]=tile+"-"+self.get_short_faction_name(player2["name"])+"-"+player2["color"]
                 break
         for x,tile in enumerate(player2["reputation_track"]):
-            if tile == "amb" or tile == "mixed":
+            if isinstance(tile, str) and (tile == "amb" or tile == "mixed"):
                 player2["reputation_track"][x]=tile+"-"+self.get_short_faction_name(player1["name"])+"-"+player1["color"]
                 break
 
