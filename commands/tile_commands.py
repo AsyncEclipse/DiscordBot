@@ -143,9 +143,9 @@ class TileCommands(commands.GroupCog, name="tile"):
             neutralPop = game.add_pop(added_pop, tile_position,playerID)  
             for x in range(neutralPop):
                 view = View()
-                view.add_item(Button(label="Material", style=discord.ButtonStyle.gray, custom_id=f"FCID{p['color']}_reducePopFor_material"))
-                view.add_item(Button(label="Science", style=discord.ButtonStyle.gray, custom_id=f"FCID{p['color']}_reducePopFor_science"))
-                view.add_item(Button(label="Money", style=discord.ButtonStyle.gray, custom_id=f"FCID{p['color']}_reducePopFor_money"))
+                view.add_item(Button(label="Material", style=discord.ButtonStyle.gray, custom_id=f"FCID{player_color}_reducePopFor_material"))
+                view.add_item(Button(label="Science", style=discord.ButtonStyle.gray, custom_id=f"FCID{player_color}_reducePopFor_science"))
+                view.add_item(Button(label="Money", style=discord.ButtonStyle.gray, custom_id=f"FCID{player_color}_reducePopFor_money"))
                 await interaction.channel.send( f"{p['player_name']} choose what type of cube to put on the neutral planet", view=view)
         if removed_pop:  
             neutralPop = game.remove_pop(removed_pop, tile_position,playerID)  
@@ -154,7 +154,7 @@ class TileCommands(commands.GroupCog, name="tile"):
                     view=View()
                     planetTypes = ["money","science","material"]
                     for planetT in planetTypes:
-                        view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{color}_addCubeToTrack_"+planetT))
+                        view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player_color}_addCubeToTrack_"+planetT))
                     await interaction.channel.send( f"A cube with no set track was removed, please tell the bot what track it should go back to", view=view)
 
         if influence != None:

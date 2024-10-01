@@ -86,8 +86,8 @@ class PopulationButtons:
                     view = View()
                     for typeP in optionsForPop:
                         view.add_item(Button(label=typeP.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_fillPopulation_{tile}_{originalPop}_{num}_{typeP}"))
-                    await interaction.message.delete()
                     await interaction.channel.send(f"{interaction.user.mention}, choose which type of resource the population should be.", view=view)
+                    await interaction.message.delete()
                     return
                 else:
                     typeOfPop = optionsForPop[0]
