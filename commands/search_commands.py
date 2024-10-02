@@ -1,0 +1,48 @@
+import discord
+
+class SearchCommands(commands.GroupCog, name="search"):
+    def __init__(self, bot):
+        self.bot = bot
+
+    tech_choices = [
+        app_commands.Choice(name="Absorption Shield", value="abs"),
+        app_commands.Choice(name="Advanced Economy", value="ade"),
+        app_commands.Choice(name="Advanced Labs", value="adl"),
+        app_commands.Choice(name="Advanced Mining", value="adm"),
+        app_commands.Choice(name="Advanced Robotics", value="adr"),
+        app_commands.Choice(name="Antimatter Cannon", value="anc"),
+        app_commands.Choice(name="Ancient Labs", value="anl"),
+        app_commands.Choice(name="Antimatter Splitter", value="ans"),
+        app_commands.Choice(name="Artifact Key", value="ark"),
+        app_commands.Choice(name="Cloaking Device", value="cld"),
+        app_commands.Choice(name="Conifold Field", value="cof"),
+        app_commands.Choice(name="Flux Missile", value="flm"),
+        app_commands.Choice(name="Fusion Drive", value="fud"),
+        app_commands.Choice(name="Fusion Source", value="fus"),
+        app_commands.Choice(name="Gauss Shield", value="gas"),
+        app_commands.Choice(name="Gluon Computer", value="glc"),
+        app_commands.Choice(name="Improved Hull", value="imh"),
+        app_commands.Choice(name="Improved Logistics", value="iml"),
+        app_commands.Choice(name="Metasynthesis", value="met"),
+        app_commands.Choice(name="Monolith", value="mon"),
+        app_commands.Choice(name="Nano Robots", value="nar"),
+        app_commands.Choice(name="Neutron Absorber", value="nea"),
+        app_commands.Choice(name="Neutron Bombs", value="neb"),
+        app_commands.Choice(name="Orbital", value="orb"),
+        app_commands.Choice(name="Phase Shield", value="phs"),
+        app_commands.Choice(name="Pico Modulator", value="pim"),
+        app_commands.Choice(name="Plasma Cannon", value="plc"),
+        app_commands.Choice(name="Plasma Missile", value="plm"),
+        app_commands.Choice(name="Positron Computer", value="poc"),
+        app_commands.Choice(name="Quantum Grid", value="qug"),
+        app_commands.Choice(name="Rift Cannon", value="rican"),
+        app_commands.Choice(name="Sentient Hull", value="seh"),
+        app_commands.Choice(name="Soliton Cannon", value="socan"),
+        app_commands.Choice(name="Star Base", value="stb"),
+        app_commands.Choice(name="Tachyon Drive", value="tad"),
+        app_commands.Choice(name="Tachyon Source", value="tas"),
+        app_commands.Choice(name="Transition Drive", value="trd"),
+        app_commands.Choice(name="Warp Portal", value="wap"),
+        app_commands.Choice(name="Wormhole Generator", value="wog"),
+        app_commands.Choice(name="Zero Point Source", value="zes"),
+    ]
