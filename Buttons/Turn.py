@@ -29,13 +29,18 @@ class TurnButtons:
 
     @staticmethod
     async def restartTurn(player, game:GamestateHelper, interaction: discord.Interaction):
-        game.backUpToLastSaveFile()
-        game = GamestateHelper(interaction.channel)
-        player = game.get_player(interaction.user.id)  
-        view = TurnButtons.getStartTurnButtons(game, player)
-        await interaction.channel.send(interaction.user.mention+" has chosen to back up to last start of turn.")
-        await interaction.channel.send(player["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(player),view=view)
-        await interaction.message.delete()
+        try:  
+            await interaction.message.delete()  
+            game.backUpToLastSaveFile()
+            game = GamestateHelper(interaction.channel)
+            player = game.get_player(interaction.user.id)  
+            view = TurnButtons.getStartTurnButtons(game, player)
+            await interaction.channel.send(interaction.user.mention+" has chosen to back up to last start of turn.")
+            await interaction.channel.send(player["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(player),view=view)
+        except discord.NotFound: 
+            await interaction.channel.send("Ignoring double press")
+            # Avoid a double backup by deleting the message first and doing nothing if it was already deleted
+        
         
 
 
