@@ -212,6 +212,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         player_helper = PlayerHelper(interaction.user.id, player)
         await interaction.response.defer(thinking=True, ephemeral=True)
         await ReputationButtons.resolveGainingReputation(game, num_options,interaction, player_helper)
+        await interaction.channel.send(interaction.user.name + " drew "+ str(num_options)+ " reputation tiles")
 
     @app_commands.command(name="show_player_ships")
     async def show_player_ships(self, interaction: discord.Interaction, player: Optional[discord.Member]=None):
