@@ -1,10 +1,16 @@
 import discord
+import json
+from discord.ext import commands
+from discord import app_commands
+from discord.ui import View, Button
+from helpers.GamestateHelper import GamestateHelper
+from helpers.DrawHelper import DrawHelper
 
 class SearchCommands(commands.GroupCog, name="search"):
     def __init__(self, bot):
         self.bot = bot
 
-    tech_choices = [
+    tech_choices_a_n = [
         app_commands.Choice(name="Absorption Shield", value="abs"),
         app_commands.Choice(name="Advanced Economy", value="ade"),
         app_commands.Choice(name="Advanced Labs", value="adl"),
@@ -27,7 +33,9 @@ class SearchCommands(commands.GroupCog, name="search"):
         app_commands.Choice(name="Monolith", value="mon"),
         app_commands.Choice(name="Nano Robots", value="nar"),
         app_commands.Choice(name="Neutron Absorber", value="nea"),
-        app_commands.Choice(name="Neutron Bombs", value="neb"),
+        app_commands.Choice(name="Neutron Bombs", value="neb")
+        ]
+    tech_choices_o_z = [
         app_commands.Choice(name="Orbital", value="orb"),
         app_commands.Choice(name="Phase Shield", value="phs"),
         app_commands.Choice(name="Pico Modulator", value="pim"),
@@ -46,3 +54,45 @@ class SearchCommands(commands.GroupCog, name="search"):
         app_commands.Choice(name="Wormhole Generator", value="wog"),
         app_commands.Choice(name="Zero Point Source", value="zes"),
     ]
+
+    @app_commands.command(name="upgrade_reference")
+    async def upgrade_reference(self, interaction: discord.Interaction):
+        await interaction.response.defer(thinking=True, ephemeral=True)
+        image = DrawHelper.show_ref("upgrade")
+        await interaction.followup.send(file=image, ephemeral=True)
+
+    @app_commands.command(name="tech_a_to_n", description="Tech information A through N")
+    @app_commands.choices(tech_choice=tech_choices_a_n)
+    async def tech_a_to_n(self, interaction: discord.Interaction, tech_choice: app_commands.Choice[str]):
+        with open("data/techs.json", "r") as f:
+            data = json.load(f)
+        game = GamestateHelper(interaction.channel)
+        drawing = DrawHelper(game.gamestate)
+        tech_info = data[tech_choice.value]
+        await interaction.response.defer(thinking=True)
+        image = drawing.show_specific_tech(tech_choice.value)
+        await interaction.followup.send(f"{tech_info['name']}"
+                                        f"\n> Base Cost: {tech_info['base_cost']}"
+                                        f"\n> Min Cost: {tech_info['min_cost']}"
+                                        f"\n> Tech track: {tech_info['track']}"
+                                        f"\n> Total number: {tech_info['num']}"
+                                        f"\n> Description: {tech_info['description']}",
+                                        file=image)
+
+    @app_commands.command(name="tech_o_to_z", description="Tech information O through Z")
+    @app_commands.choices(tech_choice=tech_choices_o_z)
+    async def tech_o_to_z(self, interaction: discord.Interaction, tech_choice: app_commands.Choice[str]):
+        with open("data/techs.json", "r") as f:
+            data = json.load(f)
+        game = GamestateHelper(interaction.channel)
+        drawing = DrawHelper(game.gamestate)
+        tech_info = data[tech_choice.value]
+        await interaction.response.defer(thinking=True)
+        image = drawing.show_specific_tech(tech_choice.value)
+        await interaction.followup.send(f"{tech_info['name']}"
+                                        f"\n> Base Cost: {tech_info['base_cost']}"
+                                        f"\n> Min Cost: {tech_info['min_cost']}"
+                                        f"\n> Tech track: {tech_info['track']}"
+                                        f"\n> Total number: {tech_info['num']}"
+                                        f"\n> Description: {tech_info['description']}",
+                                        file=image)
