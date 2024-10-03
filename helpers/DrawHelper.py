@@ -891,3 +891,17 @@ class DrawHelper:
         bytes.seek(0)
         file = discord.File(bytes, filename="reference_image.png")
         return file
+
+    @staticmethod
+    def show_tech_ref_image(tech_name, tech_type):
+        context = Image.new("RGBA", (259, 257), (255, 255, 255, 0))
+        fixed_name = tech_name.lower().replace(" ", "_")
+        filepath = f"images/resources/components/technology/{tech_type}/tech_{fixed_name}.png"
+        if not os.path.exists(filepath):
+            filepath = f"images/resources/components/technology/rare/tech_{fixed_name}.png"
+        tech_image = Image.open(filepath)
+        context.paste(tech_image, (0, 0), mask=tech_image)
+        bytes_io = BytesIO()
+        context.save(bytes_io, format="PNG")
+        bytes_io.seek(0)
+        return discord.File(bytes_io, filename="tech_image.png")

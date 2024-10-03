@@ -84,11 +84,9 @@ class SearchCommands(commands.GroupCog, name="search"):
     async def tech_o_to_z(self, interaction: discord.Interaction, tech_choice: app_commands.Choice[str]):
         with open("data/techs.json", "r") as f:
             data = json.load(f)
-        game = GamestateHelper(interaction.channel)
-        drawing = DrawHelper(game.gamestate)
         tech_info = data[tech_choice.value]
         await interaction.response.defer(thinking=True)
-        image = drawing.show_specific_tech(tech_choice.value)
+        image = DrawHelper.show_tech_ref_image(tech_choice.name, tech_choice.value)
         await interaction.followup.send(f"{tech_info['name']}"
                                         f"\n> Base Cost: {tech_info['base_cost']}"
                                         f"\n> Min Cost: {tech_info['min_cost']}"
