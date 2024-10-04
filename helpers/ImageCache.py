@@ -49,7 +49,7 @@ class ImageCacheHelper:
                 return (895, 500)
         elif "all_boards" in folder.lower():  
             if "popcube" in filename.lower():
-                return (30,30)
+                return (35,35)
             elif "influence_disc" in filename.lower():
                 return (40,40)
             elif "reputation" in filename.lower():
@@ -69,7 +69,10 @@ class ImageCacheHelper:
                 else:
                     return (110,110)
             else:
-                return (70,70) 
+                if "damage" in filename.lower():
+                    return (15,15) 
+                else:
+                    return (70,70) 
         elif "discovery_tiles" in folder.lower():  
             return (80, 80)  
         elif "upgrades" in folder.lower():  

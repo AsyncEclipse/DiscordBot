@@ -17,7 +17,7 @@ class MoveButtons:
         tile_map = game.get_gamestate()["board"]
         tiles = []
         for tile in tile_map:
-            if ("player_ships" in tile_map[tile] and ExploreButtons.doesPlayerHaveUnpinnedShips(player,tile_map[tile]["player_ships"])):
+            if ("player_ships" in tile_map[tile] and ExploreButtons.doesPlayerHaveUnpinnedShips(player,tile_map[tile]["player_ships"],game)):
                 tiles.append(tile)
         return tiles
     @staticmethod
@@ -57,7 +57,7 @@ class MoveButtons:
             visited.add(pos)
             player_ships = tile_map[pos]["player_ships"][:]
             player_ships.append(f"{player['color']}-cruiser") #adding phantom ship so I can reuse a method
-            if not ExploreButtons.doesPlayerHaveUnpinnedShips(player, player_ships):
+            if not ExploreButtons.doesPlayerHaveUnpinnedShips(player, player_ships, game):
                 return
 
             for adjTile in configs.get(pos)[0].split(","):

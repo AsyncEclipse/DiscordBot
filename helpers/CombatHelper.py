@@ -3,6 +3,7 @@ import random
 
 import discord
 from discord.ui import View, Button
+from Buttons.Reputation import ReputationButtons
 from helpers.DrawHelper import DrawHelper
 from helpers.GamestateHelper import GamestateHelper
 from helpers.ShipHelper import AI_Ship, PlayerShip
@@ -102,6 +103,33 @@ class Combat:
                 sorted_ships_grouped.append((ship[0], ship[1], amount))
             
         return sorted_ships_grouped
+    @staticmethod
+    def getOpponentUnitsThatCanBeHit(game:GamestateHelper, colorOrAI:str,playerShipsList, dieVal:int, computerVal:int, pos:str):
+        players = Combat.findPlayersInTile(game, pos)
+        opponent = ""
+        hittableShips = []
+        if len(players) < 2:
+            return hittableShips
+        if colorOrAI == players[len(players)-1]:
+            opponent = players[len(players)-2]
+        else:
+            opponent = players[len(players)-1]
+        
+        opponentShips = Combat.getCombatantShipsBySpeed(game, opponent, playerShipsList)
+        for ship in opponentShips:
+            if opponent == "ai":
+                shipModel = AI_Ship(ship[1], game.gamestate["advanced_ai"])
+            else:
+                player = game.get_player_from_color(opponent)
+                shipModel = PlayerShip(game.gamestate["players"][player], ship[1])
+            shieldVal = shipModel.shield
+            if dieVal == 6 or dieVal + computerVal - shieldVal > 5:
+                ship_type = ship[1]
+                if "-" in ship_type:
+                    temp = ship_type.split("-")
+                    ship = temp[1]
+                hittableShips.append(opponent+"-"+ship.replace("adv",""))
+        return hittableShips
     
     @staticmethod
     def doesCombatantHaveMissiles(game:GamestateHelper, colorOrAI:str, playerShipsList):
@@ -143,9 +171,9 @@ class Combat:
             defenderSpeeds = Combat.getCombatantSpeeds(game, defender, player_ships)
             attackerSpeeds = Combat.getCombatantSpeeds(game, attacker, player_ships)
             if Combat.doesCombatantHaveMissiles(game, defender, player_ships):
-                view.add_item(Button(label="(Defender) Roll Missiles", style=discord.ButtonStyle.green, custom_id=f"rollMissiles_{pos}_{defender}"))
+                view.add_item(Button(label="(Defender) Roll Missiles", style=discord.ButtonStyle.green, custom_id=f"rollDice_{pos}_{defender}_99"))
             if Combat.doesCombatantHaveMissiles(game, attacker, player_ships):
-                view.add_item(Button(label="(Attacker) Roll Missiles", style=discord.ButtonStyle.red, custom_id=f"rollMissiles_{pos}_{attacker}"))
+                view.add_item(Button(label="(Attacker) Roll Missiles", style=discord.ButtonStyle.red, custom_id=f"rollDice_{pos}_{defender}_99"))
             for i in range(20,-1,-1):
                 if i in defenderSpeeds:
                     checker = ""
@@ -210,7 +238,7 @@ class Combat:
         ships = Combat.getCombatantShipsBySpeed(game, colorOrAI, player_ships)
         drawing = DrawHelper(game.gamestate)
         for ship in ships:
-            if ship[0] == speed:
+            if ship[0] == speed or speed == 99:
                 name = interaction.user.mention
                 if colorOrAI == "ai":
                     shipModel = AI_Ship(ship[1], game.gamestate["advanced_ai"])
@@ -219,44 +247,146 @@ class Combat:
                     player = game.get_player_from_color(colorOrAI)
                     shipModel = PlayerShip(game.gamestate["players"][player], ship[1])
                 dice = shipModel.dice
-                msg = name + " rolled the following with their "+str(ship[2])+" "+Combat.translateShipAbrToName(ship[1])+"(s):\n"
+                missiles = ""
+                nonMissiles = " on initiative "+str(speed)
+                if speed == 99:
+                    dice = shipModel.missile
+                    missiles = "missiles "
+                    nonMissiles =""
+                
+                msg = name + " rolled the following "+missiles+"with their "+str(ship[2])+" "+Combat.translateShipAbrToName(ship[1])+"(s)"+nonMissiles+":\n"
                 dieFiles = []
+                dieNums = []
                 for x in range(ship[2]):
                     for die in dice:
                         random_number = random.randint(1, 6)
                         num = str(random_number).replace("1","Miss").replace("6",":boom:")
                         msg +=num+" "
                         dieFiles.append(drawing.use_image("images/resources/components/dice_faces/dice_"+Combat.translateColorToName(die)+"_"+str(random_number)+".png"))
+                        dieNums.append([random_number,Combat.translateColorToDamage(die)])
                 if shipModel.computer > 0:
                     msg = msg + "\nThis ship type has a +"+str(shipModel.computer)+" computer"
-                await interaction.channel.send(msg,file=drawing.append_images(dieFiles))
+                if(len(dice) > 0):
+                    await interaction.channel.send(msg,file=drawing.append_images(dieFiles))
+                    oldNumPeeps = len(Combat.findPlayersInTile(game, pos))
+                    for die in dieNums:
+                        dieNum = die[0]
+                        dieDam = die[1]
+                        if dieNum == 1 or dieNum + shipModel.computer < 6 or oldNumPeeps > len(Combat.findPlayersInTile(game, pos)):
+                            continue
+                        hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships, dieNum, shipModel.computer, pos)
+                        if len(hittableShips) > 0:
+                            if len(hittableShips) > 1:
+                                if colorOrAI != "ai":
+                                    msg = interaction.user.mention + " choose what ship to hit with the die that rolled a "+str(dieNum)+". The bot has calculated that you can hit these ships"
+                                    view = View()
+                                    for ship in hittableShips:
+                                        shipType = ship.split("-")[1]
+                                        shipOwner = ship.split("-")[0]
+                                        label = "Hit "+Combat.translateShipAbrToName(shipType)
+                                        buttonID = "FCID"+colorOrAI+"_assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(dieDam)
+                                        view.add_item(Button(label=label, style=discord.ButtonStyle.red, custom_id=buttonID))
+                                    await interaction.channel.send(msg,view=view)
+                                else:
+                                    ship = hittableShips[0]
+                                    oldShipVal = 0
+                                    ableToKillSomething = False
+                                    for option in hittableShips:
+                                        damageOnShip = game.add_damage(option, pos, 0)
+                                        shipType = option.split("-")[1]
+                                        shipOwner = option.split("-")[0]
+                                        player = game.get_player_from_color(shipOwner)
+                                        shipModel = PlayerShip(game.gamestate["players"][player], shipType)
+                                        if ableToKillSomething:
+                                            if dieDam +damageOnShip> shipModel.hull and shipModel.cost > oldShipVal:
+                                                oldShipVal = shipModel.cost
+                                                ship = option
+                                        else:
+                                            if dieDam +damageOnShip> shipModel.hull:
+                                                oldShipVal = shipModel.cost
+                                                ship = option
+                                                ableToKillSomething = True
+                                            else:
+                                                if shipModel.cost > oldShipVal:
+                                                    oldShipVal = shipModel.cost
+                                                    ship = option
+
+                                    buttonID = "assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(dieDam)
+                                    await Combat.assignHitTo(game, buttonID, interaction, False)
+                            else:
+                                ship = hittableShips[0]
+                                buttonID = "assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(dieDam)
+                                await Combat.assignHitTo(game, buttonID, interaction, False)
+
     @staticmethod
-    async def rollMissiles(game:GamestateHelper, buttonID:str, interaction:discord.Interaction):
+    async def assignHitTo(game:GamestateHelper, buttonID:str, interaction:discord.Interaction, button:bool):
         pos = buttonID.split("_")[1]
         colorOrAI = buttonID.split("_")[2]
-        tile_map = game.get_gamestate()["board"]
-        player_ships = tile_map[pos]["player_ships"][:]
-        ships = Combat.getCombatantShipsBySpeed(game, colorOrAI, player_ships)
-        drawing = DrawHelper(game.gamestate)
-        for ship in ships:
-            name = interaction.user.mention
-            if colorOrAI == "ai":
-                shipModel = AI_Ship(ship[1], game.gamestate["advanced_ai"])
-                name = "The AI"
+        ship = buttonID.split("_")[3]
+        dieNum = buttonID.split("_")[4]
+        dieDam = buttonID.split("_")[5]
+        shipType = ship.split("-")[1]
+        shipOwner = ship.split("-")[0]
+        if shipOwner == "ai":
+            shipModel = AI_Ship(shipType, game.gamestate["advanced_ai"])
+        else:
+            player = game.get_player_from_color(shipOwner)
+            shipModel = PlayerShip(game.gamestate["players"][player], shipType)
+        damage = game.add_damage(ship, pos, int(dieDam))
+        if colorOrAI != "ai":
+            msg = interaction.user.mention + " dealt "+dieDam+" damage to a "+Combat.translateShipAbrToName(shipType)+" with a die that rolled a "+str(dieNum)
+        else:
+            msg = "The AI dealt "+dieDam+" damage to a "+Combat.translateShipAbrToName(shipType)+" with a die that rolled a "+str(dieNum)
+        msg = msg + ". The damaged ship has "+str(shipModel.hull)+" hull, and so has "+str((shipModel.hull-damage+1))+" hp left."
+        await interaction.channel.send(msg)
+        if shipModel.hull < damage:
+            oldLength = len(Combat.findPlayersInTile(game, pos))
+            player1 = ""
+            player2 = ""
+            if oldLength > 1:
+                player1 = Combat.findPlayersInTile(game, pos)[oldLength-2]
+                player2 = Combat.findPlayersInTile(game, pos)[oldLength-1]
+            game.destroy_ship(ship, pos, colorOrAI)
+            if colorOrAI != "ai":
+                msg = interaction.user.mention + " destroyed the "+Combat.translateShipAbrToName(shipType)+" due to the damage exceeding the ships hull"
             else:
-                player = game.get_player_from_color(colorOrAI)
-                shipModel = PlayerShip(game.gamestate["players"][player], ship[1])
-            dice = shipModel.missile
-            if(len(dice) > 0):
-                msg = name + " rolled the following missiles with their "+Combat.translateShipAbrToName(ship[1])+":\n"
-                dieFiles = []
-                for die in dice:
-                    random_number = random.randint(1, 6)
-                    msg +=str(random_number)+" "
-                    dieFiles.append(drawing.use_image("images/resources/components/dice_faces/dice_"+Combat.translateColorToName(die)+"_"+str(random_number)+".png"))
-                if shipModel.computer > 0:
-                    msg = msg + "\nThe ship has a +"+str(shipModel.computer)+" computer"
-                await interaction.channel.send(msg,file=drawing.append_images(dieFiles))
+                msg = "The AI destroyed the "+Combat.translateShipAbrToName(shipType)+" due to the damage exceeding the ships hull"
+            await interaction.channel.send(msg)
+            if len(Combat.findPlayersInTile(game, pos)) < 2 and len(Combat.findPlayersInTile(game, pos)) != oldLength:
+                actions_channel = discord.utils.get(interaction.guild.channels, name=game.game_id+"-actions") 
+                if actions_channel is not None and isinstance(actions_channel, discord.TextChannel):
+                    await actions_channel.send("Combat in tile "+pos+" has concluded. There are "+str(len(Combat.findTilesInConflict(game)))+" tiles left in conflict")
+            if len(Combat.findPlayersInTile(game, pos)) != oldLength:
+                players = [player1, player2]
+                for playerColor in players:
+                    if playerColor == "ai":
+                        continue
+                    player = game.getPlayerObjectFromColor(playerColor)
+                    count = str(game.getReputationTilesToDraw(pos, playerColor))
+                    view = View()
+                    label = "Draw "+count+" Reputation"
+                    buttonID = "FCID"+playerColor+"_drawReputation_"+count
+                    view.add_item(Button(label=label, style=discord.ButtonStyle.green, custom_id=buttonID))
+                    label = "Decline"
+                    buttonID = "FCID"+playerColor+"_deleteMsg"
+                    view.add_item(Button(label=label, style=discord.ButtonStyle.red, custom_id=buttonID))
+                    msg = player["player_name"] + " the bot believes you should draw "+count+" reputation tiles here. Click to do so or press decline if the bot messed up."
+                    await interaction.channel.send(msg, view=view)
+                if len(Combat.findPlayersInTile(game, pos)) > 1:
+                    drawing = DrawHelper(game.gamestate)
+                    await interaction.channel.send("Updated view",view = Combat.getCombatButtons(game, pos),file=drawing.board_tile_image_file(pos))
+                
+        if button:
+            await interaction.message.delete()
+
+
+    @staticmethod
+    async def drawReputation(game:GamestateHelper, buttonID:str, interaction:discord.Interaction, player_helper):
+        num_options = int(buttonID.split("_")[1])
+        await ReputationButtons.resolveGainingReputation(game, num_options,interaction, player_helper)
+        await interaction.channel.send(interaction.user.name + " drew "+ str(num_options)+ " reputation tiles")
+        await interaction.message.delete()
+
     @staticmethod
     async def refreshImage(game:GamestateHelper, buttonID:str, interaction:discord.Interaction):
         pos = buttonID.split("_")[1]
@@ -272,6 +402,15 @@ class Combat:
         if dieColor == "blue":
             return "soliton"
         return "ion"
+    @staticmethod
+    def translateColorToDamage(dieColor:str):
+        if dieColor == "red":
+            return 4
+        if dieColor == "orange":
+            return 2
+        if dieColor == "blue":
+            return 3
+        return 1
     @staticmethod
     def translateShipAbrToName(ship:str):
         if "-" in ship:

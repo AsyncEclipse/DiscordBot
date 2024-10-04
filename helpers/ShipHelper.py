@@ -12,6 +12,7 @@ class Ship:
         self.hull = 0
         self.repair = 0
         self.external = 0
+        self.cost = 0
 
     def build_ship_stats(self, ship_parts):
 
@@ -57,6 +58,7 @@ class PlayerShip(Ship):
         self.computer = player[f"base_{self.ship_type}_comp"]
         self.ship_parts = player[f"{self.ship_type}_parts"]
         self.build_ship_stats(self.ship_parts)
+        self.cost = player[f"cost_{self.ship_type}"]
 
 
     def getRange(self):
@@ -106,6 +108,8 @@ class AI_Ship(Ship):
         super().__init__()
         with open("data/AI_ships.json", "r") as f:
             AI_parts = json.load(f)
+        if "ai-" not in ship_type:
+            ship_type = "ai-"+ship_type
         if advanced == True:
             ship_parts = AI_parts[ship_type + "adv"]
         else:

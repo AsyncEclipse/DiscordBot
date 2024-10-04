@@ -81,7 +81,7 @@ class DiplomaticRelationsButtons:
         if type == "material":
             player_helper.adjust_material_cube(-1)
         game.update_player(player_helper)
-        await interaction.channel.send( f"{interaction.user.mention} put a {type} cube on the ambassador")
+        await interaction.channel.send( f"{interaction.user.mention} put a {type} cube down")
         await interaction.message.delete()
     
    
