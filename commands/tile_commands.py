@@ -146,7 +146,7 @@ class TileCommands(commands.GroupCog, name="tile"):
                 view.add_item(Button(label="Material", style=discord.ButtonStyle.gray, custom_id=f"FCID{player_color}_reducePopFor_material"))
                 view.add_item(Button(label="Science", style=discord.ButtonStyle.gray, custom_id=f"FCID{player_color}_reducePopFor_science"))
                 view.add_item(Button(label="Money", style=discord.ButtonStyle.gray, custom_id=f"FCID{player_color}_reducePopFor_money"))
-                await interaction.channel.send( f"{p['player_name']} choose what type of cube to put on the neutral planet", view=view)
+                await interaction.channel.send( f"Choose what type of cube to put on the neutral planet", view=view)
         if removed_pop:  
             neutralPop = game.remove_pop(removed_pop, tile_position,playerID)  
             if neutralPop > 0:
@@ -217,7 +217,7 @@ class TileCommands(commands.GroupCog, name="tile"):
     @app_commands.command(name="resolve_discovery_tile")
     async def resolve_discovery_tile(self, interaction: discord.Interaction, tile_position: str):
         game = GamestateHelper(interaction.channel)
-        await interaction.response.defer(thinking=False)
+        await interaction.response.defer(thinking = False)
         await DiscoveryTileButtons.exploreDiscoveryTile(game, tile_position, interaction,game.get_player(interaction.user.id))
 
     @app_commands.command(name="show")

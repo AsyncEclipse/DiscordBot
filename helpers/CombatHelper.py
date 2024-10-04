@@ -25,11 +25,29 @@ class Combat:
         return players
     
     @staticmethod
+    def findShipTypesInTile(game:GamestateHelper,pos:str):
+        tile_map = game.get_gamestate()["board"]
+        if "player_ships" not in tile_map[pos]:
+            return []
+        player_ships = tile_map[pos]["player_ships"][:]
+        ships = []
+        for ship in player_ships:
+            if "orb" in ship or "mon" in ship:
+                continue
+            shipType = ship.split("-")[1]
+            if shipType not in ships:
+                ships.append(shipType)
+        return ships
+    
+    @staticmethod
     def findTilesInConflict(game:GamestateHelper):
         tile_map = game.get_gamestate()["board"]
         tiles = []
         for tile in tile_map:
             if len(Combat.findPlayersInTile(game,tile)) > 1:
+                #Dont start combat between draco and ancients
+                if(len(Combat.findPlayersInTile(game,tile)) == 2 and "anc" in Combat.findShipTypesInTile(game,tile) and "Draco" in game.find_player_faction_name_from_color(Combat.findPlayersInTile(game,tile)[1])):
+                    continue
                 tiles.append((int(tile_map[tile]["sector"]),tile))
         sorted_tiles = sorted(tiles, key=lambda x: x[0], reverse=True)  
         return sorted_tiles
@@ -45,6 +63,15 @@ class Combat:
             thread = await message.create_thread(name=threadName)
             drawing = DrawHelper(game.gamestate)
             await thread.send(role.mention +"Combat will occur in this tile",view = Combat.getCombatButtons(game, tile[1]),file=drawing.board_tile_image_file(tile[1]))
+            drawing = DrawHelper(game.gamestate)
+            for player in Combat.findPlayersInTile(game, tile[1]):
+                if player != "ai":
+                    image = drawing.player_area(game.getPlayerObjectFromColor(player))
+                    file=drawing.show_player_ship_area(image)
+                    await thread.send(game.getPlayerObjectFromColor(player)["player_name"]+" ships look like this",file=file)
+                else:
+                    file = drawing.show_AI_stats()
+                    await thread.send("AI stats look like this",file=file)
         await channel.send("Please resolve the combats in the order they appeared")
     @staticmethod
     def getCombatantShipsBySpeed(game:GamestateHelper, colorOrAI:str, playerShipsList):
@@ -159,11 +186,18 @@ class Combat:
     async def removeThisUnit(game:GamestateHelper, customID:str, player, interaction:discord.Interaction):
         pos = customID.split("_")[1]
         unit =  customID.split("_")[2]
+        oldLength = len(Combat.findPlayersInTile(game, pos))
         owner = unit.split("-")[0]
         game.remove_units([unit],pos)
+        if owner == "ai":
+            owner = "AI"
         await interaction.channel.send(interaction.user.mention+" removed 1 "+owner+" "+Combat.translateShipAbrToName(unit))
         view = Combat.getRemovalButtons(game, pos, player)
         await interaction.message.edit(view=view)
+        if len(Combat.findPlayersInTile(game, pos)) < 2 and len(Combat.findPlayersInTile(game, pos)) != oldLength:
+            actions_channel = discord.utils.get(interaction.guild.channels, name=game.game_id+"-actions") 
+            if actions_channel is not None and isinstance(actions_channel, discord.TextChannel):
+                await actions_channel.send("Combat in tile "+pos+" has concluded. There are "+str(len(Combat.findTilesInConflict(game)))+" tiles left in conflict")
 
 
     @staticmethod
@@ -192,10 +226,10 @@ class Combat:
                         random_number = random.randint(1, 6)
                         num = str(random_number).replace("1","Miss").replace("6",":boom:")
                         msg +=num+" "
-                        dieFiles.append(drawing.get_file("images/resources/components/dice_faces/dice_"+Combat.translateColorToName(die)+"_"+str(random_number)+".png"))
+                        dieFiles.append(drawing.use_image("images/resources/components/dice_faces/dice_"+Combat.translateColorToName(die)+"_"+str(random_number)+".png"))
                 if shipModel.computer > 0:
                     msg = msg + "\nThis ship type has a +"+str(shipModel.computer)+" computer"
-                await interaction.channel.send(msg,files=dieFiles)
+                await interaction.channel.send(msg,file=drawing.append_images(dieFiles))
     @staticmethod
     async def rollMissiles(game:GamestateHelper, buttonID:str, interaction:discord.Interaction):
         pos = buttonID.split("_")[1]
@@ -219,10 +253,10 @@ class Combat:
                 for die in dice:
                     random_number = random.randint(1, 6)
                     msg +=str(random_number)+" "
-                    dieFiles.append(drawing.get_file("images/resources/components/dice_faces/dice_"+Combat.translateColorToName(die)+"_"+str(random_number)+".png"))
+                    dieFiles.append(drawing.use_image("images/resources/components/dice_faces/dice_"+Combat.translateColorToName(die)+"_"+str(random_number)+".png"))
                 if shipModel.computer > 0:
                     msg = msg + "\nThe ship has a +"+str(shipModel.computer)+" computer"
-                await interaction.channel.send(msg,files=dieFiles)
+                await interaction.channel.send(msg,file=drawing.append_images(dieFiles))
     @staticmethod
     async def refreshImage(game:GamestateHelper, buttonID:str, interaction:discord.Interaction):
         pos = buttonID.split("_")[1]

@@ -770,6 +770,17 @@ class DrawHelper:
         image.save(bytes_io, format="PNG")
         bytes_io.seek(0)
         return discord.File(bytes_io, filename="image.png")
+    
+    def append_images(self, images):
+
+        image1 = images[0]
+        context = Image.new("RGBA", ((image1.size[0]+10) * len(images), image1.size[1]), (255, 255, 255, 0))
+        for x,image in enumerate(images):
+            context.paste(image, (x*(image1.size[0]+10),0),mask=image)
+        bytes_io = BytesIO()
+        context.save(bytes_io, format="PNG")
+        bytes_io.seek(0)
+        return discord.File(bytes_io, filename="image.png")
 
 
     def show_stats(self):
@@ -878,6 +889,14 @@ class DrawHelper:
         player_area.save(bytes, format="PNG")
         bytes.seek(0)
         file = discord.File(bytes, filename="player_area.png")
+        return file
+    
+    def show_AI_stats(self):
+        ai_ships = self.display_remaining_tiles().crop((50,350,500, 500))
+        bytes = BytesIO()
+        ai_ships.save(bytes, format="PNG")
+        bytes.seek(0)
+        file = discord.File(bytes, filename="ai_ships.png")
         return file
 
     @staticmethod

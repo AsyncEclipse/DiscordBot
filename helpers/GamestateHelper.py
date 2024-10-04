@@ -141,6 +141,8 @@ class GamestateHelper:
             return fullName.lower().replace(" ","_")
 
 
+    def find_player_faction_name_from_color(self, color):
+        return self.gamestate["players"][self.get_player_from_color(color)]["name"]
     def rotate_tile(self, position, orientation):
         tile = self.gamestate["board"][position]
         tile.update({"orientation": (tile["orientation"]+orientation) % 360})
@@ -479,6 +481,10 @@ class GamestateHelper:
         for i in self.gamestate["players"]:
             if self.gamestate["players"][i]["color"] == color:
                 return i
+    def getPlayerObjectFromColor(self, color):
+        for i in self.gamestate["players"]:
+            if self.gamestate["players"][i]["color"] == color:
+                return self.gamestate["players"][i]
 
     def fillInDiscTiles(self):
         listOfDisc = []
@@ -520,11 +526,11 @@ class GamestateHelper:
         self.update()
     def breakRelationsBetween(self, player1, player2):
         for x,tile in enumerate(player1["reputation_track"]):
-            if player2["color"] in tile:
+            if isinstance(tile, str) and player2["color"] in tile:
                 player1["reputation_track"][x]=tile.split("-")[0]
                 break
         for x,tile in enumerate(player2["reputation_track"]):
-            if player1["color"] in tile:
+            if isinstance(tile, str) and player1["color"] in tile:
                 player2["reputation_track"][x]=tile.split("-")[0]
                 break
 
