@@ -7,6 +7,8 @@ pyvenv.cfg
 launch.json
 ActiveGames/
 .idea
+test.py
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
