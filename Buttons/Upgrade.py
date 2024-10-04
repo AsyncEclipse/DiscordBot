@@ -39,9 +39,14 @@ class UpgradeButtons:
         discTileUpgrade = customID.split("_")[3]
         player_helper.setOldShipParts(ship)
         game.update_player(player_helper)
+        if discTileUpgrade == "mus":
+            await UpgradeButtons.chooseUpgrade(game, player, interaction, f"chooseUpgrade_{actions}_{ship}_dummy_mus_mus",player_helper)
+            return
         with open("data/parts.json", "r") as f:
             part_stats = json.load(f)
         for i in set(player[f"{ship}_parts"]):
+            if i == "mus":
+                continue
             view.add_item(Button(label=part_stats[i]["name"], style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_selectOldPart_{actions}_{ship}_{i}_{discTileUpgrade}"))
         await interaction.message.edit(content=f"{interaction.user.mention}, pick which part to replace or remove.",
                                                 view=view)
@@ -96,11 +101,13 @@ class UpgradeButtons:
             newPart = player[f"old_{ship}_parts"][index]
         if newPart in ["anm", "axc", "cod", "fls", "hyg", "ins", "iod", "iom", "iot", "jud", "mus", "ricon", "shd", "som", "socha"] and newPart in player_helper.stats["ancient_parts"]:
             player_helper.stats["ancient_parts"].remove(newPart)
-        player_helper.stats[f"{ship}_parts"][index] = newPart
+        if newPart == "mus":
+            player_helper.stats[f"{ship}_parts"] = player_helper.stats[f"{ship}_parts"].append("mus")
+        else:
+            player_helper.stats[f"{ship}_parts"][index] = newPart
         shipCheck = PlayerShip(player_helper.stats, ship)
         if not shipCheck.check_valid_ship():
-            await interaction.followup.send("Your ship is not valid! Please try a different part",
-                                                   ephemeral=True)
+            await interaction.followup.send("Your ship is not valid! Please try a different part",ephemeral=True)
             return
         
         game.update_player(player_helper)

@@ -183,9 +183,13 @@ class DrawHelper:
 
             if "player_ships" in tile and len(tile["player_ships"]) > 0:
                 counts = {}  # To track counts for each ship type
+                countsShips = {}
                 for ship in tile["player_ships"]:
                     ship_type = ship.split("-")[1]  # Extract ship type
                     size = 70
+                    if ship not in countsShips:
+                        countsShips[ship] = 0
+                    countsShips[ship] += 10
                     if ship_type in ["gcds", "gcdsadv", "anc", "ancadv", "grd", "grdadv"]:
                         ship = ship_type.replace("adv","")
                         ship_type = "ai"
@@ -206,10 +210,25 @@ class DrawHelper:
                                     (int(345 / 1024 * coords[0] + counts[ship_type]-size/2),
                                     int(345 / 1024 * coords[1] + counts[ship_type]-size/2)),
                                     mask=ship_image)
-
                     counts[ship_type] += 10
                     if ship_type == "ai":
                         counts[ship_type] += 20
+                for key, value in countsShips.items():  
+                    damage = 0
+                    ship_type = "ai"
+                    if "ai-" not in key:
+                        ship_type=key.split("-")[1]
+                    coords = tile[f"{ship_type}_snap"]
+                    if "damage_tracker" in self.gamestate["board"][position]:
+                        if key in self.gamestate["board"][position]["damage_tracker"]:
+                            damage = self.gamestate["board"][position]["damage_tracker"][key]
+                    if damage > 0:
+                        for count in range(damage):
+                            damage_image = self.use_image(f"images/resources/components/basic_ships/marker_damage.png")
+                            tile_image.paste(damage_image,
+                                    (int(345 / 1024 * coords[0] + value-size/2+count*10+35),
+                                    int(345 / 1024 * coords[1] + value-size/2+35)),
+                                    mask=damage_image)
 
             def paste_resourcecube(tile, tile_image, resource_type, color):
                 if f"{resource_type}_pop" in tile and tile[f"{resource_type}_pop"] != 0 and tile[f"{resource_type}_pop"]:
@@ -224,7 +243,12 @@ class DrawHelper:
                                 coords = tile[f"orb_snap"]
                             else:
                                 coords = tile[f"{resource_type}{x+1}_snap"]
-                            tile_image.paste(pop_image, (int(345 / 1024 * coords[0] - 15), int(345 / 1024 * coords[1] - 15)), mask=pop_image)
+                            tile_image.paste(pop_image, (int(345 / 1024 * coords[0] - 18), int(345 / 1024 * coords[1] - 18)), mask=pop_image)
+                            if "money" in resource_type or "science" in resource_type or "material" in resource_type:
+                                resource_type2 = resource_type.replace("adv","")
+                                pop_path = f"images/resources/components/resourcesymbols/{resource_type2}.png"
+                                pop_image = self.use_image(pop_path).resize((20,20))
+                                tile_image.paste(pop_image, (int(345 / 1024 * coords[0] - 10), int(345 / 1024 * coords[1] - 10)), mask=pop_image)
 
             if "owner" in tile and tile["owner"] != 0:
                 color = tile["owner"]
@@ -507,11 +531,11 @@ class DrawHelper:
         process_tech(player["grid_tech"], "grid", 285)
         process_tech(player["military_tech"], "military", 203)
 
-
-        interceptCoord = [ (74, 39),(16, 86), (74, 97), (132, 86)]
-        cruiserCoord = [(221, 63), (279, 39),(337, 63),(221, 121), (279, 97),(337, 121)]
-        dreadCoord = [(435, 64), (493, 40),(551, 40),(609, 64),(435, 122), (493, 98),(551, 98),(609, 122)]
-        sbCoord = [(697, 39),(813, 39),(697, 97),(755, 66), (814, 97)]
+        # Last coord is for muon source exclusively
+        interceptCoord = [ (74, 39),(16, 86), (74, 97), (132, 86), (148, 39)]
+        cruiserCoord = [(221, 63), (279, 39),(337, 63),(221, 121), (279, 97),(337, 121), (353, 19)]
+        dreadCoord = [(435, 64), (493, 40),(551, 40),(609, 64),(435, 122), (493, 98),(551, 98),(609, 122), (628, 20)]
+        sbCoord = [(697, 39),(813, 39),(697, 97),(755, 66), (814, 97),(815, 0)]
 
         if player["name"]=="Planta":
             interceptCoord.pop(2)
@@ -529,6 +553,8 @@ class DrawHelper:
                 partName = part_details["name"].lower().replace(" ", "_") if part_details else part
                 part_path = f"images/resources/components/upgrades/{partName}.png"
                 part_image = self.use_image(part_path)
+                if part == "mus":
+                    part_image = part_image.resize((40,40))
                 context.paste(part_image, coords[counter], mask=part_image)
 
         process_parts(player["interceptor_parts"], interceptCoord)

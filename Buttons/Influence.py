@@ -37,13 +37,13 @@ class InfluenceButtons:
                     tilesViewed.append(adjTile)
                     playerShips =game.get_gamestate()["board"][adjTile]["player_ships"]
                     playerShips.append(player["color"])
-                    if "owner" in game.get_gamestate()["board"][adjTile] and game.get_gamestate()["board"][adjTile]["owner"]==0 and ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips):
+                    if "owner" in game.get_gamestate()["board"][adjTile] and game.get_gamestate()["board"][adjTile]["owner"]==0 and ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips,game):
                         tilesToInfluence.append(adjTile)
             if tile not in tilesViewed:
                     tilesViewed.append(tile)
                     playerShips =game.get_gamestate()["board"][tile]["player_ships"]
                     playerShips.append(player["color"])
-                    if "owner" in game.get_gamestate()["board"][tile] and game.get_gamestate()["board"][tile]["owner"]==0 and ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips):
+                    if "owner" in game.get_gamestate()["board"][tile] and game.get_gamestate()["board"][tile]["owner"]==0 and ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips,game):
                         tilesToInfluence.append(tile)
         return tilesToInfluence
     @staticmethod

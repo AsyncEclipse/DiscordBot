@@ -167,12 +167,14 @@ class ButtonListener(commands.Cog):
                     await game.endGame(interaction)
                 if customID.startswith("rollDice"):
                     await Combat.rollDice(game, customID,interaction)
-                if customID.startswith("rollMissiles"):
-                    await Combat.rollMissiles(game, customID,interaction)
                 if customID.startswith("refreshImage"):
                     await Combat.refreshImage(game, customID,interaction)
                 if customID.startswith("removeUnits"):
                     await Combat.removeUnits(game, customID,player, interaction)
+                if customID.startswith("assignHitTo"):
+                    await Combat.assignHitTo(game, customID, interaction, True)
+                if customID.startswith("drawReputation"):
+                    await Combat.drawReputation(game, customID, interaction,player_helper)
                 if customID.startswith("removeThisUnit"):
                     await Combat.removeThisUnit(game, customID,player, interaction)
                 end_time = time.perf_counter()  

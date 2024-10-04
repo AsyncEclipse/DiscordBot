@@ -15,11 +15,12 @@ class ExploreButtons:
         tile_map = game.get_gamestate()["board"]
         tiles = []
         for tile in tile_map:
-            if ("owner" in tile_map[tile] and tile_map[tile]["owner"] == player["color"]) or ("player_ships" in tile_map[tile] and ExploreButtons.doesPlayerHaveUnpinnedShips(player,tile_map[tile]["player_ships"])):
+            if ("owner" in tile_map[tile] and tile_map[tile]["owner"] == player["color"]) or ("player_ships" in tile_map[tile] and ExploreButtons.doesPlayerHaveUnpinnedShips(player,tile_map[tile]["player_ships"],game)):
                 tiles.append(tile)
         return tiles
     @staticmethod
-    def doesPlayerHaveUnpinnedShips(player, playerShips):
+    def doesPlayerHaveUnpinnedShips(player, playerShips, game):
+        player_helper = PlayerHelper(game.get_player_from_color(player['color']), player)
         playerShipsCount = 0
         opponentShips = 0
         if len(playerShips) == 0:
@@ -30,6 +31,11 @@ class ExploreButtons:
                     playerShipsCount = playerShipsCount +1
                 else:
                     opponentShips = opponentShips +1
+                    if "gcds" in ship:
+                        opponentShips += 99
+        researchedTechs = player_helper.getTechs()
+        if "clo" in researchedTechs:
+            playerShipsCount = playerShipsCount*2
         return playerShipsCount > opponentShips
 
     @staticmethod

@@ -195,6 +195,47 @@ class GamestateHelper:
         self.gamestate["players"][self.get_player_from_color(color)]["influence_discs"] = amount
         self.update()
 
+    def add_damage(self, ship, position, damage):
+        if "damage_tracker" in self.gamestate["board"][position]:
+            if ship in self.gamestate["board"][position]["damage_tracker"]:
+                damage = self.gamestate["board"][position]["damage_tracker"][ship]+damage
+            else:
+                self.gamestate["board"][position]["damage_tracker"][ship] = []
+        else:
+            self.gamestate["board"][position]["damage_tracker"] = {}
+            self.gamestate["board"][position]["damage_tracker"][ship] = []
+        self.gamestate["board"][position]["damage_tracker"][ship] = damage
+        self.update()
+        return damage
+
+    def destroy_ship(self, ship, position, destroyer):
+        self.remove_units([ship],position)
+        if "damage_tracker" in self.gamestate["board"][position]:
+            if ship in self.gamestate["board"][position]["damage_tracker"]:
+                del self.gamestate["board"][position]["damage_tracker"][ship]
+        if destroyer != "ai":
+            key = "ships_destroyed_by_" + destroyer 
+            if key not in self.gamestate["board"][position]:  
+                self.gamestate["board"][position][key] = []  
+            self.gamestate["board"][position][key].append(ship.split("-")[1])
+        self.update()
+
+    def getReputationTilesToDraw(self, position, color):
+        key = "ships_destroyed_by_" + color
+        count = 1
+        if key not in self.gamestate["board"][position]:  
+            return count
+        else:
+            for ship in self.gamestate["board"][position][key]:
+                if ship == "anc" or ship == "sb" or ship == "int":
+                    count +=1
+                if ship == "cru" or ship == "grd":
+                    count += 2
+                if ship == "drd" or ship == "gcds":
+                    count +=3
+            del self.gamestate["board"][position][key]
+        self.update()
+        return min(5,count)
     def remove_control(self, color, position):
         self.gamestate["board"][position]["owner"] = 0
         self.gamestate["players"][self.get_player_from_color(color)]["owned_tiles"].remove(position)

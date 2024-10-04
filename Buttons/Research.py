@@ -104,6 +104,10 @@ class ResearchButtons:
                 cost = ResearchButtons.calculate_cost(tech_details,tech_type,player)   
                 tech_groups[tech_type].append((tech, tech_details["name"], cost))  
         displayedTechs = [] 
+        for techType in tech_groups:
+            researchedTech = player_helper.stats[f"{techType}_tech"]
+            for tech in researchedTech:
+                displayedTechs.append(tech)
         buttonCount = 1
         for tech_type in tech_groups:  
             sorted_techs = sorted(tech_groups[tech_type], key=lambda x: x[2])  # Sort by cost  
