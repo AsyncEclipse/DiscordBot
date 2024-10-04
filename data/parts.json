@@ -179,7 +179,7 @@
     "nrg_use": 0,
     "nrg_src": 0,
     "tech_req": "none",
-    "dice": [],
+    "dice": [yellow],
     "comp": 0,
     "shield": 0,
     "missile": [],
