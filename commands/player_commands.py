@@ -60,7 +60,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
                         f"\n> Influence dics: {p1.stats['influence_discs']}"
                         f"\n> Upkeep: {p1.upkeepCosts()}"
                         f"\n> Colony Ships: {p1.stats['colony_ships']}"
-                        f"\n> Discovert Tiles Kept For Points: {p1.stats['disc_tiles_for_points']}")
+                        f"\n> Discovery Tiles Kept For Points: {p1.stats['disc_tiles_for_points']}")
             await interaction.response.send_message(top_response)
             await interaction.channel.send(response)
             return
@@ -237,9 +237,5 @@ class PlayerCommands(commands.GroupCog, name="player"):
                                                         "number of activations you have for each action is listed in ()"+game.displayPlayerStats(p1)), view=view)
     
     
-    @app_commands.command(name="show_upgrade_reference")
-    async def show_upgrade_reference(self, interaction: discord.Interaction):
-        await interaction.response.defer(thinking=True, ephemeral=True)
-        image = DrawHelper.show_ref("upgrade")
-        await interaction.followup.send(file=image, ephemeral=True)
+
 
