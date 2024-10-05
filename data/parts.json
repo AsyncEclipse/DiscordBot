@@ -173,13 +173,15 @@
   },
   "iod": {
     "name": "Ion Disruptor",
-    "description": "This is an Ancient Tech; it can only be added to a single Ship Blueprint slot, and then it is exhausted. During the Combat Phase, the Ion Disruptor adds +3 to the ship's Initiative (Combat Speed) and deals 1 hit to a single target if 1) the yellow die rolls a Direct Hit, or 2) if the yellow die result + total Computers - total Shields of the target ship = 6 or greater. Each Ion Cannon requires 0 Energy.", 
+    "description": "This is an Ancient Tech; it can only be added to a single Ship Blueprint slot, and then it is exhausted. During the Combat Phase, the Ion Disruptor adds +3 to the ship's Initiative (Combat Speed) and deals 1 hit to a single target if 1) the yellow die rolls a Direct Hit, or 2) if the yellow die result + total Computers - total Shields of the target ship = 6 or greater. Each Ion Cannon requires 0 Energy.",
     "range": 0,
     "speed": 3,
     "nrg_use": 0,
     "nrg_src": 0,
     "tech_req": "none",
-    "dice": [],
+    "dice": [
+      "yellow"
+    ],
     "comp": 0,
     "shield": 0,
     "missile": [],
