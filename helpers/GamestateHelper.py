@@ -31,6 +31,8 @@ class GamestateHelper:
 
     async def endGame(self, interaction:discord.Interaction):
         guild = interaction.guild
+        self.gamestate["gameEnded"] = True
+        self.update()
         category = interaction.channel.category
         role = discord.utils.get(guild.roles, name=self.game_id)  
         for channel in guild.channels:  

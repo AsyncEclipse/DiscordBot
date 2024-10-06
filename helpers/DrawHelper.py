@@ -181,6 +181,42 @@ class DrawHelper:
             textDrawableImage = ImageDraw.Draw(tile_image)
             textDrawableImage.text(text_position, text, text_color, font=font)
 
+
+
+            wormholeCode = ""
+            closedpath = f"images/resources/masks/closed_wh_mask.png"
+            openpath = f"images/resources/masks/open_wh_mask.png"
+            greenpath = f"images/resources/masks/orange_open_wh_mask.png"
+            blackpath = f"images/resources/masks/black_line.png"
+            closed_mask = self.use_image(closedpath)
+            open_mask = self.use_image(openpath)
+            green = self.use_image(greenpath)
+            black = self.use_image(blackpath)
+            configs = Properties()
+            with open("data/tileAdjacencies.properties", "rb") as f:
+                configs.load(f)
+            if "wormholes" in tile:
+                for wormhole in tile["wormholes"]:
+                    wormholeCode = wormholeCode+str(wormhole)
+                for i in range(6):
+                    tile_orientation_index = (i + 6 + int(int(rotation) / 60)) % 6
+                    if tile_orientation_index in tile["wormholes"]:
+                        found = False
+                        for x,adjTile in enumerate(configs.get(position)[0].split(",")):
+                            if x==i and self.areTwoTilesAdjacent(position, adjTile, configs):
+                                tile_image.paste(green, (152, 0), mask=green)
+                                found = True
+                                break
+                        if not found:
+                            tile_image.paste(open_mask, (152, 0), mask=open_mask)
+                        
+                    else:
+                        tile_image.paste(closed_mask, (152, 0), mask=closed_mask)
+                        tile_image.paste(black, (80, 0), mask=black)
+                    tile_image = tile_image.rotate(60)
+
+
+
             if "player_ships" in tile and len(tile["player_ships"]) > 0:
                 counts = {}  # To track counts for each ship type
                 countsShips = {}
@@ -258,38 +294,7 @@ class DrawHelper:
                 for resource in ["neutral", "neutraladv","money", "moneyadv", "science","scienceadv", "material","materialadv","orbital"]:
                     paste_resourcecube(tile, tile_image, resource, color)
 
-            wormholeCode = ""
-            closedpath = f"images/resources/masks/closed_wh_mask.png"
-            openpath = f"images/resources/masks/open_wh_mask.png"
-            greenpath = f"images/resources/masks/green_open_wh_mask2.png"
-            blackpath = f"images/resources/masks/black_line.png"
-            closed_mask = self.use_image(closedpath)
-            open_mask = self.use_image(openpath)
-            green = self.use_image(greenpath)
-            black = self.use_image(blackpath)
-            configs = Properties()
-            with open("data/tileAdjacencies.properties", "rb") as f:
-                configs.load(f)
-            if "wormholes" in tile:
-                for wormhole in tile["wormholes"]:
-                    wormholeCode = wormholeCode+str(wormhole)
-                for i in range(6):
-                    tile_orientation_index = (i + 6 + int(int(rotation) / 60)) % 6
-                    if tile_orientation_index in tile["wormholes"]:
-                        found = False
-                        for x,adjTile in enumerate(configs.get(position)[0].split(",")):
-                            if x==i and self.areTwoTilesAdjacent(position, adjTile, configs):
-                                tile_image.paste(green, (152, 0), mask=green)
-                                found = True
-                                break
-                        if not found:
-                            tile_image.paste(open_mask, (152, 0), mask=open_mask)
-                        
-                    else:
-                        tile_image.paste(closed_mask, (152, 0), mask=closed_mask)
-                        tile_image.paste(black, (80, 0), mask=black)
-                    tile_image = tile_image.rotate(60)
-                  #345, 299
+            
 
             
             return tile_image
@@ -308,7 +313,7 @@ class DrawHelper:
         return is_adjacent(tile1, tile2) and is_adjacent(tile2, tile1)
 
     def display_techs(self):
-        context = Image.new("RGBA", (2500, 470), (255, 255, 255, 0))
+        context = Image.new("RGBA", (2500, 470), (0,0,0,255))
         techsAvailable = self.gamestate["available_techs"]
         with open("data/techs.json", "r") as f:
             tech_data = json.load(f)
@@ -388,7 +393,7 @@ class DrawHelper:
         return context
 
     def display_remaining_tiles(self):
-        context = Image.new("RGBA", (1300, 500), (255, 255, 255, 0))
+        context = Image.new("RGBA", (1300, 500), (0,0,0,255))
 
 
         filepath = f"images/resources/hexes/sector3backblank.png"
@@ -435,7 +440,7 @@ class DrawHelper:
         return context
     
     def display_cube_track_reference(self, player):
-        context = Image.new("RGBA", (1600, 125), (255, 255, 255, 0))
+        context = Image.new("RGBA", (1600, 125), (0,0,0,255))
 
         spaces = [28,24,21,18,15,12,10,8,6,4,3,2]
         pop_path = f"images/resources/components/all_boards/popcube_{player['color']}.png"
@@ -451,25 +456,28 @@ class DrawHelper:
         pop_image = self.use_image(pop_path).resize((220,75))
         context.paste(pop_image, (0,25), mask=pop_image)
         text_drawable_image = ImageDraw.Draw(context)
-        text_drawable_image.text((15,35), "Income:", color, font=font,
+        text_drawable_image.text((18,35), "Income:", color, font=font,
                             stroke_width=stroke_width, stroke_fill=stroke_color)
         
-        pop_image = self.use_image(pop_path).resize((75,75))
-        for count,num in enumerate(spaces):
-            x=  1100 - count*80
-            context.paste(pop_image, (x,25), mask=pop_image)
-            mod = 0
-            if num > 9:
-                mod = 12
-            text_drawable_image.text((x+20-mod,35), str(num), color, font=font,
-                            stroke_width=stroke_width, stroke_fill=stroke_color)
+        
             
          # Resource details: [(image_path, text_color, player_key, amount_key)]
         resources = [
-            ("images/resources/components/resourcesymbols/money.png", "money_pop_cubes", (0, 0)),
-            ("images/resources/components/resourcesymbols/science.png", "science_pop_cubes",(0, 95)),
-            ("images/resources/components/resourcesymbols/material.png", "material_pop_cubes",(35, 95))
+            ("images/resources/components/resourcesymbols/money.png", "images/resources/components/all_boards/popcube_orange.png","money_pop_cubes", (0, 0)),
+            ("images/resources/components/resourcesymbols/science.png", "images/resources/components/all_boards/popcube_pink.png","science_pop_cubes",(0, 95)),
+            ("images/resources/components/resourcesymbols/material.png","images/resources/components/all_boards/popcube_brown.png", "material_pop_cubes",(35, 95))
         ]
+
+        def draw_resourceCube(context, pop_path, amount_key):
+            population_track = player["population_track"]  
+            pop_image = self.use_image(pop_path).resize((95,95))
+            amount_index = player[amount_key] - 1  
+            if 0 <= amount_index < len(population_track):  
+                population_value = population_track[amount_index]  
+            else:  
+                population_value = 2   
+            ind = spaces.index(population_value) +1
+            context.paste(pop_image, (1300 - ind*90,15))
 
         def draw_resource(context, img_path, amount_key, position):
             image = self.use_image(img_path).resize((30,30))
@@ -480,17 +488,28 @@ class DrawHelper:
             else:  
                 population_value = 2   
             ind = spaces.index(population_value) +1
-            context.paste(image, (position[0]+1185 - ind*80,position[1]))
+            context.paste(image, (position[0]+1315 - ind*90,position[1]))
 
-        for img_path, amount_key, position in resources:
+        for img_path, color_path, amount_key, position in resources:
+            draw_resourceCube(context, color_path, amount_key)
+        for img_path, color_path, amount_key, position in resources:
             draw_resource(context, img_path, amount_key, position)
-        return context
 
+        pop_image = self.use_image(pop_path).resize((75,75))
+        for count,num in enumerate(spaces):
+            x=  1220 - count*90
+            context.paste(pop_image, (x,25), mask=pop_image)
+            mod = 0
+            if num > 9:
+                mod = 12
+            text_drawable_image.text((x+20-mod,35), str(num), color, font=font,
+                            stroke_width=stroke_width, stroke_fill=stroke_color)
+        return context
 
     def player_area(self, player):
         faction = self.get_short_faction_name(player["name"])
         filepath = "images/resources/components/factions/"+str(faction)+"_board.png"
-        context = Image.new("RGBA", (1350, 625), (255, 255, 255, 0))
+        context = Image.new("RGBA", (1350, 625), (0,0,0,255))
         board_image = self.use_image(filepath)
         context.paste(board_image, (0,0))
         inf_path = "images/resources/components/all_boards/influence_disc_"+player["color"]+".png"
@@ -571,8 +590,20 @@ class DrawHelper:
             scaler = 67
             mod = 3
         for x,reputation in enumerate(player["reputation_track"]):
-            if reputation != "mixed" and reputation != "amb":
-                context.paste(reputation_image, (825,172+x*scaler-mod), mask=reputation_image)
+            if isinstance(reputation, int):
+                if "gameEnded" in self.gamestate:
+                    pointsPath = "images/resources/components/all_boards/points.png"
+                    points = self.use_image(pointsPath).resize(((58,58)))
+                    context.paste(points, (825,172+x*scaler-mod), mask=points)
+                    font = ImageFont.truetype("images/resources/arial.ttf", size=50)
+                    stroke_color = (0, 0, 0)
+                    color = (0, 0, 0)
+                    stroke_width = 2
+                    text_drawable_image = ImageDraw.Draw(context)
+                    text_drawable_image.text((825+13,172+x*scaler-mod), str(reputation), color, font=font,
+                                    stroke_width=stroke_width, stroke_fill=stroke_color)
+                else:
+                    context.paste(reputation_image, (825,172+x*scaler-mod), mask=reputation_image)
             if not isinstance(reputation, int) and "-" in reputation:
                 faction = reputation.split("-")[1]
                 color =  reputation.split("-")[2]
@@ -655,8 +686,6 @@ class DrawHelper:
         context.paste(context2,(0,500))
         return context
 
-
-
     def get_public_points(self, player):
         points = 0
         tile_map = self.gamestate["board"]
@@ -665,10 +694,16 @@ class DrawHelper:
         for tile in tile_map:
             if "owner" in tile_map[tile] and tile_map[tile]["owner"] == color:
                 points += tile_map[tile]["vp"]
-                if "player_ships" in tile_map[tile] and "mon" in tile_map[tile]["player_ships"]:
-                    points += 3
+                if "player_ships" in tile_map[tile]:
+                    for ship in tile_map[tile]["player_ships"]:
+                        if "mon" in ship:
+                            points += 3
                 if player["name"] == "Planta":
                     points +=1
+            if player["name"] == "Descendants of Draco" and "player_ships" in tile_map[tile]:
+                for ship in tile_map[tile]["player_ships"]:
+                    if "anc" in ship:
+                        points += 1
         techTypes =["military_tech","grid_tech","nano_tech"]
         for type in techTypes:
             if type in player and len(player[type]) > 4:
@@ -678,7 +713,14 @@ class DrawHelper:
                     points += len(player[type])-3
         if "disc_tiles_for_points" in player:
             points += player["disc_tiles_for_points"]*2
+        for reputation in player["reputation_track"]:
+            if isinstance(reputation, int):
+                if "gameEnded" in self.gamestate:
+                    points += reputation
+            if not isinstance(reputation, int) and "-" in reputation:
+                points += 1
         return points
+    
     #effectively discontinued in favor of show_map and show_stats
     def show_game(self):
         start_time = time.perf_counter() 
@@ -781,7 +823,7 @@ class DrawHelper:
                 max_x = max(max_x, x + tile_image.width)
                 max_y = max(max_y, y + tile_image.height)
             return min_x, min_y, max_x, max_y
-        context = Image.new("RGBA", (4160, 5100), (255, 255, 255, 0))
+        context = Image.new("RGBA", (4160, 5100), (0,0,0,255))
         min_x, min_y, max_x, max_y = paste_tiles(context, self.gamestate["board"])
         cropped_context = context.crop((min_x, min_y, max_x, max_y))
         cropped_context=cropped_context.resize([int((max_x-min_x)/2),int((max_y-min_y)/2)])
@@ -814,7 +856,7 @@ class DrawHelper:
             pCount = len(self.gamestate["players"])
             player_area_length = 1500 if pCount > 3 else 750
             width = 4150 if (pCount != 2 and pCount != 4) else 2800
-            context2 = Image.new("RGBA", (width, player_area_length), (255, 255, 255, 0))
+            context2 = Image.new("RGBA", (width, player_area_length), (0, 0, 0, 255))
             x, y, count = 100, 50, 0
             for player in self.gamestate["players"]:
                 player_image = self.player_area(self.gamestate["players"][player])
@@ -843,8 +885,8 @@ class DrawHelper:
         #context5 = self.display_cube_track_reference()
         pCount = len(self.gamestate["players"])
         width = 4150 if (pCount != 2 and pCount != 4) else 2800
-        width = max(context2.size[0],context3.size[0]+context4.size[0])
-        final_context = Image.new("RGBA", (width, context2.size[1]+max(context3.size[1],context4.size[1])), (255, 255, 255, 0))
+        width = max(context2.size[0],context3.size[0]+context4.size[0]+150)
+        final_context = Image.new("RGBA", (width, context2.size[1]+max(context3.size[1],context4.size[1])), (0, 0, 0, 255))
         final_context.paste(context2, (0, 0))
         final_context.paste(context3, (0, context2.size[1]))
         #final_context.paste(context5, (50, context2.size[1]-20))
