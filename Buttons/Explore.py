@@ -34,7 +34,7 @@ class ExploreButtons:
                     if "gcds" in ship:
                         opponentShips += 99
         researchedTechs = player_helper.getTechs()
-        if "clo" in researchedTechs:
+        if "clo" in researchedTechs or "cld" in researchedTechs:
             playerShipsCount = playerShipsCount*2
         return playerShipsCount > opponentShips
 
