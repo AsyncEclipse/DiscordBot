@@ -115,5 +115,5 @@ class InfluenceButtons:
     async def addCubeToTrack(game: GamestateHelper, p1, interaction: discord.Interaction, buttonID:str):
         pop = buttonID.split("_")[1]
         game.remove_pop([pop+"_pop"],"dummy",game.get_player_from_color(p1["color"]))
-        await interaction.channel.send( f"Added 1 "+pop.replace('adv','')+" population back to the relevant track")
+        await interaction.channel.send( f"{p1['player_name']}Added 1 "+pop.replace('adv','')+" population back to the relevant track")
         await interaction.message.delete()

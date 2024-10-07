@@ -260,7 +260,11 @@ class GamestateHelper:
                     keysToRemove.append(key)
             for key in keysToRemove:
                 del self.gamestate[f"board"][key]
-
+        self.update()
+    def makeEveryoneNotTraitor(self):
+        for player in self.gamestate["players"]:
+            if "traitor" in self.gamestate["players"][player]:
+                self.gamestate["players"][player]["traitor"] = False
         self.update()
     def add_units(self, unit_list, position):
         color = unit_list[0].split("-")[0]
@@ -557,24 +561,28 @@ class GamestateHelper:
             return full_name.lower().replace(" ","_")
     
     def formRelationsBetween(self, player1, player2):
+        pID = self.get_player_from_color(player1['color'])
+        pID2 = self.get_player_from_color(player2['color'])
         for x,tile in enumerate(player1["reputation_track"]):
             if isinstance(tile, str) and (tile == "amb" or tile == "mixed"):
-                player1["reputation_track"][x]=tile+"-"+self.get_short_faction_name(player2["name"])+"-"+player2["color"]
+                self.gamestate["players"][pID]["reputation_track"][x]=tile+"-"+self.get_short_faction_name(player2["name"])+"-"+player2["color"]
                 break
         for x,tile in enumerate(player2["reputation_track"]):
             if isinstance(tile, str) and (tile == "amb" or tile == "mixed"):
-                player2["reputation_track"][x]=tile+"-"+self.get_short_faction_name(player1["name"])+"-"+player1["color"]
+                self.gamestate["players"][pID2]["reputation_track"][x]=tile+"-"+self.get_short_faction_name(player1["name"])+"-"+player1["color"]
                 break
 
         self.update()
     def breakRelationsBetween(self, player1, player2):
+        pID = self.get_player_from_color(player1['color'])
+        pID2 = self.get_player_from_color(player2['color'])
         for x,tile in enumerate(player1["reputation_track"]):
             if isinstance(tile, str) and player2["color"] in tile:
-                player1["reputation_track"][x]=tile.split("-")[0]
+                self.gamestate["players"][pID]["reputation_track"][x]=tile.split("-")[0]
                 break
         for x,tile in enumerate(player2["reputation_track"]):
             if isinstance(tile, str) and player1["color"] in tile:
-                player2["reputation_track"][x]=tile.split("-")[0]
+                self.gamestate["players"][pID2]["reputation_track"][x]=tile.split("-")[0]
                 break
 
         self.update()

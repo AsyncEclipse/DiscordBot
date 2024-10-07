@@ -1,5 +1,6 @@
 import discord
 from discord.ui import View
+from Buttons.DiplomaticRelations import DiplomaticRelationsButtons
 from Buttons.Explore import ExploreButtons
 from Buttons.Influence import InfluenceButtons
 from Buttons.Turn import TurnButtons
@@ -40,8 +41,10 @@ class MoveButtons:
         shipTypes = ["interceptor","cruiser","dreadnought"]
         for shipType in shipTypes:
             player_color = player["color"]
+            ship = PlayerShip(player, shipType)
+            shipRange = ship.getRange()
             if f"{player_color}-{game.getShipShortName(shipType)}" in game.get_gamestate()["board"][originT]["player_ships"]:
-                view.add_item(Button(label=shipType.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_moveThisShip_{originT}_{shipType}_{moveCount}"))
+                view.add_item(Button(label=shipType.capitalize() + "(Range: "+str(shipRange)+")", style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_moveThisShip_{originT}_{shipType}_{moveCount}"))
         await interaction.message.delete()
         await interaction.channel.send( f"{interaction.user.mention} Select the ship you would like to move from {originT}", view=view)
     @staticmethod
@@ -93,6 +96,25 @@ class MoveButtons:
         game.add_units([shipName],destination)
         drawing = DrawHelper(game.gamestate)
         await interaction.channel.send( f"{interaction.user.mention} Moved a {shipType} from {originT} to {destination}.", file=drawing.board_tile_image_file(destination))
+
+        for tile in player["reputation_track"]:
+            if isinstance(tile, str) and "-" in tile:
+                color = tile.split("-")[2]
+                p2 = game.getPlayerObjectFromColor(color)
+                broken = False
+                if destination in p2["owned_tiles"]:
+                    broken = True
+                for ship in game.gamestate["board"][destination]["player_ships"]:
+                    if "orb" in ship or "mon" in ship:
+                        continue
+                    if color in ship:
+                        broken = True
+                if broken:
+                    await DiplomaticRelationsButtons.breakRelationsWith(game, player, p2, interaction)
+                    game.makeEveryoneNotTraitor()
+                    player_helper.setTraitor(True)
+                    game.update_player(player_helper)
+                    await interaction.channel.send( f"{interaction.user.mention} You broke relations with {color} and now are a traitor.")
         if moveCount == 1:
             player_helper.spend_influence_on_action("move")
             game.update_player(player_helper)

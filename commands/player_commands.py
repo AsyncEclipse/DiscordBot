@@ -171,11 +171,20 @@ class PlayerCommands(commands.GroupCog, name="player"):
     @app_commands.choices(color=color_choices)
     async def break_relations(self, interaction: discord.Interaction, color:app_commands.Choice[str]):
         player = interaction.user
-        await interaction.response.defer()
+        await interaction.response.defer(thinking=False)
         game = GamestateHelper(interaction.channel)
         p1 = game.get_player(player.id)
-        p2 = game.get_player_from_color(color.value)
-        await DiplomaticRelationsButtons.breakRelationsWith(game, p1, game.get_gamestate()['players'][p2], interaction)
+        p2 = game.getPlayerObjectFromColor(color.value)
+        await DiplomaticRelationsButtons.breakRelationsWith(game, p1, p2, interaction)
+
+    @app_commands.command(name="form_relations")
+    @app_commands.choices(color=color_choices)
+    async def form_relations(self, interaction: discord.Interaction, color:app_commands.Choice[str]):
+        player = interaction.user
+        await interaction.response.defer(thinking=False)
+        game = GamestateHelper(interaction.channel)
+        p1 = game.get_player(player.id)
+        await DiplomaticRelationsButtons.acceptRelationsWith(game, p1,interaction,"dummy_"+color.value)
 
 
 
@@ -203,6 +212,18 @@ class PlayerCommands(commands.GroupCog, name="player"):
         player_helper.passTurn(passed)
         game.update_player(player_helper)
         await interaction.response.send_message(f"{player.mention} set passed status to "+str(passed))
+    
+    @app_commands.command(name="set_traitor")
+    async def set_traitor(self, interaction: discord.Interaction, traitor:bool, player: Optional[discord.Member]=None):
+        if player == None:
+            player = interaction.user
+        game = GamestateHelper(interaction.channel)
+        p1 = game.get_player(player.id)
+        player_helper = PlayerHelper(player.id, p1)
+        game.makeEveryoneNotTraitor()
+        player_helper.setTraitor(traitor)
+        game.update_player(player_helper)
+        await interaction.response.send_message(f"{player.mention} set traitor status to "+str(traitor))
         
     
     @app_commands.command(name="draw_reputation")

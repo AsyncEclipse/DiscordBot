@@ -627,6 +627,8 @@ class DrawHelper:
             text_image = text_image.rotate(45, expand=True)
             context.paste(text_image, (0, 0), text_image)
 
+        
+
         # Resource details: [(image_path, text_color, player_key, amount_key)]
         resources = [
             ("images/resources/components/resourcesymbols/money.png", (255, 255, 0), "money", "money_pop_cubes"),
@@ -719,6 +721,8 @@ class DrawHelper:
                     points += reputation
             if not isinstance(reputation, int) and "-" in reputation:
                 points += 1
+        if "traitor" in player and player["traitor"] == True:
+            points -= 2
         return points
     
     #effectively discontinued in favor of show_map and show_stats
@@ -866,7 +870,11 @@ class DrawHelper:
                     color = (255, 165, 0)
                     stroke_width = 2
                     text_drawable_image = ImageDraw.Draw(context2)
-                    text_drawable_image.text((x,y), self.gamestate["players"][player]["username"], color, font=font,
+                    username = self.gamestate["players"][player]["username"]
+
+                    if "traitor" in self.gamestate["players"][player] and self.gamestate["players"][player]["traitor"] == True:
+                        username = username + " (TRAITOR)"
+                    text_drawable_image.text((x,y), username, color, font=font,
                                     stroke_width=stroke_width, stroke_fill=stroke_color)
                 context2.paste(player_image, (x, y+50), mask=player_image)
                 count += 1
