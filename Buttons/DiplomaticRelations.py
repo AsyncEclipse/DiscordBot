@@ -15,8 +15,10 @@ class DiplomaticRelationsButtons:
     async def startDiplomaticRelations(game: GamestateHelper, player, interaction: discord.Interaction):
         view = View()
         for p2 in game.get_gamestate()["players"]:
-            # if game.get_gamestate()["players"][p2]["color"] == player["color"]:
-            #     continue
+            if game.get_gamestate()["players"][p2]["color"] == player["color"]:
+                continue
+            if "traitor" in game.get_gamestate()["players"][p2] and game.get_gamestate()["players"][p2]["traitor"] == True:
+                continue
             buttonID = f"FCID{player['color']}_offerRelationsTo_"+game.get_gamestate()["players"][p2]["color"]
             label = f"{game.get_gamestate()['players'][p2]['name']}"
             view.add_item(Button(label=label, style=discord.ButtonStyle.blurple, custom_id=buttonID))
@@ -45,7 +47,7 @@ class DiplomaticRelationsButtons:
     async def acceptRelationsWith(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str):
         p2 = buttonID.split("_")[1]
         pID = game.get_player_from_color(p2)
-        await interaction.channel.send( f"{game.get_gamestate()['players'][pID]['player_name']} your relations have been accepted by {interaction.user.mention}")
+        await interaction.followup.send( f"{game.get_gamestate()['players'][pID]['player_name']} your relations have been accepted by {interaction.user.mention}")
         p2 = game.get_gamestate()["players"][pID]
         game.formRelationsBetween(player,p2)
 
@@ -56,12 +58,13 @@ class DiplomaticRelationsButtons:
             view.add_item(Button(label="Money", style=discord.ButtonStyle.gray, custom_id=f"FCID{p['color']}_reducePopFor_money"))
             await interaction.channel.send( f"{p['player_name']} choose what type of cube to put on the ambassador", view=view)
 
-        await interaction.message.delete()
+        if "dummy" not in buttonID:
+            await interaction.message.delete()
 
     @staticmethod
     async def breakRelationsWith(game: GamestateHelper, player, p2, interaction: discord.Interaction):
         
-        await interaction.channel.send( f"{p2['player_name']} your relations have been broken with {interaction.user.mention}")
+        await interaction.followup.send( f"{p2['player_name']} your relations have been broken with {interaction.user.mention}")
         game.breakRelationsBetween(player,p2)
         for p in [player,p2]:
             view=View()

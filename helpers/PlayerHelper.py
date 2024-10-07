@@ -7,7 +7,7 @@ class PlayerHelper:
         self.name = self.stats["player_name"]
 
     def isTraitor(self):
-        if "passed" in self.stats and self.stats["passed"]== True:
+        if "traitor" in self.stats and self.stats["traitor"]== True:
             return True
         else:
             return False
@@ -101,6 +101,10 @@ class PlayerHelper:
         
     def passTurn(self, passed:bool):
         self.stats["passed"] = passed
+
+    def setTraitor(self, traitor:bool):
+        self.stats["traitor"] = traitor
+    
     def permanentlyPassTurn(self, passed:bool):
         self.stats["perma_passed"] = passed
     
