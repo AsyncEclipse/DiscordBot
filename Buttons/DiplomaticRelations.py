@@ -71,7 +71,7 @@ class DiplomaticRelationsButtons:
             planetTypes = ["money","science","material"]
             for planetT in planetTypes:
                 view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{p['color']}_addCubeToTrack_"+planetT))
-            await interaction.channel.send( f"{p['player_name']} a cube with no set track was removed, please tell the bot what track it should go back to", view=view)
+            await interaction.channel.send( f"{p['player_name']} a cube with no set track was removed, please tell the bot what track you want it to go on", view=view)
 
     
     @staticmethod

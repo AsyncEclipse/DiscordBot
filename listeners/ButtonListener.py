@@ -72,6 +72,7 @@ class ButtonListener(commands.Cog):
                     await TurnButtons.undoLastTurn(player, game, interaction)
                 if customID == "runUpkeep":
                     await TurnButtons.runUpkeep(game, interaction,self.bot)
+                    await interaction.message.delete()
                 if customID.startswith("startExplore"):
                     if "2" not in customID:
                         game.updateSaveFile()
@@ -79,7 +80,7 @@ class ButtonListener(commands.Cog):
                 if customID.startswith("exploreTile_"):
                     await ExploreButtons.exploreTile(game, player, interaction, customID)
                 if customID.startswith("placeTile"):
-                    await ExploreButtons.placeTile(game,  interaction, player, customID)
+                    await ExploreButtons.placeTile(game,  interaction, player, customID,player_helper)
                 if customID.startswith("discardTile"):
                     await ExploreButtons.discardTile(game, interaction, player, customID)
                 if customID.startswith("keepDiscForPoints"):
@@ -93,6 +94,8 @@ class ButtonListener(commands.Cog):
                     await ResearchButtons.startResearch(game, player, player_helper, interaction,True)
                 if customID.startswith("getTech_"):
                     await ResearchButtons.getTech(game, player, player_helper, interaction, customID)
+                if customID.startswith("placeWarpPortal"):
+                    await ResearchButtons.placeWarpPortal(interaction, game, player, customID)
                 if customID.startswith("payAtRatio_"):
                     await ResearchButtons.payAtRatio(game, player, player_helper, interaction, customID)
                 if customID.startswith("gain5resource_"):
@@ -165,6 +168,8 @@ class ButtonListener(commands.Cog):
                     await MoveButtons.moveTo(game, player, interaction,customID,player_helper,self.bot)
                 if customID.startswith("endGame"):
                     await game.endGame(interaction)
+                if customID.startswith("declareWinner"):
+                    await game.declareWinner(interaction)
                 if customID.startswith("rollDice"):
                     await Combat.rollDice(game, customID,interaction)
                 if customID.startswith("refreshImage"):
@@ -177,6 +182,8 @@ class ButtonListener(commands.Cog):
                     await Combat.drawReputation(game, customID, interaction,player_helper)
                 if customID.startswith("removeThisUnit"):
                     await Combat.removeThisUnit(game, customID,player, interaction)
+                if customID.startswith("startToRetreatUnits"):
+                    await Combat.startToRetreatUnits(game, customID, interaction)
                 end_time = time.perf_counter()  
                 elapsed_time = end_time - start_time  
                 if(elapsed_time > 2):

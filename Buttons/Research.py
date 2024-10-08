@@ -15,6 +15,8 @@ class ResearchButtons:
                                         ("nano", discord.ButtonStyle.blurple),   
                                         ("military", discord.ButtonStyle.red)]:  
             cost = ResearchButtons.calculate_cost(tech_details, tech_type,player)  
+            if len(player[f"{tech_type}_tech"]) == 7:
+                continue
             view.add_item(Button(label=f"{tech_type.capitalize()} ({cost})",   
                                 style=button_style,   
                                 custom_id=f"FCID{player['color']}_getTech_{tech}_{tech_type}"))  
@@ -30,6 +32,7 @@ class ResearchButtons:
         tech_details = tech_data.get(tech)
         drawing = DrawHelper(game.gamestate)
         await interaction.channel.send(f"{interaction.user.mention} acquired the tech "+tech_details["name"],file=drawing.show_specific_tech(tech))
+        player_helper.specifyDetailsOfAction("Researched "+tech_details["name"]+".")
         if player["science"] >= cost:  
             msg = player_helper.adjust_science(-cost)  
             game.update_player(player_helper)  
@@ -62,8 +65,24 @@ class ResearchButtons:
             await interaction.channel.send(  
                 f"You can gain 5 of any type of resource for each artifact you have",view=view  
             )  
+        if tech == "wap":
+            view = View()
+            for tile in player["owned_tiles"]: 
+                view.add_item(Button(label=tile,   
+                                style=discord.ButtonStyle.blurple,   
+                                custom_id=f"FCID{player['color']}_placeWarpPortal_"+tile))  
+            await interaction.channel.send(  
+                f"Choose which tile you would like to place the warp tile in",view=view  
+            )  
         if tech_details["dtile"] != 0:
             await DiscoveryTileButtons.exploreDiscoveryTile(game, game.getLocationFromID(player["home_planet"]),interaction,player)
+
+    @staticmethod  
+    async def placeWarpPortal(interaction:discord.Interaction, game: GamestateHelper, player, customID):
+        loc = customID.split("_")[1]
+        game.addWarpPortal(loc)
+        await interaction.channel.send(interaction.user.mention + " added a warp portal to tile "+loc)
+        await interaction.message.delete() 
 
     @staticmethod  
     def calculate_cost( tech_details, tech_type,player):
@@ -101,6 +120,9 @@ class ResearchButtons:
             tech_details = tech_data.get(tech)  
             if tech_details:  
                 tech_type = tech_details["track"]  
+                if tech_type != "any":
+                    if len(player[f"{tech_type}_tech"]) == 7:
+                        continue
                 cost = ResearchButtons.calculate_cost(tech_details,tech_type,player)   
                 tech_groups[tech_type].append((tech, tech_details["name"], cost))  
         displayedTechs = [] 
@@ -139,7 +161,6 @@ class ResearchButtons:
                 if buttonCount > 24:
                     await interaction.channel.send(view=view2)
             view = View()
-            #view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
             view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                                  custom_id=f"FCID{player['color']}_finishAction"))
             await interaction.channel.send(f"{interaction.user.mention} when finished you may resolve your action "

@@ -17,6 +17,14 @@ class PlayerCommands(commands.GroupCog, name="player"):
     def __init__(self, bot):
         self.bot = bot
 
+    color_choices = [
+        app_commands.Choice(name="Blue", value="blue"),
+        app_commands.Choice(name="Red", value="red"),
+        app_commands.Choice(name="Yellow", value="yellow"),
+        app_commands.Choice(name="Purple", value="purple"),
+        app_commands.Choice(name="Green", value="green"),
+        app_commands.Choice(name="White", value="white")
+    ]
 
     @app_commands.command(name="stats", description="Anything to do with player stats")
     async def stats(self, interaction: discord.Interaction,
@@ -143,6 +151,24 @@ class PlayerCommands(commands.GroupCog, name="player"):
         player_helper = PlayerHelper(interaction.user.id, player)
         await interaction.response.defer(thinking=False)
         await ResearchButtons.startResearch(game, player, player_helper,interaction,False)
+
+
+    @app_commands.command(name="change_color")
+    @app_commands.choices(color=color_choices)
+    async def change_color(self, interaction: discord.Interaction, color:app_commands.Choice[str]):
+        game = GamestateHelper(interaction.channel)
+        player = game.get_player(interaction.user.id)  
+        for p2 in game.get_gamestate()["players"]:
+            if game.get_gamestate()["players"][p2]["color"] == color.value:
+                await interaction.channel.send("Another player already uses that color")
+                return
+
+        game.changeColor(player["color"],color.value)
+        await interaction.response.defer(thinking=False)
+        drawing = DrawHelper(game.gamestate)
+        await interaction.followup.send(interaction.user.mention+" Successfully changed color to "+color.value, file = drawing.show_stats())
+        await interaction.channel.send("Successfully changed color to "+color.value, file = drawing.show_map())
+
     @app_commands.command(name="upgrade")
     async def upgrade(self, interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)
@@ -158,14 +184,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         await MoveButtons.startMove(game, player, interaction,"startMove_8", True)
 
 
-    color_choices = [
-        app_commands.Choice(name="Blue", value="blue"),
-        app_commands.Choice(name="Red", value="red"),
-        app_commands.Choice(name="Yellow", value="yellow"),
-        app_commands.Choice(name="Purple", value="purple"),
-        app_commands.Choice(name="Green", value="green"),
-        app_commands.Choice(name="White", value="white")
-    ]
+   
 
     @app_commands.command(name="break_relations")
     @app_commands.choices(color=color_choices)

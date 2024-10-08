@@ -23,6 +23,11 @@ class GameCommands(commands.GroupCog, name="game"):
         game = GamestateHelper(interaction.channel)
         await game.endGame(interaction)
 
+    @app_commands.command(name="declare_winner")
+    async def declare_winner(self,interaction: discord.Interaction):
+        game = GamestateHelper(interaction.channel)
+        await game.declareWinner(interaction)
+
     @app_commands.command(name="start_combats")
     async def start_combats(self,interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)

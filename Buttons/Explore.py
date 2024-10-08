@@ -103,9 +103,11 @@ class ExploreButtons:
         await interaction.channel.send(f"{interaction.user.mention} select the orientation you prefer or discard the tile.",view=view, file=file)
         await interaction.message.delete()
     @staticmethod
-    async def placeTile(game: GamestateHelper, interaction: discord.Interaction, player, customID):
+    async def placeTile(game: GamestateHelper, interaction: discord.Interaction, player, customID, player_helper):
         msg = customID.split("_")
         game.add_tile(msg[1], int(msg[3]), msg[2])
+        player_helper.specifyDetailsOfAction(f"Explored {msg[1]}.")
+        game.update_player(player_helper)
         await interaction.channel.send(f"Tile added to position {msg[1]}")
         if game.get_gamestate()["board"][msg[1]]["ancient"] == 0 or player["name"]=="Descendants of Draco":
             view = View()
@@ -116,7 +118,6 @@ class ExploreButtons:
                 await DiscoveryTileButtons.exploreDiscoveryTile(game, msg[1],interaction,player)
         view = View()
         view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
-        #view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
         view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_finishAction"))
         await interaction.channel.send(f"{interaction.user.mention} when you're finished resolving your action, you may end turn with this button.", view=view)
         await interaction.message.delete()
@@ -127,7 +128,6 @@ class ExploreButtons:
         await interaction.channel.send("Tile discarded")
         view = View()
         view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
-        #view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
         view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                              custom_id=f"FCID{player['color']}_finishAction"))
         await interaction.channel.send(f"{interaction.user.mention} when finished you may resolve your action "

@@ -11,7 +11,7 @@ from jproperties import Properties
 class InfluenceButtons:
 
     @staticmethod
-    def areTwoTilesAdjacent(game: GamestateHelper, tile1, tile2, configs):
+    def areTwoTilesAdjacent(game: GamestateHelper, tile1, tile2, configs, wormholeGen: bool):
 
         def is_adjacent(tile_a, tile_b):
             for index, adjTile in enumerate(configs.get(tile_a)[0].split(",")):
@@ -21,7 +21,10 @@ class InfluenceButtons:
                         return True
             return False
 
-        return is_adjacent(tile1, tile2) and is_adjacent(tile2, tile1)
+        if wormholeGen:
+            return is_adjacent(tile1, tile2) or is_adjacent(tile2, tile1)
+        else:
+            return is_adjacent(tile1, tile2) and is_adjacent(tile2, tile1)
 
     @staticmethod
     def getTilesToInfluence(game: GamestateHelper, player):
@@ -29,11 +32,14 @@ class InfluenceButtons:
         with open("data/tileAdjacencies.properties", "rb") as f:
             configs.load(f)
         tilesViewed = []
+        player_helper = PlayerHelper(game.get_player_from_color(player["color"]),player)
+        techsResearched = player_helper.getTechs()
+        wormHoleGen = "wog" in techsResearched
         tilesToInfluence = []
         playerTiles = ExploreButtons.getListOfTilesPlayerIsIn(game, player)
         for tile in playerTiles:
             for adjTile in configs.get(tile)[0].split(","):
-                if adjTile not in tilesViewed and InfluenceButtons.areTwoTilesAdjacent(game, tile, adjTile, configs):
+                if adjTile not in tilesViewed and InfluenceButtons.areTwoTilesAdjacent(game, tile, adjTile, configs, wormHoleGen):
                     tilesViewed.append(adjTile)
                     playerShips =game.get_gamestate()["board"][adjTile]["player_ships"]
                     playerShips.append(player["color"])
@@ -107,7 +113,7 @@ class InfluenceButtons:
                 planetTypes = ["money","science","material"]
                 for planetT in planetTypes:
                     view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{p1['color']}_addCubeToTrack_"+planetT))
-                await interaction.channel.send( f"A neutral cube was removed, please tell the bot what track it came from", view=view)
+                await interaction.channel.send( f"A neutral cube was removed, please tell the bot what track you want it to go on", view=view)
             else:
                 await interaction.channel.send( f"Removed 1 "+pop.replace("adv","")+" population")
         await interaction.message.delete()
@@ -115,5 +121,5 @@ class InfluenceButtons:
     async def addCubeToTrack(game: GamestateHelper, p1, interaction: discord.Interaction, buttonID:str):
         pop = buttonID.split("_")[1]
         game.remove_pop([pop+"_pop"],"dummy",game.get_player_from_color(p1["color"]))
-        await interaction.channel.send( f"{p1['player_name']}Added 1 "+pop.replace('adv','')+" population back to the relevant track")
+        await interaction.channel.send( f"{p1['player_name']} Added 1 "+pop.replace('adv','')+" population back to its track")
         await interaction.message.delete()

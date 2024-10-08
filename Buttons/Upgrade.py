@@ -109,7 +109,7 @@ class UpgradeButtons:
         if not shipCheck.check_valid_ship():
             await interaction.followup.send("Your ship is not valid! Please try a different part",ephemeral=True)
             return
-        
+        player_helper.specifyDetailsOfAction(f"Replaced {part_stats[oldPart]['name']} with {part_stats[newPart]['name']} on their {ship.capitalize()}.")
         game.update_player(player_helper)
         drawing = DrawHelper(game.gamestate)
         image = drawing.player_area(player_helper.stats)
@@ -118,7 +118,6 @@ class UpgradeButtons:
             ships = ["interceptor","cruiser","dread","starbase"]
             for ship2 in ships:
                 view.add_item(Button(label=ship2.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_upgradeShip_{str(actions)}_{ship2}_dummy"))
-        #view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
         view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                              custom_id=f"FCID{player['color']}_finishAction"))
         await interaction.message.delete()

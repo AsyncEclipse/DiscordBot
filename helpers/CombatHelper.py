@@ -6,7 +6,9 @@ from discord.ui import View, Button
 from Buttons.Reputation import ReputationButtons
 from helpers.DrawHelper import DrawHelper
 from helpers.GamestateHelper import GamestateHelper
+from helpers.PlayerHelper import PlayerHelper
 from helpers.ShipHelper import AI_Ship, PlayerShip
+from jproperties import Properties
 
 class Combat:
 
@@ -52,27 +54,38 @@ class Combat:
                 tiles.append((int(tile_map[tile]["sector"]),tile))
         sorted_tiles = sorted(tiles, key=lambda x: x[0], reverse=True)  
         return sorted_tiles
+    
+    @staticmethod
+    async def startCombat(game:GamestateHelper, channel, pos):
+        drawing = DrawHelper(game.gamestate)
+        players = Combat.findPlayersInTile(game, pos)[-2:]  
+        game.setAttackerAndDefender(players[1], players[0],pos)
+        game.setCurrentRoller(None, pos)
+        game.setCurrentRoller(None, pos)
+        for player in players:
+            if player != "ai":
+                image = drawing.player_area(game.getPlayerObjectFromColor(player))
+                file=drawing.show_player_ship_area(image)
+                await channel.send(game.getPlayerObjectFromColor(player)["player_name"]+" ships look like this",file=file)
+            else:
+                file = drawing.show_AI_stats()
+                await channel.send("AI stats look like this",file=file)
+        await Combat.promptNextSpeed(game, pos, channel, False)
+
     @staticmethod
     async def startCombatThreads(game:GamestateHelper, interaction:discord.Interaction):
         channel = interaction.channel
         role = discord.utils.get(interaction.guild.roles, name=game.get_gamestate()["game_id"])  
         tiles = Combat.findTilesInConflict(game)
         for tile in tiles:
+            game.setCombatants(Combat.findPlayersInTile(game, tile[1]), tile[1])
             message_to_send = "Combat will occur in system "+str(tile[0])+", position "+tile[1]  
             message = await channel.send(message_to_send) 
             threadName = game.get_gamestate()["game_id"]+"-Round "+str(game.get_gamestate()["roundNum"])+", Tile "+tile[1]+", Combat"
             thread = await message.create_thread(name=threadName)
             drawing = DrawHelper(game.gamestate)
             await thread.send(role.mention +"Combat will occur in this tile",view = Combat.getCombatButtons(game, tile[1]),file=drawing.board_tile_image_file(tile[1]))
-            drawing = DrawHelper(game.gamestate)
-            for player in Combat.findPlayersInTile(game, tile[1]):
-                if player != "ai":
-                    image = drawing.player_area(game.getPlayerObjectFromColor(player))
-                    file=drawing.show_player_ship_area(image)
-                    await thread.send(game.getPlayerObjectFromColor(player)["player_name"]+" ships look like this",file=file)
-                else:
-                    file = drawing.show_AI_stats()
-                    await thread.send("AI stats look like this",file=file)
+            await Combat.startCombat(game, thread, tile[1])
         await channel.send("Please resolve the combats in the order they appeared")
     @staticmethod
     def getCombatantShipsBySpeed(game:GamestateHelper, colorOrAI:str, playerShipsList):
@@ -103,6 +116,35 @@ class Combat:
                 sorted_ships_grouped.append((ship[0], ship[1], amount))
             
         return sorted_ships_grouped
+    
+
+    @staticmethod
+    def getBothCombatantShipsBySpeed(game:GamestateHelper, defender:str,attacker:str, playerShipsList):
+        ships = []
+        if Combat.doesCombatantHaveMissiles(game, defender, playerShipsList):
+            ships.append((99, defender))
+        if Combat.doesCombatantHaveMissiles(game, attacker, playerShipsList):
+            ships.append((99, attacker))
+        for unit in playerShipsList:
+            type = unit.split("-")[1]
+            owner = unit.split('-')[0]
+            if type == "orb" or type == "mon":
+                continue
+            if defender == owner or attacker == owner:
+                if owner == "ai":
+                    ship = AI_Ship(unit, game.gamestate["advanced_ai"])
+                    if (ship.speed,owner) not in ships:
+                        ships.append((ship.speed, owner))
+                else:
+                    player = game.get_player_from_color(owner)
+                    ship = PlayerShip(game.gamestate["players"][player], type)
+                    if (ship.speed,owner) not in ships:
+                        ships.append((ship.speed, owner))
+        sorted_ships = sorted(ships, key=lambda x: (x[0], x[1] == defender), reverse=True)    
+        return sorted_ships
+    
+
+    
     @staticmethod
     def getOpponentUnitsThatCanBeHit(game:GamestateHelper, colorOrAI:str,playerShipsList, dieVal:int, computerVal:int, pos:str):
         players = Combat.findPlayersInTile(game, pos)
@@ -127,8 +169,8 @@ class Combat:
                 ship_type = ship[1]
                 if "-" in ship_type:
                     temp = ship_type.split("-")
-                    ship = temp[1]
-                hittableShips.append(opponent+"-"+ship.replace("adv",""))
+                    ship_type = temp[1]
+                hittableShips.append(opponent+"-"+ship_type.replace("adv",""))
         return hittableShips
     
     @staticmethod
@@ -232,10 +274,16 @@ class Combat:
     async def rollDice(game:GamestateHelper, buttonID:str, interaction:discord.Interaction):
         pos = buttonID.split("_")[1]
         colorOrAI = buttonID.split("_")[2]
+        if "delete" in buttonID:
+            await interaction.message.delete()
         speed = int(buttonID.split("_")[3])
+        oldLength = len(Combat.findPlayersInTile(game, pos))
         tile_map = game.get_gamestate()["board"]
         player_ships = tile_map[pos]["player_ships"][:]
+        game.setCurrentRoller(colorOrAI,pos)
+        game.setCurrentSpeed(speed,pos)
         ships = Combat.getCombatantShipsBySpeed(game, colorOrAI, player_ships)
+        update = False
         drawing = DrawHelper(game.gamestate)
         for ship in ships:
             if ship[0] == speed or speed == 99:
@@ -259,11 +307,23 @@ class Combat:
                 dieNums = []
                 for x in range(ship[2]):
                     for die in dice:
+                        split = False
                         random_number = random.randint(1, 6)
                         num = str(random_number).replace("1","Miss").replace("6",":boom:")
                         msg +=num+" "
                         dieFiles.append(drawing.use_image("images/resources/components/dice_faces/dice_"+Combat.translateColorToName(die)+"_"+str(random_number)+".png"))
-                        dieNums.append([random_number,Combat.translateColorToDamage(die)])
+                        if missiles == "" and Combat.translateColorToDamage(die) == 4 and colorOrAI != "ai":
+                            player = game.get_player_from_color(colorOrAI)
+                            playerObj = game.getPlayerObjectFromColor(colorOrAI)
+                            player_helper = PlayerHelper(player, playerObj)
+                            researchedTechs = player_helper.getTechs()
+                            if "ans" in researchedTechs:
+                                split = True
+                        if not split:
+                            dieNums.append([random_number,Combat.translateColorToDamage(die)])
+                        else:
+                            for i in range(4):
+                                dieNums.append([random_number,1])
                 if shipModel.computer > 0:
                     msg = msg + "\nThis ship type has a +"+str(shipModel.computer)+" computer"
                 if(len(dice) > 0):
@@ -276,6 +336,7 @@ class Combat:
                             continue
                         hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships, dieNum, shipModel.computer, pos)
                         if len(hittableShips) > 0:
+                            update = True
                             if len(hittableShips) > 1:
                                 if colorOrAI != "ai":
                                     msg = interaction.user.mention + " choose what ship to hit with the die that rolled a "+str(dieNum)+". The bot has calculated that you can hit these ships"
@@ -287,6 +348,8 @@ class Combat:
                                         buttonID = "FCID"+colorOrAI+"_assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(dieDam)
                                         view.add_item(Button(label=label, style=discord.ButtonStyle.red, custom_id=buttonID))
                                     await interaction.channel.send(msg,view=view)
+                                    hitsToAssign = game.get_gamestate()["board"][pos]["unresolvedHits"]+1
+                                    game.setUnresolvedHits(hitsToAssign,pos)
                                 else:
                                     ship = hittableShips[0]
                                     oldShipVal = 0
@@ -317,6 +380,126 @@ class Combat:
                                 ship = hittableShips[0]
                                 buttonID = "assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(dieDam)
                                 await Combat.assignHitTo(game, buttonID, interaction, False)
+        hitsToAssign = 0
+        if "unresolvedHits" in game.get_gamestate()["board"][pos]:
+            hitsToAssign = game.get_gamestate()["board"][pos]["unresolvedHits"]
+        if hitsToAssign == 0 and oldLength == len(Combat.findPlayersInTile(game, pos)):
+            await Combat.promptNextSpeed(game, pos, interaction.channel, update)
+
+    @staticmethod
+    async def promptNextSpeed(game:GamestateHelper, pos:str, channel, update:bool):
+        currentSpeed = None
+        if "currentSpeed" in game.get_gamestate()["board"][pos]:
+            currentSpeed = game.get_gamestate()["board"][pos]["currentSpeed"]
+        currentRoller = None
+        if "currentRoller" in game.get_gamestate()["board"][pos]:
+            currentRoller = game.get_gamestate()["board"][pos]["currentRoller"]
+        attacker = game.get_gamestate()["board"][pos]["attacker"]
+        defender = game.get_gamestate()["board"][pos]["defender"]
+        ships = game.get_gamestate()["board"][pos]["player_ships"]
+        sortedSpeeds = Combat.getBothCombatantShipsBySpeed(game, defender, attacker, ships)
+
+        found = False
+        nextSpeed = -1
+        nextOwner = ""
+        for speed,owner in sortedSpeeds:
+            if found or currentSpeed == None or currentRoller == None:
+                nextSpeed = speed
+                nextOwner = owner
+                break
+            if speed == currentSpeed and currentRoller == owner:
+                found = True
+        if found and nextSpeed == -1:
+            for speed,owner in sortedSpeeds:
+                if speed != 99:
+                    nextSpeed = speed
+                    nextOwner = owner
+                    break
+        view = View()
+        checker = ""
+        if update:
+            drawing = DrawHelper(game.gamestate)
+            await channel.send("Updated view",file=drawing.board_tile_image_file(pos))
+        game.setCurrentRoller(nextOwner,pos)
+        game.setCurrentSpeed(nextSpeed,pos)
+        initiative = "Initiative "+str(nextSpeed)
+        if nextSpeed == 99:
+            initiative = "missiles"
+
+
+
+        if (nextSpeed,nextOwner) in game.getRetreatingUnits(pos):
+            checker="FCID"+nextOwner+"_"
+            playerObj = game.getPlayerObjectFromColor(owner)
+            msg = playerObj["player_name"] + " announced a retreat for ships with "+initiative +" and should now choose a controlled sector adjacent that does not contain enemy ships"
+            for tile in Combat.getRetreatTiles(game, pos, nextOwner):
+                view.add_item(Button(label=tile, style=discord.ButtonStyle.red, custom_id=f"{checker}finishRetreatingUnits_{pos}_{nextOwner}_{str(nextSpeed)}_{tile}"))
+        else:
+            if nextOwner != "ai":
+                checker="FCID"+nextOwner+"_"
+                playerObj = game.getPlayerObjectFromColor(owner)
+                msg = playerObj["player_name"] + " it is your turn to roll your ships with "+initiative
+                
+                view.add_item(Button(label="Roll "+initiative+" Ships", style=discord.ButtonStyle.green, custom_id=f"{checker}rollDice_{pos}_{nextOwner}_{str(nextSpeed)}_delete"))
+                if nextSpeed != 99 and len(Combat.getRetreatTiles(game, pos, nextOwner)) > 0:
+                    msg += ". You can also alternatively choose to start to retreat them."
+                    view.add_item(Button(label="Retreat "+initiative+" Ships", style=discord.ButtonStyle.red, custom_id=f"{checker}startToRetreatUnits_{pos}_{nextOwner}_{str(nextSpeed)}"))
+            else:
+                view.add_item(Button(label="Roll "+initiative+" Ships For AI", style=discord.ButtonStyle.green, custom_id=f"{checker}rollDice_{pos}_{nextOwner}_{str(nextSpeed)}_delete"))
+                playerObj = game.getPlayerObjectFromColor(attacker)
+                msg = playerObj["player_name"] + " please roll the dice for the AI ships with "+initiative
+        await channel.send(msg, view = view)
+        
+    @staticmethod
+    async def finishRetreatingUnits(game:GamestateHelper, buttonID:str, interaction:discord.Interaction):
+        pos = buttonID.split("_")[1]
+        colorOrAI = buttonID.split("_")[2]
+        speed = buttonID.split("_")[3]
+        destination = buttonID.split("_")[4]
+        game.removeCertainRetreatingUnits((int(speed),colorOrAI), pos)
+        tile_map = game.get_gamestate()["board"]
+        player_ships = tile_map[pos]["player_ships"][:]
+        for ship in player_ships:
+            if colorOrAI in ship:
+                type = ship.split("-")[1]
+                player = game.get_player_from_color(colorOrAI)
+                shipM = PlayerShip(game.gamestate["players"][player], type)
+                if shipM.speed == int(speed):
+                    game.remove_units([ship],pos)
+                    game.add_units([ship],destination)
+        await interaction.message.delete()
+        await interaction.channel.send(interaction.user.mention + " has retreated all ships with initiative "+speed+" to "+destination+".")
+        await Combat.promptNextSpeed(game, pos, interaction.channel, True)
+
+
+    @staticmethod
+    def getRetreatTiles(game:GamestateHelper, pos:str, color:str):
+        from Buttons.Influence import InfluenceButtons
+        playerObj = game.getPlayerObjectFromColor(color)
+        player_helper = PlayerHelper(game.get_player_from_color(color),playerObj)
+        techsResearched = player_helper.getTechs()
+        configs = Properties()
+        with open("data/tileAdjacencies.properties", "rb") as f:
+            configs.load(f)
+        wormHoleGen = "wog" in techsResearched
+        validTiles = []
+        for tile in playerObj["owned_tiles"]:
+            players = Combat.findPlayersInTile(game, pos)
+            if InfluenceButtons.areTwoTilesAdjacent(game, pos, tile, configs, wormHoleGen) and len(players) < 2:
+                if len(players) == 1 and players[0] != color:
+                    continue
+                validTiles.append(tile)
+        return validTiles
+
+    @staticmethod
+    async def startToRetreatUnits(game:GamestateHelper, buttonID:str, interaction:discord.Interaction):
+        pos = buttonID.split("_")[1]
+        colorOrAI = buttonID.split("_")[2]
+        speed = buttonID.split("_")[3]
+        game.setRetreatingUnits((int(speed),colorOrAI), pos)
+        await interaction.message.delete()
+        await interaction.channel.send(interaction.user.mention + " has chosen to start to retreat the ships with initiative "+speed+". They will be prompted to retreat when their turn comes around again")
+        await Combat.promptNextSpeed(game, pos, interaction.channel, False)
 
     @staticmethod
     async def assignHitTo(game:GamestateHelper, buttonID:str, interaction:discord.Interaction, button:bool):
@@ -339,8 +522,8 @@ class Combat:
             msg = "The AI dealt "+dieDam+" damage to a "+Combat.translateShipAbrToName(shipType)+" with a die that rolled a "+str(dieNum)
         msg = msg + ". The damaged ship has "+str(shipModel.hull)+" hull, and so has "+str((shipModel.hull-damage+1))+" hp left."
         await interaction.channel.send(msg)
+        oldLength = len(Combat.findPlayersInTile(game, pos))
         if shipModel.hull < damage:
-            oldLength = len(Combat.findPlayersInTile(game, pos))
             player1 = ""
             player2 = ""
             if oldLength > 1:
@@ -352,12 +535,11 @@ class Combat:
             else:
                 msg = "The AI destroyed the "+Combat.translateShipAbrToName(shipType)+" due to the damage exceeding the ships hull"
             await interaction.channel.send(msg)
-            if len(Combat.findPlayersInTile(game, pos)) < 2 and len(Combat.findPlayersInTile(game, pos)) != oldLength:
+            if len(Combat.findPlayersInTile(game, pos)) < 2:
                 actions_channel = discord.utils.get(interaction.guild.channels, name=game.game_id+"-actions") 
                 if actions_channel is not None and isinstance(actions_channel, discord.TextChannel):
                     await actions_channel.send("Combat in tile "+pos+" has concluded. There are "+str(len(Combat.findTilesInConflict(game)))+" tiles left in conflict")
-            if len(Combat.findPlayersInTile(game, pos)) != oldLength:
-                players = [player1, player2]
+                players = game.gamestate["board"][pos]["combatants"]
                 for playerColor in players:
                     if playerColor == "ai":
                         continue
@@ -372,12 +554,19 @@ class Combat:
                     view.add_item(Button(label=label, style=discord.ButtonStyle.red, custom_id=buttonID))
                     msg = player["player_name"] + " the bot believes you should draw "+count+" reputation tiles here. Click to do so or press decline if the bot messed up."
                     await interaction.channel.send(msg, view=view)
-                if len(Combat.findPlayersInTile(game, pos)) > 1:
-                    drawing = DrawHelper(game.gamestate)
-                    await interaction.channel.send("Updated view",view = Combat.getCombatButtons(game, pos),file=drawing.board_tile_image_file(pos))
+                
+            elif oldLength != len(Combat.findPlayersInTile(game, pos)):
+                drawing = DrawHelper(game.gamestate)
+                await interaction.channel.send("Updated view",view = Combat.getCombatButtons(game, pos),file=drawing.board_tile_image_file(pos))
+                await Combat.startCombat(game, interaction.channel, pos)
                 
         if button:
             await interaction.message.delete()
+            hitsToAssign = game.get_gamestate()["board"][pos]["unresolvedHits"]-1
+            game.setUnresolvedHits(hitsToAssign)
+            if hitsToAssign == 0 and oldLength == len(Combat.findPlayersInTile(game, pos)):
+                await Combat.promptNextSpeed(game, pos, interaction.channel, True)
+
 
 
     @staticmethod

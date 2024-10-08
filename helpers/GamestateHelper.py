@@ -29,6 +29,30 @@ class GamestateHelper:
          self.gamestate["roundNum"] = round
          self.update()
 
+
+
+
+    def changeColor(self, colorOld, colorNew):
+        def replace_string_in_dict(original_dict, old_string, new_string):  
+            new_dict = {}  
+            for key, value in original_dict.items():  
+                new_key = key.replace(old_string, new_string)  
+                if isinstance(value, dict):  
+                    new_value = replace_string_in_dict(value, old_string, new_string)  
+                elif isinstance(value, list):  
+                    new_value = [item.replace(old_string, new_string) if isinstance(item, str) else item for item in value]
+                elif isinstance(value, str):  
+                    new_value = value.replace(old_string, new_string)  
+                else:  
+                    new_value = value 
+                new_dict[new_key] = new_value  
+            return new_dict  
+        modified_dict = replace_string_in_dict(self.gamestate, colorOld, colorNew)   
+
+        self.gamestate = modified_dict  
+        self.update()
+
+
     async def endGame(self, interaction:discord.Interaction):
         guild = interaction.guild
         self.gamestate["gameEnded"] = True
@@ -48,11 +72,47 @@ class GamestateHelper:
             drawing = DrawHelper(self.gamestate)
             await thread.send(file=drawing.show_map())
             await thread.send(file=drawing.show_stats())
-            await thread.send(role.mention + " final state here")
+            winner,highestScore = self.getWinner()
+            await thread.send(role.mention + " final state here. "+winner+" won with "+str(highestScore)+" points")
         if role:  
             await role.delete()  
         if os.path.exists(f"{config.gamestate_path}/{self.game_id}_saveFile.json"):   
             os.remove(f"{self.game_id}_saveFile.json")
+    
+
+    def getWinner(self):
+        winner = ""
+        highestScore = 0
+        resources = 0
+        for player in self.gamestate["players"]:
+            playerObj = self.get_player(player)  
+            drawing = DrawHelper(self.gamestate)
+            player_helper = PlayerHelper(player, playerObj)
+            points = drawing.get_public_points(playerObj)
+            totalResources = playerObj["science"]+playerObj["money"]+playerObj["materials"]
+            if points > highestScore:
+                highestScore = points
+                winner = playerObj["player_name"]
+                resources = totalResources
+            if points == highestScore:
+                if totalResources > resources:
+                    winner = playerObj["player_name"]
+                    resources = totalResources
+        return (winner, highestScore)
+    async def declareWinner(self, interaction:discord.Interaction):
+        self.gamestate["gameEnded"] = True
+        self.update()
+        
+        winner,highestScore = self.getWinner()
+        if interaction.message:
+            await interaction.message.delete()
+        guild = interaction.guild
+        role = discord.utils.get(guild.roles, name=self.game_id)  
+        await interaction.channel.send(role.mention +" "+ winner +" is the winner with "+str(highestScore) + " points", file = drawing.show_stats())
+        view = View()
+        view.add_item(Button(label="End Game",style=discord.ButtonStyle.blurple, custom_id="endGame"))
+        await interaction.channel.send("Hit this button to cleanup the channels.", view=view)
+
 
 
     def getLocationFromID(self, id):
@@ -150,6 +210,13 @@ class GamestateHelper:
         tile.update({"orientation": (tile["orientation"]+orientation) % 360})
         self.gamestate["board"][position] = tile
         self.update()
+    
+    def addWarpPortal(self, position):
+        tile = self.gamestate["board"][position]
+        tile.update({"warp": 1})
+        tile["warpPoint"] = 1
+        self.gamestate["board"][position] = tile
+        self.update()
     def add_tile(self, position, orientation, sector, owner=None):
 
         with open("data/sectors.json") as f:
@@ -225,6 +292,8 @@ class GamestateHelper:
     def getReputationTilesToDraw(self, position, color):
         key = "ships_destroyed_by_" + color
         count = 1
+        if "damage_tracker" in self.gamestate["board"][position]:
+            del self.gamestate["board"][position]["damage_tracker"]
         if key not in self.gamestate["board"][position]:  
             return count
         else:
@@ -247,6 +316,7 @@ class GamestateHelper:
 
     def add_warp(self, position):
         self.gamestate["board"][position]["warp"]=1
+        self.gamestate["board"][position]["warpDisc"]=2
         self.update()
 
     def updateNamesAndOutRimTiles(self, interaction:discord.Interaction):
@@ -299,19 +369,52 @@ class GamestateHelper:
         msg = f"\nYour current economic situation is as follows:\nMoney: {money} ({moneyIncrease} - {moneyDecrease})\nScience: {science} ({scienceIncrease})\nMaterials: {materials} ({materialsIncrease})\nIf you spend another disk, your maintenance cost will go from -{moneyDecrease} to -{moneyDecrease2}. If you drop another money cube, your income will go from {moneyIncrease} to {moneyIncrease2}"
         return msg
             
-        
+    def setCombatants(self, players, pos):
+        self.gamestate["board"][pos]["combatants"] = players
+        self.update()
+
+    def setCurrentSpeed(self, speed, pos):
+        self.gamestate["board"][pos]["currentSpeed"] = speed
+        self.update()
+    def setRetreatingUnits(self, unitsToRetreat, pos):
+        if "unitsToRetreat" not in self.gamestate["board"][pos]:
+            self.gamestate["board"][pos]["unitsToRetreat"] = []
+        self.gamestate["board"][pos]["unitsToRetreat"].append(unitsToRetreat)
+        self.update()
+    def removeCertainRetreatingUnits(self, unitsToRetreat, pos):
+        if "unitsToRetreat" not in self.gamestate["board"][pos]:
+            self.gamestate["board"][pos]["unitsToRetreat"] = []
+        if unitsToRetreat in self.gamestate["board"][pos]["unitsToRetreat"]:
+            self.gamestate["board"][pos]["unitsToRetreat"].remove(unitsToRetreat)
+        self.update()
+    def getRetreatingUnits(self, pos):
+        if "unitsToRetreat" not in self.gamestate["board"][pos]:
+            self.gamestate["board"][pos]["unitsToRetreat"] = []
+            self.update()
+        return self.gamestate["board"][pos]["unitsToRetreat"]
+
+    def setCurrentRoller(self, roller, pos):
+        self.gamestate["board"][pos]["currentRoller"] = roller
+        self.update()
+    def setAttackerAndDefender(self, attacker, defender, pos):
+        self.gamestate["board"][pos]["attacker"] = attacker
+        self.gamestate["board"][pos]["defender"] = defender
+        self.update()
+    def setUnresolvedHits(self, amount, pos):
+        self.gamestate["board"][pos]["unresolvedHits"] = amount
+        self.update()
             
     def add_pop_specific(self, originalType:str, type:str, number:int, position:str, playerID):
-        if "orbital" not in originalType:
-            if self.gamestate["players"][playerID]["colony_ships"] > 0:
-                self.gamestate["players"][playerID]["colony_ships"] = self.gamestate["players"][playerID]["colony_ships"]-1
-            else:
-                return False
+        if self.gamestate["players"][playerID]["colony_ships"] > 0:
+            self.gamestate["players"][playerID]["colony_ships"] = self.gamestate["players"][playerID]["colony_ships"]-1
+        else:
+            return False
         if  f"{originalType}_pop" in self.gamestate["board"][position]:
             self.gamestate["board"][position][f"{originalType}_pop"][number] = self.gamestate["board"][position][f"{originalType}_pop"][number]+1
         else:
             self.gamestate["board"][position][f"{originalType}_pop"] = [1]
-        self.gamestate["players"][playerID][type.replace("adv","")+"_pop_cubes"] = self.gamestate["players"][playerID][type.replace("adv","")+"_pop_cubes"]-1
+        if type.replace("adv","")+"_pop_cubes" in self.gamestate["players"][playerID]:
+            self.gamestate["players"][playerID][type.replace("adv","")+"_pop_cubes"] = self.gamestate["players"][playerID][type.replace("adv","")+"_pop_cubes"]-1
         self.update()
         return True
 
@@ -383,6 +486,7 @@ class GamestateHelper:
                 pass
             else:
                 tech_draws -= 1
+
         if "roundNum" in self.gamestate:
             self.gamestate["roundNum"] += 1
         else:

@@ -53,6 +53,9 @@ class MoveButtons:
         with open("data/tileAdjacencies.properties", "rb") as f:
             configs.load(f)
         tile_map = game.get_gamestate()["board"]
+        player_helper = PlayerHelper(game.get_player_from_color(player["color"]),player)
+        techsResearched = player_helper.getTechs()
+        wormHoleGen = "wog" in techsResearched
 
         def recursive_search(pos, distance, visited):
             if distance >  shipRange:
@@ -64,8 +67,12 @@ class MoveButtons:
                 return
 
             for adjTile in configs.get(pos)[0].split(","):
-                if InfluenceButtons.areTwoTilesAdjacent(game, pos, adjTile, configs):
+                if InfluenceButtons.areTwoTilesAdjacent(game, pos, adjTile, configs, wormHoleGen):
                     recursive_search(adjTile, distance + 1, visited)
+            if tile_map[pos]["warp"] == 1:
+                for tile in tile_map:
+                    if tile_map[tile]["warp"] == 1:
+                        recursive_search(tile, distance + 1, visited)
 
         visited_tiles = set()
         recursive_search(origin, 0, visited_tiles)
@@ -96,7 +103,8 @@ class MoveButtons:
         game.add_units([shipName],destination)
         drawing = DrawHelper(game.gamestate)
         await interaction.channel.send( f"{interaction.user.mention} Moved a {shipType} from {originT} to {destination}.", file=drawing.board_tile_image_file(destination))
-
+        player_helper.specifyDetailsOfAction(f"Moved a {shipType} from {originT} to {destination}.")
+        game.update_player(player_helper)
         for tile in player["reputation_track"]:
             if isinstance(tile, str) and "-" in tile:
                 color = tile.split("-")[2]
@@ -124,7 +132,6 @@ class MoveButtons:
             view.add_item(Button(label="Move an additional ship", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startMove_"+str(moveCount+1)))
             view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                                  custom_id=f"FCID{player['color']}_finishAction"))
-            #view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
             await interaction.channel.send(f"{interaction.user.mention} you can move an additional ship or end your "
                                            f"action.", view=view)
         else:
