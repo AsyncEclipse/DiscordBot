@@ -262,7 +262,7 @@ class DrawHelper:
                         for count in range(damage):
                             damage_image = self.use_image(f"images/resources/components/basic_ships/marker_damage.png")
                             tile_image.paste(damage_image,
-                                    (int(345 / 1024 * coords[0] + value-size/2+count*10+35),
+                                    (int(345 / 1024 * coords[0] + value-size/2+count*10+15),
                                     int(345 / 1024 * coords[1] + value-size/2+35)),
                                     mask=damage_image)
 
@@ -281,10 +281,10 @@ class DrawHelper:
                                 coords = tile[f"{resource_type}{x+1}_snap"]
                             tile_image.paste(pop_image, (int(345 / 1024 * coords[0] - 18), int(345 / 1024 * coords[1] - 18)), mask=pop_image)
                             if "money" in resource_type or "science" in resource_type or "material" in resource_type:
-                                resource_type2 = resource_type.replace("adv","")
+                                resource_type2 = resource_type.replace("adv","")+"_Alone"
                                 pop_path = f"images/resources/components/resourcesymbols/{resource_type2}.png"
-                                pop_image = self.use_image(pop_path).resize((20,20))
-                                tile_image.paste(pop_image, (int(345 / 1024 * coords[0] - 10), int(345 / 1024 * coords[1] - 10)), mask=pop_image)
+                                pop_image = self.use_image(pop_path).resize((40,40))
+                                tile_image.paste(pop_image, (int(345 / 1024 * coords[0] - 20), int(345 / 1024 * coords[1] - 20)), mask=pop_image)
 
             if "owner" in tile and tile["owner"] != 0:
                 color = tile["owner"]
@@ -696,6 +696,10 @@ class DrawHelper:
         for tile in tile_map:
             if "owner" in tile_map[tile] and tile_map[tile]["owner"] == color:
                 points += tile_map[tile]["vp"]
+                if "warpPoint" in tile_map[tile]:
+                    points += tile_map[tile]["warpPoint"]
+                if "warpDisc" in tile_map[tile]:
+                    points += tile_map[tile]["warpDisc"]
                 if "player_ships" in tile_map[tile]:
                     for ship in tile_map[tile]["player_ships"]:
                         if "mon" in ship:

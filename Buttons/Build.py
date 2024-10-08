@@ -168,6 +168,7 @@ class BuildButtons:
         science = int(buttonID.split("_")[4])
         money = int(buttonID.split("_")[5])
         game.add_units(build, loc)
+        player_helper.specifyDetailsOfAction("Built "+" ".join(build)+" in "+loc+".")
         player_helper.stats["science"], player_helper.stats["materials"], player_helper.stats["money"] = science, material, money
         game.update_player(player_helper)
         drawing = DrawHelper(game.gamestate)
@@ -182,7 +183,6 @@ class BuildButtons:
         else:
             view2 = View()
             view2.add_item(Button(label="Build Somewhere Else", style=discord.ButtonStyle.red, custom_id="startBuild2"))  
-            #view2.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id="endTurn"))
             view2.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                                  custom_id=f"FCID{player['color']}_finishAction"))
             await interaction.channel.send(f"{interaction.user.mention} you could potentially build somewhere else.", view=view2)

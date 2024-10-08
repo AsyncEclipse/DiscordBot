@@ -1,6 +1,5 @@
 import discord
 from Buttons.Population import PopulationButtons
-from helpers.CombatHelper import Combat
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 from helpers.DrawHelper import DrawHelper
@@ -54,13 +53,17 @@ class TurnButtons:
         else:
             await interaction.channel.send("All players have passed")
         await interaction.message.delete()
-        await game.showUpdate(f"End of {interaction.user.name}'s turn",interaction, bot)
+        msg = f"End of {interaction.user.name}'s turn."
+        if "lastAction" in player and "detailsOflastAction" in player:
+            msg = f"End of {interaction.user.name}'s turn. They used their action to "+player["lastAction"]+". "+player["detailsOflastAction"]
+        await game.showUpdate(msg,interaction, bot)
 
 
     
 
     @staticmethod
     async def passForRound(player, game: GamestateHelper, interaction: discord.Interaction, player_helper : PlayerHelper, bot):
+        from helpers.CombatHelper import Combat
         if "passed" in player and player["passed"]== True:
             await interaction.channel.send(f"{interaction.user.mention} passed on their reaction window.")
         else:
@@ -122,8 +125,8 @@ class TurnButtons:
                 await interaction.channel.send("Could not find first player, someone run /player start_turn")
         else:
             view = View()
-            view.add_item(Button(label="End Game",style=discord.ButtonStyle.blurple, custom_id="endGame"))
-            await interaction.channel.send("It seems like the game should be ended, hit this button to cleanup the channels.", view=view)
+            view.add_item(Button(label="Declare Winner",style=discord.ButtonStyle.blurple, custom_id="declareWinner"))
+            await interaction.channel.send("It seems like the game should be ended, hit this button to reveal the winner.", view=view)
         await game.showUpdate(f"Start of new round",interaction, bot)
 
 

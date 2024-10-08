@@ -18,6 +18,7 @@ class PlayerHelper:
         return(f"\n> Adjusted materials from {before} to {before+adjustment}")
 
 
+
     def adjust_science(self, adjustment):
         before = self.stats["science"]
         self.stats["science"] += adjustment
@@ -72,9 +73,18 @@ class PlayerHelper:
         return (f"\n> Adjusted influence discs from {before} to {amount}")
     def spend_influence_on_action(self, action:str):
         self.adjust_influence(-1)
+        self.stats["lastAction"] = action
+        self.stats["detailsOflastAction"] = ""
         if action+"_action_counters" not in self.stats:
             self.stats[action+"_action_counters"] = 0
         self.stats[action+"_action_counters"] = self.stats[action+"_action_counters"]+1
+
+    def specifyDetailsOfAction(self, details:str):
+        if "detailsOflastAction" in self.stats and self.stats["detailsOflastAction"] != "":
+            self.stats["detailsOflastAction"] = self.stats["detailsOflastAction"]+" "+details
+        else:
+            self.stats["detailsOflastAction"] = details
+        
 
     def adjust_influence_on_action(self, action:str, amount:int):
         self.adjust_influence(-amount)
