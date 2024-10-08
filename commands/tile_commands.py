@@ -120,6 +120,7 @@ class TileCommands(commands.GroupCog, name="tile"):
         game = GamestateHelper(interaction.channel)  
         player_color = color.value if color else game.get_player(str(interaction.user.id))["color"]  
         playerID = game.get_player_from_color(player_color)
+        playerObj = game.getPlayerObjectFromColor(player_color)
         added_pop, removed_pop = [], []  
         
         def process_pop(pop_type, count):  
@@ -146,7 +147,7 @@ class TileCommands(commands.GroupCog, name="tile"):
                 view.add_item(Button(label="Material", style=discord.ButtonStyle.gray, custom_id=f"FCID{player_color}_reducePopFor_material"))
                 view.add_item(Button(label="Science", style=discord.ButtonStyle.gray, custom_id=f"FCID{player_color}_reducePopFor_science"))
                 view.add_item(Button(label="Money", style=discord.ButtonStyle.gray, custom_id=f"FCID{player_color}_reducePopFor_money"))
-                await interaction.channel.send( f"Choose what type of cube to put on the neutral planet", view=view)
+                await interaction.channel.send( f"{playerObj['player_name']} Choose what type of cube to put on the neutral/orbital planet", view=view)
         if removed_pop:  
             neutralPop = game.remove_pop(removed_pop, tile_position,playerID)  
             if neutralPop > 0:
