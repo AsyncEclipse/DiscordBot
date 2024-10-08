@@ -15,7 +15,9 @@ class DiscoveryTileButtons:
     async def exploreDiscoveryTile(game: GamestateHelper, tile:str, interaction: discord.Interaction, player):
         if "discTiles" not in game.get_gamestate():
             game.fillInDiscTiles()
-
+        if game.gamestate["board"][tile]["disctile"]==0:
+            await interaction.followup.send("No discovery tile in tile "+tile)
+            return
         disc = game.getNextDiscTile(tile)
         with open("data/discoverytiles.json") as f:
             discTile_data = json.load(f)
