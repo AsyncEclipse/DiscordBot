@@ -52,11 +52,11 @@ class TurnButtons:
             await interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(nextPlayer),view=view)
         else:
             await interaction.channel.send("All players have passed")
-        await interaction.message.delete()
         msg = f"End of {interaction.user.name}'s turn."
         if "lastAction" in player and "detailsOflastAction" in player:
             msg = f"End of {interaction.user.name}'s turn. They used their action to "+player["lastAction"]+". "+player["detailsOflastAction"]
         await game.showUpdate(msg,interaction, bot)
+        await interaction.message.delete()
 
 
     
