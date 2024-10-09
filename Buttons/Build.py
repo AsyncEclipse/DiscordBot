@@ -176,15 +176,11 @@ class BuildButtons:
         await interaction.channel.send(f"This is what the tile looks like after the build. ",file=drawing.board_tile_image_file(loc))
         if player["passed"]== True:
             buildApt = 1
-        if len(build) == buildApt:
-            next_player = game.get_next_player(player)
-            view = TurnButtons.getStartTurnButtons(game, next_player)
-            await interaction.channel.send(f"{next_player['player_name']} use these buttons to do your turn. "+game.displayPlayerStats(next_player),view=view)
-        else:
-            view2 = View()
+        view2 = View()
+        if len(build) < buildApt:
             view2.add_item(Button(label="Build Somewhere Else", style=discord.ButtonStyle.red, custom_id="startBuild2"))  
-            view2.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
-                                 custom_id=f"FCID{player['color']}_finishAction"))
-            await interaction.channel.send(f"{interaction.user.mention} you could potentially build somewhere else.", view=view2)
+        view2.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
+                                custom_id=f"FCID{player['color']}_finishAction"))
+        await interaction.channel.send(f"{interaction.user.mention} use buttons to finish turn or potentially build somewhere else.", view=view2)
         await interaction.message.delete()
         

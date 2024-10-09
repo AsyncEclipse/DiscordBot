@@ -15,7 +15,6 @@ class ImageCacheHelper:
         return cls._instance
 
     def load_images(self):  
-        # def load_images_internal():  
         for root, dirs, files in os.walk(self.base_directory):  
             for filename in files:  
                 if filename.endswith(('.png')):
@@ -24,13 +23,11 @@ class ImageCacheHelper:
                     if "wh_mask" in filename:
                         self.cache[filename] = Image.open(image_path).convert("RGBA").resize(size).rotate(180)
                     else:  
-                            self.cache[filename] = Image.open(image_path).convert("RGBA").resize(size)
-        # with concurrent.futures.ThreadPoolExecutor() as executor:  
-        #     executor.submit(asyncio.run_coroutine_threadsafe,load_images_internal) 
-    #any(substring in main_string for substring in substrings)
+                        self.cache[filename] = Image.open(image_path).convert("RGBA").resize(size)
+
     def get_image_size(self, folder, filename):  
         if "hexes" in folder.lower():  
-            return (345,299)
+            return (345,300)
         elif "upgrade_reference1" in filename.lower() or "upgrade_reference2" in filename.lower():  
             return (310,300)  
         elif "masks" in folder.lower():  

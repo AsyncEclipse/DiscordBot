@@ -42,8 +42,10 @@ class ExploreButtons:
     async def startExplore(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction, buttonID:str):
         if "2" not in buttonID:
             player_helper.spend_influence_on_action("explore")
-        await interaction.channel.send(f"{interaction.user.mention} is using their turn to explore")
-        game.update_player(player_helper)
+            await interaction.channel.send(f"{interaction.user.mention} is using their turn to explore")
+            game.update_player(player_helper)
+        else:
+            await interaction.channel.send(f"{interaction.user.mention} is resolving their second explore")
         configs = Properties()
         with open("data/tileAdjacencies.properties", "rb") as f:
             configs.load(f)
@@ -65,9 +67,9 @@ class ExploreButtons:
                     tilesViewed.append(adjTile)
                     view.add_item(Button(label=str(adjTile), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_exploreTile_" + str(adjTile)))
         await interaction.channel.send(f"{interaction.user.mention} select the tile you would like to explore",view=view)
-        if player["explore_apt"] > 1:
+        if player["explore_apt"] > 1 and "2" not in buttonID:
             view2 = View()
-            view2.add_item(Button(label="Start 2nd explore", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_startExplore2"))
+            view2.add_item(Button(label="Start 2nd explore", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startExplore2"))
             view2.add_item(Button(label="Decline 2nd Explore", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))
             await interaction.channel.send(f"{interaction.user.mention} after exploring the first time, you can use this button to explore again.", view=view2)
         await interaction.message.delete()

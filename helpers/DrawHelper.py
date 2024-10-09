@@ -132,15 +132,15 @@ class DrawHelper:
     
     def availablePartsFile(self,available_parts):
         available_parts.discard("empty")
-        context = Image.new("RGBA", (68*(len(available_parts)), 68), (255, 255, 255, 0))
+        context = Image.new("RGBA", (260*(len(available_parts)), 256), (255, 255, 255, 0))
         with open("data/parts.json", "r") as f:
                 part_data = json.load(f)
         for x,part in enumerate(available_parts):
             part_details = part_data.get(part)
             partName = part_details["name"].lower().replace(" ", "_") if part_details else part
-            part_path = f"images/resources/components/upgrades/{partName}.png"
-            part_image = self.use_image(part_path)
-            context.paste(part_image,(x*68, 0),mask=part_image)
+            part_path = f"images/resources/components/upgrades/{partName}.png" 
+            part_image = Image.open(part_path).resize((256,256))
+            context.paste(part_image,(x*259, 0))
         
         bytes_io = BytesIO()
         context.save(bytes_io, format="PNG")
@@ -965,6 +965,22 @@ class DrawHelper:
 
     def show_player_ship_area(self, player_area):
         player_area = player_area.crop((0,0,895, 196))
+        bytes = BytesIO()
+        player_area.save(bytes, format="PNG")
+        bytes.seek(0)
+        file = discord.File(bytes, filename="player_area.png")
+        return file
+
+    def show_player_ship(self, player_area, ship):
+        player_area = player_area.crop((0,0,895, 196))
+        if "intercept" in ship:
+            player_area = player_area.crop((16,0,200, 170))
+        if "cru" in ship:
+            player_area = player_area.crop((221,0,405, 196))
+        if "dread" in ship:
+            player_area = player_area.crop((435,0,680, 196))
+        if "starbase" in ship:
+            player_area = player_area.crop((696,0,875, 160))
         bytes = BytesIO()
         player_area.save(bytes, format="PNG")
         bytes.seek(0)

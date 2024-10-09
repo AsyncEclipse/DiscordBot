@@ -539,6 +539,11 @@ class Combat:
                 actions_channel = discord.utils.get(interaction.guild.channels, name=game.game_id+"-actions") 
                 if actions_channel is not None and isinstance(actions_channel, discord.TextChannel):
                     await actions_channel.send("Combat in tile "+pos+" has concluded. There are "+str(len(Combat.findTilesInConflict(game)))+" tiles left in conflict")
+                    if len(Combat.findTilesInConflict(game)) == 0:
+                        role = discord.utils.get(interaction.guild.roles, name=game.game_id)
+                        view = View()
+                        view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"startPopDrop"))
+                        actions_channel.send(role.mention+" Please run upkeep after all post combat events are resolved. You can use this button to drop pop after taking control of a tile", view = view)
                 players = game.gamestate["board"][pos]["combatants"]
                 for playerColor in players:
                     if playerColor == "ai":
