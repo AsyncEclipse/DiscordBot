@@ -31,7 +31,8 @@ class ResearchButtons:
             tech_data = json.load(f)  
         tech_details = tech_data.get(tech)
         drawing = DrawHelper(game.gamestate)
-        await interaction.channel.send(f"{interaction.user.mention} acquired the tech "+tech_details["name"],file=drawing.show_specific_tech(tech))
+        image = DrawHelper.show_tech_ref_image(tech_details["name"], tech_details['track'])
+        await interaction.channel.send(f"{interaction.user.mention} acquired the tech "+tech_details["name"],file=image)
         player_helper.specifyDetailsOfAction("Researched "+tech_details["name"]+".")
         if player["science"] >= cost:  
             msg = player_helper.adjust_science(-cost)  

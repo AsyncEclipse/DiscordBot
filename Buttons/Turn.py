@@ -91,10 +91,13 @@ class TurnButtons:
             await interaction.followup.send(interaction.user.mention+ " you can use this button to permanently pass on reactions if you want.",view=view2,ephemeral=True)
         else:
             view = View()
+            role = discord.utils.get(interaction.guild.roles, name=game.game_id)  
+            msg = role.mention+" All players have passed, you can use this button to start the next round"
             if len(Combat.findTilesInConflict(game)) > 0:
                 await Combat.startCombatThreads(game, interaction)
+                msg = msg +  " after all battles are resolved"
             view.add_item(Button(label="Run Upkeep",style=discord.ButtonStyle.blurple, custom_id="runUpkeep"))
-            await interaction.channel.send("All players have passed, you can use this button to start the next round after all battles are resolved", view=view)
+            await interaction.channel.send(msg, view=view)
         await interaction.message.delete()
         await game.showUpdate(f"{interaction.user.name} Passing",interaction, bot)
 

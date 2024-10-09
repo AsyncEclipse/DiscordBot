@@ -323,6 +323,11 @@ class GamestateHelper:
         for player in self.gamestate["players"]:
             if "username" not in self.gamestate["players"][player]:
                 self.gamestate["players"][player]["username"] = interaction.guild.get_member(int(player)).display_name
+            tiles = self.gamestate["players"][player]["owned_tiles"][:]
+            for tile in tiles:
+                if "owner" not in self.gamestate["board"][tile] or self.gamestate["board"][tile]["owner"] != self.gamestate["players"][player]["color"]:
+                    self.gamestate["players"][player]["owned_tiles"].remove(tile)
+
         if len(self.gamestate[f"tile_deck_300"]) == 0:
             keysToRemove = []
             for key,value in self.gamestate[f"board"].items():
@@ -434,10 +439,12 @@ class GamestateHelper:
                     self.gamestate["board"][position][i][0] = self.gamestate["board"][position][i][0]+1
             else:
                 self.gamestate["board"][position][i] = [1]
-            if "neutral" not in i and "orbital" not in i:    
-                self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] = self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"]-1
-            else: 
-                neutralPop += 1
+            length = len(self.gamestate["board"][position][i])
+            if self.gamestate["board"][position][i][0] <= length:
+                if "neutral" not in i and "orbital" not in i:    
+                    self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] = self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"]-1
+                else: 
+                    neutralPop += 1
         self.update()
         return neutralPop
     def remove_pop(self, pop_list, position, playerID):
