@@ -166,6 +166,7 @@ class ResearchButtons:
                                  custom_id=f"FCID{player['color']}_finishAction"))
             await interaction.channel.send(f"{interaction.user.mention} when finished you may resolve your action "
                                            f"with this button.", view=view)
+            await interaction.message.delete()
 
     @staticmethod  
     async def getTech(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction, buttonID:str):

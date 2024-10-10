@@ -520,7 +520,7 @@ class Combat:
             msg = interaction.user.mention + " dealt "+dieDam+" damage to a "+Combat.translateShipAbrToName(shipType)+" with a die that rolled a "+str(dieNum)
         else:
             msg = "The AI dealt "+dieDam+" damage to a "+Combat.translateShipAbrToName(shipType)+" with a die that rolled a "+str(dieNum)
-        msg = msg + ". The damaged ship has "+str(shipModel.hull)+" hull, and so has "+str((shipModel.hull-damage+1))+" hp left."
+        msg = msg + ". The damaged ship has "+str((shipModel.hull-damage+1))+"/"+str(shipModel.hull+1)+" hp left."
         await interaction.channel.send(msg)
         oldLength = len(Combat.findPlayersInTile(game, pos))
         if shipModel.hull < damage:
@@ -536,6 +536,7 @@ class Combat:
                 msg = "The AI destroyed the "+Combat.translateShipAbrToName(shipType)+" due to the damage exceeding the ships hull"
             await interaction.channel.send(msg)
             if len(Combat.findPlayersInTile(game, pos)) < 2:
+                game.updateSaveFile()
                 actions_channel = discord.utils.get(interaction.guild.channels, name=game.game_id+"-actions") 
                 if actions_channel is not None and isinstance(actions_channel, discord.TextChannel):
                     await actions_channel.send("Combat in tile "+pos+" has concluded. There are "+str(len(Combat.findTilesInConflict(game)))+" tiles left in conflict")

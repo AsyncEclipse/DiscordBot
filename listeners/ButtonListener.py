@@ -72,6 +72,7 @@ class ButtonListener(commands.Cog):
                     await TurnButtons.undoLastTurn(player, game, interaction)
                 if customID == "runUpkeep":
                     await TurnButtons.runUpkeep(game, interaction,self.bot)
+                    game.updateSaveFile()
                     await interaction.message.delete()
                 if customID.startswith("startExplore"):
                     if "2" not in customID:

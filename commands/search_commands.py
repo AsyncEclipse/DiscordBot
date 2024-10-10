@@ -88,7 +88,7 @@ class SearchCommands(commands.GroupCog, name="search"):
         app_commands.Choice(name="Rift Cannon", value="rican"),
         app_commands.Choice(name="Rift Conductor", value="ricon"),
         app_commands.Choice(name="Sentient Hull", value="seh"),
-        app_commands.Choice(name="Shard Hull", value="shd"),
+        app_commands.Choice(name="Shard Hull", value="shh"),
         app_commands.Choice(name="Soliton Cannon", value="socan"),
         app_commands.Choice(name="Soliton Charger", value="socha"),
         app_commands.Choice(name="Soliton Missile", value="som"),

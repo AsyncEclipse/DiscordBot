@@ -126,15 +126,12 @@ class MoveButtons:
         if moveCount == 1:
             player_helper.spend_influence_on_action("move")
             game.update_player(player_helper)
+        view = View()
+        await interaction.message.delete()
         if player["move_apt"] > moveCount:
-            await interaction.message.delete()
-            view = View()
             view.add_item(Button(label="Move an additional ship", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startMove_"+str(moveCount+1)))
-            view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
-                                 custom_id=f"FCID{player['color']}_finishAction"))
-            await interaction.channel.send(f"{interaction.user.mention} you can move an additional ship or end your "
-                                           f"action.", view=view)
-        else:
-            if player["move_apt"] == moveCount:
-                await TurnButtons.endTurn(player, game, interaction, bot)
+        view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
+                                custom_id=f"FCID{player['color']}_finishAction"))
+        await interaction.channel.send(f"{interaction.user.mention} you can move an additional ship if you still have move activations or end your action.", view=view)
+
 

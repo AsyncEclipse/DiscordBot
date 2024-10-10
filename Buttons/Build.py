@@ -19,6 +19,7 @@ class BuildButtons:
         if "2" not in buttonID:
             player_helper.spend_influence_on_action("build")
             game.update_player(player_helper)
+            await interaction.message.delete()
         for tile in tiles:
             view.add_item(Button(label=tile, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_buildIn_{tile}"))
         await interaction.channel.send(f"{interaction.user.mention}, choose which tile you would like to build in.", view=view)
