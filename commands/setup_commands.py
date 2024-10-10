@@ -1,3 +1,4 @@
+import asyncio
 import discord
 from Buttons.Turn import TurnButtons
 import config
@@ -114,7 +115,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         game.fillInDiscTiles()
         await interaction.response.send_message("Done With Setup!")
         
-        await game.showUpdate("Start of Game",interaction, self.bot)
+        asyncio.create_task(game.showUpdate("Start of Game",interaction, self.bot))
         view = TurnButtons.getStartTurnButtons(game, game.get_player(player1.id))
         await interaction.channel.send(f"<@{player1.id}> use these buttons to do your turn. "+ game.displayPlayerStats(game.get_player(player1.id)),view=view)
 

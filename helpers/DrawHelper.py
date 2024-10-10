@@ -808,7 +808,7 @@ class DrawHelper:
         print(f"Total elapsed time for pasting all together: {elapsed_time:.2f} seconds")
         return discord.File(bytes_io, filename="map_image.png")
     
-    def show_map(self):
+    async def show_map(self):
         def load_tile_coordinates():
             configs = Properties()
             with open("data/tileImageCoordinates.properties", "rb") as f:
@@ -859,7 +859,7 @@ class DrawHelper:
         return discord.File(bytes_io, filename="image.png")
 
 
-    def show_stats(self):
+    async def show_stats(self):
         def create_player_area():
             pCount = len(self.gamestate["players"])
             player_area_length = 1500 if pCount > 3 else 750
