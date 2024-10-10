@@ -55,7 +55,7 @@ class TurnButtons:
         msg = f"End of {interaction.user.name}'s turn."
         if "lastAction" in player and "detailsOflastAction" in player:
             msg = f"End of {interaction.user.name}'s turn. They used their action to "+player["lastAction"]+". "+player["detailsOflastAction"]
-        await game.showUpdate(msg,interaction, bot)
+        asyncio.create_task(game.showUpdate(msg,interaction, bot))
         await interaction.message.delete()
 
 
@@ -99,7 +99,7 @@ class TurnButtons:
             view.add_item(Button(label="Run Upkeep",style=discord.ButtonStyle.blurple, custom_id="runUpkeep"))
             await interaction.channel.send(msg, view=view)
         await interaction.message.delete()
-        await game.showUpdate(f"{interaction.user.name} Passing",interaction, bot)
+        asyncio.create_task(game.showUpdate(f"{interaction.user.name} Passing",interaction, bot))
 
 
     @staticmethod
@@ -130,7 +130,7 @@ class TurnButtons:
             view = View()
             view.add_item(Button(label="Declare Winner",style=discord.ButtonStyle.blurple, custom_id="declareWinner"))
             await interaction.channel.send("It seems like the game should be ended, hit this button to reveal the winner.", view=view)
-        await game.showUpdate(f"Start of new round",interaction, bot)
+        asyncio.create_task(game.showUpdate(f"Start of new round",interaction, bot))
 
 
     @staticmethod
@@ -157,10 +157,12 @@ class TurnButtons:
         view = View()
         view.add_item(Button(label="Show Game",style=discord.ButtonStyle.blurple, custom_id="showGame"))
         view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
-        map = drawing.show_map()
-        stats = drawing.show_stats()
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            future = executor.submit(asyncio.run_coroutine_threadsafe, TurnButtons.send_files(interaction, [map,stats]),bot.loop)
+        map = await drawing.show_map()
+        stats = await drawing.show_stats()
+        await TurnButtons.send_file(interaction,map)
+        await TurnButtons.send_file(interaction,stats)
+        # with concurrent.futures.ThreadPoolExecutor() as executor:
+        #     future = executor.submit(asyncio.run_coroutine_threadsafe, TurnButtons.send_files(interaction, [map,stats]),bot.loop)
 
     @staticmethod
     def getStartTurnButtons(game: GamestateHelper,p1):

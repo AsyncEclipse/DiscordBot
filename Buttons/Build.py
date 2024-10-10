@@ -169,7 +169,11 @@ class BuildButtons:
         science = int(buttonID.split("_")[4])
         money = int(buttonID.split("_")[5])
         game.add_units(build, loc)
-        player_helper.specifyDetailsOfAction("Built "+" ".join(build)+" in "+loc+".")
+        summary = ""
+        for ship in build:
+            shortName = ship.split("-")[1]
+            summary += " "+game.getShipFullName(shortName)
+        player_helper.specifyDetailsOfAction("Built "+summary+" in "+loc+".")
         player_helper.stats["science"], player_helper.stats["materials"], player_helper.stats["money"] = science, material, money
         game.update_player(player_helper)
         drawing = DrawHelper(game.gamestate)
