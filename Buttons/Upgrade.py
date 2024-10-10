@@ -18,16 +18,11 @@ class UpgradeButtons:
         actions = str(player['upgrade_apt'])
         for ship in ships:
             view.add_item(Button(label=ship.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_upgradeShip_{actions}_{ship}_{discTileUpgrade}"))
-
-        if button and discTileUpgrade != "dummy":
-            view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
-            view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
-            await interaction.message.delete()
-        if discTileUpgrade == "dummy":
-            await interaction.followup.send(file=drawing.show_player_ship_area(image),ephemeral=True)
-        else:
-            await interaction.followup.send(file=drawing.show_player_ship_area(image),ephemeral=True)
+        await interaction.followup.send(file=drawing.show_player_ship_area(image),ephemeral=True)
+        if discTileUpgrade != "dummy":
             view.add_item(Button(label="Save For Future Upgrade Action", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))
+        if button:
+            await interaction.message.delete()
         await interaction.channel.send(
             f"{interaction.user.mention}, choose which ship you would like to upgrade.", view=view)
 
@@ -99,7 +94,7 @@ class UpgradeButtons:
                     player_helper.spend_influence_on_action("upgrade")
         else:
             newPart = player[f"old_{ship}_parts"][index]
-        if newPart in ["anm", "axc", "cod", "fls", "hyg", "ins", "iod", "iom", "iot", "jud", "mus", "ricon", "shd", "som", "socha"] and newPart in player_helper.stats["ancient_parts"]:
+        if newPart in ["anm", "axc", "cod", "fls", "hyg", "ins", "iod", "iom", "iot", "jud", "mus", "ricon", "shh", "som", "socha"] and newPart in player_helper.stats["ancient_parts"]:
             player_helper.stats["ancient_parts"].remove(newPart)
         if newPart == "mus":
             player_helper.stats[f"{ship}_parts"] = player_helper.stats[f"{ship}_parts"].append("mus")
