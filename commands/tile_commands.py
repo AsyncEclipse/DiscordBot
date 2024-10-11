@@ -1,5 +1,6 @@
 import discord
 from Buttons.DiscoveryTile import DiscoveryTileButtons
+from Buttons.Influence import InfluenceButtons
 import config
 from discord.ext import commands
 from discord import app_commands
@@ -193,8 +194,8 @@ class TileCommands(commands.GroupCog, name="tile"):
         if game.gamestate["board"][tile_position]["owner"] == 0:
             await interaction.response.send_message("This tile already has no influence.")
             return
-        game.remove_control(color.value, tile_position)
         await interaction.response.defer(thinking=True)
+        await InfluenceButtons.removeInfluenceFinish(game, interaction, f"dummy_{tile_position}_Normal",False)
         drawing = DrawHelper(game.gamestate)
         image = drawing.board_tile_image(tile_position)
         await interaction.followup.send(file=drawing.show_single_tile(image))

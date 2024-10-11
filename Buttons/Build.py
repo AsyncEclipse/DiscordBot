@@ -66,18 +66,29 @@ class BuildButtons:
         if build == "":
             build = "none"
         game = GamestateHelper(interaction.channel)
+        shipsShort = ["int","cru","drd","sb"]
+        ultimateC = 0
+        for counter,ship in enumerate(ships):
+            remaining = player["ship_stock"][counter]
+                
         if "stb" not in player["military_tech"]:
             ships.remove("Starbase")
-        if "orb" not in player["nano_tech"]:
+        if "orb" not in player["nano_tech"]or "orb" in build:
             ships.remove("Orbital")
-        if "mon" not in player["nano_tech"]:
+        if "mon" not in player["nano_tech"] or "mon" in build:
             ships.remove("Monolith")
-        for ship in ships:
+        for counter,ship in enumerate(ships):
             key = f"cost_{ship.lower()}"
+            remaining = 10
+            if counter < 4:
+                remaining = player["ship_stock"][counter]
+                if shipsShort[counter] in build:
+                    remaining -= build.count(shipsShort[counter])
             if ship.lower() == "dreadnought":
                 key = f"cost_dread"
             buttonElements = [f"FCID{player['color']}","buildShip", build, str(cost), build_loc, ship]
-            view.add_item(Button(label=f"{ship} ({player[f'{key}']})", style=discord.ButtonStyle.blurple, custom_id="_".join(buttonElements))) 
+            if remaining > 0:
+                view.add_item(Button(label=f"{ship} ({player[f'{key}']})", style=discord.ButtonStyle.blurple, custom_id="_".join(buttonElements))) 
         buttonElements = [f"FCID{player['color']}","finishBuild", build, str(cost), build_loc]
         view.add_item(Button(label="Finished In This System", style=discord.ButtonStyle.red, custom_id="_".join(buttonElements))) 
         view.add_item(Button(label="Reset", style=discord.ButtonStyle.gray, custom_id=f"buildIn_{build_loc}")) 

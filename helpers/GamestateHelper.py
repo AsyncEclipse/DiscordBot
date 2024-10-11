@@ -102,7 +102,7 @@ class GamestateHelper:
     async def declareWinner(self, interaction:discord.Interaction):
         self.gamestate["gameEnded"] = True
         self.update()
-        
+        drawing = DrawHelper(self.gamestate)
         winner,highestScore = self.getWinner()
         if interaction.message:
             await interaction.message.delete()
@@ -342,7 +342,7 @@ class GamestateHelper:
         self.gamestate["board"][position]["warpDisc"]=2
         self.update()
 
-    def updateNamesAndOutRimTiles(self, interaction:discord.Interaction):
+    async def updateNamesAndOutRimTiles(self, interaction:discord.Interaction):
         for player in self.gamestate["players"]:
             if "username" not in self.gamestate["players"][player]:
                 self.gamestate["players"][player]["username"] = interaction.guild.get_member(int(player)).display_name
@@ -357,16 +357,16 @@ class GamestateHelper:
                 self.gamestate[f"tile_deck_300"] = self.gamestate[f"tile_discard_deck_300"]
                 self.gamestate[f"tile_discard_deck_300"] = []
                 if role:
-                    interaction.channel.send(role.mention + " shuffling the discarded outer rim tiles back into the deck")
+                    await interaction.channel.send(role.mention + " shuffling the discarded outer rim tiles back into the deck")
             else:
                 keysToRemove = []
                 for key,value in self.gamestate[f"board"].items():
                     if value["sector"] == "sector3back":
                         keysToRemove.append(key)
+                if role and len(keysToRemove) > 0:
+                    await interaction.channel.send(role.mention + " the outer rim has run out of tiles to explore")
                 for key in keysToRemove:
                     del self.gamestate[f"board"][key]
-                if role:
-                    interaction.channel.send(role.mention + " the outer rim has run out of tiles to explore")
         self.update()
     def makeEveryoneNotTraitor(self):
         for player in self.gamestate["players"]:
@@ -385,7 +385,10 @@ class GamestateHelper:
                 self.gamestate["players"][player]["ship_stock"][2] -= 1
             if "sb" in i:
                 self.gamestate["players"][player]["ship_stock"][3] -= 1
-            self.gamestate["board"][position]["player_ships"].append(i)
+            if color == self.gamestate["board"][position]["owner"] and len(self.gamestate["board"][position]["player_ships"]) > 0:
+                self.gamestate["board"][position]["player_ships"].insert(1,i)
+            else:
+                self.gamestate["board"][position]["player_ships"].append(i)
         self.update()
     def displayPlayerStats(self, player):
         money = player["money"]
@@ -479,7 +482,7 @@ class GamestateHelper:
                     neutralPop += 1
         self.update()
         return neutralPop
-    def remove_pop(self, pop_list, position, playerID):
+    def remove_pop(self, pop_list, position, playerID, graveYard:bool):
         neutralPop = 0
         for i in pop_list:
             if position != "dummy":
@@ -487,11 +490,15 @@ class GamestateHelper:
                     if(num > 0):
                         self.gamestate["board"][position][i][val] = num-1
                         break
-            if "neutral" not in i and "orbital" not in i:
-                self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] = self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"]+1
+            if not graveYard:
+                if "neutral" not in i and "orbital" not in i:
+                    self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] = self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"]+1
+                else:
+                    neutralPop += 1
             else:
-                neutralPop += 1
-
+                if "graveYard" not in self.gamestate["players"][playerID]:
+                    self.gamestate["players"][playerID]["graveYard"] = []
+                self.gamestate["players"][playerID]["graveYard"].append(i.replace("adv",""))   
         self.update()
         return neutralPop
 
@@ -511,10 +518,17 @@ class GamestateHelper:
                 self.gamestate["board"][position]["player_ships"].remove(i)
         self.update()
 
-    def upkeep(self):
+    async def upkeep(self, interaction:discord.Interaction):
         for player in self.gamestate["players"]:
             p1 = PlayerHelper(player, self.get_player(player))
-            p1.upkeep()
+            neutrals = p1.upkeep()
+            for cube in range(neutrals):
+                view=View()
+                planetTypes = ["money","science","material"]
+                for planetT in planetTypes:
+                    view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{p1['color']}_addCubeToTrack_"+planetT))
+                await interaction.channel.send( f"{p1.stats['player_name']} A neutral or orbital cube was found in your graveyard, please tell the bot what track you want it to go on", view=view)
+
         tech_draws = self.gamestate["player_count"]+3
         while tech_draws > 0:
             random.shuffle(self.gamestate["tech_deck"])
@@ -769,7 +783,7 @@ class GamestateHelper:
             await thread.send(message,file=file,view=view)
 
     async def showUpdate(self, message:str, interaction: discord.Interaction, bot):
-        self.updateNamesAndOutRimTiles(interaction)
+        await self.updateNamesAndOutRimTiles(interaction)
         if "-" in interaction.channel.name:
             thread_name = interaction.channel.name.split("-")[0]+"-bot-map-updates"
             thread = discord.utils.get(interaction.channel.threads, name=thread_name)

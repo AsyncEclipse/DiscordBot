@@ -161,6 +161,7 @@ class PlayerHelper:
         self.stats["colony_ships"] = self.stats["base_colony_ships"]
         self.stats["passed"] = False
         self.stats["perma_passed"] = False
+        neutralCubes = 0
         actions = ["influence","build","move","upgrade","explore","research"]
         for action in actions:
             if action+"_action_counters" not in self.stats:
@@ -169,3 +170,11 @@ class PlayerHelper:
                 count = self.stats[action+"_action_counters"]
                 self.stats[action+"_action_counters"] = 0
                 self.adjust_influence(count)
+        if "graveYard" in self.stats:
+            for cube in self.stats["graveYard"]:
+                if "neutral" not in cube and "orbital" not in cube:
+                    self.stats[cube+"_cubes"] = self.stats[cube+"_cubes"]+1
+                else:
+                    neutralCubes +=1
+            self.stats["graveYard"]=[]
+        return neutralCubes
