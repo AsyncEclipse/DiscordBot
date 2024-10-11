@@ -1,4 +1,5 @@
 import discord
+from Buttons.DiplomaticRelations import DiplomaticRelationsButtons
 from Buttons.Population import PopulationButtons
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
@@ -108,15 +109,41 @@ class TurnButtons:
         game.update_player(player_helper)
         await interaction.followup.send("You permanently passed", ephemeral=True)
 
+    @staticmethod  
+    async def tradeAtRatio(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction,  buttonID:str):
+        game = GamestateHelper(interaction.channel)  
+        resource_type = buttonID.split("_")[1]
+        resource_type2 = buttonID.split("_")[2]
+        trade_value = player["trade_value"]
+        if trade_value > player[resource_type]:
+            await interaction.channel.send(interaction.user.mention + " does not have enough "+resource_type +" to trade") 
+            return
+        msg = player_helper.adjust_resource(resource_type,-trade_value)  
+        msg2 = player_helper.adjust_resource(resource_type2, 1) 
+        game.update_player(player_helper)  
+        await interaction.channel.send(msg)  
+        await interaction.channel.send(msg2)
+
+
     @staticmethod
     async def runUpkeep(game: GamestateHelper, interaction: discord.Interaction,bot):
         for player in game.gamestate["players"]:
             p1 = PlayerHelper(player, game.get_player(player))
             if p1.checkBankrupt():
-                await interaction.channel.send("It appears that "+p1.name + " would be bankrupt (negative money). Please adjust the money or systems controlled so that upkeep can be run without the player entering negative money")
+                view = View()
+                trade_value = p1.stats['trade_value']
+                view.add_item(Button(label="Remove Control of A Sector", style=discord.ButtonStyle.blurple, custom_id=f"FCID{game.get_player(player)['color']}_removeInfluenceStart"))
+                for resource_type, button_style in [("materials", discord.ButtonStyle.gray),   
+                                            ("science", discord.ButtonStyle.gray)]: 
+                    if(p1.stats[resource_type] >= trade_value):
+                        view.add_item(Button(label=f"Trade {trade_value} {resource_type.capitalize()}",   
+                                        style=button_style,   
+                                        custom_id=f"FCID{p1.stats['color']}_tradeAtRatio_{resource_type}_money")) 
+                view.add_item(Button(label="Done Resolving", style=discord.ButtonStyle.red, custom_id=f"FCID{game.get_player(player)['color']}_deleteMsg"))
+                await interaction.channel.send("It appears that "+p1.name + " would be bankrupt (negative money). They currently have "+str(p1.stats["money"])+" money and will get "+str(p1.money_income())+" in income, but they owe "+str(p1.upkeepCosts())+" money. Please adjust the money or systems controlled so that upkeep can be run without the player entering negative money", view=view)
                 return
 
-        game.upkeep()
+        await game.upkeep(interaction)
         drawing = DrawHelper(game.gamestate)
         if game.gamestate["roundNum"] < 9:
             await interaction.channel.send("Tech At Start Of New Round",file=drawing.show_available_techs())
@@ -152,7 +179,7 @@ class TurnButtons:
 
     @staticmethod
     async def showGame(game: GamestateHelper, interaction: discord.Interaction, bot):
-        game.updateNamesAndOutRimTiles(interaction)
+        await game.updateNamesAndOutRimTiles(interaction)
         drawing = DrawHelper(game.gamestate)
         view = View()
         view.add_item(Button(label="Show Game",style=discord.ButtonStyle.blurple, custom_id="showGame"))
@@ -186,7 +213,7 @@ class TurnButtons:
         view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
         if len(PopulationButtons.findEmptyPopulation(game,p1)) > 0 and p1["colony_ships"] > 0:
             view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{p1['color']}_startPopDrop"))
-        if game.get_gamestate()["player_count"] > 3 and not player_helper.isTraitor():
+        if game.get_gamestate()["player_count"] > 3 and not player_helper.isTraitor() and len(DiplomaticRelationsButtons.getPlayersWithWhichDiplomatcRelationsCanBeFormed(game, player)) > 0:
             view.add_item(Button(label="Initiate Diplomatic Relations", style=discord.ButtonStyle.gray, custom_id=f"FCID{p1['color']}_startDiplomaticRelations"))
         if game.getNumberOfSaveFiles() > 0:
             view.add_item(Button(label="Undo Last Turn", style=discord.ButtonStyle.red, custom_id=f"undoLastTurn"))

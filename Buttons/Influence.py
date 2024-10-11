@@ -99,27 +99,34 @@ class InfluenceButtons:
     async def removeInfluenceStart(game: GamestateHelper, player, interaction: discord.Interaction):
         view = View()
         for tile in game.get_owned_tiles(player):
-            view.add_item(Button(label=tile, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_removeInfluenceFinish_"+tile))
+            view.add_item(Button(label=tile, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_removeInfluenceFinish_"+tile+"_normal"))
         await interaction.channel.send( f"{interaction.user.mention} choose the tile you would like to remove influence from", view=view)
     @staticmethod
-    async def removeInfluenceFinish(game: GamestateHelper, p1, interaction: discord.Interaction, buttonID:str):
+    async def removeInfluenceFinish(game: GamestateHelper, interaction: discord.Interaction, buttonID:str, delete:bool):
         tileLoc = buttonID.split("_")[1]
+        owner = game.get_gamestate()["board"][tileLoc]["owner"]
+        if owner == 0:
+            await interaction.channel.send("No owner found of "+tileLoc)
+            return
+        p1 = game.getPlayerObjectFromColor(owner)
+        graveYard = buttonID.split("_")[2] == "graveYard"
         game.remove_control(p1["color"],tileLoc)
-        await interaction.channel.send( f"{interaction.user.mention} relinquished control of "+tileLoc)
-        for pop in PopulationButtons.findFullPopulation(game, p1, tileLoc):
-            game.remove_pop([pop+"_pop"],tileLoc,game.get_player_from_color(p1["color"]))
-            if "neutral" in pop:
+        await interaction.channel.send( f"{p1["player_name"]} lost control of "+tileLoc)
+        for pop in PopulationButtons.findFullPopulation(game, tileLoc):
+            neutralCubes = game.remove_pop([pop+"_pop"],tileLoc,game.get_player_from_color(p1["color"]), graveYard)
+            if neutralCubes > 0:
                 view=View()
                 planetTypes = ["money","science","material"]
                 for planetT in planetTypes:
                     view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{p1['color']}_addCubeToTrack_"+planetT))
                 await interaction.channel.send( f"A neutral cube was removed, please tell the bot what track you want it to go on", view=view)
             else:
-                await interaction.channel.send( f"Removed 1 "+pop.replace("adv","")+" population")
-        await interaction.message.delete()
+                await interaction.channel.send( f"{p1['username']} Removed 1 "+pop.replace("adv","")+" population")
+        if delete:
+            await interaction.message.delete()
     @staticmethod
     async def addCubeToTrack(game: GamestateHelper, p1, interaction: discord.Interaction, buttonID:str):
         pop = buttonID.split("_")[1]
-        game.remove_pop([pop+"_pop"],"dummy",game.get_player_from_color(p1["color"]))
+        game.remove_pop([pop+"_pop"],"dummy",game.get_player_from_color(p1["color"]), False)
         await interaction.channel.send( f"{p1['player_name']} Added 1 "+pop.replace('adv','')+" population back to its track")
         await interaction.message.delete()

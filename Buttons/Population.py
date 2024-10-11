@@ -37,7 +37,7 @@ class PopulationButtons:
         return emptyPlanets
 
     @staticmethod
-    def findFullPopulation(game: GamestateHelper, player, tile :str):
+    def findFullPopulation(game: GamestateHelper, tile :str):
         fullPlanets = []
         tileState = game.get_gamestate()["board"][tile]
         planetTypes = ["money","science","material","neutral","moneyadv","scienceadv","materialadv","neutraladv","orbital"]
@@ -45,7 +45,8 @@ class PopulationButtons:
             if f"{planetT}_pop" in tileState:
                 for i,val in enumerate(tileState[f"{planetT}_pop"]):
                     if val > 0:
-                        fullPlanets.append(f"{planetT}")
+                        for num in range(val):
+                            fullPlanets.append(f"{planetT}")
         return fullPlanets
     @staticmethod
     async def startPopDrop(game: GamestateHelper, player, interaction: discord.Interaction):

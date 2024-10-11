@@ -17,13 +17,21 @@ class DrawHelper:
     def use_image(self, filename):  
         image_cache = ImageCacheHelper("images/resources")  # Get the singleton instance  
         image = image_cache.get_image(filename)  
+        origFile = filename
+        fineToGetOrig = "back" in filename or "Alone" in filename or"masks" in filename or"basic_ships" in filename or "factions" in filename or "reference" in filename or "technology" in filename or "upgrades" in filename
         if image:  
-            return image.copy()  
+            if fineToGetOrig:
+                return image
+            else:
+                return image.copy()  
         else:  
             filename = filename.split(f"/")[len(filename.split(f"/"))-1] 
             image = image_cache.get_image(filename)  
             if image:  
-                return image.copy()    
+                if fineToGetOrig:
+                    return image
+                else:
+                    return image.copy() 
             else:  
                 print(filename)
 
@@ -274,7 +282,7 @@ class DrawHelper:
                     if len(tile[f"{resource_type}_pop"]) > 1:
                         popSize += tile[f"{resource_type}_pop"][1]
                     for x in range(popSize):
-                        if tile[f"{resource_type}_pop"][0] != 0 and (x+1) <= len(tile[f"{resource_type}_pop"]):
+                        if (x+1) <= len(tile[f"{resource_type}_pop"]):
                             pop_path = f"images/resources/components/all_boards/popcube_{color}.png"
                             pop_image = self.use_image(pop_path)
                             if resource_type == "orbital":

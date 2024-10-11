@@ -57,6 +57,8 @@ class ButtonListener(commands.Cog):
                     await TurnButtons.showGame(game, interaction, self.bot)
                 if player == None:
                     return
+                if customID.startswith("tradeAtRatio"):
+                    await TurnButtons.tradeAtRatio(game, player, player_helper, interaction, customID)
                 if customID == "showReputation":  
                     await TurnButtons.showReputation(game, interaction,player)
                 if customID == "passForRound":
@@ -78,7 +80,7 @@ class ButtonListener(commands.Cog):
                     if "2" not in customID:
                         game.updateSaveFile()
                     await ExploreButtons.startExplore(game, player, player_helper, interaction,customID)
-                if customID.startswith("exploreTile_"):
+                if customID.startswith("exploreTile"):
                     await ExploreButtons.exploreTile(game, player, interaction, customID)
                 if customID.startswith("placeTile"):
                     await ExploreButtons.placeTile(game,  interaction, player, customID,player_helper)
@@ -86,6 +88,8 @@ class ButtonListener(commands.Cog):
                     await ExploreButtons.discardTile(game, interaction, player, customID)
                 if customID.startswith("keepDiscForPoints"):
                     await DiscoveryTileButtons.keepDiscForPoints(game, player_helper, interaction)
+                if customID.startswith("exploreDiscoveryTile"):
+                    await DiscoveryTileButtons.exploreDiscoveryTile(game, customID.split("_")[1], interaction, player)
                 if customID.startswith("usedDiscForAbility"):
                     await DiscoveryTileButtons.usedDiscForAbility(game, player_helper, interaction, customID,player)
                 if customID.startswith("getFreeTech"):
@@ -93,13 +97,13 @@ class ButtonListener(commands.Cog):
                 if customID.startswith("startResearch"):
                     game.updateSaveFile()
                     await ResearchButtons.startResearch(game, player, player_helper, interaction,True)
-                if customID.startswith("getTech_"):
+                if customID.startswith("getTech"):
                     await ResearchButtons.getTech(game, player, player_helper, interaction, customID)
                 if customID.startswith("placeWarpPortal"):
                     await ResearchButtons.placeWarpPortal(interaction, game, player, customID)
-                if customID.startswith("payAtRatio_"):
+                if customID.startswith("payAtRatio"):
                     await ResearchButtons.payAtRatio(game, player, player_helper, interaction, customID)
-                if customID.startswith("gain5resource_"):
+                if customID.startswith("gain5resource"):
                     await ResearchButtons.gain5resource(game, player, player_helper, interaction, customID)
                 if customID.startswith("startBuild"):
                     if "2" not in customID:
@@ -140,7 +144,7 @@ class ButtonListener(commands.Cog):
                 if customID.startswith("removeInfluenceStart"):
                     await InfluenceButtons.removeInfluenceStart(game, player, interaction)
                 if customID.startswith("removeInfluenceFinish"):
-                    await InfluenceButtons.removeInfluenceFinish(game, player, interaction,customID)
+                    await InfluenceButtons.removeInfluenceFinish(game, interaction,customID, True)
                 if customID.startswith("addCubeToTrack"):
                     await InfluenceButtons.addCubeToTrack(game, player, interaction,customID)
                 if customID.startswith("refreshPopShips"):
@@ -185,6 +189,8 @@ class ButtonListener(commands.Cog):
                     await Combat.removeThisUnit(game, customID,player, interaction)
                 if customID.startswith("startToRetreatUnits"):
                     await Combat.startToRetreatUnits(game, customID, interaction)
+                if customID.startswith("killPop"):
+                    await Combat.killPop(game, customID, interaction,player)
                 end_time = time.perf_counter()  
                 elapsed_time = end_time - start_time  
                 if(elapsed_time > 2):

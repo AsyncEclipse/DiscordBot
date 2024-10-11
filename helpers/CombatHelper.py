@@ -3,6 +3,8 @@ import random
 
 import discord
 from discord.ui import View, Button
+from Buttons.Influence import InfluenceButtons
+from Buttons.Population import PopulationButtons
 from Buttons.Reputation import ReputationButtons
 from helpers.DrawHelper import DrawHelper
 from helpers.GamestateHelper import GamestateHelper
@@ -54,6 +56,16 @@ class Combat:
                 tiles.append((int(tile_map[tile]["sector"]),tile))
         sorted_tiles = sorted(tiles, key=lambda x: x[0], reverse=True)  
         return sorted_tiles
+
+    @staticmethod
+    def findTilesInContention(game:GamestateHelper):
+        tile_map = game.get_gamestate()["board"]
+        tiles = []
+        for tile in tile_map:
+            if len(Combat.findPlayersInTile(game,tile)) == 1 and tile_map[tile]["owner"] != 0 and tile_map[tile]["owner"] != Combat.findPlayersInTile(game,tile)[0] and Combat.findPlayersInTile(game,tile)[0] != "ai":
+                tiles.append((int(tile_map[tile]["sector"]),tile))
+        sorted_tiles = sorted(tiles, key=lambda x: x[0], reverse=True)  
+        return sorted_tiles
     
     @staticmethod
     async def startCombat(game:GamestateHelper, channel, pos):
@@ -86,6 +98,35 @@ class Combat:
             drawing = DrawHelper(game.gamestate)
             await thread.send(role.mention +"Combat will occur in this tile",view = Combat.getCombatButtons(game, tile[1]),file=drawing.board_tile_image_file(tile[1]))
             await Combat.startCombat(game, thread, tile[1])
+        for tile2 in Combat.findTilesInContention(game):
+            message_to_send = "Bombing may occur in system "+str(tile2[0])+", position "+tile2[1]  
+            message = await channel.send(message_to_send) 
+            threadName = game.get_gamestate()["game_id"]+"-Round "+str(game.get_gamestate()["roundNum"])+", Tile "+tile2[1]+", Bombing"
+            thread2 = await message.create_thread(name=threadName)
+            drawing = DrawHelper(game.gamestate)
+            await thread2.send(role.mention +" population bombing may occur in this tile",file=drawing.board_tile_image_file(tile2[1]))
+            owner = game.get_gamestate()["board"][tile2[1]]["owner"]
+            playerColor = Combat.findPlayersInTile(game, tile2[1])[0]
+            winner = playerColor
+            pos = tile2[1]
+            player = game.getPlayerObjectFromColor(playerColor)
+            p2 = game.getPlayerObjectFromColor(owner)
+            player_helper = PlayerHelper(game.get_player_from_color(playerColor),player)
+            player_helper2 = PlayerHelper(game.get_player_from_color(p2["color"]),p2)
+            if p2["name"]=="Planta" or ("neb" in player_helper.getTechs() and "nea" not in player_helper2.getTechs()):
+                view = View()
+                view.add_item(Button(label="Destroy All Population", style=discord.ButtonStyle.green, custom_id="FCID"+winner+"_removeInfluenceFinish_"+pos+"_graveYard"))
+                await thread2.send(player["player_name"]+" you can destroy all enemy population automatically",view=view)
+                view2 = View()
+                view2.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple, custom_id=f"FCID{winner}_addInfluenceFinish_"+pos))
+                await thread2.send(player["player_name"]+" you can place your influence on the tile after destroying the enemy population",view=view2)
+                view3 = View()
+                view3.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
+                await thread2.send(player["player_name"]+" if you have enough colony ships, you can use this to drop population after taking control of the sector",view=view3)
+            else:
+                view = View()
+                view.add_item(Button(label="Roll to Destroy Population", style=discord.ButtonStyle.green, custom_id=f"FCID{winner}_rollDice_{pos}_{winner}_1000"))
+                await thread2.send(player["player_name"]+" you can roll to attempt to kill enemy population",view=view)
         await channel.send("Please resolve the combats in the order they appeared")
     @staticmethod
     def getCombatantShipsBySpeed(game:GamestateHelper, colorOrAI:str, playerShipsList):
@@ -146,11 +187,15 @@ class Combat:
 
     
     @staticmethod
-    def getOpponentUnitsThatCanBeHit(game:GamestateHelper, colorOrAI:str,playerShipsList, dieVal:int, computerVal:int, pos:str):
+    def getOpponentUnitsThatCanBeHit(game:GamestateHelper, colorOrAI:str,playerShipsList, dieVal:int, computerVal:int, pos:str, speed:int):
         players = Combat.findPlayersInTile(game, pos)
         opponent = ""
         hittableShips = []
         if len(players) < 2:
+            if speed == 1000:
+                if dieVal == 6 or dieVal + computerVal > 5:
+                    for pop in PopulationButtons.findFullPopulation(game, pos):
+                        hittableShips.append(pop)
             return hittableShips
         if colorOrAI == players[len(players)-1]:
             opponent = players[len(players)-2]
@@ -286,7 +331,7 @@ class Combat:
         update = False
         drawing = DrawHelper(game.gamestate)
         for ship in ships:
-            if ship[0] == speed or speed == 99:
+            if ship[0] == speed or speed == 99 or speed == 1000:
                 name = interaction.user.mention
                 if colorOrAI == "ai":
                     shipModel = AI_Ship(ship[1], game.gamestate["advanced_ai"])
@@ -301,6 +346,8 @@ class Combat:
                     dice = shipModel.missile
                     missiles = "missiles "
                     nonMissiles =""
+                if speed == 1000:
+                    nonMissiles = " against the population"
                 
                 msg = name + " rolled the following "+missiles+"with their "+str(ship[2])+" "+Combat.translateShipAbrToName(ship[1])+"(s)"+nonMissiles+":\n"
                 dieFiles = []
@@ -319,10 +366,12 @@ class Combat:
                             researchedTechs = player_helper.getTechs()
                             if "ans" in researchedTechs:
                                 split = True
+                        if speed == 1000:
+                            split = True
                         if not split:
                             dieNums.append([random_number,Combat.translateColorToDamage(die)])
                         else:
-                            for i in range(4):
+                            for i in range(Combat.translateColorToDamage(die)):
                                 dieNums.append([random_number,1])
                 if shipModel.computer > 0:
                     msg = msg + "\nThis ship type has a +"+str(shipModel.computer)+" computer"
@@ -334,58 +383,94 @@ class Combat:
                         dieDam = die[1]
                         if dieNum == 1 or dieNum + shipModel.computer < 6 or oldNumPeeps > len(Combat.findPlayersInTile(game, pos)):
                             continue
-                        hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships, dieNum, shipModel.computer, pos)
+                        hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships, dieNum, shipModel.computer, pos, speed)
                         if len(hittableShips) > 0:
-                            update = True
-                            if len(hittableShips) > 1:
-                                if colorOrAI != "ai":
-                                    msg = interaction.user.mention + " choose what ship to hit with the die that rolled a "+str(dieNum)+". The bot has calculated that you can hit these ships"
-                                    view = View()
-                                    for ship in hittableShips:
-                                        shipType = ship.split("-")[1]
-                                        shipOwner = ship.split("-")[0]
-                                        label = "Hit "+Combat.translateShipAbrToName(shipType)
-                                        buttonID = "FCID"+colorOrAI+"_assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(dieDam)
-                                        view.add_item(Button(label=label, style=discord.ButtonStyle.red, custom_id=buttonID))
-                                    await interaction.channel.send(msg,view=view)
-                                    hitsToAssign = game.get_gamestate()["board"][pos]["unresolvedHits"]+1
-                                    game.setUnresolvedHits(hitsToAssign,pos)
-                                else:
-                                    ship = hittableShips[0]
-                                    oldShipVal = 0
-                                    ableToKillSomething = False
-                                    for option in hittableShips:
-                                        damageOnShip = game.add_damage(option, pos, 0)
-                                        shipType = option.split("-")[1]
-                                        shipOwner = option.split("-")[0]
-                                        player = game.get_player_from_color(shipOwner)
-                                        shipModel = PlayerShip(game.gamestate["players"][player], shipType)
-                                        if ableToKillSomething:
-                                            if dieDam +damageOnShip> shipModel.hull and shipModel.cost > oldShipVal:
-                                                oldShipVal = shipModel.cost
-                                                ship = option
-                                        else:
-                                            if dieDam +damageOnShip> shipModel.hull:
-                                                oldShipVal = shipModel.cost
-                                                ship = option
-                                                ableToKillSomething = True
-                                            else:
-                                                if shipModel.cost > oldShipVal:
+                            if speed == 1000:
+                                msg = interaction.user.name + " choose what pop to hit with the die that rolled a "+str(dieNum)+"."
+
+                                view = View()
+                                for count,cube in enumerate(hittableShips):
+                                    advanced = ""
+                                    if "adv" in cube:
+                                        advanced = "advanced "
+                                    label = "Hit "+advanced+cube.replace("adv","") + " population"
+                                    buttonID = "FCID"+colorOrAI+"_killPop_"+pos+"_"+cube+"_"+str(count)
+                                    view.add_item(Button(label=label, style=discord.ButtonStyle.gray, custom_id=buttonID))
+                                await interaction.channel.send(msg,view=view)
+                            else:
+                                update = True
+                                if len(hittableShips) > 1:
+                                    if colorOrAI != "ai":
+                                        msg = interaction.user.mention + " choose what ship to hit with the die that rolled a "+str(dieNum)+". The bot has calculated that you can hit these ships"
+                                        view = View()
+                                        for ship in hittableShips:
+                                            shipType = ship.split("-")[1]
+                                            shipOwner = ship.split("-")[0]
+                                            label = "Hit "+Combat.translateShipAbrToName(shipType)
+                                            buttonID = "FCID"+colorOrAI+"_assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(dieDam)
+                                            view.add_item(Button(label=label, style=discord.ButtonStyle.red, custom_id=buttonID))
+                                        await interaction.channel.send(msg,view=view)
+                                        hitsToAssign = game.get_gamestate()["board"][pos]["unresolvedHits"]+1
+                                        game.setUnresolvedHits(hitsToAssign,pos)
+                                    else:
+                                        ship = hittableShips[0]
+                                        oldShipVal = 0
+                                        ableToKillSomething = False
+                                        for option in hittableShips:
+                                            damageOnShip = game.add_damage(option, pos, 0)
+                                            shipType = option.split("-")[1]
+                                            shipOwner = option.split("-")[0]
+                                            player = game.get_player_from_color(shipOwner)
+                                            shipModel = PlayerShip(game.gamestate["players"][player], shipType)
+                                            if ableToKillSomething:
+                                                if dieDam +damageOnShip> shipModel.hull and shipModel.cost > oldShipVal:
                                                     oldShipVal = shipModel.cost
                                                     ship = option
+                                            else:
+                                                if dieDam +damageOnShip> shipModel.hull:
+                                                    oldShipVal = shipModel.cost
+                                                    ship = option
+                                                    ableToKillSomething = True
+                                                else:
+                                                    if shipModel.cost > oldShipVal:
+                                                        oldShipVal = shipModel.cost
+                                                        ship = option
 
+                                        buttonID = "assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(dieDam)
+                                        await Combat.assignHitTo(game, buttonID, interaction, False)
+                                else:
+                                    ship = hittableShips[0]
                                     buttonID = "assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(dieDam)
                                     await Combat.assignHitTo(game, buttonID, interaction, False)
-                            else:
-                                ship = hittableShips[0]
-                                buttonID = "assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(dieDam)
-                                await Combat.assignHitTo(game, buttonID, interaction, False)
         hitsToAssign = 0
-        if "unresolvedHits" in game.get_gamestate()["board"][pos]:
-            hitsToAssign = game.get_gamestate()["board"][pos]["unresolvedHits"]
-        if hitsToAssign == 0 and oldLength == len(Combat.findPlayersInTile(game, pos)):
-            await Combat.promptNextSpeed(game, pos, interaction.channel, update)
+        if speed != 1000:
+            if "unresolvedHits" in game.get_gamestate()["board"][pos]:
+                hitsToAssign = game.get_gamestate()["board"][pos]["unresolvedHits"]
+            if hitsToAssign == 0 and oldLength == len(Combat.findPlayersInTile(game, pos)):
+                await Combat.promptNextSpeed(game, pos, interaction.channel, update)
 
+
+    @staticmethod
+    async def killPop(game:GamestateHelper, buttonID:str, interaction:discord.Interaction, player):
+        pos = buttonID.split("_")[1]
+        cube = buttonID.split("_")[2]
+        owner = game.get_gamestate()["board"][pos]["owner"]
+        advanced = ""
+        if "adv" in cube:
+            advanced = "advanced "
+        msg = player["username"]+" hit "+advanced+cube.replace("adv","") + " population"
+        await interaction.channel.send(msg)
+        game.remove_pop([cube+"_pop"],pos,game.get_player_from_color(owner), True)
+        await interaction.message.delete()
+        if len(PopulationButtons.findFullPopulation(game, pos))==0:
+            game.remove_control(owner,pos)
+            view2 = View()
+            view2.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_addInfluenceFinish_"+pos))
+            await interaction.channel.send(player["player_name"]+" you can place your influence on the tile now that you have destroyed all the enemy population",view=view2)
+            view3 = View()
+            view3.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
+            await interaction.channel.send(player["player_name"]+" if you have enough colony ships, you can use this to drop population after taking control of the sector",view=view3)
+            
 
     @staticmethod
     async def checkForMorphShield(game:GamestateHelper, pos:str, channel, ships, players):
@@ -517,6 +602,7 @@ class Combat:
         await interaction.channel.send(interaction.user.mention + " has chosen to start to retreat the ships with initiative "+speed+". They will be prompted to retreat when their turn comes around again")
         await Combat.promptNextSpeed(game, pos, interaction.channel, False)
 
+
     @staticmethod
     async def assignHitTo(game:GamestateHelper, buttonID:str, interaction:discord.Interaction, button:bool):
         pos = buttonID.split("_")[1]
@@ -574,8 +660,41 @@ class Combat:
                     label = "Decline"
                     buttonID = "FCID"+playerColor+"_deleteMsg"
                     view.add_item(Button(label=label, style=discord.ButtonStyle.red, custom_id=buttonID))
-                    msg = player["player_name"] + " the bot believes you should draw "+count+" reputation tiles here. Click to do so or press decline if the bot messed up."
+                    msg = player["player_name"] + " the bot believes you should draw "+count+" reputation tiles here. Click to do so or press decline if the bot messed up. Please ensure that players in combats earlier than yours have drawn their reputation tiles first"
                     await interaction.channel.send(msg, view=view)
+                winner = Combat.findPlayersInTile(game, pos)[0]
+                owner = game.gamestate["board"][pos]["owner"]
+                if winner != "ai" and owner != winner:
+                    player = game.getPlayerObjectFromColor(winner)
+                    if owner==0:
+                        if game.gamestate["board"][pos]["disctile"]!=0:
+                            view = View()
+                            view.add_item(Button(label="Explore Discovery Tile", style=discord.ButtonStyle.green, custom_id="FCID"+winner+"_exploreDiscoveryTile_"+pos))
+                            await interaction.channel.send(player["player_name"]+" you can explore the discovery tile",view=view)
+                        view2 = View()
+                        view2.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple, custom_id=f"FCID{winner}_addInfluenceFinish_"+pos))
+                        await interaction.channel.send(player["player_name"]+" you can place your influence on the tile",view=view2)
+                        view3 = View()
+                        view3.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
+                        await interaction.channel.send(player["player_name"]+" if you have enough colony ships, you can use this to drop population after taking control of the sector",view=view3)
+                    else:
+                        p2 = game.getPlayerObjectFromColor(owner)
+                        player_helper = PlayerHelper(game.get_player_from_color(player["color"]),player)
+                        player_helper2 = PlayerHelper(game.get_player_from_color(p2["color"]),p2)
+                        if p2["name"]=="Planta" or ("neb" in player_helper.getTechs() and "nea" not in player_helper2.getTechs()):
+                            view = View()
+                            view.add_item(Button(label="Destroy All Population", style=discord.ButtonStyle.green, custom_id="FCID"+winner+"_removeInfluenceFinish_"+pos+"_graveYard"))
+                            await interaction.channel.send(player["player_name"]+" you can destroy all enemy population automatically",view=view)
+                            view2 = View()
+                            view2.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple, custom_id=f"FCID{winner}_addInfluenceFinish_"+pos))
+                            await interaction.channel.send(player["player_name"]+" you can place your influence on the tile after destroying the enemy population",view=view2)
+                            view3 = View()
+                            view3.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
+                            await interaction.channel.send(player["player_name"]+" if you have enough colony ships, you can use this to drop population after taking control of the sector",view=view3)
+                        else:
+                            view = View()
+                            view.add_item(Button(label="Roll to Destroy Population", style=discord.ButtonStyle.green, custom_id=f"FCID{winner}_rollDice_{pos}_{winner}_1000"))
+                            await interaction.channel.send(player["player_name"]+" you can roll to attempt to kill enemy population",view=view)
                 
             elif oldLength != len(Combat.findPlayersInTile(game, pos)):
                 drawing = DrawHelper(game.gamestate)
@@ -589,7 +708,7 @@ class Combat:
             if hitsToAssign == 0 and oldLength == len(Combat.findPlayersInTile(game, pos)):
                 await Combat.promptNextSpeed(game, pos, interaction.channel, True)
 
-
+   
 
     @staticmethod
     async def drawReputation(game:GamestateHelper, buttonID:str, interaction:discord.Interaction, player_helper):

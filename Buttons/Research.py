@@ -39,18 +39,25 @@ class ResearchButtons:
             game.update_player(player_helper)  
             await interaction.channel.send(msg)  
         else:  
-            paid = min(cost, player["science"])  
-            msg = player_helper.adjust_science(-paid)  
-            game.update_player(player_helper)  
+            paid = min(cost, player["science"])   
             view = View()
             trade_value = player['trade_value']
+            val = paid
             for resource_type, button_style in [("materials", discord.ButtonStyle.gray),   
                                         ("money", discord.ButtonStyle.blurple)]: 
                 if(player[resource_type] >= trade_value):
+                    val += int(player[resource_type]/trade_value)
                     view.add_item(Button(label=f"Pay {trade_value} {resource_type.capitalize()}",   
                                     style=button_style,   
                                     custom_id=f"FCID{player['color']}_payAtRatio_{resource_type}")) 
             view.add_item(Button(label="Done Paying", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))  
+            if val < cost:
+                view2 = View()
+                view2.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
+                await interaction.channel.send(f"Attempted to pay a cost of {str(cost)} but you did not have enough. Please restart the turn or manually adjust resources if for some reason you should have more",view=view2)
+                return
+            msg = player_helper.adjust_science(-paid)  
+            game.update_player(player_helper) 
             await interaction.channel.send(  
                 f"Attempted to pay a cost of {str(cost)}\n{msg}\n Please pay the rest of the cost by trading other resources at your trade ratio ({trade_value}:1)",view=view  
             )  
@@ -193,8 +200,10 @@ class ResearchButtons:
         game = GamestateHelper(interaction.channel)  
         resource_type = buttonID.split("_")[1]
         trade_value = player["trade_value"]
-        paid = min(trade_value, player[resource_type])  
-        msg = player_helper.adjust_resource(resource_type,-paid)  
+        if trade_value > player[resource_type]:
+            await interaction.channel.send(interaction.user.mention + " does not have enough "+resource_type +" to trade") 
+            return
+        msg = player_helper.adjust_resource(resource_type,-trade_value)  
         game.update_player(player_helper)  
         await interaction.channel.send(msg)  
 
