@@ -155,7 +155,10 @@ class GamestateHelper:
             return tile
 
     def tile_discard(self, sector):
-        self.gamestate["tile_discard"].append(sector)
+        firstNum = int(sector) % 100
+        if "tile_discard_deck_"+str(firstNum)+"00" not in self.gamestate:
+            self.gamestate["tile_discard_deck_"+str(firstNum)+"00"]=[]
+        self.gamestate["tile_discard_deck_"+str(firstNum)+"00"].append(sector)
         self.update()
 
     @staticmethod
@@ -168,6 +171,12 @@ class GamestateHelper:
             return "dreadnought"
         elif shipAbbreviation == "sb":
             return "starbase"
+        elif shipAbbreviation == "orb":
+            return "orbital"
+        elif shipAbbreviation == "mon":
+            return "monolith"
+        else:
+            return shipAbbreviation
     @staticmethod
     def getShipShortName(shipName:str):
         shipName = shipName.lower()
@@ -269,10 +278,24 @@ class GamestateHelper:
             if ship in self.gamestate["board"][position]["damage_tracker"]:
                 damage = self.gamestate["board"][position]["damage_tracker"][ship]+damage
             else:
-                self.gamestate["board"][position]["damage_tracker"][ship] = []
+                self.gamestate["board"][position]["damage_tracker"][ship] = [0]
         else:
             self.gamestate["board"][position]["damage_tracker"] = {}
-            self.gamestate["board"][position]["damage_tracker"][ship] = []
+            self.gamestate["board"][position]["damage_tracker"][ship] = [0]
+        self.gamestate["board"][position]["damage_tracker"][ship] = damage
+        self.update()
+        return damage
+    
+    def repair_damage(self, ship, position):
+        damage = 0
+        if "damage_tracker" in self.gamestate["board"][position]:
+            if ship in self.gamestate["board"][position]["damage_tracker"] and self.gamestate["board"][position]["damage_tracker"][ship] > 0:
+                damage = self.gamestate["board"][position]["damage_tracker"][ship]-1
+            else:
+                self.gamestate["board"][position]["damage_tracker"][ship] = [0]
+        else:
+            self.gamestate["board"][position]["damage_tracker"] = {}
+            self.gamestate["board"][position]["damage_tracker"][ship] = [0]
         self.gamestate["board"][position]["damage_tracker"][ship] = damage
         self.update()
         return damage
@@ -329,12 +352,21 @@ class GamestateHelper:
                     self.gamestate["players"][player]["owned_tiles"].remove(tile)
 
         if len(self.gamestate[f"tile_deck_300"]) == 0:
-            keysToRemove = []
-            for key,value in self.gamestate[f"board"].items():
-                if value["sector"] == "sector3back":
-                    keysToRemove.append(key)
-            for key in keysToRemove:
-                del self.gamestate[f"board"][key]
+            role = discord.utils.get(interaction.guild.roles, name=self.game_id)  
+            if "tile_discard_deck_300" in self.gamestate and len(self.gamestate[f"tile_discard_deck_300"]) > 0:
+                self.gamestate[f"tile_deck_300"] = self.gamestate[f"tile_discard_deck_300"]
+                self.gamestate[f"tile_discard_deck_300"] = []
+                if role:
+                    interaction.channel.send(role.mention + " shuffling the discarded outer rim tiles back into the deck")
+            else:
+                keysToRemove = []
+                for key,value in self.gamestate[f"board"].items():
+                    if value["sector"] == "sector3back":
+                        keysToRemove.append(key)
+                for key in keysToRemove:
+                    del self.gamestate[f"board"][key]
+                if role:
+                    interaction.channel.send(role.mention + " the outer rim has run out of tiles to explore")
         self.update()
     def makeEveryoneNotTraitor(self):
         for player in self.gamestate["players"]:

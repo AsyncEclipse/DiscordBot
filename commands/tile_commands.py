@@ -199,25 +199,25 @@ class TileCommands(commands.GroupCog, name="tile"):
         image = drawing.board_tile_image(tile_position)
         await interaction.followup.send(file=drawing.show_single_tile(image))
 
-    @app_commands.command(name="explore")
-    async def explore(self, interaction: discord.Interaction, tile_position: str):
-        game = GamestateHelper(interaction.channel)
-        tile = game.tile_draw(tile_position)
-        drawing = DrawHelper(game.gamestate)
-        orientation = 0
-        await interaction.response.defer(thinking=True)
-        image = drawing.base_tile_image(tile)
-        await interaction.followup.send(file=drawing.show_single_tile(image))
-        view = View()
-        button = Button(label="Place Tile",style=discord.ButtonStyle.green, custom_id=f"placeTile_"
-                                                                                        f"{tile_position}_{tile}_{orientation}")
-        button2 = Button(label="Discard Tile",style=discord.ButtonStyle.red, custom_id=f"discardTile_{tile}")
-        view.add_item(button)
-        view.add_item(button2)
-        await interaction.channel.send(view=view)
+    # @app_commands.command(name="explore_new_system_tile")
+    # async def explore_new_system_tile(self, interaction: discord.Interaction, tile_position: str):
+    #     game = GamestateHelper(interaction.channel)
+    #     tile = game.tile_draw(tile_position)
+    #     drawing = DrawHelper(game.gamestate)
+    #     orientation = 0
+    #     await interaction.response.defer(thinking=True)
+    #     image = drawing.base_tile_image(tile)
+    #     await interaction.followup.send(file=drawing.show_single_tile(image))
+    #     view = View()
+    #     button = Button(label="Place Tile",style=discord.ButtonStyle.green, custom_id=f"placeTile_"
+    #                                                                                     f"{tile_position}_{tile}_{orientation}")
+    #     button2 = Button(label="Discard Tile",style=discord.ButtonStyle.red, custom_id=f"discardTile_{tile}")
+    #     view.add_item(button)
+    #     view.add_item(button2)
+    #     await interaction.channel.send(view=view)
     
-    @app_commands.command(name="resolve_discovery_tile")
-    async def resolve_discovery_tile(self, interaction: discord.Interaction, tile_position: str):
+    @app_commands.command(name="explore_discovery_tile")
+    async def explore_discovery_tile(self, interaction: discord.Interaction, tile_position: str):
         game = GamestateHelper(interaction.channel)
         await interaction.response.defer(thinking = False)
         await DiscoveryTileButtons.exploreDiscoveryTile(game, tile_position, interaction,game.get_player(interaction.user.id))

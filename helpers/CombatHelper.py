@@ -386,6 +386,21 @@ class Combat:
         if hitsToAssign == 0 and oldLength == len(Combat.findPlayersInTile(game, pos)):
             await Combat.promptNextSpeed(game, pos, interaction.channel, update)
 
+
+    @staticmethod
+    async def checkForMorphShield(game:GamestateHelper, pos:str, channel, ships, players):
+        for playerColor in players:
+            if playerColor != "ai":
+                for ship in Combat.getCombatantShipsBySpeed(game, playerColor, ships):
+                    player = game.get_player_from_color(playerColor)
+                    shipModel = PlayerShip(game.gamestate["players"][player], ship[1])
+                    shipName = playerColor+"-"+ship[1]
+                    if shipModel.repair > 0 and "damage_tracker" in game.gamestate["board"][pos] and shipName in game.gamestate["board"][pos]["damage_tracker"]:
+                        if game.gamestate["board"][pos]["damage_tracker"][shipName] > 0:
+                            damage = game.repair_damage(shipName, pos)
+                            await channel.send(game.gamestate["players"][player]["player_name"] + "repaired 1 damage on their "+Combat.translateShipAbrToName(ship[1]) + " using a morph shield")
+                            break
+
     @staticmethod
     async def promptNextSpeed(game:GamestateHelper, pos:str, channel, update:bool):
         currentSpeed = None
@@ -410,6 +425,7 @@ class Combat:
             if speed == currentSpeed and currentRoller == owner:
                 found = True
         if found and nextSpeed == -1:
+            await Combat.checkForMorphShield(game, pos, channel, ships, [attacker, defender])
             for speed,owner in sortedSpeeds:
                 if speed != 99:
                     nextSpeed = speed
@@ -544,7 +560,7 @@ class Combat:
                         role = discord.utils.get(interaction.guild.roles, name=game.game_id)
                         view = View()
                         view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"startPopDrop"))
-                        actions_channel.send(role.mention+" Please run upkeep after all post combat events are resolved. You can use this button to drop pop after taking control of a tile", view = view)
+                        await actions_channel.send(role.mention+" Please run upkeep after all post combat events are resolved. You can use this button to drop pop after taking control of a tile", view = view)
                 players = game.gamestate["board"][pos]["combatants"]
                 for playerColor in players:
                     if playerColor == "ai":
