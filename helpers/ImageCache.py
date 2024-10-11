@@ -2,7 +2,7 @@ import asyncio
 from PIL import Image  
 import os  
 import concurrent.futures
-
+import time 
 class ImageCacheHelper:  
     _instance = None  
 
@@ -18,12 +18,18 @@ class ImageCacheHelper:
         for root, dirs, files in os.walk(self.base_directory):  
             for filename in files:  
                 if filename.endswith(('.png')):
+                    if "mask" in filename and "_" not in filename:
+                        continue
                     image_path = os.path.join(root, filename)  
                     size = self.get_image_size(root, filename)  
                     if "wh_mask" in filename:
                         self.cache[filename] = Image.open(image_path).convert("RGBA").resize(size).rotate(180)
                     else:  
-                        self.cache[filename] = Image.open(image_path).convert("RGBA").resize(size)
+                        imageTemp = Image.open(image_path).convert("RGBA")
+                        if imageTemp.size != size:
+                            imageTemp = imageTemp.resize(size)
+                        self.cache[filename] = imageTemp
+                        
 
     def get_image_size(self, folder, filename):  
         if "hexes" in folder.lower():  
@@ -57,6 +63,8 @@ class ImageCacheHelper:
                 return (80,80)
             elif "yellow_square" in filename.lower():
                 return (65,65)
+            elif "warp_picture" in filename.lower():
+                return (132,102)
             else:
                 return (80,80)
         elif "basic_ships" in folder.lower():  

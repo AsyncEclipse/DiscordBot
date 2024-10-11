@@ -56,8 +56,8 @@ class MoveButtons:
         player_helper = PlayerHelper(game.get_player_from_color(player["color"]),player)
         techsResearched = player_helper.getTechs()
         wormHoleGen = "wog" in techsResearched
-
-        def recursive_search(pos, distance, visited):
+        jumpDrive = "jud" in techsResearched
+        def recursive_search(pos, distance, visited, jumpDriveAvailable):
             if distance >  shipRange:
                 return
             visited.add(pos)
@@ -68,14 +68,16 @@ class MoveButtons:
 
             for adjTile in configs.get(pos)[0].split(","):
                 if InfluenceButtons.areTwoTilesAdjacent(game, pos, adjTile, configs, wormHoleGen):
-                    recursive_search(adjTile, distance + 1, visited)
+                    recursive_search(adjTile, distance + 1, visited, jumpDriveAvailable)
+                elif jumpDriveAvailable and "wormholes" in tile_map[pos]:
+                    recursive_search(adjTile, distance + 1, visited, False)
             if "warp" in tile_map[pos] and tile_map[pos]["warp"] == 1:
                 for tile in tile_map:
                     if "warp" in tile_map[tile] and tile_map[tile]["warp"] == 1:
-                        recursive_search(tile, distance + 1, visited)
+                        recursive_search(tile, distance + 1, visited, jumpDriveAvailable)
 
         visited_tiles = set()
-        recursive_search(origin, 0, visited_tiles)
+        recursive_search(origin, 0, visited_tiles, jumpDrive)
         return visited_tiles
     @staticmethod
     async def moveThisShip(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str):

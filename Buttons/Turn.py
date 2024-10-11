@@ -159,8 +159,8 @@ class TurnButtons:
         view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
         map = await drawing.show_map()
         stats = await drawing.show_stats()
-        await TurnButtons.send_file(interaction,map)
-        await TurnButtons.send_file(interaction,stats)
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+             future = executor.submit(asyncio.run_coroutine_threadsafe, TurnButtons.send_files(interaction, [map,stats]),bot.loop)
         # with concurrent.futures.ThreadPoolExecutor() as executor:
         #     future = executor.submit(asyncio.run_coroutine_threadsafe, TurnButtons.send_files(interaction, [map,stats]),bot.loop)
 

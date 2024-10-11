@@ -215,8 +215,10 @@ class DrawHelper:
                         tile_image.paste(black, (80, 0), mask=black)
                     tile_image = tile_image.rotate(60)
 
-
-
+            if "warpDisc" in tile or "warpPoint" in tile:
+                warppath = f"images/resources/all_boards/Warp_picture.png"
+                warp_mask = self.use_image(warppath)
+                tile_image.paste(warp_mask, (20, 140), mask=warp_mask)
             if "player_ships" in tile and len(tile["player_ships"]) > 0:
                 counts = {}  # To track counts for each ship type
                 countsShips = {}
@@ -404,8 +406,12 @@ class DrawHelper:
         font = ImageFont.truetype("images/resources/arial.ttf", size=70)
         stroke_color = (0, 0, 0)
         stroke_width = 2
+        amount = len(self.gamestate["tile_deck_300"])
 
-        text_drawable_image.text((565, 140), str(len(self.gamestate["tile_deck_300"])), (0, 255, 0), font=font,
+        if "tile_discard_deck_300"  in self.gamestate:
+            amount += len(self.gamestate["tile_discard_deck_300"])
+
+        text_drawable_image.text((565, 140), str(amount), (0, 255, 0), font=font,
                                     stroke_width=stroke_width, stroke_fill=stroke_color)
         text_drawable_image.text((0, 140), "Remaining           :", (0, 255, 0), font=font,
                                     stroke_width=stroke_width, stroke_fill=stroke_color)
@@ -642,7 +648,18 @@ class DrawHelper:
             text_drawable_image = ImageDraw.Draw(context)
             text_drawable_image.text((position[0] + 120, position[1]), f"{player[player_key]}", color, font=font,
                                     stroke_width=stroke_width, stroke_fill=stroke_color)
-
+            
+        newY = y 
+        newX = x+240
+        with open("data/discoverytiles.json") as f:
+            discTile_data = json.load(f)
+        
+        for part in player["ancient_parts"]:
+            discName = discTile_data[part]["name"]
+            part_path = f"images/resources/components/discovery_tiles/discovery_{discName.replace(' ','_').lower()}.png"
+            part_image = self.use_image(part_path)
+            context.paste(part_image, (newX, newY), mask=part_image)
+            newY+=85
         for img_path, text_color, player_key, amount_key in resources:
             draw_resource(context, img_path, text_color, player_key, amount_key, (x, y))
             y += 100
