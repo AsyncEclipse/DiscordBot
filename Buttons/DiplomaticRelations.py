@@ -37,7 +37,7 @@ class DiplomaticRelationsButtons:
             for tile in game.get_gamestate()["players"][p2]["owned_tiles"]:
                 for tile2 in player["owned_tiles"]:
                     if InfluenceButtons.areTwoTilesAdjacent(game, tile, tile2, configs, False):
-                        for rep in game.get_gamestate()["players"][p2]["reputation"]:
+                        for rep in game.get_gamestate()["players"][p2]["reputation_track"]:
                             if player["color"] in rep:
                                 alreadyFriends = True
                         allowable = True
