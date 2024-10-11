@@ -111,7 +111,7 @@ class InfluenceButtons:
         p1 = game.getPlayerObjectFromColor(owner)
         graveYard = buttonID.split("_")[2] == "graveYard"
         game.remove_control(p1["color"],tileLoc)
-        await interaction.channel.send( f"{p1["player_name"]} lost control of "+tileLoc)
+        await interaction.channel.send( f"{p1['player_name']} lost control of "+tileLoc)
         for pop in PopulationButtons.findFullPopulation(game, tileLoc):
             neutralCubes = game.remove_pop([pop+"_pop"],tileLoc,game.get_player_from_color(p1["color"]), graveYard)
             if neutralCubes > 0:
