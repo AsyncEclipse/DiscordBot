@@ -68,8 +68,6 @@ class BuildButtons:
         game = GamestateHelper(interaction.channel)
         shipsShort = ["int","cru","drd","sb"]
         ultimateC = 0
-        for counter,ship in enumerate(ships):
-            remaining = player["ship_stock"][counter]
                 
         if "stb" not in player["military_tech"]:
             ships.remove("Starbase")
@@ -80,7 +78,7 @@ class BuildButtons:
         for counter,ship in enumerate(ships):
             key = f"cost_{ship.lower()}"
             remaining = 10
-            if counter < 4:
+            if counter < len(player["ship_stock"]):
                 remaining = player["ship_stock"][counter]
                 if shipsShort[counter] in build:
                     remaining -= build.count(shipsShort[counter])
