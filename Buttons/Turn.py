@@ -35,6 +35,7 @@ class TurnButtons:
             game = GamestateHelper(interaction.channel)
             player = game.get_player(interaction.user.id)  
             view = TurnButtons.getStartTurnButtons(game, player)
+            game.saveLastButtonPressed("restart")
             await interaction.channel.send(interaction.user.mention+" has chosen to back up to last start of turn.")
             await interaction.channel.send(player["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(player),view=view)
         except discord.NotFound: 
