@@ -20,6 +20,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         self.bot = bot
     
 
+    
     factionChoices = [
         app_commands.Choice(name="Hydran Progress", value="hyd"),
         app_commands.Choice(name="Eridian Empire", value="eri"),
@@ -230,7 +231,9 @@ class SetupCommands(commands.GroupCog, name="setup"):
             if member:  
                 await member.add_roles(role) 
                 overwrites[member] = discord.PermissionOverwrite(read_messages=True, manage_messages=True)  # Grant access to the player  
-
+        roleObv = discord.utils.get(interaction.guild.roles, name="Observers") 
+        if roleObv:
+            overwrites[roleObv] = discord.PermissionOverwrite(read_messages=True)
         # Create the text channels for the game  
         tabletalk = await interaction.guild.create_text_channel(f'aeb{config.game_number}-{game_name}', category=category, overwrites=overwrites)  
         actions = await interaction.guild.create_text_channel(f'aeb{config.game_number}-actions', category=category, overwrites=overwrites)  
@@ -240,10 +243,36 @@ class SetupCommands(commands.GroupCog, name="setup"):
         game = GamestateHelper(actions)
         game.setup_techs_and_outer_rim(player_count)
         drawing = DrawHelper(game.gamestate)  
+        random.shuffle(player_list)
+        list = ""
+        for x, player in enumerate(player_list):
+            member = interaction.guild.get_member(player[0])
+            list += str(x+1)+". "+member.mention +"\n"
+
+        list += """For your reference, the factions currently available in the bot are the following 6, plus the 6 terran equivalents. First timers are encouraged to use the terran factions, which are all the same and dont have as many quirks (the quirks are tame compared to TI4 asymmetry though):  
+        1. Hydran Progress   
+        2. Eridian Empire   
+        3. Orion Hegemony   
+        4. Mechanema   
+        5. Descendants of Draco   
+        6. Planta  
+        """
+        
         await thread.send(role.mention + " pinging you here")
-        await actions.send("Draft factions and turn position in the manner of your choice, then setup the game with /setup game. Enter the players in the order they should take turns in (i.e. enter first player first)")
+        await actions.send(role.mention+" Draft factions and turn position in the manner of your choice, then setup the game with /setup game. Enter the players in the order they should take turns in (i.e. enter first player first)")
         await actions.send("Initial tech draw is as follows",file=drawing.show_available_techs())
+        await actions.send("A common way to draft factions is to generate a random pick order and then have the turn order be the reverse of that pick order. For your conveinence, the following random pick order was generated, but you can ignore it: \n"+list)
         await interaction.followup.send('New game created! Here are the channels: \n'+tabletalk.jump_url +"\n"+actions.jump_url)
+        factionThread = await actions.create_thread(name="Faction Reference", auto_archive_duration=10080)  
+        await factionThread.send(file = drawing.get_file("images/resources/components/factions/hydran_board.png"))
+        await factionThread.send(file = drawing.get_file("images/resources/components/factions/eridani_board.png"))
+        await factionThread.send(file = drawing.get_file("images/resources/components/factions/orion_board.png"))
+        await factionThread.send(file = drawing.get_file("images/resources/components/factions/mechanema_board.png"))
+        await factionThread.send(file = drawing.get_file("images/resources/components/factions/draco_board.png"))
+        await factionThread.send(file = drawing.get_file("images/resources/components/factions/planta_board.png"))
+        await factionThread.send(file = drawing.get_file("images/resources/components/factions/terran_conglomerate_board.png"))
+        await factionThread.send(role.mention + " pinging you here, which contains all the faction sheets")
+       
 
     
     

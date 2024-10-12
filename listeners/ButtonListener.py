@@ -30,6 +30,9 @@ class ButtonListener(commands.Cog):
             log_channel = discord.utils.get(interaction.guild.channels, name="bot-log") 
             button_log_channel = discord.utils.get(interaction.guild.channels, name="button-log") 
             try:
+                customID = interaction.data["custom_id"]
+                if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):  
+                    await button_log_channel.send(f'{customID} pressed: '+interaction.message.jump_url) 
                 await interaction.response.defer(thinking=False)
                 start_time = time.perf_counter()  
                 game = GamestateHelper(interaction.channel)
@@ -38,7 +41,11 @@ class ButtonListener(commands.Cog):
                     player_helper = PlayerHelper(interaction.user.id, player)
                 else:
                     player_helper = None
-                customID = interaction.data["custom_id"]
+                if "lastButton" in game.gamestate and game.gamestate["lastButton"] == customID:
+                    if "showGame" not in customID and "AtRatio" not in customID:
+                        await interaction.followup.send(interaction.user.mention+" This button ("+customID+") was pressed most recently, and we are attempting to prevent an accidental double press.", ephemeral=True)
+                        return
+                game.saveLastButtonPressed(customID)
                 # If we want to prevent others from touching someone else's buttons, we can attach FCID{color}_ to the start of the button ID as a check.
                 # We then remove this check so it doesnt interfere with the rest of the resolution
                 if player != None:
@@ -49,8 +56,7 @@ class ButtonListener(commands.Cog):
                             return
                         customID = customID.replace(check+"_","")
                 
-                if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):  
-                    await button_log_channel.send(f'{customID} pressed: '+interaction.message.jump_url)  
+                 
                 if customID == "deleteMsg":
                     await interaction.message.delete()
                 if customID == "showGame":  
