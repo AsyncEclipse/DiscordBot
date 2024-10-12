@@ -216,6 +216,13 @@ class TileCommands(commands.GroupCog, name="tile"):
     #     view.add_item(button)
     #     view.add_item(button2)
     #     await interaction.channel.send(view=view)
+
+    @app_commands.command(name="add_discovery_tile")
+    async def add_discovery_tile(self, interaction: discord.Interaction, tile_position: str):
+        game = GamestateHelper(interaction.channel)
+        await interaction.response.defer(thinking = False)
+        game.addDiscTile(tile_position)
+        await interaction.followup.send("Added a discovery tile to tile "+tile_position)
     
     @app_commands.command(name="explore_discovery_tile")
     async def explore_discovery_tile(self, interaction: discord.Interaction, tile_position: str):

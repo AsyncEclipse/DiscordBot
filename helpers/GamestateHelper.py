@@ -30,7 +30,8 @@ class GamestateHelper:
          self.update()
 
 
-
+    def saveLastButtonPressed(self, buttonID:str):
+        self.gamestate["lastButton"] = buttonID
 
     def changeColor(self, colorOld, colorNew):
         def replace_string_in_dict(original_dict, old_string, new_string):  
@@ -745,6 +746,10 @@ class GamestateHelper:
                 self.gamestate["players"][pID2]["reputation_track"][x]=tile.split("-")[0]
                 break
 
+        self.update()
+
+    def addDiscTile(self, tile:str):
+        self.gamestate["board"][tile]["disctile"]=1
         self.update()
 
     def getNextDiscTile(self, tile:str):
