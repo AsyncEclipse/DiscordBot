@@ -151,7 +151,7 @@ class TileCommands(commands.GroupCog, name="tile"):
                 view.add_item(Button(label="Money", style=discord.ButtonStyle.gray, custom_id=f"FCID{player_color}_reducePopFor_money"))
                 await interaction.channel.send( f"{playerObj['player_name']} Choose what type of cube to put on the neutral/orbital planet", view=view)
         if removed_pop:  
-            neutralPop = game.remove_pop(removed_pop, tile_position,playerID)  
+            neutralPop = game.remove_pop(removed_pop, tile_position,playerID, False)  
             if neutralPop > 0:
                 for x in range(neutralPop):
                     view=View()
