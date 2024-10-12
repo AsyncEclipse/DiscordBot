@@ -86,7 +86,9 @@ class UpgradeButtons:
         discTileUpgrade = customID.split("_")[5]
         with open("data/parts.json", "r") as f:
             part_stats = json.load(f)
-        index = player[f"{ship}_parts"].index(oldPart)
+        index = 0
+        if newPart != "mus":
+            index = player[f"{ship}_parts"].index(oldPart)
         if newPart != "empty":
             if newPart != oldPart:
                 actions -= 1

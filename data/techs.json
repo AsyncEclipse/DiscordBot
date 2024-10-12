@@ -301,8 +301,8 @@
   },
   "ans": {
     "name": "Antimatter Splitter",
-    "base_cost": 4,
-    "min_cost": 3,
+    "base_cost": 5,
+    "min_cost": 5,
     "track": "any",
     "activ1": 0,
     "art_pt": 0,

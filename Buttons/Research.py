@@ -68,7 +68,7 @@ class ResearchButtons:
                                         ("money", discord.ButtonStyle.blurple), ("science", discord.ButtonStyle.green)]: 
                 view.add_item(Button(label=f"Gain 5 {resource_type.capitalize()}",   
                                 style=button_style,   
-                                custom_id=f"gain5resource_{resource_type}")) 
+                                custom_id=f"FCID{player['color']}_gain5resource_{resource_type}")) 
             view.add_item(Button(label="Done Gaining", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))  
             await interaction.channel.send(  
                 f"You can gain 5 of any type of resource for each artifact you have",view=view  
@@ -155,7 +155,7 @@ class ResearchButtons:
                     else:
                         view2.add_item(Button(label=f"{tech_name} ({cost})", style=buttonStyle, custom_id=f"FCID{player['color']}_getTech_{tech}_{tech_type}"))
                     buttonCount+=1
-        await interaction.channel.send(f"{interaction.user.mention}, select the tech you would like to acquire. The discounted cost is in parentheses.", view=view)
+        await interaction.channel.send(f"{interaction.user.mention}, select the tech you would like to acquire. The discounted cost is in parentheses. You currently have {str(player['science'])} science, and can trade other resources for science at a {str(player['trade_value'])}:1 ratio", view=view)
         if buttonCount > 26:
             await interaction.channel.send(view=view2)
         await interaction.followup.send(file=drawing.show_available_techs(),ephemeral=True)
@@ -171,6 +171,7 @@ class ResearchButtons:
             view = View()
             view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                                  custom_id=f"FCID{player['color']}_finishAction"))
+            view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
             await interaction.channel.send(f"{interaction.user.mention} when finished you may resolve your action "
                                            f"with this button.", view=view)
             await interaction.message.delete()
