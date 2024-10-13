@@ -43,7 +43,7 @@ class ButtonListener(commands.Cog):
                     player_helper = None
                 if "lastButton" in game.gamestate and game.gamestate["lastButton"] == customID:
                     if not any(substring in customID for substring in ["showGame", "AtRatio", "gain5", "showReputation"]):  
-                        await interaction.followup.send(interaction.user.mention+" This button ("+customID+") was pressed most recently, and we are attempting to prevent an accidental double press.", ephemeral=True)
+                        await interaction.followup.send(interaction.user.mention+" This button ("+customID+") was pressed most recently, and we are attempting to prevent an accidental double press. Try hitting show game first and then hitting this button, if for some reason you need to press this button", ephemeral=True)
                         return
                 game.saveLastButtonPressed(customID)
                 # If we want to prevent others from touching someone else's buttons, we can attach FCID{color}_ to the start of the button ID as a check.

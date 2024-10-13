@@ -86,10 +86,21 @@ class DrawHelper:
             tile_data = json.load(f)
         tile = tile_data[tileID]
         wormholeStringsViewed = []
+        def contains_all_chars(wormhole_string1, wormhole_string2):  
+            set1 = set(wormhole_string1)  
+            set2 = set(wormhole_string2)  
+            
+            return set1.issubset(set2)
         for x in range(6):
             rotation = x * 60
             wormholeString = ''.join(str((wormhole + x) % 6) for wormhole in tile["wormholes"])
-            if wormholeString in wormholeStringsViewed: continue
+            alreadyFound = False
+            for string in wormholeStringsViewed:
+                if contains_all_chars(string, wormholeString): 
+                    alreadyFound = True
+                    
+            if alreadyFound:
+                continue
             wormholeStringsViewed.append(wormholeString)
             rotationWorks = False
             for index, adjTile in enumerate(configs.get(position)[0].split(",")):

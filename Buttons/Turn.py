@@ -89,8 +89,8 @@ class TurnButtons:
             await interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(nextPlayer),view=view)
 
             view2 = View()
-            view2.add_item(Button(label=f"Permanently Pass", style=discord.ButtonStyle.green, custom_id="permanentlyPass"))
-            await interaction.followup.send(interaction.user.mention+ " you can use this button to permanently pass on reactions if you want.",view=view2,ephemeral=True)
+            view2.add_item(Button(label=f"Pass Unless Someone Attacks You", style=discord.ButtonStyle.green, custom_id="permanentlyPass"))
+            await interaction.followup.send(interaction.user.mention+ " you can use this button to pass on reactions unless someone attacks you if you want.",view=view2,ephemeral=True)
         else:
             view = View()
             role = discord.utils.get(interaction.guild.roles, name=game.game_id)  
@@ -108,7 +108,7 @@ class TurnButtons:
     async def permanentlyPass(player, game: GamestateHelper, interaction: discord.Interaction, player_helper : PlayerHelper):
         player_helper.permanentlyPassTurn(True)
         game.update_player(player_helper)
-        await interaction.followup.send("You permanently passed", ephemeral=True)
+        await interaction.followup.send("You passed on reactions as long as noone attacks you", ephemeral=True)
 
     @staticmethod  
     async def tradeAtRatio(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction,  buttonID:str):
@@ -197,19 +197,25 @@ class TurnButtons:
         view = View()
         player = p1
         player_helper = PlayerHelper(game.getPlayersID(player), player)
-        if "passed" in p1 and p1["passed"]== True:
-            view.add_item(Button(label=f"Build (1)", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startBuild"))
-            view.add_item(Button(label=f"Upgrade (1)", style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_startUpgrade"))
-            view.add_item(Button(label=f"Move (1)", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startMove"))
-            view.add_item(Button(label="Pass On Reaction", style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_passForRound"))
+        if player["influence_discs"] != 0:
+            if "passed" in p1 and p1["passed"]== True:
+                view.add_item(Button(label=f"Build (1)", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startBuild"))
+                view.add_item(Button(label=f"Upgrade (1)", style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_startUpgrade"))
+                view.add_item(Button(label=f"Move (1)", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startMove"))
+                view.add_item(Button(label="Pass On Reaction", style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_passForRound"))
+            else:
+                view.add_item(Button(label=f"Explore ({p1['explore_apt']})", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startExplore"))
+                view.add_item(Button(label=f"Research ({p1['research_apt']})", style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_startResearch"))
+                view.add_item(Button(label=f"Build ({p1['build_apt']})", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startBuild"))
+                view.add_item(Button(label=f"Upgrade ({p1['upgrade_apt']})", style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_startUpgrade"))
+                view.add_item(Button(label=f"Move ({p1['move_apt']})", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startMove"))
+                view.add_item(Button(label=f"Influence ({p1['influence_apt']})", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startInfluence"))
+                view.add_item(Button(label="Pass", style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_passForRound"))
         else:
-            view.add_item(Button(label=f"Explore ({p1['explore_apt']})", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startExplore"))
-            view.add_item(Button(label=f"Research ({p1['research_apt']})", style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_startResearch"))
-            view.add_item(Button(label=f"Build ({p1['build_apt']})", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startBuild"))
-            view.add_item(Button(label=f"Upgrade ({p1['upgrade_apt']})", style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_startUpgrade"))
-            view.add_item(Button(label=f"Move ({p1['move_apt']})", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startMove"))
-            view.add_item(Button(label=f"Influence ({p1['influence_apt']})", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startInfluence"))
-            view.add_item(Button(label="Pass", style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_passForRound"))
+            if "passed" in p1 and p1["passed"]== True:
+                view.add_item(Button(label="Pass On Reaction", style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_passForRound"))
+            else:
+                view.add_item(Button(label="Pass", style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_passForRound"))
         view.add_item(Button(label="Show Game",style=discord.ButtonStyle.gray, custom_id="showGame"))
         view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
         if len(PopulationButtons.findEmptyPopulation(game,p1)) > 0 and p1["colony_ships"] > 0:

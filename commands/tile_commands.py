@@ -1,3 +1,4 @@
+import json
 import discord
 from Buttons.DiscoveryTile import DiscoveryTileButtons
 from Buttons.Influence import InfluenceButtons
@@ -224,6 +225,29 @@ class TileCommands(commands.GroupCog, name="tile"):
         game.addDiscTile(tile_position)
         await interaction.followup.send("Added a discovery tile to tile "+tile_position)
     
+    @app_commands.command(name="resolve_specific_discovery_tile")
+    async def resolve_specific_discovery_tile(self, interaction: discord.Interaction, tile_position: str, discovery_id:str):
+        game = GamestateHelper(interaction.channel)
+        disc = discovery_id
+        tile = tile_position
+        await interaction.response.defer(thinking = False)
+        with open("data/discoverytiles.json") as f:
+            discTile_data = json.load(f)
+        if disc not in discTile_data:
+            await interaction.followup.send(discovery_id+" is not a valid ID. Ping someone who knows the code to find the correct ID")
+            return
+        discName = discTile_data[disc]["name"]
+        drawing = DrawHelper(game.gamestate)
+        file = drawing.show_disc_tile(discName)
+        msg = f"{interaction.user.mention} you explored a discovery tile and found a "+discName+". You can keep it for 2 points at the end of the game or use it for its ability"
+        
+        view = View()
+        view.add_item(Button(label="Use it for its ability", style=discord.ButtonStyle.green, custom_id=f"usedDiscForAbility_"+disc+"_"+tile))  
+        view.add_item(Button(label="Get 2 Points", style=discord.ButtonStyle.red, custom_id="keepDiscForPoints"))  
+        await interaction.followup.send(msg, view=view,file=file)
+
+
+
     @app_commands.command(name="explore_discovery_tile")
     async def explore_discovery_tile(self, interaction: discord.Interaction, tile_position: str):
         game = GamestateHelper(interaction.channel)

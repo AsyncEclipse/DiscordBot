@@ -107,6 +107,13 @@ class MoveButtons:
         await interaction.channel.send( f"{interaction.user.mention} Moved a {shipType} from {originT} to {destination}.", file=drawing.board_tile_image_file(destination))
         player_helper.specifyDetailsOfAction(f"Moved a {shipType} from {originT} to {destination}.")
         game.update_player(player_helper)
+        owner = game.gamestate["board"][destination]["owner"]
+        if owner != 0 and isinstance(owner, str) and owner != player["color"]:
+            p2 = game.getPlayerObjectFromColor(owner)
+            player_helper2 = PlayerHelper(game.get_player_from_color(owner), p2)
+            player_helper2.permanentlyPassTurn(False)
+            game.update_player(player_helper2)
+            await interaction.channel.send(p2["player_name"]+" your system has been invaded")
         for tile in player["reputation_track"]:
             if isinstance(tile, str) and "-" in tile:
                 color = tile.split("-")[2]

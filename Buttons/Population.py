@@ -62,7 +62,10 @@ class PopulationButtons:
                 label = "Advanced " + label
             label = label + f" (tile {tile})"
             view.add_item(Button(label=label, style=discord.ButtonStyle.blurple, custom_id=buttonID))
-        await interaction.channel.send( f"{interaction.user.mention}, choose which planet you would like to put a population cube on.", view=view)
+        if len(PopulationButtons.findEmptyPopulation(game, player)) > 0:
+            await interaction.channel.send( f"{interaction.user.mention}, choose which planet you would like to put a population cube on.", view=view)
+        else:
+            await interaction.channel.send( f"{interaction.user.mention}, the bot can find no empty planets which you can put population on.", view=view)
     @staticmethod
     async def fillPopulation(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str):
         tile = buttonID.split("_")[1]
@@ -99,7 +102,9 @@ class PopulationButtons:
             return
         await interaction.message.delete()
         drawing = DrawHelper(game.gamestate)
-        await interaction.channel.send(f"Successfully added a {typeOfPop.replace('adv','')} population to tile {tile}. "+str(game.gamestate["players"][game.get_player_from_color(player["color"])]["colony_ships"])+" colony ships left unexhausted", file=drawing.board_tile_image_file(tile))
+        resourceType = typeOfPop.replace('adv','')
+        income = player["population_track"][player[resourceType+"_pop_cubes"]-1]
+        await interaction.channel.send(f"Successfully added a {resourceType} population to tile {tile}. You now have an income of {str(income)} {resourceType}. "+str(game.gamestate["players"][game.get_player_from_color(player["color"])]["colony_ships"])+" colony ships left unexhausted", file=drawing.board_tile_image_file(tile))
 
 
 
