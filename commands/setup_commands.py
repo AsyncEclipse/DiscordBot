@@ -28,12 +28,12 @@ class SetupCommands(commands.GroupCog, name="setup"):
         app_commands.Choice(name="Descendants of Draco", value="dra"),
         app_commands.Choice(name="Mechanema", value="mec"),
         app_commands.Choice(name="Planta", value="pla"),
-        app_commands.Choice(name="Terran Alliance", value="ter1"),
-        app_commands.Choice(name="Terran Conglomerate", value="ter2"),
-        app_commands.Choice(name="Terran Directorate", value="ter3"),
-        app_commands.Choice(name="Terran Federation", value="ter4"),
-        app_commands.Choice(name="Terran Republic", value="ter5"),
-        app_commands.Choice(name="Terran Union", value="ter6"),
+        app_commands.Choice(name="Terran Alliance (Orion)", value="ter1"),
+        app_commands.Choice(name="Terran Conglomerate (Mech)", value="ter2"),
+        app_commands.Choice(name="Terran Directorate (Eridian)", value="ter3"),
+        app_commands.Choice(name="Terran Federation (Hydran)", value="ter4"),
+        app_commands.Choice(name="Terran Republic (Draco)", value="ter5"),
+        app_commands.Choice(name="Terran Union (Planta)", value="ter6"),
     ]
 
     
@@ -89,7 +89,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         tile_mapping = {  
             3: ["201", "205", "209", "211", "203", "207"],  
             4: ["201", "205", "207", "211", "203", "209"],  
-            5: ["201", "203", "205", "209", "211", "209"],  
+            5: ["201", "203", "205", "209", "211", "207"],  
             6: ["201", "203", "205", "207", "209", "211"]  
         }  
         if count in tile_mapping:  
