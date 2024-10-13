@@ -57,11 +57,16 @@ class DiscoveryTileButtons:
             with open("data/techs.json", "r") as f:
                 tech_data = json.load(f)
             minCost = 20
+            ownedTechs = player_helper.getTechs()
             for tech in techsAvailable:  
+                if tech in ownedTechs:
+                    continue
                 tech_details = tech_data.get(tech)
                 minCost = min(minCost,tech_details["base_cost"])
             cheapestTechs = []
             for tech in techsAvailable:  
+                if tech in ownedTechs:
+                    continue
                 tech_details = tech_data.get(tech)
                 if minCost == tech_details["base_cost"] and tech not in cheapestTechs:
                     cheapestTechs.append(tech)
@@ -72,7 +77,7 @@ class DiscoveryTileButtons:
                     view.add_item(Button(label=tech_details["name"], style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_getFreeTech_"+tech))
                 await interaction.channel.send("Choose the tech you would like to gain",view=view)
             else:
-                await DiscoveryTileButtons.getFreeTech(game, interaction, "spoof_"+tech)
+                await DiscoveryTileButtons.getFreeTech(game, interaction, "spoof_"+cheapestTechs[0])
         elif discTile_data[disc]["spawn"] != 0:
             if discTile_data[disc]["spawn"] == "cruiser":
                 game.add_units([player["color"]+"-"+"cru"],tile)
