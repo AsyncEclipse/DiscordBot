@@ -65,11 +65,12 @@ class GameCommands(commands.GroupCog, name="game"):
         elapsed_time = end_time - start_time  
         print(f"Total elapsed time for show game command: {elapsed_time:.2f} seconds")  
     
-    @app_commands.command(name="undo")
-    async def undo(self, interaction: discord.Interaction):
+    @app_commands.command(name="undo_to_last_turn_start")
+    async def undo_to_last_turn_start(self, interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)
         if game.backUpToLastSaveFile():
-            await interaction.response.send_message("Successfully backed up to the last save file. "+str(game.getNumberOfSaveFiles())+" save files remain")
+            await interaction.response.send_message("Successfully backed up to the last save file. This generally means it backed up to the last start of someone's turn. They can run /player start_turn to get their buttons. "+str(game.getNumberOfSaveFiles())+" save files remain")
+            game.saveLastButtonPressed("restart")
         else:
             await interaction.response.send_message("Ran out of save files, could not back up")
     

@@ -98,7 +98,8 @@ class ResearchButtons:
             len(player[f"{tech_type}_tech"]) if tech_type != "any"  
             else max(len(player["nano_tech"]), len(player["grid_tech"]), len(player["military_tech"]))  
         )  
-        discount = player["tech_track"][6 - prev_tech_count]  
+        track = [-8, -6, -4, -3, -2, -1, 0, 0]
+        discount = track[6 - prev_tech_count]  
         return max(tech_details["base_cost"] + discount, tech_details["min_cost"])  
 
     @staticmethod  

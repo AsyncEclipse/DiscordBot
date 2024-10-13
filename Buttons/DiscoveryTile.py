@@ -24,7 +24,7 @@ class DiscoveryTileButtons:
         discName = discTile_data[disc]["name"]
         drawing = DrawHelper(game.gamestate)
         file = drawing.show_disc_tile(discName)
-        msg = f"{interaction.user.mention} you explored a discorvery tile and found a "+discName+". You can keep it for 2 points at the end of the game or use it for its ability"
+        msg = f"{interaction.user.mention} you explored a discovery tile and found a "+discName+". You can keep it for 2 points at the end of the game or use it for its ability"
         
         view = View()
         view.add_item(Button(label="Use it for its ability", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_usedDiscForAbility_"+disc+"_"+tile))  

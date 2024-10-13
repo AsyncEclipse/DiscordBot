@@ -109,6 +109,7 @@ class ExploreButtons:
         msg = customID.split("_")
         game.add_tile(msg[1], int(msg[3]), msg[2])
         player_helper.specifyDetailsOfAction(f"Explored {msg[1]}.")
+        view2 = View()
         game.update_player(player_helper)
         await interaction.channel.send(f"Tile added to position {msg[1]}")
         if game.get_gamestate()["board"][msg[1]]["ancient"] == 0 or player["name"]=="Descendants of Draco":
@@ -118,10 +119,13 @@ class ExploreButtons:
             await interaction.channel.send(f"{interaction.user.mention} choose whether or not to place influence in the tile."+game.displayPlayerStats(player), view = view)
             if game.get_gamestate()["board"][msg[1]]["ancient"] == 0 and game.get_gamestate()["board"][msg[1]]["disctile"] > 0:
                 await DiscoveryTileButtons.exploreDiscoveryTile(game, msg[1],interaction,player)
-        view = View()
-        view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
-        view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_finishAction"))
-        await interaction.channel.send(f"{interaction.user.mention} when you're finished resolving your action, you may end turn with this button.", view=view)
+            view2.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
+        else:
+            await interaction.channel.send("There are "+str(game.get_gamestate()["board"][msg[1]]["ancient"])+" ancients in this tile, so you will not be able to claim it until you fight and destroy them.")
+        
+        
+        view2.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_finishAction"))
+        await interaction.channel.send(f"{interaction.user.mention} when you're finished resolving your action, you may end turn with this button.", view=view2)
         await interaction.message.delete()
     @staticmethod
     async def discardTile(game: GamestateHelper, interaction: discord.Interaction, player, customID:str):

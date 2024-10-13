@@ -241,7 +241,7 @@
     "name": "Morph Shield",
     "description": "This is an Ancient Tech; it can only be added to a single Ship Blueprint slot, and then it is exhausted. The Morph Shield acts as 1 shield and repairs 1 damage at the end of a round.",
     "range": 0,
-    "speed": 0,
+    "speed": 1,
     "nrg_use": 0,
     "nrg_src": 0,
     "tech_req": "none",
