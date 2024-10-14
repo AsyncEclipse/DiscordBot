@@ -110,7 +110,7 @@ class AI_Ship(Ship):
             AI_parts = json.load(f)
         if "ai-" not in ship_type:
             ship_type = "ai-"+ship_type
-        if advanced == True:
+        if advanced == True and "adv" not in ship_type:
             ship_parts = AI_parts[ship_type + "adv"]
         else:
             ship_parts = AI_parts[ship_type]

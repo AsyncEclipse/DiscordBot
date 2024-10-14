@@ -23,6 +23,8 @@ class UpgradeButtons:
             view.add_item(Button(label="Save For Future Upgrade Action", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))
         if button:
             await interaction.message.delete()
+            if discTileUpgrade == "dummy":
+                view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
         await interaction.channel.send(
             f"{interaction.user.mention}, choose which ship you would like to upgrade.", view=view)
 

@@ -98,7 +98,7 @@ class DrawHelper:
             for string in wormholeStringsViewed:
                 if contains_all_chars(string, wormholeString): 
                     alreadyFound = True
-                    
+
             if alreadyFound:
                 continue
             wormholeStringsViewed.append(wormholeString)
@@ -673,7 +673,10 @@ class DrawHelper:
         with open("data/discoverytiles.json") as f:
             discTile_data = json.load(f)
         
-        for part in player["ancient_parts"]:
+        listOfAncient = player["ancient_parts"]
+        if "discoveryTileBonusPointTiles" in player:
+            listOfAncient = listOfAncient + player["discoveryTileBonusPointTiles"]
+        for part in listOfAncient:
             discName = discTile_data[part]["name"]
             part_path = f"images/resources/components/discovery_tiles/discovery_{discName.replace(' ','_').lower()}.png"
             part_image = self.use_image(part_path)
@@ -736,6 +739,8 @@ class DrawHelper:
                     points += tile_map[tile]["warpPoint"]
                 if "warpDisc" in tile_map[tile]:
                     points += tile_map[tile]["warpDisc"]
+                if "discoveryTileBonusPointTiles" in player and "art" in player["discoveryTileBonusPointTiles"] and tile_map[tile]["artifact"] == 1:
+                    points += 1
                 if "player_ships" in tile_map[tile]:
                     for ship in tile_map[tile]["player_ships"]:
                         if "mon" in ship:
@@ -755,12 +760,16 @@ class DrawHelper:
                     points += len(player[type])-3
         if "disc_tiles_for_points" in player:
             points += player["disc_tiles_for_points"]*2
+        reputationPoints = 0
         for reputation in player["reputation_track"]:
             if isinstance(reputation, int):
                 if "gameEnded" in self.gamestate:
                     points += reputation
+                    reputationPoints +=reputation
             if not isinstance(reputation, int) and "-" in reputation:
                 points += 1
+        if "discoveryTileBonusPointTiles" in player and "rep" in player["discoveryTileBonusPointTiles"]:
+            points += int(reputationPoints/3)
         if "traitor" in player and player["traitor"] == True:
             points -= 2
         return points

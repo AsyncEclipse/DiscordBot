@@ -30,7 +30,8 @@ class ExploreButtons:
                 if player["color"] in ship:
                     playerShipsCount = playerShipsCount +1
                 else:
-                    opponentShips = opponentShips +1
+                    if "anc" not in ship or "Draco" not in player["name"]:
+                        opponentShips = opponentShips +1
                     if "gcds" in ship:
                         opponentShips += 99
         researchedTechs = player_helper.getTechs()
@@ -66,6 +67,7 @@ class ExploreButtons:
                         continue
                     tilesViewed.append(adjTile)
                     view.add_item(Button(label=str(adjTile), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_exploreTile_" + str(adjTile)))
+        view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
         await interaction.channel.send(f"{interaction.user.mention} select the tile you would like to explore",view=view)
         if player["explore_apt"] > 1 and "2" not in buttonID:
             view2 = View()

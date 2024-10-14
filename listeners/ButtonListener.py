@@ -42,7 +42,7 @@ class ButtonListener(commands.Cog):
                 else:
                     player_helper = None
                 if "lastButton" in game.gamestate and game.gamestate["lastButton"] == customID:
-                    if not any(substring in customID for substring in ["showGame", "AtRatio", "gain5", "showReputation"]):  
+                    if not any(substring in customID for substring in ["showGame", "AtRatio", "gain5", "showReputation", "rollDice"]):  
                         await interaction.followup.send(interaction.user.mention+" This button ("+customID+") was pressed most recently, and we are attempting to prevent an accidental double press. Try hitting show game first and then hitting this button, if for some reason you need to press this button", ephemeral=True)
                         return
                 game.saveLastButtonPressed(customID)

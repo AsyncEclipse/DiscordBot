@@ -158,7 +158,8 @@ class TileCommands(commands.GroupCog, name="tile"):
                     view=View()
                     planetTypes = ["money","science","material"]
                     for planetT in planetTypes:
-                        view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player_color}_addCubeToTrack_"+planetT))
+                        if playerObj[planetT+"_pop_cubes"] < 12:
+                            view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player_color}_addCubeToTrack_"+planetT))
                     await interaction.channel.send( f"A cube with no set track was removed, please tell the bot what track you want it to go on", view=view)
 
         if influence != None:

@@ -234,7 +234,7 @@
     "num": 2
   },
   "art": {
-    "name": "Artifact Point",
+    "name": "Artifact Codex",
     "part": "",
     "money": 0,
     "material": 0,
@@ -247,7 +247,7 @@
     "num": 1
   },
   "rep": {
-    "name": "Reputation Points",
+    "name": "Ancient Might",
     "part": "",
     "money": 0,
     "material": 0,

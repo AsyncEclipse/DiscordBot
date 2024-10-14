@@ -48,12 +48,20 @@ class TurnButtons:
 
     @staticmethod
     async def endTurn(player, game:GamestateHelper, interaction: discord.Interaction, bot):
+        from helpers.CombatHelper import Combat
         nextPlayer = game.get_next_player(player)
         if nextPlayer != None and not game.is_everyone_passed():
             view = TurnButtons.getStartTurnButtons(game,nextPlayer)
             await interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(nextPlayer),view=view)
         else:
-            await interaction.channel.send("All players have passed")
+            view = View()
+            role = discord.utils.get(interaction.guild.roles, name=game.game_id)  
+            msg = role.mention+" All players have passed, you can use this button to start the next round"
+            if len(Combat.findTilesInConflict(game)) > 0:
+                await Combat.startCombatThreads(game, interaction)
+                msg = msg +  " after all battles are resolved"
+            view.add_item(Button(label="Run Upkeep",style=discord.ButtonStyle.blurple, custom_id="runUpkeep"))
+            await interaction.channel.send(msg, view=view)
         msg = f"End of {interaction.user.name}'s turn."
         if "lastAction" in player and "detailsOflastAction" in player:
             msg = f"End of {interaction.user.name}'s turn. They used their action to "+player["lastAction"]+". "+player["detailsOflastAction"]
