@@ -22,6 +22,7 @@ class BuildButtons:
             await interaction.message.delete()
         for tile in tiles:
             view.add_item(Button(label=tile, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_buildIn_{tile}"))
+        view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
         await interaction.channel.send(f"{interaction.user.mention}, choose which tile you would like to build in.", view=view)
 
     @staticmethod  

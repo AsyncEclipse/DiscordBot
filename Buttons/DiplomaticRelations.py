@@ -76,9 +76,13 @@ class DiplomaticRelationsButtons:
 
         for p in [player,p2]:
             view = View()
-            view.add_item(Button(label="Material", style=discord.ButtonStyle.gray, custom_id=f"FCID{p['color']}_reducePopFor_material"))
-            view.add_item(Button(label="Science", style=discord.ButtonStyle.gray, custom_id=f"FCID{p['color']}_reducePopFor_science"))
-            view.add_item(Button(label="Money", style=discord.ButtonStyle.gray, custom_id=f"FCID{p['color']}_reducePopFor_money"))
+        
+            if p["material_pop_cubes"] > 0:
+                view.add_item(Button(label="Material", style=discord.ButtonStyle.gray, custom_id=f"FCID{p['color']}_reducePopFor_material"))
+            if p["science_pop_cubes"] > 0:
+                view.add_item(Button(label="Science", style=discord.ButtonStyle.gray, custom_id=f"FCID{p['color']}_reducePopFor_science"))
+            if p["money_pop_cubes"] > 0:
+                view.add_item(Button(label="Money", style=discord.ButtonStyle.gray, custom_id=f"FCID{p['color']}_reducePopFor_money"))
             await interaction.channel.send( f"{p['player_name']} choose what type of cube to put on the ambassador", view=view)
 
         if "dummy" not in buttonID:
@@ -93,7 +97,8 @@ class DiplomaticRelationsButtons:
             view=View()
             planetTypes = ["money","science","material"]
             for planetT in planetTypes:
-                view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{p['color']}_addCubeToTrack_"+planetT))
+                if p[planetT+"_pop_cubes"] < 12:
+                    view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{p['color']}_addCubeToTrack_"+planetT))
             await interaction.channel.send( f"{p['player_name']} a cube with no set track was removed, please tell the bot what track you want it to go on", view=view)
 
     

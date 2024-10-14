@@ -144,7 +144,7 @@ class PlayerHelper:
         return(track[cubes-1])
 
     def upkeepCosts(self):
-        track = self.stats["influence_track"]
+        track = [30, 25, 21, 17, 13, 10, 7, 5, 3, 2, 1, 0, 0,0,0,0]
         discs = self.stats["influence_discs"]
         if discs >= 13:
             return(0)

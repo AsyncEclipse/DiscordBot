@@ -71,8 +71,10 @@ class GamestateHelper:
             message = await chronicles_channel.send(message_to_send)  
             thread = await message.create_thread(name=self.game_id) 
             drawing = DrawHelper(self.gamestate)
-            await thread.send(file=drawing.show_map())
-            await thread.send(file=drawing.show_stats())
+            map = await drawing.show_map()
+            stats = await drawing.show_stats()
+            await thread.send(file=map)
+            await thread.send(file=stats)
             winner,highestScore = self.getWinner()
             await thread.send(role.mention + " final state here. "+winner+" won with "+str(highestScore)+" points")
         if role:  
@@ -100,6 +102,9 @@ class GamestateHelper:
                     winner = playerObj["player_name"]
                     resources = totalResources
         return (winner, highestScore)
+    def setAdvancedAI(self, status:bool):
+        self.gamestate["advanced_ai"] = status
+        self.update()
     async def declareWinner(self, interaction:discord.Interaction):
         self.gamestate["gameEnded"] = True
         self.update()
@@ -275,6 +280,8 @@ class GamestateHelper:
         self.update()
 
     def add_damage(self, ship, position, damage):
+        if "ai-" in ship and "adv" not in "ship" and self.gamestate["advanced_ai"]:
+            ship = ship +"adv"
         if "damage_tracker" in self.gamestate["board"][position]:
             if ship in self.gamestate["board"][position]["damage_tracker"]:
                 damage = self.gamestate["board"][position]["damage_tracker"][ship]+damage
@@ -319,6 +326,7 @@ class GamestateHelper:
         if "damage_tracker" in self.gamestate["board"][position]:
             del self.gamestate["board"][position]["damage_tracker"]
         if key not in self.gamestate["board"][position]:  
+            self.update()
             return count
         else:
             for ship in self.gamestate["board"][position][key]:
@@ -397,10 +405,13 @@ class GamestateHelper:
         moneyIncrease2 = "Error"
         if player["money_pop_cubes"]-2 > -1:
             moneyIncrease2 = "+"+str(player["population_track"][player["money_pop_cubes"]-2])
-        moneyDecrease = str(player["influence_track"][player["influence_discs"]])
+        influence_track = [30, 25, 21, 17, 13, 10, 7, 5, 3, 2, 1, 0, 0,0,0,0]
+        moneyDecrease = str(influence_track[player["influence_discs"]])
         moneyDecrease2 = "Error"
         if player["influence_discs"]-1 > -1:
-            moneyDecrease2 = str(player["influence_track"][player["influence_discs"]-1])
+            moneyDecrease2 = str(influence_track[player["influence_discs"]-1])
+        else:
+            moneyDecrease2 = "Illegal (discs have run out)"
         science = player["science"]
         scienceIncrease = player["population_track"][player["science_pop_cubes"]-1]
         scienceIncrease = "+"+str(scienceIncrease)
@@ -527,7 +538,8 @@ class GamestateHelper:
                 view=View()
                 planetTypes = ["money","science","material"]
                 for planetT in planetTypes:
-                    view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{p1['color']}_addCubeToTrack_"+planetT))
+                    if p1.stats[planetT+"_pop_cubes"] < 12:
+                        view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{p1['color']}_addCubeToTrack_"+planetT))
                 await interaction.channel.send( f"{p1.stats['player_name']} A neutral or orbital cube was found in your graveyard, please tell the bot what track you want it to go on", view=view)
 
         tech_draws = self.gamestate["player_count"]+3
@@ -550,6 +562,10 @@ class GamestateHelper:
             self.gamestate["roundNum"] = 2
         self.update()
 
+    def createRoundNum(self):
+        if "roundNum" not in self.gamestate:
+            self.gamestate["roundNum"] = 1
+            self.update()
     def player_setup(self, player_id, faction, color):
         if self.gamestate["setup_finished"] == 1:
             return ("The game has already been setup!")

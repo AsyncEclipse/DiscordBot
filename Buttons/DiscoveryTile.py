@@ -47,7 +47,11 @@ class DiscoveryTileButtons:
         discName = discTile_data[disc]["name"]
         await interaction.message.edit(view=None)
         await interaction.channel.send( f"{interaction.user.mention} chose to keep use '"+discName+"' for its ability")
-
+        if disc == "rep" or disc == "art":
+            if "discoveryTileBonusPointTiles" not in player_helper.stats:
+                player_helper.stats["discoveryTileBonusPointTiles"] = []
+            player_helper.stats["discoveryTileBonusPointTiles"].append(disc)
+            game.update_player(player_helper)
         if discTile_data[disc]["part"] != "":
             player_helper.stats["ancient_parts"].append(discTile_data[disc]["part"])
             game.update_player(player_helper)

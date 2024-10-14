@@ -89,6 +89,7 @@ class Combat:
         channel = interaction.channel
         role = discord.utils.get(interaction.guild.roles, name=game.get_gamestate()["game_id"])  
         tiles = Combat.findTilesInConflict(game)
+        game.createRoundNum()
         for tile in tiles:
             game.setCombatants(Combat.findPlayersInTile(game, tile[1]), tile[1])
             message_to_send = "Combat will occur in system "+str(tile[0])+", position "+tile[1]  
@@ -316,6 +317,38 @@ class Combat:
 
 
     @staticmethod
+    def getShipToSelfHitWithRiftCannon(game:GamestateHelper, colorOrAI, player_ships, pos):
+        hittableShips = Combat.getCombatantShipsBySpeed(game, colorOrAI, player_ships)
+        ship = hittableShips[0]
+        oldShipVal = 0
+        dieDam = 1
+        ableToKillSomething = False
+        for optionStuff in hittableShips:
+            optionType = optionStuff[1]
+            option = colorOrAI + "-"+optionType
+            damageOnShip = game.add_damage(option, pos, 0)
+            shipType = option.split("-")[1]
+            shipOwner = option.split("-")[0]
+            player = game.get_player_from_color(shipOwner)
+            shipModel = PlayerShip(game.gamestate["players"][player], shipType)
+            if "pink" not in shipModel.dice:
+                continue
+            if ableToKillSomething:
+                if dieDam +damageOnShip> shipModel.hull and shipModel.cost > oldShipVal:
+                    oldShipVal = shipModel.cost
+                    ship = option
+            else:
+                if dieDam +damageOnShip> shipModel.hull:
+                    oldShipVal = shipModel.cost
+                    ship = option
+                    ableToKillSomething = True
+                else:
+                    if shipModel.cost > oldShipVal:
+                        oldShipVal = shipModel.cost
+                        ship = option
+        return ship
+
+    @staticmethod
     async def rollDice(game:GamestateHelper, buttonID:str, interaction:discord.Interaction):
         pos = buttonID.split("_")[1]
         colorOrAI = buttonID.split("_")[2]
@@ -359,7 +392,7 @@ class Combat:
                         num = str(random_number).replace("1","Miss").replace("6",":boom:")
                         msg +=num+" "
                         dieFiles.append(drawing.use_image("images/resources/components/dice_faces/dice_"+Combat.translateColorToName(die)+"_"+str(random_number)+".png"))
-                        if missiles == "" and Combat.translateColorToDamage(die) == 4 and colorOrAI != "ai":
+                        if missiles == "" and Combat.translateColorToDamage(die, random_number) == 4 and colorOrAI != "ai":
                             player = game.get_player_from_color(colorOrAI)
                             playerObj = game.getPlayerObjectFromColor(colorOrAI)
                             player_helper = PlayerHelper(player, playerObj)
@@ -369,10 +402,10 @@ class Combat:
                         if speed == 1000:
                             split = True
                         if not split:
-                            dieNums.append([random_number,Combat.translateColorToDamage(die)])
+                            dieNums.append([random_number,Combat.translateColorToDamage(die, random_number), die])
                         else:
-                            for i in range(Combat.translateColorToDamage(die)):
-                                dieNums.append([random_number,1])
+                            for i in range(Combat.translateColorToDamage(die, random_number)):
+                                dieNums.append([random_number,1,die])
                 if shipModel.computer > 0:
                     msg = msg + "\nThis ship type has a +"+str(shipModel.computer)+" computer"
                 if(len(dice) > 0):
@@ -381,9 +414,21 @@ class Combat:
                     for die in dieNums:
                         dieNum = die[0]
                         dieDam = die[1]
-                        if dieNum == 1 or dieNum + shipModel.computer < 6 or oldNumPeeps > len(Combat.findPlayersInTile(game, pos)):
-                            continue
-                        hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships, dieNum, shipModel.computer, pos, speed)
+                        dieColor = die[2]
+                        hittableShips = []
+                        if dieColor != "pink":
+                            if dieNum == 1 or dieNum + shipModel.computer < 6 or oldNumPeeps > len(Combat.findPlayersInTile(game, pos)):
+                                continue
+                            hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships, dieNum, shipModel.computer, pos, speed)
+                        else:
+                            if dieNum == 2 or dieNum == 3:
+                                continue
+                            if dieNum == 1 or dieNum == 6:
+                                ship = Combat.getShipToSelfHitWithRiftCannon(game, colorOrAI,player_ships, pos)
+                                buttonID = "assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(1)
+                                await Combat.assignHitTo(game, buttonID, interaction, False)
+                            if dieNum > 3:
+                                hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships, 6, shipModel.computer, pos, speed)
                         if len(hittableShips) > 0:
                             if speed == 1000:
                                 msg = interaction.user.name + " choose what pop to hit with the die that rolled a "+str(dieNum)+"."
@@ -616,6 +661,8 @@ class Combat:
         shipOwner = ship.split("-")[0]
         if shipOwner == "ai":
             shipModel = AI_Ship(shipType, game.gamestate["advanced_ai"])
+            if "ai-" in ship and "adv" not in "ship" and game.gamestate["advanced_ai"]:
+                ship = ship +"adv"
         else:
             player = game.get_player_from_color(shipOwner)
             shipModel = PlayerShip(game.gamestate["players"][player], shipType)
@@ -708,7 +755,7 @@ class Combat:
             hitsToAssign = 0
             if "unresolvedHits" in game.get_gamestate()["board"][pos]:
                 hitsToAssign = max(game.get_gamestate()["board"][pos]["unresolvedHits"]-1,0)
-            game.setUnresolvedHits(hitsToAssign)
+            game.setUnresolvedHits(hitsToAssign, pos)
             if hitsToAssign == 0 and oldLength == len(Combat.findPlayersInTile(game, pos)):
                 await Combat.promptNextSpeed(game, pos, interaction.channel, True)
 
@@ -731,19 +778,29 @@ class Combat:
     def translateColorToName(dieColor:str):
         if dieColor == "red":
             return "antimatter"
+        if dieColor == "pink":
+            return "rift"
         if dieColor == "orange":
             return "plasma"
         if dieColor == "blue":
             return "soliton"
         return "ion"
     @staticmethod
-    def translateColorToDamage(dieColor:str):
+    def translateColorToDamage(dieColor:str, dieValue:int):
         if dieColor == "red":
             return 4
         if dieColor == "orange":
             return 2
         if dieColor == "blue":
             return 3
+        if dieColor == "pink":
+            if dieValue == 6:
+                return 3
+            if dieValue == 5:
+                return 2
+            if dieValue == 4:
+                return 1
+            return 0
         return 1
     @staticmethod
     def translateShipAbrToName(ship:str):

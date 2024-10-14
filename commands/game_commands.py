@@ -28,6 +28,12 @@ class GameCommands(commands.GroupCog, name="game"):
         game = GamestateHelper(interaction.channel)
         await game.declareWinner(interaction)
 
+    @app_commands.command(name="set_advanced_ai")
+    async def set_advanced_ai(self,interaction: discord.Interaction, status:bool):
+        game = GamestateHelper(interaction.channel)
+        game.setAdvancedAI(status)
+        await interaction.response.send_message("Set AI Advanced status to "+str(status))
+
     @app_commands.command(name="start_combats")
     async def start_combats(self,interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)
