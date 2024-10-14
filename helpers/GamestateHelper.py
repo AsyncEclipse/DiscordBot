@@ -161,6 +161,18 @@ class GamestateHelper:
             tile = self.gamestate[f"tile_deck_300"].pop(0)
             self.update()
             return tile
+    def tile_draw_specific(self, ring, system):
+        ring = int(int(ring)/100)
+        if ring <= 3:
+            if system in self.gamestate[f"tile_deck_{ring}00"]:
+                self.gamestate[f"tile_deck_{ring}00"].remove(system)
+            self.update()
+            return system
+        else:
+            if system in self.gamestate[f"tile_deck_300"]:
+                self.gamestate[f"tile_deck_300"].remove(system)
+            self.update()
+            return system
 
     def tile_discard(self, sector):
         firstNum = int(sector) % 100

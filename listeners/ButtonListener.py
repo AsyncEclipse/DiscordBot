@@ -115,6 +115,8 @@ class ButtonListener(commands.Cog):
                     await ResearchButtons.payAtRatio(game, player, player_helper, interaction, customID)
                 if customID.startswith("gain5resource"):
                     await ResearchButtons.gain5resource(game, player, player_helper, interaction, customID)
+                if customID.startswith("gain3resource"):
+                    await ResearchButtons.gain3resource(game, player, player_helper, interaction, customID)
                 if customID.startswith("startBuild"):
                     if "2" not in customID:
                         game.updateSaveFile()

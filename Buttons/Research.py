@@ -216,3 +216,11 @@ class ResearchButtons:
         msg = player_helper.adjust_resource(resource_type,5)  
         game.update_player(player_helper)  
         await interaction.channel.send(msg)  
+    @staticmethod  
+    async def gain3resource(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction, buttonID:str):
+        game = GamestateHelper(interaction.channel)  
+        resource_type = buttonID.split("_")[1]   
+        msg = player_helper.adjust_resource(resource_type,5)  
+        game.update_player(player_helper)  
+        await interaction.channel.send(msg)  
+        await interaction.message.delete()

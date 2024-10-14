@@ -101,6 +101,14 @@ class DiscoveryTileButtons:
                 await interaction.channel.send( player_helper.adjust_science(discTile_data[disc]["science"]))
             if discTile_data[disc]["money"] != 0:
                 await interaction.channel.send( player_helper.adjust_money(discTile_data[disc]["money"]))
+            if discTile_data[disc]["any"] != 0:
+                view = View()
+                for resource_type, button_style in [("materials", discord.ButtonStyle.gray),   
+                                            ("money", discord.ButtonStyle.blurple), ("science", discord.ButtonStyle.green)]: 
+                    view.add_item(Button(label=f"Gain 3 {resource_type.capitalize()}",   
+                                    style=button_style,   
+                                    custom_id=f"FCID{player_helper.stats['color']}_gain3resource_{resource_type}")) 
+                await interaction.channel.send(f"You can gain 3 of any type of resource",view=view )  
         game.update_player(player_helper)
 
     @staticmethod 

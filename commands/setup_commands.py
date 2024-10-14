@@ -114,11 +114,13 @@ class SetupCommands(commands.GroupCog, name="setup"):
         if game.gamestate["setup_finished"] != 1:
             game.setup_finished()
         game.fillInDiscTiles()
-        await interaction.response.send_message("Done With Setup!")
+        await interaction.channel.send("Done With Setup!")
+        
         
         asyncio.create_task(game.showUpdate("Start of Game",interaction, self.bot))
         view = TurnButtons.getStartTurnButtons(game, game.get_player(player1.id))
         await interaction.channel.send(f"<@{player1.id}> use these buttons to do your turn. "+ game.displayPlayerStats(game.get_player(player1.id)),view=view)
+        await interaction.response.defer()
 
 
     @app_commands.command(name="set_turn_order")
@@ -262,7 +264,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         await actions.send(role.mention+" Draft factions and turn position in the manner of your choice, then setup the game with /setup game. Enter the players in the order they should take turns in (i.e. enter first player first)")
         await actions.send("Initial tech draw is as follows",file=drawing.show_available_techs())
         await actions.send("A common way to draft factions is to generate a random pick order and then have the turn order be the reverse of that pick order. For your convenience, the following random pick order was generated, but you can ignore it: \n"+list)
-        await interaction.followup.send('New game created! Here are the channels: \n'+tabletalk.jump_url +"\n"+actions.jump_url)
+        
         factionThread = await actions.create_thread(name="Faction Reference", auto_archive_duration=10080)
 
         message = "\n".join(["# Eridani Empire",
@@ -372,6 +374,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         if isinstance(interaction.channel, discord.Thread):  
             new_name = f"[Launched] {interaction.channel.name}"   
             await interaction.channel.edit(name=new_name)
+        await interaction.followup.send('New game created! Here are the channels: \n'+tabletalk.jump_url +"\n"+actions.jump_url)
        
 
     
