@@ -76,6 +76,12 @@ class BuildButtons:
             ships.remove("Orbital")
         if "mon" not in player["nano_tech"] or "mon" in build:
             ships.remove("Monolith")
+        player_ships = game.get_gamestate()["board"][build_loc]["player_ships"]
+        for shipInTile in player_ships:
+            if "orb" in shipInTile and "Orbital" in ships:
+                ships.remove("Orbital")
+            if "mon" in shipInTile and "Monolith" in ships:
+                ships.remove("Monolith")
         for counter,ship in enumerate(ships):
             key = f"cost_{ship.lower()}"
             remaining = 10

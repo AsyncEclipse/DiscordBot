@@ -60,6 +60,7 @@ class TurnButtons:
             if len(Combat.findTilesInConflict(game)) > 0:
                 await Combat.startCombatThreads(game, interaction)
                 msg = msg +  " after all battles are resolved"
+            view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"startPopDrop"))
             view.add_item(Button(label="Run Upkeep",style=discord.ButtonStyle.blurple, custom_id="runUpkeep"))
             await interaction.channel.send(msg, view=view)
         msg = f"End of {interaction.user.name}'s turn."

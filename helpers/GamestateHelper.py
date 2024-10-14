@@ -79,8 +79,9 @@ class GamestateHelper:
             await thread.send(role.mention + " final state here. "+winner+" won with "+str(highestScore)+" points")
         if role:  
             await role.delete()  
-        if os.path.exists(f"{config.gamestate_path}/{self.game_id}_saveFile.json"):   
-            os.remove(f"{self.game_id}_saveFile.json")
+        file_path = f"{config.gamestate_path}/{self.game_id}_saveFile.json"  
+        if os.path.exists(file_path):   
+            os.remove(file_path)  
     
 
     def getWinner(self):
@@ -114,7 +115,8 @@ class GamestateHelper:
             await interaction.message.delete()
         guild = interaction.guild
         role = discord.utils.get(guild.roles, name=self.game_id)  
-        await interaction.channel.send(role.mention +" "+ winner +" is the winner with "+str(highestScore) + " points", file = drawing.show_stats())
+        stats = await drawing.show_stats()
+        await interaction.channel.send(role.mention +" "+ winner +" is the winner with "+str(highestScore) + " points", file = stats)
         view = View()
         view.add_item(Button(label="End Game",style=discord.ButtonStyle.blurple, custom_id="endGame"))
         await interaction.channel.send("Hit this button to cleanup the channels.", view=view)
@@ -449,6 +451,9 @@ class GamestateHelper:
         self.gamestate["board"][pos]["currentRoller"] = roller
         self.update()
     def setAttackerAndDefender(self, attacker, defender, pos):
+        if isinstance(self.gamestate["board"][pos]["owner"], str) and attacker == self.gamestate["board"][pos]["owner"]:
+            attacker = defender
+            defender = self.gamestate["board"][pos]["owner"]
         self.gamestate["board"][pos]["attacker"] = attacker
         self.gamestate["board"][pos]["defender"] = defender
         self.update()
@@ -480,13 +485,16 @@ class GamestateHelper:
     def add_pop(self, pop_list, position, playerID):
         neutralPop = 0
         for i in pop_list:
-            if "orbital" not in i:   
+            length = 0
+            if i in self.gamestate["board"][position]:
                 length = len(self.gamestate["board"][position][i])
+            if "orbital" not in i:   
                 if self.gamestate["board"][position][i][0]+1 <= length:
                     self.gamestate["board"][position][i][0] = self.gamestate["board"][position][i][0]+1
             else:
                 self.gamestate["board"][position][i] = [1]
-            length = len(self.gamestate["board"][position][i])
+                length = len(self.gamestate["board"][position][i])
+
             if self.gamestate["board"][position][i][0] <= length:
                 if "neutral" not in i and "orbital" not in i:    
                     self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] = self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"]-1
