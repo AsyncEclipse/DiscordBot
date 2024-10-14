@@ -74,7 +74,7 @@ class InfluenceButtons:
     @staticmethod
     async def addInfluenceFinish(game: GamestateHelper, p1, interaction: discord.Interaction, buttonID:str):
         tileLoc = buttonID.split("_")[1]
-        if game.get_gamestate["board"][tileLoc] != 0:
+        if game.get_gamestate()["board"][tileLoc] != 0:
             await interaction.channel.send( f"Someone else controls {tileLoc}. Remove their control via valid means first")
             return
         game.add_control(p1["color"],tileLoc)
