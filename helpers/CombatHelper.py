@@ -258,18 +258,18 @@ class Combat:
             defenderSpeeds = Combat.getCombatantSpeeds(game, defender, player_ships)
             attackerSpeeds = Combat.getCombatantSpeeds(game, attacker, player_ships)
             if Combat.doesCombatantHaveMissiles(game, defender, player_ships):
-                view.add_item(Button(label="(Defender) Roll Missiles", style=discord.ButtonStyle.green, custom_id=f"rollDice_{pos}_{defender}_99"))
+                view.add_item(Button(label="(Defender) Roll Missiles", style=discord.ButtonStyle.green, custom_id=f"rollDice_{pos}_{defender}_99_defender"))
             if Combat.doesCombatantHaveMissiles(game, attacker, player_ships):
-                view.add_item(Button(label="(Attacker) Roll Missiles", style=discord.ButtonStyle.red, custom_id=f"rollDice_{pos}_{defender}_99"))
+                view.add_item(Button(label="(Attacker) Roll Missiles", style=discord.ButtonStyle.red, custom_id=f"rollDice_{pos}_{attacker}_99_attacker"))
             for i in range(20,-1,-1):
                 if i in defenderSpeeds:
                     checker = ""
                     if defender != "ai":
                         checker="FCID"+defender+"_"
-                    view.add_item(Button(label="(Defender) Roll Initative "+str(i)+" Ships", style=discord.ButtonStyle.green, custom_id=f"{checker}rollDice_{pos}_{defender}_{str(i)}"))
+                    view.add_item(Button(label="(Defender) Roll Initative "+str(i)+" Ships", style=discord.ButtonStyle.green, custom_id=f"{checker}rollDice_{pos}_{defender}_{str(i)}_defender"))
                 if i in attackerSpeeds:
                     checker="FCID"+attacker+"_"
-                    view.add_item(Button(label="(Attacker) Roll Initative "+str(i)+" Ships", style=discord.ButtonStyle.red, custom_id=f"{checker}rollDice_{pos}_{attacker}_{str(i)}"))
+                    view.add_item(Button(label="(Attacker) Roll Initative "+str(i)+" Ships", style=discord.ButtonStyle.red, custom_id=f"{checker}rollDice_{pos}_{attacker}_{str(i)}_attacker"))
         view.add_item(Button(label="Refresh Image", style=discord.ButtonStyle.blurple, custom_id=f"refreshImage_{pos}"))
         view.add_item(Button(label="Remove Units", style=discord.ButtonStyle.gray, custom_id=f"removeUnits_{pos}"))
         return view
