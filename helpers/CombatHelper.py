@@ -410,7 +410,9 @@ class Combat:
                                             buttonID = "FCID"+colorOrAI+"_assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(dieDam)
                                             view.add_item(Button(label=label, style=discord.ButtonStyle.red, custom_id=buttonID))
                                         await interaction.channel.send(msg,view=view)
-                                        hitsToAssign = game.get_gamestate()["board"][pos]["unresolvedHits"]+1
+                                        hitsToAssign = 1
+                                        if "unresolvedHits" in game.get_gamestate()["board"][pos]:
+                                            hitsToAssign = game.get_gamestate()["board"][pos]["unresolvedHits"]+1
                                         game.setUnresolvedHits(hitsToAssign,pos)
                                     else:
                                         ship = hittableShips[0]
@@ -703,7 +705,9 @@ class Combat:
                 
         if button:
             await interaction.message.delete()
-            hitsToAssign = game.get_gamestate()["board"][pos]["unresolvedHits"]-1
+            hitsToAssign = 0
+            if "unresolvedHits" in game.get_gamestate()["board"][pos]:
+                hitsToAssign = max(game.get_gamestate()["board"][pos]["unresolvedHits"]-1,0)
             game.setUnresolvedHits(hitsToAssign)
             if hitsToAssign == 0 and oldLength == len(Combat.findPlayersInTile(game, pos)):
                 await Combat.promptNextSpeed(game, pos, interaction.channel, True)
