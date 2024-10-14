@@ -336,12 +336,12 @@
     "nrg_use": 1,
     "nrg_src": 0,
     "tech_req": "none",
-    "dice": [],
-    "comp": 0,
-    "shield": 0,
-    "missile": [
+    "dice": [
       "pink"
     ],
+    "comp": 0,
+    "shield": 0,
+    "missile": [],
     "hull": 1,
     "repair": 0,
     "external": 0
