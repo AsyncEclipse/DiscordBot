@@ -263,14 +263,111 @@ class SetupCommands(commands.GroupCog, name="setup"):
         await actions.send("Initial tech draw is as follows",file=drawing.show_available_techs())
         await actions.send("A common way to draft factions is to generate a random pick order and then have the turn order be the reverse of that pick order. For your convenience, the following random pick order was generated, but you can ignore it: \n"+list)
         await interaction.followup.send('New game created! Here are the channels: \n'+tabletalk.jump_url +"\n"+actions.jump_url)
-        factionThread = await actions.create_thread(name="Faction Reference", auto_archive_duration=10080)  
-        await factionThread.send(file = drawing.get_file("images/resources/components/factions/hydran_board.png"))
-        await factionThread.send(file = drawing.get_file("images/resources/components/factions/eridani_board.png"))
-        await factionThread.send(file = drawing.get_file("images/resources/components/factions/orion_board.png"))
-        await factionThread.send(file = drawing.get_file("images/resources/components/factions/mechanema_board.png"))
-        await factionThread.send(file = drawing.get_file("images/resources/components/factions/draco_board.png"))
-        await factionThread.send(file = drawing.get_file("images/resources/components/factions/planta_board.png"))
-        await factionThread.send(file = drawing.get_file("images/resources/components/factions/terran_conglomerate_board.png"))
+        factionThread = await actions.create_thread(name="Faction Reference", auto_archive_duration=10080)
+
+        message = "\n".join(["# Eridani Empire",
+                             "- 2🛡 Draw two random Reputation Tiles before the game starts, and place them facedown on your Reputation Track.",
+                             "- -2 🔴 Start with two fewer Influence Discs (leave your two leftmost Influence Track spaces empty).",
+                             "- These Ship Blueprints have additional Energy Production:",
+                             "  - **Interceptor** - 1⚡",
+                             "  - **Cruiser** - 1⚡",
+                             "  - **Dreadnought** - 1⚡"])
+        await factionThread.send(message, file=drawing.get_file("images/resources/components/factions/eridani_board.png"))
+
+        message = "\n".join(["# Hydran Progress",
+                             "- ⚗️ During game setup, place a Population Cube in the Advanced Science Population Square on your Starting Sector."])
+        await factionThread.send(message, file=drawing.get_file("images/resources/components/factions/hydran_board.png"))
+
+        message = "\n".join(["# Planta",
+                             "- Your Population Cubes are automatically destroyed by opponent Ships at the end of the Combat Phase.",
+                             "- 1 extra VP for each Controlled Sector at the end of the game.",
+                             "- All Ship Blueprints have reduced Initiative Bonuses.",
+                             "- All Ship Blueprints have additional Computers and Energy Production but have one less Ship Part Space:",
+                             "  - **Interceptor**, **Cruiser**, **Dreadnought** - +1⬜ 2⚡",
+                             "  - **Starbase** - +1⬜ 5⚡"])
+        await factionThread.send(message, file=drawing.get_file("images/resources/components/factions/planta_board.png"))
+
+        message = "\n".join(["# Descendants of Draco",
+                             "- __Explore Action__: For each Activation, you may flip two Sectors from which to choose one (or none)to place."
+                             + " Unplaced Sectors are discarded faceup in the corresponding Sector Discard Pile.",
+                             "- 1 VP per Ancient on the game board at the end of the game.",
+                             "- You may have Ships in Sectors containing Ancients but are not allowed to battle the Ancients. Your ships are not Pinned by Ancients."
+                             + " You may place Influence Discs in Sectors with Ancients; you are not allowed to collect Discovery Tiles from Sectors containing Ancients."])
+        await factionThread.send(message, file=drawing.get_file("images/resources/components/factions/draco_board.png"))
+
+        message = "\n".join(["# Mechanema",
+                             "- Cheaper Building costs (instead of):",
+                             "  - **Interceptor: 2🔧 (3)",
+                             "  - **Cruiser: 4🔧 (5)",
+                             "  - **Dreadnought: 7🔧 (8)",
+                             "  - **Starbase: 2🔧 (3)",
+                             "  - **Orbital: 3🔧 (4)",
+                             "  - **Monolith: 8🔧 (10)"])
+        await factionThread.send(message, file=drawing.get_file("images/resources/components/factions/mechanema_board.png"))
+
+        message = "\n".join(["# Orion Hegemony",
+                             "- Start with a Cruiser in your Starting Sector instead of an Interceptor.",
+                             "- All Ship Blueprints have increased Initiative Bonuses.",
+                             "- These Ship Blueprints have additional Energy Production:",
+                             "  - **Interceptor: 1⚡",
+                             "  - **Cruiser: 2⚡",
+                             "  - **Dreadnought: 3⚡"])
+        await factionThread.send(message, file=drawing.get_file("images/resources/components/factions/orion_board.png"))
+
+        message = "\n".join(["# Wardens of Magellan",
+                             "- Start with a Discovery Tile facedown on the Discovery Tile Symbol on the top Tech Track of your Species Board.", 
+                             "- Resolve the Discovery Tile on your Species Board the first time you place a fourth Tech on one of your Tech Tracks."
+                             + " If the Discovery Tile allows you to place something in a Sector (such as Ancient Cruiser or Ancient Orbital), place it in your Starting Sector."
+                             + " If you do not control your Starting Sector, you must take the tile as 2VP.",
+                             "- 1 VP at the end of the game per Discovery Tile you used as a Ship Part.",
+                             "- At any time, you may flip unused Colony Ships to gain one Resource of your choice per Colony Ship flipped."])
+
+        message = "\n".join(["# Enlightened of Lyra",
+                             "- 1 VP per Shrine\\* you control at the end of the game.",
+                             "- During the Combat Phase, you may flip unused Colony Ships to reroll one of your own dice per Colony Ship flipped.",
+                             "- ## \\*Shrines",
+                             "- You start the game with nine Shrines (special Structures) on the indicated spaces of your Shrine Board])",
+                             "- With each **Research** Action, you may additionally place one Shrine from your Shrine Board"
+                             + " in any Sector you Control by paying its indicated cost and adhering to the following restrictions:",
+                             "  - Shrines must be placed next to a planet of the same color as the Resource used to place the Shrine (or a gray planet).",
+                             "  - Each planet may have only one Shrine.",
+                             "- Shrines cannot be placed using the **Build** Action.",
+                             "- When you place the last Shrine from a row of the Shrine Board, gain the indicated bonus:",
+                             "  - __Wormhole Generator ability__: You may Explore, Move to, and Influence adjacent Sectors if the edges connecting the Sectors contain one Wormhole.",
+                             "  - __Discovery Tile__: If the Discovery Tile allows you to place something in a Sector (such as Ancient Cruiser or Ancient Orbital), place it in your Starting Sector."
+                             + " If you do not control your Starting Sector, you must take the tile as 2VP.",
+                             "  - __Extra Influence Disc__: You receive one additional Influence Disc, placed immediately on your Influence Track"
+                             + " (you start with 4 extra Influence Discs in your Species Tray instead of 3)."])
+
+        message = "\n".join(["# The Exiles",
+                             "- Start with an Orbital in your Starting Sector.",
+                             "- 1 VP for each Orbital with your Population Cube at the end of the game.",
+                             "- Orbitals with your Population Cubes are considered Ships:",
+                             "  - They have their own Blueprints but are unable to receive Drive Ship Part Tiles",
+                             "  - When destroyed in battle, return your Population Cube to the Science or Money Graveyard, but do not remove the Orbital miniature.",
+                             "  - our destroyed Orbitals each add 1 to your opponent’s Reputation Tile draw (max 5).",
+                             "- You cannot construct Starbases.",
+                             "- Your Orbitals have Ship Blueprints."])
+
+        message = "\n".join(["# Rho Indi Syndicate",
+                             "- Start with two Interceptors in your Starting Sector.",
+                             "- You have only two Ambassador Tiles.",
+                             "- After drawing Reputation Tiles, gain Money equal to the number of Reputation Tiles you drew minus 1.",
+                             "- You do not lose VP for holding the Traitor Card at the end of the game.",
+                             "- You cannot construct Dreadnoughts.",
+                             "- Increased Building costs (instead of):",
+                             "  - **Interceptor: 4🔧 (3)",
+                             "  - **Cruiser: 6🔧 (5)",
+                             "  - **Starbase: 4🔧 (3)",
+                             "- Interceptor and Cruiser Ship Blueprints have increased Initiative Bonuses.",
+                             "- All Ship Blueprints have additional **Gauss Shields**:",
+                             "  - **Interceptor: -1⬛",
+                             "  - **Cruiser: -1⬛",
+                             "  - **Dreadnought: -1⬛"])
+
+        message = "\n".join(["# Terrans"])
+        await factionThread.send(message, file=drawing.get_file("images/resources/components/factions/terran_conglomerate_board.png"))
+
         await factionThread.send(role.mention + " pinging you here, which contains all the faction sheets")
         if isinstance(interaction.channel, discord.Thread):  
             new_name = f"[Launched] {interaction.channel.name}"   
