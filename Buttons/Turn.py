@@ -181,7 +181,7 @@ class TurnButtons:
     @staticmethod
     async def send_files(interaction, files):
         for file in files:
-            await interaction.followup.send(file=file,ephemeral=True)
+            asyncio.create_task(interaction.followup.send(file=file,ephemeral=True))
 
     @staticmethod
     async def send_file(interaction, file):
@@ -196,8 +196,7 @@ class TurnButtons:
         view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
         map = await drawing.show_map()
         stats = await drawing.show_stats()
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-             future = executor.submit(asyncio.run_coroutine_threadsafe, TurnButtons.send_files(interaction, [map,stats]),bot.loop)
+        asyncio.create_task(TurnButtons.send_files(interaction, [map,stats]))
         # with concurrent.futures.ThreadPoolExecutor() as executor:
         #     future = executor.submit(asyncio.run_coroutine_threadsafe, TurnButtons.send_files(interaction, [map,stats]),bot.loop)
 

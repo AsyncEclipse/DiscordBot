@@ -48,7 +48,7 @@ class MoveButtons:
         await interaction.message.delete()
         await interaction.channel.send( f"{interaction.user.mention} Select the ship you would like to move from {originT}", view=view)
     @staticmethod
-    def getTilesInRange(game: GamestateHelper, player, origin:str, shipRange : int):
+    def getTilesInRange(game: GamestateHelper, player, origin:str, shipRange : int, jumpDrivePresent:int):
         configs = Properties()
         with open("data/tileAdjacencies.properties", "rb") as f:
             configs.load(f)
@@ -56,7 +56,10 @@ class MoveButtons:
         player_helper = PlayerHelper(game.get_player_from_color(player["color"]),player)
         techsResearched = player_helper.getTechs()
         wormHoleGen = "wog" in techsResearched
-        jumpDrive = "jud" in techsResearched
+        
+        jumpDrive = False
+        if jumpDrivePresent == 1:
+            jumpDrive = True
         def recursive_search(pos, distance, visited, jumpDriveAvailable):
             if distance >  shipRange:
                 return
@@ -69,7 +72,7 @@ class MoveButtons:
             for adjTile in configs.get(pos)[0].split(","):
                 if InfluenceButtons.areTwoTilesAdjacent(game, pos, adjTile, configs, wormHoleGen):
                     recursive_search(adjTile, distance + 1, visited, jumpDriveAvailable)
-                elif jumpDriveAvailable and "wormholes" in tile_map[pos]:
+                elif jumpDriveAvailable and "wormholes" in tile_map[adjTile]:
                     recursive_search(adjTile, distance + 1, visited, False)
             if "warp" in tile_map[pos] and tile_map[pos]["warp"] == 1:
                 for tile in tile_map:
@@ -87,7 +90,7 @@ class MoveButtons:
         moveCount = buttonID.split("_")[3]
         ship = PlayerShip(player, shipType)
         shipRange = ship.getRange()
-        for destination in MoveButtons.getTilesInRange(game, player, originT, shipRange):
+        for destination in MoveButtons.getTilesInRange(game, player, originT, shipRange, ship.getJumpDrive()):
             if destination == originT:
                 continue
             view.add_item(Button(label=destination, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_moveTo_{originT}_{shipType}_{destination}_{moveCount}"))

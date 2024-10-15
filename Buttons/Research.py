@@ -83,6 +83,7 @@ class ResearchButtons:
                 f"Choose which tile you would like to place the warp tile in",view=view  
             )  
         if tech_details["dtile"] != 0:
+            game.addDiscTile(game.getLocationFromID(player["home_planet"]))
             await DiscoveryTileButtons.exploreDiscoveryTile(game, game.getLocationFromID(player["home_planet"]),interaction,player)
 
     @staticmethod  

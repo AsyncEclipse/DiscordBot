@@ -13,6 +13,7 @@ class Ship:
         self.repair = 0
         self.external = 0
         self.cost = 0
+        self.jumpdrive = 0
 
     def build_ship_stats(self, ship_parts):
 
@@ -21,7 +22,8 @@ class Ship:
         for part in ship_parts:
             if part == "empty":
                 continue
-
+            if part == "jud":
+                self.jumpdrive = 1
             part_stats = part_dict[part]
             self.range += part_stats["range"]
             self.speed += part_stats["speed"]
@@ -63,6 +65,9 @@ class PlayerShip(Ship):
 
     def getRange(self):
         return self.range
+    
+    def getJumpDrive(self):
+        return self.jumpdrive
     '''
     Parameters
     ----------
