@@ -29,6 +29,7 @@ class MoveButtons:
         view = View()
         for tile in MoveButtons.getListOfUnpinnedShipTiles(game, player):
             view.add_item(Button(label=tile.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_moveFrom_{tile}_{moveCount}"))
+        view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
         if button:
             await interaction.message.delete()
         await interaction.channel.send( f"{interaction.user.mention} Select the tile you would like to move from", view=view)
@@ -45,6 +46,7 @@ class MoveButtons:
             shipRange = ship.getRange()
             if f"{player_color}-{game.getShipShortName(shipType)}" in game.get_gamestate()["board"][originT]["player_ships"]:
                 view.add_item(Button(label=shipType.capitalize() + "(Range: "+str(shipRange)+")", style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_moveThisShip_{originT}_{shipType}_{moveCount}"))
+        view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
         await interaction.message.delete()
         await interaction.channel.send( f"{interaction.user.mention} Select the ship you would like to move from {originT}", view=view)
     @staticmethod
@@ -94,6 +96,7 @@ class MoveButtons:
             if destination == originT:
                 continue
             view.add_item(Button(label=destination, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_moveTo_{originT}_{shipType}_{destination}_{moveCount}"))
+        view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
         await interaction.message.delete()
         await interaction.channel.send( f"{interaction.user.mention} Select the tile you would like to move a {shipType} from {originT} to", view=view)
     @staticmethod
@@ -144,6 +147,7 @@ class MoveButtons:
             view.add_item(Button(label="Move an additional ship", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startMove_"+str(moveCount+1)))
         view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                                 custom_id=f"FCID{player['color']}_finishAction"))
+        view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
         await interaction.channel.send(f"{interaction.user.mention} you can move an additional ship if you still have move activations or end your action.", view=view)
 
 
