@@ -88,16 +88,22 @@ class ExploreButtons:
         else:
             tileID = game.tile_draw(msg[1])
             if player["name"]=="Descendants of Draco":
-                tileID2 = game.tile_draw(msg[1])
-                image = drawing.base_tile_image(tileID)
-                image2 = drawing.base_tile_image(tileID2)
-                await interaction.channel.send("Option #1",file=drawing.show_single_tile(image))
-                await interaction.channel.send("Option #2",file=drawing.show_single_tile(image2))
-                view.add_item(Button(label="Option #1",style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_exploreTile_{position}_{tileID}_{tileID2}"))
-                view.add_item(Button(label="Option #2",style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_exploreTile_{position}_{tileID2}_{tileID}"))
-                await interaction.channel.send(f"{interaction.user.mention} select the tile you wish to resolve.",view=view)
-                await interaction.message.delete()
-                return
+                ring = int(int(msg[1])/100)
+                ring  = min(3, ring)
+                discard = 0
+                if "tile_discard_deck_300" in game.gamestate():
+                    discard = len(game.gamestate[f"tile_discard_deck_300"])
+                if ring != 3 or discard + len(game.gamestate[f"tile_deck_300"]) > 0:
+                    tileID2 = game.tile_draw(msg[1])
+                    image = drawing.base_tile_image(tileID)
+                    image2 = drawing.base_tile_image(tileID2)
+                    await interaction.channel.send("Option #1",file=drawing.show_single_tile(image))
+                    await interaction.channel.send("Option #2",file=drawing.show_single_tile(image2))
+                    view.add_item(Button(label="Option #1",style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_exploreTile_{position}_{tileID}_{tileID2}"))
+                    view.add_item(Button(label="Option #2",style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_exploreTile_{position}_{tileID2}_{tileID}"))
+                    await interaction.channel.send(f"{interaction.user.mention} select the tile you wish to resolve.",view=view)
+                    await interaction.message.delete()
+                    return
         image = drawing.base_tile_image(tileID)
         await interaction.channel.send("Tile explored in position "+position+": Tile "+tileID,file=drawing.show_single_tile(image))
         playerTiles = ExploreButtons.getListOfTilesPlayerIsIn(game, player)

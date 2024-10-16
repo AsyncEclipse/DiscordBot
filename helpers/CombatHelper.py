@@ -550,13 +550,13 @@ class Combat:
         nextSpeed = -1
         nextOwner = ""
         for speed,owner in sortedSpeeds:
-            if found or currentSpeed == None or currentRoller == None:
+            if found or currentSpeed == None or currentRoller == None or (currentSpeed != None and speed < currentSpeed):
                 nextSpeed = speed
                 nextOwner = owner
                 break
             if speed == currentSpeed and currentRoller == owner:
                 found = True
-        if found and nextSpeed == -1:
+        if nextSpeed == -1:
             await Combat.checkForMorphShield(game, pos, channel, ships, [attacker, defender])
             for speed,owner in sortedSpeeds:
                 if speed != 99:
@@ -576,16 +576,16 @@ class Combat:
 
 
 
-        if (nextSpeed,nextOwner) in game.getRetreatingUnits(pos):
+        if [nextSpeed,nextOwner] in game.getRetreatingUnits(pos):
             checker="FCID"+nextOwner+"_"
-            playerObj = game.getPlayerObjectFromColor(owner)
+            playerObj = game.getPlayerObjectFromColor(nextOwner)
             msg = playerObj["player_name"] + " announced a retreat for ships with "+initiative +" and should now choose a controlled sector adjacent that does not contain enemy ships"
             for tile in Combat.getRetreatTiles(game, pos, nextOwner):
                 view.add_item(Button(label=tile, style=discord.ButtonStyle.red, custom_id=f"{checker}finishRetreatingUnits_{pos}_{nextOwner}_{str(nextSpeed)}_{tile}"))
         else:
-            if nextOwner != "ai":
+            if nextOwner != "ai" and nextOwner != "":
                 checker="FCID"+nextOwner+"_"
-                playerObj = game.getPlayerObjectFromColor(owner)
+                playerObj = game.getPlayerObjectFromColor(nextOwner)
                 msg = playerObj["player_name"] + " it is your turn to roll your ships with "+initiative
                 
                 view.add_item(Button(label="Roll "+initiative+" Ships", style=discord.ButtonStyle.green, custom_id=f"{checker}rollDice_{pos}_{nextOwner}_{str(nextSpeed)}_delete"))
@@ -632,7 +632,7 @@ class Combat:
         wormHoleGen = "wog" in techsResearched
         validTiles = []
         for tile in playerObj["owned_tiles"]:
-            players = Combat.findPlayersInTile(game, pos)
+            players = Combat.findPlayersInTile(game, tile)
             if InfluenceButtons.areTwoTilesAdjacent(game, pos, tile, configs, wormHoleGen) and len(players) < 2:
                 if len(players) == 1 and players[0] != color:
                     continue

@@ -201,6 +201,8 @@ class ButtonListener(commands.Cog):
                     await Combat.removeThisUnit(game, customID,player, interaction)
                 if customID.startswith("startToRetreatUnits"):
                     await Combat.startToRetreatUnits(game, customID, interaction)
+                if customID.startswith("finishRetreatingUnits"):
+                    await Combat.finishRetreatingUnits(game, customID, interaction)
                 if customID.startswith("killPop"):
                     await Combat.killPop(game, customID, interaction,player)
                 end_time = time.perf_counter()  

@@ -151,31 +151,25 @@ class GamestateHelper:
 
     def tile_draw(self, ring):
         ring = int(int(ring)/100)
-        if ring <= 3:
-            random.shuffle(self.gamestate[f"tile_deck_{ring}00"])
-            tile = self.gamestate[f"tile_deck_{ring}00"].pop(0)
-            self.update()
-            return tile
-        else:
-            random.shuffle(self.gamestate[f"tile_deck_300"])
-            tile = self.gamestate[f"tile_deck_300"].pop(0)
-            self.update()
-            return tile
+        ring  = min(3, ring)
+        if len(self.gamestate[f"tile_deck_{ring}00"]) == 0 and f"tile_deck_{ring}00" in self.gamestate and len(self.gamestate[f"tile_discard_deck_{ring}00"]) > 0:
+            self.gamestate[f"tile_deck_{ring}00"] = self.gamestate[f"tile_discard_deck_{ring}00"]
+            self.gamestate[f"tile_discard_deck_{ring}00"] = []
+        random.shuffle(self.gamestate[f"tile_deck_{ring}00"])
+        tile = self.gamestate[f"tile_deck_{ring}00"].pop(0)
+        self.update()
+        return tile
     def tile_draw_specific(self, ring, system):
         ring = int(int(ring)/100)
-        if ring <= 3:
-            if system in self.gamestate[f"tile_deck_{ring}00"]:
-                self.gamestate[f"tile_deck_{ring}00"].remove(system)
-            self.update()
-            return system
-        else:
-            if system in self.gamestate[f"tile_deck_300"]:
-                self.gamestate[f"tile_deck_300"].remove(system)
-            self.update()
-            return system
+        ring  = min(3, ring)
+        if system in self.gamestate[f"tile_deck_{ring}00"]:
+            self.gamestate[f"tile_deck_{ring}00"].remove(system)
+        self.update()
+        return system
 
     def tile_discard(self, sector):
         firstNum = int(sector) % 100
+        firstNum = min(3, firstNum)
         if "tile_discard_deck_"+str(firstNum)+"00" not in self.gamestate:
             self.gamestate["tile_discard_deck_"+str(firstNum)+"00"]=[]
         self.gamestate["tile_discard_deck_"+str(firstNum)+"00"].append(sector)
@@ -281,7 +275,10 @@ class GamestateHelper:
         if position != None and sector != "sector3back":
             tiles = configs.get(position)[0].split(",")
             for adjTile in tiles:
-                if adjTile not in self.gamestate["board"]:
+                discard = 0
+                if "tile_discard_deck_300" in self.gamestate:
+                    discard = len(self.gamestate[f"tile_discard_deck_300"])
+                if adjTile not in self.gamestate["board"] and len(self.gamestate[f"tile_deck_300"])+discard > 0:
                     self.add_tile(adjTile, 0, "sector3back")
         self.update()
 
@@ -576,6 +573,11 @@ class GamestateHelper:
             else:
                 tech_draws -= 1
 
+        if "turnsInPassingOrder" in self.gamestate and "pass_order" in self.gamestate:
+            if self.gamestate["turnsInPassingOrder"] == True:
+                self.setTurnOrder(self.gamestate["pass_order"])
+            self.gamestate["pass_order"] = []
+
         if "roundNum" in self.gamestate:
             self.gamestate["roundNum"] += 1
         else:
@@ -620,6 +622,7 @@ class GamestateHelper:
                     self.update_player(p1)
 
         self.gamestate["setup_finished"] = 1
+        self.gamestate["turnsInPassingOrder"]=True
         self.update()
     
     def setup_techs_and_outer_rim(self, count:int):
@@ -652,7 +655,8 @@ class GamestateHelper:
                 tech_draws -= 1
         self.update()
 
-
+    def setTurnsInPassingOrder(self, status:bool):
+        self.gamestate["turnsInPassingOrder"] = status
 
     def playerResearchTech(self, playerid, tech, type):
         self.gamestate["available_techs"].remove(tech)
@@ -796,6 +800,14 @@ class GamestateHelper:
     def setTurnOrder(self, order):
         self.gamestate["turn_order"]=order
         self.update()
+
+    def addToPassOrder(self, player_name):
+        if "pass_order" not in self.gamestate:
+            self.gamestate["pass_order"] = []
+        if player_name not in self.gamestate["pass_order"]:
+            self.gamestate["pass_order"].append(player_name)
+        self.update()
+
 
     def update_player(self, *args):
 

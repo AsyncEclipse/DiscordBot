@@ -78,6 +78,7 @@ class TurnButtons:
         if "passed" in player and player["passed"]== True:
             await interaction.channel.send(f"{interaction.user.mention} passed on their reaction window.")
         else:
+
             if TurnButtons.noOneElsePassed(player,game):
                 player_helper.adjust_money(2)
                 await interaction.channel.send(f"{interaction.user.mention} you gained 2 money and the first player marker for next round for passing first")
@@ -93,6 +94,7 @@ class TurnButtons:
         player_helper.passTurn(True)
         game.update_player(player_helper)
         nextPlayer = game.get_next_player(player)
+        game.addToPassOrder(player["player_name"])
         if nextPlayer != None and not game.is_everyone_passed():
             view = TurnButtons.getStartTurnButtons(game,nextPlayer)
             await interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(nextPlayer),view=view)
@@ -152,7 +154,10 @@ class TurnButtons:
                 view.add_item(Button(label="Done Resolving", style=discord.ButtonStyle.red, custom_id=f"FCID{game.get_player(player)['color']}_deleteMsg"))
                 await interaction.channel.send("It appears that "+p1.name + " would be bankrupt (negative money). They currently have "+str(p1.stats["money"])+" money and will get "+str(p1.money_income())+" in income, but they owe "+str(p1.upkeepCosts())+" money. Please adjust the money or systems controlled so that upkeep can be run without the player entering negative money", view=view)
                 return
-
+        if "actions" in interaction.channel.name:
+            for thread in interaction.channel.threads:  
+                if "Round" in thread.name:
+                    await thread.edit(archived=True)
         await game.upkeep(interaction)
         drawing = DrawHelper(game.gamestate)
         if game.gamestate["roundNum"] < 9:

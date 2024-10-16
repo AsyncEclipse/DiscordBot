@@ -77,7 +77,13 @@ class ImageCacheHelper:
                 if "damage" in filename.lower():
                     return (15,15) 
                 else:
-                    return (70,70) 
+                    if "cru" in filename.lower() or "sb" in filename.lower():
+                        return (90,90)
+                    else:
+                        if "drd" in filename.lower():
+                            return (90,90)
+                        else:
+                            return (70,70) 
         elif "discovery_tiles" in folder.lower():  
             return (80, 80)  
         elif "upgrades" in folder.lower():  
