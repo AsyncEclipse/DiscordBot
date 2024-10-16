@@ -579,9 +579,12 @@ class Combat:
         if [nextSpeed,nextOwner] in game.getRetreatingUnits(pos):
             checker="FCID"+nextOwner+"_"
             playerObj = game.getPlayerObjectFromColor(nextOwner)
+            viewedTiles = []
             msg = playerObj["player_name"] + " announced a retreat for ships with "+initiative +" and should now choose a controlled sector adjacent that does not contain enemy ships"
             for tile in Combat.getRetreatTiles(game, pos, nextOwner):
-                view.add_item(Button(label=tile, style=discord.ButtonStyle.red, custom_id=f"{checker}finishRetreatingUnits_{pos}_{nextOwner}_{str(nextSpeed)}_{tile}"))
+                if tile not in viewedTiles:
+                    viewedTiles.append(tile)
+                    view.add_item(Button(label=tile, style=discord.ButtonStyle.red, custom_id=f"{checker}finishRetreatingUnits_{pos}_{nextOwner}_{str(nextSpeed)}_{tile}"))
         else:
             if nextOwner != "ai" and nextOwner != "":
                 checker="FCID"+nextOwner+"_"

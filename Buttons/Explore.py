@@ -91,7 +91,7 @@ class ExploreButtons:
                 ring = int(int(msg[1])/100)
                 ring  = min(3, ring)
                 discard = 0
-                if "tile_discard_deck_300" in game.gamestate():
+                if "tile_discard_deck_300" in game.get_gamestate():
                     discard = len(game.gamestate[f"tile_discard_deck_300"])
                 if ring != 3 or discard + len(game.gamestate[f"tile_deck_300"]) > 0:
                     tileID2 = game.tile_draw(msg[1])
