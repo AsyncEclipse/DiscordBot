@@ -199,7 +199,7 @@ class BuildButtons:
             buildApt = 1
         view2 = View()
         if len(build) < buildApt:
-            view2.add_item(Button(label="Build Somewhere Else", style=discord.ButtonStyle.red, custom_id="startBuild2"))  
+            view2.add_item(Button(label="Build Somewhere Else", style=discord.ButtonStyle.red, custom_id="startBuild2_deleteMsg"))  
         view2.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                                 custom_id=f"FCID{player['color']}_finishAction"))
         await interaction.channel.send(f"{interaction.user.mention} use buttons to finish turn or potentially build somewhere else.", view=view2)

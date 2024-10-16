@@ -33,6 +33,11 @@ class GameCommands(commands.GroupCog, name="game"):
         game = GamestateHelper(interaction.channel)
         game.setAdvancedAI(status)
         await interaction.response.send_message("Set AI Advanced status to "+str(status))
+    @app_commands.command(name="set_turns_in_passing_order")
+    async def set_turns_in_passing_order(self,interaction: discord.Interaction, status:bool):
+        game = GamestateHelper(interaction.channel)
+        game.setTurnsInPassingOrder(status)
+        await interaction.response.send_message("Set Turn Order In Passing Order to "+str(status))
 
     @app_commands.command(name="start_combats")
     async def start_combats(self,interaction: discord.Interaction):

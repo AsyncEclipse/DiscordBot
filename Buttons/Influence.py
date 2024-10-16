@@ -50,6 +50,12 @@ class InfluenceButtons:
                     playerShips =game.get_gamestate()["board"][tile]["player_ships"]
                     playerShips.append(player["color"])
                     if "owner" in game.get_gamestate()["board"][tile] and game.get_gamestate()["board"][tile]["owner"]==0 and ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips,game):
+                        if any("ai" in s for s in playerShips):
+                            if any("anc" in s for s in playerShips):
+                                if "Draco" not in player["name"]:
+                                    continue
+                            else:
+                                    continue
                         tilesToInfluence.append(tile)
         return tilesToInfluence
     @staticmethod

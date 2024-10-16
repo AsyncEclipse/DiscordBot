@@ -262,10 +262,15 @@ class DrawHelper:
 
                     if ship_type not in counts:
                         counts[ship_type] = 0
+                    xCordToUse = coords[0]
+                    yCordToUse = coords[1]
+                    if "drd" in ship_type:
+                        xCordToUse-=30
+                        yCordToUse-=30
 
                     tile_image.paste(ship_image,
-                                    (int(345 / 1024 * coords[0] + counts[ship_type]-size/2),
-                                    int(345 / 1024 * coords[1] + counts[ship_type]-size/2)),
+                                    (int(345 / 1024 * xCordToUse + counts[ship_type]-size/2),
+                                    int(345 / 1024 * yCordToUse + counts[ship_type]-size/2)),
                                     mask=ship_image)
                     counts[ship_type] += 10
                     if ship_type == "ai":

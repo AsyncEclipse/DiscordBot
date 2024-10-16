@@ -229,6 +229,8 @@ class PlayerCommands(commands.GroupCog, name="player"):
         player_helper = PlayerHelper(player.id, p1)
         player_helper.permanentlyPassTurn(permanent)
         player_helper.passTurn(passed)
+        if passed:
+            game.addToPassOrder(p1["player_name"])
         game.update_player(player_helper)
         await interaction.response.send_message(f"{player.mention} set passed status to "+str(passed))
     
