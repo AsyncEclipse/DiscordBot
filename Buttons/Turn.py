@@ -1,5 +1,6 @@
 import discord
 from Buttons.DiplomaticRelations import DiplomaticRelationsButtons
+from Buttons.Explore import ExploreButtons
 from Buttons.Population import PopulationButtons
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
@@ -109,6 +110,7 @@ class TurnButtons:
             if len(Combat.findTilesInConflict(game)) > 0:
                 await Combat.startCombatThreads(game, interaction)
                 msg = msg +  " after all battles are resolved"
+            view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"startPopDrop"))
             view.add_item(Button(label="Run Upkeep",style=discord.ButtonStyle.blurple, custom_id="runUpkeep"))
             await interaction.channel.send(msg, view=view)
         await interaction.message.delete()
@@ -217,7 +219,8 @@ class TurnButtons:
                 view.add_item(Button(label=f"Move (1)", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startMove"))
                 view.add_item(Button(label="Pass On Reaction", style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_passForRound"))
             else:
-                view.add_item(Button(label=f"Explore ({p1['explore_apt']})", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startExplore"))
+                if len(ExploreButtons.getTilesToExplore(game, player)) > 0:
+                    view.add_item(Button(label=f"Explore ({p1['explore_apt']})", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startExplore"))
                 view.add_item(Button(label=f"Research ({p1['research_apt']})", style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_startResearch"))
                 view.add_item(Button(label=f"Build ({p1['build_apt']})", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startBuild"))
                 view.add_item(Button(label=f"Upgrade ({p1['upgrade_apt']})", style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_startUpgrade"))

@@ -1,3 +1,4 @@
+from asyncio.log import logger
 import json
 import discord
 from Buttons.DiscoveryTile import DiscoveryTileButtons
@@ -18,6 +19,10 @@ import random
 class TileCommands(commands.GroupCog, name="tile"):
     def __init__(self, bot):
         self.bot = bot
+    
+
+ 
+
 
     color_choices = [
         app_commands.Choice(name="Blue", value="blue"),
@@ -28,6 +33,42 @@ class TileCommands(commands.GroupCog, name="tile"):
         app_commands.Choice(name="White", value="white")
     ]
 
+    unit_choices = [
+        app_commands.Choice(name="interceptor", value="int"),
+        app_commands.Choice(name="cruiser", value="cru"),
+        app_commands.Choice(name="dreadnought", value="drd"),
+        app_commands.Choice(name="starbase", value="sb"),
+        app_commands.Choice(name="guardian", value="grd"),
+        app_commands.Choice(name="ancient", value="anc"),
+        app_commands.Choice(name="gcds", value="gcds")
+    ]
+
+    @app_commands.command(name="manage_damage", description="add or remove damage from units")
+    @app_commands.choices(color=color_choices, unit=unit_choices)
+    async def manage_damage(self, interaction: discord.Interaction, tile_position: str,
+                        damage_change: int,
+                        unit : app_commands.Choice[str],
+                        color: Optional[app_commands.Choice[str]]=None):
+        game = GamestateHelper(interaction.channel)  
+        type = unit.value
+        if unit.value == "grd" or unit.value == "anc" or unit.value == "gcds":
+            colorOrAI = "ai"
+            if game.gamestate["advanced_ai"]:
+                type += "adv"
+        else:
+            colorOrAI = color.value if color else game.get_player(str(interaction.user.id))["color"]
+        option = colorOrAI + "-"+type
+        damageOnShip = game.add_damage(option, tile_position, 0)
+        if damage_change > 0:
+            game.add_damage(option, tile_position, damage_change)
+        else:
+            for x in range(-1*damage_change):
+                game.repair_damage(option, tile_position)
+        await interaction.response.defer(thinking=True)  
+        drawing = DrawHelper(game.gamestate)  
+        image = drawing.board_tile_image(tile_position)  
+        await interaction.followup.send(file=drawing.show_single_tile(image)) 
+        
     @app_commands.command(name="manage_units", description="add or remove units from a tile")
     @app_commands.choices(color=color_choices)
     async def manage_units(self, interaction: discord.Interaction, tile_position: str,
@@ -97,6 +138,7 @@ class TileCommands(commands.GroupCog, name="tile"):
         drawing = DrawHelper(game.gamestate)  
         image = drawing.board_tile_image(tile_position)  
         await interaction.followup.send(file=drawing.show_single_tile(image)) 
+
 
 
 

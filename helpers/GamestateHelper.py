@@ -32,6 +32,7 @@ class GamestateHelper:
 
     def saveLastButtonPressed(self, buttonID:str):
         self.gamestate["lastButton"] = buttonID
+        self.update()
 
     def changeColor(self, colorOld, colorNew):
         def replace_string_in_dict(original_dict, old_string, new_string):  
@@ -331,6 +332,17 @@ class GamestateHelper:
             self.gamestate["board"][position][key].append(ship.split("-")[1])
         self.update()
 
+    def cleanAllTheTiles(self):
+        for position in self.gamestate["board"]:
+            if "damage_tracker" in self.gamestate["board"][position]:
+                del self.gamestate["board"][position]["damage_tracker"]
+            
+            for player in self.gamestate["players"]:
+                key = "ships_destroyed_by_" + self.gamestate["players"][player]["color"]
+                if key in self.gamestate["board"][position]:
+                    del self.gamestate["board"][position][key]
+        self.update()
+
     def getReputationTilesToDraw(self, position, color):
         key = "ships_destroyed_by_" + color
         count = 1
@@ -341,11 +353,11 @@ class GamestateHelper:
             return count
         else:
             for ship in self.gamestate["board"][position][key]:
-                if ship == "anc" or ship == "sb" or ship == "int":
+                if "anc" in ship  or ship == "sb" or ship == "int":
                     count +=1
-                if ship == "cru" or ship == "grd":
+                if ship == "cru" or "grd" in ship:
                     count += 2
-                if ship == "drd" or ship == "gcds":
+                if ship == "drd" or "gcds" in ship:
                     count +=3
             del self.gamestate["board"][position][key]
         self.update()
@@ -545,6 +557,9 @@ class GamestateHelper:
                 if "sb" in i:
                     self.gamestate["players"][player]["ship_stock"][3] += 1
                 self.gamestate["board"][position]["player_ships"].remove(i)
+            else:
+                if i+"adv" in self.gamestate["board"][position]["player_ships"]:
+                    self.gamestate["board"][position]["player_ships"].remove(i+"adv")
         self.update()
 
     async def upkeep(self, interaction:discord.Interaction):
@@ -582,6 +597,7 @@ class GamestateHelper:
             self.gamestate["roundNum"] += 1
         else:
             self.gamestate["roundNum"] = 2
+        self.cleanAllTheTiles()
         self.update()
 
     def createRoundNum(self):

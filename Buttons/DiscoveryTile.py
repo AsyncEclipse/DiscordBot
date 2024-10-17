@@ -119,10 +119,10 @@ class DiscoveryTileButtons:
         tech_type = tech_data.get(tech)["track"]
         game.playerResearchTech(str(interaction.user.id), tech, tech_type)
         tech_details = tech_data.get(tech)
-        drawing = DrawHelper(game.gamestate)
+        image = DrawHelper.show_tech_ref_image(tech_details["name"], tech_details['track'])
         if "spoof" in buttonID:
-            await interaction.channel.send(f"{interaction.user.mention} acquired the tech "+tech_details["name"],file=drawing.show_specific_tech(tech))
+            await interaction.channel.send(f"{interaction.user.mention} acquired the tech "+tech_details["name"],file=image)
         else:
             await interaction.message.delete()
-            await interaction.channel.send( f"{interaction.user.mention} acquired the tech "+tech_details["name"],file=drawing.show_specific_tech(tech))
+            await interaction.channel.send( f"{interaction.user.mention} acquired the tech "+tech_details["name"],file=image)
     
