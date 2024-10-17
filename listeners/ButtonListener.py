@@ -57,7 +57,7 @@ class ButtonListener(commands.Cog):
                         customID = customID.replace(check+"_","")
                 
                  
-                if customID == "deleteMsg":
+                if "deleteMsg" in customID:
                     await interaction.message.delete()
                 if customID == "showGame":  
                     await TurnButtons.showGame(game, interaction, self.bot)
@@ -224,13 +224,16 @@ class ButtonListener(commands.Cog):
                         f"- Traceback:\n{tb}" 
                     )  
                     try:  
-                        await log_channel.send(log_message)  
+                        if isinstance(error, discord.HTTPException) and error.status == 404:  
+                            await log_channel.send("Hit the unknown interaction error")
+                        else:
+                            await log_channel.send(log_message)  
                     except discord.Forbidden:  
                         logger.warning(f'Cannot send messages to the log channel "bot-log". Check permissions.')  
                     except discord.HTTPException as e:  
                         logger.error(f'Failed to send message to log channel: {e}')  
                 if isinstance(error, discord.HTTPException) and error.status == 404:  
                     logger.error(f'Unknown Interaction error: {error}')  
-                    await interaction.channel.send("The bot was busy handling another request. Try again in around 3 seconds")
+                    await interaction.channel.send("The bot was busy handling another request. Try again")
                 else:
                     await interaction.channel.send("This button press hit some sort of new error. Devs will probably need to fix it later")

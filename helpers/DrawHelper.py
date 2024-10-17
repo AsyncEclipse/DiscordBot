@@ -264,8 +264,10 @@ class DrawHelper:
                         counts[ship_type] = 0
                     xCordToUse = coords[0]
                     yCordToUse = coords[1]
-                    if "drd" in ship_type:
+                    if "drd" in ship_type or "cru" in ship_type:
                         xCordToUse-=30
+                        yCordToUse-=30
+                    if "sb" in ship_type:
                         yCordToUse-=30
 
                     tile_image.paste(ship_image,
@@ -280,7 +282,8 @@ class DrawHelper:
                     ship_type = "ai"
                     if "ai-" not in key:
                         ship_type=key.split("-")[1]
-                    coords = tile[f"{ship_type}_snap"]
+
+                    coords = tile[f"{ship_type.replace("adv","")}_snap"]
                     if "damage_tracker" in self.gamestate["board"][position]:
                         if key in self.gamestate["board"][position]["damage_tracker"]:
                             damage = self.gamestate["board"][position]["damage_tracker"][key]
@@ -958,26 +961,6 @@ class DrawHelper:
         final_context.save(bytes_io, format="PNG")
         bytes_io.seek(0)
         return discord.File(bytes_io, filename="stats_image.png")
-
-
-    def show_specific_tech(self, tech):
-        context = Image.new("RGBA", (68, 68), (255, 255, 255, 0))
-        techsAvailable = self.gamestate["available_techs"]
-        with open("data/techs.json", "r") as f:
-            tech_data = json.load(f)
-        tech_details = tech_data.get(tech)
-        tech_type = tech_details["track"]
-        techName = tech_details["name"].lower().replace(" ", "_") if tech_details else tech
-        tech_path = f"images/resources/components/technology/{tech_type}/tech_{techName}.png"
-        if not os.path.exists(tech_path):
-            tech_path = f"images/resources/components/technology/rare/tech_{techName}.png"
-        tech_image = self.use_image(tech_path)
-        context.paste(tech_image, (0,0), mask=tech_image)
-        bytes_io = BytesIO()
-        context.save(bytes_io, format="PNG")
-        bytes_io.seek(0)
-
-        return discord.File(bytes_io, filename="techs_image.png")
 
     def show_available_techs(self):
         context = self.display_techs()

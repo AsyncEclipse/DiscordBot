@@ -1,3 +1,4 @@
+import asyncio
 import json
 import random
 
@@ -78,10 +79,10 @@ class Combat:
             if player != "ai":
                 image = drawing.player_area(game.getPlayerObjectFromColor(player))
                 file=drawing.show_player_ship_area(image)
-                await channel.send(game.getPlayerObjectFromColor(player)["player_name"]+" ships look like this",file=file)
+                asyncio.create_task(channel.send(game.getPlayerObjectFromColor(player)["player_name"]+" ships look like this",file=file))
             else:
                 file = drawing.show_AI_stats()
-                await channel.send("AI stats look like this",file=file)
+                asyncio.create_task(channel.send("AI stats look like this",file=file))
         await Combat.promptNextSpeed(game, pos, channel, False)
 
     @staticmethod
@@ -409,7 +410,7 @@ class Combat:
                 if shipModel.computer > 0:
                     msg = msg + "\nThis ship type has a +"+str(shipModel.computer)+" computer"
                 if(len(dice) > 0):
-                    await interaction.channel.send(msg,file=drawing.append_images(dieFiles))
+                    asyncio.create_task(interaction.channel.send(msg,file=drawing.append_images(dieFiles)))
                     oldNumPeeps = len(Combat.findPlayersInTile(game, pos))
                     for die in dieNums:
                         dieNum = die[0]
@@ -567,7 +568,7 @@ class Combat:
         checker = ""
         if update:
             drawing = DrawHelper(game.gamestate)
-            await channel.send("Updated view",file=drawing.board_tile_image_file(pos))
+            asyncio.create_task(channel.send("Updated view",file=drawing.board_tile_image_file(pos)))
         game.setCurrentRoller(nextOwner,pos)
         game.setCurrentSpeed(nextSpeed,pos)
         initiative = "Initiative "+str(nextSpeed)
@@ -718,11 +719,11 @@ class Combat:
                 owner = game.gamestate["board"][pos]["owner"]
                 if winner != "ai" and owner != winner:
                     player = game.getPlayerObjectFromColor(winner)
+                    if game.gamestate["board"][pos]["disctile"]!=0:
+                        view = View()
+                        view.add_item(Button(label="Explore Discovery Tile", style=discord.ButtonStyle.green, custom_id="FCID"+winner+"_exploreDiscoveryTile_"+pos+"_deleteMsg"))
+                        await interaction.channel.send(player["player_name"]+" you can explore the discovery tile",view=view)
                     if owner==0:
-                        if game.gamestate["board"][pos]["disctile"]!=0:
-                            view = View()
-                            view.add_item(Button(label="Explore Discovery Tile", style=discord.ButtonStyle.green, custom_id="FCID"+winner+"_exploreDiscoveryTile_"+pos))
-                            await interaction.channel.send(player["player_name"]+" you can explore the discovery tile",view=view)
                         view2 = View()
                         view2.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple, custom_id=f"FCID{winner}_addInfluenceFinish_"+pos))
                         await interaction.channel.send(player["player_name"]+" you can place your influence on the tile",view=view2)

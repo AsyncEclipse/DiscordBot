@@ -31,6 +31,14 @@ class DiscordBot(commands.Bot):
         elapsed_time = end_time - start_time
         print(f"Total elapsed time for image load: {elapsed_time:.2f} seconds")
         print("Bot is now ready.")
+    
+    async def on_application_command_error(self, interaction: discord.Interaction, error: Exception):  
+        logging.basicConfig(level=logging.INFO)  
+        logger = logging.getLogger(__name__)  
+        log_channel = discord.utils.get(interaction.guild.channels, name="bot-log")   
+        if log_channel is not None and isinstance(log_channel, discord.TextChannel):    
+            await log_channel.send(f"An error occurred in slash command `{interaction.command.name}`: `{error}`")  
+        logger.error(f"Slash command error: {error}")  
 
 logging.basicConfig(level=logging.INFO)  
 logger = logging.getLogger(__name__)  
@@ -40,16 +48,6 @@ intents.messages = True
 intents.message_content = True    
 bot = DiscordBot(command_prefix="$", intents=discord.Intents.all())
 
-@bot.event  
-async def on_command_error(ctx, error):  
-    logger.error(f'Error in command {ctx.command}: {error}')  
-    
-    log_channel = discord.utils.get(ctx.guild.channels, name="bot-log")  
-    
-    if log_channel is not None and isinstance(log_channel, discord.TextChannel):  
-        await log_channel.send(f'Error in command {ctx.command}: {error}')  
-    else:  
-        logger.warning(f'Log channel "bot-log" not found.') 
 
 bot.run(config.token)
 

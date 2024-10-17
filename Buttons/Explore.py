@@ -39,18 +39,12 @@ class ExploreButtons:
             playerShipsCount = playerShipsCount*2
         return playerShipsCount > opponentShips
 
+
     @staticmethod
-    async def startExplore(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction, buttonID:str):
-        if "2" not in buttonID:
-            player_helper.spend_influence_on_action("explore")
-            await interaction.channel.send(f"{interaction.user.mention} is using their turn to explore")
-            game.update_player(player_helper)
-        else:
-            await interaction.channel.send(f"{interaction.user.mention} is resolving their second explore")
+    def getTilesToExplore(game: GamestateHelper, player):
         configs = Properties()
         with open("data/tileAdjacencies.properties", "rb") as f:
             configs.load(f)
-        view = View()
         tilesViewed = []
         playerTiles = ExploreButtons.getListOfTilesPlayerIsIn(game, player)
         for tile in playerTiles:
@@ -66,7 +60,18 @@ class ExploreButtons:
                     if int(adjTile) > 299 and len(game.get_gamestate()[f"tile_deck_300"]) == 0:
                         continue
                     tilesViewed.append(adjTile)
-                    view.add_item(Button(label=str(adjTile), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_exploreTile_" + str(adjTile)))
+        return tilesViewed
+    @staticmethod
+    async def startExplore(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction, buttonID:str):
+        if "2" not in buttonID:
+            player_helper.spend_influence_on_action("explore")
+            await interaction.channel.send(f"{interaction.user.mention} is using their turn to explore")
+            game.update_player(player_helper)
+        else:
+            await interaction.channel.send(f"{interaction.user.mention} is resolving their second explore")
+        view = View()
+        for tile in ExploreButtons.getTilesToExplore(game, player):
+            view.add_item(Button(label=str(tile), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_exploreTile_" + str(tile)))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
         await interaction.channel.send(f"{interaction.user.mention} select the tile you would like to explore",view=view)
         if player["explore_apt"] > 1 and "2" not in buttonID:
