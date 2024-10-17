@@ -283,7 +283,7 @@ class DrawHelper:
                     if "ai-" not in key:
                         ship_type=key.split("-")[1]
 
-                    coords = tile[f"{ship_type.replace("adv","")}_snap"]
+                    coords = tile[ship_type.replace("adv","")+"_snap"]
                     if "damage_tracker" in self.gamestate["board"][position]:
                         if key in self.gamestate["board"][position]["damage_tracker"]:
                             damage = self.gamestate["board"][position]["damage_tracker"][key]
