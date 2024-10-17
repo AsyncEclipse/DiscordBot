@@ -5,9 +5,9 @@ scripts/
 include/
 pyvenv.cfg
 launch.json
-ActiveGames/
 .idea
 test.py
+ActiveGames/
 
 
 # Byte-compiled / optimized / DLL files
