@@ -212,6 +212,11 @@ class TurnButtons:
         view = View()
         player = p1
         player_helper = PlayerHelper(game.getPlayersID(player), player)
+        number_passed = 0
+        ordinal = lambda n: "tsnrhtdd"[(n//10%10!=1)*(n%10<4)*n%10::4]
+        for p2 in game.get_gamestate()["players"]:
+            if "passed" in game.get_gamestate()["players"][p2] and game.get_gamestate()["players"][p2]["passed"] == True:
+                number_passed += 1
         if player["influence_discs"] != 0:
             if "passed" in p1 and p1["passed"]== True:
                 view.add_item(Button(label=f"Build (1)", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startBuild"))
@@ -226,12 +231,12 @@ class TurnButtons:
                 view.add_item(Button(label=f"Upgrade ({p1['upgrade_apt']})", style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_startUpgrade"))
                 view.add_item(Button(label=f"Move ({p1['move_apt']})", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startMove"))
                 view.add_item(Button(label=f"Influence ({p1['influence_apt']})", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startInfluence"))
-                view.add_item(Button(label="Pass", style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_passForRound"))
+                view.add_item(Button(label=f"Pass {number_passed+1}{ordinal(number_passed+1)})", style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_passForRound"))
         else:
             if "passed" in p1 and p1["passed"]== True:
                 view.add_item(Button(label="Pass On Reaction", style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_passForRound"))
             else:
-                view.add_item(Button(label="Pass", style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_passForRound"))
+                view.add_item(Button(label=f"Pass {number_passed+1}{ordinal(number_passed+1)})", style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_passForRound"))
         view.add_item(Button(label="Show Game",style=discord.ButtonStyle.gray, custom_id="showGame"))
         view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
         if len(PopulationButtons.findEmptyPopulation(game,p1)) > 0 and p1["colony_ships"] > 0:
