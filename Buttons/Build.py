@@ -24,6 +24,8 @@ class BuildButtons:
             view.add_item(Button(label=tile, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_buildIn_{tile}"))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
         await interaction.channel.send(f"{interaction.user.mention}, choose which tile you would like to build in.", view=view)
+        drawing = DrawHelper(game.gamestate)
+        await interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True)
 
     @staticmethod  
     async def buildIn(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
@@ -188,15 +190,17 @@ class BuildButtons:
         money = int(buttonID.split("_")[5])
         game.add_units(build, loc)
         summary = ""
+        textSum = ""
         for ship in build:
             shortName = ship.split("-")[1]
             summary += " "+game.getShipFullName(shortName)
+            textSum +=game.getShipFullName(shortName).capitalize()+"\n"
         player_helper.specifyDetailsOfAction("Built "+summary+" in "+loc+".")
         player_helper.stats["science"], player_helper.stats["materials"], player_helper.stats["money"] = science, material, money
         game.update_player(player_helper)
         drawing = DrawHelper(game.gamestate)
         buildApt = player["build_apt"]
-        await interaction.channel.send(f"This is what the tile looks like after the build. ",file=drawing.board_tile_image_file(loc))
+        await interaction.channel.send(f"This is what the tile looks like after the build. They built the following:\n"+textSum,file=drawing.board_tile_image_file(loc))
         if player["passed"]== True:
             buildApt = 1
         view2 = View()
