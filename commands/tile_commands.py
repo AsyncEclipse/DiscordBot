@@ -8,6 +8,7 @@ from discord.ext import commands
 from discord import app_commands
 from discord.ui import View, Button
 from typing import Optional, List
+from helpers.CombatHelper import Combat
 from setup.GameInit import GameInit
 from helpers.GamestateHelper import GamestateHelper
 from helpers.DrawHelper import DrawHelper
@@ -245,6 +246,10 @@ class TileCommands(commands.GroupCog, name="tile"):
         await interaction.followup.send(file=drawing.show_single_tile(image))
 
 
+    @app_commands.command(name="declare_a_combat_winner")
+    async def declare_a_combat_winner(self, interaction: discord.Interaction, tile_position: str):
+        game = GamestateHelper(interaction.channel)
+        await Combat.declareAWinner(game, interaction, tile_position)
 
     @app_commands.command(name="explore_specific_system_tile")
     async def explore_specific_system_tile(self, interaction: discord.Interaction, tile_position: str, system_num:str):

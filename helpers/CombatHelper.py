@@ -630,7 +630,7 @@ class Combat:
         await interaction.message.delete()
         await interaction.channel.send(interaction.user.mention + " has retreated all ships with initiative "+speed+" to "+destination+".")
         if len(Combat.findPlayersInTile(game, pos)) < 2:
-                Combat.declareAWinner(game, interaction, pos)
+                await Combat.declareAWinner(game, interaction, pos)
         elif oldLength != len(Combat.findPlayersInTile(game, pos)):
             drawing = DrawHelper(game.gamestate)
             await interaction.channel.send("Updated view",view = Combat.getCombatButtons(game, pos),file=drawing.board_tile_image_file(pos))
@@ -680,7 +680,10 @@ class Combat:
                 view = View()
                 view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"startPopDrop"))
                 await actions_channel.send(role.mention+" Please run upkeep after all post combat events are resolved. You can use this button to drop pop after taking control of a tile", view = view)
-        players = game.gamestate["board"][pos]["combatants"]
+        if "combatants" in game.gamestate["board"][pos]:
+            players = game.gamestate["board"][pos]["combatants"]
+        else:
+            players = Combat.findPlayersInTile(game,pos)
         for playerColor in players:
             if playerColor == "ai":
                 continue
@@ -765,7 +768,7 @@ class Combat:
                 msg = "The AI destroyed the "+Combat.translateShipAbrToName(shipType)+" due to the damage exceeding the ships hull"
             await interaction.channel.send(msg)
             if len(Combat.findPlayersInTile(game, pos)) < 2:
-                Combat.declareAWinner(game, interaction, pos)
+                await Combat.declareAWinner(game, interaction, pos)
             elif oldLength != len(Combat.findPlayersInTile(game, pos)):
                 drawing = DrawHelper(game.gamestate)
                 await interaction.channel.send("Updated view",view = Combat.getCombatButtons(game, pos),file=drawing.board_tile_image_file(pos))
