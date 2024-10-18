@@ -109,7 +109,7 @@ class PlayerShip(Ship):
             return True
 
 class AI_Ship(Ship):
-    def __init__(self, ship_type, advanced=False):
+    def __init__(self, ship_type, advanced=False, wa=False):
         super().__init__()
         with open("data/AI_ships.json", "r") as f:
             AI_parts = json.load(f)
@@ -117,6 +117,8 @@ class AI_Ship(Ship):
             ship_type = "ai-"+ship_type
         if advanced == True and "adv" not in ship_type:
             ship_parts = AI_parts[ship_type + "adv"]
+        if wa == True and "wa" not in ship_type:
+            ship_parts = AI_parts[ship_type + "wa"]
         else:
             ship_parts = AI_parts[ship_type]
         self.dice = ship_parts["dice"]

@@ -646,7 +646,6 @@ class GamestateHelper:
                     self.update_player(p1)
 
         self.gamestate["setup_finished"] = 1
-        self.gamestate["turnsInPassingOrder"]=True
         self.update()
     
     def setup_techs_and_outer_rim(self, count:int):
@@ -758,16 +757,16 @@ class GamestateHelper:
             if self.gamestate["players"][i]["color"] == color:
                 return self.gamestate["players"][i]
 
-    def fillInDiscTiles(self):
-        listOfDisc = []
-        with open("data/discoverytiles.json") as f:
-            discTile_data = json.load(f)
-        for tile in discTile_data:
-            for x in range(discTile_data[tile]["num"]):
-                listOfDisc.append(tile)
-        random.shuffle(listOfDisc)
-        self.gamestate["discTiles"]= listOfDisc
-        self.update()
+    #def fillInDiscTiles(self):
+    #    listOfDisc = []
+    #    with open("data/discoverytiles.json") as f:
+    #        discTile_data = json.load(f)
+    #    for tile in discTile_data:
+    #        for x in range(discTile_data[tile]["num"]):
+    #            listOfDisc.append(tile)
+    #    random.shuffle(listOfDisc)
+    #    self.gamestate["discTiles"]= listOfDisc
+    #    self.update()
 
     def get_short_faction_name(self, full_name):
         if full_name == "Descendants of Draco":

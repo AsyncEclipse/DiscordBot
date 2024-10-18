@@ -13,8 +13,8 @@ from jproperties import Properties
 class DiscoveryTileButtons:
     @staticmethod 
     async def exploreDiscoveryTile(game: GamestateHelper, tile:str, interaction: discord.Interaction, player):
-        if "discTiles" not in game.get_gamestate():
-            game.fillInDiscTiles()
+        #if "discTiles" not in game.get_gamestate():
+        #    game.fillInDiscTiles()
         if game.gamestate["board"][tile]["disctile"]==0:
             await interaction.followup.send("No discovery tile in tile "+tile)
             return

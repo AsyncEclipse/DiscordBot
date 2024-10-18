@@ -36,6 +36,12 @@ class SetupCommands(commands.GroupCog, name="setup"):
         app_commands.Choice(name="Terran Union (Planta)", value="ter6"),
     ]
 
+    ai_choices = [
+        app_commands.Choice(name="Default", value="def"),
+        app_commands.Choice(name="Advanced", value="adv"),
+        app_commands.Choice(name="Worlds Apart", value="wa")
+    ]
+
     
 
     def getColor(self, faction:str):
@@ -55,14 +61,16 @@ class SetupCommands(commands.GroupCog, name="setup"):
 
 
     @app_commands.command(name="game")
-    @app_commands.choices(faction1=factionChoices,faction2=factionChoices,faction3=factionChoices,faction4=factionChoices,faction5=factionChoices,faction6=factionChoices)
+    @app_commands.choices(faction1=factionChoices,faction2=factionChoices,faction3=factionChoices,
+                          faction4=factionChoices,faction5=factionChoices,faction6=factionChoices)
     async def game(self, interaction: discord.Interaction, 
                                 player1: discord.Member, faction1: app_commands.Choice[str], 
                                 player2: discord.Member,faction2: app_commands.Choice[str], 
-                                player3: Optional[discord.Member]=None,faction3: Optional[app_commands.Choice[str]]=None, 
+                                player3: Optional[discord.Member]=None,faction3: Optional[app_commands.Choice[str]]=None,
                                 player4: Optional[discord.Member]=None, faction4: Optional[app_commands.Choice[str]]=None,
                                 player5: Optional[discord.Member]=None, faction5: Optional[app_commands.Choice[str]]=None,
                                 player6: Optional[discord.Member]=None, faction6: Optional[app_commands.Choice[str]]=None):
+
         temp_player_list = [player1, player2, player3, player4, player5, player6]
         temp_faction_list = [faction1, faction2, faction3, faction4, faction5, faction6]
         colors = ["blue", "red", "green", "yellow", "purple", "white"]
@@ -113,7 +121,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
             game.add_tile(str(i), 0, "sector3back")
         if game.gamestate["setup_finished"] != 1:
             game.setup_finished()
-        game.fillInDiscTiles()
+        #game.fillInDiscTiles()
         await interaction.channel.send("Done With Setup!")
         
         
@@ -171,12 +179,9 @@ class SetupCommands(commands.GroupCog, name="setup"):
             if member:  
                 await member.add_roles(role) 
         await interaction.channel.send("Successfully Added Players")
-        
 
-
-        
-
-    @app_commands.command(name="create_new_game")
+    @app_commands.choices(ai_ship_type=ai_choices)
+    @app_commands.command(name="create_new_game", description="Finalize game setup. Set expansion rules at the end.")
     async def create_new_game(self, interaction: discord.Interaction, game_name: str,
                             player1: discord.Member,
                             player_count:int,
@@ -184,7 +189,17 @@ class SetupCommands(commands.GroupCog, name="setup"):
                             player3: Optional[discord.Member]=None,
                             player4: Optional[discord.Member]=None,
                             player5: Optional[discord.Member]=None,
-                            player6: Optional[discord.Member]=None):
+                            player6: Optional[discord.Member]=None,
+                            ai_ship_type: Optional[app_commands.Choice[str]]=None,
+                            rift_cannon: Optional[bool]=True,
+                            turn_order_variant: Optional[bool]=True
+                   ):
+        """
+        :param ai_ship_type: Choose which type of AI ships to use.
+        :param rift_cannon: Rift cannons are enabled by default
+        :param turn_order_variant: Pass turn order is enabled by default
+        :return:
+        """
         temp_player_list = [player1, player2, player3, player4, player5, player6]
         player_list = []
         await interaction.response.defer(thinking=True)
@@ -192,7 +207,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
             if i != None:
                 player_list.append([i.id, i.name])
 
-        new_game = GameInit(game_name, player_list)
+        new_game = GameInit(game_name, player_list, ai_ship_type.value, rift_cannon, turn_order_variant)
         new_game.create_game()
         MAX_CHANNELS_PER_CATEGORY = 20  # Number of channels allowed in each category  
         async def get_or_create_category(guild:discord.Guild, category_name):  
