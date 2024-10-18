@@ -95,8 +95,10 @@ class BuildButtons:
             if remaining > 0:
                 view.add_item(Button(label=f"{ship} ({player[f'{key}']})", style=discord.ButtonStyle.blurple, custom_id="_".join(buttonElements))) 
         buttonElements = [f"FCID{player['color']}","finishBuild", build, str(cost), build_loc]
-        view.add_item(Button(label="Finished In This System", style=discord.ButtonStyle.red, custom_id="_".join(buttonElements))) 
-        view.add_item(Button(label="Reset", style=discord.ButtonStyle.gray, custom_id=f"buildIn_{build_loc}")) 
+        if build != "none":
+            view.add_item(Button(label="Finished In This System", style=discord.ButtonStyle.red, custom_id="_".join(buttonElements))) 
+        view.add_item(Button(label="Reset Build", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_buildIn_{build_loc}")) 
+        view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn")) 
         return view
     
 

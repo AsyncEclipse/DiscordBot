@@ -615,6 +615,7 @@ class Combat:
         colorOrAI = buttonID.split("_")[2]
         speed = buttonID.split("_")[3]
         destination = buttonID.split("_")[4]
+        oldLength = len(Combat.findPlayersInTile(game, pos))
         game.removeCertainRetreatingUnits((int(speed),colorOrAI), pos)
         tile_map = game.get_gamestate()["board"]
         player_ships = tile_map[pos]["player_ships"][:]
@@ -628,7 +629,14 @@ class Combat:
                     game.add_units([ship],destination)
         await interaction.message.delete()
         await interaction.channel.send(interaction.user.mention + " has retreated all ships with initiative "+speed+" to "+destination+".")
-        await Combat.promptNextSpeed(game, pos, interaction.channel, True)
+        if len(Combat.findPlayersInTile(game, pos)) < 2:
+                Combat.declareAWinner(game, interaction, pos)
+        elif oldLength != len(Combat.findPlayersInTile(game, pos)):
+            drawing = DrawHelper(game.gamestate)
+            await interaction.channel.send("Updated view",view = Combat.getCombatButtons(game, pos),file=drawing.board_tile_image_file(pos))
+            await Combat.startCombat(game, interaction.channel, pos)
+        else:
+            await Combat.promptNextSpeed(game, pos, interaction.channel, True)
 
 
     @staticmethod
@@ -661,6 +669,65 @@ class Combat:
         await Combat.promptNextSpeed(game, pos, interaction.channel, False)
 
 
+    @staticmethod
+    async def declareAWinner(game:GamestateHelper, interaction:discord.Interaction, pos:str):
+        game.updateSaveFile()
+        actions_channel = discord.utils.get(interaction.guild.channels, name=game.game_id+"-actions") 
+        if actions_channel is not None and isinstance(actions_channel, discord.TextChannel):
+            await actions_channel.send("Combat in tile "+pos+" has concluded. There are "+str(len(Combat.findTilesInConflict(game)))+" tiles left in conflict")
+            if len(Combat.findTilesInConflict(game)) == 0:
+                role = discord.utils.get(interaction.guild.roles, name=game.game_id)
+                view = View()
+                view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"startPopDrop"))
+                await actions_channel.send(role.mention+" Please run upkeep after all post combat events are resolved. You can use this button to drop pop after taking control of a tile", view = view)
+        players = game.gamestate["board"][pos]["combatants"]
+        for playerColor in players:
+            if playerColor == "ai":
+                continue
+            player = game.getPlayerObjectFromColor(playerColor)
+            count = str(game.getReputationTilesToDraw(pos, playerColor))
+            view = View()
+            label = "Draw "+count+" Reputation"
+            buttonID = "FCID"+playerColor+"_drawReputation_"+count
+            view.add_item(Button(label=label, style=discord.ButtonStyle.green, custom_id=buttonID))
+            label = "Decline"
+            buttonID = "FCID"+playerColor+"_deleteMsg"
+            view.add_item(Button(label=label, style=discord.ButtonStyle.red, custom_id=buttonID))
+            msg = player["player_name"] + " the bot believes you should draw "+count+" reputation tiles here. Click to do so or press decline if the bot messed up. Please ensure that players in combats earlier than yours have drawn their reputation tiles first"
+            await interaction.channel.send(msg, view=view)
+        winner = Combat.findPlayersInTile(game, pos)[0]
+        owner = game.gamestate["board"][pos]["owner"]
+        if winner != "ai" and owner != winner:
+            player = game.getPlayerObjectFromColor(winner)
+            if game.gamestate["board"][pos]["disctile"]!=0:
+                view = View()
+                view.add_item(Button(label="Explore Discovery Tile", style=discord.ButtonStyle.green, custom_id="FCID"+winner+"_exploreDiscoveryTile_"+pos+"_deleteMsg"))
+                await interaction.channel.send(player["player_name"]+" you can explore the discovery tile",view=view)
+            if owner==0:
+                view2 = View()
+                view2.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple, custom_id=f"FCID{winner}_addInfluenceFinish_"+pos))
+                await interaction.channel.send(player["player_name"]+" you can place your influence on the tile",view=view2)
+                view3 = View()
+                view3.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
+                await interaction.channel.send(player["player_name"]+" if you have enough colony ships, you can use this to drop population after taking control of the sector",view=view3)
+            else:
+                p2 = game.getPlayerObjectFromColor(owner)
+                player_helper = PlayerHelper(game.get_player_from_color(player["color"]),player)
+                player_helper2 = PlayerHelper(game.get_player_from_color(p2["color"]),p2)
+                if p2["name"]=="Planta" or ("neb" in player_helper.getTechs() and "nea" not in player_helper2.getTechs()):
+                    view = View()
+                    view.add_item(Button(label="Destroy All Population", style=discord.ButtonStyle.green, custom_id="FCID"+winner+"_removeInfluenceFinish_"+pos+"_graveYard"))
+                    await interaction.channel.send(player["player_name"]+" you can destroy all enemy population automatically",view=view)
+                    view2 = View()
+                    view2.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple, custom_id=f"FCID{winner}_addInfluenceFinish_"+pos))
+                    await interaction.channel.send(player["player_name"]+" you can place your influence on the tile after destroying the enemy population",view=view2)
+                    view3 = View()
+                    view3.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
+                    await interaction.channel.send(player["player_name"]+" if you have enough colony ships, you can use this to drop population after taking control of the sector",view=view3)
+                else:
+                    view = View()
+                    view.add_item(Button(label="Roll to Destroy Population", style=discord.ButtonStyle.green, custom_id=f"FCID{winner}_rollDice_{pos}_{winner}_1000"))
+                    await interaction.channel.send(player["player_name"]+" you can roll to attempt to kill enemy population",view=view)
     @staticmethod
     async def assignHitTo(game:GamestateHelper, buttonID:str, interaction:discord.Interaction, button:bool):
         pos = buttonID.split("_")[1]
@@ -698,64 +765,7 @@ class Combat:
                 msg = "The AI destroyed the "+Combat.translateShipAbrToName(shipType)+" due to the damage exceeding the ships hull"
             await interaction.channel.send(msg)
             if len(Combat.findPlayersInTile(game, pos)) < 2:
-                game.updateSaveFile()
-                actions_channel = discord.utils.get(interaction.guild.channels, name=game.game_id+"-actions") 
-                if actions_channel is not None and isinstance(actions_channel, discord.TextChannel):
-                    await actions_channel.send("Combat in tile "+pos+" has concluded. There are "+str(len(Combat.findTilesInConflict(game)))+" tiles left in conflict")
-                    if len(Combat.findTilesInConflict(game)) == 0:
-                        role = discord.utils.get(interaction.guild.roles, name=game.game_id)
-                        view = View()
-                        view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"startPopDrop"))
-                        await actions_channel.send(role.mention+" Please run upkeep after all post combat events are resolved. You can use this button to drop pop after taking control of a tile", view = view)
-                players = game.gamestate["board"][pos]["combatants"]
-                for playerColor in players:
-                    if playerColor == "ai":
-                        continue
-                    player = game.getPlayerObjectFromColor(playerColor)
-                    count = str(game.getReputationTilesToDraw(pos, playerColor))
-                    view = View()
-                    label = "Draw "+count+" Reputation"
-                    buttonID = "FCID"+playerColor+"_drawReputation_"+count
-                    view.add_item(Button(label=label, style=discord.ButtonStyle.green, custom_id=buttonID))
-                    label = "Decline"
-                    buttonID = "FCID"+playerColor+"_deleteMsg"
-                    view.add_item(Button(label=label, style=discord.ButtonStyle.red, custom_id=buttonID))
-                    msg = player["player_name"] + " the bot believes you should draw "+count+" reputation tiles here. Click to do so or press decline if the bot messed up. Please ensure that players in combats earlier than yours have drawn their reputation tiles first"
-                    await interaction.channel.send(msg, view=view)
-                winner = Combat.findPlayersInTile(game, pos)[0]
-                owner = game.gamestate["board"][pos]["owner"]
-                if winner != "ai" and owner != winner:
-                    player = game.getPlayerObjectFromColor(winner)
-                    if game.gamestate["board"][pos]["disctile"]!=0:
-                        view = View()
-                        view.add_item(Button(label="Explore Discovery Tile", style=discord.ButtonStyle.green, custom_id="FCID"+winner+"_exploreDiscoveryTile_"+pos+"_deleteMsg"))
-                        await interaction.channel.send(player["player_name"]+" you can explore the discovery tile",view=view)
-                    if owner==0:
-                        view2 = View()
-                        view2.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple, custom_id=f"FCID{winner}_addInfluenceFinish_"+pos))
-                        await interaction.channel.send(player["player_name"]+" you can place your influence on the tile",view=view2)
-                        view3 = View()
-                        view3.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
-                        await interaction.channel.send(player["player_name"]+" if you have enough colony ships, you can use this to drop population after taking control of the sector",view=view3)
-                    else:
-                        p2 = game.getPlayerObjectFromColor(owner)
-                        player_helper = PlayerHelper(game.get_player_from_color(player["color"]),player)
-                        player_helper2 = PlayerHelper(game.get_player_from_color(p2["color"]),p2)
-                        if p2["name"]=="Planta" or ("neb" in player_helper.getTechs() and "nea" not in player_helper2.getTechs()):
-                            view = View()
-                            view.add_item(Button(label="Destroy All Population", style=discord.ButtonStyle.green, custom_id="FCID"+winner+"_removeInfluenceFinish_"+pos+"_graveYard"))
-                            await interaction.channel.send(player["player_name"]+" you can destroy all enemy population automatically",view=view)
-                            view2 = View()
-                            view2.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple, custom_id=f"FCID{winner}_addInfluenceFinish_"+pos))
-                            await interaction.channel.send(player["player_name"]+" you can place your influence on the tile after destroying the enemy population",view=view2)
-                            view3 = View()
-                            view3.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
-                            await interaction.channel.send(player["player_name"]+" if you have enough colony ships, you can use this to drop population after taking control of the sector",view=view3)
-                        else:
-                            view = View()
-                            view.add_item(Button(label="Roll to Destroy Population", style=discord.ButtonStyle.green, custom_id=f"FCID{winner}_rollDice_{pos}_{winner}_1000"))
-                            await interaction.channel.send(player["player_name"]+" you can roll to attempt to kill enemy population",view=view)
-                
+                Combat.declareAWinner(game, interaction, pos)
             elif oldLength != len(Combat.findPlayersInTile(game, pos)):
                 drawing = DrawHelper(game.gamestate)
                 await interaction.channel.send("Updated view",view = Combat.getCombatButtons(game, pos),file=drawing.board_tile_image_file(pos))
