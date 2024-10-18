@@ -74,7 +74,7 @@ class MoveButtons:
             for adjTile in configs.get(pos)[0].split(","):
                 if InfluenceButtons.areTwoTilesAdjacent(game, pos, adjTile, configs, wormHoleGen):
                     recursive_search(adjTile, distance + 1, visited, jumpDriveAvailable)
-                elif jumpDriveAvailable and "wormholes" in tile_map[adjTile]:
+                elif jumpDriveAvailable and adjTile in tile_map and "wormholes" in tile_map[adjTile]:
                     recursive_search(adjTile, distance + 1, visited, False)
             if "warp" in tile_map[pos] and tile_map[pos]["warp"] == 1:
                 for tile in tile_map:

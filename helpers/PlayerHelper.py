@@ -50,19 +50,22 @@ class PlayerHelper:
 
     def adjust_material_cube(self, adjustment):
         before = self.stats["material_pop_cubes"]
-        amount = min(self.stats["material_pop_cubes"] + adjustment, 11)
+        amount = min(self.stats["material_pop_cubes"] + adjustment, 13)
+        amount = max(amount, 1)
         self.stats["material_pop_cubes"] = amount
         return (f"\n> Adjusted material cubes from {before} to {amount}")
 
     def adjust_science_cube(self, adjustment):
         before = self.stats["science_pop_cubes"]
-        amount = min(self.stats["science_pop_cubes"] + adjustment, 11)
+        amount = min(self.stats["science_pop_cubes"] + adjustment, 13)
+        amount = max(amount, 1)
         self.stats["science_pop_cubes"] = amount
         return (f"\n> Adjusted science cubes from {before} to {amount}")
 
     def adjust_money_cube(self, adjustment):
         before = self.stats["money_pop_cubes"]
-        amount = min(self.stats["money_pop_cubes"] + adjustment, 11)
+        amount = min(self.stats["money_pop_cubes"] + adjustment, 13)
+        amount = max(amount, 1)
         self.stats["money_pop_cubes"] = amount
         return (f"\n> Adjusted money cubes from {before} to {amount}")
     def adjust_influence(self, adjustment):

@@ -407,10 +407,13 @@ class Combat:
                         else:
                             for i in range(Combat.translateColorToDamage(die, random_number)):
                                 dieNums.append([random_number,1,die])
+                needsShieldMessage = False
                 if shipModel.computer > 0:
                     msg = msg + "\nThis ship type has a +"+str(shipModel.computer)+" computer"
+                    needsShieldMessage = True
+                
                 if(len(dice) > 0):
-                    asyncio.create_task(interaction.channel.send(msg,file=drawing.append_images(dieFiles)))
+                    await interaction.channel.send(msg,file=drawing.append_images(dieFiles))
                     oldNumPeeps = len(Combat.findPlayersInTile(game, pos))
                     for die in dieNums:
                         dieNum = die[0]
@@ -421,6 +424,9 @@ class Combat:
                             if dieNum == 1 or dieNum + shipModel.computer < 6 or oldNumPeeps > len(Combat.findPlayersInTile(game, pos)):
                                 continue
                             hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships, dieNum, shipModel.computer, pos, speed)
+                            if dieNum + shipModel.computer > 5 and len(hittableShips) == 0 and needsShieldMessage:
+                                msg += ". Some of the computer bonus was cancelled by the shields on each of the opponents ships."
+                                needsShieldMessage = False
                         else:
                             if dieNum == 2 or dieNum == 3:
                                 continue
@@ -490,6 +496,7 @@ class Combat:
                                     ship = hittableShips[0]
                                     buttonID = "assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(dieDam)
                                     await Combat.assignHitTo(game, buttonID, interaction, False)
+
         hitsToAssign = 0
         if speed != 1000:
             if "unresolvedHits" in game.get_gamestate()["board"][pos]:
@@ -763,7 +770,7 @@ class Combat:
             if hitsToAssign == 0 and oldLength == len(Combat.findPlayersInTile(game, pos)):
                 await Combat.promptNextSpeed(game, pos, interaction.channel, True)
 
-   
+
 
     @staticmethod
     async def drawReputation(game:GamestateHelper, buttonID:str, interaction:discord.Interaction, player_helper):
