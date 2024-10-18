@@ -244,6 +244,8 @@ class TileCommands(commands.GroupCog, name="tile"):
         image = drawing.board_tile_image(tile_position)
         await interaction.followup.send(file=drawing.show_single_tile(image))
 
+
+
     @app_commands.command(name="explore_specific_system_tile")
     async def explore_specific_system_tile(self, interaction: discord.Interaction, tile_position: str, system_num:str):
         game = GamestateHelper(interaction.channel)

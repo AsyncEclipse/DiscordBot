@@ -39,6 +39,15 @@ class GameCommands(commands.GroupCog, name="game"):
         game.setTurnsInPassingOrder(status)
         await interaction.response.send_message("Set Turn Order In Passing Order to "+str(status))
 
+    @app_commands.command(name="add_specific_tile_to_deck")
+    async def explore_specific_system_tile(self, interaction: discord.Interaction, system_num:str):
+        game = GamestateHelper(interaction.channel)
+        tile = game.add_specific_tile_to_deck(system_num,system_num)
+        drawing = DrawHelper(game.gamestate)
+        await interaction.response.defer(thinking=True)
+        image = drawing.base_tile_image(tile)
+        await interaction.followup.send("Added this tile to the deck", file=drawing.show_single_tile(image))
+
     @app_commands.command(name="start_combats")
     async def start_combats(self,interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)

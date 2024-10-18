@@ -167,6 +167,14 @@ class GamestateHelper:
             self.gamestate[f"tile_deck_{ring}00"].remove(system)
         self.update()
         return system
+    
+    def add_specific_tile_to_deck(self, ring, system):
+        ring = int(int(ring)/100)
+        ring  = min(3, ring)
+        if system not in self.gamestate[f"tile_deck_{ring}00"]:
+            self.gamestate[f"tile_deck_{ring}00"].append(system)
+        self.update()
+        return system
 
     def tile_discard(self, sector):
         firstNum = int(sector) % 100
