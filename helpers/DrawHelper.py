@@ -473,9 +473,9 @@ class DrawHelper:
         return context
     
     def display_cube_track_reference(self, player):
-        context = Image.new("RGBA", (1600, 125), (0,0,0,255))
+        context = Image.new("RGBA", (1690, 125), (0,0,0,255))
 
-        spaces = [28,24,21,18,15,12,10,8,6,4,3,2]
+        spaces = [28,24,21,18,15,12,10,8,6,4,3,2,0]
         pop_path = f"images/resources/components/all_boards/popcube_{player['color']}.png"
         
         font = ImageFont.truetype("images/resources/arial.ttf", size=50)
@@ -510,7 +510,7 @@ class DrawHelper:
             else:  
                 population_value = 2   
             ind = spaces.index(population_value) +1
-            context.paste(pop_image, (1300 - ind*90,15))
+            context.paste(pop_image, (1390 - ind*90,15))
 
         def draw_resource(context, img_path, amount_key, position):
             image = self.use_image(img_path).resize((30,30))
@@ -521,7 +521,7 @@ class DrawHelper:
             else:  
                 population_value = 2   
             ind = spaces.index(population_value) +1
-            context.paste(image, (position[0]+1315 - ind*90,position[1]))
+            context.paste(image, (position[0]+1405 - ind*90,position[1]))
 
         for img_path, color_path, amount_key, position in resources:
             draw_resourceCube(context, color_path, amount_key)
@@ -530,7 +530,7 @@ class DrawHelper:
 
         pop_image = self.use_image(pop_path).resize((75,75))
         for count,num in enumerate(spaces):
-            x=  1220 - count*90
+            x=  1310 - count*90
             context.paste(pop_image, (x,25), mask=pop_image)
             mod = 0
             if num > 9:
@@ -542,7 +542,7 @@ class DrawHelper:
     def player_area(self, player):
         faction = self.get_short_faction_name(player["name"])
         filepath = "images/resources/components/factions/"+str(faction)+"_board.png"
-        context = Image.new("RGBA", (1350, 625), (0,0,0,255))
+        context = Image.new("RGBA", (1440, 625), (0,0,0,255))
         board_image = self.use_image(filepath)
         context.paste(board_image, (0,0))
         inf_path = "images/resources/components/all_boards/influence_disc_"+player["color"]+".png"
@@ -722,7 +722,7 @@ class DrawHelper:
             filepath = f"images/resources/components/basic_ships/{player['color']}-{ship}.png"
             ship_image = self.use_image(filepath)
             for shipCounter in range(player["ship_stock"][counter]):
-                context.paste(ship_image, (x+ultimateC*10+counter*50,y),ship_image)
+                context.paste(ship_image, (x+ultimateC*10+counter*70,y),ship_image)
                 ultimateC +=1
 
         discTile = Image.open(f"images/resources/components/discovery_tiles/discovery_2ptback.png").convert("RGBA").resize((40, 40))
@@ -812,7 +812,7 @@ class DrawHelper:
         def create_player_area():
             pCount = len(self.gamestate["players"])
             player_area_length = 1200 if pCount > 3 else 600
-            width = 4150 if (pCount != 2 and pCount != 4) else 2810
+            width = 4420 if (pCount != 2 and pCount != 4) else 2990
             context2 = Image.new("RGBA", (width, player_area_length), (255, 255, 255, 0))
             x, y, count = 100, 100, 0
             for player in self.gamestate["players"]:
@@ -826,7 +826,7 @@ class DrawHelper:
                     x = 100  # Reset x back to the starting position
                     y += 600
                 else:
-                    x += 1350
+                    x += 1440
             return context2
 
 
@@ -916,7 +916,7 @@ class DrawHelper:
         def create_player_area():
             pCount = len(self.gamestate["players"])
             player_area_length = 1500 if pCount > 3 else 750
-            width = 4150 if (pCount != 2 and pCount != 4) else 2800
+            width = 4420 if (pCount != 2 and pCount != 4) else 2980
             context2 = Image.new("RGBA", (width, player_area_length), (0, 0, 0, 255))
             x, y, count = 100, 50, 0
             for player in self.gamestate["players"]:
@@ -942,7 +942,7 @@ class DrawHelper:
                     x = 100 
                     y += 700
                 else:
-                    x += 1350
+                    x += 1440
             return context2
         context2 = create_player_area()
         context3 = self.display_techs()

@@ -19,6 +19,10 @@ class InfluenceButtons:
                     tile_orientation_index = (index + 6 + int(int(game.gamestate["board"][tile_a]["orientation"]) / 60)) % 6
                     if adjTile == tile_b and "wormholes" in game.gamestate["board"][tile_a] and tile_orientation_index in game.gamestate["board"][tile_a]["wormholes"]:
                         return True
+            if tile_a in game.gamestate["board"] and tile_b in game.gamestate["board"]:
+                if "warp" in game.gamestate["board"][tile_a] and game.gamestate["board"][tile_a]["warp"] == 1:
+                    if "warp" in game.gamestate["board"][tile_b] and game.gamestate["board"][tile_b]["warp"] == 1:
+                        return True
             return False
 
         if wormholeGen:
