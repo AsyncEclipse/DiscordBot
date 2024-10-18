@@ -1,3 +1,4 @@
+import math
 import discord
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
@@ -18,7 +19,7 @@ class DrawHelper:
         image_cache = ImageCacheHelper("images/resources")  # Get the singleton instance  
         image = image_cache.get_image(filename)  
         origFile = filename
-        fineToGetOrig = "back" in filename or "Alone" in filename or"masks" in filename or"basic_ships" in filename or "factions" in filename or "reference" in filename or "technology" in filename or "upgrades" in filename
+        fineToGetOrig =  "Alone" in filename or"masks" in filename or"basic_ships" in filename or "factions" in filename or "reference" in filename or "technology" in filename or "upgrades" in filename
         if image:  
             if fineToGetOrig:
                 return image
@@ -165,6 +166,25 @@ class DrawHelper:
         context.save(bytes_io, format="PNG")
         bytes_io.seek(0)
         return discord.File(bytes_io, filename="parts.png")
+    
+    def mergeLocationsFile(self,locations):
+        amount = len(locations)
+        sqrt_value = math.sqrt(amount)  
+        result = int(math.ceil(sqrt_value))
+        height = math.ceil(result * result / amount)
+        if amount == 2:
+            height = 1
+        context = Image.new("RGBA", (360*result, 315*height), (255, 255, 255, 0))
+        
+        for count,tile in enumerate(locations):
+            image = self.board_tile_image(tile)
+            x = count % result
+            y = int(count/result)
+            context.paste(image,(x*360, y*315))
+        bytes_io = BytesIO()
+        context.save(bytes_io, format="PNG")
+        bytes_io.seek(0)
+        return discord.File(bytes_io, filename="tiles.png")
 
     def board_tile_image(self, position):
         sector = self.gamestate["board"][position]["sector"]

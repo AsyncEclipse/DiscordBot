@@ -27,12 +27,15 @@ class MoveButtons:
         if "_" in buttonID:
             moveCount = buttonID.split("_")[1]
         view = View()
-        for tile in MoveButtons.getListOfUnpinnedShipTiles(game, player):
-            view.add_item(Button(label=tile.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_moveFrom_{tile}_{moveCount}"))
+        tiles = MoveButtons.getListOfUnpinnedShipTiles(game, player)
+        for tile in tiles:
+            view.add_item(Button(label=tile, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_moveFrom_{tile}_{moveCount}"))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
         if button:
             await interaction.message.delete()
         await interaction.channel.send( f"{interaction.user.mention} Select the tile you would like to move from", view=view)
+        drawing = DrawHelper(game.gamestate)
+        await interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True)
 
     @staticmethod
     async def moveFrom(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str):
@@ -92,13 +95,16 @@ class MoveButtons:
         moveCount = buttonID.split("_")[3]
         ship = PlayerShip(player, shipType)
         shipRange = ship.getRange()
-        for destination in MoveButtons.getTilesInRange(game, player, originT, shipRange, ship.getJumpDrive()):
-            if destination == originT:
-                continue
+        tiles = MoveButtons.getTilesInRange(game, player, originT, shipRange, ship.getJumpDrive())
+        if originT in tiles:
+            tiles.remove(originT)
+        for destination in tiles:
             view.add_item(Button(label=destination, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_moveTo_{originT}_{shipType}_{destination}_{moveCount}"))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
         await interaction.message.delete()
         await interaction.channel.send( f"{interaction.user.mention} Select the tile you would like to move a {shipType} from {originT} to", view=view)
+        drawing = DrawHelper(game.gamestate)
+        await interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True)
     @staticmethod
     async def moveTo(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str, player_helper:PlayerHelper, bot):
         originT = buttonID.split("_")[1]

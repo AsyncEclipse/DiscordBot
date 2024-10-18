@@ -3,6 +3,7 @@ from discord.ui import View
 from Buttons.Explore import ExploreButtons
 from Buttons.Population import PopulationButtons
 from Buttons.Turn import TurnButtons
+from helpers.DrawHelper import DrawHelper
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 from discord.ui import View, Button
@@ -78,9 +79,12 @@ class InfluenceButtons:
     @staticmethod
     async def addInfluenceStart(game: GamestateHelper, p1, interaction: discord.Interaction):
         view = View()
-        for tile in InfluenceButtons.getTilesToInfluence(game, p1):
+        tiles = InfluenceButtons.getTilesToInfluence(game, p1)
+        for tile in tiles:
             view.add_item(Button(label=tile, style=discord.ButtonStyle.blurple, custom_id=f"FCID{p1['color']}_addInfluenceFinish_"+tile))
         await interaction.channel.send( f"{interaction.user.mention} choose the tile you would like to influence", view=view)
+        drawing = DrawHelper(game.gamestate)
+        await interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True)
     @staticmethod
     async def addInfluenceFinish(game: GamestateHelper, p1, interaction: discord.Interaction, buttonID:str):
         tileLoc = buttonID.split("_")[1]
@@ -111,9 +115,13 @@ class InfluenceButtons:
     @staticmethod
     async def removeInfluenceStart(game: GamestateHelper, player, interaction: discord.Interaction):
         view = View()
-        for tile in game.get_owned_tiles(player):
+        tiles = game.get_owned_tiles(player)
+        for tile in tiles:
             view.add_item(Button(label=tile, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_removeInfluenceFinish_"+tile+"_normal"))
         await interaction.channel.send( f"{interaction.user.mention} choose the tile you would like to remove influence from", view=view)
+
+        drawing = DrawHelper(game.gamestate)
+        await interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True)
     @staticmethod
     async def removeInfluenceFinish(game: GamestateHelper, interaction: discord.Interaction, buttonID:str, delete:bool):
         tileLoc = buttonID.split("_")[1]
