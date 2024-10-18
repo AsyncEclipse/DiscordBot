@@ -177,7 +177,7 @@ class GamestateHelper:
         return system
 
     def tile_discard(self, sector):
-        firstNum = int(sector) % 100
+        firstNum = int(sector / 100)
         firstNum = min(3, firstNum)
         if "tile_discard_deck_"+str(firstNum)+"00" not in self.gamestate:
             self.gamestate["tile_discard_deck_"+str(firstNum)+"00"]=[]
