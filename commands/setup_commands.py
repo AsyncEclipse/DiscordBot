@@ -181,7 +181,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         await interaction.channel.send("Successfully Added Players")
 
     @app_commands.choices(ai_ship_type=ai_choices)
-    @app_commands.command(name="create_new_game", description="Finalize game setup. Set expansion rules at the end.")
+    @app_commands.command(name="create_new_game", description="Start the game setup. Also, choose which expansions to use.")
     async def create_new_game(self, interaction: discord.Interaction, game_name: str,
                             player1: discord.Member,
                             player_count:int,
@@ -196,8 +196,8 @@ class SetupCommands(commands.GroupCog, name="setup"):
                    ):
         """
         :param ai_ship_type: Choose which type of AI ships to use.
-        :param rift_cannon: Rift cannons are enabled by default
-        :param turn_order_variant: Pass turn order is enabled by default
+        :param rift_cannon: Rift cannons are enabled by default.
+        :param turn_order_variant: Pass turn order is enabled by default.
         :return:
         """
         temp_player_list = [player1, player2, player3, player4, player5, player6]
@@ -282,7 +282,6 @@ class SetupCommands(commands.GroupCog, name="setup"):
         await actions.send(role.mention+" Draft factions and turn position in the manner of your choice, then setup the game with /setup game. Enter the players in the order they should take turns in (i.e. enter first player first)")
         await actions.send("Initial tech draw is as follows",file=drawing.show_available_techs())
         await actions.send("A common way to draft factions is to generate a random pick order and then have the turn order be the reverse of that pick order. For your convenience, the following random pick order was generated, but you can ignore it: \n"+list)
-        await actions.send("By default, the game has been set to use the expansion turn order rules, where your turn order follows your passing order from the last round. You can go back to base game with /game set_turns_in_passing_order(False)")
         factionThread = await actions.create_thread(name="Faction Reference", auto_archive_duration=10080)
 
         message = "\n".join(["# Eridani Empire",
