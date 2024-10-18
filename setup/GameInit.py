@@ -10,7 +10,7 @@ class GameInit:
         self.player_list = player_list
         self.gamestate = []
         self.ai_ship_type = ai_ship_type
-        self.rift_cannon = rift_cannon,
+        self.rift_cannon = rift_cannon
         self.turn_order_variant = turn_order_variant
 
     def create_game(self):
@@ -40,15 +40,14 @@ class GameInit:
         self.gamestate["discTiles"] = listOfDisc
 
         #Loading of variants here
-
         if self.ai_ship_type=="adv":
             self.gamestate["advanced_ai"] = 1
         if self.ai_ship_type=="wa":
             self.gamestate["wa_ai"] = 1
         self.gamestate["turnsInPassingOrder"] = self.turn_order_variant
         if self.rift_cannon == False:
-            self.gamestate["tech_deck"] = self.gamestate["tech_deck"].remove("rican")
-            self.gamestate["discTiles"]= self.gamestate["discTiles"].remove("ricon")
+            self.gamestate["tech_deck"].remove("rican")
+            self.gamestate["discTiles"].remove("ricon")
 
 
         with open(f"{config.gamestate_path}/{self.gamestate['game_id']}.json", "w") as f:
