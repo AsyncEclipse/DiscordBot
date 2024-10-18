@@ -98,7 +98,7 @@ class UpgradeButtons:
                     player_helper.spend_influence_on_action("upgrade")
         else:
             newPart = player[f"old_{ship}_parts"][index]
-        if newPart in ["anm", "axc", "cod", "fls", "hyg", "ins", "iod", "iom", "iot", "jud", "mus", "ricon", "shh", "som", "socha", "mos"] and newPart in player_helper.stats["ancient_parts"]:
+        if newPart in ["anm", "axc", "cod", "fls", "hyg", "ins", "iod", "iom", "iot", "jud", "mus", "ricon", "shh", "som", "socha", "mos","plt"] and newPart in player_helper.stats["ancient_parts"]:
             player_helper.stats["ancient_parts"].remove(newPart)
         oldName = ""
         if newPart == "mus":
