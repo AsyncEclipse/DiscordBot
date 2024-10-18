@@ -206,8 +206,11 @@ class SetupCommands(commands.GroupCog, name="setup"):
         for i in temp_player_list:
             if i != None:
                 player_list.append([i.id, i.name])
-
-        new_game = GameInit(game_name, player_list, ai_ship_type.value, rift_cannon, turn_order_variant)
+        if not ai_ship_type:
+            ai_ships = "def"
+        else:
+            ai_ships = ai_ship_type.value
+        new_game = GameInit(game_name, player_list, ai_ships, rift_cannon, turn_order_variant)
         new_game.create_game()
         MAX_CHANNELS_PER_CATEGORY = 20  # Number of channels allowed in each category  
         async def get_or_create_category(guild:discord.Guild, category_name):  

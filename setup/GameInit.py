@@ -47,8 +47,8 @@ class GameInit:
             self.gamestate["wa_ai"] = 1
         self.gamestate["turnsInPassingOrder"] = self.turn_order_variant
         if self.rift_cannon == False:
-            self.gamestate["tech_deck"].remove("rican")
-            self.gamestate["discTiles"].remove("ricon")
+            self.gamestate["tech_deck"] = self.gamestate["tech_deck"].remove("rican")
+            self.gamestate["discTiles"]= self.gamestate["discTiles"].remove("ricon")
 
 
         with open(f"{config.gamestate_path}/{self.gamestate['game_id']}.json", "w") as f:
