@@ -476,6 +476,8 @@ class DrawHelper:
             adv = ""
             if self.gamestate["advanced_ai"]:
                 adv = "adv"
+            if self.gamestate["wa_ai"]:
+                adv = "wa"
             ship = "ai-"+ship_type+adv  
             filepathShip = f"images/resources/components/basic_ships/{ship}.png"
             ship_image = self.use_image(filepathShip)

@@ -140,7 +140,7 @@ class Combat:
                 continue
             if colorOrAI == owner:
                 if colorOrAI == "ai":
-                    ship = AI_Ship(unit, game.gamestate["advanced_ai"])
+                    ship = AI_Ship(unit, game.gamestate["advanced_ai"], game.gamestate["wa_ai"])
                     ships.append((ship.speed, unit))
                 else:
                     player = game.get_player_from_color(colorOrAI)
@@ -175,7 +175,7 @@ class Combat:
                 continue
             if defender == owner or attacker == owner:
                 if owner == "ai":
-                    ship = AI_Ship(unit, game.gamestate["advanced_ai"])
+                    ship = AI_Ship(unit, game.gamestate["advanced_ai"], game.gamestate["wa_ai"])
                     if (ship.speed,owner) not in ships:
                         ships.append((ship.speed, owner))
                 else:
@@ -207,7 +207,7 @@ class Combat:
         opponentShips = Combat.getCombatantShipsBySpeed(game, opponent, playerShipsList)
         for ship in opponentShips:
             if opponent == "ai":
-                shipModel = AI_Ship(ship[1], game.gamestate["advanced_ai"])
+                shipModel = AI_Ship(ship[1], game.gamestate["advanced_ai"], game.gamestate["wa_ai"])
             else:
                 player = game.get_player_from_color(opponent)
                 shipModel = PlayerShip(game.gamestate["players"][player], ship[1])
@@ -229,7 +229,7 @@ class Combat:
                 continue
             if colorOrAI == owner:
                 if colorOrAI == "ai":
-                    ship = AI_Ship(unit, game.gamestate["advanced_ai"])
+                    ship = AI_Ship(unit, game.gamestate["advanced_ai"], game.gamestate["wa_ai"])
                     if len(ship.missile) > 0:
                         return True
                 else:
@@ -368,7 +368,7 @@ class Combat:
             if ship[0] == speed or speed == 99 or speed == 1000:
                 name = interaction.user.mention
                 if colorOrAI == "ai":
-                    shipModel = AI_Ship(ship[1], game.gamestate["advanced_ai"])
+                    shipModel = AI_Ship(ship[1], game.gamestate["advanced_ai"], game.gamestate["wa_ai"])
                     name = "The AI"
                 else:
                     player = game.get_player_from_color(colorOrAI)
@@ -741,7 +741,7 @@ class Combat:
         shipType = ship.split("-")[1]
         shipOwner = ship.split("-")[0]
         if shipOwner == "ai":
-            shipModel = AI_Ship(shipType, game.gamestate["advanced_ai"])
+            shipModel = AI_Ship(shipType, game.gamestate["advanced_ai"], game.gamestate["wa_ai"])
             if "ai-" in ship and "adv" not in "ship" and game.gamestate["advanced_ai"]:
                 ship = ship +"adv"
         else:
