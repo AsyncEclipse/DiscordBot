@@ -115,10 +115,14 @@ class AI_Ship(Ship):
             AI_parts = json.load(f)
         if "ai-" not in ship_type:
             ship_type = "ai-"+ship_type
-        if advanced == True and "adv" not in ship_type:
-            ship_parts = AI_parts[ship_type + "adv"]
-        if wa == True and "wa" not in ship_type:
-            ship_parts = AI_parts[ship_type + "wa"]
+        if advanced == True:
+            if "adv" not in ship_type:
+                ship_type = ship_type + "adv"
+            ship_parts = AI_parts[ship_type]
+        if wa == True:
+            if "wa" not in ship_type:
+                ship_type = ship_type + "wa"
+            ship_parts = AI_parts[ship_type]
         else:
             ship_parts = AI_parts[ship_type]
         self.dice = ship_parts["dice"]
