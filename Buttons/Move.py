@@ -68,6 +68,8 @@ class MoveButtons:
         def recursive_search(pos, distance, visited, jumpDriveAvailable):
             if distance >  shipRange:
                 return
+            if pos not in tile_map:
+                return
             visited.add(pos)
             player_ships = tile_map[pos]["player_ships"][:]
             player_ships.append(f"{player['color']}-cruiser") #adding phantom ship so I can reuse a method
@@ -75,7 +77,7 @@ class MoveButtons:
                 return
 
             for adjTile in configs.get(pos)[0].split(","):
-                if InfluenceButtons.areTwoTilesAdjacent(game, pos, adjTile, configs, wormHoleGen):
+                if adjTile in tile_map and InfluenceButtons.areTwoTilesAdjacent(game, pos, adjTile, configs, wormHoleGen):
                     recursive_search(adjTile, distance + 1, visited, jumpDriveAvailable)
                 elif jumpDriveAvailable and adjTile in tile_map and "wormholes" in tile_map[adjTile]:
                     recursive_search(adjTile, distance + 1, visited, False)
@@ -104,7 +106,8 @@ class MoveButtons:
         await interaction.message.delete()
         await interaction.channel.send( f"{interaction.user.mention} Select the tile you would like to move a {shipType} from {originT} to", view=view)
         drawing = DrawHelper(game.gamestate)
-        await interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True)
+        if len(tiles) < 15:
+            await interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True)
     @staticmethod
     async def moveTo(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str, player_helper:PlayerHelper, bot):
         originT = buttonID.split("_")[1]
