@@ -251,10 +251,11 @@ class Combat:
     @staticmethod
     def getCombatButtons(game:GamestateHelper, pos:str):
         view = View()
-        players = Combat.findPlayersInTile(game, pos)
+        players = Combat.findPlayersInTile(game, pos)[-2:]  
+        game.setAttackerAndDefender(players[1], players[0],pos)
         if len(players) > 1:
-            defender = players[len(players)-2]
-            attacker = players[len(players)-1]
+            attacker = game.get_gamestate()["board"][pos]["attacker"]
+            defender = game.get_gamestate()["board"][pos]["defender"]
             tile_map = game.get_gamestate()["board"]
             player_ships = tile_map[pos]["player_ships"][:]
             defenderSpeeds = Combat.getCombatantSpeeds(game, defender, player_ships)
@@ -453,7 +454,7 @@ class Combat:
                                 update = True
                                 if len(hittableShips) > 1:
                                     if colorOrAI != "ai":
-                                        msg = interaction.user.mention + " choose what ship to hit with the die that rolled a "+str(dieNum)+". The bot has calculated that you can hit these ships"
+                                        msg = interaction.user.mention + " choose what ship to hit with the die that rolled a "+str(dieNum)+". You will deal "+str(dieDam)+" damage. The bot has calculated that you can hit these ships"
                                         view = View()
                                         for ship in hittableShips:
                                             shipType = ship.split("-")[1]
@@ -538,7 +539,7 @@ class Combat:
                     if shipModel.repair > 0 and "damage_tracker" in game.gamestate["board"][pos] and shipName in game.gamestate["board"][pos]["damage_tracker"]:
                         if game.gamestate["board"][pos]["damage_tracker"][shipName] > 0:
                             damage = game.repair_damage(shipName, pos)
-                            await channel.send(game.gamestate["players"][player]["player_name"] + "repaired 1 damage on their "+Combat.translateShipAbrToName(ship[1]) + " using a morph shield")
+                            await channel.send(game.gamestate["players"][player]["player_name"] + " repaired 1 damage on their "+Combat.translateShipAbrToName(ship[1]) + " using a morph shield")
                             break
 
     @staticmethod
