@@ -920,7 +920,7 @@ class DrawHelper:
         context = Image.new("RGBA", (4160, 5100), (0,0,0,255))
         min_x, min_y, max_x, max_y = paste_tiles(context, self.gamestate["board"])
         cropped_context = context.crop((min_x, min_y, max_x, max_y))
-        cropped_context=cropped_context.resize([int((max_x-min_x)/2),int((max_y-min_y)/2)])
+        #cropped_context=cropped_context.resize([int((max_x-min_x)/2),int((max_y-min_y)/2)])
         bytes_io = BytesIO()
         cropped_context.save(bytes_io, format="WEBP")
         bytes_io.seek(0)

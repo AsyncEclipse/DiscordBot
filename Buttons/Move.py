@@ -101,11 +101,20 @@ class MoveButtons:
         tiles = MoveButtons.getTilesInRange(game, player, originT, shipRange, ship.getJumpDrive())
         if originT in tiles:
             tiles.remove(originT)
+        view2 = View()
+        count = 0
         for destination in tiles:
-            view.add_item(Button(label=destination, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_moveTo_{originT}_{shipType}_{destination}_{moveCount}"))
+            if count < 24:
+                view.add_item(Button(label=destination, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_moveTo_{originT}_{shipType}_{destination}_{moveCount}"))
+            else:
+                view2.add_item(Button(label=destination, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_moveTo_{originT}_{shipType}_{destination}_{moveCount}"))
+            count += 1
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
+
         await interaction.message.delete()
         await interaction.channel.send( f"{interaction.user.mention} Select the tile you would like to move a {shipType} from {originT} to", view=view)
+        if count > 24:
+            await interaction.channel.send( f"Additional Options", view=view2)
         drawing = DrawHelper(game.gamestate)
         if len(tiles) < 15 and len(tiles) > 0:
             await interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True)
