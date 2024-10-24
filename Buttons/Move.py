@@ -35,7 +35,8 @@ class MoveButtons:
             await interaction.message.delete()
         await interaction.channel.send( f"{interaction.user.mention} Select the tile you would like to move from", view=view)
         drawing = DrawHelper(game.gamestate)
-        await interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True)
+        if len(tiles) > 0:
+            await interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True)
 
     @staticmethod
     async def moveFrom(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str):
@@ -106,7 +107,7 @@ class MoveButtons:
         await interaction.message.delete()
         await interaction.channel.send( f"{interaction.user.mention} Select the tile you would like to move a {shipType} from {originT} to", view=view)
         drawing = DrawHelper(game.gamestate)
-        if len(tiles) < 15:
+        if len(tiles) < 15 and len(tiles) > 0:
             await interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True)
     @staticmethod
     async def moveTo(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str, player_helper:PlayerHelper, bot):
@@ -118,6 +119,7 @@ class MoveButtons:
         shipName = f"{player_color}-{game.getShipShortName(shipType)}"
         game.remove_units([shipName],originT)
         game.add_units([shipName],destination)
+        game.fixshipsOrder(destination)
         drawing = DrawHelper(game.gamestate)
         await interaction.channel.send( f"{interaction.user.mention} Moved a {shipType} from {originT} to {destination}.", file=drawing.board_tile_image_file(destination))
         player_helper.specifyDetailsOfAction(f"Moved a {shipType} from {originT} to {destination}.")

@@ -25,7 +25,8 @@ class BuildButtons:
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
         await interaction.channel.send(f"{interaction.user.mention}, choose which tile you would like to build in.", view=view)
         drawing = DrawHelper(game.gamestate)
-        await interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True)
+        if len(tiles) > 0:
+            await interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True)
 
     @staticmethod  
     async def buildIn(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
@@ -189,6 +190,7 @@ class BuildButtons:
         science = int(buttonID.split("_")[4])
         money = int(buttonID.split("_")[5])
         game.add_units(build, loc)
+        game.fixshipsOrder(loc)
         summary = ""
         textSum = ""
         for ship in build:

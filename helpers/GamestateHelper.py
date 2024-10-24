@@ -349,11 +349,15 @@ class GamestateHelper:
                 key = "ships_destroyed_by_" + self.gamestate["players"][player]["color"]
                 if key in self.gamestate["board"][position]:
                     del self.gamestate["board"][position][key]
+                if "retreatPenalty"+[player]["color"] in self.gamestate["board"][position]:
+                    del self.gamestate["board"][position]["retreatPenalty"+[player]["color"]]
         self.update()
 
     def getReputationTilesToDraw(self, position, color):
         key = "ships_destroyed_by_" + color
         count = 1
+        if "retreatPenalty"+color in self.gamestate["board"][position]:
+            count = 0
         if "damage_tracker" in self.gamestate["board"][position]:
             del self.gamestate["board"][position]["damage_tracker"]
         if key not in self.gamestate["board"][position]:  
@@ -459,6 +463,11 @@ class GamestateHelper:
     def setCurrentSpeed(self, speed, pos):
         self.gamestate["board"][pos]["currentSpeed"] = speed
         self.update()
+    
+    def setRetreatingPenalty(self, color, pos):
+        self.gamestate["board"][pos]["retreatPenalty"+color] = True
+        self.update()
+        
     def setRetreatingUnits(self, unitsToRetreat, pos):
         if "unitsToRetreat" not in self.gamestate["board"][pos]:
             self.gamestate["board"][pos]["unitsToRetreat"] = []
@@ -475,6 +484,43 @@ class GamestateHelper:
             self.gamestate["board"][pos]["unitsToRetreat"] = []
             self.update()
         return self.gamestate["board"][pos]["unitsToRetreat"]
+    
+
+
+
+
+
+
+    def fixshipsOrder(self, pos):
+        from collections import OrderedDict  
+
+        arr = self.gamestate["board"][pos]["player_ships"]
+        if len(arr) < 2:
+            return
+        colors_seen = OrderedDict()  
+
+        excludedColors = []
+
+        for item in arr:  
+            color = item.split('-')[0]  
+            if color not in colors_seen:  
+                if "mon" in item or "orb" in item:
+                    if color not in excludedColors:
+                        excludedColors.append(color)
+                else:
+                    colors_seen[color] = len(colors_seen)  
+
+        for color in excludedColors:
+            if color not in colors_seen:
+                colors_seen[color] = len(colors_seen)
+
+        sorted = []  
+        for item in arr:  
+            sorted.append(item)  
+        sorted.sort(key=lambda x: colors_seen[x.split('-')[0]])  
+        self.gamestate["board"][pos]["player_ships"] = sorted
+        self.update()
+
 
     def setCurrentRoller(self, roller, pos):
         self.gamestate["board"][pos]["currentRoller"] = roller
@@ -525,7 +571,7 @@ class GamestateHelper:
                 length = len(self.gamestate["board"][position][i])
 
             if self.gamestate["board"][position][i][0] <= length:
-                if "neutral" not in i and "orbital" not in i:    
+                if "neutral" not in i and "orbital" not in i and self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] > 1:    
                     self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] = self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"]-1
                 else: 
                     neutralPop += 1
@@ -540,7 +586,7 @@ class GamestateHelper:
                         self.gamestate["board"][position][i][val] = num-1
                         break
             if not graveYard:
-                if "neutral" not in i and "orbital" not in i:
+                if "neutral" not in i and "orbital" not in i and self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] < 13:
                     self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] = self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"]+1
                 else:
                     neutralPop += 1
