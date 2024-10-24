@@ -121,9 +121,9 @@ class DrawHelper:
         bytes = BytesIO()
         if count < 5:
             context = context.crop((0,0,345*3*(count-1),300*3))
-        context.save(bytes, format="PNG")
+        context.save(bytes, format="WEBP")
         bytes.seek(0)
-        file = discord.File(bytes, filename="tile_image.png")
+        file = discord.File(bytes, filename="tile_image.webp")
         return view,file
 
 
@@ -146,34 +146,45 @@ class DrawHelper:
     def board_tile_image_file(self,position):
         final_context = self.board_tile_image(position)
         bytes_io = BytesIO()
-        final_context.save(bytes_io, format="PNG")
+        final_context.save(bytes_io, format="WEBP")
         bytes_io.seek(0)
-        return discord.File(bytes_io, filename="tile_image.png")
+        return discord.File(bytes_io, filename="tile_image.webp")
     
     def availablePartsFile(self,available_parts):
         available_parts.discard("empty")
-        context = Image.new("RGBA", (260*(len(available_parts)), 256), (255, 255, 255, 0))
+        amount = len(available_parts)
+        result = math.ceil(math.sqrt(amount))  
+        height = math.ceil(amount / result)
+        context = Image.new("RGBA", (262*result, 262*height), (255, 255, 255, 0))
+        
         with open("data/parts.json", "r") as f:
                 part_data = json.load(f)
-        for x,part in enumerate(available_parts):
+        for count,part in enumerate(available_parts):
             part_details = part_data.get(part)
             partName = part_details["name"].lower().replace(" ", "_") if part_details else part
             part_path = f"images/resources/components/upgrades/{partName}.png" 
             part_image = Image.open(part_path).resize((256,256))
-            context.paste(part_image,(x*259, 0))
+            x = count % result
+            y = int(count/result)
+            context.paste(part_image,(x*262, y*262))
+        # context = Image.new("RGBA", (260*(len(available_parts)), 256), (255, 255, 255, 0))
+        
+        # for x,part in enumerate(available_parts):
+        #     part_details = part_data.get(part)
+        #     partName = part_details["name"].lower().replace(" ", "_") if part_details else part
+        #     part_path = f"images/resources/components/upgrades/{partName}.png" 
+        #     part_image = Image.open(part_path).resize((256,256))
+        #     context.paste(part_image,(x*259, 0))
         
         bytes_io = BytesIO()
-        context.save(bytes_io, format="PNG")
+        context.save(bytes_io, format="WEBP")
         bytes_io.seek(0)
-        return discord.File(bytes_io, filename="parts.png")
+        return discord.File(bytes_io, filename="parts.webp")
     
     def mergeLocationsFile(self,locations):
         amount = len(locations)
-        sqrt_value = math.sqrt(amount)  
-        result = int(math.ceil(sqrt_value))
-        height = math.ceil(result * result / amount)
-        if amount == 2:
-            height = 1
+        result = math.ceil(math.sqrt(amount))  
+        height = math.ceil(amount / result)
         context = Image.new("RGBA", (360*result, 315*height), (255, 255, 255, 0))
         
         for count,tile in enumerate(locations):
@@ -182,9 +193,9 @@ class DrawHelper:
             y = int(count/result)
             context.paste(image,(x*360, y*315))
         bytes_io = BytesIO()
-        context.save(bytes_io, format="PNG")
+        context.save(bytes_io, format="WEBP")
         bytes_io.seek(0)
-        return discord.File(bytes_io, filename="tiles.png")
+        return discord.File(bytes_io, filename="tiles.webp")
 
     def board_tile_image(self, position):
         sector = self.gamestate["board"][position]["sector"]
@@ -476,7 +487,7 @@ class DrawHelper:
             adv = ""
             if self.gamestate["advanced_ai"]:
                 adv = "adv"
-            if self.gamestate["wa_ai"]:
+            if "wa_ai" in self.gamestate and self.gamestate["wa_ai"]:
                 adv = "wa"
             ship = "ai-"+ship_type+adv  
             filepathShip = f"images/resources/components/basic_ships/{ship}.png"
@@ -876,12 +887,12 @@ class DrawHelper:
         
         final_context = final_context.resize((int(final_context.width/1.5),int(final_context.height/1.5)))
         bytes_io = BytesIO()
-        final_context.save(bytes_io, format="PNG")
+        final_context.save(bytes_io, format="WEBP")
         bytes_io.seek(0)
         end_time = time.perf_counter()  
         elapsed_time = end_time - start_time  
         print(f"Total elapsed time for pasting all together: {elapsed_time:.2f} seconds")
-        return discord.File(bytes_io, filename="map_image.png")
+        return discord.File(bytes_io, filename="map_image.webp")
     
     async def show_map(self):
         def load_tile_coordinates():
@@ -911,16 +922,16 @@ class DrawHelper:
         cropped_context = context.crop((min_x, min_y, max_x, max_y))
         cropped_context=cropped_context.resize([int((max_x-min_x)/2),int((max_y-min_y)/2)])
         bytes_io = BytesIO()
-        cropped_context.save(bytes_io, format="PNG")
+        cropped_context.save(bytes_io, format="WEBP")
         bytes_io.seek(0)
-        return discord.File(bytes_io, filename="map_image.png")
+        return discord.File(bytes_io, filename="map_image.webp")
     
     def get_file(self, imageName:str):
         bytes_io = BytesIO()
         image = self.use_image(imageName)
-        image.save(bytes_io, format="PNG")
+        image.save(bytes_io, format="WEBP")
         bytes_io.seek(0)
-        return discord.File(bytes_io, filename="image.png")
+        return discord.File(bytes_io, filename="image.webp")
     
     def append_images(self, images):
 
@@ -929,9 +940,9 @@ class DrawHelper:
         for x,image in enumerate(images):
             context.paste(image, (x*(image1.size[0]+10),0),mask=image)
         bytes_io = BytesIO()
-        context.save(bytes_io, format="PNG")
+        context.save(bytes_io, format="WEBP")
         bytes_io.seek(0)
-        return discord.File(bytes_io, filename="image.png")
+        return discord.File(bytes_io, filename="image.webp")
 
 
     async def show_stats(self):
@@ -980,25 +991,25 @@ class DrawHelper:
         final_context.paste(context4, (context3.size[0]+150, context2.size[1]))
         
         bytes_io = BytesIO()
-        final_context.save(bytes_io, format="PNG")
+        final_context.save(bytes_io, format="WEBP")
         bytes_io.seek(0)
-        return discord.File(bytes_io, filename="stats_image.png")
+        return discord.File(bytes_io, filename="stats_image.webp")
 
     def show_available_techs(self):
         context = self.display_techs()
         bytes_io = BytesIO()
-        context.save(bytes_io, format="PNG")
+        context.save(bytes_io, format="WEBP")
         bytes_io.seek(0)
 
-        return discord.File(bytes_io, filename="techs_image.png")
+        return discord.File(bytes_io, filename="techs_image.webp")
 
     def show_single_tile(self, tile_image):
         context = Image.new("RGBA", (345, 299), (255, 255, 255, 0))
         context.paste(tile_image, (0,0), mask=tile_image)
         bytes = BytesIO()
-        context.save(bytes, format="PNG")
+        context.save(bytes, format="WEBP")
         bytes.seek(0)
-        file = discord.File(bytes, filename="tile_image.png")
+        file = discord.File(bytes, filename="tile_image.webp")
         return file
 
     def show_disc_tile(self, disc_tile_name:str):
@@ -1006,24 +1017,24 @@ class DrawHelper:
         tile_image = Image.open(f"images/resources/components/discovery_tiles/discovery_{disc_tile_name.replace(' ','_').lower()}.png").convert("RGBA").resize((260, 260))
         context.paste(tile_image, (0,0), mask=tile_image)
         bytes = BytesIO()
-        context.save(bytes, format="PNG")
+        context.save(bytes, format="WEBP")
         bytes.seek(0)
-        file = discord.File(bytes, filename="disc_tile_image.png")
+        file = discord.File(bytes, filename="disc_tile_image.webp")
         return file
 
     def show_player_area(self, player_area):
         bytes = BytesIO()
-        player_area.save(bytes, format="PNG")
+        player_area.save(bytes, format="WEBP")
         bytes.seek(0)
-        file = discord.File(bytes, filename="player_area.png")
+        file = discord.File(bytes, filename="player_area.webp")
         return file
 
     def show_player_ship_area(self, player_area):
         player_area = player_area.crop((0,0,895, 196))
         bytes = BytesIO()
-        player_area.save(bytes, format="PNG")
+        player_area.save(bytes, format="WEBP")
         bytes.seek(0)
-        file = discord.File(bytes, filename="player_area.png")
+        file = discord.File(bytes, filename="player_area.webp")
         return file
 
     def show_player_ship(self, player_area, ship):
@@ -1037,17 +1048,17 @@ class DrawHelper:
         if "starbase" in ship:
             player_area = player_area.crop((696,0,875, 160))
         bytes = BytesIO()
-        player_area.save(bytes, format="PNG")
+        player_area.save(bytes, format="WEBP")
         bytes.seek(0)
-        file = discord.File(bytes, filename="player_area.png")
+        file = discord.File(bytes, filename="player_area.webp")
         return file
     
     def show_AI_stats(self):
         ai_ships = self.display_remaining_tiles().crop((50,350,500, 500))
         bytes = BytesIO()
-        ai_ships.save(bytes, format="PNG")
+        ai_ships.save(bytes, format="WEBP")
         bytes.seek(0)
-        file = discord.File(bytes, filename="ai_ships.png")
+        file = discord.File(bytes, filename="ai_ships.webp")
         return file
 
     @staticmethod
@@ -1057,9 +1068,9 @@ class DrawHelper:
         context = Image.new("RGBA", (1600, 2919), (255, 255, 255, 0))
         context.paste(ref_image, (0,0), mask=ref_image)
         bytes = BytesIO()
-        context.save(bytes, format="PNG")
+        context.save(bytes, format="WEBP")
         bytes.seek(0)
-        file = discord.File(bytes, filename="reference_image.png")
+        file = discord.File(bytes, filename="reference_image.webp")
         return file
 
     @staticmethod
@@ -1073,9 +1084,9 @@ class DrawHelper:
         tech_image = Image.open(filepath)
         context.paste(tech_image, (0, 0), mask=tech_image)
         bytes_io = BytesIO()
-        context.save(bytes_io, format="PNG")
+        context.save(bytes_io, format="WEBP")
         bytes_io.seek(0)
-        return discord.File(bytes_io, filename="tech_image.png")
+        return discord.File(bytes_io, filename="tech_image.webp")
 
     @staticmethod
     def show_part_ref_image(part_name):
@@ -1085,6 +1096,6 @@ class DrawHelper:
         part_image = Image.open(filepath)
         context.paste(part_image, (0, 0), mask=part_image)
         bytes_io = BytesIO()
-        context.save(bytes_io, format="PNG")
+        context.save(bytes_io, format="WEBP")
         bytes_io.seek(0)
-        return discord.File(bytes_io, filename="part_image.png")
+        return discord.File(bytes_io, filename="part_image.webp")

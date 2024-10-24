@@ -84,7 +84,8 @@ class InfluenceButtons:
             view.add_item(Button(label=tile, style=discord.ButtonStyle.blurple, custom_id=f"FCID{p1['color']}_addInfluenceFinish_"+tile))
         await interaction.channel.send( f"{interaction.user.mention} choose the tile you would like to influence", view=view)
         drawing = DrawHelper(game.gamestate)
-        await interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True)
+        if len(tiles) > 0:
+            await interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True)
     @staticmethod
     async def addInfluenceFinish(game: GamestateHelper, p1, interaction: discord.Interaction, buttonID:str):
         tileLoc = buttonID.split("_")[1]
@@ -121,7 +122,8 @@ class InfluenceButtons:
         await interaction.channel.send( f"{interaction.user.mention} choose the tile you would like to remove influence from", view=view)
 
         drawing = DrawHelper(game.gamestate)
-        await interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True)
+        if len(tiles) > 0:
+            await interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True)
     @staticmethod
     async def removeInfluenceFinish(game: GamestateHelper, interaction: discord.Interaction, buttonID:str, delete:bool):
         tileLoc = buttonID.split("_")[1]
@@ -149,6 +151,10 @@ class InfluenceButtons:
     @staticmethod
     async def addCubeToTrack(game: GamestateHelper, p1, interaction: discord.Interaction, buttonID:str):
         pop = buttonID.split("_")[1]
+        cubes = p1[pop+"_pop_cubes"]
+        if cubes > 12:
+            await interaction.channel.send("The "+pop + " track is full. Cannot add more cubes to this track")
+            return
         game.remove_pop([pop+"_pop"],"dummy",game.get_player_from_color(p1["color"]), False)
         await interaction.channel.send( f"{p1['player_name']} Added 1 "+pop.replace('adv','')+" population back to its track")
         await interaction.message.delete()

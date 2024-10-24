@@ -126,7 +126,7 @@ class TileCommands(commands.GroupCog, name="tile"):
             game.add_units(added_units, tile_position)  
         if removed_units:  
             game.remove_units(removed_units, tile_position)  
-        
+        game.fixshipsOrder(tile_position)
         if influence != None:
             if influence:
                 if game.gamestate["board"][tile_position]["owner"] != 0:
@@ -201,7 +201,7 @@ class TileCommands(commands.GroupCog, name="tile"):
                     view=View()
                     planetTypes = ["money","science","material"]
                     for planetT in planetTypes:
-                        if playerObj[planetT+"_pop_cubes"] < 12:
+                        if playerObj[planetT+"_pop_cubes"] < 13:
                             view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player_color}_addCubeToTrack_"+planetT))
                     await interaction.channel.send( f"A cube with no set track was removed, please tell the bot what track you want it to go on", view=view)
 
