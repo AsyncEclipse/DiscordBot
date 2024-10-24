@@ -346,11 +346,12 @@ class GamestateHelper:
                 del self.gamestate["board"][position]["damage_tracker"]
             
             for player in self.gamestate["players"]:
-                key = "ships_destroyed_by_" + self.gamestate["players"][player]["color"]
+                color = self.gamestate["players"][player]["color"]
+                key = "ships_destroyed_by_" + color
                 if key in self.gamestate["board"][position]:
                     del self.gamestate["board"][position][key]
-                if "retreatPenalty"+[player]["color"] in self.gamestate["board"][position]:
-                    del self.gamestate["board"][position]["retreatPenalty"+[player]["color"]]
+                if "retreatPenalty"+color in self.gamestate["board"][position]:
+                    del self.gamestate["board"][position]["retreatPenalty"+color]
         self.update()
 
     def getReputationTilesToDraw(self, position, color):
