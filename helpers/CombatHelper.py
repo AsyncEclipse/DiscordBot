@@ -70,6 +70,16 @@ class Combat:
         return sorted_tiles
     
     @staticmethod
+    def findUnownedTilesToTakeOver(game:GamestateHelper):
+        tile_map = game.get_gamestate()["board"]
+        tiles = []
+        for tile in tile_map:
+            if len(Combat.findPlayersInTile(game,tile)) == 1 and tile_map[tile]["owner"] == 0 and Combat.findPlayersInTile(game,tile)[0] != "ai":
+                tiles.append((int(tile_map[tile]["sector"]),tile))
+        sorted_tiles = sorted(tiles, key=lambda x: x[0], reverse=True)  
+        return sorted_tiles
+    
+    @staticmethod
     async def startCombat(game:GamestateHelper, channel, pos):
         drawing = DrawHelper(game.gamestate)
         players = Combat.findPlayersInTile(game, pos)[-2:]  
@@ -130,6 +140,21 @@ class Combat:
                 view = View()
                 view.add_item(Button(label="Roll to Destroy Population", style=discord.ButtonStyle.green, custom_id=f"FCID{winner}_rollDice_{pos}_{winner}_1000"))
                 await thread2.send(player["player_name"]+" you can roll to attempt to kill enemy population",view=view)
+        for tile3 in Combat.findUnownedTilesToTakeOver(game):
+            message_to_send = "An influence disc may be placed in system "+str(tile3[0])+", position "+tile3[1]  
+            message = await channel.send(message_to_send) 
+            threadName = game.get_gamestate()["game_id"]+"-Round "+str(game.get_gamestate()["roundNum"])+", Tile "+tile3[1]+", Influence"
+            thread3 = await message.create_thread(name=threadName)
+            playerColor = Combat.findPlayersInTile(game, tile3[1])[0]
+            winner = playerColor
+            pos = tile3[1]
+            player = game.getPlayerObjectFromColor(playerColor)
+            view2 = View()
+            view2.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple, custom_id=f"FCID{winner}_addInfluenceFinish_"+pos))
+            asyncio.create_task(thread3.send(player["player_name"]+" you can place your influence on the tile after destroying the enemy population",view=view2))
+            view3 = View()
+            view3.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
+            asyncio.create_task(thread3.send(player["player_name"]+" if you have enough colony ships, you can use this to drop population after taking control of the sector",view=view3))
         asyncio.create_task(channel.send("Please resolve the combats in the order they appeared"))
     @staticmethod
     def getCombatantShipsBySpeed(game:GamestateHelper, colorOrAI:str, playerShipsList):

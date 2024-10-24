@@ -834,16 +834,51 @@ class GamestateHelper:
     def formRelationsBetween(self, player1, player2):
         pID = self.get_player_from_color(player1['color'])
         pID2 = self.get_player_from_color(player2['color'])
+        found = False
         for x,tile in enumerate(player1["reputation_track"]):
             if isinstance(tile, str) and (tile == "amb" or tile == "mixed"):
                 self.gamestate["players"][pID]["reputation_track"][x]=tile+"-"+self.get_short_faction_name(player2["name"])+"-"+player2["color"]
+                found = True
                 break
+        if not found:
+            lowest = 10
+            loc = 0
+            for x,tile in enumerate(player1["reputation_track"]):
+                if isinstance(tile, int) and tile < lowest:
+                    loc = x
+                    lowest = tile
+            self.gamestate["players"][pID]["reputation_track"][loc] = "mixed-"+self.get_short_faction_name(player2["name"])+"-"+player2["color"]
+            self.gamestate["reputation_tiles"].append(lowest)
+            
+        found = False
         for x,tile in enumerate(player2["reputation_track"]):
             if isinstance(tile, str) and (tile == "amb" or tile == "mixed"):
                 self.gamestate["players"][pID2]["reputation_track"][x]=tile+"-"+self.get_short_faction_name(player1["name"])+"-"+player1["color"]
+                found = True
                 break
+        if not found:
+            lowest = 10
+            loc = 0
+            for x,tile in enumerate(player2["reputation_track"]):
+                if isinstance(tile, int) and tile < lowest:
+                    loc = x
+                    lowest = tile
+            self.gamestate["players"][pID2]["reputation_track"][loc] = "mixed-"+self.get_short_faction_name(player1["name"])+"-"+player1["color"]
+            self.gamestate["reputation_tiles"].append(lowest)
 
         self.update()
+
+    def returnReputation(self, val:int, player):
+        loc = 0
+        pID = self.get_player_from_color(player["color"])
+        for x,tile in enumerate(player["reputation_track"]):
+            if isinstance(tile, int) and tile == val:
+                loc = x
+                lowest = tile
+                self.gamestate["players"][pID]["reputation_track"][loc] = "mixed"
+                self.gamestate["reputation_tiles"].append(lowest)
+                self.update()
+                return
     def breakRelationsBetween(self, player1, player2):
         pID = self.get_player_from_color(player1['color'])
         pID2 = self.get_player_from_color(player2['color'])

@@ -58,7 +58,7 @@ class TurnButtons:
             view = View()
             role = discord.utils.get(interaction.guild.roles, name=game.game_id)  
             msg = role.mention+" All players have passed, you can use this button to start the next round"
-            if len(Combat.findTilesInConflict(game)) > 0:
+            if len(Combat.findTilesInConflict(game))+ len(Combat.findUnownedTilesToTakeOver(game)) + len(Combat.findTilesInContention(game)) > 0:
                 await Combat.startCombatThreads(game, interaction)
                 msg = msg +  " after all battles are resolved"
             view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"startPopDrop"))
@@ -107,7 +107,7 @@ class TurnButtons:
             view = View()
             role = discord.utils.get(interaction.guild.roles, name=game.game_id)  
             msg = role.mention+" All players have passed, you can use this button to start the next round"
-            if len(Combat.findTilesInConflict(game)) > 0:
+            if len(Combat.findTilesInConflict(game)) + len(Combat.findUnownedTilesToTakeOver(game))+ len(Combat.findTilesInContention(game))> 0:
                 await Combat.startCombatThreads(game, interaction)
                 msg = msg +  " after all battles are resolved"
             view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"startPopDrop"))

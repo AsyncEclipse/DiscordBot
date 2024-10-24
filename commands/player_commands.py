@@ -256,6 +256,13 @@ class PlayerCommands(commands.GroupCog, name="player"):
         await ReputationButtons.resolveGainingReputation(game, num_options,interaction, player_helper)
         await interaction.channel.send(interaction.user.name + " drew "+ str(num_options)+ " reputation tiles")
 
+    @app_commands.command(name="return_reputation")
+    async def return_reputation(self, interaction: discord.Interaction, rep_value:int):
+        game = GamestateHelper(interaction.channel)
+        player = game.get_player(interaction.user.id)  
+        game.returnReputation(rep_value, player)
+        await interaction.response.send_message(interaction.user.name + " returned a reputation tile with value "+str(rep_value), ephemeral=True)
+
     @app_commands.command(name="show_player_ships")
     async def show_player_ships(self, interaction: discord.Interaction, player: Optional[discord.Member]=None):
         if player == None:
