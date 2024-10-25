@@ -4,7 +4,7 @@
     "speed": 2,
     "computer": 1,
     "hull": 1},
-  "ai-ancawa":{
+  "ai-ancwa":{
     "dice": ["yellow"],
     "missile": [],
     "speed": 3,
