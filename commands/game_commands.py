@@ -93,4 +93,48 @@ class GameCommands(commands.GroupCog, name="game"):
             game.saveLastButtonPressed("restart")
         else:
             await interaction.response.send_message("Ran out of save files, could not back up")
-    
+
+    @app_commands.command(name="eliminate_player")
+    async def eliminate_player(self, interaction: discord.Interaction, player: discord.Member):
+        game = GamestateHelper(interaction.channel)
+        try:
+            player_color = game.gamestate["players"][str(player.id)]["color"]
+            player_name = game.gamestate["players"][str(player.id)]["player_name"]
+        except KeyError:
+            await interaction.response.send_message("That player is not in this game.")
+            return
+        for tile in game.gamestate["board"]:
+            if "back" in game.gamestate["board"][tile]["sector"]:
+                continue
+            if game.gamestate["board"][tile]["owner"] == player_color:
+                game.gamestate["board"][tile]["owner"] = 0
+                if len(game.gamestate["board"][tile]["money_pop"]) > 0:
+                    game.gamestate["board"][tile]["money_pop"][0] = 0
+                if len(game.gamestate["board"][tile]["science_pop"]) > 0:
+                    game.gamestate["board"][tile]["science_pop"][0] = 0
+                if len(game.gamestate["board"][tile]["material_pop"]) > 0:
+                    game.gamestate["board"][tile]["material_pop"][0] = 0
+                if len(game.gamestate["board"][tile]["neutral_pop"]) > 0:
+                    game.gamestate["board"][tile]["neutral_pop"][0] = 0
+                if len(game.gamestate["board"][tile]["moneyadv_pop"]) > 0:
+                    game.gamestate["board"][tile]["moneyadv_pop"][0] = 0
+                if len(game.gamestate["board"][tile]["scienceadv_pop"]) > 0:
+                    game.gamestate["board"][tile]["scienceadv_pop"][0] = 0
+                if len(game.gamestate["board"][tile]["materialadv_pop"]) > 0:
+                    game.gamestate["board"][tile]["materialadv_pop"][0] = 0
+                if len(game.gamestate["board"][tile]["neutraladv_pop"]) > 0:
+                    game.gamestate["board"][tile]["neutraladv_pop"][0] = 0
+                game.gamestate["board"][tile]["player_ships"] = [e for e in game.gamestate["board"][tile]["player_ships"] if player_color not in e]
+        try:
+            if player_name in game.gamestate["pass_order"]:
+                game.gamestate["pass_order"].remove(player_name)
+        except KeyError:
+            pass
+        try:
+            if player_name in game.gamestate["turn_order"]:
+                game.gamestate["turn_order"].remove(player_name)
+        except KeyError:
+            pass
+        del game.gamestate["players"][str(player.id)]
+        await interaction.response.send_message(f"{player_name} has been removed from the game.")
+        game.update()
