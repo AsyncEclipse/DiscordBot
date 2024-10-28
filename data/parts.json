@@ -91,7 +91,7 @@
   },
   "elc": {
     "name": "Electron Computer",
-    "description": "Basic ship part available to all species. Positron Computers add +1 to all non-Direct Hit (1-5) dice values rolled by this ship during the Combat Phase. Each Electron Computer requires 0 Energy.",
+    "description": "Basic ship part available to all species. Electron Computers add +1 to all non-Direct Hit (2-5) dice values rolled by this ship during the Combat Phase. Each Electron Computer requires 0 Energy.",
     "range": 0,
     "speed": 0,
     "nrg_use": 0,
@@ -107,7 +107,7 @@
   },
   "poc": {
     "name": "Positron Computer",
-    "description": "Requires Positron Computer Technology.  Positron Computers add +2 to all non-Direct Hit (1-5) dice values rolled by this ship during the Combat Phase. Each Positron Computer requires 1 Energy.",
+    "description": "Requires Positron Computer Technology.  Positron Computers add +2 to all non-Direct Hit (2-5) dice values rolled by this ship during the Combat Phase. Each Positron Computer requires 1 Energy.",
     "range": 0,
     "speed": 0,
     "nrg_use": 1,
@@ -123,7 +123,7 @@
   },
   "glc": {
     "name": "Gluon Computer",
-    "description": "Requires Gluon Computer Technology. Gluon Computers add +3 to all non-Direct Hit (1-5) dice values rolled by this ship during the Combat Phase. Each Gluon Computer requires 2 Energy.",
+    "description": "Requires Gluon Computer Technology. Gluon Computers add +3 to all non-Direct Hit (2-5) dice values rolled by this ship during the Combat Phase. Each Gluon Computer requires 2 Energy.",
     "range": 0,
     "speed": 0,
     "nrg_use": 2,
@@ -139,7 +139,7 @@
   },
   "axc": {
     "name": "Axion Computer",
-    "description": "This is an Ancient Tech; it can only be added to a single Ship Blueprint slot, and then it is exhausted. The Axion Computer increases Initiative (Combat Speed) by 1, and adds +2 to all non-Direct Hit (1-5) dice values rolled by this ship during the Combat Phase. The Axion Computer requires 0 Energy.",
+    "description": "This is an Ancient Tech; it can only be added to a single Ship Blueprint slot, and then it is exhausted. The Axion Computer increases Initiative (Combat Speed) by 1, and adds +2 to all non-Direct Hit (2-5) dice values rolled by this ship during the Combat Phase. The Axion Computer requires 0 Energy.",
     "range": 0,
     "speed": 1,
     "nrg_use": 0,
