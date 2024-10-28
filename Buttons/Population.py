@@ -114,7 +114,7 @@ class PopulationButtons:
         if len(PopulationButtons.findEmptyPopulation(game, player)) < 1:
             await interaction.message.delete()
         else:
-            await interaction.message.edit(view=PopulationButtons.findEmptyPopulation())
+            await interaction.message.edit(view=PopulationButtons.getPopButtons(game, player))
         drawing = DrawHelper(game.gamestate)
         resourceType = typeOfPop.replace('adv','')
         income = player["population_track"][player[resourceType+"_pop_cubes"]-1]
