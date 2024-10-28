@@ -68,7 +68,7 @@ class PopulationButtons:
 
     @staticmethod
     async def startPopDrop(game: GamestateHelper, player, interaction: discord.Interaction):
-        view = PopulationButtons.findEmptyPopulation(game, player)
+        view = PopulationButtons.getPopButtons(game, player)
         if len(PopulationButtons.findEmptyPopulation(game, player)) > 0:
             await interaction.channel.send( f"{interaction.user.mention}, choose which planet you would like to put a population cube on.", view=view)
         else:
