@@ -187,15 +187,20 @@ class TileCommands(commands.GroupCog, name="tile"):
         process_pop("orbital", orbital)  
 
         if added_pop:  
-            neutralPop = game.add_pop(added_pop, tile_position,playerID)  
+            neutralPop, orbitalPop = game.add_pop(added_pop, tile_position,playerID)  
             for x in range(neutralPop):
                 view = View()
                 view.add_item(Button(label="Material", style=discord.ButtonStyle.gray, custom_id=f"FCID{player_color}_reducePopFor_material"))
                 view.add_item(Button(label="Science", style=discord.ButtonStyle.gray, custom_id=f"FCID{player_color}_reducePopFor_science"))
                 view.add_item(Button(label="Money", style=discord.ButtonStyle.gray, custom_id=f"FCID{player_color}_reducePopFor_money"))
-                await interaction.channel.send( f"{playerObj['player_name']} Choose what type of cube to put on the neutral/orbital planet", view=view)
+                await interaction.channel.send( f"{playerObj['player_name']} Choose what type of cube to put on the neutral planet", view=view)
+            for x in range(orbitalPop):
+                view = View()
+                view.add_item(Button(label="Science", style=discord.ButtonStyle.gray, custom_id=f"FCID{player_color}_reducePopFor_science"))
+                view.add_item(Button(label="Money", style=discord.ButtonStyle.gray, custom_id=f"FCID{player_color}_reducePopFor_money"))
+                await interaction.channel.send( f"{playerObj['player_name']} Choose what type of cube to put on the orbital", view=view)
         if removed_pop:  
-            neutralPop = game.remove_pop(removed_pop, tile_position,playerID, False)  
+            neutralPop, orbitalPop = game.remove_pop(removed_pop, tile_position,playerID, False)  
             if neutralPop > 0:
                 for x in range(neutralPop):
                     view=View()
@@ -204,7 +209,14 @@ class TileCommands(commands.GroupCog, name="tile"):
                         if playerObj[planetT+"_pop_cubes"] < 13:
                             view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player_color}_addCubeToTrack_"+planetT))
                     await interaction.channel.send( f"A cube with no set track was removed, please tell the bot what track you want it to go on", view=view)
-
+            if orbitalPop > 0:
+                for x in range(orbitalPop):
+                    view=View()
+                    planetTypes = ["money","science"]
+                    for planetT in planetTypes:
+                        if playerObj[planetT+"_pop_cubes"] < 13:
+                            view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player_color}_addCubeToTrack_"+planetT))
+                    await interaction.channel.send( f"An orbital cube was removed, please tell the bot what track you want it to go on", view=view)
         if influence != None:
             if influence:
                 if game.gamestate["board"][tile_position]["owner"] != 0:

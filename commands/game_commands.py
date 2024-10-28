@@ -72,15 +72,14 @@ class GameCommands(commands.GroupCog, name="game"):
         await interaction.response.defer(thinking=True)
         start_time = time.perf_counter()
         drawing = DrawHelper(game.gamestate)
-        map = await drawing.show_map()
-        stats = await drawing.show_stats()
-        await interaction.followup.send(file=map)
-        await interaction.followup.send(file=stats)
+        map = await drawing.show_game()
         view = View()
         button = Button(label="Show Game",style=discord.ButtonStyle.blurple, custom_id="showGame")
         view.add_item(button)
         view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
-        await interaction.channel.send(view=view)
+        
+        await interaction.followup.send(file=map, view=view)
+        
         end_time = time.perf_counter()  
         elapsed_time = end_time - start_time  
         print(f"Total elapsed time for show game command: {elapsed_time:.2f} seconds")  

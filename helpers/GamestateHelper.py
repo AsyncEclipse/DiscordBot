@@ -30,6 +30,20 @@ class GamestateHelper:
          self.update()
 
 
+    def initilizeKey(self, key):
+        self.gamestate[key] = []
+        self.update()
+
+    def removeFromKey(self, key, deletion):
+        if key in self.gamestate and deletion in self.gamestate[key]:
+            self.gamestate[key].remove(deletion)
+            self.update()
+
+    def addToKey(self, key, addition):
+        if key in self.gamestate and addition not in self.gamestate[key]:
+            self.gamestate[key].append(addition)
+            self.update()
+
     def saveLastButtonPressed(self, buttonID:str):
         self.gamestate["lastButton"] = buttonID
         self.update()
@@ -344,7 +358,8 @@ class GamestateHelper:
         for position in self.gamestate["board"]:
             if "damage_tracker" in self.gamestate["board"][position]:
                 del self.gamestate["board"][position]["damage_tracker"]
-            
+            if "unitsToRetreat"  in self.gamestate["board"][position]:
+                del self.gamestate["board"][position]["unitsToRetreat"]
             for player in self.gamestate["players"]:
                 color = self.gamestate["players"][player]["color"]
                 key = "ships_destroyed_by_" + color
@@ -560,6 +575,7 @@ class GamestateHelper:
 
     def add_pop(self, pop_list, position, playerID):
         neutralPop = 0
+        orbitalPop = 0
         for i in pop_list:
             length = 0
             if i in self.gamestate["board"][position]:
@@ -575,11 +591,15 @@ class GamestateHelper:
                 if "neutral" not in i and "orbital" not in i and self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] > 1:    
                     self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] = self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"]-1
                 else: 
-                    neutralPop += 1
+                    if "neutral" not in i:
+                        orbitalPop +=1
+                    else:
+                        neutralPop += 1
         self.update()
-        return neutralPop
+        return neutralPop, orbitalPop
     def remove_pop(self, pop_list, position, playerID, graveYard:bool):
         neutralPop = 0
+        orbitalPop = 0
         for i in pop_list:
             if position != "dummy":
                 for val,num in enumerate(self.gamestate["board"][position][i]):
@@ -590,13 +610,16 @@ class GamestateHelper:
                 if "neutral" not in i and "orbital" not in i and self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] < 13:
                     self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] = self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"]+1
                 else:
-                    neutralPop += 1
+                    if "neutral" not in i:
+                        orbitalPop +=1
+                    else:
+                        neutralPop += 1
             else:
                 if "graveYard" not in self.gamestate["players"][playerID]:
                     self.gamestate["players"][playerID]["graveYard"] = []
                 self.gamestate["players"][playerID]["graveYard"].append(i.replace("adv",""))   
         self.update()
-        return neutralPop
+        return neutralPop, orbitalPop
 
     def remove_units(self, unit_list, position):
         color = unit_list[0].split("-")[0]
@@ -652,6 +675,9 @@ class GamestateHelper:
             self.gamestate["roundNum"] += 1
         else:
             self.gamestate["roundNum"] = 2
+        self.initilizeKey("tilesToResolve")
+        self.initilizeKey("queuedQuestions")
+        self.initilizeKey("queuedDraws")
         self.cleanAllTheTiles()
         self.update()
 
@@ -957,12 +983,11 @@ class GamestateHelper:
             #         future = executor.submit(asyncio.run_coroutine_threadsafe, self.send_files(interaction, [map,stats], thread, message, view),bot.loop)
  
             drawing = DrawHelper(self.gamestate)  
-            map_result = await drawing.show_map()  
-            stats_result = await drawing.show_stats()  
+            map_result = await drawing.show_game()   
             view = View()  
             view.add_item(Button(label="Show Game", style=discord.ButtonStyle.blurple, custom_id="showGame"))  
             view.add_item(Button(label="Show Reputation", style=discord.ButtonStyle.gray, custom_id="showReputation"))  
-            await self.send_files(interaction, [map_result, stats_result], thread, message, view) 
+            await self.send_files(interaction, [map_result], thread, message, view) 
     def getPlayerFromHSLocation(self, location):
         tileID = self.get_gamestate()["board"][location]["sector"]
         return next((player for player in self.get_gamestate()["players"] if str(self.get_gamestate()["players"][player]["home_planet"]) == tileID), None)

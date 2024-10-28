@@ -388,13 +388,9 @@ class SetupCommands(commands.GroupCog, name="setup"):
         await factionThread.send(message, file=drawing.get_file("images/resources/components/factions/terran_conglomerate_board.png"))
 
         await factionThread.send(role.mention + " pinging you here, which contains all the faction sheets")
+        await interaction.followup.send('New game created! Here are the channels: \n'+tabletalk.jump_url +"\n"+actions.jump_url)
         if isinstance(interaction.channel, discord.Thread):  
             new_name = f"[Launched] {interaction.channel.name}"   
             await interaction.channel.edit(name=new_name)
-        await interaction.followup.send('New game created! Here are the channels: \n'+tabletalk.jump_url +"\n"+actions.jump_url)
-       
-
-    
-    
-
-   
+            await thread.edit(archived=True)
+        
