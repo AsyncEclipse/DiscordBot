@@ -7,7 +7,7 @@ from helpers.PlayerHelper import PlayerHelper
 
 class ReputationButtons:
     @staticmethod 
-    async def resolveGainingReputation(game: GamestateHelper, amount_of_options:int, interaction: discord.Interaction, player_helper:PlayerHelper):
+    async def resolveGainingReputation(game: GamestateHelper, amount_of_options:int, interaction: discord.Interaction, player_helper:PlayerHelper, queue:bool):
         randomList = game.gamestate["reputation_tiles"][:]
         random.shuffle(randomList)
         opts = ""
@@ -40,6 +40,17 @@ class ReputationButtons:
                 msg += " It was lower or equal to your highest value reputation tile, so you put it back in the bag."
         game.update_player(player_helper)
         game.update()
-        await interaction.followup.send(msg,ephemeral=True)
-        
-
+        if not queue:
+            await interaction.followup.send(msg,ephemeral=True)
+        else:
+            threadName = game.get_gamestate()["game_id"]+"-Round "+str(game.get_gamestate()["roundNum"])+", Queued Draw for "+player_helper.stats["color"]
+            actions_channel = discord.utils.get(interaction.guild.channels, name=game.game_id+"-actions") 
+            if actions_channel is not None and isinstance(actions_channel, discord.TextChannel):
+                channel = actions_channel
+                thread = await channel.create_thread(  
+                    name=threadName,  
+                    auto_archive_duration=1440,  
+                    type=discord.ChannelType.private_thread,  
+                    invitable=False,    
+                )  
+                await thread.send(msg)

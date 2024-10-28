@@ -201,9 +201,8 @@ class TurnButtons:
         view = View()
         view.add_item(Button(label="Show Game",style=discord.ButtonStyle.blurple, custom_id="showGame"))
         view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
-        map = await drawing.show_map()
-        stats = await drawing.show_stats()
-        asyncio.create_task(TurnButtons.send_files(interaction, [map,stats]))
+        map = await drawing.show_game()
+        asyncio.create_task(TurnButtons.send_files(interaction, [map]))
         # with concurrent.futures.ThreadPoolExecutor() as executor:
         #     future = executor.submit(asyncio.run_coroutine_threadsafe, TurnButtons.send_files(interaction, [map,stats]),bot.loop)
 

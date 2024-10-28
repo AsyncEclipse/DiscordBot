@@ -253,7 +253,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         player = game.get_player(interaction.user.id)  
         player_helper = PlayerHelper(interaction.user.id, player)
         await interaction.response.defer(thinking=True, ephemeral=True)
-        await ReputationButtons.resolveGainingReputation(game, num_options,interaction, player_helper)
+        await ReputationButtons.resolveGainingReputation(game, num_options,interaction, player_helper, False)
         await interaction.channel.send(interaction.user.name + " drew "+ str(num_options)+ " reputation tiles")
 
     @app_commands.command(name="return_reputation")

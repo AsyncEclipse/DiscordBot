@@ -814,10 +814,8 @@ class DrawHelper:
         if "traitor" in player and player["traitor"] == True:
             points -= 2
         return points
-    
-    #effectively discontinued in favor of show_map and show_stats
-    def show_game(self):
-        start_time = time.perf_counter() 
+   
+    async def show_game(self):
         def load_tile_coordinates():
             configs = Properties()
             with open("data/tileImageCoordinates.properties", "rb") as f:
@@ -826,7 +824,6 @@ class DrawHelper:
 
         def paste_tiles(context, tile_map):
             configs = load_tile_coordinates()
-
             min_x = float('inf')
             min_y = float('inf')
             max_x = float('-inf')
@@ -841,57 +838,58 @@ class DrawHelper:
                 max_x = max(max_x, x + tile_image.width)
                 max_y = max(max_y, y + tile_image.height)
             return min_x, min_y, max_x, max_y
-
+        context = Image.new("RGBA", (4160, 5100), (0,0,0,255))
+        min_x, min_y, max_x, max_y = paste_tiles(context, self.gamestate["board"])
+        cropped_context = context.crop((min_x, min_y, max_x, max_y))
         def create_player_area():
             pCount = len(self.gamestate["players"])
-            player_area_length = 1200 if pCount > 3 else 600
-            width = 4420 if (pCount != 2 and pCount != 4) else 2990
-            context2 = Image.new("RGBA", (width, player_area_length), (255, 255, 255, 0))
-            x, y, count = 100, 100, 0
+            player_area_length = 1500 if pCount > 3 else 750
+            width = 4420 if (pCount != 2 and pCount != 4) else 2980
+            context2 = Image.new("RGBA", (width, player_area_length), (0, 0, 0, 255))
+            x, y, count = 100, 50, 0
             for player in self.gamestate["players"]:
                 player_image = self.player_area(self.gamestate["players"][player])
-                context2.paste(player_image, (x, y), mask=player_image)
+                if "username" in self.gamestate["players"][player]:
+                    font = ImageFont.truetype("images/resources/arial.ttf", size=50)
+                    stroke_color = (0, 0, 0)
+                    color = (255, 165, 0)
+                    stroke_width = 2
+                    text_drawable_image = ImageDraw.Draw(context2)
+                    username = self.gamestate["players"][player]["username"]
+
+                    if "traitor" in self.gamestate["players"][player] and self.gamestate["players"][player]["traitor"] == True:
+                        username = username + " (TRAITOR)"
+                    text_drawable_image.text((x,y), username, color, font=font,
+                                    stroke_width=stroke_width, stroke_fill=stroke_color)
+                context2.paste(player_image, (x, y+50), mask=player_image)
                 count += 1
                 if count % 2 == 0 and pCount == 4:
-                    x = 100  # Reset x back to the starting position
-                    y += 600
+                    x = 100  
+                    y += 700
                 elif count % 3 == 0 and pCount != 4:
-                    x = 100  # Reset x back to the starting position
-                    y += 600
+                    x = 100 
+                    y += 700
                 else:
                     x += 1440
             return context2
-
-
-        
-        context = Image.new("RGBA", (4160, 5100), (255, 255, 255, 0))
-        min_x, min_y, max_x, max_y = paste_tiles(context, self.gamestate["board"])
-
-        board_width = max_x - min_x
-        board_height = max_y - min_y
-        cropped_context = context.crop((0, min_y, 4160, max_y))
         context2 = create_player_area()
         context3 = self.display_techs()
         context4 = self.display_remaining_tiles()
-        context5 = self.display_cube_track_reference()
-        end_time = time.perf_counter()  
-        elapsed_time = end_time - start_time  
-        print(f"Total elapsed time for generating all contexts: {elapsed_time:.2f} seconds")
-        start_time = time.perf_counter() 
-        final_context = Image.new("RGBA", (4160, board_height + context2.size[1]+context3.size[1]), (255, 255, 255, 0))
-        final_context.paste(cropped_context, (0, 0))
-        final_context.paste(context2, (0, board_height))
-        final_context.paste(context3, (0, board_height+context2.size[1]))
-        final_context.paste(context5, (50, board_height+context2.size[1]-20))
-        final_context.paste(context4, (1500, board_height+context2.size[1]))
-        
-        final_context = final_context.resize((int(final_context.width/1.5),int(final_context.height/1.5)))
+        #context5 = self.display_cube_track_reference()
+        pCount = len(self.gamestate["players"])
+        width = 4150 if (pCount != 2 and pCount != 4) else 2800
+        width = max(context2.size[0],context3.size[0]+context4.size[0]+150)
+        width = max(width, cropped_context.size[0])
+        final_context = Image.new("RGBA", (width, cropped_context.size[1]+context2.size[1]+max(context3.size[1],context4.size[1])), (0, 0, 0, 255))
+        centering = int((width - cropped_context.size[0])/2)
+        final_context.paste(cropped_context, (centering, 0))
+        final_context.paste(context2, (0, cropped_context.size[1]))
+        final_context.paste(context3, (0, cropped_context.size[1]+context2.size[1]))
+        #final_context.paste(context5, (50, context2.size[1]-20))
+        final_context.paste(context4, (context3.size[0]+150, cropped_context.size[1]+context2.size[1]))
         bytes_io = BytesIO()
         final_context.save(bytes_io, format="WEBP")
         bytes_io.seek(0)
-        end_time = time.perf_counter()  
-        elapsed_time = end_time - start_time  
-        print(f"Total elapsed time for pasting all together: {elapsed_time:.2f} seconds")
         return discord.File(bytes_io, filename="map_image.webp")
     
     async def show_map(self):

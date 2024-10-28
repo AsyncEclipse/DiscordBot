@@ -94,7 +94,7 @@ class Combat:
             else:
                 file = drawing.show_AI_stats()
                 asyncio.create_task(channel.send("AI stats look like this",file=file))
-        await Combat.promptNextSpeed(game, pos, channel, False)
+        asyncio.create_task(Combat.promptNextSpeed(game, pos, channel, False))
 
     @staticmethod
     async def startCombatThreads(game:GamestateHelper, interaction:discord.Interaction):
@@ -102,6 +102,13 @@ class Combat:
         role = discord.utils.get(interaction.guild.roles, name=game.get_gamestate()["game_id"])  
         tiles = Combat.findTilesInConflict(game)
         game.createRoundNum()
+        if "wa_ai" not in game.get_gamestate():
+            game.initilizeKey("wa_ai")
+        if "tilesToResolve" not in game.get_gamestate():
+            game.initilizeKey("tilesToResolve")
+            game.initilizeKey("queuedQuestions")
+            game.initilizeKey("queuedDraws")
+            
         for tile in tiles:
             game.setCombatants(Combat.findPlayersInTile(game, tile[1]), tile[1])
             message_to_send = "Combat will occur in system "+str(tile[0])+", position "+tile[1]  
@@ -111,6 +118,7 @@ class Combat:
             drawing = DrawHelper(game.gamestate)
             await thread.send(role.mention +"Combat will occur in this tile",view = Combat.getCombatButtons(game, tile[1]),file=drawing.board_tile_image_file(tile[1]))
             await Combat.startCombat(game, thread, tile[1])
+            game.addToKey("tilesToResolve",tile[0])
         for tile2 in Combat.findTilesInContention(game):
             message_to_send = "Bombing may occur in system "+str(tile2[0])+", position "+tile2[1]  
             message = await channel.send(message_to_send) 
@@ -656,7 +664,7 @@ class Combat:
         tile_map = game.get_gamestate()["board"]
         player_ships = tile_map[pos]["player_ships"][:]
         for ship in player_ships:
-            if colorOrAI in ship:
+            if colorOrAI in ship and "orb" not in ship and "mon" not in ship and "sb" not in ship:
                 type = ship.split("-")[1]
                 player = game.get_player_from_color(colorOrAI)
                 shipM = PlayerShip(game.gamestate["players"][player], type)
@@ -737,6 +745,8 @@ class Combat:
             players = game.gamestate["board"][pos]["combatants"]
         else:
             players = Combat.findPlayersInTile(game,pos)
+        countDraw = 1
+        game.removeFromKey("tilesToResolve",int(game.gamestate["board"][pos]["sector"]))
         for playerColor in players:
             if playerColor == "ai":
                 continue
@@ -744,13 +754,16 @@ class Combat:
             count = str(game.getReputationTilesToDraw(pos, playerColor))
             view = View()
             label = "Draw "+count+" Reputation"
-            buttonID = "FCID"+playerColor+"_drawReputation_"+count
+            buttonID = "FCID"+playerColor+"_drawReputation_"+count + "_"+game.gamestate["board"][pos]["sector"]+ "_"+str(countDraw)+"_" +playerColor
             view.add_item(Button(label=label, style=discord.ButtonStyle.green, custom_id=buttonID))
             label = "Decline"
             buttonID = "FCID"+playerColor+"_deleteMsg"
             view.add_item(Button(label=label, style=discord.ButtonStyle.red, custom_id=buttonID))
             msg = player["player_name"] + " the bot believes you should draw "+count+" reputation tiles here. Click to do so or press decline if the bot messed up. Please ensure that players in combats earlier than yours have drawn their reputation tiles first"
             if int(count) > 0:
+                if "tilesToResolve" in game.get_gamestate():
+                    game.addToKey("queuedQuestions", [int(game.gamestate["board"][pos]["sector"]), countDraw, playerColor])
+                    countDraw +=1
                 asyncio.create_task(interaction.channel.send(msg, view=view))
         winner = Combat.findPlayersInTile(game, pos)[0]
         owner = game.gamestate["board"][pos]["owner"]
@@ -835,19 +848,62 @@ class Combat:
                 await Combat.promptNextSpeed(game, pos, interaction.channel, True)
 
 
+    @staticmethod
+    async def resolveQueue(game:GamestateHelper, interaction:discord.Interaction):
+        foundNoSuccess = False
+        success = 1
+        while not foundNoSuccess and success < 20:
+            foundNoSuccess = True
+            queuedDraws = game.get_gamestate()["queuedDraws"][:]
+            for system, drawOrder, color, num_options in queuedDraws:
+                systemAheadNeedsToResolve = False
+                for system2 in game.get_gamestate()["tilesToResolve"]:
+                    if system2 > system:
+                        systemAheadNeedsToResolve = True
+                if not systemAheadNeedsToResolve:
+                    goodToResolve = True
+                    for system2, drawOrder2, color2, num_options2 in game.get_gamestate()["queuedDraws"]:
+                        if int(system2) > int(system) or (int(system2) == int(system) and drawOrder > drawOrder2):
+                            goodToResolve = False
+                    for system2, drawOrder2, color2 in game.get_gamestate()["queuedQuestions"]:
+                        if int(system2) > int(system) or (int(system2) == int(system) and drawOrder > drawOrder2):
+                            goodToResolve = False
+                    if goodToResolve:
+                        foundNoSuccess = False
+                        player_helper = PlayerHelper(game.get_player_from_color(color),game.getPlayerObjectFromColor(color))
+                        await ReputationButtons.resolveGainingReputation(game, num_options,interaction, player_helper, True)
+                        game.removeFromKey("queuedDraws", [system, drawOrder, color, num_options])
+                        success += 1
+    
+
 
     @staticmethod
     async def drawReputation(game:GamestateHelper, buttonID:str, interaction:discord.Interaction, player_helper):
         num_options = int(buttonID.split("_")[1])
-        await ReputationButtons.resolveGainingReputation(game, num_options,interaction, player_helper)
-        await interaction.channel.send(interaction.user.name + " drew "+ str(num_options)+ " reputation tiles")
+        system = int(buttonID.split("_")[2])
+        drawOrder = int(buttonID.split("_")[3])
+        color = buttonID.split("_")[4]
+        if "tilesToResolve" in game.gamestate:
+            game.removeFromKey("queuedQuestions",[system, drawOrder, color])
+            game.addToKey("queuedDraws", [system, drawOrder, color, num_options])
+            await Combat.resolveQueue(game, interaction)
+            if [system, drawOrder, color, num_options] in game.gamestate["queuedDraws"]:
+                await interaction.channel.send(interaction.user.name + " your reputation draw has been queued")
+            else:
+                await interaction.channel.send(interaction.user.name + " drew "+ str(num_options)+ " reputation tiles")
+        else:
+            await ReputationButtons.resolveGainingReputation(game, num_options,interaction, player_helper, False)
+            await interaction.channel.send(interaction.user.name + " drew "+ str(num_options)+ " reputation tiles")
         await interaction.message.delete()
 
     @staticmethod
     async def refreshImage(game:GamestateHelper, buttonID:str, interaction:discord.Interaction):
         pos = buttonID.split("_")[1]
         drawing = DrawHelper(game.gamestate)
-        await interaction.channel.send("Updated view",view = Combat.getCombatButtons(game, pos),file=drawing.board_tile_image_file(pos))
+        view = View()
+        if len(Combat.findPlayersInTile(game, pos)) > 1:
+            view = Combat.getCombatButtons(game, pos)
+        await interaction.channel.send("Updated view",view = view,file=drawing.board_tile_image_file(pos))
 
     @staticmethod
     def translateColorToName(dieColor:str):

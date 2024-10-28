@@ -23,7 +23,7 @@ class PopulationButtons:
                     for i,val in enumerate(tileState[f"{planetT}_pop"]):
                         if val == 0:
                             emptyPlanets.append(f"{tile}_{planetT}_{str(i)}")
-            if player["color"]+"-orb" in tileState["player_ships"]:
+            if any("-orb" in s for s in tileState["player_ships"]):
                 if "orbital_pop" not in tileState or tileState["orbital_pop"]==0:
                     emptyPlanets.append(f"{tile}_orbital_0")
         allPlayerTechs =  player["military_tech"] + player["grid_tech"] + player["nano_tech"]
@@ -51,7 +51,7 @@ class PopulationButtons:
                             fullPlanets.append(f"{planetT}")
         return fullPlanets
     @staticmethod
-    async def startPopDrop(game: GamestateHelper, player, interaction: discord.Interaction):
+    def getPopButtons(game, player):
         view = View()
         for pop in PopulationButtons.findEmptyPopulation(game, player):
             tile = pop.split("_")[0]
@@ -64,6 +64,11 @@ class PopulationButtons:
                 label = "Advanced " + label
             label = label + f" (tile {tile})"
             view.add_item(Button(label=label, style=discord.ButtonStyle.blurple, custom_id=buttonID))
+        return view
+
+    @staticmethod
+    async def startPopDrop(game: GamestateHelper, player, interaction: discord.Interaction):
+        view = PopulationButtons.findEmptyPopulation(game, player)
         if len(PopulationButtons.findEmptyPopulation(game, player)) > 0:
             await interaction.channel.send( f"{interaction.user.mention}, choose which planet you would like to put a population cube on.", view=view)
         else:
@@ -106,7 +111,10 @@ class PopulationButtons:
         if not game.add_pop_specific(originalPop,typeOfPop,int(num),tile,game.get_player_from_color(player["color"])):
             await interaction.channel.send(f"Did not have enough colony ships so failed to add {typeOfPop} pop to tile {tile}")
             return
-        await interaction.message.delete()
+        if len(PopulationButtons.findEmptyPopulation(game, player)) < 1:
+            await interaction.message.delete()
+        else:
+            await interaction.message.edit(view=PopulationButtons.findEmptyPopulation())
         drawing = DrawHelper(game.gamestate)
         resourceType = typeOfPop.replace('adv','')
         income = player["population_track"][player[resourceType+"_pop_cubes"]-1]
