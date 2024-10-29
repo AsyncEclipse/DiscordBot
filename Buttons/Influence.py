@@ -136,7 +136,7 @@ class InfluenceButtons:
         game.remove_control(p1["color"],tileLoc)
         await interaction.channel.send( f"{p1['player_name']} lost control of "+tileLoc)
         for pop in PopulationButtons.findFullPopulation(game, tileLoc):
-            neutralCubes = game.remove_pop([pop+"_pop"],tileLoc,game.get_player_from_color(p1["color"]), graveYard)
+            neutralCubes, orbitalCubes = game.remove_pop([pop+"_pop"],tileLoc,game.get_player_from_color(p1["color"]), graveYard)
             if neutralCubes > 0:
                 view=View()
                 planetTypes = ["money","science","material"]
@@ -144,6 +144,13 @@ class InfluenceButtons:
                     if p1[planetT+"_pop_cubes"] < 12:
                         view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{p1['color']}_addCubeToTrack_"+planetT))
                 await interaction.channel.send( f"A neutral cube was removed, please tell the bot what track you want it to go on", view=view)
+            if orbitalCubes > 0:
+                view=View()
+                planetTypes = ["money","science"]
+                for planetT in planetTypes:
+                    if p1[planetT+"_pop_cubes"] < 12:
+                        view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{p1['color']}_addCubeToTrack_"+planetT))
+                await interaction.channel.send( f"An orbital cube was removed, please tell the bot what track you want it to go on", view=view)
             else:
                 await interaction.channel.send( f"{p1['username']} Removed 1 "+pop.replace("adv","")+" population")
         if delete:
