@@ -163,7 +163,7 @@ class Combat:
             view3 = View()
             view3.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
             asyncio.create_task(thread3.send(player["player_name"]+" if you have enough colony ships, you can use this to drop population after taking control of the sector",view=view3))
-        asyncio.create_task(channel.send("Please resolve the combats in the order they appeared"))
+        asyncio.create_task(channel.send("Resolve the combats simultaneously if you wish -- any reputation draws will be queued to resolve correctly"))
     @staticmethod
     def getCombatantShipsBySpeed(game:GamestateHelper, colorOrAI:str, playerShipsList):
         ships = []
@@ -759,7 +759,7 @@ class Combat:
             label = "Decline"
             buttonID = "FCID"+playerColor+"_deleteMsg"
             view.add_item(Button(label=label, style=discord.ButtonStyle.red, custom_id=buttonID))
-            msg = player["player_name"] + " the bot believes you should draw "+count+" reputation tiles here. Click to do so or press decline if the bot messed up. Please ensure that players in combats earlier than yours have drawn their reputation tiles first"
+            msg = player["player_name"] + " the bot believes you should draw "+count+" reputation tiles here. Click to do so or press decline if the bot messed up. If other battles/players need to resolve first, your draw will be queued after you click this button"
             if int(count) > 0:
                 if "tilesToResolve" in game.get_gamestate():
                     game.addToKey("queuedQuestions", [int(game.gamestate["board"][pos]["sector"]), countDraw, playerColor])
