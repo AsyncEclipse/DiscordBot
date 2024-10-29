@@ -265,7 +265,7 @@ class DrawHelper:
                         
                     else:
                         tile_image.paste(closed_mask, (int(152*mult), 0), mask=closed_mask)
-                        tile_image.paste(black, (int(80*mult), 0), mask=black)
+                        #tile_image.paste(black, (int(80*mult), 0), mask=black)
                     tile_image = tile_image.rotate(60)
 
             if "warpDisc" in tile or "warpPoint" in tile:
