@@ -62,6 +62,7 @@ class DrawHelper:
         filepath = f"images/resources/hexes/{str(sector)}.png"
         if os.path.exists(filepath):
             tile_image = self.use_image(filepath)
+        mult = 1024/345
         closedpath = f"images/resources/masks/closed_wh_mask.png"
         openpath = f"images/resources/masks/open_wh_mask.png"
         closed_mask = self.use_image(closedpath)
@@ -71,15 +72,16 @@ class DrawHelper:
         for i in range(6):
             tile_orientation_index = (i + 6 + int(rotation / 60)) % 6
             if tile_orientation_index in wormholes:
-                tile_image.paste(open_mask, (154, 0), mask=open_mask)
+                tile_image.paste(open_mask, (int(154*mult), 0), mask=open_mask)
             else:
-                tile_image.paste(closed_mask, (154, 0), mask=closed_mask)
+                tile_image.paste(closed_mask, (int(154*mult), 0), mask=closed_mask)
             tile_image = tile_image.rotate(60)
         return tile_image
 
     def draw_possible_oritentations(self, tileID, position, playerTiles, view:View, player):
         count = 1
-        context = Image.new("RGBA", (345*3*3, 300*3*2+10), (255, 255, 255, 0))
+        mult = 1024/345
+        context = Image.new("RGBA", (int(345*3*3*mult), int(300*3*2*mult)+int(10*mult)), (255, 255, 255, 0))
         configs = Properties()
         with open("data/tileAdjacencies.properties", "rb") as f:
             configs.load(f)
@@ -115,12 +117,12 @@ class DrawHelper:
                                 break
             if rotationWorks:
                 context2 = self.base_tile_image_with_rotation_in_context(rotation, tileID, tile, count, configs, position)
-                context.paste(context2, (345*3*((count-1)%3),910*(int((count-1)/3))),mask=context2)
+                context.paste(context2, (int(345*3*((count-1)%3)*mult),int(910*(int((count-1)/3)))*mult),mask=context2)
                 view.add_item(Button(label="Option #"+str(count),style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_placeTile_{position}_{tileID}_{rotation}"))
                 count += 1
         bytes = BytesIO()
         if count < 5:
-            context = context.crop((0,0,345*3*(count-1),300*3))
+            context = context.crop((0,0,int(345*3*(count-1)*mult),int(mult*300*3)))
         context.save(bytes, format="WEBP")
         bytes.seek(0)
         file = discord.File(bytes, filename="tile_image.webp")
@@ -130,10 +132,11 @@ class DrawHelper:
 
 
     def base_tile_image_with_rotation_in_context(self, rotation, tileID, tile, count, configs, position):
-        context = Image.new("RGBA", (345*3, 300*3), (255, 255, 255, 0))
+        mult = 1024/345
+        context = Image.new("RGBA", (int(345*3*mult), int(300*3*mult)), (255, 255, 255, 0))
         image = self.base_tile_image_with_rotation(tileID,rotation,tile["wormholes"])
-        context.paste(image,(345, 300),mask=image)
-        coords = [(345, 0), (605, 150),(605, 450),(345, 600), (85, 450),(85, 150)]
+        context.paste(image,(int(mult*345), int(mult*300)),mask=image)
+        coords = [(int(mult*345), 0), (int(mult*605), int(mult*150)),(int(mult*605), int(mult*450)),(int(mult*345), int(mult*600)), (int(mult*85), int(mult*450)),(int(mult*85), int(mult*150))]
         for index, adjTile in enumerate(configs.get(position)[0].split(",")):
             if adjTile in self.gamestate["board"]:
                 adjTileImage = self.board_tile_image(adjTile)
@@ -183,15 +186,16 @@ class DrawHelper:
     
     def mergeLocationsFile(self,locations):
         amount = len(locations)
+        mult = 1024/345
         result = math.ceil(math.sqrt(amount))  
         height = math.ceil(amount / result)
-        context = Image.new("RGBA", (360*result, 315*height), (255, 255, 255, 0))
+        context = Image.new("RGBA", (int(mult*360*result), int(mult*315*height)), (255, 255, 255, 0))
         
         for count,tile in enumerate(locations):
             image = self.board_tile_image(tile)
             x = count % result
             y = int(count/result)
-            context.paste(image,(x*360, y*315))
+            context.paste(image,(int(mult*x*360), int(mult*y*315)))
         bytes_io = BytesIO()
         context.save(bytes_io, format="WEBP")
         bytes_io.seek(0)
@@ -200,7 +204,7 @@ class DrawHelper:
     def board_tile_image(self, position):
         sector = self.gamestate["board"][position]["sector"]
         filepath = f"images/resources/hexes/{sector}.png"
-
+        mult = 1024/345
 
         if os.path.exists(filepath):
             tile_image = self.use_image(filepath)
@@ -208,23 +212,22 @@ class DrawHelper:
             rotation = int(tile["orientation"])
 
             if int(int(position) /100) == 2 and int(position) %2 == 1:
-                hsMaskpath = f"images/resources/masks/hsmaskTrip.png"
-                hsMask2 = Image.open(f"images/resources/masks/hsmaskTrip.png").convert("RGBA").resize((70, 70))
-                tile_image.paste(hsMask2, (138, 115), mask=hsMask2)
+                hsMask2 = Image.open(f"images/resources/masks/hsmaskTrip.png").convert("RGBA").resize((210, 210))
+                tile_image.paste(hsMask2, (int(138*mult), int(115*mult)), mask=hsMask2)
             if "disctile" in tile and tile["disctile"] > 0:
                 discPath = f"images/resources/components/discovery_tiles/discovery_2ptback.png"
                 discTile = self.use_image(discPath)
                 discTile = discTile.rotate(315,expand=True)
-                tile_image.paste(discTile, (108, 89), mask=discTile)
+                tile_image.paste(discTile, (int(108*mult), int(89*mult)), mask=discTile)
 
 
 
-            text_position = (268, 132)
+            text_position = (int(268*mult), int(132*mult))
             bannerPath = f"images/resources/masks/banner.png"
             banner = self.use_image(bannerPath)
-            tile_image.paste(banner, (247, 126), mask=banner)
+            tile_image.paste(banner, (int(247*mult), int(126*mult)), mask=banner)
 
-            font = ImageFont.truetype("images/resources/arial.ttf", size=30)
+            font = ImageFont.truetype("images/resources/arial.ttf", size=int(30*mult))
             text = str(position)
 
             text_color = (255, 255, 255)
@@ -254,34 +257,34 @@ class DrawHelper:
                         found = False
                         for x,adjTile in enumerate(configs.get(position)[0].split(",")):
                             if x==i and self.areTwoTilesAdjacent(position, adjTile, configs):
-                                tile_image.paste(green, (152, 0), mask=green)
+                                tile_image.paste(green, (int(152*mult), 0), mask=green)
                                 found = True
                                 break
                         if not found:
-                            tile_image.paste(open_mask, (152, 0), mask=open_mask)
+                            tile_image.paste(open_mask, (int(152*mult), 0), mask=open_mask)
                         
                     else:
-                        tile_image.paste(closed_mask, (152, 0), mask=closed_mask)
-                        tile_image.paste(black, (80, 0), mask=black)
+                        tile_image.paste(closed_mask, (int(152*mult), 0), mask=closed_mask)
+                        tile_image.paste(black, (int(80*mult), 0), mask=black)
                     tile_image = tile_image.rotate(60)
 
             if "warpDisc" in tile or "warpPoint" in tile:
                 warppath = f"images/resources/all_boards/Warp_picture.png"
                 warp_mask = self.use_image(warppath)
-                tile_image.paste(warp_mask, (20, 140), mask=warp_mask)
+                tile_image.paste(warp_mask, (int(20*mult), int(140*mult)), mask=warp_mask)
             if "player_ships" in tile and len(tile["player_ships"]) > 0:
                 counts = {}  # To track counts for each ship type
                 countsShips = {}
                 for ship in tile["player_ships"]:
                     ship_type = ship.split("-")[1]  # Extract ship type
-                    size = 70
+                    size = int(70*mult)
                     if ship not in countsShips:
                         countsShips[ship] = 0
-                    countsShips[ship] += 10
+                    countsShips[ship] += int(10*mult)
                     if ship_type in ["gcds", "gcdsadv", "anc", "ancadv", "grd", "grdadv"]:
                         ship = ship_type.replace("adv","")
                         ship_type = "ai"
-                        size = 110
+                        size = int(110*mult)
                     if ship_type == "orb" or ship_type =="mon":
                         ship = ship_type
                     filepathShip = f"images/resources/components/basic_ships/{ship}.png"
@@ -302,12 +305,12 @@ class DrawHelper:
                         yCordToUse-=30
 
                     tile_image.paste(ship_image,
-                                    (int(345 / 1024 * xCordToUse + counts[ship_type]-size/2),
-                                    int(345 / 1024 * yCordToUse + counts[ship_type]-size/2)),
+                                    (int(345 / 1024 *mult* xCordToUse + (counts[ship_type]-size/2)),
+                                    int(345 / 1024 *mult* yCordToUse + (counts[ship_type]-size/2))),
                                     mask=ship_image)
-                    counts[ship_type] += 10
+                    counts[ship_type] += int(10*mult)
                     if ship_type == "ai":
-                        counts[ship_type] += 20
+                        counts[ship_type] += int(20*mult)
                 for key, value in countsShips.items():  
                     damage = 0
                     ship_type = "ai"
@@ -322,8 +325,8 @@ class DrawHelper:
                         for count in range(damage):
                             damage_image = self.use_image(f"images/resources/components/basic_ships/marker_damage.png")
                             tile_image.paste(damage_image,
-                                    (int(345 / 1024 * coords[0] + value-size/2+count*10+15),
-                                    int(345 / 1024 * coords[1] + value-size/2+35)),
+                                    (int(345 / 1024 *mult* coords[0] + value-size/2+count*10*mult+15*mult),
+                                    int(345 / 1024 *mult* coords[1] + value-size/2+35*mult)),
                                     mask=damage_image)
 
             def paste_resourcecube(tile, tile_image, resource_type, color):
@@ -339,18 +342,18 @@ class DrawHelper:
                                 coords = tile[f"orb_snap"]
                             else:
                                 coords = tile[f"{resource_type}{x+1}_snap"]
-                            tile_image.paste(pop_image, (int(345 / 1024 * coords[0] - 18), int(345 / 1024 * coords[1] - 18)), mask=pop_image)
+                            tile_image.paste(pop_image, (int(345 / 1024 *mult* coords[0] - int(18*mult)), int(345 / 1024 *mult* coords[1] - int(18*mult))), mask=pop_image)
                             if "money" in resource_type or "science" in resource_type or "material" in resource_type:
                                 resource_type2 = resource_type.replace("adv","")+"_Alone"
                                 pop_path = f"images/resources/components/resourcesymbols/{resource_type2}.png"
-                                pop_image = self.use_image(pop_path).resize((40,40))
-                                tile_image.paste(pop_image, (int(345 / 1024 * coords[0] - 20), int(345 / 1024 * coords[1] - 20)), mask=pop_image)
+                                pop_image = self.use_image(pop_path)
+                                tile_image.paste(pop_image, (int(345 / 1024 *mult* coords[0] - int(13*mult)), int(345 / 1024*mult * coords[1] - int(13*mult))), mask=pop_image)
 
             if "owner" in tile and tile["owner"] != 0:
                 color = tile["owner"]
                 inf_path = f"images/resources/components/all_boards/influence_disc_{color}.png"
                 inf_image = self.use_image(inf_path)
-                tile_image.paste(inf_image, (153, 130), mask=inf_image)
+                tile_image.paste(inf_image, (int(153*mult), int(130*mult)), mask=inf_image)
                 for resource in ["neutral", "neutraladv","money", "moneyadv", "science","scienceadv", "material","materialadv","orbital"]:
                     paste_resourcecube(tile, tile_image, resource, color)
 
@@ -579,7 +582,7 @@ class DrawHelper:
         board_image = self.use_image(filepath)
         context.paste(board_image, (0,0))
         inf_path = "images/resources/components/all_boards/influence_disc_"+player["color"]+".png"
-        inf_image = self.use_image(inf_path)
+        inf_image = self.use_image(inf_path).resize((40,40))
 
         for x in range(player["influence_discs"]):
             context.paste(inf_image, (764-(int(x*38.5)), 450), mask=inf_image)
@@ -674,7 +677,7 @@ class DrawHelper:
                 faction = reputation.split("-")[1]
                 color =  reputation.split("-")[2]
                 pop_path = f"images/resources/components/all_boards/popcube_{color}.png"
-                pop_image = self.use_image(pop_path)
+                pop_image = self.use_image(pop_path).resize((35,35))
                 amb_tile_path = f"images/resources/components/factions/{faction}_ambassador.png"
                 amb_tile_image = self.use_image(amb_tile_path)
                 context.paste(amb_tile_image, (825,172+x*scaler-mod), mask=amb_tile_image)
@@ -720,7 +723,7 @@ class DrawHelper:
         for part in listOfAncient:
             discName = discTile_data[part]["name"]
             part_path = f"images/resources/components/discovery_tiles/discovery_{discName.replace(' ','_').lower()}.png"
-            part_image = self.use_image(part_path)
+            part_image = self.use_image(part_path).resize((80,80))
             context.paste(part_image, (newX, newY), mask=part_image)
             newY+=85
         for img_path, text_color, player_key, amount_key in resources:
@@ -753,13 +756,13 @@ class DrawHelper:
         ultimateC = 0
         for counter,ship in enumerate(ships):
             filepath = f"images/resources/components/basic_ships/{player['color']}-{ship}.png"
-            ship_image = self.use_image(filepath)
+            ship_image = self.use_image(filepath).resize((80,80))
             for shipCounter in range(player["ship_stock"][counter]):
                 context.paste(ship_image, (x+ultimateC*10+counter*70,y),ship_image)
                 ultimateC +=1
 
         discTile = Image.open(f"images/resources/components/discovery_tiles/discovery_2ptback.png").convert("RGBA").resize((40, 40))
-        discTile = discTile.rotate(315,expand=True)
+        discTile = discTile.rotate(315,expand=True).resize((80,80))
         if "disc_tiles_for_points" in player:
             for discT in range(player["disc_tiles_for_points"]):
                 context.paste(discTile, (x+discT*25,y+50), mask=discTile)
@@ -829,7 +832,7 @@ class DrawHelper:
             max_x = float('-inf')
             max_y = float('-inf')
             for tile in tile_map:
-                tile_image = self.board_tile_image(tile)
+                tile_image = self.board_tile_image(tile).resize((345,300))
                 x, y = map(int, configs.get(tile)[0].split(","))
                 context.paste(tile_image, (x, y), mask=tile_image)
                 # Update bounding box coordinates
@@ -1002,7 +1005,8 @@ class DrawHelper:
         return discord.File(bytes_io, filename="techs_image.webp")
 
     def show_single_tile(self, tile_image):
-        context = Image.new("RGBA", (345, 299), (255, 255, 255, 0))
+        mult = 1024/345
+        context = Image.new("RGBA", (int(345*mult), int(299*mult)), (255, 255, 255, 0))
         context.paste(tile_image, (0,0), mask=tile_image)
         bytes = BytesIO()
         context.save(bytes, format="WEBP")

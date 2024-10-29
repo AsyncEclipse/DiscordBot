@@ -16,7 +16,7 @@ class ReputationButtons:
             opt = randomList.pop()
             opts += " "+str(opt)
             highest = max(opt, highest)
-        msg = f"{interaction.user.mention}, you drew the tiles{opts} and selected {str(highest)}."
+        msg = f"{player_helper.stats['player_name']}, you drew the tiles{opts} and selected {str(highest)}."
         found = False
         for x,tile in enumerate(player_helper.stats["reputation_track"]):
             if tile == "mixed":
