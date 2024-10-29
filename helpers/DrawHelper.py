@@ -80,7 +80,7 @@ class DrawHelper:
 
     def draw_possible_oritentations(self, tileID, position, playerTiles, view:View, player):
         count = 1
-        mult = 1024/345
+        mult = 1
         context = Image.new("RGBA", (int(345*3*3*mult), int(300*3*2*mult)+int(10*mult)), (255, 255, 255, 0))
         configs = Properties()
         with open("data/tileAdjacencies.properties", "rb") as f:
@@ -117,7 +117,7 @@ class DrawHelper:
                                 break
             if rotationWorks:
                 context2 = self.base_tile_image_with_rotation_in_context(rotation, tileID, tile, count, configs, position)
-                context.paste(context2, (int(345*3*((count-1)%3)*mult),int(910*(int((count-1)/3)))*mult),mask=context2)
+                context.paste(context2, (int(345*3*((count-1)%3)*mult),int(910*(int((count-1)/3))*mult)),mask=context2)
                 view.add_item(Button(label="Option #"+str(count),style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_placeTile_{position}_{tileID}_{rotation}"))
                 count += 1
         bytes = BytesIO()
@@ -132,14 +132,14 @@ class DrawHelper:
 
 
     def base_tile_image_with_rotation_in_context(self, rotation, tileID, tile, count, configs, position):
-        mult = 1024/345
+        mult = 1
         context = Image.new("RGBA", (int(345*3*mult), int(300*3*mult)), (255, 255, 255, 0))
-        image = self.base_tile_image_with_rotation(tileID,rotation,tile["wormholes"])
+        image = self.base_tile_image_with_rotation(tileID,rotation,tile["wormholes"]).resize((345,300))
         context.paste(image,(int(mult*345), int(mult*300)),mask=image)
         coords = [(int(mult*345), 0), (int(mult*605), int(mult*150)),(int(mult*605), int(mult*450)),(int(mult*345), int(mult*600)), (int(mult*85), int(mult*450)),(int(mult*85), int(mult*150))]
         for index, adjTile in enumerate(configs.get(position)[0].split(",")):
             if adjTile in self.gamestate["board"]:
-                adjTileImage = self.board_tile_image(adjTile)
+                adjTileImage = self.board_tile_image(adjTile).resize((345,300))
                 context.paste(adjTileImage,coords[index],mask=adjTileImage)
         font = ImageFont.truetype("images/resources/arial.ttf", size=80)
         ImageDraw.Draw(context).text((10, 10), f"Option #{count}", (255, 255, 255), font=font,
