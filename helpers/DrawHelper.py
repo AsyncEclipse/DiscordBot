@@ -343,8 +343,8 @@ class DrawHelper:
                             if "money" in resource_type or "science" in resource_type or "material" in resource_type:
                                 resource_type2 = resource_type.replace("adv","")+"_Alone"
                                 pop_path = f"images/resources/components/resourcesymbols/{resource_type2}.png"
-                                pop_image = self.use_image(pop_path).resize((40,40))
-                                tile_image.paste(pop_image, (int(345 / 1024 * coords[0] - 20), int(345 / 1024 * coords[1] - 20)), mask=pop_image)
+                                pop_image = self.use_image(pop_path).resize((25,25))
+                                tile_image.paste(pop_image, (int(345 / 1024 * coords[0] - 13), int(345 / 1024 * coords[1] - 13)), mask=pop_image)
 
             if "owner" in tile and tile["owner"] != 0:
                 color = tile["owner"]

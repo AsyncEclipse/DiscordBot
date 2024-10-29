@@ -424,7 +424,10 @@ class Combat:
                         split = False
                         random_number = random.randint(1, 6)
                         num = str(random_number).replace("1","Miss").replace("6",":boom:")
-                        msg +=num+" "
+                        emojiName = "dice_"+Combat.translateColorToName(die)+"_"+str(random_number)
+                        guild_emojis = interaction.guild.emojis  
+                        matching_emojis = [emoji for emoji in guild_emojis if emoji.name == emojiName]
+                        msg +=str(matching_emojis[0])+" "
                         dieFiles.append(drawing.use_image("images/resources/components/dice_faces/dice_"+Combat.translateColorToName(die)+"_"+str(random_number)+".png"))
                         if missiles == "" and Combat.translateColorToDamage(die, random_number) == 4 and colorOrAI != "ai":
                             player = game.get_player_from_color(colorOrAI)

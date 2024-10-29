@@ -89,6 +89,8 @@ class ImageCacheHelper:
         elif "upgrades" in folder.lower():  
             return (58,58)  
         elif "resourcesymbol" in folder.lower():  
+            if "alone" in filename.lower():
+                return (70,70)
             return (100,100)  
         elif "tech_" in filename.lower():  
             return (68, 68)   
