@@ -32,19 +32,20 @@ class ImageCacheHelper:
                         
 
     def get_image_size(self, folder, filename):  
+        mult = 1024/345
         if "hexes" in folder.lower():  
-            return (345,300)
+            return (int(345*mult),int(300*mult))
         elif "upgrade_reference1" in filename.lower() or "upgrade_reference2" in filename.lower():  
             return (310,300)  
         elif "masks" in folder.lower():  
             if "banner" in filename.lower():
-                return (98, 48)  
+                return (int(98*mult), int(48*mult))  
             elif "hsMask" in filename.lower():
-                return (70,70)
+                return (int(70*mult),int(70*mult))
             elif "line" in filename.lower():
-                return (178,6)
+                return (int(178*mult),int(6*mult))
             else:
-                return (42,22)  
+                return (int(42*mult),int(22*mult))  
         elif "factions" in folder.lower():  
             if "ambassador" in filename.lower():
                 return (58,58)
@@ -52,9 +53,9 @@ class ImageCacheHelper:
                 return (895, 500)
         elif "all_boards" in folder.lower():  
             if "popcube" in filename.lower():
-                return (35,35)
+                return (int(35*mult),int(35*mult))
             elif "influence_disc" in filename.lower():
-                return (40,40)
+                return (int(40*mult),int(40*mult))
             elif "reputation" in filename.lower():
                 return (58,58)
             elif "colony_ship" in filename.lower():
@@ -64,33 +65,33 @@ class ImageCacheHelper:
             elif "yellow_square" in filename.lower():
                 return (65,65)
             elif "warp_picture" in filename.lower():
-                return (132,102)
+                return (int(132*mult),int(102*mult))
             else:
                 return (80,80)
         elif "basic_ships" in folder.lower():  
             if any(substring in filename.lower() for substring in ["gcds", "gcdsadv", "anc", "ancadv", "grd", "grdadv"]):
                 if "ai" in filename.lower():
-                    return (140,140)
+                    return (int(140),int(140))
                 else:
-                    return (110,110)
+                    return (int(110*mult),int(110*mult))
             else:
                 if "damage" in filename.lower():
-                    return (15,15) 
+                    return (int(15*mult),int(15*mult)) 
                 else:
                     if "cru" in filename.lower() or "sb" in filename.lower():
-                        return (90,90)
+                        return (int(90*mult),int(90*mult))
                     else:
                         if "drd" in filename.lower():
-                            return (90,90)
+                            return (int(90*mult),int(90*mult))
                         else:
-                            return (70,70) 
+                            return (int(70*mult),int(70*mult)) 
         elif "discovery_tiles" in folder.lower():  
-            return (80, 80)  
+            return (int(80*mult), int(80*mult))  
         elif "upgrades" in folder.lower():  
             return (58,58)  
         elif "resourcesymbol" in folder.lower():  
             if "alone" in filename.lower():
-                return (70,70)
+                return (int(25*mult),int(25*mult))
             return (100,100)  
         elif "tech_" in filename.lower():  
             return (68, 68)   

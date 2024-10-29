@@ -419,6 +419,7 @@ class Combat:
                 msg = name + " rolled the following "+missiles+"with their "+str(ship[2])+" "+Combat.translateShipAbrToName(ship[1])+"(s)"+nonMissiles+":\n"
                 dieFiles = []
                 dieNums = []
+                msg2 = "\n"
                 for x in range(ship[2]):
                     for die in dice:
                         split = False
@@ -427,8 +428,10 @@ class Combat:
                         emojiName = "dice_"+Combat.translateColorToName(die)+"_"+str(random_number)
                         guild_emojis = interaction.guild.emojis  
                         matching_emojis = [emoji for emoji in guild_emojis if emoji.name == emojiName]
-                        msg +=str(matching_emojis[0])+" "
-                        dieFiles.append(drawing.use_image("images/resources/components/dice_faces/dice_"+Combat.translateColorToName(die)+"_"+str(random_number)+".png"))
+                        msg +=str(num)+" "
+                        if len(matching_emojis) > 0:
+                            msg2 +=str(matching_emojis[0])+" "
+                        #dieFiles.append(drawing.use_image("images/resources/components/dice_faces/dice_"+Combat.translateColorToName(die)+"_"+str(random_number)+".png"))
                         if missiles == "" and Combat.translateColorToDamage(die, random_number) == 4 and colorOrAI != "ai":
                             player = game.get_player_from_color(colorOrAI)
                             playerObj = game.getPlayerObjectFromColor(colorOrAI)
@@ -449,7 +452,8 @@ class Combat:
                     needsShieldMessage = True
                 
                 if(len(dice) > 0):
-                    await interaction.channel.send(msg,file=drawing.append_images(dieFiles))
+                    #await interaction.channel.send(msg,file=drawing.append_images(dieFiles))
+                    await interaction.channel.send(msg+msg2)
                     oldNumPeeps = len(Combat.findPlayersInTile(game, pos))
                     for die in dieNums:
                         tile_map = game.get_gamestate()["board"]
