@@ -75,10 +75,13 @@ class ResearchButtons:
             )  
         if tech == "wap":
             view = View()
+            seenTiles = []
             for tile in player["owned_tiles"]: 
-                view.add_item(Button(label=tile,   
-                                style=discord.ButtonStyle.blurple,   
-                                custom_id=f"FCID{player['color']}_placeWarpPortal_"+tile))  
+                if tile not in seenTiles:
+                    seenTiles.append(tile)
+                    view.add_item(Button(label=tile,   
+                                    style=discord.ButtonStyle.blurple,   
+                                    custom_id=f"FCID{player['color']}_placeWarpPortal_"+tile))  
             await interaction.channel.send(  
                 f"Choose which tile you would like to place the warp tile in",view=view  
             )  
