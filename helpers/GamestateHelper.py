@@ -86,10 +86,8 @@ class GamestateHelper:
             message = await chronicles_channel.send(message_to_send)  
             thread = await message.create_thread(name=self.game_id) 
             drawing = DrawHelper(self.gamestate)
-            map = await drawing.show_map()
-            stats = await drawing.show_stats()
+            map = await drawing.show_game()
             await thread.send(file=map)
-            await thread.send(file=stats)
             winner,highestScore = self.getWinner()
             await thread.send(role.mention + " final state here. "+winner+" won with "+str(highestScore)+" points")
         if role:  
@@ -271,7 +269,8 @@ class GamestateHelper:
             tile = tile_data[sector]
             if owner != None:
                 tile["owner"] = owner
-                self.gamestate["players"][self.get_player_from_color(owner)]["owned_tiles"].append(position)
+                if position not in self.gamestate["players"][self.get_player_from_color(owner)]["owned_tiles"]:
+                    self.gamestate["players"][self.get_player_from_color(owner)]["owned_tiles"].append(position)
 
             if tile["ancient"] or tile["guardian"] or tile["gcds"]:
                 adv = ""
