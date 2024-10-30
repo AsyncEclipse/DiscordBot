@@ -1,4 +1,5 @@
 
+import asyncio
 import discord
 from discord.ui import View
 from Buttons.Turn import TurnButtons
@@ -26,7 +27,7 @@ class BuildButtons:
         await interaction.channel.send(f"{interaction.user.mention}, choose which tile you would like to build in.", view=view)
         drawing = DrawHelper(game.gamestate)
         if len(tiles) > 0:
-            await interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True)
+            asyncio.create_task(interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True))
 
     @staticmethod  
     async def buildIn(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):

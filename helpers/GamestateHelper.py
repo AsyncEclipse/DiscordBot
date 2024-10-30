@@ -961,32 +961,21 @@ class GamestateHelper:
                 tiles.append(tile)
         return tiles
 
-    async def send_files(self, interaction, files, thread, message, view):
-        for file in files:
-            await thread.send(message,file=file,view=view)
+    async def showGame(self,  thread, message):
+        drawing = DrawHelper(self.gamestate)  
+        map_result = await drawing.show_game()   
+        view = View()  
+        view.add_item(Button(label="Show Game", style=discord.ButtonStyle.blurple, custom_id="showGame"))  
+        view.add_item(Button(label="Show Reputation", style=discord.ButtonStyle.gray, custom_id="showReputation"))  
+        await thread.send(message,file=map_result,view=view)
 
-    async def showUpdate(self, message:str, interaction: discord.Interaction, bot):
+    async def showUpdate(self, message:str, interaction: discord.Interaction):
         await self.updateNamesAndOutRimTiles(interaction)
         if "-" in interaction.channel.name:
             thread_name = interaction.channel.name.split("-")[0]+"-bot-map-updates"
-            thread = discord.utils.get(interaction.channel.threads, name=thread_name)
-            # if thread is not None:
-            #     # Sending a message to the thread
-            #     drawing = DrawHelper(self.gamestate)
-            #     view = View()
-            #     view.add_item(Button(label="Show Game",style=discord.ButtonStyle.blurple, custom_id="showGame"))
-            #     view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
-            #     map = drawing.show_map()
-            #     stats = drawing.show_stats()
-            #     with concurrent.futures.ThreadPoolExecutor() as executor:
-            #         future = executor.submit(asyncio.run_coroutine_threadsafe, self.send_files(interaction, [map,stats], thread, message, view),bot.loop)
- 
-            drawing = DrawHelper(self.gamestate)  
-            map_result = await drawing.show_game()   
-            view = View()  
-            view.add_item(Button(label="Show Game", style=discord.ButtonStyle.blurple, custom_id="showGame"))  
-            view.add_item(Button(label="Show Reputation", style=discord.ButtonStyle.gray, custom_id="showReputation"))  
-            await self.send_files(interaction, [map_result], thread, message, view) 
+            thread = discord.utils.get(interaction.channel.threads, name=thread_name) 
+            if thread != None:
+                asyncio.create_task(self.showGame(interaction, thread, message))
     def getPlayerFromHSLocation(self, location):
         tileID = self.get_gamestate()["board"][location]["sector"]
         return next((player for player in self.get_gamestate()["players"] if str(self.get_gamestate()["players"][player]["home_planet"]) == tileID), None)

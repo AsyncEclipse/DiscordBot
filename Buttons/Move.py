@@ -1,3 +1,4 @@
+import asyncio
 import discord
 from discord.ui import View
 from Buttons.DiplomaticRelations import DiplomaticRelationsButtons
@@ -36,7 +37,7 @@ class MoveButtons:
         await interaction.channel.send( f"{interaction.user.mention} Select the tile you would like to move from", view=view)
         drawing = DrawHelper(game.gamestate)
         if len(tiles) > 0:
-            await interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True)
+            asyncio.create_task(interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True))
 
     @staticmethod
     async def moveFrom(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str):
@@ -70,6 +71,8 @@ class MoveButtons:
             if distance >  shipRange:
                 return
             if pos not in tile_map:
+                return
+            if "player_ships" not in tile_map[pos]:
                 return
             visited.add(pos)
             player_ships = tile_map[pos]["player_ships"][:]
@@ -117,9 +120,9 @@ class MoveButtons:
             await interaction.channel.send( f"Additional Options", view=view2)
         drawing = DrawHelper(game.gamestate)
         if len(tiles) < 15 and len(tiles) > 0:
-            await interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True)
+            asyncio.create_task(interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True))
     @staticmethod
-    async def moveTo(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str, player_helper:PlayerHelper, bot):
+    async def moveTo(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str, player_helper:PlayerHelper):
         originT = buttonID.split("_")[1]
         shipType = buttonID.split("_")[2]
         destination = buttonID.split("_")[3]

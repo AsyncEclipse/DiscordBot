@@ -48,7 +48,7 @@ class TurnButtons:
 
 
     @staticmethod
-    async def endTurn(player, game:GamestateHelper, interaction: discord.Interaction, bot):
+    async def endTurn(player, game:GamestateHelper, interaction: discord.Interaction):
         from helpers.CombatHelper import Combat
         nextPlayer = game.get_next_player(player)
         if nextPlayer != None and not game.is_everyone_passed():
@@ -59,22 +59,22 @@ class TurnButtons:
             role = discord.utils.get(interaction.guild.roles, name=game.game_id)  
             msg = role.mention+" All players have passed, you can use this button to start the next round"
             if len(Combat.findTilesInConflict(game))+ len(Combat.findUnownedTilesToTakeOver(game)) + len(Combat.findTilesInContention(game)) > 0:
-                await Combat.startCombatThreads(game, interaction)
+                asyncio.create_task(Combat.startCombatThreads(game, interaction))
                 msg = msg +  " after all battles are resolved"
             view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"startPopDrop"))
             view.add_item(Button(label="Run Upkeep",style=discord.ButtonStyle.blurple, custom_id="runUpkeep"))
-            await interaction.channel.send(msg, view=view)
+            asyncio.create_task(interaction.channel.send(msg, view=view))
         msg = f"End of {interaction.user.name}'s turn."
         if "lastAction" in player and "detailsOflastAction" in player:
             msg = f"End of {interaction.user.name}'s turn. They used their action to "+player["lastAction"]+". "+player["detailsOflastAction"]
-        asyncio.create_task(game.showUpdate(msg,interaction, bot))
+        asyncio.create_task(game.showUpdate(msg,interaction))
         await interaction.message.delete()
 
 
     
 
     @staticmethod
-    async def passForRound(player, game: GamestateHelper, interaction: discord.Interaction, player_helper : PlayerHelper, bot):
+    async def passForRound(player, game: GamestateHelper, interaction: discord.Interaction, player_helper : PlayerHelper):
         from helpers.CombatHelper import Combat
         if "passed" in player and player["passed"]== True:
             await interaction.channel.send(f"{interaction.user.mention} passed on their reaction window.")
@@ -114,7 +114,7 @@ class TurnButtons:
             view.add_item(Button(label="Run Upkeep",style=discord.ButtonStyle.blurple, custom_id="runUpkeep"))
             await interaction.channel.send(msg, view=view)
         await interaction.message.delete()
-        asyncio.create_task(game.showUpdate(f"{interaction.user.name} Passing",interaction, bot))
+        asyncio.create_task(game.showUpdate(f"{interaction.user.name} Passing",interaction))
 
 
     @staticmethod
@@ -140,7 +140,7 @@ class TurnButtons:
 
 
     @staticmethod
-    async def runUpkeep(game: GamestateHelper, interaction: discord.Interaction,bot):
+    async def runUpkeep(game: GamestateHelper, interaction: discord.Interaction):
         for player in game.gamestate["players"]:
             p1 = PlayerHelper(player, game.get_player(player))
             if p1.checkBankrupt():
@@ -163,7 +163,7 @@ class TurnButtons:
         await game.upkeep(interaction)
         drawing = DrawHelper(game.gamestate)
         if game.gamestate["roundNum"] < 9:
-            await interaction.channel.send("Tech At Start Of New Round",file=drawing.show_available_techs())
+            await interaction.channel.send("Tech At Start Of Round "+str(game.gamestate['roundNum']),file=drawing.show_available_techs())
             nextPlayer = TurnButtons.getFirstPlayer(game)
             if nextPlayer != None:
                 view = TurnButtons.getStartTurnButtons(game,nextPlayer)
@@ -174,7 +174,7 @@ class TurnButtons:
             view = View()
             view.add_item(Button(label="Declare Winner",style=discord.ButtonStyle.blurple, custom_id="declareWinner"))
             await interaction.channel.send("It seems like the game should be ended, hit this button to reveal the winner.", view=view)
-        asyncio.create_task(game.showUpdate(f"Start of new round",interaction, bot))
+        asyncio.create_task(game.showUpdate(f"Start of round {str(game.gamestate['roundNum'])}",interaction))
 
 
     @staticmethod
@@ -186,25 +186,28 @@ class TurnButtons:
 
         await interaction.followup.send(msg,ephemeral=True)
     @staticmethod
-    async def send_files(interaction, files):
+    async def send_files(interaction, files, view, ephemeralStatus):
         for file in files:
-            asyncio.create_task(interaction.followup.send(file=file,ephemeral=True))
+            asyncio.create_task(interaction.followup.send(file=file,ephemeral=ephemeralStatus, view=view))
 
     @staticmethod
     async def send_file(interaction, file):
         await interaction.followup.send(file=file,ephemeral=True)
 
     @staticmethod
-    async def showGame(game: GamestateHelper, interaction: discord.Interaction, bot):
+    async def showGame(game: GamestateHelper, interaction: discord.Interaction):
         await game.updateNamesAndOutRimTiles(interaction)
+        asyncio.create_task(TurnButtons.showGameAsync(game, interaction, True))
+
+    @staticmethod
+    async def showGameAsync(game: GamestateHelper, interaction: discord.Interaction, ephemeralStatus):
         drawing = DrawHelper(game.gamestate)
-        view = View()
-        view.add_item(Button(label="Show Game",style=discord.ButtonStyle.blurple, custom_id="showGame"))
-        view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
         map = await drawing.show_game()
-        asyncio.create_task(TurnButtons.send_files(interaction, [map]))
-        # with concurrent.futures.ThreadPoolExecutor() as executor:
-        #     future = executor.submit(asyncio.run_coroutine_threadsafe, TurnButtons.send_files(interaction, [map,stats]),bot.loop)
+        view = View()
+        button = Button(label="Show Game",style=discord.ButtonStyle.blurple, custom_id="showGame")
+        view.add_item(button)
+        view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
+        asyncio.create_task(TurnButtons.send_files(interaction, [map], view, ephemeralStatus))
 
     @staticmethod
     def getStartTurnButtons(game: GamestateHelper,p1):

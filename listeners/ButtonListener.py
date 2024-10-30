@@ -60,7 +60,7 @@ class ButtonListener(commands.Cog):
                 if "deleteMsg" in customID:
                     await interaction.message.delete()
                 if customID == "showGame":  
-                    await TurnButtons.showGame(game, interaction, self.bot)
+                    await TurnButtons.showGame(game, interaction)
                 if player == None:
                     return
                 if customID.startswith("tradeAtRatio"):
@@ -69,11 +69,11 @@ class ButtonListener(commands.Cog):
                     await TurnButtons.showReputation(game, interaction,player)
                 if customID == "passForRound":
                     game.updateSaveFile()
-                    await TurnButtons.passForRound(player, game, interaction,player_helper, self.bot)
+                    await TurnButtons.passForRound(player, game, interaction,player_helper)
                 if customID == "permanentlyPass":
                     await TurnButtons.permanentlyPass(player, game, interaction,player_helper)
                 if customID == "endTurn":
-                    await TurnButtons.endTurn(player, game, interaction, self.bot)
+                    await TurnButtons.endTurn(player, game, interaction)
                 if customID == "restartTurn":
                     await TurnButtons.restartTurn(player, game, interaction)
                 if customID == "undoLastTurn":
@@ -81,7 +81,7 @@ class ButtonListener(commands.Cog):
                 if customID == "runUpkeep":
                     game.createRoundNum()
                     round = game.get_gamestate()["roundNum"]
-                    await TurnButtons.runUpkeep(game, interaction,self.bot)
+                    await TurnButtons.runUpkeep(game, interaction)
                     game.updateSaveFile()
                     round2 = game.get_gamestate()["roundNum"]
                     if round != round2:
@@ -182,7 +182,7 @@ class ButtonListener(commands.Cog):
                 if customID.startswith("moveThisShip"):
                     await MoveButtons.moveThisShip(game, player, interaction,customID)
                 if customID.startswith("moveTo"):
-                    await MoveButtons.moveTo(game, player, interaction,customID,player_helper,self.bot)
+                    await MoveButtons.moveTo(game, player, interaction,customID,player_helper)
                 if customID.startswith("endGame"):
                     await game.endGame(interaction)
                 if customID.startswith("declareWinner"):
