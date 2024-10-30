@@ -1,3 +1,4 @@
+import asyncio
 import json
 import discord
 from discord.ui import View
@@ -164,7 +165,7 @@ class ResearchButtons:
         await interaction.channel.send(f"{interaction.user.mention}, select the tech you would like to acquire. The discounted cost is in parentheses. You currently have {str(player['science'])} science, and can trade other resources for science at a {str(player['trade_value'])}:1 ratio", view=view)
         if buttonCount > 26:
             await interaction.channel.send(view=view2)
-        await interaction.followup.send(file=drawing.show_available_techs(),ephemeral=True)
+        asyncio.create_task(interaction.followup.send(file=drawing.show_available_techs(),ephemeral=True))
         if buttonCommand:
             if player["research_apt"] > 1:
                 if buttonCount < 25:

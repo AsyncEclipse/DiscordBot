@@ -970,7 +970,6 @@ class GamestateHelper:
         await thread.send(message,file=map_result,view=view)
 
     async def showUpdate(self, message:str, interaction: discord.Interaction):
-        await self.updateNamesAndOutRimTiles(interaction)
         if "-" in interaction.channel.name:
             thread_name = interaction.channel.name.split("-")[0]+"-bot-map-updates"
             thread = discord.utils.get(interaction.channel.threads, name=thread_name) 
