@@ -112,8 +112,9 @@ class ResearchButtons:
         player = game.get_player(interaction.user.id)  
         await interaction.channel.send(f"{interaction.user.mention} is using their turn to research")
         player_helper = PlayerHelper(interaction.user.id, player)  
-        player_helper.spend_influence_on_action("research")
-        game.update_player(player_helper)
+        if buttonCommand:
+            player_helper.spend_influence_on_action("research")
+            game.update_player(player_helper)
         player = game.get_player(interaction.user.id) 
         drawing = DrawHelper(game.gamestate)  
         view = View()

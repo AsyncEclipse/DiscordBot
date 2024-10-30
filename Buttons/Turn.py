@@ -50,6 +50,7 @@ class TurnButtons:
     @staticmethod
     async def endTurn(player, game:GamestateHelper, interaction: discord.Interaction):
         from helpers.CombatHelper import Combat
+        start_time = time.perf_counter()
         nextPlayer = game.get_next_player(player)
         if nextPlayer != None and not game.is_everyone_passed():
             view = TurnButtons.getStartTurnButtons(game,nextPlayer)
@@ -67,6 +68,9 @@ class TurnButtons:
         msg = f"End of {interaction.user.name}'s turn."
         if "lastAction" in player and "detailsOflastAction" in player:
             msg = f"End of {interaction.user.name}'s turn. They used their action to "+player["lastAction"]+". "+player["detailsOflastAction"]
+        end_time = time.perf_counter()  
+        elapsed_time = end_time - start_time  
+        print(f"Total elapsed time for non-update part of endTurn: {elapsed_time:.2f} seconds")  
         asyncio.create_task(game.showUpdate(msg,interaction))
         await interaction.message.delete()
 

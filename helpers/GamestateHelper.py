@@ -975,7 +975,7 @@ class GamestateHelper:
             thread_name = interaction.channel.name.split("-")[0]+"-bot-map-updates"
             thread = discord.utils.get(interaction.channel.threads, name=thread_name) 
             if thread != None:
-                asyncio.create_task(self.showGame(interaction, thread, message))
+                asyncio.create_task(self.showGame(thread, message))
     def getPlayerFromHSLocation(self, location):
         tileID = self.get_gamestate()["board"][location]["sector"]
         return next((player for player in self.get_gamestate()["players"] if str(self.get_gamestate()["players"][player]["home_planet"]) == tileID), None)
