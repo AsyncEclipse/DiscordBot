@@ -68,11 +68,18 @@ class TurnButtons:
         msg = f"End of {interaction.user.name}'s turn."
         if "lastAction" in player and "detailsOflastAction" in player:
             msg = f"End of {interaction.user.name}'s turn. They used their action to "+player["lastAction"]+". "+player["detailsOflastAction"]
+        await game.updateNamesAndOutRimTiles(interaction)
+        await interaction.message.delete()
+        if "-" in interaction.channel.name:
+            thread_name = interaction.channel.name.split("-")[0]+"-bot-map-updates"
+            thread = discord.utils.get(interaction.channel.threads, name=thread_name) 
+            end_time = time.perf_counter()
+            if thread != None:
+                asyncio.create_task(game.showGame(thread, msg))
         end_time = time.perf_counter()  
         elapsed_time = end_time - start_time  
         print(f"Total elapsed time for non-update part of endTurn: {elapsed_time:.2f} seconds")  
-        asyncio.create_task(game.showUpdate(msg,interaction))
-        await interaction.message.delete()
+        
 
 
     
