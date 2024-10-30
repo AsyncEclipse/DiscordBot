@@ -1,3 +1,4 @@
+import asyncio
 import os
 import discord
 from Buttons.Turn import TurnButtons
@@ -58,7 +59,7 @@ class GameCommands(commands.GroupCog, name="game"):
     async def upkeep(self,interaction: discord.Interaction):
         await interaction.response.defer(thinking=False)
         game = GamestateHelper(interaction.channel)
-        await TurnButtons.runUpkeep(game, interaction,self.bot)
+        await TurnButtons.runUpkeep(game, interaction)
     
     @app_commands.command(name="set_round")
     async def set_round(self,interaction: discord.Interaction, round:int):
@@ -71,14 +72,7 @@ class GameCommands(commands.GroupCog, name="game"):
         game = GamestateHelper(interaction.channel)
         await interaction.response.defer(thinking=True)
         start_time = time.perf_counter()
-        drawing = DrawHelper(game.gamestate)
-        map = await drawing.show_game()
-        view = View()
-        button = Button(label="Show Game",style=discord.ButtonStyle.blurple, custom_id="showGame")
-        view.add_item(button)
-        view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
-        
-        await interaction.followup.send(file=map, view=view)
+        asyncio.create_task(TurnButtons.showGameAsync(game, interaction, False))
         
         end_time = time.perf_counter()  
         elapsed_time = end_time - start_time  

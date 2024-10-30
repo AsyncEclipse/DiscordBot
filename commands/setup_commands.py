@@ -125,7 +125,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         await interaction.channel.send("Done With Setup!")
         
         
-        asyncio.create_task(game.showUpdate("Start of Game",interaction, self.bot))
+        asyncio.create_task(game.showUpdate("Start of Game",interaction))
         view = TurnButtons.getStartTurnButtons(game, game.get_player(player1.id))
         await interaction.channel.send(f"<@{player1.id}> use these buttons to do your turn. "+ game.displayPlayerStats(game.get_player(player1.id)),view=view)
         await interaction.response.defer()
