@@ -392,5 +392,5 @@ class SetupCommands(commands.GroupCog, name="setup"):
         if isinstance(interaction.channel, discord.Thread):  
             new_name = f"[Launched] {interaction.channel.name}"   
             await interaction.channel.edit(name=new_name)
-            await thread.edit(archived=True)
+            await interaction.channel.edit(archived=True)
         
