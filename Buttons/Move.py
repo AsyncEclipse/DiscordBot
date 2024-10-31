@@ -6,6 +6,7 @@ from Buttons.Explore import ExploreButtons
 from Buttons.Influence import InfluenceButtons
 from Buttons.Turn import TurnButtons
 from helpers.DrawHelper import DrawHelper
+from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 from discord.ui import View, Button
@@ -50,7 +51,8 @@ class MoveButtons:
             ship = PlayerShip(player, shipType)
             shipRange = ship.getRange()
             if f"{player_color}-{game.getShipShortName(shipType)}" in game.get_gamestate()["board"][originT]["player_ships"] and shipRange > 0:
-                view.add_item(Button(label=shipType.capitalize() + " (Range: "+str(shipRange)+")", style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_moveThisShip_{originT}_{shipType}_{moveCount}"))
+                shipEmoji = Emoji.getEmojiByName(player['color']+game.getShipShortName(ship))
+                view.add_item(Button(label=shipType.capitalize() + " (Range: "+str(shipRange)+")", emoji=shipEmoji, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_moveThisShip_{originT}_{shipType}_{moveCount}"))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
         await interaction.message.delete()
         await interaction.channel.send( f"{interaction.user.mention} Select the ship you would like to move from {originT}", view=view)
