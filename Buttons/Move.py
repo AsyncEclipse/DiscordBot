@@ -51,7 +51,7 @@ class MoveButtons:
             ship = PlayerShip(player, shipType)
             shipRange = ship.getRange()
             if f"{player_color}-{game.getShipShortName(shipType)}" in game.get_gamestate()["board"][originT]["player_ships"] and shipRange > 0:
-                shipEmoji = Emoji.getEmojiByName(player['color']+game.getShipShortName(ship))
+                shipEmoji = Emoji.getEmojiByName(player['color']+game.getShipShortName(shipType))
                 view.add_item(Button(label=shipType.capitalize() + " (Range: "+str(shipRange)+")", emoji=shipEmoji, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_moveThisShip_{originT}_{shipType}_{moveCount}"))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
         await interaction.message.delete()
