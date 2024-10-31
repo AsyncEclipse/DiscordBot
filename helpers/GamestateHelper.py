@@ -927,6 +927,7 @@ class GamestateHelper:
         self.gamestate["board"][tile]["disctile"]=0
         self.update()
         return nextTile
+    
     def setTurnOrder(self, order):
         self.gamestate["turn_order"]=order
         self.update()

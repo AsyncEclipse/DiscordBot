@@ -1,6 +1,7 @@
 import json
 import discord
 from discord.ui import View
+from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 from helpers.DrawHelper import DrawHelper
@@ -17,7 +18,8 @@ class UpgradeButtons:
         view = View()
         actions = str(player['upgrade_apt'])
         for ship in ships:
-            view.add_item(Button(label=ship.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_upgradeShip_{actions}_{ship}_{discTileUpgrade}"))
+            shipEmoji = Emoji.getEmojiByName(player['color']+game.getShipShortName(ship))
+            view.add_item(Button(label=ship.capitalize(), emoji = shipEmoji, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_upgradeShip_{actions}_{ship}_{discTileUpgrade}"))
         await interaction.followup.send(file=drawing.show_player_ship_area(image),ephemeral=True)
         if discTileUpgrade != "dummy":
             view.add_item(Button(label="Save For Future Upgrade Action", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))
@@ -44,7 +46,9 @@ class UpgradeButtons:
         for i in set(player[f"{ship}_parts"]):
             if i == "mus":
                 continue
-            view.add_item(Button(label=part_stats[i]["name"], style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_selectOldPart_{actions}_{ship}_{i}_{discTileUpgrade}"))
+            part_details = part_stats.get(i)
+            partName = part_details["name"].lower().replace(" ", "_") if part_details else i
+            view.add_item(Button(label=part_stats[i]["name"], style=discord.ButtonStyle.blurple, emoji= Emoji.getEmojiByName(partName), custom_id=f"FCID{player['color']}_selectOldPart_{actions}_{ship}_{i}_{discTileUpgrade}"))
         await interaction.message.edit(content=f"{interaction.user.mention}, pick which part to replace or remove.",
                                                 view=view)
     @staticmethod
@@ -74,8 +78,15 @@ class UpgradeButtons:
             if "ancient_parts" in player and tech in player["ancient_parts"]:
                 available_parts.append(tech)
         available_parts = set(available_parts)
+        with open("data/parts.json", "r") as f:
+                part_data = json.load(f)
+        
+           
         for i in available_parts:
-            view.add_item(Button(label=part_stats[i]["name"], style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_chooseUpgrade_{actions}_{ship}_{oldPart}_{i}_{discTileUpgrade}"))
+            part_details = part_data.get(i)
+            partName = part_details["name"].lower().replace(" ", "_") if part_details else i
+            
+            view.add_item(Button(label=part_stats[i]["name"], style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_chooseUpgrade_{actions}_{ship}_{oldPart}_{i}_{discTileUpgrade}", emoji=Emoji.getEmojiByName(partName)))
         await interaction.message.edit(content=f"{interaction.user.mention}, replace "
                                                         f"{part_stats[oldPart]['name']} with which part? Remove as a free action by selecting 'Empty'.", view=view)
         await interaction.followup.send("Available parts", file=drawing.availablePartsFile(available_parts),ephemeral=True)
@@ -119,7 +130,8 @@ class UpgradeButtons:
         if actions > 0:
             ships = ["interceptor","cruiser","dread","starbase"]
             for ship2 in ships:
-                view.add_item(Button(label=ship2.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_upgradeShip_{str(actions)}_{ship2}_dummy"))
+                shipEmoji = Emoji.getEmojiByName(player['color']+game.getShipShortName(ship))
+                view.add_item(Button(label=ship2.capitalize(),emoji=shipEmoji, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_upgradeShip_{str(actions)}_{ship2}_dummy"))
         view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                              custom_id=f"FCID{player['color']}_finishAction"))
         await interaction.message.delete()

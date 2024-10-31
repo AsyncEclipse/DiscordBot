@@ -1,4 +1,5 @@
 import math
+import random
 import discord
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
@@ -455,6 +456,23 @@ class DrawHelper:
         context = context.crop((0, 0,largestX,470))
         return context
 
+
+    def display_remaining_discoveries(self):
+        tiles = self.gamestate["discTiles"][:]
+        sorted_tiles = sorted(tiles)
+        context = Image.new("RGBA", (85*len(tiles), 90), (0,0,0,255))
+        count = 0
+        with open("data/discoverytiles.json") as f:
+            discTile_data = json.load(f)
+        for tile in sorted_tiles:
+            discName = discTile_data[tile]["name"]
+            part_path = f"images/resources/components/discovery_tiles/discovery_{discName.replace(' ','_').lower()}.png"
+            part_image = self.use_image(part_path).resize((80,80))
+            context.paste(part_image, (85*count, 0), mask=part_image)
+            count +=1
+        return context
+
+
     def display_remaining_tiles(self):
         context = Image.new("RGBA", (1300, 500), (0,0,0,255))
 
@@ -878,18 +896,22 @@ class DrawHelper:
         context2 = create_player_area()
         context3 = self.display_techs()
         context4 = self.display_remaining_tiles()
+        context5 = self.display_remaining_discoveries()
         #context5 = self.display_cube_track_reference()
         pCount = len(self.gamestate["players"])
         width = 4150 if (pCount != 2 and pCount != 4) else 2800
         width = max(context2.size[0],context3.size[0]+context4.size[0]+150)
         width = max(width, cropped_context.size[0])
-        final_context = Image.new("RGBA", (width, cropped_context.size[1]+context2.size[1]+max(context3.size[1],context4.size[1])), (0, 0, 0, 255))
+        width = max(width, context5.size[0])
+        height = cropped_context.size[1]+context2.size[1]+max(context3.size[1],context4.size[1])+90
+        final_context = Image.new("RGBA", (width, height), (0, 0, 0, 255))
         centering = int((width - cropped_context.size[0])/2)
         final_context.paste(cropped_context, (centering, 0))
         final_context.paste(context2, (0, cropped_context.size[1]))
         final_context.paste(context3, (0, cropped_context.size[1]+context2.size[1]))
         #final_context.paste(context5, (50, context2.size[1]-20))
         final_context.paste(context4, (context3.size[0]+150, cropped_context.size[1]+context2.size[1]))
+        final_context.paste(context5, (0, cropped_context.size[1]+context2.size[1]+max(context3.size[1],context4.size[1])))
         bytes_io = BytesIO()
         final_context.save(bytes_io, format="WEBP")
         bytes_io.seek(0)

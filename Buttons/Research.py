@@ -4,6 +4,7 @@ import discord
 from discord.ui import View
 from Buttons.DiscoveryTile import DiscoveryTileButtons
 from helpers.DrawHelper import DrawHelper
+from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 from discord.ui import View, Button
@@ -107,6 +108,11 @@ class ResearchButtons:
         discount = track[6 - prev_tech_count]  
         return max(tech_details["base_cost"] + discount, tech_details["min_cost"])  
 
+
+    @staticmethod
+    def getPlayerTotalAvailableScience(player):
+        return player["science"] + int(player["money"]/player["trade_value"]) + int(player["materials"]/player["trade_value"])
+
     @staticmethod  
     async def startResearch(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction, buttonCommand:bool):
         game = GamestateHelper(interaction.channel)
@@ -145,9 +151,14 @@ class ResearchButtons:
         for tech in researchedTech:
             displayedTechs.append(tech)
         buttonCount = 1
+        avalScience = ResearchButtons.getPlayerTotalAvailableScience(player)
         for tech_type in tech_groups:  
             sorted_techs = sorted(tech_groups[tech_type], key=lambda x: x[2])  # Sort by cost  
             for tech, tech_name, cost in sorted_techs:  
+                if cost > avalScience:
+                    continue
+                tech_details = tech_data.get(tech)  
+                techName = "tech_"+tech_details["name"].lower().replace(" ", "_") if tech_details else tech
                 buttonStyle = discord.ButtonStyle.red  
                 if tech_type == "grid":  
                     buttonStyle = discord.ButtonStyle.green  
@@ -158,9 +169,9 @@ class ResearchButtons:
                 if(tech not in displayedTechs):
                     displayedTechs.append(tech)
                     if buttonCount < 26:
-                        view.add_item(Button(label=f"{tech_name} ({cost})", style=buttonStyle, custom_id=f"FCID{player['color']}_getTech_{tech}_{tech_type}"))  
+                        view.add_item(Button(label=f"{tech_name} ({cost})", style=buttonStyle, emoji=Emoji.getEmojiByName(techName), custom_id=f"FCID{player['color']}_getTech_{tech}_{tech_type}"))  
                     else:
-                        view2.add_item(Button(label=f"{tech_name} ({cost})", style=buttonStyle, custom_id=f"FCID{player['color']}_getTech_{tech}_{tech_type}"))
+                        view2.add_item(Button(label=f"{tech_name} ({cost})", style=buttonStyle, emoji=Emoji.getEmojiByName(techName),custom_id=f"FCID{player['color']}_getTech_{tech}_{tech_type}"))
                     buttonCount+=1
         await interaction.channel.send(f"{interaction.user.mention}, select the tech you would like to acquire. The discounted cost is in parentheses. You currently have {str(player['science'])} science, and can trade other resources for science at a {str(player['trade_value'])}:1 ratio", view=view)
         if buttonCount > 26:

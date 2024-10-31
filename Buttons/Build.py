@@ -4,6 +4,7 @@ import discord
 from discord.ui import View
 from Buttons.Turn import TurnButtons
 from helpers.DrawHelper import DrawHelper
+from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 from discord.ui import View, Button
@@ -97,7 +98,11 @@ class BuildButtons:
                 key = f"cost_dread"
             buttonElements = [f"FCID{player['color']}","buildShip", build, str(cost), build_loc, ship]
             if remaining > 0:
-                view.add_item(Button(label=f"{ship} ({player[f'{key}']})", style=discord.ButtonStyle.blurple, custom_id="_".join(buttonElements))) 
+                if ship != "Orbital" and ship !="Monolith":
+                    shipEmoji = Emoji.getEmojiByName(player['color']+game.getShipShortName(ship))
+                    view.add_item(Button(label=f"{ship} ({player[f'{key}']})",emoji=shipEmoji, style=discord.ButtonStyle.blurple, custom_id="_".join(buttonElements)))
+                else:
+                    view.add_item(Button(label=f"{ship} ({player[f'{key}']})", style=discord.ButtonStyle.blurple, custom_id="_".join(buttonElements))) 
         buttonElements = [f"FCID{player['color']}","finishBuild", build, str(cost), build_loc]
         if build != "none":
             view.add_item(Button(label="Finished In This System", style=discord.ButtonStyle.red, custom_id="_".join(buttonElements))) 
@@ -195,7 +200,11 @@ class BuildButtons:
         summary = ""
         textSum = ""
         for ship in build:
+            
             shortName = ship.split("-")[1]
+            if shortName != "mon" and shortName != "orb":
+                shipEmoji = Emoji.getEmojiByName(player['color']+shortName)
+                textSum += shipEmoji +" "
             summary += " "+game.getShipFullName(shortName)
             textSum +=game.getShipFullName(shortName).capitalize()+"\n"
         player_helper.specifyDetailsOfAction("Built "+summary+" in "+loc+".")
