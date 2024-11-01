@@ -181,7 +181,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         player = game.get_player(interaction.user.id)  
         player_helper = PlayerHelper(interaction.user.id, player)
         await interaction.response.defer(thinking=False)
-        await MoveButtons.startMove(game, player, interaction,"startMove_8", True)
+        await MoveButtons.startMove(game, player, interaction,"startMove_8", False)
 
 
    

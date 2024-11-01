@@ -73,12 +73,11 @@ class TurnButtons:
         if "-" in interaction.channel.name:
             thread_name = interaction.channel.name.split("-")[0]+"-bot-map-updates"
             thread = discord.utils.get(interaction.channel.threads, name=thread_name) 
-            end_time = time.perf_counter()
             if thread != None:
                 asyncio.create_task(game.showGame(thread, msg))
         end_time = time.perf_counter()  
         elapsed_time = end_time - start_time  
-        print(f"Total elapsed time for non-update part of endTurn: {elapsed_time:.2f} seconds")  
+        #print(f"Total elapsed time for non-update part of endTurn: {elapsed_time:.2f} seconds")  
         
 
 
@@ -124,8 +123,14 @@ class TurnButtons:
             view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"startPopDrop"))
             view.add_item(Button(label="Run Upkeep",style=discord.ButtonStyle.blurple, custom_id="runUpkeep"))
             await interaction.channel.send(msg, view=view)
+        msg2 = f"{interaction.user.name} Passing"
+        await game.updateNamesAndOutRimTiles(interaction)
         await interaction.message.delete()
-        asyncio.create_task(game.showUpdate(f"{interaction.user.name} Passing",interaction))
+        if "-" in interaction.channel.name:
+            thread_name = interaction.channel.name.split("-")[0]+"-bot-map-updates"
+            thread = discord.utils.get(interaction.channel.threads, name=thread_name) 
+            if thread != None:
+                asyncio.create_task(game.showGame(thread, msg2))
 
 
     @staticmethod
@@ -256,6 +261,8 @@ class TurnButtons:
             view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{p1['color']}_startPopDrop"))
         if game.get_gamestate()["player_count"] > 3 and not player_helper.isTraitor() and len(DiplomaticRelationsButtons.getPlayersWithWhichDiplomatcRelationsCanBeFormed(game, player)) > 0:
             view.add_item(Button(label="Initiate Diplomatic Relations", style=discord.ButtonStyle.gray, custom_id=f"FCID{p1['color']}_startDiplomaticRelations"))
+        if not player_helper.isTraitor() and "minor_species" in game.gamestate and len(game.get_gamestate()["minor_species"]) > 0:
+            view.add_item(Button(label="Minor Species Relations", style=discord.ButtonStyle.green, custom_id=f"FCID{p1['color']}_startMinorRelations"))
         if game.getNumberOfSaveFiles() > 0:
             view.add_item(Button(label="Undo Last Turn", style=discord.ButtonStyle.red, custom_id=f"undoLastTurn"))
         return view

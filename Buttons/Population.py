@@ -14,6 +14,7 @@ class PopulationButtons:
         tiles.sort()
         emptyPlanets = []
         for tile in tiles:
+            #neutraladv
             tileState = game.get_gamestate()["board"][tile]
             planetTypes = ["money","science","material","neutral","moneyadv","scienceadv","materialadv","neutraladv"]
             for planetT in planetTypes:
