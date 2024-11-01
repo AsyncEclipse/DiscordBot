@@ -474,7 +474,7 @@ class DrawHelper:
 
 
     def display_remaining_tiles(self):
-        context = Image.new("RGBA", (1300, 500), (0,0,0,255))
+        context = Image.new("RGBA", (1800, 500), (0,0,0,255))
 
 
         filepath = f"images/resources/hexes/sector3backblank.png"
@@ -524,6 +524,16 @@ class DrawHelper:
         filepathRef = f"images/resources/components/reference_sheets/upgrade_reference2.png"
         ref_image = self.use_image(filepathRef)
         context.paste(ref_image, (970,85), mask=ref_image)
+
+        if "minor_species" in self.gamestate and len(self.gamestate["minor_species"]) > 0:
+            text_drawable_image.text((1300, 0), "Minor Species:", (0, 255, 0), font=font,
+                                    stroke_width=stroke_width, stroke_fill=stroke_color)
+            minor_species = self.gamestate["minor_species"]
+            count = 0
+            for species in minor_species:
+                tile_image = Image.open(f"images/resources/components/minor_species/minorspecies_{species.replace(' ','_').lower()}.png").convert("RGBA").resize((100, 100))
+                context.paste(tile_image, (1320+120*count,85), mask=tile_image)
+                count += 1
         return context
     
     def display_cube_track_reference(self, player):
@@ -694,12 +704,20 @@ class DrawHelper:
             if not isinstance(reputation, int) and "-" in reputation:
                 faction = reputation.split("-")[1]
                 color =  reputation.split("-")[2]
-                pop_path = f"images/resources/components/all_boards/popcube_{color}.png"
-                pop_image = self.use_image(pop_path).resize((35,35))
-                amb_tile_path = f"images/resources/components/factions/{faction}_ambassador.png"
-                amb_tile_image = self.use_image(amb_tile_path)
+                
+                if faction == "minor":
+                    amb_tile_path = f"images/resources/components/minor_species/minorspecies_{color.replace(' ','_').lower()}.png"
+                    amb_tile_image = self.use_image(amb_tile_path)
+                else:
+                    amb_tile_path = f"images/resources/components/factions/{faction}_ambassador.png"
+                    amb_tile_image = self.use_image(amb_tile_path)
                 context.paste(amb_tile_image, (825,172+x*scaler-mod), mask=amb_tile_image)
-                context.paste(pop_image, (825+20,172+x*scaler+25-mod), mask=pop_image)
+                if faction != "minor" or "cube" in color:
+                    if "cube" in color:
+                        color = player["color"]
+                    pop_path = f"images/resources/components/all_boards/popcube_{color}.png"
+                    pop_image = self.use_image(pop_path).resize((35,35))
+                    context.paste(pop_image, (825+20,172+x*scaler+25-mod), mask=pop_image)
 
         x = 925
         y = 0
@@ -823,13 +841,31 @@ class DrawHelper:
         if "disc_tiles_for_points" in player:
             points += player["disc_tiles_for_points"]*2
         reputationPoints = 0
+        ambass = 0
+        repu = 0
+        countAmb = False
+        countRep = False
         for reputation in player["reputation_track"]:
             if isinstance(reputation, int):
+                repu +=1
                 if "gameEnded" in self.gamestate:
                     points += reputation
                     reputationPoints +=reputation
             if not isinstance(reputation, int) and "-" in reputation:
+                reputation = reputation.lower()
                 points += 1
+                ambass += 1
+                if "three" in reputation:
+                    points += 2
+                if "per ambassador" in reputation:
+                    countAmb = True
+                if "per rep" in reputation:
+                    countRep = True
+        if countAmb:
+            points += ambass
+        if countRep:
+            points += repu
+                
         if "discoveryTileBonusPointTiles" in player and "rep" in player["discoveryTileBonusPointTiles"]:
             points += int(reputationPoints/3)
         if "traitor" in player and player["traitor"] == True:
@@ -1035,6 +1071,22 @@ class DrawHelper:
         bytes.seek(0)
         file = discord.File(bytes, filename="tile_image.webp")
         return file
+
+    def show_minor_species(self):
+        minor_species = self.gamestate["minor_species"]
+        context = Image.new("RGBA", (300 *len(minor_species), 260), (255, 255, 255, 0))
+        count = 0
+        for species in minor_species:
+            tile_image = Image.open(f"images/resources/components/minor_species/minorspecies_{species.replace(' ','_').lower()}.png").convert("RGBA").resize((260, 260))
+            context.paste(tile_image, (300*count,0), mask=tile_image)
+            count += 1
+        bytes = BytesIO()
+        context.save(bytes, format="WEBP")
+        bytes.seek(0)
+        file = discord.File(bytes, filename="disc_tile_image.webp")
+        return file
+
+
 
     def show_disc_tile(self, disc_tile_name:str):
         context = Image.new("RGBA", (260, 260), (255, 255, 255, 0))

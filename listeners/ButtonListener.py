@@ -164,13 +164,18 @@ class ButtonListener(commands.Cog):
                 if customID.startswith("finishInfluenceAction"):
                     await InfluenceButtons.finishInfluenceAction(game, player, interaction,player_helper)
                 if customID.startswith("startDiplomaticRelations"):
+                    game.updateSaveFile()
                     await DiplomaticRelationsButtons.startDiplomaticRelations(game, player, interaction)
+                if customID.startswith("startMinorRelations"):
+                    await DiplomaticRelationsButtons.startMinorRelations(game, player, interaction)
                 if customID.startswith("offerRelationsTo"):
                     await DiplomaticRelationsButtons.offerRelationsTo(game, player, interaction,customID)
                 if customID.startswith("declineRelationsWith"):
                     await DiplomaticRelationsButtons.declineRelationsWith(game, player, interaction,customID)
                 if customID.startswith("acceptRelationsWith"):
                     await DiplomaticRelationsButtons.acceptRelationsWith(game, player, interaction,customID)
+                if customID.startswith("formMinorRelations"):
+                    await DiplomaticRelationsButtons.formMinorRelations(game, player, interaction,customID, player_helper)
                 if customID.startswith("reducePopFor"):
                     await DiplomaticRelationsButtons.reducePopFor(game, player_helper, interaction,customID)
                 if customID.startswith("startMove"):

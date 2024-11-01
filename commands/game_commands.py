@@ -60,6 +60,12 @@ class GameCommands(commands.GroupCog, name="game"):
         await interaction.response.defer(thinking=False)
         game = GamestateHelper(interaction.channel)
         await TurnButtons.runUpkeep(game, interaction)
+
+    @app_commands.command(name="disable_minor_species")
+    async def disable_minor_species(self,interaction: discord.Interaction):
+        await interaction.response.send_message("The Minor Species expansion has been disabled")
+        game = GamestateHelper(interaction.channel)
+        game.initilizeKey("minor_species")
     
     @app_commands.command(name="set_round")
     async def set_round(self,interaction: discord.Interaction, round:int):

@@ -219,7 +219,7 @@ class GamestateHelper:
             return "int"
         elif shipName == "cruiser":
             return "cru"
-        elif shipName == "dreadnought":
+        elif shipName == "dreadnought" or shipName == "dread":
             return "drd"
         elif shipName == "starbase":
             return "sb"
@@ -748,6 +748,14 @@ class GamestateHelper:
                 pass
             else:
                 tech_draws -= 1
+        minorDraws = 4
+        minor_species = ["Cruiser Discount","Dreadnought Discount","Monolith Discount", "Orbital Discount","Tech Discount", "Population Cube",
+                         "Three Points","Point Per Ambassador","Point Per Reputation Tile"]
+        self.gamestate["minor_species"]=[]
+        while minorDraws > 0:
+            random.shuffle(minor_species)
+            self.gamestate["minor_species"].append(minor_species.pop())
+            minorDraws -=1
         self.update()
 
     def setTurnsInPassingOrder(self, status:bool):
@@ -890,6 +898,33 @@ class GamestateHelper:
                     lowest = tile
             self.gamestate["players"][pID2]["reputation_track"][loc] = "mixed-"+self.get_short_faction_name(player1["name"])+"-"+player1["color"]
             self.gamestate["reputation_tiles"].append(lowest)
+
+        self.update()
+
+    def formMinorSpeciesRelations(self, player, minor_species_name:str):
+        pID = self.get_player_from_color(player['color'])
+        found = False
+        for x,tile in enumerate(player["reputation_track"]):
+            if isinstance(tile, str) and (tile == "amb" or tile == "mixed"):
+                self.gamestate["players"][pID]["reputation_track"][x]=tile+"-minor-"+minor_species_name
+                found = True
+                break
+        if not found:
+            lowest = 10
+            loc = 0
+            for x,tile in enumerate(player["reputation_track"]):
+                if isinstance(tile, int) and tile < lowest:
+                    loc = x
+                    lowest = tile
+            self.gamestate["players"][pID]["reputation_track"][loc] = tile+"-minor-"+minor_species_name
+            self.gamestate["reputation_tiles"].append(lowest)
+        if "Discount" in minor_species_name and "Tech" not in minor_species_name:
+            discountedUnit = minor_species_name.replace(" Discount","").replace("Dreadnought","dread").lower()
+            discount = 1
+            if "dread" in discountedUnit or "monolith" in discountedUnit:
+                discount = 2
+            self.gamestate["players"][pID]["cost_"+discountedUnit] -= discount
+        self.gamestate["minor_species"].remove(minor_species_name)
 
         self.update()
 

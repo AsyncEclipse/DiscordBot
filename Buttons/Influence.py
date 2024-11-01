@@ -17,9 +17,9 @@ class InfluenceButtons:
 
         def is_adjacent(tile_a, tile_b):
             for index, adjTile in enumerate(configs.get(tile_a)[0].split(",")):
-                if tile_a in game.gamestate["board"]:
+                if tile_a in game.gamestate["board"] and tile_b in game.gamestate["board"] and adjTile == tile_b:
                     tile_orientation_index = (index + 6 + int(int(game.gamestate["board"][tile_a]["orientation"]) / 60)) % 6
-                    if adjTile == tile_b and "wormholes" in game.gamestate["board"][tile_a] and tile_orientation_index in game.gamestate["board"][tile_a]["wormholes"]:
+                    if "wormholes" in game.gamestate["board"][tile_a] and tile_orientation_index in game.gamestate["board"][tile_a]["wormholes"]:
                         return True
             if tile_a in game.gamestate["board"] and tile_b in game.gamestate["board"]:
                 if "warp" in game.gamestate["board"][tile_a] and game.gamestate["board"][tile_a]["warp"] == 1:
@@ -47,22 +47,25 @@ class InfluenceButtons:
             for adjTile in configs.get(tile)[0].split(","):
                 if adjTile not in tilesViewed and InfluenceButtons.areTwoTilesAdjacent(game, tile, adjTile, configs, wormHoleGen):
                     tilesViewed.append(adjTile)
+                    if adjTile not in game.get_gamestate()["board"]:
+                        continue
+
                     playerShips =game.get_gamestate()["board"][adjTile]["player_ships"]
                     playerShips.append(player["color"])
                     if "owner" in game.get_gamestate()["board"][adjTile] and game.get_gamestate()["board"][adjTile]["owner"]==0 and ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips,game):
                         tilesToInfluence.append(adjTile)
             if tile not in tilesViewed:
-                    tilesViewed.append(tile)
-                    playerShips =game.get_gamestate()["board"][tile]["player_ships"]
-                    playerShips.append(player["color"])
-                    if "owner" in game.get_gamestate()["board"][tile] and game.get_gamestate()["board"][tile]["owner"]==0 and ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips,game):
-                        if any("ai" in s for s in playerShips):
-                            if any("anc" in s for s in playerShips):
-                                if "Draco" not in player["name"]:
-                                    continue
-                            else:
-                                    continue
-                        tilesToInfluence.append(tile)
+                tilesViewed.append(tile)
+                playerShips =game.get_gamestate()["board"][tile]["player_ships"]
+                playerShips.append(player["color"])
+                if "owner" in game.get_gamestate()["board"][tile] and game.get_gamestate()["board"][tile]["owner"]==0 and ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips,game):
+                    if any("ai" in s for s in playerShips):
+                        if any("anc" in s for s in playerShips):
+                            if "Draco" not in player["name"]:
+                                continue
+                        else:
+                                continue
+                    tilesToInfluence.append(tile)
         return tilesToInfluence
     @staticmethod
     async def startInfluence(game: GamestateHelper, p1, interaction: discord.Interaction):

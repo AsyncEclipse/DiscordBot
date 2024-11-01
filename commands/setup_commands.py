@@ -277,11 +277,17 @@ class SetupCommands(commands.GroupCog, name="setup"):
         5. Descendants of Draco   
         6. Planta  
         """
-        
+        minorSpeciesList = ""
+        for species in game.get_gamestate()["minor_species"]:
+            minorSpeciesList+=species+"\n"
         await thread.send(role.mention + " pinging you here")
         await actions.send(role.mention+" Draft factions and turn position in the manner of your choice, then setup the game with /setup game. Enter the players in the order they should take turns in (i.e. enter first player first)")
         await actions.send("Initial tech draw is as follows",file=drawing.show_available_techs())
-        await actions.send("A common way to draft factions is to generate a random pick order and then have the turn order be the reverse of that pick order. For your convenience, the following random pick order was generated, but you can ignore it: \n"+list)
+        await actions.send("A common way to draft factions is to generate a random pick order and then have the turn order be the reverse of that pick order. For your convenience, the following random pick order was generated, but you can ignore it: \n"+list+
+                           "\nThis game has been set to auto include minor species, 4 of which have been drawn at random below. If you want to disable this, you can use /game disable_minor_species. The minor species are as follows:\n"+minorSpeciesList,file=drawing.show_minor_species())
+    
+        
+        
         factionThread = await actions.create_thread(name="Faction Reference", auto_archive_duration=10080)
 
         message = "\n".join(["# Eridani Empire",

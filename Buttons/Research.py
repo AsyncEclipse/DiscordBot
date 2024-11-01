@@ -106,6 +106,11 @@ class ResearchButtons:
         )  
         track = [-8, -6, -4, -3, -2, -1, 0, 0]
         discount = track[6 - prev_tech_count]  
+        for rep in player["reputation_track"]:
+            if isinstance(rep, str):
+                rep = rep.lower()
+                if "tech discount" in rep:
+                    discount -=1
         return max(tech_details["base_cost"] + discount, tech_details["min_cost"])  
 
 
@@ -237,7 +242,7 @@ class ResearchButtons:
     async def gain3resource(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction, buttonID:str):
         game = GamestateHelper(interaction.channel)  
         resource_type = buttonID.split("_")[1]   
-        msg = player_helper.adjust_resource(resource_type,5)  
+        msg = player_helper.adjust_resource(resource_type,3)  
         game.update_player(player_helper)  
         await interaction.channel.send(msg)  
         await interaction.message.delete()
