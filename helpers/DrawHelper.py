@@ -288,7 +288,11 @@ class DrawHelper:
                         size = int(110*mult)
                     if ship_type == "orb" or ship_type =="mon":
                         ship = ship_type
-                    filepathShip = f"images/resources/components/basic_ships/{ship}.png"
+                    
+                    if "fancy_ships" in self.gamestate and self.gamestate["fancy_ships"] == True:
+                        filepathShip = f"images/resources/components/fancy_ships/fancy_{ship}.png"
+                    else:
+                        filepathShip = f"images/resources/components/basic_ships/{ship}.png"
                     if ship_type == "None":
                         continue
                     ship_image = self.use_image(filepathShip)
@@ -791,7 +795,10 @@ class DrawHelper:
         ships = ["int","cru","drd","sb"]
         ultimateC = 0
         for counter,ship in enumerate(ships):
-            filepath = f"images/resources/components/basic_ships/{player['color']}-{ship}.png"
+            if "fancy_ships" in self.gamestate and self.gamestate["fancy_ships"] == True:
+                filepath = f"images/resources/components/fancy_ships/fancy_{player['color']}-{ship}.png"
+            else:
+                filepath = f"images/resources/components/basic_ships/{player['color']}-{ship}.png"
             ship_image = self.use_image(filepath).resize((80,80))
             for shipCounter in range(player["ship_stock"][counter]):
                 context.paste(ship_image, (x+ultimateC*10+counter*70,y),ship_image)
@@ -833,7 +840,7 @@ class DrawHelper:
                         points += 1
         techTypes =["military_tech","grid_tech","nano_tech"]
         for type in techTypes:
-            if type in player and len(player[type]) > 4:
+            if type in player and len(player[type]) > 3:
                 if len(player[type]) == 7:
                     points += 5
                 else:

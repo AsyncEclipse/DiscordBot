@@ -33,7 +33,7 @@ class DiplomaticRelationsButtons:
             label = minor + " ("+str(cost)+")"
             if cost <= money:
                 view.add_item(Button(label=label, style=discord.ButtonStyle.blurple, custom_id=buttonID))
-        await interaction.channel.send( f"{interaction.user.mention}, choose which minor species you would like to recruit", view=view, file = drawing.show_minor_species())
+        await interaction.channel.send( f"{player['player_name']}, choose which minor species you would like to recruit", view=view, file = drawing.show_minor_species())
 
     @staticmethod
     async def formMinorRelations(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str, player_helper:PlayerHelper):
@@ -77,7 +77,7 @@ class DiplomaticRelationsButtons:
             buttonID = f"FCID{player['color']}_offerRelationsTo_"+game.get_gamestate()["players"][p2]["color"]
             label = f"{game.get_gamestate()['players'][p2]['name']}"
             view.add_item(Button(label=label, style=discord.ButtonStyle.blurple, custom_id=buttonID))
-        await interaction.channel.send( f"{interaction.user.mention}, choose which player you would like to offer diplomatic relations to", view=view)
+        await interaction.channel.send( f"{player['player_name']}, choose which player you would like to offer diplomatic relations to", view=view)
     @staticmethod
     def getPlayersWithWhichDiplomatcRelationsCanBeFormed(game: GamestateHelper, player):
         from Buttons.Influence import InfluenceButtons
@@ -121,14 +121,14 @@ class DiplomaticRelationsButtons:
     async def declineRelationsWith(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str):
         p2 = buttonID.split("_")[1]
         pID = game.get_player_from_color(p2)
-        await interaction.channel.send( f"{game.get_gamestate()['players'][pID]['player_name']} your relations have been refused by {interaction.user.mention}")
+        await interaction.channel.send( f"{game.get_gamestate()['players'][pID]['player_name']} your relations have been refused by {player['player_name']}")
         await interaction.message.delete()
 
     @staticmethod
     async def acceptRelationsWith(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str):
         p2 = buttonID.split("_")[1]
         pID = game.get_player_from_color(p2)
-        await interaction.followup.send( f"{game.get_gamestate()['players'][pID]['player_name']} your relations have been accepted by {interaction.user.mention}")
+        await interaction.followup.send( f"{game.get_gamestate()['players'][pID]['player_name']} your relations have been accepted by {player['player_name']}")
         p2 = game.get_gamestate()["players"][pID]
         game.formRelationsBetween(player,p2)
 

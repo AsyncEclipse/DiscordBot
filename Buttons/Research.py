@@ -61,8 +61,9 @@ class ResearchButtons:
             msg = player_helper.adjust_science(-paid)  
             game.update_player(player_helper) 
             await interaction.channel.send(  
-                f"Attempted to pay a cost of {str(cost)}\n{msg}\n Please pay the rest of the cost by trading other resources at your trade ratio ({trade_value}:1)",view=view  
+                f"Attempted to pay a cost of {str(cost)}\n{msg}\n Please pay the rest of the cost by trading other resources at your trade ratio ({trade_value}:1)"  
             )  
+            await interaction.channel.send("Payment buttons",view=view)
         
         if tech_details["art_pt"] != 0:
             view = View()
@@ -122,7 +123,7 @@ class ResearchButtons:
     async def startResearch(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction, buttonCommand:bool):
         game = GamestateHelper(interaction.channel)
         player = game.get_player(interaction.user.id)  
-        await interaction.channel.send(f"{interaction.user.mention} is using their turn to research")
+        await interaction.channel.send(f"{player['player_name']} is using their turn to research")
         player_helper = PlayerHelper(interaction.user.id, player)  
         if buttonCommand:
             player_helper.spend_influence_on_action("research")
@@ -225,7 +226,7 @@ class ResearchButtons:
         resource_type = buttonID.split("_")[1]
         trade_value = player["trade_value"]
         if trade_value > player[resource_type]:
-            await interaction.channel.send(interaction.user.mention + " does not have enough "+resource_type +" to trade") 
+            await interaction.channel.send(player['player_name'] + " does not have enough "+resource_type +" to trade") 
             return
         msg = player_helper.adjust_resource(resource_type,-trade_value)  
         game.update_player(player_helper)  

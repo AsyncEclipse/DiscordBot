@@ -4,6 +4,7 @@ import json
 import discord
 import config
 from helpers.DrawHelper import DrawHelper
+from helpers.EmojiHelper import Emoji
 from helpers.PlayerHelper import PlayerHelper
 import os
 from jproperties import Properties
@@ -118,6 +119,9 @@ class GamestateHelper:
         return (winner, highestScore)
     def setAdvancedAI(self, status:bool):
         self.gamestate["advanced_ai"] = status
+        self.update()
+    def setFancyShips(self, status:bool):
+        self.gamestate["fancy_ships"] = status
         self.update()
     async def declareWinner(self, interaction:discord.Interaction):
         self.gamestate["gameEnded"] = True
@@ -600,23 +604,26 @@ class GamestateHelper:
         neutralPop = 0
         orbitalPop = 0
         for i in pop_list:
+            found = False
             if position != "dummy":
                 for val,num in enumerate(self.gamestate["board"][position][i]):
                     if(num > 0):
                         self.gamestate["board"][position][i][val] = num-1
+                        found = True
                         break
-            if not graveYard:
-                if "neutral" not in i and "orbital" not in i and self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] < 13:
-                    self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] = self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"]+1
-                else:
-                    if "neutral" not in i:
-                        orbitalPop +=1
+            if found:
+                if not graveYard:
+                    if "neutral" not in i and "orbital" not in i and self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] < 13:
+                        self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] = self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"]+1
                     else:
-                        neutralPop += 1
-            else:
-                if "graveYard" not in self.gamestate["players"][playerID]:
-                    self.gamestate["players"][playerID]["graveYard"] = []
-                self.gamestate["players"][playerID]["graveYard"].append(i.replace("adv",""))   
+                        if "neutral" not in i:
+                            orbitalPop +=1
+                        else:
+                            neutralPop += 1
+                else:
+                    if "graveYard" not in self.gamestate["players"][playerID]:
+                        self.gamestate["players"][playerID]["graveYard"] = []
+                    self.gamestate["players"][playerID]["graveYard"].append(i.replace("adv",""))   
         self.update()
         return neutralPop, orbitalPop
 
@@ -680,6 +687,13 @@ class GamestateHelper:
         self.cleanAllTheTiles()
         self.update()
 
+    def getPlayerEmoji(self, player):
+        name = player["player_name"]
+        shortFaction = self.getShortFactionNameFromFull(player["name"])
+        if "terran" in shortFaction:
+            shortFaction += "_"
+        emoji = Emoji.getEmojiByName(shortFaction+"token")
+        return emoji
     def createRoundNum(self):
         if "roundNum" not in self.gamestate:
             self.gamestate["roundNum"] = 1
@@ -695,6 +709,12 @@ class GamestateHelper:
         self.gamestate["players"][str(player_id)].update(faction_data[faction])
         self.gamestate["players"][str(player_id)].update({"passed": False})
         self.gamestate["players"][str(player_id)].update({"perma_passed": False})
+        name = self.gamestate["players"][str(player_id)]["player_name"]
+        shortFaction = self.getShortFactionNameFromFull(self.gamestate["players"][str(player_id)]["name"])
+        if "terran" in shortFaction:
+            shortFaction += "_"
+        emoji = Emoji.getEmojiByName(shortFaction+"token")
+        self.gamestate["players"][str(player_id)]["player_name"] = name + " "+emoji
         self.update()
         #return(f"{name} is now setup!")
 

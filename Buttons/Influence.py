@@ -78,7 +78,7 @@ class InfluenceButtons:
         view.add_item(Button(label="Conclude Influence Action", style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_finishInfluenceAction"))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{p1['color']}_restartTurn"))
         await interaction.message.delete()
-        await interaction.channel.send( f"{interaction.user.mention} you can remove up to two disks and influence up to 2 spaces. You can also refresh 2 colony ships or put down population at any time during this resolution", view=view)
+        await interaction.channel.send( f"{p1['player_name']} you can remove up to two disks and influence up to 2 spaces. You can also refresh 2 colony ships or put down population at any time during this resolution", view=view)
 
     @staticmethod
     async def addInfluenceStart(game: GamestateHelper, p1, interaction: discord.Interaction):
@@ -86,7 +86,7 @@ class InfluenceButtons:
         tiles = InfluenceButtons.getTilesToInfluence(game, p1)
         for tile in tiles:
             view.add_item(Button(label=tile, style=discord.ButtonStyle.blurple, custom_id=f"FCID{p1['color']}_addInfluenceFinish_"+tile))
-        await interaction.channel.send( f"{interaction.user.mention} choose the tile you would like to influence", view=view)
+        await interaction.channel.send( f"{p1['player_name']} choose the tile you would like to influence", view=view)
         drawing = DrawHelper(game.gamestate)
         if len(tiles) > 0:
             asyncio.create_task(interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True))
@@ -97,7 +97,7 @@ class InfluenceButtons:
             await interaction.channel.send( f"Someone else controls {tileLoc}. Remove their control via valid means first")
             return
         game.add_control(p1["color"],tileLoc)
-        await interaction.channel.send( f"{interaction.user.mention} acquired control of "+tileLoc)
+        await interaction.channel.send( f"{p1['player_name']} acquired control of "+tileLoc)
         await interaction.message.delete()
 
     @staticmethod
@@ -107,7 +107,7 @@ class InfluenceButtons:
         for button in view.children:
             if buttonID in button.custom_id:
                 view.remove_item(button)
-        await interaction.followup.send( f"{interaction.user.mention} now has "+str(numShips)+" colony ships "
+        await interaction.followup.send( f"{player['player_name']} now has "+str(numShips)+" colony ships "
                                                                                                "available to use")
         await interaction.message.edit(view=view)
 
@@ -123,7 +123,7 @@ class InfluenceButtons:
         tiles = game.get_owned_tiles(player)
         for tile in tiles:
             view.add_item(Button(label=tile, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_removeInfluenceFinish_"+tile+"_normal"))
-        await interaction.channel.send( f"{interaction.user.mention} choose the tile you would like to remove influence from", view=view)
+        await interaction.channel.send( f"{player['player_name']} choose the tile you would like to remove influence from", view=view)
 
         drawing = DrawHelper(game.gamestate)
         if len(tiles) > 0:
