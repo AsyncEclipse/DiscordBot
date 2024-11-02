@@ -241,4 +241,4 @@ class ButtonListener(commands.Cog):
                     logger.error(f'Unknown Interaction error: {error}')  
                     await interaction.channel.send("The bot was busy handling another request. Try again")
                 else:
-                    await interaction.channel.send("This button press hit some sort of new error. Devs will probably need to fix it later")
+                    await interaction.channel.send("This button press hit some sort of new error. Devs will probably need to fix it later. Please press this button no more than twice in the meantime")
