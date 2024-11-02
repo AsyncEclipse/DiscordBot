@@ -146,7 +146,7 @@ class MoveButtons:
             game.update_player(player_helper2)
             await interaction.channel.send(p2["player_name"]+" your system has been invaded")
         for tile in player["reputation_track"]:
-            if isinstance(tile, str) and "-" in tile:
+            if isinstance(tile, str) and "-" in tile and "minor" not in tile:
                 color = tile.split("-")[2]
                 p2 = game.getPlayerObjectFromColor(color)
                 broken = False
