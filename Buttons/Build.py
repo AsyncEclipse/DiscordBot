@@ -17,7 +17,7 @@ class BuildButtons:
         tiles = game.get_owned_tiles(player)
         tiles.sort()
         view = View()
-        await interaction.channel.send(f"{interaction.user.mention} is using their turn to build")
+        await interaction.channel.send(f"{player['player_name']} is using their turn to build")
         if "2" not in buttonID:
             player_helper.spend_influence_on_action("build")
             game.update_player(player_helper)
@@ -25,7 +25,7 @@ class BuildButtons:
         for tile in tiles:
             view.add_item(Button(label=tile, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_buildIn_{tile}"))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
-        await interaction.channel.send(f"{interaction.user.mention}, choose which tile you would like to build in.", view=view)
+        await interaction.channel.send(f"{player['player_name']}, choose which tile you would like to build in.", view=view)
         drawing = DrawHelper(game.gamestate)
         if len(tiles) > 0:
             asyncio.create_task(interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True))
@@ -39,7 +39,7 @@ class BuildButtons:
         buildApt = player["build_apt"]
         if player["passed"]== True:
             buildApt = 1
-        await interaction.channel.send(f"{interaction.user.mention}, you have {player['materials']} materials to "
+        await interaction.channel.send(f"{player['player_name']}, you have {player['materials']} materials to "
                                                 f"spend on up to {str(buildApt)} units in this system.", view=view)
         
     @staticmethod  
@@ -220,6 +220,6 @@ class BuildButtons:
             view2.add_item(Button(label="Build Somewhere Else", style=discord.ButtonStyle.red, custom_id="startBuild2_deleteMsg"))  
         view2.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                                 custom_id=f"FCID{player['color']}_finishAction"))
-        await interaction.channel.send(f"{interaction.user.mention} use buttons to finish turn or potentially build somewhere else.", view=view2)
+        await interaction.channel.send(f"{player['player_name']} use buttons to finish turn or potentially build somewhere else.", view=view2)
         await interaction.message.delete()
         

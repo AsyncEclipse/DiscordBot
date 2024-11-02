@@ -36,7 +36,7 @@ class DiscoveryTileButtons:
         player_helper.acquire_disc_tile_for_points()
         game.update_player(player_helper)
         await interaction.message.edit(view=None)
-        await interaction.channel.send( f"{interaction.user.mention} chose to keep the tile for 2 points")
+        await interaction.channel.send( f"{player_helper.stats['player_name']} chose to keep the tile for 2 points")
     
     @staticmethod 
     async def usedDiscForAbility(game: GamestateHelper, player_helper:PlayerHelper, interaction: discord.Interaction, buttonID:str,player):
@@ -46,7 +46,7 @@ class DiscoveryTileButtons:
             discTile_data = json.load(f)
         discName = discTile_data[disc]["name"]
         await interaction.message.edit(view=None)
-        await interaction.channel.send( f"{interaction.user.mention} chose to keep use '"+discName+"' for its ability")
+        await interaction.channel.send( f"{player['player_name']} chose to use '"+discName+"' for its ability")
         if disc == "rep" or disc == "art":
             if "discoveryTileBonusPointTiles" not in player_helper.stats:
                 player_helper.stats["discoveryTileBonusPointTiles"] = []
@@ -91,7 +91,7 @@ class DiscoveryTileButtons:
                 game.add_units([player["color"]+"-"+"mon"],tile)
             if discTile_data[disc]["spawn"] == "warp":
                 game.add_warp(tile)
-            await interaction.channel.send( f"{interaction.user.mention} added a "+discTile_data[disc]["spawn"]+ " to tile "+tile)
+            await interaction.channel.send( f"{player['player_name']} added a "+discTile_data[disc]["spawn"]+ " to tile "+tile)
             if discTile_data[disc]["material"] != 0:
                 await interaction.channel.send( player_helper.adjust_materials(discTile_data[disc]["material"]))
         else:

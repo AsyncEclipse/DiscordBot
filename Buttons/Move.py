@@ -135,7 +135,7 @@ class MoveButtons:
         game.add_units([shipName],destination)
         game.fixshipsOrder(destination)
         drawing = DrawHelper(game.gamestate)
-        await interaction.channel.send( f"{interaction.user.mention} Moved a {shipType} from {originT} to {destination}.", file=drawing.board_tile_image_file(destination))
+        await interaction.channel.send( f"{player['player_name']} Moved a {shipType} from {originT} to {destination}.", file=drawing.board_tile_image_file(destination))
         player_helper.specifyDetailsOfAction(f"Moved a {shipType} from {originT} to {destination}.")
         game.update_player(player_helper)
         owner = game.gamestate["board"][destination]["owner"]
@@ -162,7 +162,7 @@ class MoveButtons:
                     game.makeEveryoneNotTraitor()
                     player_helper.setTraitor(True)
                     game.update_player(player_helper)
-                    await interaction.channel.send( f"{interaction.user.mention} You broke relations with {color} and now are a traitor.")
+                    await interaction.channel.send( f"{player['player_name']} You broke relations with {color} and now are a traitor.")
         if moveCount == 1:
             player_helper.spend_influence_on_action("move")
             game.update_player(player_helper)

@@ -65,20 +65,20 @@ class ExploreButtons:
     async def startExplore(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction, buttonID:str):
         if "2" not in buttonID:
             player_helper.spend_influence_on_action("explore")
-            await interaction.channel.send(f"{interaction.user.mention} is using their turn to explore")
+            await interaction.channel.send(f"{player['player_name']} is using their turn to explore")
             game.update_player(player_helper)
         else:
-            await interaction.channel.send(f"{interaction.user.mention} is resolving their second explore")
+            await interaction.channel.send(f"{player['player_name']} is resolving their second explore")
         view = View()
         for tile in ExploreButtons.getTilesToExplore(game, player):
             view.add_item(Button(label=str(tile), style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_exploreTile_" + str(tile)))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
-        await interaction.channel.send(f"{interaction.user.mention} select the tile you would like to explore",view=view)
+        await interaction.channel.send(f"{player['player_name']} select the tile you would like to explore",view=view)
         if player["explore_apt"] > 1 and "2" not in buttonID:
             view2 = View()
             view2.add_item(Button(label="Start 2nd explore", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startExplore2"))
             view2.add_item(Button(label="Decline 2nd Explore", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))
-            await interaction.channel.send(f"{interaction.user.mention} after exploring the first time, you can use this button to explore again.", view=view2)
+            await interaction.channel.send(f"{player['player_name']} after exploring the first time, you can use this button to explore again.", view=view2)
         await interaction.message.delete()
     @staticmethod
     async def exploreTile(game: GamestateHelper, player, interaction: discord.Interaction, customID:str):
@@ -106,7 +106,7 @@ class ExploreButtons:
                     await interaction.channel.send("Option #2",file=drawing.show_single_tile(image2))
                     view.add_item(Button(label="Option #1",style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_exploreTile_{position}_{tileID}_{tileID2}"))
                     view.add_item(Button(label="Option #2",style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_exploreTile_{position}_{tileID2}_{tileID}"))
-                    await interaction.channel.send(f"{interaction.user.mention} select the tile you wish to resolve.",view=view)
+                    await interaction.channel.send(f"{player['player_name']} select the tile you wish to resolve.",view=view)
                     await interaction.message.delete()
                     return
         image = drawing.base_tile_image(tileID)
@@ -115,7 +115,7 @@ class ExploreButtons:
         view, file = drawing.draw_possible_oritentations(tileID,position,playerTiles, view,player)
 
         view.add_item(Button(label="Discard Tile",style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_discardTile_{tileID}"))
-        await interaction.channel.send(f"{interaction.user.mention} select the orientation you prefer or discard the tile.",view=view, file=file)
+        await interaction.channel.send(f"{player['player_name']} select the orientation you prefer or discard the tile.",view=view, file=file)
         await interaction.message.delete()
     @staticmethod
     async def placeTile(game: GamestateHelper, interaction: discord.Interaction, player, customID, player_helper):
@@ -129,7 +129,7 @@ class ExploreButtons:
             view = View()
             view.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_addInfluenceFinish_"+msg[1]))
             view.add_item(Button(label="Decline Influence Placement", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))
-            await interaction.channel.send(f"{interaction.user.mention} choose whether or not to place influence in the tile."+game.displayPlayerStats(player), view = view)
+            await interaction.channel.send(f"{player['player_name']} choose whether or not to place influence in the tile."+game.displayPlayerStats(player), view = view)
             if game.get_gamestate()["board"][msg[1]]["ancient"] == 0 and game.get_gamestate()["board"][msg[1]]["disctile"] > 0:
                 await DiscoveryTileButtons.exploreDiscoveryTile(game, msg[1],interaction,player)
             view2.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
@@ -138,7 +138,7 @@ class ExploreButtons:
         
         
         view2.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_finishAction"))
-        await interaction.channel.send(f"{interaction.user.mention} when you're finished resolving your action, you may end turn with this button.", view=view2)
+        await interaction.channel.send(f"{player['player_name']} when you're finished resolving your action, you may end turn with this button.", view=view2)
         await interaction.message.delete()
     @staticmethod
     async def discardTile(game: GamestateHelper, interaction: discord.Interaction, player, customID:str):
@@ -149,6 +149,6 @@ class ExploreButtons:
         view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
         view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                              custom_id=f"FCID{player['color']}_finishAction"))
-        await interaction.channel.send(f"{interaction.user.mention} when finished you may resolve your action "
+        await interaction.channel.send(f"{player['player_name']} when finished you may resolve your action "
                                            f"with this button.", view=view)
         await interaction.message.delete()

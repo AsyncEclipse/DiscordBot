@@ -142,7 +142,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         player_helper = PlayerHelper(interaction.user.id, player)
         player_helper.adjust_influence_on_action(action.value, amount_to_change)
         game.update_player(player_helper)
-        await interaction.response.send_message(f"{interaction.user.mention} adjusted action disks for "+action.value+" by "+str(amount_to_change))
+        await interaction.response.send_message(f"{player['player_name']} adjusted action disks for "+action.value+" by "+str(amount_to_change))
 
     @app_commands.command(name="research")
     async def research(self, interaction: discord.Interaction):
@@ -166,7 +166,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         game.changeColor(player["color"],color.value)
         await interaction.response.defer(thinking=False)
         drawing = DrawHelper(game.gamestate)
-        await interaction.followup.send(interaction.user.mention+" Successfully changed color to "+color.value, file = drawing.show_stats())
+        await interaction.followup.send(player['player_name']+" Successfully changed color to "+color.value, file = drawing.show_stats())
         await interaction.channel.send("Successfully changed color to "+color.value, file = drawing.show_map())
 
     @app_commands.command(name="upgrade")
@@ -282,7 +282,8 @@ class PlayerCommands(commands.GroupCog, name="player"):
         game = GamestateHelper(interaction.channel)
         p1 = game.get_player(player.id)
         view = TurnButtons.getStartTurnButtons(game,p1)
-        await interaction.response.send_message((f"{player.mention} use these buttons to do your turn. The "
+        await interaction.response.send_message("## "+game.getPlayerEmoji(p1)+" started their turn")
+        await interaction.channel.send((f"{p1['player_name']} use these buttons to do your turn. The "
                                                         "number of activations you have for each action is listed in ()"+game.displayPlayerStats(p1)), view=view)
     
     

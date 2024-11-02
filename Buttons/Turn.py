@@ -37,7 +37,7 @@ class TurnButtons:
             player = game.get_player(interaction.user.id)  
             view = TurnButtons.getStartTurnButtons(game, player)
             game.saveLastButtonPressed("restart")
-            await interaction.channel.send(interaction.user.mention+" has chosen to back up to last start of turn.")
+            await interaction.channel.send(player['player_name']+" has chosen to back up to last start of turn.")
             await interaction.channel.send(player["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(player),view=view)
         except discord.NotFound: 
             await interaction.channel.send("Ignoring double press")
@@ -54,6 +54,7 @@ class TurnButtons:
         nextPlayer = game.get_next_player(player)
         if nextPlayer != None and not game.is_everyone_passed():
             view = TurnButtons.getStartTurnButtons(game,nextPlayer)
+            await interaction.channel.send("## "+game.getPlayerEmoji(nextPlayer)+" started their turn")
             await interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(nextPlayer),view=view)
         else:
             view = View()
@@ -87,12 +88,12 @@ class TurnButtons:
     async def passForRound(player, game: GamestateHelper, interaction: discord.Interaction, player_helper : PlayerHelper):
         from helpers.CombatHelper import Combat
         if "passed" in player and player["passed"]== True:
-            await interaction.channel.send(f"{interaction.user.mention} passed on their reaction window.")
+            await interaction.channel.send(f"{player['player_name']} passed on their reaction window.")
         else:
 
             if TurnButtons.noOneElsePassed(player,game):
                 player_helper.adjust_money(2)
-                await interaction.channel.send(f"{interaction.user.mention} you gained 2 money and the first player marker for next round for passing first")
+                await interaction.channel.send(f"{player['player_name']} you gained 2 money and the first player marker for next round for passing first")
                 player_helper.setFirstPlayer(True)
                 for p2 in game.get_gamestate()["players"]:
                     if game.get_gamestate()["players"][p2]["color"] == player["color"]:
@@ -101,18 +102,19 @@ class TurnButtons:
                     player_helper2.setFirstPlayer(False)
                     game.update_player(player_helper2)
             else:
-                await interaction.channel.send(f"{interaction.user.mention} passed.")
+                await interaction.channel.send(f"{player['player_name']} passed.")
         player_helper.passTurn(True)
         game.update_player(player_helper)
         nextPlayer = game.get_next_player(player)
         game.addToPassOrder(player["player_name"])
         if nextPlayer != None and not game.is_everyone_passed():
             view = TurnButtons.getStartTurnButtons(game,nextPlayer)
+            await interaction.channel.send("## "+game.getPlayerEmoji(nextPlayer)+" started their turn")
             await interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(nextPlayer),view=view)
 
             view2 = View()
             view2.add_item(Button(label=f"Pass Unless Someone Attacks You", style=discord.ButtonStyle.green, custom_id="permanentlyPass"))
-            await interaction.followup.send(interaction.user.mention+ " you can use this button to pass on reactions unless someone attacks you if you want.",view=view2,ephemeral=True)
+            await interaction.followup.send(interaction.user.mention+ " you can use this button to pass on reactions unless someone invades your systems.",view=view2,ephemeral=True)
         else:
             view = View()
             role = discord.utils.get(interaction.guild.roles, name=game.game_id)  
@@ -146,7 +148,7 @@ class TurnButtons:
         resource_type2 = buttonID.split("_")[2]
         trade_value = player["trade_value"]
         if trade_value > player[resource_type]:
-            await interaction.channel.send(interaction.user.mention + " does not have enough "+resource_type +" to trade") 
+            await interaction.channel.send(player['player_name'] + " does not have enough "+resource_type +" to trade") 
             return
         msg = player_helper.adjust_resource(resource_type,-trade_value)  
         msg2 = player_helper.adjust_resource(resource_type2, 1) 

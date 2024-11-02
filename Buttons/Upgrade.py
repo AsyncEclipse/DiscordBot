@@ -130,7 +130,7 @@ class UpgradeButtons:
         drawing = DrawHelper(game.gamestate)
         image = drawing.player_area(player_helper.stats)
         view = View()
-        if actions > 0:
+        if actions > 0 and ("passed" not in player or player["passed"] != True):
             ships = ["interceptor","cruiser","dread","starbase"]
             for ship2 in ships:
                 shipEmoji = Emoji.getEmojiByName(player['color']+game.getShipShortName(ship2))
@@ -138,10 +138,10 @@ class UpgradeButtons:
         view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                              custom_id=f"FCID{player['color']}_finishAction"))
         await interaction.message.delete()
-        await interaction.channel.send(f"{interaction.user.mention} replaced {oldName} with {part_stats[newPart]['name']} on their {ship.capitalize()} which now looks like this",file=drawing.show_player_ship(image, ship))
+        await interaction.channel.send(f"{player['player_name']} replaced {oldName} with {part_stats[newPart]['name']} on their {ship.capitalize()} which now looks like this",file=drawing.show_player_ship(image, ship))
         if discTileUpgrade == "dummy":
             await interaction.channel.send(
-                f"{interaction.user.mention}, choose which ship you would like to upgrade or finish your action.",
+                f"{player['player_name']}, choose which ship you would like to upgrade or finish your action.",
                 view=view)
 
 

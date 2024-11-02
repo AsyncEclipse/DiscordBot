@@ -25,7 +25,7 @@ class PopulationButtons:
                         if val == 0:
                             emptyPlanets.append(f"{tile}_{planetT}_{str(i)}")
             if any("-orb" in s for s in tileState["player_ships"]):
-                if "orbital_pop" not in tileState or tileState["orbital_pop"]==0:
+                if "orbital_pop" not in tileState or tileState["orbital_pop"]==0 or tileState["orbital_pop"]==[0]:
                     emptyPlanets.append(f"{tile}_orbital_0")
         allPlayerTechs =  player["military_tech"] + player["grid_tech"] + player["nano_tech"]
         if "met" not in allPlayerTechs:
