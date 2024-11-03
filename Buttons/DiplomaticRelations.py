@@ -89,8 +89,12 @@ class DiplomaticRelationsButtons:
         from Buttons.Influence import InfluenceButtons
         players = []
         configs = Properties()
-        with open("data/tileAdjacencies.properties", "rb") as f:
-            configs.load(f)
+        if "5playerhyperlane" in game.gamestate and game.gamestate["5playerhyperlane"]:
+            with open("data/tileAdjacencies_5p.properties", "rb") as f:
+                configs.load(f)
+        else:
+            with open("data/tileAdjacencies.properties", "rb") as f:
+                configs.load(f)
         for p2 in game.get_gamestate()["players"]:
             if game.get_gamestate()["players"][p2]["color"] == player["color"]:
                 continue

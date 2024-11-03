@@ -43,8 +43,12 @@ class ExploreButtons:
     @staticmethod
     def getTilesToExplore(game: GamestateHelper, player):
         configs = Properties()
-        with open("data/tileAdjacencies.properties", "rb") as f:
-            configs.load(f)
+        if "5playerhyperlane" in game.gamestate and game.gamestate["5playerhyperlane"]:
+            with open("data/tileAdjacencies_5p.properties", "rb") as f:
+                configs.load(f)
+        else:
+            with open("data/tileAdjacencies.properties", "rb") as f:
+                configs.load(f)
         tilesViewed = []
         playerTiles = ExploreButtons.getListOfTilesPlayerIsIn(game, player)
         for tile in playerTiles:

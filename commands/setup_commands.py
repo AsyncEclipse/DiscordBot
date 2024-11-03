@@ -103,22 +103,31 @@ class SetupCommands(commands.GroupCog, name="setup"):
         }  
         if count in tile_mapping:  
             listOfTilesPos = tile_mapping[count]  
-        
+        hyperlane5 = False
+        if "5playerhyperlane" in game.gamestate and game.gamestate["5playerhyperlane"]:
+            hyperlane5 = True
         listDefended = ["271","272","273","274"]
         random.shuffle(listDefended)
         game.add_tile("000", 0, "001")
         for i in range(count):
             rotDet = ((180 - (int(listOfTilesPos[i])-201)/2 * 60) + 360)%360
             game.add_tile(listOfTilesPos[i], rotDet, listPlayerHomes[i][0], listPlayerHomes[i][1])
-        for i in range(6-count):
-            rotDet = ((180 - (int(listOfTilesPos[5-i])-201)/2 * 60) + 360)%360
-            game.add_tile(listOfTilesPos[5-i], rotDet, listDefended[i])
+        if not hyperlane5:
+            for i in range(6-count):
+                rotDet = ((180 - (int(listOfTilesPos[5-i])-201)/2 * 60) + 360)%360
+                game.add_tile(listOfTilesPos[5-i], rotDet, listDefended[i])
         for i in range(101, 107):
+            if hyperlane5 and i == 104:
+                continue
             game.add_tile(str(i), 0, "sector1back")
         for i in range(201, 213):
+            if hyperlane5 and (i == 206 or i == 207):
+                continue
             if str(i) not in listOfTilesPos:
                 game.add_tile(str(i), 0, "sector2back")
         for i in range(301, 319):
+            if hyperlane5 and (i == 309 or i == 310 or i == 311):
+                continue
             game.add_tile(str(i), 0, "sector3back")
         if game.gamestate["setup_finished"] != 1:
             game.setup_finished()

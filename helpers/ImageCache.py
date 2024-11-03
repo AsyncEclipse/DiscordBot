@@ -36,6 +36,8 @@ class ImageCacheHelper:
     def get_image_size(self, folder, filename):  
         mult = 1024/345
         if "hexes" in folder.lower():  
+            if "hyper" in filename.lower():
+                return (1125,900)
             return (int(345*mult),int(300*mult))
         elif "upgrade_reference1" in filename.lower() or "upgrade_reference2" in filename.lower():  
             return (310,300)  

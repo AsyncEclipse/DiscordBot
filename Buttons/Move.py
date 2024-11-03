@@ -59,8 +59,12 @@ class MoveButtons:
     @staticmethod
     def getTilesInRange(game: GamestateHelper, player, origin:str, shipRange : int, jumpDrivePresent:int):
         configs = Properties()
-        with open("data/tileAdjacencies.properties", "rb") as f:
-            configs.load(f)
+        if "5playerhyperlane" in game.gamestate and game.gamestate["5playerhyperlane"]:
+            with open("data/tileAdjacencies_5p.properties", "rb") as f:
+                configs.load(f)
+        else:
+            with open("data/tileAdjacencies.properties", "rb") as f:
+                configs.load(f)
         tile_map = game.get_gamestate()["board"]
         player_helper = PlayerHelper(game.get_player_from_color(player["color"]),player)
         techsResearched = player_helper.getTechs()

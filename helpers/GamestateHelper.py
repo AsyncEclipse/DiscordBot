@@ -300,8 +300,12 @@ class GamestateHelper:
         self.gamestate["board"][position] = tile
 
         configs = Properties()
-        with open("data/tileAdjacencies.properties", "rb") as f:
-            configs.load(f)
+        if "5playerhyperlane" in self.gamestate and self.gamestate["5playerhyperlane"]:
+            with open("data/tileAdjacencies_5p.properties", "rb") as f:
+                configs.load(f)
+        else:
+            with open("data/tileAdjacencies.properties", "rb") as f:
+                configs.load(f)
         if position != None and sector != "sector3back":
             tiles = configs.get(position)[0].split(",")
             for adjTile in tiles:
@@ -776,6 +780,10 @@ class GamestateHelper:
         minor_species = ["Cruiser Discount","Dreadnought Discount","Monolith Discount", "Orbital Discount","Tech Discount", "Population Cube",
                          "Three Points","Point Per Ambassador","Point Per Reputation Tile"]
         self.gamestate["minor_species"]=[]
+        if count == 5:
+            self.gamestate["5playerhyperlane"] = True
+        else:
+            self.gamestate["5playerhyperlane"] = False
         while minorDraws > 0:
             random.shuffle(minor_species)
             self.gamestate["minor_species"].append(minor_species.pop())

@@ -35,8 +35,12 @@ class InfluenceButtons:
     @staticmethod
     def getTilesToInfluence(game: GamestateHelper, player):
         configs = Properties()
-        with open("data/tileAdjacencies.properties", "rb") as f:
-            configs.load(f)
+        if "5playerhyperlane" in game.gamestate and game.gamestate["5playerhyperlane"]:
+            with open("data/tileAdjacencies_5p.properties", "rb") as f:
+                configs.load(f)
+        else:
+            with open("data/tileAdjacencies.properties", "rb") as f:
+                configs.load(f)
         tilesViewed = []
         player_helper = PlayerHelper(game.get_player_from_color(player["color"]),player)
         techsResearched = player_helper.getTechs()

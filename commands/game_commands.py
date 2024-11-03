@@ -72,6 +72,11 @@ class GameCommands(commands.GroupCog, name="game"):
         await interaction.response.send_message("The Minor Species expansion has been disabled")
         game = GamestateHelper(interaction.channel)
         game.initilizeKey("minor_species")
+    @app_commands.command(name="disable_five_player_hyperlanes")
+    async def disable_five_player_hyperlanes(self,interaction: discord.Interaction):
+        await interaction.response.send_message("The hyperlanes for 5 player mode have been disabled")
+        game = GamestateHelper(interaction.channel)
+        game.initilizeKey("5playerhyperlane")
     
     @app_commands.command(name="set_round")
     async def set_round(self,interaction: discord.Interaction, round:int):
