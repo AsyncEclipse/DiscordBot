@@ -446,10 +446,8 @@ class Combat:
                         else:
                             for i in range(Combat.translateColorToDamage(die, random_number)):
                                 dieNums.append([random_number,1,die])
-                needsShieldMessage = False
                 if shipModel.computer > 0:
                     msg = msg + "\nThis ship type has a +"+str(shipModel.computer)+" computer"
-                    needsShieldMessage = True
                 
                 if(len(dice) > 0):
                     #await interaction.channel.send(msg,file=drawing.append_images(dieFiles))
@@ -466,9 +464,8 @@ class Combat:
                             if dieNum == 1 or dieNum + shipModel.computer < 6 or oldNumPeeps > len(Combat.findPlayersInTile(game, pos)):
                                 continue
                             hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships, dieNum, shipModel.computer, pos, speed)
-                            if dieNum + shipModel.computer > 5 and len(hittableShips) == 0 and needsShieldMessage:
-                                msg += ". Some of the computer bonus was cancelled by the shields on each of the opponents ships."
-                                needsShieldMessage = False
+                            if dieNum + shipModel.computer > 5 and len(hittableShips) == 0:
+                                await interaction.channel.send("The computer bonus for a die that rolled a "+str(dieNum)+" was cancelled by the shields on each of the opponents ships.")
                         else:
                             if dieNum == 2 or dieNum == 3:
                                 continue
