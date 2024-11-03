@@ -247,8 +247,12 @@ class GamestateHelper:
             return "hydran"
         elif fullName == "Eridani Empire":
             return "eridani"
+        elif fullName == "Wardens of Magellan":
+            return "magellan"
         elif "Terran" in fullName:
             return fullName.lower().replace(" ","_")
+        
+        return fullName
 
 
     def find_player_faction_name_from_color(self, color):
@@ -881,6 +885,8 @@ class GamestateHelper:
             return "hydran"
         elif full_name == "Eridani Empire":
             return "eridani"
+        elif full_name == "Wardens of Magellan":
+            return "magellan"
         elif "Terran" in full_name:
             return full_name.lower().replace(" ","_")
     
@@ -994,6 +1000,11 @@ class GamestateHelper:
             self.gamestate["pass_order"].append(player_name)
         self.update()
 
+
+    def useMagDisc(self, playerID):
+
+        self.gamestate["players"][playerID]["magDiscTileUsed"]=True
+        self.update()
 
     def update_player(self, *args):
 

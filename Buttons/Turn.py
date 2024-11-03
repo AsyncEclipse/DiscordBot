@@ -2,6 +2,7 @@ import discord
 from Buttons.DiplomaticRelations import DiplomaticRelationsButtons
 from Buttons.Explore import ExploreButtons
 from Buttons.Population import PopulationButtons
+from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 from helpers.DrawHelper import DrawHelper
@@ -171,6 +172,9 @@ class TurnButtons:
                         view.add_item(Button(label=f"Trade {trade_value} {resource_type.capitalize()}",   
                                         style=button_style,   
                                         custom_id=f"FCID{p1.stats['color']}_tradeAtRatio_{resource_type}_money")) 
+                if player["colony_ships"] > 0 and game.get_short_faction_name(player["name"]) == "magellan":
+                    emojiC = Emoji.getEmojiByName("colony_ship")
+                    view.add_item(Button(label=f"Get 1 Money", style=discord.ButtonStyle.red, emoji=emojiC, custom_id=f"FCID{player['color']}_magColShipForResource_money"))
                 view.add_item(Button(label="Done Resolving", style=discord.ButtonStyle.red, custom_id=f"FCID{game.get_player(player)['color']}_deleteMsg"))
                 await interaction.channel.send("It appears that "+p1.name + " would be bankrupt (negative money). They currently have "+str(p1.stats["money"])+" money and will get "+str(p1.money_income())+" in income, but they owe "+str(p1.upkeepCosts())+" money. Please adjust the money or systems controlled so that upkeep can be run without the player entering negative money", view=view)
                 return
@@ -259,6 +263,11 @@ class TurnButtons:
                 view.add_item(Button(label=f"Pass ({number_passed+1}{ordinal(number_passed+1)})", style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_passForRound"))
         view.add_item(Button(label="Show Game",style=discord.ButtonStyle.gray, custom_id="showGame"))
         view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
+        if p1["colony_ships"] > 0 and game.get_short_faction_name(p1["name"]) == "magellan":
+            emojiC = Emoji.getEmojiByName("colony_ship")
+            view.add_item(Button(label=f"Get 1 Science", style=discord.ButtonStyle.red, emoji=emojiC, custom_id=f"FCID{player['color']}_magColShipForResource_science"))
+            view.add_item(Button(label=f"Get 1 Money", style=discord.ButtonStyle.green,emoji=emojiC, custom_id=f"FCID{player['color']}_magColShipForResource_money"))
+            view.add_item(Button(label=f"Get 1 Material", style=discord.ButtonStyle.blurple,emoji=emojiC, custom_id=f"FCID{p1['color']}_magColShipForResource_materials"))
         if len(PopulationButtons.findEmptyPopulation(game,p1)) > 0 and p1["colony_ships"] > 0:
             view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{p1['color']}_startPopDrop"))
         if game.get_gamestate()["player_count"] > 3 and not player_helper.isTraitor() and len(DiplomaticRelationsButtons.getPlayersWithWhichDiplomatcRelationsCanBeFormed(game, player)) > 0:
@@ -268,6 +277,18 @@ class TurnButtons:
         if game.getNumberOfSaveFiles() > 0:
             view.add_item(Button(label="Undo Last Turn", style=discord.ButtonStyle.red, custom_id=f"undoLastTurn"))
         return view
+    
+
+    @staticmethod
+    async def magColShipForResource(game: GamestateHelper, interaction: discord.Interaction,player, buttonID, player_helper :PlayerHelper):
+        resource = buttonID.split("_")[1]
+        if player["colony_ships"] < 1:
+            await interaction.followup.send("You do not have enough color ships for this")
+            return
+        player_helper.adjust_colony_ships(1)
+        await interaction.channel.send(player["player_name"]+ " exhausted 1 colony ship to get 1 "+resource +". They have "+str(player_helper.stats["colony_ships"])+" colony ships left."+player_helper.adjust_resource(resource,1))
+        game.update_player(player_helper)
+
 
     @staticmethod
     async def undoLastTurn(player, game:GamestateHelper, interaction: discord.Interaction):
@@ -282,6 +303,11 @@ class TurnButtons:
         view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
         if len(PopulationButtons.findEmptyPopulation(game, player)) > 0 and player["colony_ships"] > 0:
             view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
+        if player["colony_ships"] > 0 and game.get_short_faction_name(player["name"]) == "magellan":
+            emojiC = Emoji.getEmojiByName("colony_ship")
+            view.add_item(Button(label=f"Get 1 Science", style=discord.ButtonStyle.red, emoji=emojiC, custom_id=f"FCID{player['color']}_magColShipForResource_science"))
+            view.add_item(Button(label=f"Get 1 Money", style=discord.ButtonStyle.green,emoji=emojiC, custom_id=f"FCID{player['color']}_magColShipForResource_money"))
+            view.add_item(Button(label=f"Get 1 Material", style=discord.ButtonStyle.blurple,emoji=emojiC, custom_id=f"FCID{player['color']}_magColShipForResource_materials"))
         await interaction.channel.send(f"Colony ships available: {player['colony_ships']}"
                                                 f"\nPlace population or end your turn.", view=view)
         await interaction.message.delete()

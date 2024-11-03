@@ -42,7 +42,7 @@ class ButtonListener(commands.Cog):
                 else:
                     player_helper = None
                 if "lastButton" in game.gamestate and game.gamestate["lastButton"] == customID:
-                    if not any(substring in customID for substring in ["showGame", "AtRatio", "gain5", "showReputation", "rollDice"]):  
+                    if not any(substring in customID for substring in ["showGame", "AtRatio", "gain5", "showReputation", "rollDice", "magColShip"]):  
                         await interaction.followup.send(interaction.user.mention+" This button ("+customID+") was pressed most recently, and we are attempting to prevent an accidental double press. Try hitting show game first and then hitting this button, if for some reason you need to press this button", ephemeral=True)
                         return
                 game.saveLastButtonPressed(customID)
@@ -86,6 +86,10 @@ class ButtonListener(commands.Cog):
                     round2 = game.get_gamestate()["roundNum"]
                     if round != round2:
                         await interaction.message.delete()
+                if customID.startswith("finishAction"):
+                    await TurnButtons.finishAction(player, game, interaction)
+                if customID.startswith("magColShipForResource"):
+                    await TurnButtons.magColShipForResource(game, interaction, player, customID, player_helper)
                 if customID.startswith("startExplore"):
                     if "2" not in customID:
                         game.updateSaveFile()
@@ -103,7 +107,7 @@ class ButtonListener(commands.Cog):
                 if customID.startswith("usedDiscForAbility"):
                     await DiscoveryTileButtons.usedDiscForAbility(game, player_helper, interaction, customID,player)
                 if customID.startswith("getFreeTech"):
-                    await DiscoveryTileButtons.getFreeTech(game, interaction, customID)
+                    await DiscoveryTileButtons.getFreeTech(game, interaction, customID, player)
                 if customID.startswith("startResearch"):
                     game.updateSaveFile()
                     await ResearchButtons.startResearch(game, player, player_helper, interaction,True)
@@ -214,8 +218,6 @@ class ButtonListener(commands.Cog):
                 elapsed_time = end_time - start_time  
                 if(elapsed_time > 2):
                     print(f"Total elapsed time for {customID} button press: {elapsed_time:.2f} seconds")  
-                if customID.startswith("finishAction"):
-                    await TurnButtons.finishAction(player, game, interaction)
             except Exception as error:
                 if log_channel is not None and isinstance(log_channel, discord.TextChannel):  
                     tb = traceback.format_exc()  # Get the traceback as a string  

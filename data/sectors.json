@@ -1564,6 +1564,98 @@
     "warp": 0,
     "type": "home"
   },
+  "233": {
+    "owner": 0,
+    "name": "Ursae Majoris",
+    "ring": 2,
+    "disctile": 0,
+    "player_ships": [],
+    "money_pop": [],
+    "money1_snap": [],
+    "money2_snap": [],
+    "moneyadv_pop": [
+      0
+    ],
+    "moneyadv1_snap": [
+      480,
+      215
+    ],
+    "moneyadv2_snap": [],
+    "science_pop": [
+      1
+    ],
+    "science1_snap": [
+      465,
+      665
+    ],
+    "science2_snap": [],
+    "scienceadv_pop": [
+      0
+    ],
+    "scienceadv1_snap": [
+      325,
+      665
+    ],
+    "scienceadv2_snap": [],
+    "material_pop": [
+      1
+    ],
+    "material1_snap": [
+      667,
+      697
+    ],
+    "material2_snap": [],
+    "materialadv_pop": [],
+    "materialadv1_snap": [],
+    "materialadv2_snap": [],
+    "neutral_pop": [],
+    "neutral1_snap": [],
+    "neutral2_snap": [],
+    "neutraladv_pop": [],
+    "neutraladv1_snap": [],
+    "neutraladv2_snap": [],
+    "int_snap": [
+      238,
+      257
+    ],
+    "cru_snap": [
+      697,
+      138
+    ],
+    "drd_snap": [
+      506,
+      686
+    ],
+    "sb_snap": [
+      158,
+      450
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      356,
+      434
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
+    "vp": 3,
+    "artifact": 1,
+    "ancient": 0,
+    "guardian": 0,
+    "gcds": 0,
+    "warp": 0,
+    "type": "home"
+  },
   "101": {
     "owner": 0,
     "name": "Castor",

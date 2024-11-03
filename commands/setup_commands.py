@@ -28,6 +28,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         app_commands.Choice(name="Descendants of Draco", value="dra"),
         app_commands.Choice(name="Mechanema", value="mec"),
         app_commands.Choice(name="Planta", value="pla"),
+        app_commands.Choice(name="Wardens of Magellan", value="mag"),
         app_commands.Choice(name="Terran Alliance (Orion)", value="ter1"),
         app_commands.Choice(name="Terran Conglomerate (Mech)", value="ter2"),
         app_commands.Choice(name="Terran Directorate (Eridian)", value="ter3"),
@@ -277,6 +278,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         4. Mechanema   
         5. Descendants of Draco   
         6. Planta  
+        7. Wardens of Magellan
         """
         minorSpeciesList = ""
         for species in game.get_gamestate()["minor_species"]:
@@ -347,7 +349,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
                              + " If you do not control your Starting Sector, you must take the tile as 2VP.",
                              "- 1 VP at the end of the game per Discovery Tile you used as a Ship Part.",
                              "- At any time, you may flip unused Colony Ships to gain one Resource of your choice per Colony Ship flipped."])
-
+        await factionThread.send(message, file=drawing.get_file("images/resources/components/factions/magellan_board.png"))
         message = "\n".join(["# Enlightened of Lyra",
                              "- 1 VP per Shrine\\* you control at the end of the game.",
                              "- During the Combat Phase, you may flip unused Colony Ships to reroll one of your own dice per Colony Ship flipped.",

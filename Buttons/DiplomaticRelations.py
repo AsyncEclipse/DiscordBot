@@ -1,6 +1,7 @@
 import json
 import discord
 from discord.ui import View
+from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
 from helpers.DrawHelper import DrawHelper
 from discord.ui import View, Button
@@ -27,6 +28,8 @@ class DiplomaticRelationsButtons:
         view = View()
         drawing = DrawHelper(game.gamestate) 
         money = player["money"] + int(player["science"]/player["trade_value"]) + int(player["materials"]/player["trade_value"])
+        if player["colony_ships"] > 0 and game.get_short_faction_name(player["name"]) == "magellan":
+            money +=player["colony_ships"]
         for minor in game.gamestate["minor_species"]:
             buttonID = f"FCID{player['color']}_formMinorRelations_"+minor
             cost = DiplomaticRelationsButtons.getMinorSpeciesCost(minor)
@@ -55,6 +58,9 @@ class DiplomaticRelationsButtons:
                     view.add_item(Button(label=f"Pay {trade_value} {resource_type.capitalize()}",   
                                     style=button_style,   
                                     custom_id=f"FCID{player['color']}_payAtRatio_{resource_type}")) 
+            if player["colony_ships"] > 0 and game.get_short_faction_name(player["name"]) == "magellan":
+                emojiC = Emoji.getEmojiByName("colony_ship")
+                view.add_item(Button(label=f"Get 1 Money", style=discord.ButtonStyle.red, emoji=emojiC, custom_id=f"FCID{player['color']}_magColShipForResource_money"))
             view.add_item(Button(label="Done Paying", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))  
             game.update_player(player_helper) 
             await interaction.channel.send(  
