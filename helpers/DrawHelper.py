@@ -50,6 +50,8 @@ class DrawHelper:
             return "hydran"
         elif full_name == "Eridani Empire":
             return "eridani"
+        elif full_name == "Wardens of Magellan":
+            return "magellan"
         elif "Terran" in full_name:
             return full_name.lower().replace(" ","_")
 
@@ -872,6 +874,8 @@ class DrawHelper:
             points += ambass
         if countRep:
             points += repu
+        if "magPartPoints" in player:
+            points += player["magPartPoints"]
                 
         if "discoveryTileBonusPointTiles" in player and "rep" in player["discoveryTileBonusPointTiles"]:
             points += int(reputationPoints/3)
