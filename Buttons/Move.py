@@ -51,7 +51,7 @@ class MoveButtons:
             ship = PlayerShip(player, shipType)
             shipRange = ship.getRange()
             if f"{player_color}-{game.getShipShortName(shipType)}" in game.get_gamestate()["board"][originT]["player_ships"] and shipRange > 0:
-                shipEmoji = Emoji.getEmojiByName(player['color']+game.getShipShortName(ship))
+                shipEmoji = Emoji.getEmojiByName(player['color']+game.getShipShortName(shipType))
                 view.add_item(Button(label=shipType.capitalize() + " (Range: "+str(shipRange)+")", emoji=shipEmoji, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_moveThisShip_{originT}_{shipType}_{moveCount}"))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
         await interaction.message.delete()
@@ -59,8 +59,12 @@ class MoveButtons:
     @staticmethod
     def getTilesInRange(game: GamestateHelper, player, origin:str, shipRange : int, jumpDrivePresent:int):
         configs = Properties()
-        with open("data/tileAdjacencies.properties", "rb") as f:
-            configs.load(f)
+        if "5playerhyperlane" in game.gamestate and game.gamestate["5playerhyperlane"]:
+            with open("data/tileAdjacencies_5p.properties", "rb") as f:
+                configs.load(f)
+        else:
+            with open("data/tileAdjacencies.properties", "rb") as f:
+                configs.load(f)
         tile_map = game.get_gamestate()["board"]
         player_helper = PlayerHelper(game.get_player_from_color(player["color"]),player)
         techsResearched = player_helper.getTechs()
@@ -135,7 +139,7 @@ class MoveButtons:
         game.add_units([shipName],destination)
         game.fixshipsOrder(destination)
         drawing = DrawHelper(game.gamestate)
-        await interaction.channel.send( f"{interaction.user.mention} Moved a {shipType} from {originT} to {destination}.", file=drawing.board_tile_image_file(destination))
+        await interaction.channel.send( f"{player['player_name']} Moved a {shipType} from {originT} to {destination}.", file=drawing.board_tile_image_file(destination))
         player_helper.specifyDetailsOfAction(f"Moved a {shipType} from {originT} to {destination}.")
         game.update_player(player_helper)
         owner = game.gamestate["board"][destination]["owner"]
@@ -146,7 +150,7 @@ class MoveButtons:
             game.update_player(player_helper2)
             await interaction.channel.send(p2["player_name"]+" your system has been invaded")
         for tile in player["reputation_track"]:
-            if isinstance(tile, str) and "-" in tile:
+            if isinstance(tile, str) and "-" in tile and "minor" not in tile:
                 color = tile.split("-")[2]
                 p2 = game.getPlayerObjectFromColor(color)
                 broken = False
@@ -162,7 +166,7 @@ class MoveButtons:
                     game.makeEveryoneNotTraitor()
                     player_helper.setTraitor(True)
                     game.update_player(player_helper)
-                    await interaction.channel.send( f"{interaction.user.mention} You broke relations with {color} and now are a traitor.")
+                    await interaction.channel.send( f"{player['player_name']} You broke relations with {color} and now are a traitor.")
         if moveCount == 1:
             player_helper.spend_influence_on_action("move")
             game.update_player(player_helper)

@@ -50,6 +50,8 @@ class DrawHelper:
             return "hydran"
         elif full_name == "Eridani Empire":
             return "eridani"
+        elif full_name == "Wardens of Magellan":
+            return "magellan"
         elif "Terran" in full_name:
             return full_name.lower().replace(" ","_")
 
@@ -84,8 +86,12 @@ class DrawHelper:
         mult = 1
         context = Image.new("RGBA", (int(345*3*3*mult), int(300*3*2*mult)+int(10*mult)), (255, 255, 255, 0))
         configs = Properties()
-        with open("data/tileAdjacencies.properties", "rb") as f:
-            configs.load(f)
+        if "5playerhyperlane" in self.gamestate and self.gamestate["5playerhyperlane"]:
+            with open("data/tileAdjacencies_5p.properties", "rb") as f:
+                configs.load(f)
+        else:
+            with open("data/tileAdjacencies.properties", "rb") as f:
+                configs.load(f)
         with open("data/sectors.json") as f:
             tile_data = json.load(f)
         tile = tile_data[tileID]
@@ -247,8 +253,12 @@ class DrawHelper:
             green = self.use_image(greenpath)
             black = self.use_image(blackpath)
             configs = Properties()
-            with open("data/tileAdjacencies.properties", "rb") as f:
-                configs.load(f)
+            if "5playerhyperlane" in self.gamestate and self.gamestate["5playerhyperlane"]:
+                with open("data/tileAdjacencies_5p.properties", "rb") as f:
+                    configs.load(f)
+            else:
+                with open("data/tileAdjacencies.properties", "rb") as f:
+                    configs.load(f)
             if "wormholes" in tile:
                 for wormhole in tile["wormholes"]:
                     wormholeCode = wormholeCode+str(wormhole)
@@ -288,7 +298,11 @@ class DrawHelper:
                         size = int(110*mult)
                     if ship_type == "orb" or ship_type =="mon":
                         ship = ship_type
-                    filepathShip = f"images/resources/components/basic_ships/{ship}.png"
+                    
+                    if "fancy_ships" in self.gamestate and self.gamestate["fancy_ships"] == True:
+                        filepathShip = f"images/resources/components/fancy_ships/fancy_{ship}.png"
+                    else:
+                        filepathShip = f"images/resources/components/basic_ships/{ship}.png"
                     if ship_type == "None":
                         continue
                     ship_image = self.use_image(filepathShip)
@@ -474,7 +488,7 @@ class DrawHelper:
 
 
     def display_remaining_tiles(self):
-        context = Image.new("RGBA", (1300, 500), (0,0,0,255))
+        context = Image.new("RGBA", (1800, 500), (0,0,0,255))
 
 
         filepath = f"images/resources/hexes/sector3backblank.png"
@@ -524,6 +538,16 @@ class DrawHelper:
         filepathRef = f"images/resources/components/reference_sheets/upgrade_reference2.png"
         ref_image = self.use_image(filepathRef)
         context.paste(ref_image, (970,85), mask=ref_image)
+
+        if "minor_species" in self.gamestate and len(self.gamestate["minor_species"]) > 0:
+            text_drawable_image.text((1300, 0), "Minor Species:", (0, 255, 0), font=font,
+                                    stroke_width=stroke_width, stroke_fill=stroke_color)
+            minor_species = self.gamestate["minor_species"]
+            count = 0
+            for species in minor_species:
+                tile_image = Image.open(f"images/resources/components/minor_species/minorspecies_{species.replace(' ','_').lower()}.png").convert("RGBA").resize((100, 100))
+                context.paste(tile_image, (1320+120*count,85), mask=tile_image)
+                count += 1
         return context
     
     def display_cube_track_reference(self, player):
@@ -694,12 +718,20 @@ class DrawHelper:
             if not isinstance(reputation, int) and "-" in reputation:
                 faction = reputation.split("-")[1]
                 color =  reputation.split("-")[2]
-                pop_path = f"images/resources/components/all_boards/popcube_{color}.png"
-                pop_image = self.use_image(pop_path).resize((35,35))
-                amb_tile_path = f"images/resources/components/factions/{faction}_ambassador.png"
-                amb_tile_image = self.use_image(amb_tile_path)
+                
+                if faction == "minor":
+                    amb_tile_path = f"images/resources/components/minor_species/minorspecies_{color.replace(' ','_').lower()}.png"
+                    amb_tile_image = self.use_image(amb_tile_path)
+                else:
+                    amb_tile_path = f"images/resources/components/factions/{faction}_ambassador.png"
+                    amb_tile_image = self.use_image(amb_tile_path)
                 context.paste(amb_tile_image, (825,172+x*scaler-mod), mask=amb_tile_image)
-                context.paste(pop_image, (825+20,172+x*scaler+25-mod), mask=pop_image)
+                if faction != "minor" or "cube" in color:
+                    if "cube" in color:
+                        color = player["color"]
+                    pop_path = f"images/resources/components/all_boards/popcube_{color}.png"
+                    pop_image = self.use_image(pop_path).resize((35,35))
+                    context.paste(pop_image, (825+20,172+x*scaler+25-mod), mask=pop_image)
 
         x = 925
         y = 0
@@ -773,7 +805,10 @@ class DrawHelper:
         ships = ["int","cru","drd","sb"]
         ultimateC = 0
         for counter,ship in enumerate(ships):
-            filepath = f"images/resources/components/basic_ships/{player['color']}-{ship}.png"
+            if "fancy_ships" in self.gamestate and self.gamestate["fancy_ships"] == True:
+                filepath = f"images/resources/components/fancy_ships/fancy_{player['color']}-{ship}.png"
+            else:
+                filepath = f"images/resources/components/basic_ships/{player['color']}-{ship}.png"
             ship_image = self.use_image(filepath).resize((80,80))
             for shipCounter in range(player["ship_stock"][counter]):
                 context.paste(ship_image, (x+ultimateC*10+counter*70,y),ship_image)
@@ -815,7 +850,7 @@ class DrawHelper:
                         points += 1
         techTypes =["military_tech","grid_tech","nano_tech"]
         for type in techTypes:
-            if type in player and len(player[type]) > 4:
+            if type in player and len(player[type]) > 3:
                 if len(player[type]) == 7:
                     points += 5
                 else:
@@ -823,13 +858,33 @@ class DrawHelper:
         if "disc_tiles_for_points" in player:
             points += player["disc_tiles_for_points"]*2
         reputationPoints = 0
+        ambass = 0
+        repu = 0
+        countAmb = False
+        countRep = False
         for reputation in player["reputation_track"]:
             if isinstance(reputation, int):
+                repu +=1
                 if "gameEnded" in self.gamestate:
                     points += reputation
                     reputationPoints +=reputation
             if not isinstance(reputation, int) and "-" in reputation:
+                reputation = reputation.lower()
                 points += 1
+                ambass += 1
+                if "three" in reputation:
+                    points += 2
+                if "per ambassador" in reputation:
+                    countAmb = True
+                if "per rep" in reputation:
+                    countRep = True
+        if countAmb:
+            points += ambass
+        if countRep:
+            points += repu
+        if "magPartPoints" in player:
+            points += player["magPartPoints"]
+                
         if "discoveryTileBonusPointTiles" in player and "rep" in player["discoveryTileBonusPointTiles"]:
             points += int(reputationPoints/3)
         if "traitor" in player and player["traitor"] == True:
@@ -843,12 +898,19 @@ class DrawHelper:
                 configs.load(f)
             return configs
 
-        def paste_tiles(context, tile_map):
+        def paste_tiles(context, tile_map, hyperlane):
             configs = load_tile_coordinates()
             min_x = float('inf')
             min_y = float('inf')
             max_x = float('-inf')
             max_y = float('-inf')
+            if hyperlane:
+                hyperImage = self.use_image("images/resources/hexes/5playerhyperlane.png").resize((1125,900))
+                context.paste(hyperImage, (1820, 2850), mask=hyperImage)
+                min_x = min(min_x, 1820)
+                min_y = min(min_y, 2850)
+                max_x = max(max_x, 1820 + hyperImage.width)
+                max_y = max(max_y, 2850 + hyperImage.height)
             for tile in tile_map:
                 tile_image = self.board_tile_image(tile).resize((345,300))
                 x, y = map(int, configs.get(tile)[0].split(","))
@@ -860,7 +922,10 @@ class DrawHelper:
                 max_y = max(max_y, y + tile_image.height)
             return min_x, min_y, max_x, max_y
         context = Image.new("RGBA", (4160, 5100), (0,0,0,255))
-        min_x, min_y, max_x, max_y = paste_tiles(context, self.gamestate["board"])
+        hyperlane5 = False
+        if "5playerhyperlane" in self.gamestate and self.gamestate["5playerhyperlane"]:
+            hyperlane5 = True
+        min_x, min_y, max_x, max_y = paste_tiles(context, self.gamestate["board"], hyperlane5)
         cropped_context = context.crop((min_x, min_y, max_x, max_y))
         def create_player_area():
             pCount = len(self.gamestate["players"])
@@ -1035,6 +1100,22 @@ class DrawHelper:
         bytes.seek(0)
         file = discord.File(bytes, filename="tile_image.webp")
         return file
+
+    def show_minor_species(self):
+        minor_species = self.gamestate["minor_species"]
+        context = Image.new("RGBA", (300 *len(minor_species), 260), (255, 255, 255, 0))
+        count = 0
+        for species in minor_species:
+            tile_image = Image.open(f"images/resources/components/minor_species/minorspecies_{species.replace(' ','_').lower()}.png").convert("RGBA").resize((260, 260))
+            context.paste(tile_image, (300*count,0), mask=tile_image)
+            count += 1
+        bytes = BytesIO()
+        context.save(bytes, format="WEBP")
+        bytes.seek(0)
+        file = discord.File(bytes, filename="disc_tile_image.webp")
+        return file
+
+
 
     def show_disc_tile(self, disc_tile_name:str):
         context = Image.new("RGBA", (260, 260), (255, 255, 255, 0))

@@ -130,6 +130,7 @@ class AI_Ship(Ship):
         self.speed = ship_parts["speed"]
         self.computer = ship_parts["computer"]
         self.hull = ship_parts["hull"]
+        self.shield = ship_parts["shield"]
 
     '''
     Parameters

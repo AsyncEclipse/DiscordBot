@@ -2,6 +2,7 @@ import discord
 from Buttons.DiplomaticRelations import DiplomaticRelationsButtons
 from Buttons.Explore import ExploreButtons
 from Buttons.Population import PopulationButtons
+from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 from helpers.DrawHelper import DrawHelper
@@ -37,7 +38,7 @@ class TurnButtons:
             player = game.get_player(interaction.user.id)  
             view = TurnButtons.getStartTurnButtons(game, player)
             game.saveLastButtonPressed("restart")
-            await interaction.channel.send(interaction.user.mention+" has chosen to back up to last start of turn.")
+            await interaction.channel.send(player['player_name']+" has chosen to back up to last start of turn.")
             await interaction.channel.send(player["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(player),view=view)
         except discord.NotFound: 
             await interaction.channel.send("Ignoring double press")
@@ -54,6 +55,7 @@ class TurnButtons:
         nextPlayer = game.get_next_player(player)
         if nextPlayer != None and not game.is_everyone_passed():
             view = TurnButtons.getStartTurnButtons(game,nextPlayer)
+            await interaction.channel.send("## "+game.getPlayerEmoji(nextPlayer)+" started their turn")
             await interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(nextPlayer),view=view)
         else:
             view = View()
@@ -73,12 +75,11 @@ class TurnButtons:
         if "-" in interaction.channel.name:
             thread_name = interaction.channel.name.split("-")[0]+"-bot-map-updates"
             thread = discord.utils.get(interaction.channel.threads, name=thread_name) 
-            end_time = time.perf_counter()
             if thread != None:
                 asyncio.create_task(game.showGame(thread, msg))
         end_time = time.perf_counter()  
         elapsed_time = end_time - start_time  
-        print(f"Total elapsed time for non-update part of endTurn: {elapsed_time:.2f} seconds")  
+        #print(f"Total elapsed time for non-update part of endTurn: {elapsed_time:.2f} seconds")  
         
 
 
@@ -88,12 +89,12 @@ class TurnButtons:
     async def passForRound(player, game: GamestateHelper, interaction: discord.Interaction, player_helper : PlayerHelper):
         from helpers.CombatHelper import Combat
         if "passed" in player and player["passed"]== True:
-            await interaction.channel.send(f"{interaction.user.mention} passed on their reaction window.")
+            await interaction.channel.send(f"{player['player_name']} passed on their reaction window.")
         else:
 
             if TurnButtons.noOneElsePassed(player,game):
                 player_helper.adjust_money(2)
-                await interaction.channel.send(f"{interaction.user.mention} you gained 2 money and the first player marker for next round for passing first")
+                await interaction.channel.send(f"{player['player_name']} you gained 2 money and the first player marker for next round for passing first")
                 player_helper.setFirstPlayer(True)
                 for p2 in game.get_gamestate()["players"]:
                     if game.get_gamestate()["players"][p2]["color"] == player["color"]:
@@ -102,18 +103,19 @@ class TurnButtons:
                     player_helper2.setFirstPlayer(False)
                     game.update_player(player_helper2)
             else:
-                await interaction.channel.send(f"{interaction.user.mention} passed.")
+                await interaction.channel.send(f"{player['player_name']} passed.")
         player_helper.passTurn(True)
         game.update_player(player_helper)
         nextPlayer = game.get_next_player(player)
         game.addToPassOrder(player["player_name"])
         if nextPlayer != None and not game.is_everyone_passed():
             view = TurnButtons.getStartTurnButtons(game,nextPlayer)
+            await interaction.channel.send("## "+game.getPlayerEmoji(nextPlayer)+" started their turn")
             await interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(nextPlayer),view=view)
 
             view2 = View()
             view2.add_item(Button(label=f"Pass Unless Someone Attacks You", style=discord.ButtonStyle.green, custom_id="permanentlyPass"))
-            await interaction.followup.send(interaction.user.mention+ " you can use this button to pass on reactions unless someone attacks you if you want.",view=view2,ephemeral=True)
+            await interaction.followup.send(interaction.user.mention+ " you can use this button to pass on reactions unless someone invades your systems.",view=view2,ephemeral=True)
         else:
             view = View()
             role = discord.utils.get(interaction.guild.roles, name=game.game_id)  
@@ -124,8 +126,14 @@ class TurnButtons:
             view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"startPopDrop"))
             view.add_item(Button(label="Run Upkeep",style=discord.ButtonStyle.blurple, custom_id="runUpkeep"))
             await interaction.channel.send(msg, view=view)
+        msg2 = f"{interaction.user.name} Passing"
+        await game.updateNamesAndOutRimTiles(interaction)
         await interaction.message.delete()
-        asyncio.create_task(game.showUpdate(f"{interaction.user.name} Passing",interaction))
+        if "-" in interaction.channel.name:
+            thread_name = interaction.channel.name.split("-")[0]+"-bot-map-updates"
+            thread = discord.utils.get(interaction.channel.threads, name=thread_name) 
+            if thread != None:
+                asyncio.create_task(game.showGame(thread, msg2))
 
 
     @staticmethod
@@ -141,7 +149,7 @@ class TurnButtons:
         resource_type2 = buttonID.split("_")[2]
         trade_value = player["trade_value"]
         if trade_value > player[resource_type]:
-            await interaction.channel.send(interaction.user.mention + " does not have enough "+resource_type +" to trade") 
+            await interaction.channel.send(player['player_name'] + " does not have enough "+resource_type +" to trade") 
             return
         msg = player_helper.adjust_resource(resource_type,-trade_value)  
         msg2 = player_helper.adjust_resource(resource_type2, 1) 
@@ -164,6 +172,9 @@ class TurnButtons:
                         view.add_item(Button(label=f"Trade {trade_value} {resource_type.capitalize()}",   
                                         style=button_style,   
                                         custom_id=f"FCID{p1.stats['color']}_tradeAtRatio_{resource_type}_money")) 
+                if p1.stats["colony_ships"] > 0 and game.get_short_faction_name(p1.stats["name"]) == "magellan":
+                    emojiC = Emoji.getEmojiByName("colony_ship")
+                    view.add_item(Button(label=f"Get 1 Money", style=discord.ButtonStyle.red, emoji=emojiC, custom_id=f"FCID{p1.stats['color']}_magColShipForResource_money"))
                 view.add_item(Button(label="Done Resolving", style=discord.ButtonStyle.red, custom_id=f"FCID{game.get_player(player)['color']}_deleteMsg"))
                 await interaction.channel.send("It appears that "+p1.name + " would be bankrupt (negative money). They currently have "+str(p1.stats["money"])+" money and will get "+str(p1.money_income())+" in income, but they owe "+str(p1.upkeepCosts())+" money. Please adjust the money or systems controlled so that upkeep can be run without the player entering negative money", view=view)
                 return
@@ -252,13 +263,32 @@ class TurnButtons:
                 view.add_item(Button(label=f"Pass ({number_passed+1}{ordinal(number_passed+1)})", style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_passForRound"))
         view.add_item(Button(label="Show Game",style=discord.ButtonStyle.gray, custom_id="showGame"))
         view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
+        if p1["colony_ships"] > 0 and game.get_short_faction_name(p1["name"]) == "magellan":
+            emojiC = Emoji.getEmojiByName("colony_ship")
+            view.add_item(Button(label=f"Get 1 Science", style=discord.ButtonStyle.red, emoji=emojiC, custom_id=f"FCID{player['color']}_magColShipForResource_science"))
+            view.add_item(Button(label=f"Get 1 Money", style=discord.ButtonStyle.green,emoji=emojiC, custom_id=f"FCID{player['color']}_magColShipForResource_money"))
+            view.add_item(Button(label=f"Get 1 Material", style=discord.ButtonStyle.blurple,emoji=emojiC, custom_id=f"FCID{p1['color']}_magColShipForResource_materials"))
         if len(PopulationButtons.findEmptyPopulation(game,p1)) > 0 and p1["colony_ships"] > 0:
             view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{p1['color']}_startPopDrop"))
         if game.get_gamestate()["player_count"] > 3 and not player_helper.isTraitor() and len(DiplomaticRelationsButtons.getPlayersWithWhichDiplomatcRelationsCanBeFormed(game, player)) > 0:
             view.add_item(Button(label="Initiate Diplomatic Relations", style=discord.ButtonStyle.gray, custom_id=f"FCID{p1['color']}_startDiplomaticRelations"))
+        if not player_helper.isTraitor() and "minor_species" in game.gamestate and len(game.get_gamestate()["minor_species"]) > 0:
+            view.add_item(Button(label="Minor Species Relations", style=discord.ButtonStyle.green, custom_id=f"FCID{p1['color']}_startMinorRelations"))
         if game.getNumberOfSaveFiles() > 0:
             view.add_item(Button(label="Undo Last Turn", style=discord.ButtonStyle.red, custom_id=f"undoLastTurn"))
         return view
+    
+
+    @staticmethod
+    async def magColShipForResource(game: GamestateHelper, interaction: discord.Interaction,player, buttonID, player_helper :PlayerHelper):
+        resource = buttonID.split("_")[1]
+        if player["colony_ships"] < 1:
+            await interaction.followup.send("You do not have enough color ships for this")
+            return
+        player_helper.adjust_colony_ships(1)
+        await interaction.channel.send(player["player_name"]+ " exhausted 1 colony ship to get 1 "+resource +". They have "+str(player_helper.stats["colony_ships"])+" colony ships left."+player_helper.adjust_resource(resource,1))
+        game.update_player(player_helper)
+
 
     @staticmethod
     async def undoLastTurn(player, game:GamestateHelper, interaction: discord.Interaction):
@@ -273,6 +303,11 @@ class TurnButtons:
         view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
         if len(PopulationButtons.findEmptyPopulation(game, player)) > 0 and player["colony_ships"] > 0:
             view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
+        if player["colony_ships"] > 0 and game.get_short_faction_name(player["name"]) == "magellan":
+            emojiC = Emoji.getEmojiByName("colony_ship")
+            view.add_item(Button(label=f"Get 1 Science", style=discord.ButtonStyle.red, emoji=emojiC, custom_id=f"FCID{player['color']}_magColShipForResource_science"))
+            view.add_item(Button(label=f"Get 1 Money", style=discord.ButtonStyle.green,emoji=emojiC, custom_id=f"FCID{player['color']}_magColShipForResource_money"))
+            view.add_item(Button(label=f"Get 1 Material", style=discord.ButtonStyle.blurple,emoji=emojiC, custom_id=f"FCID{player['color']}_magColShipForResource_materials"))
         await interaction.channel.send(f"Colony ships available: {player['colony_ships']}"
                                                 f"\nPlace population or end your turn.", view=view)
         await interaction.message.delete()

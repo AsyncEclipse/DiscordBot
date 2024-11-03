@@ -4,6 +4,7 @@ import json
 import discord
 import config
 from helpers.DrawHelper import DrawHelper
+from helpers.EmojiHelper import Emoji
 from helpers.PlayerHelper import PlayerHelper
 import os
 from jproperties import Properties
@@ -119,6 +120,9 @@ class GamestateHelper:
     def setAdvancedAI(self, status:bool):
         self.gamestate["advanced_ai"] = status
         self.update()
+    def setFancyShips(self, status:bool):
+        self.gamestate["fancy_ships"] = status
+        self.update()
     async def declareWinner(self, interaction:discord.Interaction):
         self.gamestate["gameEnded"] = True
         self.update()
@@ -219,7 +223,7 @@ class GamestateHelper:
             return "int"
         elif shipName == "cruiser":
             return "cru"
-        elif shipName == "dreadnought":
+        elif shipName == "dreadnought" or shipName == "dread":
             return "drd"
         elif shipName == "starbase":
             return "sb"
@@ -243,8 +247,12 @@ class GamestateHelper:
             return "hydran"
         elif fullName == "Eridani Empire":
             return "eridani"
+        elif fullName == "Wardens of Magellan":
+            return "magellan"
         elif "Terran" in fullName:
             return fullName.lower().replace(" ","_")
+        
+        return fullName
 
 
     def find_player_faction_name_from_color(self, color):
@@ -292,8 +300,12 @@ class GamestateHelper:
         self.gamestate["board"][position] = tile
 
         configs = Properties()
-        with open("data/tileAdjacencies.properties", "rb") as f:
-            configs.load(f)
+        if "5playerhyperlane" in self.gamestate and self.gamestate["5playerhyperlane"]:
+            with open("data/tileAdjacencies_5p.properties", "rb") as f:
+                configs.load(f)
+        else:
+            with open("data/tileAdjacencies.properties", "rb") as f:
+                configs.load(f)
         if position != None and sector != "sector3back":
             tiles = configs.get(position)[0].split(",")
             for adjTile in tiles:
@@ -600,23 +612,26 @@ class GamestateHelper:
         neutralPop = 0
         orbitalPop = 0
         for i in pop_list:
+            found = False
             if position != "dummy":
                 for val,num in enumerate(self.gamestate["board"][position][i]):
                     if(num > 0):
                         self.gamestate["board"][position][i][val] = num-1
+                        found = True
                         break
-            if not graveYard:
-                if "neutral" not in i and "orbital" not in i and self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] < 13:
-                    self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] = self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"]+1
-                else:
-                    if "neutral" not in i:
-                        orbitalPop +=1
+            if found:
+                if not graveYard:
+                    if "neutral" not in i and "orbital" not in i and self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] < 13:
+                        self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"] = self.gamestate["players"][playerID][i.replace("adv","")+"_cubes"]+1
                     else:
-                        neutralPop += 1
-            else:
-                if "graveYard" not in self.gamestate["players"][playerID]:
-                    self.gamestate["players"][playerID]["graveYard"] = []
-                self.gamestate["players"][playerID]["graveYard"].append(i.replace("adv",""))   
+                        if "neutral" not in i:
+                            orbitalPop +=1
+                        else:
+                            neutralPop += 1
+                else:
+                    if "graveYard" not in self.gamestate["players"][playerID]:
+                        self.gamestate["players"][playerID]["graveYard"] = []
+                    self.gamestate["players"][playerID]["graveYard"].append(i.replace("adv",""))   
         self.update()
         return neutralPop, orbitalPop
 
@@ -680,6 +695,13 @@ class GamestateHelper:
         self.cleanAllTheTiles()
         self.update()
 
+    def getPlayerEmoji(self, player):
+        name = player["player_name"]
+        shortFaction = self.getShortFactionNameFromFull(player["name"])
+        if "terran" in shortFaction:
+            shortFaction += "_"
+        emoji = Emoji.getEmojiByName(shortFaction+"token")
+        return emoji
     def createRoundNum(self):
         if "roundNum" not in self.gamestate:
             self.gamestate["roundNum"] = 1
@@ -695,6 +717,12 @@ class GamestateHelper:
         self.gamestate["players"][str(player_id)].update(faction_data[faction])
         self.gamestate["players"][str(player_id)].update({"passed": False})
         self.gamestate["players"][str(player_id)].update({"perma_passed": False})
+        name = self.gamestate["players"][str(player_id)]["player_name"]
+        shortFaction = self.getShortFactionNameFromFull(self.gamestate["players"][str(player_id)]["name"])
+        if "terran" in shortFaction:
+            shortFaction += "_"
+        emoji = Emoji.getEmojiByName(shortFaction+"token")
+        self.gamestate["players"][str(player_id)]["player_name"] = name + " "+emoji
         self.update()
         #return(f"{name} is now setup!")
 
@@ -748,6 +776,18 @@ class GamestateHelper:
                 pass
             else:
                 tech_draws -= 1
+        minorDraws = 4
+        minor_species = ["Cruiser Discount","Dreadnought Discount","Monolith Discount", "Orbital Discount","Tech Discount", "Population Cube",
+                         "Three Points","Point Per Ambassador","Point Per Reputation Tile"]
+        self.gamestate["minor_species"]=[]
+        if count == 5:
+            self.gamestate["5playerhyperlane"] = True
+        else:
+            self.gamestate["5playerhyperlane"] = False
+        while minorDraws > 0:
+            random.shuffle(minor_species)
+            self.gamestate["minor_species"].append(minor_species.pop())
+            minorDraws -=1
         self.update()
 
     def setTurnsInPassingOrder(self, status:bool):
@@ -853,6 +893,8 @@ class GamestateHelper:
             return "hydran"
         elif full_name == "Eridani Empire":
             return "eridani"
+        elif full_name == "Wardens of Magellan":
+            return "magellan"
         elif "Terran" in full_name:
             return full_name.lower().replace(" ","_")
     
@@ -890,6 +932,33 @@ class GamestateHelper:
                     lowest = tile
             self.gamestate["players"][pID2]["reputation_track"][loc] = "mixed-"+self.get_short_faction_name(player1["name"])+"-"+player1["color"]
             self.gamestate["reputation_tiles"].append(lowest)
+
+        self.update()
+
+    def formMinorSpeciesRelations(self, player, minor_species_name:str):
+        pID = self.get_player_from_color(player['color'])
+        found = False
+        for x,tile in enumerate(player["reputation_track"]):
+            if isinstance(tile, str) and (tile == "amb" or tile == "mixed"):
+                self.gamestate["players"][pID]["reputation_track"][x]=tile+"-minor-"+minor_species_name
+                found = True
+                break
+        if not found:
+            lowest = 10
+            loc = 0
+            for x,tile in enumerate(player["reputation_track"]):
+                if isinstance(tile, int) and tile < lowest:
+                    loc = x
+                    lowest = tile
+            self.gamestate["players"][pID]["reputation_track"][loc] = tile+"-minor-"+minor_species_name
+            self.gamestate["reputation_tiles"].append(lowest)
+        if "Discount" in minor_species_name and "Tech" not in minor_species_name:
+            discountedUnit = minor_species_name.replace(" Discount","").replace("Dreadnought","dread").lower()
+            discount = 1
+            if "dread" in discountedUnit or "monolith" in discountedUnit:
+                discount = 2
+            self.gamestate["players"][pID]["cost_"+discountedUnit] -= discount
+        self.gamestate["minor_species"].remove(minor_species_name)
 
         self.update()
 
@@ -939,6 +1008,11 @@ class GamestateHelper:
             self.gamestate["pass_order"].append(player_name)
         self.update()
 
+
+    def useMagDisc(self, playerID):
+
+        self.gamestate["players"][playerID]["magDiscTileUsed"]=True
+        self.update()
 
     def update_player(self, *args):
 

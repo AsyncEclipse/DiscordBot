@@ -34,6 +34,12 @@ class GameCommands(commands.GroupCog, name="game"):
         game = GamestateHelper(interaction.channel)
         game.setAdvancedAI(status)
         await interaction.response.send_message("Set AI Advanced status to "+str(status))
+    
+    @app_commands.command(name="set_fancy_ships")
+    async def set_fancy_ships(self,interaction: discord.Interaction, status:bool):
+        game = GamestateHelper(interaction.channel)
+        game.setFancyShips(status)
+        await interaction.response.send_message("Set fancy ships status to "+str(status))
     @app_commands.command(name="set_turns_in_passing_order")
     async def set_turns_in_passing_order(self,interaction: discord.Interaction, status:bool):
         game = GamestateHelper(interaction.channel)
@@ -60,6 +66,17 @@ class GameCommands(commands.GroupCog, name="game"):
         await interaction.response.defer(thinking=False)
         game = GamestateHelper(interaction.channel)
         await TurnButtons.runUpkeep(game, interaction)
+
+    @app_commands.command(name="disable_minor_species")
+    async def disable_minor_species(self,interaction: discord.Interaction):
+        await interaction.response.send_message("The Minor Species expansion has been disabled")
+        game = GamestateHelper(interaction.channel)
+        game.initilizeKey("minor_species")
+    @app_commands.command(name="disable_five_player_hyperlanes")
+    async def disable_five_player_hyperlanes(self,interaction: discord.Interaction):
+        await interaction.response.send_message("The hyperlanes for 5 player mode have been disabled")
+        game = GamestateHelper(interaction.channel)
+        game.initilizeKey("5playerhyperlane")
     
     @app_commands.command(name="set_round")
     async def set_round(self,interaction: discord.Interaction, round:int):

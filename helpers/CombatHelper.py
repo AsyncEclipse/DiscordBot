@@ -332,7 +332,7 @@ class Combat:
     async def removeUnits(game:GamestateHelper, customID:str, player, interaction:discord.Interaction):
         pos = customID.split("_")[1]
         view = Combat.getRemovalButtons(game, pos, player)
-        await interaction.channel.send(interaction.user.mention+" use buttons to remove units",view=view)
+        await interaction.channel.send(player['player_name']+" use buttons to remove units",view=view)
     
     @staticmethod
     async def removeThisUnit(game:GamestateHelper, customID:str, player, interaction:discord.Interaction):
@@ -343,7 +343,7 @@ class Combat:
         game.remove_units([unit],pos)
         if owner == "ai":
             owner = "AI"
-        await interaction.channel.send(interaction.user.mention+" removed 1 "+owner+" "+Combat.translateShipAbrToName(unit))
+        await interaction.channel.send(player['player_name']+" removed 1 "+owner+" "+Combat.translateShipAbrToName(unit))
         view = Combat.getRemovalButtons(game, pos, player)
         await interaction.message.edit(view=view)
         if len(Combat.findPlayersInTile(game, pos)) < 2 and len(Combat.findPlayersInTile(game, pos)) != oldLength:
@@ -446,10 +446,8 @@ class Combat:
                         else:
                             for i in range(Combat.translateColorToDamage(die, random_number)):
                                 dieNums.append([random_number,1,die])
-                needsShieldMessage = False
                 if shipModel.computer > 0:
                     msg = msg + "\nThis ship type has a +"+str(shipModel.computer)+" computer"
-                    needsShieldMessage = True
                 
                 if(len(dice) > 0):
                     #await interaction.channel.send(msg,file=drawing.append_images(dieFiles))
@@ -466,9 +464,8 @@ class Combat:
                             if dieNum == 1 or dieNum + shipModel.computer < 6 or oldNumPeeps > len(Combat.findPlayersInTile(game, pos)):
                                 continue
                             hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships, dieNum, shipModel.computer, pos, speed)
-                            if dieNum + shipModel.computer > 5 and len(hittableShips) == 0 and needsShieldMessage:
-                                msg += ". Some of the computer bonus was cancelled by the shields on each of the opponents ships."
-                                needsShieldMessage = False
+                            if dieNum + shipModel.computer > 5 and len(hittableShips) == 0:
+                                await interaction.channel.send("The computer bonus for a die that rolled a "+str(dieNum)+" was cancelled by the shields on each of the opponents ships.")
                         else:
                             if dieNum == 2 or dieNum == 3:
                                 continue
@@ -679,8 +676,9 @@ class Combat:
                     game.remove_units([ship],pos)
                     game.add_units([ship],destination)
         await interaction.message.delete()
-        await interaction.channel.send(interaction.user.mention + " has retreated all ships with initiative "+speed+" to "+destination+".")
-        if len(Combat.findPlayersInTile(game, pos)) < 2:
+        await interaction.channel.send(player['player_name'] + " has retreated all ships with initiative "+speed+" to "+destination+".")
+        dracoNAnc = len(Combat.findPlayersInTile(game,pos)) == 2 and "anc" in Combat.findShipTypesInTile(game,pos) and "Draco" in game.find_player_faction_name_from_color(Combat.findPlayersInTile(game,pos)[1])
+        if len(Combat.findPlayersInTile(game, pos)) < 2 or dracoNAnc:
                 await Combat.declareAWinner(game, interaction, pos)
         elif oldLength != len(Combat.findPlayersInTile(game, pos)):
             drawing = DrawHelper(game.gamestate)
@@ -697,8 +695,12 @@ class Combat:
         player_helper = PlayerHelper(game.get_player_from_color(color),playerObj)
         techsResearched = player_helper.getTechs()
         configs = Properties()
-        with open("data/tileAdjacencies.properties", "rb") as f:
-            configs.load(f)
+        if "5playerhyperlane" in game.gamestate and game.gamestate["5playerhyperlane"]:
+            with open("data/tileAdjacencies_5p.properties", "rb") as f:
+                configs.load(f)
+        else:
+            with open("data/tileAdjacencies.properties", "rb") as f:
+                configs.load(f)
         wormHoleGen = "wog" in techsResearched
         validTiles = []
         for tile in playerObj["owned_tiles"]:
@@ -717,9 +719,9 @@ class Combat:
         game.setRetreatingUnits((int(speed),colorOrAI), pos)
         tile_map = game.get_gamestate()["board"]
         player_ships = tile_map[pos]["player_ships"][:]
-        
+        player = game.getPlayerObjectFromColor(colorOrAI)
         await interaction.message.delete()
-        await interaction.channel.send(interaction.user.mention + " has chosen to start to retreat the ships with initiative "+speed+". They will be prompted to retreat when their turn comes around again")
+        await interaction.channel.send(player['player_name'] + " has chosen to start to retreat the ships with initiative "+speed+". They will be prompted to retreat when their turn comes around again")
         ships = Combat.getCombatantShipsBySpeed(game, colorOrAI, player_ships)
         newSpeeds = 0
         for ship in ships:
@@ -837,7 +839,8 @@ class Combat:
             else:
                 msg += "The AI destroyed the "+Combat.translateShipAbrToName(shipType)+" due to the damage exceeding the ships hull"
             await interaction.channel.send(msg)
-            if len(Combat.findPlayersInTile(game, pos)) < 2:
+            dracoNAnc = len(Combat.findPlayersInTile(game,pos)) == 2 and "anc" in Combat.findShipTypesInTile(game,pos) and "Draco" in game.find_player_faction_name_from_color(Combat.findPlayersInTile(game,pos)[1])
+            if len(Combat.findPlayersInTile(game, pos)) < 2 or dracoNAnc:
                 await Combat.declareAWinner(game, interaction, pos)
             elif oldLength != len(Combat.findPlayersInTile(game, pos)):
                 drawing = DrawHelper(game.gamestate)

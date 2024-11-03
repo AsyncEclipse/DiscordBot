@@ -34,7 +34,7 @@ class ResearchButtons:
         tech_details = tech_data.get(tech)
         drawing = DrawHelper(game.gamestate)
         image = DrawHelper.show_tech_ref_image(tech_details["name"], tech_details['track'])
-        await interaction.channel.send(f"{interaction.user.mention} acquired the tech "+tech_details["name"],file=image)
+        await interaction.channel.send(f"{player['player_name']} acquired the tech "+tech_details["name"],file=image)
         player_helper.specifyDetailsOfAction("Researched "+tech_details["name"]+".")
         if player["science"] >= cost:  
             msg = player_helper.adjust_science(-cost)  
@@ -52,6 +52,9 @@ class ResearchButtons:
                     view.add_item(Button(label=f"Pay {trade_value} {resource_type.capitalize()}",   
                                     style=button_style,   
                                     custom_id=f"FCID{player['color']}_payAtRatio_{resource_type}")) 
+            if player["colony_ships"] > 0 and game.get_short_faction_name(player["name"]) == "magellan":
+                emojiC = Emoji.getEmojiByName("colony_ship")
+                view.add_item(Button(label=f"Get 1 Science", style=discord.ButtonStyle.red, emoji=emojiC, custom_id=f"FCID{player['color']}_magColShipForResource_science"))
             view.add_item(Button(label="Done Paying", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))  
             if val < cost:
                 view2 = View()
@@ -61,8 +64,9 @@ class ResearchButtons:
             msg = player_helper.adjust_science(-paid)  
             game.update_player(player_helper) 
             await interaction.channel.send(  
-                f"Attempted to pay a cost of {str(cost)}\n{msg}\n Please pay the rest of the cost by trading other resources at your trade ratio ({trade_value}:1)",view=view  
+                f"Attempted to pay a cost of {str(cost)}\n{msg}\n Please pay the rest of the cost by trading other resources at your trade ratio ({trade_value}:1)"  
             )  
+            await interaction.channel.send("Payment buttons",view=view)
         
         if tech_details["art_pt"] != 0:
             view = View()
@@ -90,6 +94,12 @@ class ResearchButtons:
         if tech_details["dtile"] != 0:
             game.addDiscTile(game.getLocationFromID(player["home_planet"]))
             await DiscoveryTileButtons.exploreDiscoveryTile(game, game.getLocationFromID(player["home_planet"]),interaction,player)
+        lenTech = len(player[tech_type+"_tech"])
+        if lenTech == 4 and "magDiscTileUsed" in player and not player["magDiscTileUsed"]:
+            await interaction.channel.send(player["player_name"]+" due to researching your fourth tech for the first time this game as Magellan, you get a discovery tile")
+            game.addDiscTile(game.getLocationFromID(player["home_planet"]))
+            game.useMagDisc(str(interaction.user.id))
+            await DiscoveryTileButtons.exploreDiscoveryTile(game, game.getLocationFromID(player["home_planet"]),interaction,player)
 
     @staticmethod  
     async def placeWarpPortal(interaction:discord.Interaction, game: GamestateHelper, player, customID):
@@ -106,18 +116,26 @@ class ResearchButtons:
         )  
         track = [-8, -6, -4, -3, -2, -1, 0, 0]
         discount = track[6 - prev_tech_count]  
+        for rep in player["reputation_track"]:
+            if isinstance(rep, str):
+                rep = rep.lower()
+                if "tech discount" in rep:
+                    discount -=1
         return max(tech_details["base_cost"] + discount, tech_details["min_cost"])  
 
 
     @staticmethod
-    def getPlayerTotalAvailableScience(player):
-        return player["science"] + int(player["money"]/player["trade_value"]) + int(player["materials"]/player["trade_value"])
+    def getPlayerTotalAvailableScience(player, game):
+        extra = 0
+        if player["colony_ships"] > 0 and game.get_short_faction_name(player["name"]) == "magellan":
+            extra +=player["colony_ships"]
+        return player["science"] + int(player["money"]/player["trade_value"]) + int(player["materials"]/player["trade_value"])+extra
 
     @staticmethod  
     async def startResearch(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction, buttonCommand:bool):
         game = GamestateHelper(interaction.channel)
         player = game.get_player(interaction.user.id)  
-        await interaction.channel.send(f"{interaction.user.mention} is using their turn to research")
+        await interaction.channel.send(f"{player['player_name']} is using their turn to research")
         player_helper = PlayerHelper(interaction.user.id, player)  
         if buttonCommand:
             player_helper.spend_influence_on_action("research")
@@ -151,7 +169,7 @@ class ResearchButtons:
         for tech in researchedTech:
             displayedTechs.append(tech)
         buttonCount = 1
-        avalScience = ResearchButtons.getPlayerTotalAvailableScience(player)
+        avalScience = ResearchButtons.getPlayerTotalAvailableScience(player,game)
         for tech_type in tech_groups:  
             sorted_techs = sorted(tech_groups[tech_type], key=lambda x: x[2])  # Sort by cost  
             for tech, tech_name, cost in sorted_techs:  
@@ -220,7 +238,7 @@ class ResearchButtons:
         resource_type = buttonID.split("_")[1]
         trade_value = player["trade_value"]
         if trade_value > player[resource_type]:
-            await interaction.channel.send(interaction.user.mention + " does not have enough "+resource_type +" to trade") 
+            await interaction.channel.send(player['player_name'] + " does not have enough "+resource_type +" to trade") 
             return
         msg = player_helper.adjust_resource(resource_type,-trade_value)  
         game.update_player(player_helper)  
@@ -237,7 +255,7 @@ class ResearchButtons:
     async def gain3resource(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction, buttonID:str):
         game = GamestateHelper(interaction.channel)  
         resource_type = buttonID.split("_")[1]   
-        msg = player_helper.adjust_resource(resource_type,5)  
+        msg = player_helper.adjust_resource(resource_type,3)  
         game.update_player(player_helper)  
         await interaction.channel.send(msg)  
         await interaction.message.delete()

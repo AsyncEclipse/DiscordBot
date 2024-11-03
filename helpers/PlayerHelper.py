@@ -1,5 +1,7 @@
 from discord.ui import View, Button
 import discord
+
+from helpers.EmojiHelper import Emoji
 class PlayerHelper:
     def __init__(self, player_id, player_stats):
         self.stats = player_stats
@@ -15,14 +17,16 @@ class PlayerHelper:
     def adjust_materials(self, adjustment):
         before = self.stats["materials"]
         self.stats["materials"] += adjustment
-        return(f"\n> Adjusted materials from {before} to {before+adjustment}")
+        emoji = Emoji.getEmojiByName("material")
+        return(f"\n> Adjusted {emoji} from {before} to {before+adjustment}")
 
 
 
     def adjust_science(self, adjustment):
         before = self.stats["science"]
+        emoji = Emoji.getEmojiByName("science")
         self.stats["science"] += adjustment
-        return (f"\n> Adjusted science from {before} to {before + adjustment}")
+        return (f"\n> Adjusted {emoji} from {before} to {before + adjustment}")
     def adjust_resource(self, resource, adjustment):
         if(resource == "science"):
             return self.adjust_science(adjustment)
@@ -34,7 +38,8 @@ class PlayerHelper:
     def adjust_money(self, adjustment):
         before = self.stats["money"]
         self.stats["money"] += adjustment
-        return(f"\n> Adjusted money from {before} to {before+adjustment}")
+        emoji = Emoji.getEmojiByName("money")
+        return(f"\n> Adjusted {emoji} from {before} to {before+adjustment}")
     def getTechs(self):
         return self.stats["military_tech"] + self.stats["grid_tech"] + self.stats["nano_tech"]
     def getTechType(self, tech:str):
@@ -60,6 +65,7 @@ class PlayerHelper:
         amount = min(self.stats["science_pop_cubes"] + adjustment, 13)
         amount = max(amount, 1)
         self.stats["science_pop_cubes"] = amount
+        
         return (f"\n> Adjusted science cubes from {before} to {amount}")
 
     def adjust_money_cube(self, adjustment):

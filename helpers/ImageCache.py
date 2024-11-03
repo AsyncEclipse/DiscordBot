@@ -28,12 +28,16 @@ class ImageCacheHelper:
                         imageTemp = Image.open(image_path).convert("RGBA")
                         if imageTemp.size != size:
                             imageTemp = imageTemp.resize(size)
+                        if "fancy" in root and "drd" in filename:
+                            imageTemp = imageTemp.rotate(-30)
                         self.cache[filename] = imageTemp
                         
 
     def get_image_size(self, folder, filename):  
         mult = 1024/345
         if "hexes" in folder.lower():  
+            if "hyper" in filename.lower():
+                return (1125,900)
             return (int(345*mult),int(300*mult))
         elif "upgrade_reference1" in filename.lower() or "upgrade_reference2" in filename.lower():  
             return (310,300)  
@@ -51,6 +55,8 @@ class ImageCacheHelper:
                 return (58,58)
             else:
                 return (895, 500)
+        elif "minor_species" in folder.lower(): 
+            return (58,58)
         elif "all_boards" in folder.lower():  
             if "popcube" in filename.lower():
                 return (int(35*mult),int(35*mult))
@@ -68,8 +74,8 @@ class ImageCacheHelper:
                 return (int(132*mult),int(102*mult))
             else:
                 return (80,80)
-        elif "basic_ships" in folder.lower():  
-            if any(substring in filename.lower() for substring in ["gcds", "gcdsadv", "anc", "ancadv", "grd", "grdadv"]):
+        elif "basic_ships" in folder.lower() or "fancy_ships" in folder.lower():  
+            if any(substring in filename.lower().replace("fancy","") for substring in ["gcds", "gcdsadv", "anc", "ancadv", "grd", "grdadv"]):
                 if "ai" in filename.lower():
                     return (int(140),int(140))
                 else:
@@ -78,13 +84,22 @@ class ImageCacheHelper:
                 if "damage" in filename.lower():
                     return (int(15*mult),int(15*mult)) 
                 else:
-                    if "cru" in filename.lower() or "sb" in filename.lower():
-                        return (int(90*mult),int(90*mult))
-                    else:
-                        if "drd" in filename.lower():
+                    if "basic_ships" in folder.lower():
+                        if "cru" in filename.lower() or "sb" in filename.lower():
                             return (int(90*mult),int(90*mult))
                         else:
-                            return (int(70*mult),int(70*mult)) 
+                            if "drd" in filename.lower():
+                                return (int(90*mult),int(90*mult))
+                            else:
+                                return (int(70*mult),int(70*mult)) 
+                    else:
+                        if "cru" in filename.lower() or "sb" in filename.lower():
+                            return (int(70*mult),int(70*mult))
+                        else:
+                            if "drd" in filename.lower():
+                                return (int(100*mult),int(100*mult))
+                            else:
+                                return (int(40*mult),int(40*mult)) 
         elif "discovery_tiles" in folder.lower():  
             return (int(80*mult), int(80*mult))  
         elif "upgrades" in folder.lower():  

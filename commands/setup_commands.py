@@ -28,6 +28,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         app_commands.Choice(name="Descendants of Draco", value="dra"),
         app_commands.Choice(name="Mechanema", value="mec"),
         app_commands.Choice(name="Planta", value="pla"),
+        app_commands.Choice(name="Wardens of Magellan", value="mag"),
         app_commands.Choice(name="Terran Alliance (Orion)", value="ter1"),
         app_commands.Choice(name="Terran Conglomerate (Mech)", value="ter2"),
         app_commands.Choice(name="Terran Directorate (Eridian)", value="ter3"),
@@ -102,22 +103,31 @@ class SetupCommands(commands.GroupCog, name="setup"):
         }  
         if count in tile_mapping:  
             listOfTilesPos = tile_mapping[count]  
-        
+        hyperlane5 = False
+        if "5playerhyperlane" in game.gamestate and game.gamestate["5playerhyperlane"]:
+            hyperlane5 = True
         listDefended = ["271","272","273","274"]
         random.shuffle(listDefended)
         game.add_tile("000", 0, "001")
         for i in range(count):
             rotDet = ((180 - (int(listOfTilesPos[i])-201)/2 * 60) + 360)%360
             game.add_tile(listOfTilesPos[i], rotDet, listPlayerHomes[i][0], listPlayerHomes[i][1])
-        for i in range(6-count):
-            rotDet = ((180 - (int(listOfTilesPos[5-i])-201)/2 * 60) + 360)%360
-            game.add_tile(listOfTilesPos[5-i], rotDet, listDefended[i])
+        if not hyperlane5:
+            for i in range(6-count):
+                rotDet = ((180 - (int(listOfTilesPos[5-i])-201)/2 * 60) + 360)%360
+                game.add_tile(listOfTilesPos[5-i], rotDet, listDefended[i])
         for i in range(101, 107):
+            if hyperlane5 and i == 104:
+                continue
             game.add_tile(str(i), 0, "sector1back")
         for i in range(201, 213):
+            if hyperlane5 and (i == 206 or i == 207):
+                continue
             if str(i) not in listOfTilesPos:
                 game.add_tile(str(i), 0, "sector2back")
         for i in range(301, 319):
+            if hyperlane5 and (i == 309 or i == 310 or i == 311):
+                continue
             game.add_tile(str(i), 0, "sector3back")
         if game.gamestate["setup_finished"] != 1:
             game.setup_finished()
@@ -127,7 +137,8 @@ class SetupCommands(commands.GroupCog, name="setup"):
         
         asyncio.create_task(game.showUpdate("Start of Game",interaction))
         view = TurnButtons.getStartTurnButtons(game, game.get_player(player1.id))
-        await interaction.channel.send(f"<@{player1.id}> use these buttons to do your turn. "+ game.displayPlayerStats(game.get_player(player1.id)),view=view)
+        await interaction.channel.send("## "+game.getPlayerEmoji(game.get_player(player1.id))+" started their turn")
+        await interaction.channel.send(f"{game.get_player(player1.id)['player_name']} use these buttons to do your turn. "+ game.displayPlayerStats(game.get_player(player1.id)),view=view)
         await interaction.response.defer()
 
 
@@ -276,12 +287,19 @@ class SetupCommands(commands.GroupCog, name="setup"):
         4. Mechanema   
         5. Descendants of Draco   
         6. Planta  
+        7. Wardens of Magellan
         """
-        
+        minorSpeciesList = ""
+        for species in game.get_gamestate()["minor_species"]:
+            minorSpeciesList+=species+"\n"
         await thread.send(role.mention + " pinging you here")
         await actions.send(role.mention+" Draft factions and turn position in the manner of your choice, then setup the game with /setup game. Enter the players in the order they should take turns in (i.e. enter first player first)")
         await actions.send("Initial tech draw is as follows",file=drawing.show_available_techs())
-        await actions.send("A common way to draft factions is to generate a random pick order and then have the turn order be the reverse of that pick order. For your convenience, the following random pick order was generated, but you can ignore it: \n"+list)
+        await actions.send("A common way to draft factions is to generate a random pick order and then have the turn order be the reverse of that pick order. For your convenience, the following random pick order was generated, but you can ignore it: \n"+list+
+                           "\nThis game has been set to auto include minor species, 4 of which have been drawn at random below. If you want to disable this, you can use /game disable_minor_species. The minor species are as follows:\n"+minorSpeciesList,file=drawing.show_minor_species())
+    
+        
+        
         factionThread = await actions.create_thread(name="Faction Reference", auto_archive_duration=10080)
 
         message = "\n".join(["# Eridani Empire",
@@ -340,7 +358,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
                              + " If you do not control your Starting Sector, you must take the tile as 2VP.",
                              "- 1 VP at the end of the game per Discovery Tile you used as a Ship Part.",
                              "- At any time, you may flip unused Colony Ships to gain one Resource of your choice per Colony Ship flipped."])
-
+        await factionThread.send(message, file=drawing.get_file("images/resources/components/factions/magellan_board.png"))
         message = "\n".join(["# Enlightened of Lyra",
                              "- 1 VP per Shrine\\* you control at the end of the game.",
                              "- During the Combat Phase, you may flip unused Colony Ships to reroll one of your own dice per Colony Ship flipped.",

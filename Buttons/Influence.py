@@ -17,9 +17,9 @@ class InfluenceButtons:
 
         def is_adjacent(tile_a, tile_b):
             for index, adjTile in enumerate(configs.get(tile_a)[0].split(",")):
-                if tile_a in game.gamestate["board"]:
+                if tile_a in game.gamestate["board"] and tile_b in game.gamestate["board"] and adjTile == tile_b:
                     tile_orientation_index = (index + 6 + int(int(game.gamestate["board"][tile_a]["orientation"]) / 60)) % 6
-                    if adjTile == tile_b and "wormholes" in game.gamestate["board"][tile_a] and tile_orientation_index in game.gamestate["board"][tile_a]["wormholes"]:
+                    if "wormholes" in game.gamestate["board"][tile_a] and tile_orientation_index in game.gamestate["board"][tile_a]["wormholes"]:
                         return True
             if tile_a in game.gamestate["board"] and tile_b in game.gamestate["board"]:
                 if "warp" in game.gamestate["board"][tile_a] and game.gamestate["board"][tile_a]["warp"] == 1:
@@ -35,8 +35,12 @@ class InfluenceButtons:
     @staticmethod
     def getTilesToInfluence(game: GamestateHelper, player):
         configs = Properties()
-        with open("data/tileAdjacencies.properties", "rb") as f:
-            configs.load(f)
+        if "5playerhyperlane" in game.gamestate and game.gamestate["5playerhyperlane"]:
+            with open("data/tileAdjacencies_5p.properties", "rb") as f:
+                configs.load(f)
+        else:
+            with open("data/tileAdjacencies.properties", "rb") as f:
+                configs.load(f)
         tilesViewed = []
         player_helper = PlayerHelper(game.get_player_from_color(player["color"]),player)
         techsResearched = player_helper.getTechs()
@@ -47,22 +51,25 @@ class InfluenceButtons:
             for adjTile in configs.get(tile)[0].split(","):
                 if adjTile not in tilesViewed and InfluenceButtons.areTwoTilesAdjacent(game, tile, adjTile, configs, wormHoleGen):
                     tilesViewed.append(adjTile)
+                    if adjTile not in game.get_gamestate()["board"]:
+                        continue
+
                     playerShips =game.get_gamestate()["board"][adjTile]["player_ships"]
                     playerShips.append(player["color"])
                     if "owner" in game.get_gamestate()["board"][adjTile] and game.get_gamestate()["board"][adjTile]["owner"]==0 and ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips,game):
                         tilesToInfluence.append(adjTile)
             if tile not in tilesViewed:
-                    tilesViewed.append(tile)
-                    playerShips =game.get_gamestate()["board"][tile]["player_ships"]
-                    playerShips.append(player["color"])
-                    if "owner" in game.get_gamestate()["board"][tile] and game.get_gamestate()["board"][tile]["owner"]==0 and ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips,game):
-                        if any("ai" in s for s in playerShips):
-                            if any("anc" in s for s in playerShips):
-                                if "Draco" not in player["name"]:
-                                    continue
-                            else:
-                                    continue
-                        tilesToInfluence.append(tile)
+                tilesViewed.append(tile)
+                playerShips =game.get_gamestate()["board"][tile]["player_ships"]
+                playerShips.append(player["color"])
+                if "owner" in game.get_gamestate()["board"][tile] and game.get_gamestate()["board"][tile]["owner"]==0 and ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips,game):
+                    if any("ai" in s for s in playerShips):
+                        if any("anc" in s for s in playerShips):
+                            if "Draco" not in player["name"]:
+                                continue
+                        else:
+                                continue
+                    tilesToInfluence.append(tile)
         return tilesToInfluence
     @staticmethod
     async def startInfluence(game: GamestateHelper, p1, interaction: discord.Interaction):
@@ -75,7 +82,7 @@ class InfluenceButtons:
         view.add_item(Button(label="Conclude Influence Action", style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_finishInfluenceAction"))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{p1['color']}_restartTurn"))
         await interaction.message.delete()
-        await interaction.channel.send( f"{interaction.user.mention} you can remove up to two disks and influence up to 2 spaces. You can also refresh 2 colony ships or put down population at any time during this resolution", view=view)
+        await interaction.channel.send( f"{p1['player_name']} you can remove up to two disks and influence up to 2 spaces. You can also refresh 2 colony ships or put down population at any time during this resolution", view=view)
 
     @staticmethod
     async def addInfluenceStart(game: GamestateHelper, p1, interaction: discord.Interaction):
@@ -83,7 +90,7 @@ class InfluenceButtons:
         tiles = InfluenceButtons.getTilesToInfluence(game, p1)
         for tile in tiles:
             view.add_item(Button(label=tile, style=discord.ButtonStyle.blurple, custom_id=f"FCID{p1['color']}_addInfluenceFinish_"+tile))
-        await interaction.channel.send( f"{interaction.user.mention} choose the tile you would like to influence", view=view)
+        await interaction.channel.send( f"{p1['player_name']} choose the tile you would like to influence", view=view)
         drawing = DrawHelper(game.gamestate)
         if len(tiles) > 0:
             asyncio.create_task(interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True))
@@ -94,7 +101,7 @@ class InfluenceButtons:
             await interaction.channel.send( f"Someone else controls {tileLoc}. Remove their control via valid means first")
             return
         game.add_control(p1["color"],tileLoc)
-        await interaction.channel.send( f"{interaction.user.mention} acquired control of "+tileLoc)
+        await interaction.channel.send( f"{p1['player_name']} acquired control of "+tileLoc)
         await interaction.message.delete()
 
     @staticmethod
@@ -104,7 +111,7 @@ class InfluenceButtons:
         for button in view.children:
             if buttonID in button.custom_id:
                 view.remove_item(button)
-        await interaction.followup.send( f"{interaction.user.mention} now has "+str(numShips)+" colony ships "
+        await interaction.followup.send( f"{player['player_name']} now has "+str(numShips)+" colony ships "
                                                                                                "available to use")
         await interaction.message.edit(view=view)
 
@@ -120,7 +127,7 @@ class InfluenceButtons:
         tiles = game.get_owned_tiles(player)
         for tile in tiles:
             view.add_item(Button(label=tile, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_removeInfluenceFinish_"+tile+"_normal"))
-        await interaction.channel.send( f"{interaction.user.mention} choose the tile you would like to remove influence from", view=view)
+        await interaction.channel.send( f"{player['player_name']} choose the tile you would like to remove influence from", view=view)
 
         drawing = DrawHelper(game.gamestate)
         if len(tiles) > 0:

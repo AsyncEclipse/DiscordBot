@@ -17,6 +17,8 @@ class UpgradeButtons:
         image = drawing.player_area(player)
         view = View()
         actions = str(player['upgrade_apt'])
+        if not button:
+            actions = "1"
         for ship in ships:
             shipEmoji = Emoji.getEmojiByName(player['color']+game.getShipShortName(ship))
             view.add_item(Button(label=ship.capitalize(), emoji = shipEmoji, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_upgradeShip_{actions}_{ship}_{discTileUpgrade}"))
@@ -27,6 +29,7 @@ class UpgradeButtons:
             await interaction.message.delete()
             if discTileUpgrade == "dummy":
                 view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
+        
         await interaction.channel.send(
             f"{interaction.user.mention}, choose which ship you would like to upgrade.", view=view)
 
@@ -127,18 +130,18 @@ class UpgradeButtons:
         drawing = DrawHelper(game.gamestate)
         image = drawing.player_area(player_helper.stats)
         view = View()
-        if actions > 0:
+        if actions > 0 and ("passed" not in player or player["passed"] != True):
             ships = ["interceptor","cruiser","dread","starbase"]
             for ship2 in ships:
-                shipEmoji = Emoji.getEmojiByName(player['color']+game.getShipShortName(ship))
+                shipEmoji = Emoji.getEmojiByName(player['color']+game.getShipShortName(ship2))
                 view.add_item(Button(label=ship2.capitalize(),emoji=shipEmoji, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_upgradeShip_{str(actions)}_{ship2}_dummy"))
         view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                              custom_id=f"FCID{player['color']}_finishAction"))
         await interaction.message.delete()
-        await interaction.channel.send(f"{interaction.user.mention} replaced {oldName} with {part_stats[newPart]['name']} on their {ship.capitalize()} which now looks like this",file=drawing.show_player_ship(image, ship))
+        await interaction.channel.send(f"{player['player_name']} replaced {oldName} with {part_stats[newPart]['name']} on their {ship.capitalize()} which now looks like this",file=drawing.show_player_ship(image, ship))
         if discTileUpgrade == "dummy":
             await interaction.channel.send(
-                f"{interaction.user.mention}, choose which ship you would like to upgrade or finish your action.",
+                f"{player['player_name']}, choose which ship you would like to upgrade or finish your action.",
                 view=view)
 
 

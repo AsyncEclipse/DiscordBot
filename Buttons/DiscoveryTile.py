@@ -24,7 +24,7 @@ class DiscoveryTileButtons:
         discName = discTile_data[disc]["name"]
         drawing = DrawHelper(game.gamestate)
         file = drawing.show_disc_tile(discName)
-        msg = f"{interaction.user.mention} you explored a discovery tile and found a "+discName+". You can keep it for 2 points at the end of the game or use it for its ability"
+        msg = f"{player['player_name']} you explored a discovery tile and found a "+discName+". You can keep it for 2 points at the end of the game or use it for its ability"
         
         view = View()
         view.add_item(Button(label="Use it for its ability", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_usedDiscForAbility_"+disc+"_"+tile))  
@@ -36,7 +36,7 @@ class DiscoveryTileButtons:
         player_helper.acquire_disc_tile_for_points()
         game.update_player(player_helper)
         await interaction.message.edit(view=None)
-        await interaction.channel.send( f"{interaction.user.mention} chose to keep the tile for 2 points")
+        await interaction.channel.send( f"{player_helper.stats['player_name']} chose to keep the tile for 2 points")
     
     @staticmethod 
     async def usedDiscForAbility(game: GamestateHelper, player_helper:PlayerHelper, interaction: discord.Interaction, buttonID:str,player):
@@ -46,7 +46,7 @@ class DiscoveryTileButtons:
             discTile_data = json.load(f)
         discName = discTile_data[disc]["name"]
         await interaction.message.edit(view=None)
-        await interaction.channel.send( f"{interaction.user.mention} chose to keep use '"+discName+"' for its ability")
+        await interaction.channel.send( f"{player['player_name']} chose to use '"+discName+"' for its ability")
         if disc == "rep" or disc == "art":
             if "discoveryTileBonusPointTiles" not in player_helper.stats:
                 player_helper.stats["discoveryTileBonusPointTiles"] = []
@@ -54,6 +54,8 @@ class DiscoveryTileButtons:
             game.update_player(player_helper)
         if discTile_data[disc]["part"] != "":
             player_helper.stats["ancient_parts"].append(discTile_data[disc]["part"])
+            if "magPartPoints" in player_helper.stats:
+                player_helper.stats["magPartPoints"] +=1
             game.update_player(player_helper)
             await UpgradeButtons.startUpgrade(game, player, interaction,False, str(discTile_data[disc]["part"]))
         elif discTile_data[disc]["gain1"] != 0:
@@ -81,7 +83,7 @@ class DiscoveryTileButtons:
                     view.add_item(Button(label=tech_details["name"], style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_getFreeTech_"+tech))
                 await interaction.channel.send("Choose the tech you would like to gain",view=view)
             else:
-                await DiscoveryTileButtons.getFreeTech(game, interaction, "spoof_"+cheapestTechs[0])
+                await DiscoveryTileButtons.getFreeTech(game, interaction, "spoof_"+cheapestTechs[0], player)
         elif discTile_data[disc]["spawn"] != 0:
             if discTile_data[disc]["spawn"] == "cruiser":
                 game.add_units([player["color"]+"-"+"cru"],tile)
@@ -91,7 +93,7 @@ class DiscoveryTileButtons:
                 game.add_units([player["color"]+"-"+"mon"],tile)
             if discTile_data[disc]["spawn"] == "warp":
                 game.add_warp(tile)
-            await interaction.channel.send( f"{interaction.user.mention} added a "+discTile_data[disc]["spawn"]+ " to tile "+tile)
+            await interaction.channel.send( f"{player['player_name']} added a "+discTile_data[disc]["spawn"]+ " to tile "+tile)
             if discTile_data[disc]["material"] != 0:
                 await interaction.channel.send( player_helper.adjust_materials(discTile_data[disc]["material"]))
         else:
@@ -112,7 +114,7 @@ class DiscoveryTileButtons:
         game.update_player(player_helper)
 
     @staticmethod 
-    async def getFreeTech(game: GamestateHelper, interaction: discord.Interaction, buttonID:str):
+    async def getFreeTech(game: GamestateHelper, interaction: discord.Interaction, buttonID:str, player):
         tech = buttonID.split("_")[1]
         with open("data/techs.json", "r") as f:
                 tech_data = json.load(f)
@@ -121,8 +123,8 @@ class DiscoveryTileButtons:
         tech_details = tech_data.get(tech)
         image = DrawHelper.show_tech_ref_image(tech_details["name"], tech_details['track'])
         if "spoof" in buttonID:
-            await interaction.channel.send(f"{interaction.user.mention} acquired the tech "+tech_details["name"],file=image)
+            await interaction.channel.send(f"{player['player_name']} acquired the tech "+tech_details["name"],file=image)
         else:
             await interaction.message.delete()
-            await interaction.channel.send( f"{interaction.user.mention} acquired the tech "+tech_details["name"],file=image)
+            await interaction.channel.send( f"{player['player_name']} acquired the tech "+tech_details["name"],file=image)
     
