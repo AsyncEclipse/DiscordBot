@@ -695,8 +695,12 @@ class Combat:
         player_helper = PlayerHelper(game.get_player_from_color(color),playerObj)
         techsResearched = player_helper.getTechs()
         configs = Properties()
-        with open("data/tileAdjacencies.properties", "rb") as f:
-            configs.load(f)
+        if "5playerhyperlane" in game.gamestate and game.gamestate["5playerhyperlane"]:
+            with open("data/tileAdjacencies_5p.properties", "rb") as f:
+                configs.load(f)
+        else:
+            with open("data/tileAdjacencies.properties", "rb") as f:
+                configs.load(f)
         wormHoleGen = "wog" in techsResearched
         validTiles = []
         for tile in playerObj["owned_tiles"]:

@@ -86,8 +86,12 @@ class DrawHelper:
         mult = 1
         context = Image.new("RGBA", (int(345*3*3*mult), int(300*3*2*mult)+int(10*mult)), (255, 255, 255, 0))
         configs = Properties()
-        with open("data/tileAdjacencies.properties", "rb") as f:
-            configs.load(f)
+        if "5playerhyperlane" in self.gamestate and self.gamestate["5playerhyperlane"]:
+            with open("data/tileAdjacencies_5p.properties", "rb") as f:
+                configs.load(f)
+        else:
+            with open("data/tileAdjacencies.properties", "rb") as f:
+                configs.load(f)
         with open("data/sectors.json") as f:
             tile_data = json.load(f)
         tile = tile_data[tileID]
@@ -249,8 +253,12 @@ class DrawHelper:
             green = self.use_image(greenpath)
             black = self.use_image(blackpath)
             configs = Properties()
-            with open("data/tileAdjacencies.properties", "rb") as f:
-                configs.load(f)
+            if "5playerhyperlane" in self.gamestate and self.gamestate["5playerhyperlane"]:
+                with open("data/tileAdjacencies_5p.properties", "rb") as f:
+                    configs.load(f)
+            else:
+                with open("data/tileAdjacencies.properties", "rb") as f:
+                    configs.load(f)
             if "wormholes" in tile:
                 for wormhole in tile["wormholes"]:
                     wormholeCode = wormholeCode+str(wormhole)
@@ -890,12 +898,19 @@ class DrawHelper:
                 configs.load(f)
             return configs
 
-        def paste_tiles(context, tile_map):
+        def paste_tiles(context, tile_map, hyperlane):
             configs = load_tile_coordinates()
             min_x = float('inf')
             min_y = float('inf')
             max_x = float('-inf')
             max_y = float('-inf')
+            if hyperlane:
+                hyperImage = self.use_image("images/resources/hexes/5playerhyperlane.png").resize((1125,900))
+                context.paste(hyperImage, (1820, 2850), mask=hyperImage)
+                min_x = min(min_x, 1820)
+                min_y = min(min_y, 2850)
+                max_x = max(max_x, 1820 + hyperImage.width)
+                max_y = max(max_y, 2850 + hyperImage.height)
             for tile in tile_map:
                 tile_image = self.board_tile_image(tile).resize((345,300))
                 x, y = map(int, configs.get(tile)[0].split(","))
@@ -907,7 +922,10 @@ class DrawHelper:
                 max_y = max(max_y, y + tile_image.height)
             return min_x, min_y, max_x, max_y
         context = Image.new("RGBA", (4160, 5100), (0,0,0,255))
-        min_x, min_y, max_x, max_y = paste_tiles(context, self.gamestate["board"])
+        hyperlane5 = False
+        if "5playerhyperlane" in self.gamestate and self.gamestate["5playerhyperlane"]:
+            hyperlane5 = True
+        min_x, min_y, max_x, max_y = paste_tiles(context, self.gamestate["board"], hyperlane5)
         cropped_context = context.crop((min_x, min_y, max_x, max_y))
         def create_player_area():
             pCount = len(self.gamestate["players"])
