@@ -1,57 +1,108 @@
-{"ai-anc": {
-    "dice": ["yellow", "yellow"],
+{
+  "ai-anc": {
+    "dice": [
+      "yellow",
+      "yellow"
+    ],
     "missile": [],
     "speed": 2,
     "computer": 1,
-    "hull": 1},
-  "ai-ancwa":{
-    "dice": ["yellow"],
+    "shield": 0,
+    "hull": 1
+  },
+  "ai-ancwa": {
+    "dice": [
+      "yellow"
+    ],
     "missile": [],
     "speed": 3,
     "computer": 2,
-    "hull": 1},  
-  "ai-ancadv":{
-    "dice": ["orange"],
+    "shield": 0,
+    "hull": 1
+  },
+  "ai-ancadv": {
+    "dice": [
+      "orange"
+    ],
     "missile": [],
     "speed": 1,
     "computer": 1,
-    "hull": 2},
+    "shield": 0,
+    "hull": 2
+  },
   "ai-grd": {
-    "dice": ["yellow", "yellow", "yellow"],
+    "dice": [
+      "yellow",
+      "yellow",
+      "yellow"
+    ],
     "missile": [],
     "speed": 3,
     "computer": 2,
-    "hull": 2},
+    "shield": 0,
+    "hull": 2
+  },
   "ai-grdwa": {
-    "dice": ["orange", "orange"],
+    "dice": [
+      "orange",
+      "orange"
+    ],
     "missile": [],
     "speed": 2,
     "computer": 1,
     "shield": 1,
-    "hull": 3},
+    "hull": 3
+  },
   "ai-grdadv": {
-    "dice": ["red"],
-    "missile": ["orange", "orange"],
+    "dice": [
+      "red"
+    ],
+    "missile": [
+      "orange",
+      "orange"
+    ],
     "speed": 1,
     "computer": 1,
-    "hull": 3},
-  "ai-gcds" : {
-    "dice": ["yellow", "yellow", "yellow", "yellow"],
+    "shield": 0,
+    "hull": 3
+  },
+  "ai-gcds": {
+    "dice": [
+      "yellow",
+      "yellow",
+      "yellow",
+      "yellow"
+    ],
     "missile": [],
     "speed": 0,
     "computer": 2,
-    "hull": 7},
+    "shield": 0,
+    "hull": 7
+  },
   "ai-gcdsadv": {
-    "dice": ["red"],
-    "missile": ["yellow", "yellow", "yellow", "yellow"],
+    "dice": [
+      "red"
+    ],
+    "missile": [
+      "yellow",
+      "yellow",
+      "yellow",
+      "yellow"
+    ],
     "speed": 2,
     "computer": 2,
-    "hull": 3},
+    "shield": 0,
+    "hull": 3
+  },
   "ai-gcdswa": {
     "dice": [],
-    "missile": ["orange","orange"],
+    "missile": [
+      "orange",
+      "orange"
+    ],
     "speed": 3,
     "computer": 2,
     "shield": 2,
-    "hull": 4}
+    "hull": 4
+  }
 }
