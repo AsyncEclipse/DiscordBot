@@ -172,9 +172,9 @@ class TurnButtons:
                         view.add_item(Button(label=f"Trade {trade_value} {resource_type.capitalize()}",   
                                         style=button_style,   
                                         custom_id=f"FCID{p1.stats['color']}_tradeAtRatio_{resource_type}_money")) 
-                if player["colony_ships"] > 0 and game.get_short_faction_name(player["name"]) == "magellan":
+                if p1.stats["colony_ships"] > 0 and game.get_short_faction_name(p1.stats["name"]) == "magellan":
                     emojiC = Emoji.getEmojiByName("colony_ship")
-                    view.add_item(Button(label=f"Get 1 Money", style=discord.ButtonStyle.red, emoji=emojiC, custom_id=f"FCID{player['color']}_magColShipForResource_money"))
+                    view.add_item(Button(label=f"Get 1 Money", style=discord.ButtonStyle.red, emoji=emojiC, custom_id=f"FCID{p1.stats['color']}_magColShipForResource_money"))
                 view.add_item(Button(label="Done Resolving", style=discord.ButtonStyle.red, custom_id=f"FCID{game.get_player(player)['color']}_deleteMsg"))
                 await interaction.channel.send("It appears that "+p1.name + " would be bankrupt (negative money). They currently have "+str(p1.stats["money"])+" money and will get "+str(p1.money_income())+" in income, but they owe "+str(p1.upkeepCosts())+" money. Please adjust the money or systems controlled so that upkeep can be run without the player entering negative money", view=view)
                 return
