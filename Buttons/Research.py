@@ -3,6 +3,7 @@ import json
 import discord
 from discord.ui import View
 from Buttons.DiscoveryTile import DiscoveryTileButtons
+from Buttons.Shrine import ShrineButtons
 from helpers.DrawHelper import DrawHelper
 from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
@@ -191,26 +192,29 @@ class ResearchButtons:
                     else:
                         view2.add_item(Button(label=f"{tech_name} ({cost})", style=buttonStyle, emoji=Emoji.getEmojiByName(techName),custom_id=f"FCID{player['color']}_getTech_{tech}_{tech_type}"))
                     buttonCount+=1
-        await interaction.channel.send(f"{interaction.user.mention}, select the tech you would like to acquire. The discounted cost is in parentheses. You currently have {str(player['science'])} science, and can trade other resources for science at a {str(player['trade_value'])}:1 ratio", view=view)
+        await interaction.channel.send(f"{player['player_name']}, select the tech you would like to acquire. The discounted cost is in parentheses. You currently have {str(player['science'])} science, and can trade other resources for science at a {str(player['trade_value'])}:1 ratio", view=view)
         if buttonCount > 26:
             await interaction.channel.send(view=view2)
-        asyncio.create_task(interaction.followup.send(file=drawing.show_available_techs(),ephemeral=True))
+        await interaction.followup.send(file=drawing.show_available_techs(),ephemeral=True)
+        if "shrine_in_storage" in player and len(ShrineButtons.getInitialShrineButtons(game, player).children) > 1:
+            await interaction.channel.send(f"{player['player_name']} you can put down a shrine with this research action by paying its cost",view=ShrineButtons.getInitialShrineButtons(game, player))
         if buttonCommand:
             if player["research_apt"] > 1:
                 if buttonCount < 25:
                     view.add_item(Button(label="Decline 2nd Tech", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))  
                 else:
                     view2.add_item(Button(label="Decline 2nd Tech", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))  
-                await interaction.channel.send(f"{interaction.user.mention}, select the second tech you would like to acquire. The discounted cost is in parentheses.", view=view)
+                await interaction.channel.send(f"{player['player_name']}, select the second tech you would like to acquire. The discounted cost is in parentheses.", view=view)
                 if buttonCount > 24:
                     await interaction.channel.send(view=view2)
             view = View()
             view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                                  custom_id=f"FCID{player['color']}_finishAction"))
             view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
-            await interaction.channel.send(f"{interaction.user.mention} when finished you may resolve your action "
+            await interaction.channel.send(f"{player['player_name']} when finished you may resolve your action "
                                            f"with this button.", view=view)
             await interaction.message.delete()
+
 
     @staticmethod  
     async def getTech(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction, buttonID:str):

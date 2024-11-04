@@ -53,6 +53,10 @@ class ImageCacheHelper:
         elif "factions" in folder.lower():  
             if "ambassador" in filename.lower():
                 return (58,58)
+            elif "shrine_board" in filename.lower():
+                return (187,171)
+            elif "shrine" in filename.lower():
+                return (24, 24)
             else:
                 return (895, 500)
         elif "minor_species" in folder.lower(): 

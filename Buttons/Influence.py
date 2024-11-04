@@ -45,6 +45,10 @@ class InfluenceButtons:
         player_helper = PlayerHelper(game.get_player_from_color(player["color"]),player)
         techsResearched = player_helper.getTechs()
         wormHoleGen = "wog" in techsResearched
+        nums = [0,1,2]
+        if "shrine_in_storage" in player:
+            if player_helper.stats["shrine_in_storage"][nums[0]] == 0 and player_helper.stats["shrine_in_storage"][nums[1]] == 0 and player_helper.stats["shrine_in_storage"][nums[2]] == 0:
+                wormHoleGen = True
         tilesToInfluence = []
         playerTiles = ExploreButtons.getListOfTilesPlayerIsIn(game, player)
         for tile in playerTiles:
@@ -77,12 +81,15 @@ class InfluenceButtons:
         view.add_item(Button(label=f"Remove Influence", style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_removeInfluenceStart"))
         if len(InfluenceButtons.getTilesToInfluence(game,p1)) > 0:
             view.add_item(Button(label=f"Add  Influence", style=discord.ButtonStyle.green, custom_id=f"FCID{p1['color']}_addInfluenceStart"))
-        view.add_item(Button(label="Refresh 2 Colony Ships", style=discord.ButtonStyle.blurple, custom_id=f"FCID{p1['color']}_refreshPopShips"))
+        if "Magellan" in p1["name"]:
+            view.add_item(Button(label="Refresh 1 Colony Ship", style=discord.ButtonStyle.blurple, custom_id=f"FCID{p1['color']}_refreshPopShips"))
+        else:
+            view.add_item(Button(label="Refresh 2 Colony Ships", style=discord.ButtonStyle.blurple, custom_id=f"FCID{p1['color']}_refreshPopShips"))
         view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{p1['color']}_startPopDrop"))
         view.add_item(Button(label="Conclude Influence Action", style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_finishInfluenceAction"))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{p1['color']}_restartTurn"))
         await interaction.message.delete()
-        await interaction.channel.send( f"{p1['player_name']} you can remove up to two disks and influence up to 2 spaces. You can also refresh 2 colony ships or put down population at any time during this resolution", view=view)
+        await interaction.channel.send( f"{p1['player_name']} you can remove up to two disks and influence up to 2 spaces. You can also refresh colony ships or put down population at any time during this resolution", view=view)
 
     @staticmethod
     async def addInfluenceStart(game: GamestateHelper, p1, interaction: discord.Interaction):
@@ -106,7 +113,10 @@ class InfluenceButtons:
 
     @staticmethod
     async def refreshPopShips(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str):
-        numShips = game.refresh_two_colony_ships(game.get_player_from_color(player["color"]))
+        if "Magellan" in player["name"]:
+            numShips = game.refresh_one_colony_ship(game.get_player_from_color(player["color"]))
+        else:
+            numShips = game.refresh_two_colony_ships(game.get_player_from_color(player["color"]))
         view = View.from_message(interaction.message)
         for button in view.children:
             if buttonID in button.custom_id:

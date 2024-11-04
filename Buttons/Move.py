@@ -69,7 +69,10 @@ class MoveButtons:
         player_helper = PlayerHelper(game.get_player_from_color(player["color"]),player)
         techsResearched = player_helper.getTechs()
         wormHoleGen = "wog" in techsResearched
-        
+        nums = [0,1,2]
+        if "shrine_in_storage" in player:
+            if player_helper.stats["shrine_in_storage"][nums[0]] == 0 and player_helper.stats["shrine_in_storage"][nums[1]] == 0 and player_helper.stats["shrine_in_storage"][nums[2]] == 0:
+                wormHoleGen = True
         jumpDrive = False
         if jumpDrivePresent == 1:
             jumpDrive = True

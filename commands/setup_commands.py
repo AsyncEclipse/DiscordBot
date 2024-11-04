@@ -29,6 +29,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         app_commands.Choice(name="Mechanema", value="mec"),
         app_commands.Choice(name="Planta", value="pla"),
         app_commands.Choice(name="Wardens of Magellan", value="mag"),
+        app_commands.Choice(name="Enlightened of Lyra", value="lyr"),
         app_commands.Choice(name="Terran Alliance (Orion)", value="ter1"),
         app_commands.Choice(name="Terran Conglomerate (Mech)", value="ter2"),
         app_commands.Choice(name="Terran Directorate (Eridian)", value="ter3"),
@@ -288,6 +289,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         5. Descendants of Draco   
         6. Planta  
         7. Wardens of Magellan
+        8. Enlightened of Lyra
         """
         minorSpeciesList = ""
         for species in game.get_gamestate()["minor_species"]:
@@ -375,7 +377,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
                              + " If you do not control your Starting Sector, you must take the tile as 2VP.",
                              "  - __Extra Influence Disc__: You receive one additional Influence Disc, placed immediately on your Influence Track"
                              + " (you start with 4 extra Influence Discs in your Species Tray instead of 3)."])
-
+        await factionThread.send(message, file=drawing.get_file("images/resources/components/factions/lyra_board.png"))
         message = "\n".join(["# The Exiles",
                              "- Start with an Orbital in your Starting Sector.",
                              "- 1 VP for each Orbital with your Population Cube at the end of the game.",
