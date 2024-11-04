@@ -227,6 +227,8 @@ class Combat:
         players = Combat.findPlayersInTile(game, pos)
         opponent = ""
         hittableShips = []
+        if dieVal == 1 or dieVal + computerVal < 6:
+            return hittableShips
         if len(players) < 2:
             if speed == 1000:
                 if dieVal == 6 or dieVal + computerVal > 5:
@@ -461,11 +463,18 @@ class Combat:
                         dieColor = die[2]
                         hittableShips = []
                         if dieColor != "pink":
-                            if dieNum == 1 or dieNum + shipModel.computer < 6 or oldNumPeeps > len(Combat.findPlayersInTile(game, pos)):
-                                continue
                             hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships, dieNum, shipModel.computer, pos, speed)
                             if dieNum + shipModel.computer > 5 and len(hittableShips) == 0:
                                 await interaction.channel.send("The computer bonus for a die that rolled a "+str(dieNum)+" was cancelled by the shields on each of the opponents ships.")
+                            if len(hittableShips) == 0 or oldNumPeeps > len(Combat.findPlayersInTile(game, pos)):
+                                if "Lyra" in game.gamestate["players"][player]["name"] and game.gamestate["players"][player]["colony_ships"] > 0:
+                                    viewLyr = View()
+                                    label = "Reroll Die"
+                                    buttonID = "FCID"+colorOrAI+"_rerollDie_"+pos+"_"+colorOrAI+"_"+str(shipModel.computer)+"_"+dieColor
+                                    viewLyr.add_item(Button(label=label, style=discord.ButtonStyle.green, custom_id=buttonID))
+                                    viewLyr.add_item(Button(label="Decline", style=discord.ButtonStyle.red, custom_id="FCID"+colorOrAI+"_deleteMsg"))
+                                    asyncio.create_task(interaction.channel.send(game.gamestate["players"][player]["player_name"]+" You can reroll a "+dieColor+" die that missed using one of you colony ships.", view=viewLyr))
+                                continue
                         else:
                             if dieNum == 2 or dieNum == 3:
                                 continue
@@ -542,6 +551,89 @@ class Combat:
                 hitsToAssign = game.get_gamestate()["board"][pos]["unresolvedHits"]
             if hitsToAssign == 0 and oldLength == len(Combat.findPlayersInTile(game, pos)):
                 await Combat.promptNextSpeed(game, pos, interaction.channel, update)
+    
+    @staticmethod
+    async def rerollDie(game:GamestateHelper, buttonID:str, interaction:discord.Interaction, player, player_helper:PlayerHelper):
+        pos = buttonID.split("_")[1]
+        colorOrAI = buttonID.split("_")[2]
+        colorDie = buttonID.split("_")[4]
+        computerVal = int(buttonID.split("_")[3])
+        tile_map = game.get_gamestate()["board"]
+        player_helper.adjust_colony_ships(1)
+        player_ships = tile_map[pos]["player_ships"][:]
+        name = interaction.user.mention  
+        game.update_player(player_helper)
+        msg = name + " rerolled a "+colorDie+" die with their ability. They have "+str(player_helper.stats["colony_ships"])+" colony ships left\n"
+        dice = [colorDie]
+        dieNums = []
+        msg2 = "\n"
+                
+        for die in dice:
+            random_number = random.randint(1, 6)
+            num = str(random_number).replace("1","Miss").replace("6",":boom:")
+            emojiName = "dice_"+Combat.translateColorToName(die)+"_"+str(random_number)
+            guild_emojis = interaction.guild.emojis  
+            matching_emojis = [emoji for emoji in guild_emojis if emoji.name == emojiName]
+            msg +=str(num)+" "
+            if len(matching_emojis) > 0:
+                msg2 +=str(matching_emojis[0])+" "
+            dieNums.append([random_number,Combat.translateColorToDamage(die, random_number), die])
+
+        if computerVal > 0:
+            msg = msg + "\nThis ship type has a +"+str(computerVal)+" computer"
+                
+        await interaction.channel.send(msg+msg2)
+        oldNumPeeps = len(Combat.findPlayersInTile(game, pos))
+        for die in dieNums:
+            tile_map = game.get_gamestate()["board"]
+            player_ships = tile_map[pos]["player_ships"][:]
+            dieNum = die[0]
+            dieDam = die[1]
+            dieColor = die[2]
+            hittableShips = []
+            if dieColor != "pink":
+                hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships, dieNum, computerVal, pos, 3)
+                if dieNum + computerVal > 5 and len(hittableShips) == 0:
+                    await interaction.channel.send("The computer bonus for a die that rolled a "+str(dieNum)+" was cancelled by the shields on each of the opponents ships.")
+                if len(hittableShips) == 0 or oldNumPeeps > len(Combat.findPlayersInTile(game, pos)):
+                    if "Lyra" in player["name"] and player["colony_ships"] > 0:
+                        viewLyr = View()
+                        label = "Reroll Die"
+                        buttonID = "FCID"+colorOrAI+"_rerollDie_"+pos+"_"+colorOrAI+"_"+str(computerVal)+"_"+dieColor
+                        viewLyr.add_item(Button(label=label, style=discord.ButtonStyle.green, custom_id=buttonID))
+                        viewLyr.add_item(Button(label="Decline", style=discord.ButtonStyle.red, custom_id="FCID"+colorOrAI+"_deleteMsg"))
+                        await interaction.channel.send(player["player_name"]+" You can reroll a "+dieColor+" die that missed using one of you colony ships.", view=viewLyr)
+                    continue
+            else:
+                if dieNum == 2 or dieNum == 3:
+                    continue
+                if dieNum == 1 or dieNum == 6:
+                    ship = Combat.getShipToSelfHitWithRiftCannon(game, colorOrAI,player_ships, pos)
+                    buttonID = "assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(1)
+                    await Combat.assignHitTo(game, buttonID, interaction, False)
+                if dieNum > 3:
+                    hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships, 6, computerVal, pos, 3)
+            if len(hittableShips) > 0:
+                if len(hittableShips) > 1:
+                    if colorOrAI != "ai":
+                        msg = interaction.user.mention + " choose what ship to hit with the die that rolled a "+str(dieNum)+". You will deal "+str(dieDam)+" damage. The bot has calculated that you can hit these ships"
+                        view = View()
+                        for ship in hittableShips:
+                            shipType = ship.split("-")[1]
+                            shipOwner = ship.split("-")[0]
+                            label = "Hit "+Combat.translateShipAbrToName(shipType)
+                            buttonID = "FCID"+colorOrAI+"_assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(dieDam)
+                            view.add_item(Button(label=label, style=discord.ButtonStyle.red, custom_id=buttonID))
+                        asyncio.create_task(interaction.channel.send(msg,view=view))
+                        hitsToAssign = 1
+                        if "unresolvedHits" in game.get_gamestate()["board"][pos]:
+                            hitsToAssign = game.get_gamestate()["board"][pos]["unresolvedHits"]+1
+                        game.setUnresolvedHits(hitsToAssign,pos)
+                else:
+                    ship = hittableShips[0]
+                    buttonID = "assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(dieDam)
+                    await Combat.assignHitTo(game, buttonID, interaction, False)
+        await interaction.message.delete()
 
 
     @staticmethod

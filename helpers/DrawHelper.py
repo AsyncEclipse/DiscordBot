@@ -52,6 +52,8 @@ class DrawHelper:
             return "eridani"
         elif full_name == "Wardens of Magellan":
             return "magellan"
+        elif full_name == "Enlightened of Lyra":
+            return "lyra"
         elif "Terran" in full_name:
             return full_name.lower().replace(" ","_")
 
@@ -346,6 +348,13 @@ class DrawHelper:
 
             def paste_resourcecube(tile, tile_image, resource_type, color):
                 if f"{resource_type}_pop" in tile and tile[f"{resource_type}_pop"] != 0 and tile[f"{resource_type}_pop"]:
+                    if resource_type+"_shrine" in tile:
+                        shrine_path = "images/resources/components/factions/shrine.png"
+                        shrine_image = self.use_image(shrine_path).resize((60,60))
+                        coords = tile[f"{resource_type}1_snap"]
+                        if coords == None or coords == []:
+                            coords = tile[f"{resource_type}adv1_snap"]
+                        tile_image.paste(shrine_image, (int(345 / 1024 *mult* coords[0] - int(38*mult)), int(345 / 1024 *mult* coords[1] - int(38*mult))), mask=shrine_image)
                     popSize = tile[f"{resource_type}_pop"][0]
                     if len(tile[f"{resource_type}_pop"]) > 1:
                         popSize += tile[f"{resource_type}_pop"][1]
@@ -642,8 +651,21 @@ class DrawHelper:
                     text_drawable_image = ImageDraw.Draw(context)
                     text_drawable_image.text((17+(int(x*47)), 426), "x"+str(num), color, font=font,
                                     stroke_width=stroke_width, stroke_fill=stroke_color)
-
-
+        if "shrine_in_storage" in player:
+            shrine_board_path = "images/resources/components/factions/shrine_board.png"
+            shrine_board_image = self.use_image(shrine_board_path)
+            context.paste(shrine_board_image, (50,240))
+            shrine_path = "images/resources/components/factions/shrine.png"
+            shrine_image = self.use_image(shrine_path)
+            for shrineCount, val in enumerate(player["shrine_in_storage"]):
+                place = shrineCount
+                widthOfShrine = 24
+                xspacing = 23
+                yspacing = 28
+                xLoc = place % 3 *(xspacing+widthOfShrine)
+                yLoc = int(place/3)*(yspacing+widthOfShrine)
+                if val == 1:
+                    context.paste(shrine_image, (76+xLoc,265+yLoc))
         with open("data/techs.json", "r") as f:
                 tech_data = json.load(f)
 
@@ -832,6 +854,8 @@ class DrawHelper:
         for tile in tile_map:
             if "owner" in tile_map[tile] and tile_map[tile]["owner"] == color:
                 points += tile_map[tile]["vp"]
+                if "Lyra" in player["name"] and "shrines" in tile_map[tile]:
+                    points += tile_map[tile]["shrines"]
                 if "warpPoint" in tile_map[tile]:
                     points += tile_map[tile]["warpPoint"]
                 if "warpDisc" in tile_map[tile]:
@@ -1115,7 +1139,29 @@ class DrawHelper:
         file = discord.File(bytes, filename="disc_tile_image.webp")
         return file
 
+    def show_shrine_board(self,player):
+        context = Image.new("RGBA", (927, 847), (255, 255, 255, 0))
 
+        shrine_board_path = "images/resources/components/factions/shrine_board.png"
+        shrine_board_image = Image.open(shrine_board_path)
+        context.paste(shrine_board_image, (0,0))
+        shrine_path = "images/resources/components/factions/shrine.png"
+        shrine_image = Image.open(shrine_path).resize((119,119))
+        for shrineCount, val in enumerate(player["shrine_in_storage"]):
+            place = shrineCount
+            widthOfShrine = 24*5
+            xspacing = 23*5
+            yspacing = 28*5
+            xLoc = place % 3 *(xspacing+widthOfShrine)
+            yLoc = int(place/3)*(yspacing+widthOfShrine)
+            if val == 1:
+                context.paste(shrine_image, (26*5+xLoc,25*5+yLoc))
+
+        bytes = BytesIO()
+        context.save(bytes, format="WEBP")
+        bytes.seek(0)
+        file = discord.File(bytes, filename="shrine_image.webp")
+        return file
 
     def show_disc_tile(self, disc_tile_name:str):
         context = Image.new("RGBA", (260, 260), (255, 255, 255, 0))

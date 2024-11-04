@@ -8,6 +8,7 @@ from Buttons.Influence import InfluenceButtons
 from Buttons.Move import MoveButtons
 from Buttons.Population import PopulationButtons
 from Buttons.Research import ResearchButtons
+from Buttons.Shrine import ShrineButtons
 from Buttons.Turn import TurnButtons
 from Buttons.Upgrade import UpgradeButtons
 from helpers.CombatHelper import Combat
@@ -42,7 +43,7 @@ class ButtonListener(commands.Cog):
                 else:
                     player_helper = None
                 if "lastButton" in game.gamestate and game.gamestate["lastButton"] == customID:
-                    if not any(substring in customID for substring in ["showGame", "AtRatio", "gain5", "showReputation", "rollDice", "magColShip"]):  
+                    if not any(substring in customID for substring in ["showGame", "AtRatio", "gain5", "showReputation", "rollDice", "magColShip","rerollDie"]):  
                         await interaction.followup.send(interaction.user.mention+" This button ("+customID+") was pressed most recently, and we are attempting to prevent an accidental double press. Try hitting show game first and then hitting this button, if for some reason you need to press this button", ephemeral=True)
                         return
                 game.saveLastButtonPressed(customID)
@@ -198,6 +199,8 @@ class ButtonListener(commands.Cog):
                     await game.declareWinner(interaction)
                 if customID.startswith("rollDice"):
                     await Combat.rollDice(game, customID,interaction)
+                if customID.startswith("rerollDie"):
+                    await Combat.rerollDie(game, customID,interaction,player, player_helper)
                 if customID.startswith("refreshImage"):
                     await Combat.refreshImage(game, customID,interaction)
                 if customID.startswith("removeUnits"):
@@ -214,6 +217,10 @@ class ButtonListener(commands.Cog):
                     await Combat.finishRetreatingUnits(game, customID, interaction)
                 if customID.startswith("killPop"):
                     await Combat.killPop(game, customID, interaction,player)
+                if customID.startswith("placeShrineInitial"):
+                    await ShrineButtons.placeShrineInitial(game, player, interaction, customID)
+                if customID.startswith("placeShrineFinal"):
+                    await ShrineButtons.placeShrineFinal(game, player, interaction, customID, player_helper)
                 end_time = time.perf_counter()  
                 elapsed_time = end_time - start_time  
                 if(elapsed_time > 2):

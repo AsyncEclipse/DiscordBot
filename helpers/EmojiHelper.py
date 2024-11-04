@@ -100,6 +100,7 @@ class Emoji:
         "<:eridanitoken:1302090245805703220>",
         "<:colony_ship:1302428460198924388>",
         "<:magellantoken:1302433939406852137>",
+        "<:lyratoken:1302700320765251655>",
         "<:hydrantoken:1302090243440115754>",
         "<:mechanematoken:1302090241007685692>",
         "<:oriontoken:1302090239401263144>",

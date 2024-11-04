@@ -30,7 +30,13 @@ class GamestateHelper:
          self.gamestate["roundNum"] = round
          self.update()
 
-
+    def addShrine(self, tile, type):
+        self.gamestate["board"][tile][type+"_shrine"]=1
+        if "shrines" in self.gamestate["board"][tile]:
+            self.gamestate["board"][tile]["shrines"] += 1
+        else:
+            self.gamestate["board"][tile]["shrines"] = 1
+        self.update()
     def initilizeKey(self, key):
         self.gamestate[key] = []
         self.update()
@@ -249,6 +255,8 @@ class GamestateHelper:
             return "eridani"
         elif fullName == "Wardens of Magellan":
             return "magellan"
+        elif fullName == "Enlightened of Lyra":
+            return "lyra"
         elif "Terran" in fullName:
             return fullName.lower().replace(" ","_")
         
@@ -583,6 +591,12 @@ class GamestateHelper:
         self.gamestate["players"][playerID]["colony_ships"] = minNum
         self.update()
         return minNum
+    def refresh_one_colony_ship(self,  playerID):
+        #"base_colony_ships"
+        minNum = min(self.gamestate["players"][playerID]["colony_ships"]+1, self.gamestate["players"][playerID]["base_colony_ships"])
+        self.gamestate["players"][playerID]["colony_ships"] = minNum
+        self.update()
+        return minNum
 
     def add_pop(self, pop_list, position, playerID):
         neutralPop = 0
@@ -895,6 +909,8 @@ class GamestateHelper:
             return "eridani"
         elif full_name == "Wardens of Magellan":
             return "magellan"
+        elif full_name == "Enlightened of Lyra":
+            return "lyra"
         elif "Terran" in full_name:
             return full_name.lower().replace(" ","_")
     
