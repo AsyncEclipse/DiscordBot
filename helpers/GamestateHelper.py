@@ -1067,6 +1067,8 @@ class GamestateHelper:
             if thread != None:
                 asyncio.create_task(self.showGame(thread, message))
     def getPlayerFromHSLocation(self, location):
+        if location not in self.get_gamestate()["board"] or "sector" not in self.get_gamestate()["board"][location]:
+            return None
         tileID = self.get_gamestate()["board"][location]["sector"]
         return next((player for player in self.get_gamestate()["players"] if str(self.get_gamestate()["players"][player]["home_planet"]) == tileID), None)
     def getPlayerFromPlayerName(self, player_name):
