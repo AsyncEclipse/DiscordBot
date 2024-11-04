@@ -160,6 +160,10 @@ class TurnButtons:
 
     @staticmethod
     async def runUpkeep(game: GamestateHelper, interaction: discord.Interaction):
+        from helpers.CombatHelper import Combat
+        if len(Combat.findTilesInConflict(game)) > 0:
+            await interaction.channel.send("It appears some tiles are still in conflict. Please resolve them before running upkeep")
+            return
         for player in game.gamestate["players"]:
             p1 = PlayerHelper(player, game.get_player(player))
             if p1.checkBankrupt():
