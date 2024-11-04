@@ -3,6 +3,7 @@ from discord.ext import commands
 from Buttons.Build import BuildButtons
 from Buttons.DiplomaticRelations import DiplomaticRelationsButtons
 from Buttons.DiscoveryTile import DiscoveryTileButtons
+from Buttons.Draft import DraftButtons
 from Buttons.Explore import ExploreButtons
 from Buttons.Influence import InfluenceButtons
 from Buttons.Move import MoveButtons
@@ -221,6 +222,8 @@ class ButtonListener(commands.Cog):
                     await ShrineButtons.placeShrineInitial(game, player, interaction, customID)
                 if customID.startswith("placeShrineFinal"):
                     await ShrineButtons.placeShrineFinal(game, player, interaction, customID, player_helper)
+                if customID.startswith("draftFaction"):
+                    await DraftButtons.draftFaction(game, interaction, customID)
                 end_time = time.perf_counter()  
                 elapsed_time = end_time - start_time  
                 if(elapsed_time > 2):

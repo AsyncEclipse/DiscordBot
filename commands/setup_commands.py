@@ -1,5 +1,6 @@
 import asyncio
 import discord
+from Buttons.Draft import DraftButtons
 from Buttons.Turn import TurnButtons
 import config
 from discord.ext import commands
@@ -44,22 +45,12 @@ class SetupCommands(commands.GroupCog, name="setup"):
         app_commands.Choice(name="Worlds Apart", value="wa")
     ]
 
+
+
+
+
     
 
-    def getColor(self, faction:str):
-        if faction == "ter6" or faction == "pla":
-            return "green"
-        if faction == "ter3" or faction == "eri":
-            return "red"
-        if faction == "ter1" or faction == "ori":
-            return "purple"
-        if faction == "ter2" or faction == "mec":
-            return "white"
-        if faction == "ter5" or faction == "dra":
-            return "yellow"
-        if faction == "ter4" or faction == "hyd":
-            return "blue"
-        return "green"
 
 
     @app_commands.command(name="game")
@@ -74,73 +65,18 @@ class SetupCommands(commands.GroupCog, name="setup"):
                                 player6: Optional[discord.Member]=None, faction6: Optional[app_commands.Choice[str]]=None):
 
         temp_player_list = [player1, player2, player3, player4, player5, player6]
+        temp_playerID_list = []
+        temp_factionID_list = []
+        for player in temp_player_list:
+            if player != None:
+                temp_playerID_list.append(player.id)
         temp_faction_list = [faction1, faction2, faction3, faction4, faction5, faction6]
-        colors = ["blue", "red", "green", "yellow", "purple", "white"]
+        for faction in temp_faction_list:
+            if faction != None:
+                temp_factionID_list.append(faction.value)
         game = GamestateHelper(interaction.channel)
-        count = 0
-        listPlayerHomes=[]
-        x = -1
-        for i in temp_player_list:
-            x = x+1
-            if i != None and temp_faction_list[x] != None:
-                player = i
-                faction = temp_faction_list[x]
-                player_color = self.getColor(faction.value)
-                if player_color in colors:
-                    colors.remove(player_color)
-                else:
-                    player_color = colors.pop(0)
-                game.player_setup(player.id, faction.value, player_color)
-                home = game.get_player(player.id)["home_planet"]
-                listPlayerHomes.append([home, player_color])
-                count = count + 1
+        await DraftButtons.generalSetup(interaction,game, temp_playerID_list, temp_factionID_list)
         
-        listOfTilesPos = ["201", "207", "205", "211", "203", "209"]  
-        tile_mapping = {  
-            3: ["201", "205", "209", "211", "203", "207"],  
-            4: ["201", "205", "207", "211", "203", "209"],  
-            5: ["201", "203", "205", "209", "211", "207"],  
-            6: ["201", "203", "205", "207", "209", "211"]  
-        }  
-        if count in tile_mapping:  
-            listOfTilesPos = tile_mapping[count]  
-        hyperlane5 = False
-        if "5playerhyperlane" in game.gamestate and game.gamestate["5playerhyperlane"]:
-            hyperlane5 = True
-        listDefended = ["271","272","273","274"]
-        random.shuffle(listDefended)
-        game.add_tile("000", 0, "001")
-        for i in range(count):
-            rotDet = ((180 - (int(listOfTilesPos[i])-201)/2 * 60) + 360)%360
-            game.add_tile(listOfTilesPos[i], rotDet, listPlayerHomes[i][0], listPlayerHomes[i][1])
-        if not hyperlane5:
-            for i in range(6-count):
-                rotDet = ((180 - (int(listOfTilesPos[5-i])-201)/2 * 60) + 360)%360
-                game.add_tile(listOfTilesPos[5-i], rotDet, listDefended[i])
-        for i in range(101, 107):
-            if hyperlane5 and i == 104:
-                continue
-            game.add_tile(str(i), 0, "sector1back")
-        for i in range(201, 213):
-            if hyperlane5 and (i == 206 or i == 207):
-                continue
-            if str(i) not in listOfTilesPos:
-                game.add_tile(str(i), 0, "sector2back")
-        for i in range(301, 319):
-            if hyperlane5 and (i == 309 or i == 310 or i == 311):
-                continue
-            game.add_tile(str(i), 0, "sector3back")
-        if game.gamestate["setup_finished"] != 1:
-            game.setup_finished()
-        #game.fillInDiscTiles()
-        await interaction.channel.send("Done With Setup!")
-        
-        
-        asyncio.create_task(game.showUpdate("Start of Game",interaction))
-        view = TurnButtons.getStartTurnButtons(game, game.get_player(player1.id))
-        await interaction.channel.send("## "+game.getPlayerEmoji(game.get_player(player1.id))+" started their turn")
-        await interaction.channel.send(f"{game.get_player(player1.id)['player_name']} use these buttons to do your turn. "+ game.displayPlayerStats(game.get_player(player1.id)),view=view)
-        await interaction.response.defer()
 
 
     @app_commands.command(name="set_turn_order")
@@ -273,33 +209,24 @@ class SetupCommands(commands.GroupCog, name="setup"):
         thread = await actions.create_thread(name=thread_name, auto_archive_duration=10080)  
         new_game.update_num() 
         game = GamestateHelper(actions)
+        if player_count < 2:
+            player_count = 2
+        if player_count > 6:
+            player_count = 6
         game.setup_techs_and_outer_rim(player_count)
         drawing = DrawHelper(game.gamestate)  
-        random.shuffle(player_list)
-        list = ""
-        for x, player in enumerate(player_list):
-            member = interaction.guild.get_member(player[0])
-            list += str(x+1)+". "+member.mention +"\n"
+        
 
-        list += """For your reference, the factions currently available in the bot are the following 6, plus the 6 terran equivalents. First timers are encouraged to use the terran factions, which are all the same and dont have as many quirks (the quirks are tame compared to TI4 asymmetry though):  
-        1. Hydran Progress   
-        2. Eridian Empire   
-        3. Orion Hegemony   
-        4. Mechanema   
-        5. Descendants of Draco   
-        6. Planta  
-        7. Wardens of Magellan
-        8. Enlightened of Lyra
-        """
+        
         minorSpeciesList = ""
         for species in game.get_gamestate()["minor_species"]:
             minorSpeciesList+=species+"\n"
         await thread.send(role.mention + " pinging you here")
-        await actions.send(role.mention+" Draft factions and turn position in the manner of your choice, then setup the game with /setup game. Enter the players in the order they should take turns in (i.e. enter first player first)")
         await actions.send("Initial tech draw is as follows",file=drawing.show_available_techs())
-        await actions.send("A common way to draft factions is to generate a random pick order and then have the turn order be the reverse of that pick order. For your convenience, the following random pick order was generated, but you can ignore it: \n"+list+
+        await actions.send(role.mention+" Draft factions and turn position in the manner of your choice, then setup the game with /setup game. Enter the players in the order they should take turns in (i.e. enter first player first). A draft has been started for you that you can use instead of the slash command")
+        await actions.send("A common way to draft factions is to generate a random pick order and then have the turn order be the reverse of that pick order. For your convenience, the following random pick order was generated, but you can ignore it. \n"+
                            "\nThis game has been set to auto include minor species, 4 of which have been drawn at random below. If you want to disable this, you can use /game disable_minor_species. The minor species are as follows:\n"+minorSpeciesList,file=drawing.show_minor_species())
-    
+        await DraftButtons.startDraft(game, player_list, interaction, actions)
         
         
         factionThread = await actions.create_thread(name="Faction Reference", auto_archive_duration=10080)

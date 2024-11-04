@@ -40,6 +40,7 @@ class GamestateHelper:
     def initilizeKey(self, key):
         self.gamestate[key] = []
         self.update()
+    
 
     def removeFromKey(self, key, deletion):
         if key in self.gamestate and deletion in self.gamestate[key]:
@@ -251,7 +252,7 @@ class GamestateHelper:
             return "orion"
         elif fullName == "Hydran Progress":
             return "hydran"
-        elif fullName == "Eridani Empire":
+        elif fullName == "Eridani Empire" or fullName == "Eridian Empire":
             return "eridani"
         elif fullName == "Wardens of Magellan":
             return "magellan"

@@ -175,7 +175,7 @@ class MoveButtons:
             game.update_player(player_helper)
         view = View()
         await interaction.message.delete()
-        if player["move_apt"] > moveCount:
+        if player["move_apt"] > moveCount and ("passed" not in player or player["passed"] != True):
             view.add_item(Button(label="Move an additional ship", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startMove_"+str(moveCount+1)))
         view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                                 custom_id=f"FCID{player['color']}_finishAction"))
