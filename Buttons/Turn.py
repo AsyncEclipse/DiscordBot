@@ -181,15 +181,15 @@ class TurnButtons:
         if "actions" in interaction.channel.name:
             for thread in interaction.channel.threads:  
                 if "Round" in thread.name:
-                    await thread.edit(archived=True)
+                    asyncio.create_task(thread.edit(archived=True))
         await game.upkeep(interaction)
         drawing = DrawHelper(game.gamestate)
         if game.gamestate["roundNum"] < 9:
-            await interaction.channel.send("Tech At Start Of Round "+str(game.gamestate['roundNum']),file=drawing.show_available_techs())
+            asyncio.create_task(interaction.channel.send("Tech At Start Of Round "+str(game.gamestate['roundNum']),file=drawing.show_available_techs()))
             nextPlayer = TurnButtons.getFirstPlayer(game)
             if nextPlayer != None:
                 view = TurnButtons.getStartTurnButtons(game,nextPlayer)
-                await interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do the first turn of the round"+game.displayPlayerStats(nextPlayer),view=view)
+                asyncio.create_task(interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do the first turn of the round"+game.displayPlayerStats(nextPlayer),view=view))
             else:
                 await interaction.channel.send("Could not find first player, someone run /player start_turn")
         else:

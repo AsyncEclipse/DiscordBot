@@ -483,12 +483,15 @@ class GamestateHelper:
         else:
             moneyDecrease2 = "Illegal (discs have run out)"
         science = player["science"]
+        moneyEmoji = Emoji.getEmojiByName("money")
+        scienceEmoji = Emoji.getEmojiByName("science")
+        materialEmoji = Emoji.getEmojiByName("material")
         scienceIncrease = player["population_track"][player["science_pop_cubes"]-1]
         scienceIncrease = "+"+str(scienceIncrease)
         materials = player["materials"]
         materialsIncrease = player["population_track"][player["material_pop_cubes"]-1]
         materialsIncrease = "+"+str(materialsIncrease)
-        msg = f"\nYour current economic situation is as follows:\nMoney: {money} ({moneyIncrease} - {moneyDecrease})\nScience: {science} ({scienceIncrease})\nMaterials: {materials} ({materialsIncrease})\nIf you spend another disk, your maintenance cost will go from -{moneyDecrease} to -{moneyDecrease2}. If you drop another money cube, your income will go from {moneyIncrease} to {moneyIncrease2}"
+        msg = f"\nYour current economic situation is as follows:\n{moneyEmoji}: {money} ({moneyIncrease} - {moneyDecrease})\n{scienceEmoji}: {science} ({scienceIncrease})\n{materialEmoji}: {materials} ({materialsIncrease})\nIf you spend another disk, your maintenance cost will go from -{moneyDecrease} to -{moneyDecrease2}. If you drop another money cube, your income will go from {moneyIncrease} to {moneyIncrease2}"
         return msg
             
     def setCombatants(self, players, pos):
