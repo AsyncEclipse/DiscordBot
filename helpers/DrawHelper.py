@@ -482,7 +482,7 @@ class DrawHelper:
                 #tech_image = tech_image.resize((73,73))
                 context.paste(tech_image, (ultimateX,y), mask=tech_image)
                 if tech in part_data and "nrg_use" in part_data[tech] and part_data[tech]["nrg_use"] > 0:
-                    energy_image = self.use_image(f"images/resources/components/energy/{str(part_data[tech]["nrg_use"])}energy.png")
+                    energy_image = self.use_image(f"images/resources/components/energy/{str(part_data[tech]['nrg_use'])}energy.png")
                     context.paste(energy_image, (ultimateX+207,y+50), mask=energy_image)
                 largestX = max(largestX,ultimateX+270)
                 last_tech = techName
