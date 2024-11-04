@@ -212,9 +212,13 @@ class DrawHelper:
 
     def board_tile_image(self, position):
         sector = self.gamestate["board"][position]["sector"]
-        filepath = f"images/resources/hexes/{sector}.png"
+        filepath2 = f"images/resources/hexes/{sector}.png"
+        filepath = f"images/resources/hexes/numberless/{sector}.png"
+        numberless = True
         mult = 1024/345
-
+        if not os.path.exists(filepath):
+            filepath  = filepath2
+            numberless = False
         if os.path.exists(filepath):
             tile_image = self.use_image(filepath)
             tile = self.gamestate["board"][position]
@@ -231,17 +235,19 @@ class DrawHelper:
 
 
 
-            text_position = (int(268*mult), int(132*mult))
+            text_position = (int(280*mult), int(132*mult))
             bannerPath = f"images/resources/masks/banner.png"
             banner = self.use_image(bannerPath)
-            tile_image.paste(banner, (int(247*mult), int(126*mult)), mask=banner)
+            if not numberless and "back" not in sector:
+                tile_image.paste(banner, (int(247*mult), int(126*mult)), mask=banner)
 
             font = ImageFont.truetype("images/resources/arial.ttf", size=int(30*mult))
             text = str(position)
-
+            stroke_color = (0, 0, 0)
+            stroke_width = 6
             text_color = (255, 255, 255)
             textDrawableImage = ImageDraw.Draw(tile_image)
-            textDrawableImage.text(text_position, text, text_color, font=font)
+            textDrawableImage.text(text_position, text, text_color, font=font,stroke_width=stroke_width, stroke_fill=stroke_color)
 
 
 
