@@ -396,6 +396,7 @@ class Combat:
         player_ships = tile_map[pos]["player_ships"][:]
         game.setCurrentRoller(colorOrAI,pos)
         game.setCurrentSpeed(speed,pos)
+        player = None
         ships = Combat.getCombatantShipsBySpeed(game, colorOrAI, player_ships)
         update = False
         drawing = DrawHelper(game.gamestate)
@@ -467,7 +468,7 @@ class Combat:
                             if dieNum + shipModel.computer > 5 and len(hittableShips) == 0:
                                 await interaction.channel.send("The computer bonus for a die that rolled a "+str(dieNum)+" was cancelled by the shields on each of the opponents ships.")
                             if len(hittableShips) == 0 or oldNumPeeps > len(Combat.findPlayersInTile(game, pos)):
-                                if "Lyra" in game.gamestate["players"][player]["name"] and game.gamestate["players"][player]["colony_ships"] > 0:
+                                if player != None and "Lyra" in game.gamestate["players"][player]["name"] and game.gamestate["players"][player]["colony_ships"] > 0:
                                     viewLyr = View()
                                     label = "Reroll Die"
                                     buttonID = "FCID"+colorOrAI+"_rerollDie_"+pos+"_"+colorOrAI+"_"+str(shipModel.computer)+"_"+dieColor
