@@ -406,11 +406,11 @@ class DrawHelper:
         return is_adjacent(tile1, tile2) and is_adjacent(tile2, tile1)
 
     def display_techs(self):
-        context = Image.new("RGBA", (2500, 470), (0,0,0,255))
+        context = Image.new("RGBA", (2500*3, 450*3), (0,0,0,255))
         techsAvailable = self.gamestate["available_techs"]
         with open("data/techs.json", "r") as f:
             tech_data = json.load(f)
-
+        
         tech_groups = {
             "nano": [],
             "grid": [],
@@ -424,45 +424,45 @@ class DrawHelper:
                 tech_type = tech_details["track"]
                 cost = tech_details["base_cost"]
                 tech_groups[tech_type].append((tech, tech_details["name"], cost))
-        x1=0
-        x2=0
-        x3=0
-        x4=0
+        x1=-0.7
+        x2=-0.7
+        x3=-0.7
+        x4=-0.7
         largestX = 760
         ultimateX = 0
         text_drawable_image = ImageDraw.Draw(context)
-        font = ImageFont.truetype("images/resources/arial.ttf", size=70)
+        font = ImageFont.truetype("images/resources/arial.ttf", size=100)
         stroke_color = (0, 0, 0)
         stroke_width = 2
-        text_drawable_image.text((120, 0), f"Available Techs", (255, 0, 0), font=font,
+        text_drawable_image.text((60, 0), f"Available Techs", (255, 0, 0), font=font,
                                     stroke_width=stroke_width, stroke_fill=stroke_color)
         for tech_type in tech_groups:
             sorted_techs = sorted(tech_groups[tech_type], key=lambda x: x[2])  # Sort by cost
-            size = 76
+            size = 290
             last_tech = "bleh"
             for tech, tech_name, cost in sorted_techs:
                 tech_details = tech_data.get(tech)
                 techName = tech_details["name"].lower().replace(" ", "_") if tech_details else tech
                 if tech_type == "military":
-                    y=size*1
+                    y=int(size*.25)
                     x1+=1
                     if techName == last_tech:
                         x1-=.7
                     ultimateX = int(x1*size)
                 if tech_type == "grid":
-                    y=size*2
+                    y=int(size*1.25)
                     x2+=1
                     if techName == last_tech:
                         x2-=.7
                     ultimateX = int(x2*size)
                 elif tech_type == "nano":
-                    y=size*3
+                    y=int(size*2.25)
                     x3+=1
                     if techName == last_tech:
                         x3-=.7
                     ultimateX = int(x3*size)
                 elif tech_type == "any":
-                    y=size*4
+                    y=int(size*3.25)
                     x4+=1
                     if techName == last_tech:
                         x4-=.7
@@ -471,18 +471,17 @@ class DrawHelper:
                
                 
                 tech_path = f"images/resources/components/technology/{tech_type}/tech_{techName}.png"
-                
-
-                ultimateX += 100
+                ultimateX += 50
                 y +=50
                 if not os.path.exists(tech_path):
                     tech_path = f"images/resources/components/technology/rare/tech_{techName}.png"
-                tech_image = self.use_image(tech_path)
-                tech_image = tech_image.resize((73,73))
+                tech_image = Image.open(tech_path)
+                #tech_image = self.use_image(tech_path)
+                #tech_image = tech_image.resize((73,73))
                 context.paste(tech_image, (ultimateX,y), mask=tech_image)
-                largestX = max(largestX,ultimateX+73)
+                largestX = max(largestX,ultimateX+270)
                 last_tech = techName
-        context = context.crop((0, 0,largestX,470))
+        context = context.crop((0, 0,largestX,450*3))
         return context
 
 
@@ -990,6 +989,8 @@ class DrawHelper:
             return context2
         context2 = create_player_area()
         context3 = self.display_techs()
+        width = int(context3.size[0] * 500/context3.size[1])
+        context3 = context3.resize((width,500))
         context4 = self.display_remaining_tiles()
         context5 = self.display_remaining_discoveries()
         #context5 = self.display_cube_track_reference()
