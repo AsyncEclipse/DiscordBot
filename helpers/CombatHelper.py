@@ -751,7 +751,7 @@ class Combat:
         await channel.send(msg, view = view)
         
     @staticmethod
-    async def finishRetreatingUnits(game:GamestateHelper, buttonID:str, interaction:discord.Interaction):
+    async def finishRetreatingUnits(game:GamestateHelper, buttonID:str, interaction:discord.Interaction, playerObj):
         pos = buttonID.split("_")[1]
         colorOrAI = buttonID.split("_")[2]
         speed = buttonID.split("_")[3]
@@ -769,7 +769,7 @@ class Combat:
                     game.remove_units([ship],pos)
                     game.add_units([ship],destination)
         await interaction.message.delete()
-        await interaction.channel.send(player['player_name'] + " has retreated all ships with initiative "+speed+" to "+destination+".")
+        await interaction.channel.send(playerObj['player_name'] + " has retreated all ships with initiative "+speed+" to "+destination+".")
         dracoNAnc = len(Combat.findPlayersInTile(game,pos)) == 2 and "anc" in Combat.findShipTypesInTile(game,pos) and "Draco" in game.find_player_faction_name_from_color(Combat.findPlayersInTile(game,pos)[1])
         if len(Combat.findPlayersInTile(game, pos)) < 2 or dracoNAnc:
                 await Combat.declareAWinner(game, interaction, pos)

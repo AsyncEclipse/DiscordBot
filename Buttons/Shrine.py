@@ -78,7 +78,7 @@ class ShrineButtons:
         shrineCost = player["shrine_cost"][count]
         player_helper.stats["shrine_in_storage"][count]=0
         game.addShrine(tile, planetType)
-        output = player_helper.adjust_resource(resourceType, min(shrineCost, player[resourceType]))
+        output = player_helper.adjust_resource(resourceType,-1*min(shrineCost, player[resourceType]))
         game.update_player(player_helper)
         await interaction.channel.send(player["player_name"]+" placed a "+resourceType+" shrine in tile "+tile+" on a "+planetType+" planet "+output)
         if shrineCost > player[resourceType]:

@@ -215,7 +215,7 @@ class ButtonListener(commands.Cog):
                 if customID.startswith("startToRetreatUnits"):
                     await Combat.startToRetreatUnits(game, customID, interaction)
                 if customID.startswith("finishRetreatingUnits"):
-                    await Combat.finishRetreatingUnits(game, customID, interaction)
+                    await Combat.finishRetreatingUnits(game, customID, interaction,player)
                 if customID.startswith("killPop"):
                     await Combat.killPop(game, customID, interaction,player)
                 if customID.startswith("placeShrineInitial"):
