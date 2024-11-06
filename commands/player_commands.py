@@ -98,6 +98,8 @@ class PlayerCommands(commands.GroupCog, name="player"):
             p1.adjust_colony_ships(-colony_ships)
             response += f"\n> Adjusted colony ships from {str(before)} to {str(p1.stats['colony_ships'])}"
         if discovery_tiles_kept:
+            if 'disc_tiles_for_points' not in p1.stats:
+                p1.stats['disc_tiles_for_points'] = 0
             before = p1.stats['disc_tiles_for_points']
             p1.modify_disc_tile_for_points(discovery_tiles_kept)
             response += f"\n> Adjusted the number of discovery tiles kept for points from {str(before)} to {str(p1.stats['disc_tiles_for_points'])}"
@@ -166,7 +168,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         game.changeColor(player["color"],color.value)
         await interaction.response.defer(thinking=False)
         drawing = DrawHelper(game.gamestate)
-        await interaction.followup.send(player['player_name']+" Successfully changed color to "+color.value, file = drawing.show_stats())
+        await interaction.followup.send(player['player_name']+" Successfully changed color to "+color.value, file = drawing.show_game())
         await interaction.channel.send("Successfully changed color to "+color.value, file = drawing.show_map())
 
     @app_commands.command(name="upgrade")

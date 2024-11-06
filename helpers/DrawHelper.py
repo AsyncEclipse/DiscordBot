@@ -231,7 +231,10 @@ class DrawHelper:
                 discPath = f"images/resources/components/discovery_tiles/discovery_2ptback.png"
                 discTile = self.use_image(discPath)
                 discTile = discTile.rotate(315,expand=True)
-                tile_image.paste(discTile, (int(108*mult), int(89*mult)), mask=discTile)
+                if "bh" in tile["type"]:
+                    tile_image.paste(discTile, (int(12*mult), int(89*mult)), mask=discTile)
+                else:
+                    tile_image.paste(discTile, (int(108*mult), int(89*mult)), mask=discTile)
 
 
 
@@ -383,7 +386,16 @@ class DrawHelper:
                 color = tile["owner"]
                 inf_path = f"images/resources/components/all_boards/influence_disc_{color}.png"
                 inf_image = self.use_image(inf_path)
-                tile_image.paste(inf_image, (int(153*mult), int(130*mult)), mask=inf_image)
+                if "currentAction" in tile:
+                    if tile["currentAction"] == "move":
+                        tile_image.paste(inf_image, (int(202*mult), int(30*mult)), mask=inf_image)
+                    elif tile["currentAction"] == "build":
+                        tile_image.paste(inf_image, (int(202*mult), int(180*mult)), mask=inf_image)
+                    else: 
+                        tile_image.paste(inf_image, (int(82*mult), int(148*mult)), mask=inf_image)
+
+                else:
+                    tile_image.paste(inf_image, (int(153*mult), int(130*mult)), mask=inf_image)
                 for resource in ["neutral", "neutraladv","money", "moneyadv", "science","scienceadv", "material","materialadv","orbital"]:
                     paste_resourcecube(tile, tile_image, resource, color)
 

@@ -170,6 +170,7 @@ class PlayerHelper:
         self.stats["colony_ships"] = self.stats["base_colony_ships"]
         self.stats["passed"] = False
         self.stats["perma_passed"] = False
+        self.stats["activatedPulsars"] = []
         neutralCubes = 0
         actions = ["influence","build","move","upgrade","explore","research"]
         for action in actions:

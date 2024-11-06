@@ -1,7 +1,10 @@
 import asyncio
+import random
 import discord
 from discord.ui import View
+from Buttons.BlackHole import BlackHoleButtons
 from Buttons.DiplomaticRelations import DiplomaticRelationsButtons
+from Buttons.DiscoveryTile import DiscoveryTileButtons
 from Buttons.Explore import ExploreButtons
 from Buttons.Influence import InfluenceButtons
 from Buttons.Turn import TurnButtons
@@ -142,7 +145,7 @@ class MoveButtons:
         game.add_units([shipName],destination)
         game.fixshipsOrder(destination)
         drawing = DrawHelper(game.gamestate)
-        await interaction.channel.send( f"{player['player_name']} Moved a {shipType} from {originT} to {destination}.", file=drawing.board_tile_image_file(destination))
+        asyncio.create_task(interaction.channel.send( f"{player['player_name']} Moved a {shipType} from {originT} to {destination}.", file=drawing.board_tile_image_file(destination)))
         player_helper.specifyDetailsOfAction(f"Moved a {shipType} from {originT} to {destination}.")
         game.update_player(player_helper)
         owner = game.gamestate["board"][destination]["owner"]
@@ -170,6 +173,50 @@ class MoveButtons:
                     player_helper.setTraitor(True)
                     game.update_player(player_helper)
                     await interaction.channel.send( f"{player['player_name']} You broke relations with {color} and now are a traitor.")
+        if "bh" in game.get_gamestate()["board"][destination]["type"]:
+            type = game.get_gamestate()["board"][destination]["type"]
+            random_number = random.randint(1, 6)
+            roundNum = 1
+            game.remove_units([shipName],destination)
+            shipModel = PlayerShip(player, shipName.split("-")[1])
+            if "roundNum" in game.gamestate:
+                roundNum = game.gamestate["roundNum"]
+            location = " any inner (first ring) sector"
+            if "border" in game.get_gamestate()["board"][destination]["type"]:
+                location = " any tile with a wormhole facing an empty space."
+            msg = "This is a black hole tile, and the ship rolled a "+str(random_number)+". That means it will "
+            if random_number == 1 or random_number == 6:
+                msg += " take one damage and "
+                if shipModel.hull > 0:
+                    msg += "then teleport to "+location
+                else:
+                    msg += "die due to lack of hull"
+            elif random_number == 2 or random_number == 3:
+                if roundNum == 8:
+                    msg += "die due to lack of time to return"
+                else:
+                    msg += "go away for now and return next round on one of your actions, teleporting to "+location
+                    if "blackHoleReturn" not in player_helper.stats:
+                        player_helper.stats["blackHoleReturn"] = []
+                    player_helper.stats["blackHoleReturn"].append(type+"_"+shipName +"_"+str((roundNum+1)))
+                    game.update_player(player_helper)
+            else:
+                if roundNum > 6:
+                    msg += "die due to lack of time to return"
+                else:
+                    msg += "go away for now and return in 2 rounds on one of your actions, teleporting to "+location
+                    if "blackHoleReturn" not in player_helper.stats:
+                        player_helper.stats["blackHoleReturn"] = []
+                    player_helper.stats["blackHoleReturn"].append(game.get_gamestate()["board"][destination]["type"]+"_"+shipName +"_"+str((roundNum+2)))
+                    game.update_player(player_helper)
+            await interaction.channel.send(msg)
+
+            if random_number == 1 or random_number == 6:
+                if "teleport" in msg:
+                    await interaction.channel.send(player["player_name"]+" Select a tile to return the ship to", view=BlackHoleButtons.findBlackHoleOptions(game, player, shipName, type, "damage"))
+            if game.get_gamestate()["board"][destination]["disctile"] > 0:
+                await DiscoveryTileButtons.exploreDiscoveryTile(game, destination,interaction,player)
+        
         if moveCount == 1:
             player_helper.spend_influence_on_action("move")
             game.update_player(player_helper)

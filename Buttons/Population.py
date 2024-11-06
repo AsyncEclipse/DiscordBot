@@ -1,3 +1,4 @@
+import asyncio
 import json
 import discord
 from discord.ui import View
@@ -119,7 +120,7 @@ class PopulationButtons:
         drawing = DrawHelper(game.gamestate)
         resourceType = typeOfPop.replace('adv','')
         income = player["population_track"][player[resourceType+"_pop_cubes"]-1]
-        await interaction.channel.send(f"Successfully added a {resourceType} population to tile {tile}. You now have an income of {str(income)} {resourceType}. "+str(game.gamestate["players"][game.get_player_from_color(player["color"])]["colony_ships"])+" colony ships left unexhausted", file=drawing.board_tile_image_file(tile))
+        asyncio.create_task(interaction.channel.send(f"Successfully added a {resourceType} population to tile {tile}. You now have an income of {str(income)} {resourceType}. "+str(game.gamestate["players"][game.get_player_from_color(player["color"])]["colony_ships"])+" colony ships left unexhausted", file=drawing.board_tile_image_file(tile)))
 
 
 

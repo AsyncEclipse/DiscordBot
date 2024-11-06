@@ -1,3 +1,4 @@
+import asyncio
 import json
 import discord
 from Buttons.DiscoveryTile import DiscoveryTileButtons
@@ -119,10 +120,10 @@ class ExploreButtons:
         view, file = drawing.draw_possible_oritentations(tileID,position,playerTiles, view,player)
 
         view.add_item(Button(label="Discard Tile",style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_discardTile_{tileID}"))
-        await interaction.channel.send(f"{player['player_name']} select the orientation you prefer or discard the tile.",view=view, file=file)
+        asyncio.create_task(interaction.channel.send(f"{player['player_name']} select the orientation you prefer or discard the tile.",view=view, file=file))
         await interaction.message.delete()
     @staticmethod
-    async def placeTile(game: GamestateHelper, interaction: discord.Interaction, player, customID, player_helper):
+    async def placeTile(game: GamestateHelper, interaction: discord.Interaction, player, customID:str, player_helper:PlayerHelper):
         msg = customID.split("_")
         game.add_tile(msg[1], int(msg[3]), msg[2])
         player_helper.specifyDetailsOfAction(f"Explored {msg[1]}.")
@@ -131,12 +132,15 @@ class ExploreButtons:
         await interaction.channel.send(f"Tile added to position {msg[1]}")
         if game.get_gamestate()["board"][msg[1]]["ancient"] == 0 or player["name"]=="Descendants of Draco":
             view = View()
-            view.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_addInfluenceFinish_"+msg[1]))
-            view.add_item(Button(label="Decline Influence Placement", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))
-            await interaction.channel.send(f"{player['player_name']} choose whether or not to place influence in the tile."+game.displayPlayerStats(player), view = view)
-            if game.get_gamestate()["board"][msg[1]]["ancient"] == 0 and game.get_gamestate()["board"][msg[1]]["disctile"] > 0:
-                await DiscoveryTileButtons.exploreDiscoveryTile(game, msg[1],interaction,player)
-            view2.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
+            if "bh" in game.get_gamestate()["board"][msg[1]]["type"]:
+                await interaction.channel.send("This is a black hole tile, so its discovery tile cannot be claimed until a ship moves in, at which point a die will be rolled and it may teleport.")
+            else:
+                view.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_addInfluenceFinish_"+msg[1]))
+                view.add_item(Button(label="Decline Influence Placement", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))
+                await interaction.channel.send(f"{player['player_name']} choose whether or not to place influence in the tile."+game.displayPlayerStats(player), view = view)
+                if game.get_gamestate()["board"][msg[1]]["ancient"] == 0 and game.get_gamestate()["board"][msg[1]]["disctile"] > 0:
+                    await DiscoveryTileButtons.exploreDiscoveryTile(game, msg[1],interaction,player)
+                view2.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startPopDrop"))
         else:
             await interaction.channel.send("There are "+str(game.get_gamestate()["board"][msg[1]]["ancient"])+" ancients in this tile, so you will not be able to claim it until you fight and destroy them.")
         
