@@ -173,7 +173,7 @@ class MoveButtons:
                     player_helper.setTraitor(True)
                     game.update_player(player_helper)
                     await interaction.channel.send( f"{player['player_name']} You broke relations with {color} and now are a traitor.")
-        if "bh" in game.get_gamestate()["board"][destination]["type"]:
+        if "type" in game.get_gamestate()["board"][destination] and "bh" in game.get_gamestate()["board"][destination]["type"]:
             type = game.get_gamestate()["board"][destination]["type"]
             random_number = random.randint(1, 6)
             roundNum = 1
