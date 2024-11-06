@@ -30,6 +30,7 @@ class ButtonListener(commands.Cog):
     @commands.Cog.listener()
     async def on_interaction(self, interaction : discord.Interaction):
         if interaction.type == discord.InteractionType.component:
+            start_time = time.perf_counter()  
             logging.basicConfig(level=logging.INFO)  
             logger = logging.getLogger(__name__)  
             log_channel = discord.utils.get(interaction.guild.channels, name="bot-log") 
@@ -38,7 +39,12 @@ class ButtonListener(commands.Cog):
             if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):  
                 await button_log_channel.send(f'{customID} pressed: '+interaction.message.jump_url)
             try:
+                await interaction.response.defer(thinking=False)
                 asyncio.create_task(self.resolveButton(interaction))
+                if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):  
+                    end_time = time.perf_counter()  
+                    elapsed_time = end_time - start_time  
+                    print(f"Total elapsed time for {customID} button press in main thread: {elapsed_time:.2f} seconds")
             except Exception as error:
                 if log_channel is not None and isinstance(log_channel, discord.TextChannel):  
                     tb = traceback.format_exc()  # Get the traceback as a string  
@@ -68,7 +74,6 @@ class ButtonListener(commands.Cog):
 
     async def resolveButton(self, interaction : discord.Interaction):
         customID = interaction.data["custom_id"]
-        await interaction.response.defer(thinking=False)
         start_time = time.perf_counter()  
         game = GamestateHelper(interaction.channel)
         player = game.get_player(interaction.user.id)  
@@ -266,4 +271,4 @@ class ButtonListener(commands.Cog):
         end_time = time.perf_counter()  
         elapsed_time = end_time - start_time  
         if(elapsed_time > 2):
-            print(f"Total elapsed time for {customID} button press: {elapsed_time:.2f} seconds")
+            print(f"Total elapsed time for {customID} button press in side thread: {elapsed_time:.2f} seconds")
