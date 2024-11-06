@@ -139,7 +139,7 @@ class GamestateHelper:
             await interaction.message.delete()
         guild = interaction.guild
         role = discord.utils.get(guild.roles, name=self.game_id)  
-        stats = await drawing.show_stats()
+        stats = await drawing.show_game()
         await interaction.channel.send(role.mention +" "+ winner +" is the winner with "+str(highestScore) + " points", file = stats)
         view = View()
         view.add_item(Button(label="End Game",style=discord.ButtonStyle.blurple, custom_id="endGame"))
@@ -412,6 +412,8 @@ class GamestateHelper:
         return min(5,count)
     def remove_control(self, color, position):
         self.gamestate["board"][position]["owner"] = 0
+        if "currentAction" in self.gamestate["board"][position]:
+            self.gamestate["board"][position]["currentAction"] = "move"
         self.gamestate["players"][self.get_player_from_color(color)]["owned_tiles"].remove(position)
         amount = min(15, self.gamestate["players"][self.get_player_from_color(color)]["influence_discs"] + 1)
         self.gamestate["players"][self.get_player_from_color(color)]["influence_discs"] = amount
@@ -673,6 +675,41 @@ class GamestateHelper:
         self.update()
 
     async def upkeep(self, interaction:discord.Interaction):
+        from Buttons.Influence import InfluenceButtons
+        round = 1
+        if "roundNum" in self.gamestate:
+            round = self.gamestate["roundNum"]
+        if "upkeepSupernovaCheck"+str(round) not in self.gamestate:
+            self.initilizeKey("upkeepSupernovaCheck"+str(round))
+            tiles = self.gamestate["board"].copy()
+            for position in tiles:
+
+                if "type" in self.gamestate["board"][position] and self.gamestate["board"][position]["type"] == "supernova":
+                    msg = "Rolled the following dice for the supernova in position "+position+": "
+                    sum = 0
+                    for x in range(2):
+                        random_number = random.randint(1, 6)
+                        if random_number != 1 and random_number != 6:
+                            sum += random_number
+                        num = str(random_number).replace("1","Miss").replace("6",":boom:")
+                        msg +=str(num)+" "
+                    if self.gamestate["board"][position]["owner"] != 0:
+                        playerObj = self.getPlayerObjectFromColor(self.gamestate["board"][position]["owner"])
+                        maxTech = max(len(playerObj["grid_tech"]), len(playerObj["military_tech"]))
+                        maxTech = max(maxTech, len(playerObj["nano_tech"]))
+                        sum += maxTech
+                    msg += "\nThe sum of that and the owners highest tech track "+str(sum)+" was compared against the round ("+str(round)+ ") and found to be "
+                    if sum < round:
+                        msg += "lesser, so the supernova exploded before income."
+                        if self.gamestate["board"][position]["owner"] != 0:
+                            await InfluenceButtons.removeInfluenceFinish(self, interaction, "removeInfluenceFinish_"+position+"_normal", False)
+                        units = self.gamestate["board"][position]["player_ships"][:]
+                        for unit in units:
+                            self.remove_units([unit],position)
+                        del self.gamestate["board"][position]
+                    else:
+                        msg +=" equal to or greater, and so the supernova is safe, for now"
+                    await interaction.channel.send(msg)
         for player in self.gamestate["players"]:
             p1 = PlayerHelper(player, self.get_player(player))
             neutrals = p1.upkeep()
@@ -766,11 +803,15 @@ class GamestateHelper:
         self.gamestate["setup_finished"] = 1
         self.update()
     
-    def setup_techs_and_outer_rim(self, count:int):
+    def setup_techs_and_outer_rim(self, count:int, galactic_events):
         self.gamestate["player_count"] = count
         draw_count = {2: [5, 12], 3: [8, 14], 4: [14, 16], 5: [16, 18], 6: [18, 20]}
 
+
         third_sector_tiles = ["301", "302", "303", "304", "305", "306", "307", "308", "309", "310", "311", "312", "313", "314",
+                              "315", "316", "317","318", "381", "382", "398", "397", "399", "396", "394", "393"]
+        if not galactic_events:
+            third_sector_tiles = ["301", "302", "303", "304", "305", "306", "307", "308", "309", "310", "311", "312", "313", "314",
                               "315", "316", "317","318", "381", "382"]
         sector_draws = draw_count[self.gamestate["player_count"]][0]
         tech_draws = draw_count[self.gamestate["player_count"]][1]
@@ -1035,9 +1076,11 @@ class GamestateHelper:
         self.update()
 
     def update_player(self, *args):
-
         for ar in args:
             self.gamestate["players"][ar.player_id] = ar.stats
+        self.update()
+    def update_pulsar_action(self,tile, action):
+        self.gamestate["board"][tile]["currentAction"] = action
         self.update()
 
     def get_system_coord(self, sector):

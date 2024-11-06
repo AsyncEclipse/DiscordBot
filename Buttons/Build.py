@@ -51,7 +51,7 @@ class BuildButtons:
         loc = buttonID.split("_")[3]
         ship = str(buttonID.split("_")[4])
         buildApt = player["build_apt"]
-        if player["passed"]== True:
+        if player["passed"]== True or player["pulsarBuild"] == True:
             buildApt = 1
         if len(build) == buildApt:
             await interaction.message.edit(content=f"You cannot build any more units. Current build is:"
@@ -213,8 +213,11 @@ class BuildButtons:
         drawing = DrawHelper(game.gamestate)
         buildApt = player["build_apt"]
         await interaction.channel.send(f"This is what the tile looks like after the build. They built the following:\n"+textSum,file=drawing.board_tile_image_file(loc))
-        if player["passed"]== True:
+        if player["passed"]== True or player["pulsarBuild"] == True:
             buildApt = 1
+            if player["pulsarBuild"] == True:
+                player_helper.stats["pulsarBuild"] = False
+                game.update_player(player_helper)
         view2 = View()
         if len(build) < buildApt:
             view2.add_item(Button(label="Build Somewhere Else", style=discord.ButtonStyle.red, custom_id="startBuild2_deleteMsg"))  

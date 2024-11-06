@@ -62,10 +62,10 @@ class DiplomaticRelationsButtons:
                 emojiC = Emoji.getEmojiByName("colony_ship")
                 view.add_item(Button(label=f"Get 1 Money", style=discord.ButtonStyle.red, emoji=emojiC, custom_id=f"FCID{player['color']}_magColShipForResource_money"))
             view.add_item(Button(label="Done Paying", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))  
-            game.update_player(player_helper) 
             await interaction.channel.send(  
                 f"Attempted to pay a cost of {str(cost)}\n Please pay the rest of the cost by trading other resources at your trade ratio ({trade_value}:1)",view=view  
             )  
+        game.update_player(player_helper) 
         if "Cube" in minor:
             view = View()
             p = player

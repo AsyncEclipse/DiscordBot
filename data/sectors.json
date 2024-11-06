@@ -5383,7 +5383,8 @@
     "guardian": 0,
     "gcds": 0,
     "warp": 0,
-    "type": "pulsar"
+    "type": "pulsar",
+    "currentAction": "move"
   },
   "394": {
     "owner": 0,
@@ -5459,7 +5460,8 @@
     "guardian": 0,
     "gcds": 0,
     "warp": 0,
-    "type": "pulsar"
+    "type": "pulsar",
+    "currentAction": "move"
   },
   "395": {
     "owner": 0,

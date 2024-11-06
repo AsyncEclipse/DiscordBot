@@ -140,12 +140,14 @@ class SetupCommands(commands.GroupCog, name="setup"):
                             player6: Optional[discord.Member]=None,
                             ai_ship_type: Optional[app_commands.Choice[str]]=None,
                             rift_cannon: Optional[bool]=True,
-                            turn_order_variant: Optional[bool]=True
+                            turn_order_variant: Optional[bool]=True,
+                            galactic_event_tiles: Optional[bool]=True
                    ):
         """
         :param ai_ship_type: Choose which type of AI ships to use.
         :param rift_cannon: Rift cannons are enabled by default.
         :param turn_order_variant: Pass turn order is enabled by default.
+        :param galactic_event_tiles: Supernova/black-holes/Pulsars are enabled by default.
         :return:
         """
         temp_player_list = [player1, player2, player3, player4, player5, player6]
@@ -213,7 +215,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
             player_count = 2
         if player_count > 6:
             player_count = 6
-        game.setup_techs_and_outer_rim(player_count)
+        game.setup_techs_and_outer_rim(player_count, galactic_event_tiles)
         drawing = DrawHelper(game.gamestate)  
         
 

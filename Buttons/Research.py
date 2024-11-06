@@ -65,7 +65,7 @@ class ResearchButtons:
             msg = player_helper.adjust_science(-paid)  
             game.update_player(player_helper) 
             await interaction.channel.send(  
-                f"Attempted to pay a cost of {str(cost)}\n{msg}\n Please pay the rest of the cost by trading other resources at your trade ratio ({trade_value}:1)"  
+                f"Attempted to pay a cost of {str(cost)}{msg}\n Please pay the rest of the cost by trading other resources at your trade ratio ({trade_value}:1)"  
             )  
             await interaction.channel.send("Payment buttons",view=view)
         
@@ -195,7 +195,7 @@ class ResearchButtons:
         await interaction.channel.send(f"{player['player_name']}, select the tech you would like to acquire. The discounted cost is in parentheses. You currently have {str(player['science'])} science, and can trade other resources for science at a {str(player['trade_value'])}:1 ratio", view=view)
         if buttonCount > 26:
             await interaction.channel.send(view=view2)
-        await interaction.followup.send(file=drawing.show_available_techs(),ephemeral=True)
+        asyncio.create_task(interaction.followup.send(file=drawing.show_available_techs(),ephemeral=True))
         if "shrine_in_storage" in player and len(ShrineButtons.getInitialShrineButtons(game, player).children) > 1:
             await interaction.channel.send(f"{player['player_name']} you can put down a shrine with this research action by paying its cost",view=ShrineButtons.getInitialShrineButtons(game, player))
         if buttonCommand:

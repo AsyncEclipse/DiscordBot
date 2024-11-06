@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from Buttons.BlackHole import BlackHoleButtons
 from Buttons.Build import BuildButtons
 from Buttons.DiplomaticRelations import DiplomaticRelationsButtons
 from Buttons.DiscoveryTile import DiscoveryTileButtons
@@ -8,6 +9,7 @@ from Buttons.Explore import ExploreButtons
 from Buttons.Influence import InfluenceButtons
 from Buttons.Move import MoveButtons
 from Buttons.Population import PopulationButtons
+from Buttons.Pulsar import PulsarButtons
 from Buttons.Research import ResearchButtons
 from Buttons.Shrine import ShrineButtons
 from Buttons.Turn import TurnButtons
@@ -224,6 +226,12 @@ class ButtonListener(commands.Cog):
                     await ShrineButtons.placeShrineFinal(game, player, interaction, customID, player_helper)
                 if customID.startswith("draftFaction"):
                     await DraftButtons.draftFaction(game, interaction, customID)
+                if customID.startswith("pulsarAction"):
+                    await PulsarButtons.pulsarAction(game, player, interaction, player_helper, customID)
+                if customID.startswith("blackHoleReturnStart"):
+                    await BlackHoleButtons.blackHoleReturnStart(game, player, customID,player_helper,  interaction)
+                if customID.startswith("blackHoleFinish"):
+                    await BlackHoleButtons.blackHoleFinish(game, player, customID,player_helper,  interaction)
                 end_time = time.perf_counter()  
                 elapsed_time = end_time - start_time  
                 if(elapsed_time > 2):

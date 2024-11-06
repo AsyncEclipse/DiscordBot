@@ -57,8 +57,9 @@ class InfluenceButtons:
                     tilesViewed.append(adjTile)
                     if adjTile not in game.get_gamestate()["board"]:
                         continue
-
-                    playerShips =game.get_gamestate()["board"][adjTile]["player_ships"]
+                    if "bh" in game.get_gamestate()["board"][adjTile]["type"]:
+                        continue
+                    playerShips = game.get_gamestate()["board"][adjTile]["player_ships"]
                     playerShips.append(player["color"])
                     if "owner" in game.get_gamestate()["board"][adjTile] and game.get_gamestate()["board"][adjTile]["owner"]==0 and ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips,game):
                         tilesToInfluence.append(adjTile)
@@ -121,7 +122,7 @@ class InfluenceButtons:
         for button in view.children:
             if buttonID in button.custom_id:
                 view.remove_item(button)
-        await interaction.followup.send( f"{player['player_name']} now has "+str(numShips)+" colony ships "
+        await interaction.message.send( f"{player['player_name']} now has "+str(numShips)+" colony ships "
                                                                                                "available to use")
         await interaction.message.edit(view=view)
 

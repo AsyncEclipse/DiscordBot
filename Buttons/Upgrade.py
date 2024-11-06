@@ -92,6 +92,7 @@ class UpgradeButtons:
             view.add_item(Button(label=part_stats[i]["name"], style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_chooseUpgrade_{actions}_{ship}_{oldPart}_{i}_{discTileUpgrade}", emoji=Emoji.getEmojiByName(partName)))
         await interaction.message.edit(content=f"{interaction.user.mention}, replace "
                                                         f"{part_stats[oldPart]['name']} with which part? Remove as a free action by selecting 'Empty'.", view=view)
+        view.add_item(Button(label="Go back 1 Step", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_upgradeShip_{actions}_{ship}_{discTileUpgrade}"))
         await interaction.followup.send("Available parts", file=drawing.availablePartsFile(available_parts),ephemeral=True)
     @staticmethod
     async def chooseUpgrade(game: GamestateHelper, player, interaction: discord.Interaction, customID : str,player_helper : PlayerHelper):

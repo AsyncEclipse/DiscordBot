@@ -1,7 +1,9 @@
 import discord
+from Buttons.BlackHole import BlackHoleButtons
 from Buttons.DiplomaticRelations import DiplomaticRelationsButtons
 from Buttons.Explore import ExploreButtons
 from Buttons.Population import PopulationButtons
+from Buttons.Pulsar import PulsarButtons
 from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
@@ -265,6 +267,10 @@ class TurnButtons:
                 view.add_item(Button(label="Pass On Reaction", style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_passForRound"))
             else:
                 view.add_item(Button(label=f"Pass ({number_passed+1}{ordinal(number_passed+1)})", style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_passForRound"))
+        if "passed" not in p1 or  p1["passed"] != True:
+            pulsarView = PulsarButtons.findPulsarOptions(game, p1)
+            for child in pulsarView.children:
+                view.add_item(child)
         view.add_item(Button(label="Show Game",style=discord.ButtonStyle.gray, custom_id="showGame"))
         view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
         if p1["colony_ships"] > 0 and game.get_short_faction_name(p1["name"]) == "magellan":
@@ -274,6 +280,9 @@ class TurnButtons:
             view.add_item(Button(label=f"Get 1 Material", style=discord.ButtonStyle.blurple,emoji=emojiC, custom_id=f"FCID{p1['color']}_magColShipForResource_materials"))
         if len(PopulationButtons.findEmptyPopulation(game,p1)) > 0 and p1["colony_ships"] > 0:
             view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"FCID{p1['color']}_startPopDrop"))
+        blackView = BlackHoleButtons.getBlackHoleShips(game, player)
+        for child in blackView.children:
+            view.add_item(child)
         if game.get_gamestate()["player_count"] > 3 and not player_helper.isTraitor() and len(DiplomaticRelationsButtons.getPlayersWithWhichDiplomatcRelationsCanBeFormed(game, player)) > 0:
             view.add_item(Button(label="Initiate Diplomatic Relations", style=discord.ButtonStyle.gray, custom_id=f"FCID{p1['color']}_startDiplomaticRelations"))
         if not player_helper.isTraitor() and "minor_species" in game.gamestate and len(game.get_gamestate()["minor_species"]) > 0:
@@ -297,6 +306,7 @@ class TurnButtons:
     @staticmethod
     async def undoLastTurn(player, game:GamestateHelper, interaction: discord.Interaction):
         view = View()
+        await interaction.message.delete()
         view.add_item(Button(label="Undo Last Turn", style=discord.ButtonStyle.red, custom_id=f"restartTurn"))
         view.add_item(Button(label="Delete This Message", style=discord.ButtonStyle.gray, custom_id=f"deleteMsg"))
         await interaction.channel.send("Please confirm you want to undo the last turn. The person who took the last turn should be the one pressing this button",view=view)

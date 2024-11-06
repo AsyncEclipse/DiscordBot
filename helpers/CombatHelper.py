@@ -465,7 +465,7 @@ class Combat:
                         hittableShips = []
                         if dieColor != "pink":
                             hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships, dieNum, shipModel.computer, pos, speed)
-                            if dieNum + shipModel.computer > 5 and len(hittableShips) == 0:
+                            if dieNum + shipModel.computer > 5 and len(hittableShips) == 0 and oldNumPeeps == len(Combat.findPlayersInTile(game, pos)):
                                 await interaction.channel.send("The computer bonus for a die that rolled a "+str(dieNum)+" was cancelled by the shields on each of the opponents ships.")
                             if len(hittableShips) == 0 or oldNumPeeps > len(Combat.findPlayersInTile(game, pos)):
                                 if player != None and "Lyra" in game.gamestate["players"][player]["name"] and game.gamestate["players"][player]["colony_ships"] > 0:
@@ -474,7 +474,7 @@ class Combat:
                                     buttonID = "FCID"+colorOrAI+"_rerollDie_"+pos+"_"+colorOrAI+"_"+str(shipModel.computer)+"_"+dieColor
                                     viewLyr.add_item(Button(label=label, style=discord.ButtonStyle.green, custom_id=buttonID))
                                     viewLyr.add_item(Button(label="Decline", style=discord.ButtonStyle.red, custom_id="FCID"+colorOrAI+"_deleteMsg"))
-                                    asyncio.create_task(interaction.channel.send(game.gamestate["players"][player]["player_name"]+" You can reroll a "+dieColor+" die that missed using one of you colony ships.", view=viewLyr))
+                                    asyncio.create_task(interaction.channel.send(game.gamestate["players"][player]["player_name"]+" You can reroll a "+dieColor+" die that missed using one of your colony ships.", view=viewLyr))
                                 continue
                         else:
                             if dieNum == 2 or dieNum == 3:
@@ -603,7 +603,7 @@ class Combat:
                         buttonID = "FCID"+colorOrAI+"_rerollDie_"+pos+"_"+colorOrAI+"_"+str(computerVal)+"_"+dieColor
                         viewLyr.add_item(Button(label=label, style=discord.ButtonStyle.green, custom_id=buttonID))
                         viewLyr.add_item(Button(label="Decline", style=discord.ButtonStyle.red, custom_id="FCID"+colorOrAI+"_deleteMsg"))
-                        await interaction.channel.send(player["player_name"]+" You can reroll a "+dieColor+" die that missed using one of you colony ships.", view=viewLyr)
+                        await interaction.channel.send(player["player_name"]+" You can reroll a "+dieColor+" die that missed using one of your colony ships.", view=viewLyr)
                     continue
             else:
                 if dieNum == 2 or dieNum == 3:
