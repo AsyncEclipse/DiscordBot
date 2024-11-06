@@ -3805,7 +3805,8 @@
     "artifact": 1,
     "ancient": 2,
     "guardian": 0,
-    "gcds": 0
+    "gcds": 0,
+    "type": "standard"
   },
   "302": {
     "owner": 0,

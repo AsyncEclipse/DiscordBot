@@ -813,6 +813,12 @@ class GamestateHelper:
         if not galactic_events:
             third_sector_tiles = ["301", "302", "303", "304", "305", "306", "307", "308", "309", "310", "311", "312", "313", "314",
                               "315", "316", "317","318", "381", "382"]
+        else:
+            ranNum = random.randint(1,2)
+            if ranNum == 1:
+                third_sector_tiles.remove("396")
+            else:
+                third_sector_tiles.remove("399")
         sector_draws = draw_count[self.gamestate["player_count"]][0]
         tech_draws = draw_count[self.gamestate["player_count"]][1]
 

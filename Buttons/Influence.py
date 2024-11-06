@@ -122,7 +122,7 @@ class InfluenceButtons:
         for button in view.children:
             if buttonID in button.custom_id:
                 view.remove_item(button)
-        await interaction.message.send( f"{player['player_name']} now has "+str(numShips)+" colony ships "
+        await interaction.channel.send( f"{player['player_name']} now has "+str(numShips)+" colony ships "
                                                                                                "available to use")
         await interaction.message.edit(view=view)
 

@@ -468,7 +468,7 @@ class Combat:
                             if dieNum + shipModel.computer > 5 and len(hittableShips) == 0 and oldNumPeeps == len(Combat.findPlayersInTile(game, pos)):
                                 await interaction.channel.send("The computer bonus for a die that rolled a "+str(dieNum)+" was cancelled by the shields on each of the opponents ships.")
                             if len(hittableShips) == 0 or oldNumPeeps > len(Combat.findPlayersInTile(game, pos)):
-                                if player != None and "Lyra" in game.gamestate["players"][player]["name"] and game.gamestate["players"][player]["colony_ships"] > 0:
+                                if player != None and "Lyra" in game.gamestate["players"][player]["name"] and game.gamestate["players"][player]["colony_ships"] > 0 and oldNumPeeps == len(Combat.findPlayersInTile(game, pos)):
                                     viewLyr = View()
                                     label = "Reroll Die"
                                     buttonID = "FCID"+colorOrAI+"_rerollDie_"+pos+"_"+colorOrAI+"_"+str(shipModel.computer)+"_"+dieColor
@@ -597,7 +597,7 @@ class Combat:
                 if dieNum + computerVal > 5 and len(hittableShips) == 0:
                     await interaction.channel.send("The computer bonus for a die that rolled a "+str(dieNum)+" was cancelled by the shields on each of the opponents ships.")
                 if len(hittableShips) == 0 or oldNumPeeps > len(Combat.findPlayersInTile(game, pos)):
-                    if "Lyra" in player["name"] and player["colony_ships"] > 0:
+                    if "Lyra" in player["name"] and player["colony_ships"] > 0 and oldNumPeeps == len(Combat.findPlayersInTile(game, pos)):
                         viewLyr = View()
                         label = "Reroll Die"
                         buttonID = "FCID"+colorOrAI+"_rerollDie_"+pos+"_"+colorOrAI+"_"+str(computerVal)+"_"+dieColor
