@@ -132,7 +132,7 @@ class ExploreButtons:
         await interaction.channel.send(f"Tile added to position {msg[1]}")
         if game.get_gamestate()["board"][msg[1]]["ancient"] == 0 or player["name"]=="Descendants of Draco":
             view = View()
-            if "bh" in game.get_gamestate()["board"][msg[1]]["type"]:
+            if "type" in game.get_gamestate()["board"][msg[1]] and "bh" in game.get_gamestate()["board"][msg[1]]["type"]:
                 await interaction.channel.send("This is a black hole tile, so its discovery tile cannot be claimed until a ship moves in, at which point a die will be rolled and it may teleport.")
             else:
                 view.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_addInfluenceFinish_"+msg[1]))

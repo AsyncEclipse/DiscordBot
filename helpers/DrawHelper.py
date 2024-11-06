@@ -231,7 +231,7 @@ class DrawHelper:
                 discPath = f"images/resources/components/discovery_tiles/discovery_2ptback.png"
                 discTile = self.use_image(discPath)
                 discTile = discTile.rotate(315,expand=True)
-                if "bh" in tile["type"]:
+                if "type" in tile and "bh" in tile["type"]:
                     tile_image.paste(discTile, (int(12*mult), int(89*mult)), mask=discTile)
                 else:
                     tile_image.paste(discTile, (int(108*mult), int(89*mult)), mask=discTile)
