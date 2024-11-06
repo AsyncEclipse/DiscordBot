@@ -57,7 +57,7 @@ class InfluenceButtons:
                     tilesViewed.append(adjTile)
                     if adjTile not in game.get_gamestate()["board"]:
                         continue
-                    if "bh" in game.get_gamestate()["board"][adjTile]["type"]:
+                    if "type" in game.get_gamestate()["board"][adjTile] and "bh" in game.get_gamestate()["board"][adjTile]["type"]:
                         continue
                     playerShips = game.get_gamestate()["board"][adjTile]["player_ships"]
                     playerShips.append(player["color"])
