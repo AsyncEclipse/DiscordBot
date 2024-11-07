@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 import discord
 from discord.ext import commands
 from Buttons.BlackHole import BlackHoleButtons
@@ -30,14 +31,16 @@ class ButtonListener(commands.Cog):
     @commands.Cog.listener()
     async def on_interaction(self, interaction : discord.Interaction):
         if interaction.type == discord.InteractionType.component:
+            start = datetime.now()
             start_time = time.perf_counter()  
             logging.basicConfig(level=logging.INFO)  
             logger = logging.getLogger(__name__)  
             log_channel = discord.utils.get(interaction.guild.channels, name="bot-log") 
             button_log_channel = discord.utils.get(interaction.guild.channels, name="button-log") 
             customID = interaction.data["custom_id"]
-            if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):  
-                await button_log_channel.send(f'{customID} pressed: '+interaction.message.jump_url)
+            # if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):  
+            #     await button_log_channel.send(f'{customID} pressed: '+interaction.message.jump_url)
+
             try:
                 await interaction.response.defer(thinking=False)
                 asyncio.create_task(self.resolveButton(interaction))
@@ -59,15 +62,14 @@ class ButtonListener(commands.Cog):
                     )  
                     try:  
                         if isinstance(error, discord.HTTPException) and error.status == 404:  
-                            await log_channel.send("Hit the unknown interaction error")
+                            await log_channel.send(f'Unknown Interaction error on {customID}. Interaction was receieved at {start.strftime("%Y-%m-%d %H:%M:%S")} and the current time is {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
                         else:
                             await log_channel.send(log_message)  
                     except discord.Forbidden:  
                         logger.warning(f'Cannot send messages to the log channel "bot-log". Check permissions.')  
                     except discord.HTTPException as e:  
                         logger.error(f'Failed to send message to log channel: {e}')  
-                if isinstance(error, discord.HTTPException) and error.status == 404:  
-                    logger.error(f'Unknown Interaction error: {error}')  
+                if isinstance(error, discord.HTTPException) and error.status == 404:   
                     await interaction.channel.send("The bot was busy handling another request. Try again")
                 else:
                     await interaction.channel.send("This button press hit some sort of new error. Devs will probably need to fix it later. Please press this button no more than twice in the meantime")
