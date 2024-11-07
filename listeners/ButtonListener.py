@@ -38,8 +38,8 @@ class ButtonListener(commands.Cog):
             log_channel = discord.utils.get(interaction.guild.channels, name="bot-log") 
             button_log_channel = discord.utils.get(interaction.guild.channels, name="button-log") 
             customID = interaction.data["custom_id"]
-            # if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):  
-            #     await button_log_channel.send(f'{customID} pressed: '+interaction.message.jump_url)
+            if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):  
+                await button_log_channel.send(f'{start.strftime("%H:%M:%S")} {customID} pressed: '+interaction.message.jump_url)
 
             try:
                 await interaction.response.defer(thinking=False)
@@ -62,7 +62,9 @@ class ButtonListener(commands.Cog):
                     )  
                     try:  
                         if isinstance(error, discord.HTTPException) and error.status == 404:  
-                            await log_channel.send(f'Unknown Interaction error on {customID}. Interaction was receieved at {start.strftime("%Y-%m-%d %H:%M:%S")} and the current time is {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
+                            await log_channel.send(f'Unknown Interaction error on {customID}. Interaction was receieved at {start.strftime("%Y-%m-%d %H:%M:%S")}')
+                            if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):  
+                                await button_log_channel.send(f'{start.strftime("%H:%M:%S")} interaction errror hit on {customID}')
                         else:
                             await log_channel.send(log_message)  
                     except discord.Forbidden:  
@@ -265,6 +267,7 @@ class ButtonListener(commands.Cog):
         if customID.startswith("draftFaction"):
             await DraftButtons.draftFaction(game, interaction, customID)
         if customID.startswith("pulsarAction"):
+            game.updateSaveFile()
             await PulsarButtons.pulsarAction(game, player, interaction, player_helper, customID)
         if customID.startswith("blackHoleReturnStart"):
             await BlackHoleButtons.blackHoleReturnStart(game, player, customID,player_helper,  interaction)
