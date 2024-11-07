@@ -468,7 +468,7 @@ class GamestateHelper:
             if "sb" in i:
                 self.gamestate["players"][player]["ship_stock"][3] -= 1
             if color == self.gamestate["board"][position]["owner"] and len(self.gamestate["board"][position]["player_ships"]) > 0:
-                self.gamestate["board"][position]["player_ships"].insert(1,i)
+                self.gamestate["board"][position]["player_ships"].insert(0,i)
             else:
                 self.gamestate["board"][position]["player_ships"].append(i)
         self.update()
@@ -541,6 +541,7 @@ class GamestateHelper:
         colors_seen = OrderedDict()  
 
         excludedColors = []
+        colors_seen["ai"] = 0
 
         for item in arr:  
             color = item.split('-')[0]  
