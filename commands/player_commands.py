@@ -110,7 +110,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         await interaction.channel.send(response)
 
     @app_commands.command(name="remove_tech")
-    async def remove_tech(self, interaction: discord.Interaction, tech:str):
+    async def remove_tech(self, interaction: discord.Interaction, tech:str, player: Optional[discord.Member]=None):
         """:param tech: The ID of the tech to be removed. Type help to get a list of your tech IDs"""
         game = GamestateHelper(interaction.channel)
         player = game.get_player(interaction.user.id)  
@@ -139,10 +139,12 @@ class PlayerCommands(commands.GroupCog, name="player"):
     ]
     @app_commands.command(name="adjust_actions")
     @app_commands.choices(action=actionChoices)
-    async def adjust_actions(self, interaction: discord.Interaction, amount_to_change:int, action:app_commands.Choice[str]):
+    async def adjust_actions(self, interaction: discord.Interaction, amount_to_change:int, action:app_commands.Choice[str], player: Optional[discord.Member]=None):
         game = GamestateHelper(interaction.channel)
-        player = game.get_player(interaction.user.id)  
-        player_helper = PlayerHelper(interaction.user.id, player)
+        if player == None:
+            player = interaction.user
+        gamestate = GamestateHelper(interaction.channel)
+        player_helper = PlayerHelper(player.id, gamestate.get_player(player.id))
         player_helper.adjust_influence_on_action(action.value, amount_to_change)
         game.update_player(player_helper)
         await interaction.response.send_message(f"{player['player_name']} adjusted action disks for "+action.value+" by "+str(amount_to_change))

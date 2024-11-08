@@ -274,7 +274,7 @@
   },
   "anm": {
     "name": "Antimatter Missile",
-    "description": "This is an Ancient Tech; it can only be added to a single Ship Blueprint slot, and then it is exhausted. The Antimatter Missile box rolls 1 die at the beginning of Combat Phase during the Fire Missiles step. The Antimatter Missile deals 4 hits if 1) the red die rolls a Direct Hit, or 2) if the red die result + total Computers - total Shields of the target ship = 6 or greater. Does not fire during the Repeated Engagement Rounds. Each Antimatter Missile box requires 0 Energy. See Technology Antimatter Splitter.",
+    "description": "This is an Ancient Tech; it can only be added to a single Ship Blueprint slot, and then it is exhausted. The Antimatter Missile box rolls 1 die at the beginning of Combat Phase during the Fire Missiles step. The Antimatter Missile deals 4 hits if 1) the red die rolls a Direct Hit, or 2) if the red die result + total Computers - total Shields of the target ship = 6 or greater. Does not fire during the Repeated Engagement Rounds. Each Antimatter Missile box requires 0 Energy.",
     "range": 0,
     "speed": 0,
     "nrg_use": 0,
