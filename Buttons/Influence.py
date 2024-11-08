@@ -59,6 +59,8 @@ class InfluenceButtons:
                         continue
                     if "type" in game.get_gamestate()["board"][adjTile] and "bh" in game.get_gamestate()["board"][adjTile]["type"]:
                         continue
+                    if "player_ships" not in game.get_gamestate()["board"][adjTile]:
+                        continue
                     playerShips = game.get_gamestate()["board"][adjTile]["player_ships"]
                     playerShips.append(player["color"])
                     if "owner" in game.get_gamestate()["board"][adjTile] and game.get_gamestate()["board"][adjTile]["owner"]==0 and ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips,game):
