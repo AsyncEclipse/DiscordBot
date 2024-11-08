@@ -127,6 +127,9 @@ class GamestateHelper:
     def setAdvancedAI(self, status:bool):
         self.gamestate["advanced_ai"] = status
         self.update()
+    def setAdvancedAI(self, status:bool):
+        self.gamestate["turnOffLines"] = not status
+        self.update()
     def setFancyShips(self, status:bool):
         self.gamestate["fancy_ships"] = status
         self.update()
@@ -679,40 +682,7 @@ class GamestateHelper:
 
     async def upkeep(self, interaction:discord.Interaction):
         from Buttons.Influence import InfluenceButtons
-        round = 1
-        if "roundNum" in self.gamestate:
-            round = self.gamestate["roundNum"]
-        if "upkeepSupernovaCheck"+str(round) not in self.gamestate:
-            self.initilizeKey("upkeepSupernovaCheck"+str(round))
-            tiles = self.gamestate["board"].copy()
-            for position in tiles:
-
-                if "type" in self.gamestate["board"][position] and self.gamestate["board"][position]["type"] == "supernova":
-                    msg = "Rolled the following dice for the supernova in position "+position+": "
-                    sum = 0
-                    for x in range(2):
-                        random_number = random.randint(1, 6)
-                        if random_number != 1 and random_number != 6:
-                            sum += random_number
-                        num = str(random_number).replace("1","Miss").replace("6",":boom:")
-                        msg +=str(num)+" "
-                    if self.gamestate["board"][position]["owner"] != 0:
-                        playerObj = self.getPlayerObjectFromColor(self.gamestate["board"][position]["owner"])
-                        maxTech = max(len(playerObj["grid_tech"]), len(playerObj["military_tech"]))
-                        maxTech = max(maxTech, len(playerObj["nano_tech"]))
-                        sum += maxTech
-                    msg += "\nThe sum of that and the owners highest tech track "+str(sum)+" was compared against the round ("+str(round)+ ") and found to be "
-                    if sum < round:
-                        msg += "lesser, so the supernova exploded before income."
-                        if self.gamestate["board"][position]["owner"] != 0:
-                            await InfluenceButtons.removeInfluenceFinish(self, interaction, "removeInfluenceFinish_"+position+"_normal", False)
-                        units = self.gamestate["board"][position]["player_ships"][:]
-                        for unit in units:
-                            self.remove_units([unit],position)
-                        del self.gamestate["board"][position]
-                    else:
-                        msg +=" equal to or greater, and so the supernova is safe, for now"
-                    await interaction.channel.send(msg)
+        
         for player in self.gamestate["players"]:
             p1 = PlayerHelper(player, self.get_player(player))
             neutrals = p1.upkeep()
@@ -743,6 +713,39 @@ class GamestateHelper:
                 self.setTurnOrder(self.gamestate["pass_order"])
             self.gamestate["pass_order"] = []
 
+        round = 1
+        if "roundNum" in self.gamestate:
+            round = self.gamestate["roundNum"]
+        if "upkeepSupernovaCheck"+str(round) not in self.gamestate:
+            self.initilizeKey("upkeepSupernovaCheck"+str(round))
+            tiles = self.gamestate["board"].copy()
+            for position in tiles:
+                if "type" in self.gamestate["board"][position] and self.gamestate["board"][position]["type"] == "supernova":
+                    msg = "Rolled the following dice for the supernova in position "+position+": "
+                    sum = 0
+                    for x in range(2):
+                        random_number = random.randint(1, 6)
+                        if random_number != 1 and random_number != 6:
+                            sum += random_number
+                        num = str(random_number).replace("1","Miss").replace("6",":boom:")
+                        msg +=str(num)+" "
+                    if self.gamestate["board"][position]["owner"] != 0:
+                        playerObj = self.getPlayerObjectFromColor(self.gamestate["board"][position]["owner"])
+                        maxTech = max(len(playerObj["grid_tech"]), len(playerObj["military_tech"]))
+                        maxTech = max(maxTech, len(playerObj["nano_tech"]))
+                        sum += maxTech
+                    msg += "\nThe sum of that and the owners highest tech track ("+str(sum)+") was compared against the round ("+str(round)+ ") and found to be "
+                    if sum < round:
+                        msg += "lesser, so the supernova exploded."
+                        if self.gamestate["board"][position]["owner"] != 0:
+                            await InfluenceButtons.removeInfluenceFinish(self, interaction, "removeInfluenceFinish_"+position+"_normal", False)
+                        units = self.gamestate["board"][position]["player_ships"][:]
+                        for unit in units:
+                            self.remove_units([unit],position)
+                        del self.gamestate["board"][position]
+                    else:
+                        msg +=" equal to or greater, and so the supernova is safe, for now"
+                    await interaction.channel.send(msg)
         if "roundNum" in self.gamestate:
             self.gamestate["roundNum"] += 1
         else:

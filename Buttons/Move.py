@@ -37,6 +37,8 @@ class MoveButtons:
             view.add_item(Button(label=tile, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_moveFrom_{tile}_{moveCount}"))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
         if button:
+            if moveCount == 1:
+                await interaction.channel.send(f"{player['player_name']} is using their turn to move")
             await interaction.message.delete()
         await interaction.channel.send( f"{interaction.user.mention} Select the tile you would like to move from", view=view)
         drawing = DrawHelper(game.gamestate)

@@ -386,6 +386,97 @@ class Combat:
                         oldShipVal = shipModel.cost
                         ship = option
         return ship
+    
+    #Not currently in use, will be built to improve AI targetting in future
+    @staticmethod
+    async def rollDiceAI(game:GamestateHelper, buttonID:str, interaction:discord.Interaction):
+        pos = buttonID.split("_")[1]
+        colorOrAI = buttonID.split("_")[2]
+        speed = int(buttonID.split("_")[3])
+        oldLength = len(Combat.findPlayersInTile(game, pos))
+        tile_map = game.get_gamestate()["board"]
+        player_ships = tile_map[pos]["player_ships"][:]
+        game.setCurrentRoller(colorOrAI,pos)
+        game.setCurrentSpeed(speed,pos)
+        player = None
+        ships = Combat.getCombatantShipsBySpeed(game, colorOrAI, player_ships)
+        update = False
+        for ship in ships:
+            if ship[0] == speed or speed == 99:
+                shipModel = AI_Ship(ship[1], game.gamestate["advanced_ai"], game.gamestate["wa_ai"])
+                name = "The AI"
+                dice = shipModel.dice
+                missiles = ""
+                nonMissiles = " on initiative "+str(speed)
+                if speed == 99:
+                    dice = shipModel.missile
+                    missiles = "missiles "
+                    nonMissiles =""
+                msg = name + " rolled the following "+missiles+"with their "+str(ship[2])+" "+Combat.translateShipAbrToName(ship[1])+"(s)"+nonMissiles+":\n"
+                dieNums = []
+                msg2 = "\n"
+                for x in range(ship[2]):
+                    for die in dice:
+                        random_number = random.randint(1, 6)
+                        num = str(random_number).replace("1","Miss").replace("6",":boom:")
+                        emojiName = "dice_"+Combat.translateColorToName(die)+"_"+str(random_number)
+                        guild_emojis = interaction.guild.emojis  
+                        matching_emojis = [emoji for emoji in guild_emojis if emoji.name == emojiName]
+                        msg +=str(num)+" "
+                        if len(matching_emojis) > 0:
+                            msg2 +=str(matching_emojis[0])+" "
+                        dieNums.append([random_number,Combat.translateColorToDamage(die, random_number), die])
+                if shipModel.computer > 0:
+                    msg = msg + "\nThis ship type has a +"+str(shipModel.computer)+" computer"
+                await interaction.channel.send(msg+msg2)
+                oldNumPeeps = len(Combat.findPlayersInTile(game, pos))
+                for die in dieNums:
+                    tile_map = game.get_gamestate()["board"]
+                    player_ships = tile_map[pos]["player_ships"][:]
+                    dieNum = die[0]
+                    dieDam = die[1]
+                    dieColor = die[2]
+                    hittableShips = []
+                    hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships, dieNum, shipModel.computer, pos, speed)
+                    if dieNum + shipModel.computer > 5 and len(hittableShips) == 0 and oldNumPeeps == len(Combat.findPlayersInTile(game, pos)):
+                        await interaction.channel.send("The computer bonus for a die that rolled a "+str(dieNum)+" was cancelled by the shields on each of the opponents ships.")
+                    if len(hittableShips) > 0:
+                        update = True
+                        if len(hittableShips) > 1:
+                            ship = hittableShips[0]
+                            oldShipVal = 0
+                            ableToKillSomething = False
+                            for option in hittableShips:
+                                damageOnShip = game.add_damage(option, pos, 0)
+                                shipType = option.split("-")[1]
+                                shipOwner = option.split("-")[0]
+                                player = game.get_player_from_color(shipOwner)
+                                shipModel = PlayerShip(game.gamestate["players"][player], shipType)
+                                if ableToKillSomething:
+                                    if dieDam +damageOnShip> shipModel.hull and shipModel.cost > oldShipVal:
+                                        oldShipVal = shipModel.cost
+                                        ship = option
+                                else:
+                                    if dieDam +damageOnShip> shipModel.hull:
+                                        oldShipVal = shipModel.cost
+                                        ship = option
+                                        ableToKillSomething = True
+                                    else:
+                                        if shipModel.cost > oldShipVal:
+                                            oldShipVal = shipModel.cost
+                                            ship = option
+                            buttonID = "assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(dieDam)
+                            await Combat.assignHitTo(game, buttonID, interaction, False)
+                        else:
+                            ship = hittableShips[0]
+                            buttonID = "assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(dieDam)
+                            await Combat.assignHitTo(game, buttonID, interaction, False)
+        hitsToAssign = 0
+        if "unresolvedHits" in game.get_gamestate()["board"][pos]:
+            hitsToAssign = game.get_gamestate()["board"][pos]["unresolvedHits"]
+        if hitsToAssign == 0 and oldLength == len(Combat.findPlayersInTile(game, pos)):
+            await Combat.promptNextSpeed(game, pos, interaction.channel, update)
+
 
     @staticmethod
     async def rollDice(game:GamestateHelper, buttonID:str, interaction:discord.Interaction):

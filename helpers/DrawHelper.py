@@ -284,12 +284,20 @@ class DrawHelper:
                                 break
                         if not found:
                             tile_image.paste(open_mask, (int(152*mult), 0), mask=open_mask)
-                        
                     else:
                         tile_image.paste(closed_mask, (int(152*mult), 0), mask=closed_mask)
-                        #tile_image.paste(black, (int(80*mult), 0), mask=black)
+                    if "owner" in tile and isinstance(tile["owner"],str):
+                        if "turnOffLines" not in self.gamestate or self.gamestate["turnOffLines"] == False:
+                            colorOwner = tile["owner"]
+                            playerObj = self.getPlayerObjectFromColor(colorOwner)
+                            for x,adjTile in enumerate(configs.get(position)[0].split(",")):
+                                if x==i:
+                                    if adjTile not in playerObj["owned_tiles"]:
+                                        linepath = f"images/resources/masks/{colorOwner}_line.png"
+                                        line = self.use_image(linepath)
+                                        tile_image.paste(line, (int(78*mult), 0), mask=line)
+                                    break
                     tile_image = tile_image.rotate(60)
-
             if "warpDisc" in tile or "warpPoint" in tile:
                 warppath = f"images/resources/all_boards/Warp_picture.png"
                 warp_mask = self.use_image(warppath)
@@ -581,6 +589,11 @@ class DrawHelper:
                 count += 1
         return context
     
+    def getPlayerObjectFromColor(self, color):
+        for i in self.gamestate["players"]:
+            if self.gamestate["players"][i]["color"] == color:
+                return self.gamestate["players"][i]
+            
     def display_cube_track_reference(self, player):
         context = Image.new("RGBA", (1690, 125), (0,0,0,255))
 
@@ -789,7 +802,7 @@ class DrawHelper:
             text_drawable.text((0, 50), "Passed", fill=(255, 0, 0), font=font, stroke_width=stroke_width, stroke_fill=stroke_color)
             text_image = text_image.rotate(45, expand=True)
             context.paste(text_image, (0, 0), text_image)
-        if "activePlayerColor" in self.gamestate and len(self.gamestate["activePlayerColor"]) == 1 and player["passed"] == self.gamestate["activePlayerColor"][0]:
+        if "activePlayerColor" in self.gamestate and len(self.gamestate["activePlayerColor"]) == 1 and player["color"] == self.gamestate["activePlayerColor"][0]:
             text_image = Image.new('RGBA', (500,500), (0, 0, 0, 0))
             text_drawable = ImageDraw.Draw(text_image)
             text_drawable.text((0, 50), "Active", fill=(0, 255, 0), font=font, stroke_width=stroke_width, stroke_fill=stroke_color)

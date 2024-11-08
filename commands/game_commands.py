@@ -55,6 +55,21 @@ class GameCommands(commands.GroupCog, name="game"):
         image = drawing.base_tile_image(tile)
         await interaction.followup.send("Added this tile to the deck", file=drawing.show_single_tile(image))
 
+
+    @app_commands.command(name="add_observer")
+    async def add_observer(self,interaction: discord.Interaction, user: discord.User):  
+        game = GamestateHelper(interaction.channel)
+        guild = interaction.guild  
+        for channel in guild.text_channels:  
+            if game.game_id in channel.name:  
+                try:  
+                    await channel.set_permissions(user, read_messages=True, send_messages=True)  
+                    await interaction.response.send_message(f"Added {user.mention} to {channel.name}")  
+                except discord.Forbidden:  
+                    await interaction.channel.send(f"Failed to add {user.mention} to {channel.name}: Missing permissions.")  
+                except discord.HTTPException as e:  
+                    await interaction.channel.send(f"An error occurred when adding {user.mention} to {channel.name}: {str(e)}")  
+
     @app_commands.command(name="start_combats")
     async def start_combats(self,interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)
@@ -72,6 +87,13 @@ class GameCommands(commands.GroupCog, name="game"):
         await interaction.response.send_message("The Minor Species expansion has been disabled")
         game = GamestateHelper(interaction.channel)
         game.initilizeKey("minor_species")
+    @app_commands.command(name="set_outlines_status")
+    async def set_outlines_status(self,interaction: discord.Interaction, status:bool):
+        game = GamestateHelper(interaction.channel)
+        game.initilizeKey("turnOffLines")
+        game.setAdvancedAI(status)
+        await interaction.response.send_message("Set Outlines status to "+str(status))
+
     @app_commands.command(name="disable_five_player_hyperlanes")
     async def disable_five_player_hyperlanes(self,interaction: discord.Interaction):
         await interaction.response.send_message("The hyperlanes for 5 player mode have been disabled")
@@ -93,7 +115,7 @@ class GameCommands(commands.GroupCog, name="game"):
         
         end_time = time.perf_counter()  
         elapsed_time = end_time - start_time  
-        print(f"Total elapsed time for show game command: {elapsed_time:.2f} seconds")  
+        #print(f"Total elapsed time for show game command: {elapsed_time:.2f} seconds")  
     
     @app_commands.command(name="undo_to_last_turn_start")
     async def undo_to_last_turn_start(self, interaction: discord.Interaction):

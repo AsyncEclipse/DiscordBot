@@ -43,11 +43,14 @@ class ButtonListener(commands.Cog):
 
             try:
                 await interaction.response.defer(thinking=False)
+                if customID == "showGame":
+                    await interaction.followup.send("Show game request received, please wait 5-10 seconds for the map to generate", ephemeral=True)
+                    
                 await asyncio.create_task(self.resolveButton(interaction))
                 if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):  
                     end_time = time.perf_counter()  
                     elapsed_time = end_time - start_time  
-                    print(f"Total elapsed time for {customID} button press in main thread: {elapsed_time:.2f} seconds")
+                    #print(f"Total elapsed time for {customID} button press in main thread: {elapsed_time:.2f} seconds")
             except Exception as error:
                 if log_channel is not None and isinstance(log_channel, discord.TextChannel):  
                     tb = traceback.format_exc()  # Get the traceback as a string  
@@ -275,5 +278,5 @@ class ButtonListener(commands.Cog):
             await BlackHoleButtons.blackHoleFinish(game, player, customID,player_helper,  interaction)
         end_time = time.perf_counter()  
         elapsed_time = end_time - start_time  
-        if(elapsed_time > 2):
+        if(elapsed_time > 5):
             print(f"Total elapsed time for {customID} button press in side thread: {elapsed_time:.2f} seconds")

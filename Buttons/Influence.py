@@ -81,6 +81,7 @@ class InfluenceButtons:
     @staticmethod
     async def startInfluence(game: GamestateHelper, p1, interaction: discord.Interaction):
         view = View()
+        await interaction.channel.send(f"{p1['player_name']} is using their turn to influence")
         view.add_item(Button(label=f"Remove Influence", style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_removeInfluenceStart"))
         if len(InfluenceButtons.getTilesToInfluence(game,p1)) > 0:
             view.add_item(Button(label=f"Add  Influence", style=discord.ButtonStyle.green, custom_id=f"FCID{p1['color']}_addInfluenceStart"))
@@ -103,7 +104,7 @@ class InfluenceButtons:
         await interaction.channel.send( f"{p1['player_name']} choose the tile you would like to influence", view=view)
         drawing = DrawHelper(game.gamestate)
         if len(tiles) > 0:
-            asyncio.create_task(interaction.followup.send(file=await asyncio.to_thread(drawing.mergeLocationsFile,tiles, ephemeral=True)))
+            asyncio.create_task(interaction.followup.send(file=await asyncio.to_thread(drawing.mergeLocationsFile,tiles), ephemeral=True))
 
     @staticmethod
     async def addInfluenceFinish(game: GamestateHelper, p1, interaction: discord.Interaction, buttonID:str):

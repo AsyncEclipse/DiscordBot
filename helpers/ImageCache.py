@@ -47,7 +47,8 @@ class ImageCacheHelper:
             elif "hsMask" in filename.lower():
                 return (int(70*mult),int(70*mult))
             elif "line" in filename.lower():
-                return (int(178*mult),int(6*mult))
+                #178
+                return (int(182*mult),int(3*mult))
             else:
                 return (int(42*mult),int(22*mult))  
         elif "factions" in folder.lower():  
@@ -87,6 +88,8 @@ class ImageCacheHelper:
                 else:
                     return (int(110*mult),int(110*mult))
             else:
+                if "mon" in filename.lower():
+                    return (int(90*mult),int(90*mult))
                 if "damage" in filename.lower():
                     return (int(15*mult),int(15*mult)) 
                 else:

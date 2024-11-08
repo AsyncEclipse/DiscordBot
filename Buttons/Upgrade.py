@@ -30,6 +30,8 @@ class UpgradeButtons:
             await interaction.message.delete()
             if discTileUpgrade == "dummy":
                 view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
+                if actions == str(player['upgrade_apt']):
+                    await interaction.channel.send(f"{player['player_name']} is using their turn to upgrade")
         
         await interaction.channel.send(
             f"{interaction.user.mention}, choose which ship you would like to upgrade.", view=view)
