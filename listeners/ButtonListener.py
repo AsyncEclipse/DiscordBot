@@ -43,7 +43,7 @@ class ButtonListener(commands.Cog):
 
             try:
                 await interaction.response.defer(thinking=False)
-                asyncio.create_task(self.resolveButton(interaction))
+                await asyncio.create_task(self.resolveButton(interaction))
                 if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):  
                     end_time = time.perf_counter()  
                     elapsed_time = end_time - start_time  
@@ -62,7 +62,7 @@ class ButtonListener(commands.Cog):
                     )  
                     try:  
                         if isinstance(error, discord.HTTPException) and error.status == 404:  
-                            await log_channel.send(f'Unknown Interaction error on {customID}. Interaction was receieved at {start.strftime("%Y-%m-%d %H:%M:%S")}')
+                            await log_channel.send(f'Unknown Interaction error on {customID}. Interaction was receieved at {start.strftime("%H:%M:%S")}')
                             if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):  
                                 await button_log_channel.send(f'{start.strftime("%H:%M:%S")} interaction errror hit on {customID}')
                         else:

@@ -41,7 +41,7 @@ class MoveButtons:
         await interaction.channel.send( f"{interaction.user.mention} Select the tile you would like to move from", view=view)
         drawing = DrawHelper(game.gamestate)
         if len(tiles) > 0:
-            asyncio.create_task(interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True))
+            asyncio.create_task(interaction.followup.send(file=await asyncio.to_thread(drawing.mergeLocationsFile,tiles), ephemeral=True))
 
     @staticmethod
     async def moveFrom(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str):
@@ -132,7 +132,7 @@ class MoveButtons:
             await interaction.channel.send( f"Additional Options", view=view2)
         drawing = DrawHelper(game.gamestate)
         if len(tiles) < 15 and len(tiles) > 0:
-            asyncio.create_task(interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True))
+            asyncio.create_task(interaction.followup.send(file=await asyncio.to_thread(drawing.mergeLocationsFile,tiles), ephemeral=True))
     @staticmethod
     async def moveTo(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str, player_helper:PlayerHelper):
         originT = buttonID.split("_")[1]
@@ -145,7 +145,7 @@ class MoveButtons:
         game.add_units([shipName],destination)
         game.fixshipsOrder(destination)
         drawing = DrawHelper(game.gamestate)
-        asyncio.create_task(interaction.channel.send( f"{player['player_name']} Moved a {shipType} from {originT} to {destination}.", file=drawing.board_tile_image_file(destination)))
+        await interaction.channel.send( f"{player['player_name']} Moved a {shipType} from {originT} to {destination}.", file=await asyncio.to_thread(drawing.board_tile_image_file,destination))
         player_helper.specifyDetailsOfAction(f"Moved a {shipType} from {originT} to {destination}.")
         game.update_player(player_helper)
         owner = game.gamestate["board"][destination]["owner"]

@@ -57,6 +57,8 @@ class TurnButtons:
         nextPlayer = game.get_next_player(player)
         if nextPlayer != None and not game.is_everyone_passed():
             view = TurnButtons.getStartTurnButtons(game,nextPlayer)
+            game.initilizeKey("activePlayerColor")
+            game.addToKey("activePlayerColor",nextPlayer["color"])
             await interaction.channel.send("## "+game.getPlayerEmoji(nextPlayer)+" started their turn")
             await interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(nextPlayer),view=view)
         else:
@@ -112,6 +114,8 @@ class TurnButtons:
         game.addToPassOrder(player["player_name"])
         if nextPlayer != None and not game.is_everyone_passed():
             view = TurnButtons.getStartTurnButtons(game,nextPlayer)
+            game.initilizeKey("activePlayerColor")
+            game.addToKey("activePlayerColor",nextPlayer["color"])
             await interaction.channel.send("## "+game.getPlayerEmoji(nextPlayer)+" started their turn")
             await interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(nextPlayer),view=view)
 
@@ -191,11 +195,14 @@ class TurnButtons:
         await game.upkeep(interaction)
         drawing = DrawHelper(game.gamestate)
         if game.gamestate["roundNum"] < 9:
-            asyncio.create_task(interaction.channel.send("Tech At Start Of Round "+str(game.gamestate['roundNum']),file=drawing.show_available_techs()))
+            await interaction.channel.send("Tech At Start Of Round "+str(game.gamestate['roundNum']),file=await asyncio.to_thread(drawing.show_available_techs))
             nextPlayer = TurnButtons.getFirstPlayer(game)
             if nextPlayer != None:
                 view = TurnButtons.getStartTurnButtons(game,nextPlayer)
-                asyncio.create_task(interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do the first turn of the round"+game.displayPlayerStats(nextPlayer),view=view))
+                game.initilizeKey("activePlayerColor")
+                game.addToKey("activePlayerColor",nextPlayer["color"])
+                await interaction.channel.send("## "+game.getPlayerEmoji(nextPlayer)+" started their turn")
+                await interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do the first turn of the round"+game.displayPlayerStats(nextPlayer),view=view)
             else:
                 await interaction.channel.send("Could not find first player, someone run /player start_turn")
         else:
@@ -216,7 +223,7 @@ class TurnButtons:
     @staticmethod
     async def send_files(interaction, files, view, ephemeralStatus):
         for file in files:
-            asyncio.create_task(interaction.followup.send(file=file,ephemeral=ephemeralStatus, view=view))
+            await interaction.followup.send(file=file,ephemeral=ephemeralStatus, view=view)
 
     @staticmethod
     async def send_file(interaction, file):
@@ -230,7 +237,7 @@ class TurnButtons:
     @staticmethod
     async def showGameAsync(game: GamestateHelper, interaction: discord.Interaction, ephemeralStatus):
         drawing = DrawHelper(game.gamestate)
-        map = await drawing.show_game()
+        map = await asyncio.to_thread(drawing.show_game())
         view = View()
         button = Button(label="Show Game",style=discord.ButtonStyle.blurple, custom_id="showGame")
         view.add_item(button)

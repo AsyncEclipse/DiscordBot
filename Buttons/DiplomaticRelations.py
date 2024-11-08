@@ -1,3 +1,4 @@
+import asyncio
 import json
 import discord
 from discord.ui import View
@@ -36,7 +37,7 @@ class DiplomaticRelationsButtons:
             label = minor + " ("+str(cost)+")"
             if cost <= money:
                 view.add_item(Button(label=label, style=discord.ButtonStyle.blurple, custom_id=buttonID))
-        await interaction.channel.send( f"{player['player_name']}, choose which minor species you would like to recruit", view=view, file = drawing.show_minor_species())
+        await interaction.channel.send( f"{player['player_name']}, choose which minor species you would like to recruit", view=view, file = await asyncio.to_thread(drawing.show_minor_species))
 
     @staticmethod
     async def formMinorRelations(game: GamestateHelper, player, interaction: discord.Interaction, buttonID:str, player_helper:PlayerHelper):

@@ -1,3 +1,4 @@
+import asyncio
 import discord
 import json
 from discord.ext import commands
@@ -168,8 +169,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         game.changeColor(player["color"],color.value)
         await interaction.response.defer(thinking=False)
         drawing = DrawHelper(game.gamestate)
-        await interaction.followup.send(player['player_name']+" Successfully changed color to "+color.value, file = drawing.show_game())
-        await interaction.channel.send("Successfully changed color to "+color.value, file = drawing.show_map())
+        await interaction.followup.send("Successfully changed color to "+color.value, file = await asyncio.to_thread(drawing.show_game))
 
     @app_commands.command(name="upgrade")
     async def upgrade(self, interaction: discord.Interaction):
@@ -284,6 +284,8 @@ class PlayerCommands(commands.GroupCog, name="player"):
         game = GamestateHelper(interaction.channel)
         p1 = game.get_player(player.id)
         view = TurnButtons.getStartTurnButtons(game,p1)
+        game.initilizeKey("activePlayerColor")
+        game.addToKey("activePlayerColor",p1["color"])
         await interaction.response.send_message("## "+game.getPlayerEmoji(p1)+" started their turn")
         await interaction.channel.send((f"{p1['player_name']} use these buttons to do your turn. The "
                                                         "number of activations you have for each action is listed in ()"+game.displayPlayerStats(p1)), view=view)

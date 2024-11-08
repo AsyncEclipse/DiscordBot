@@ -28,7 +28,7 @@ class BuildButtons:
         await interaction.channel.send(f"{player['player_name']}, choose which tile you would like to build in.", view=view)
         drawing = DrawHelper(game.gamestate)
         if len(tiles) > 0:
-            asyncio.create_task(interaction.followup.send(file=drawing.mergeLocationsFile(tiles), ephemeral=True))
+            asyncio.create_task(interaction.followup.send(file=await asyncio.to_thread(drawing.mergeLocationsFile,tiles), ephemeral=True))
 
     @staticmethod  
     async def buildIn(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
@@ -212,7 +212,7 @@ class BuildButtons:
         game.update_player(player_helper)
         drawing = DrawHelper(game.gamestate)
         buildApt = player["build_apt"]
-        await interaction.channel.send(f"This is what the tile looks like after the build. They built the following:\n"+textSum,file=drawing.board_tile_image_file(loc))
+        await interaction.channel.send(f"This is what the tile looks like after the build. They built the following:\n"+textSum,file=await asyncio.to_thread(drawing.board_tile_image_file, loc))
         if ("passed" in player and player["passed"]== True) or ("pulsarBuild" in player and player["pulsarBuild"] == True):
             buildApt = 1
             if "pulsarBuild" in player and player["pulsarBuild"] == True:
