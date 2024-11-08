@@ -24,7 +24,7 @@ class DiscoveryTileButtons:
             discTile_data = json.load(f)
         discName = discTile_data[disc]["name"]
         drawing = DrawHelper(game.gamestate)
-        file = drawing.show_disc_tile(discName)
+        file = await asyncio.to_thread(drawing.show_disc_tile,discName)
         msg = f"{player['player_name']} you explored a discovery tile and found a "+discName+". You can keep it for 2 points at the end of the game or use it for its ability"
         
         view = View()

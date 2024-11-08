@@ -65,7 +65,7 @@ class ShrineButtons:
         for count,shrineType in enumerate(player["shrine_type"]):
             if (type == shrineType or type == "neutral") and player["shrine_in_storage"][count] == 1 and player["shrine_cost"][count] <= ShrineButtons.getResourceAvailable(type,player, game):
                 view.add_item(Button(label=f"{shrineType.capitalize()} (Cost {str(player['shrine_cost'][count])})", style=discord.ButtonStyle.gray, emoji=Emoji.getEmojiByName(type), custom_id=f"FCID{player['color']}_placeShrineFinal_{type}_{tile}_{str(count)}"))
-        await interaction.channel.send("Please select the shrine type and cost you would like to pay",view=view, file=drawing.show_shrine_board(player))
+        await interaction.channel.send("Please select the shrine type and cost you would like to pay",view=view, file=await asyncio.to_thread(drawing.show_shrine_board,player))
         await interaction.message.delete()
     
     @staticmethod  

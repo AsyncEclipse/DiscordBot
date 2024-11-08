@@ -94,7 +94,7 @@ class GamestateHelper:
             message = await chronicles_channel.send(message_to_send)  
             thread = await message.create_thread(name=self.game_id) 
             drawing = DrawHelper(self.gamestate)
-            map = await drawing.show_game()
+            map = await asyncio.to_thread(drawing.show_game)
             await thread.send(file=map)
             winner,highestScore = self.getWinner()
             await thread.send(role.mention + " final state here. "+winner+" won with "+str(highestScore)+" points")
@@ -139,7 +139,7 @@ class GamestateHelper:
             await interaction.message.delete()
         guild = interaction.guild
         role = discord.utils.get(guild.roles, name=self.game_id)  
-        stats = await drawing.show_game()
+        stats = await asyncio.to_thread(drawing.show_game)
         await interaction.channel.send(role.mention +" "+ winner +" is the winner with "+str(highestScore) + " points", file = stats)
         view = View()
         view.add_item(Button(label="End Game",style=discord.ButtonStyle.blurple, custom_id="endGame"))
@@ -265,6 +265,8 @@ class GamestateHelper:
 
 
     def find_player_faction_name_from_color(self, color):
+        if color == "ai" or self.get_player_from_color(color) == color:
+            return color
         return self.gamestate["players"][self.get_player_from_color(color)]["name"]
     def rotate_tile(self, position, orientation):
         tile = self.gamestate["board"][position]
@@ -930,6 +932,7 @@ class GamestateHelper:
         for i in self.gamestate["players"]:
             if self.gamestate["players"][i]["color"] == color:
                 return i
+        return color
     def getPlayerObjectFromColor(self, color):
         for i in self.gamestate["players"]:
             if self.gamestate["players"][i]["color"] == color:
@@ -1108,7 +1111,7 @@ class GamestateHelper:
 
     async def showGame(self,  thread, message):
         drawing = DrawHelper(self.gamestate)  
-        map_result = await drawing.show_game()   
+        map_result = await asyncio.to_thread(drawing.show_game)   
         view = View()  
         view.add_item(Button(label="Show Game", style=discord.ButtonStyle.blurple, custom_id="showGame"))  
         view.add_item(Button(label="Show Reputation", style=discord.ButtonStyle.gray, custom_id="showReputation"))  

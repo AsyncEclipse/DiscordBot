@@ -1,3 +1,4 @@
+import asyncio
 import json
 import discord
 from discord.ui import View
@@ -14,7 +15,7 @@ class UpgradeButtons:
     async def startUpgrade(game: GamestateHelper, player, interaction: discord.Interaction, button:bool, discTileUpgrade:str):
         ships = ["interceptor","cruiser","dread","starbase"]
         drawing = DrawHelper(game.gamestate)
-        image = drawing.player_area(player)
+        image = await asyncio.to_thread(drawing.player_area,player)
         view = View()
         actions = str(player['upgrade_apt'])
         if not button:
@@ -22,7 +23,7 @@ class UpgradeButtons:
         for ship in ships:
             shipEmoji = Emoji.getEmojiByName(player['color']+game.getShipShortName(ship))
             view.add_item(Button(label=ship.capitalize(), emoji = shipEmoji, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_upgradeShip_{actions}_{ship}_{discTileUpgrade}"))
-        await interaction.followup.send(file=drawing.show_player_ship_area(image),ephemeral=True)
+        await interaction.followup.send(file=await asyncio.to_thread(drawing.show_player_ship_area,image),ephemeral=True)
         if discTileUpgrade != "dummy":
             view.add_item(Button(label="Save For Future Upgrade Action", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))
         if button:
@@ -93,7 +94,7 @@ class UpgradeButtons:
         await interaction.message.edit(content=f"{interaction.user.mention}, replace "
                                                         f"{part_stats[oldPart]['name']} with which part? Remove as a free action by selecting 'Empty'.", view=view)
         view.add_item(Button(label="Go back 1 Step", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_upgradeShip_{actions}_{ship}_{discTileUpgrade}"))
-        await interaction.followup.send("Available parts", file=drawing.availablePartsFile(available_parts),ephemeral=True)
+        await interaction.followup.send("Available parts", file=await asyncio.to_thread(drawing.availablePartsFile,available_parts),ephemeral=True)
     @staticmethod
     async def chooseUpgrade(game: GamestateHelper, player, interaction: discord.Interaction, customID : str,player_helper : PlayerHelper):
         actions = int(customID.split("_")[1])
@@ -129,7 +130,7 @@ class UpgradeButtons:
         player_helper.specifyDetailsOfAction(f"Replaced {oldName} with {part_stats[newPart]['name']} on their {ship.capitalize()}.")
         game.update_player(player_helper)
         drawing = DrawHelper(game.gamestate)
-        image = drawing.player_area(player_helper.stats)
+        image = await asyncio.to_thread(drawing.player_area,player_helper.stats)
         view = View()
         if actions > 0 and ("passed" not in player or player["passed"] != True):
             ships = ["interceptor","cruiser","dread","starbase"]
@@ -139,7 +140,7 @@ class UpgradeButtons:
         view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                              custom_id=f"FCID{player['color']}_finishAction"))
         await interaction.message.delete()
-        await interaction.channel.send(f"{player['player_name']} replaced {oldName} with {part_stats[newPart]['name']} on their {ship.capitalize()} which now looks like this",file=drawing.show_player_ship(image, ship))
+        await interaction.channel.send(f"{player['player_name']} replaced {oldName} with {part_stats[newPart]['name']} on their {ship.capitalize()} which now looks like this",file=await asyncio.to_thread(drawing.show_player_ship,image, ship))
         if discTileUpgrade == "dummy":
             await interaction.channel.send(
                 f"{player['player_name']}, choose which ship you would like to upgrade or finish your action.",

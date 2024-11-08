@@ -789,6 +789,12 @@ class DrawHelper:
             text_drawable.text((0, 50), "Passed", fill=(255, 0, 0), font=font, stroke_width=stroke_width, stroke_fill=stroke_color)
             text_image = text_image.rotate(45, expand=True)
             context.paste(text_image, (0, 0), text_image)
+        if "activePlayerColor" in self.gamestate and len(self.gamestate["activePlayerColor"]) == 1 and player["passed"] == self.gamestate["activePlayerColor"][0]:
+            text_image = Image.new('RGBA', (500,500), (0, 0, 0, 0))
+            text_drawable = ImageDraw.Draw(text_image)
+            text_drawable.text((0, 50), "Active", fill=(0, 255, 0), font=font, stroke_width=stroke_width, stroke_fill=stroke_color)
+            text_image = text_image.rotate(45, expand=True)
+            context.paste(text_image, (0, 0), text_image)
 
         
 
@@ -937,7 +943,7 @@ class DrawHelper:
             points -= 2
         return points
    
-    async def show_game(self):
+    def show_game(self):
         def load_tile_coordinates():
             configs = Properties()
             with open("data/tileImageCoordinates.properties", "rb") as f:
