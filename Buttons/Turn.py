@@ -232,17 +232,17 @@ class TurnButtons:
     @staticmethod
     async def showGame(game: GamestateHelper, interaction: discord.Interaction):
         await game.updateNamesAndOutRimTiles(interaction)
-        asyncio.create_task(TurnButtons.showGameAsync(game, interaction, True))
+        await TurnButtons.showGameAsync(game, interaction, True)
 
     @staticmethod
     async def showGameAsync(game: GamestateHelper, interaction: discord.Interaction, ephemeralStatus):
         drawing = DrawHelper(game.gamestate)
-        map = await asyncio.to_thread(drawing.show_game())
+        map = await asyncio.to_thread(drawing.show_game)
         view = View()
         button = Button(label="Show Game",style=discord.ButtonStyle.blurple, custom_id="showGame")
         view.add_item(button)
         view.add_item(Button(label="Show Reputation",style=discord.ButtonStyle.gray, custom_id="showReputation"))
-        asyncio.create_task(TurnButtons.send_files(interaction, [map], view, ephemeralStatus))
+        await TurnButtons.send_files(interaction, [map], view, ephemeralStatus)
 
     @staticmethod
     def getStartTurnButtons(game: GamestateHelper,p1):
