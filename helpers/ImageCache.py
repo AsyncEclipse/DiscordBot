@@ -48,7 +48,7 @@ class ImageCacheHelper:
                 return (int(70*mult),int(70*mult))
             elif "line" in filename.lower():
                 #178
-                return (int(182*mult),int(3*mult))
+                return (int(182*mult),int(5*mult))
             else:
                 return (int(42*mult),int(22*mult))  
         elif "factions" in folder.lower():  
