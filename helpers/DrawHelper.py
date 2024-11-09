@@ -619,7 +619,7 @@ class DrawHelper:
 
 
     def display_remaining_tiles(self):
-        context = Image.new("RGBA", (1800, 500), (0,0,0,255))
+        context = Image.new("RGBA", (1900, 500), (0,0,0,255))
 
 
         filepath = f"images/resources/hexes/sector3backblank.png"
