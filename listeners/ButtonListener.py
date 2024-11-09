@@ -61,7 +61,7 @@ class ButtonListener(commands.Cog):
                         f"- User: {interaction.user} \n"  
                         f"- Channel: {interaction.message.jump_url}\n"  
                         f"- Component Custom ID: {interaction.data['custom_id'] if 'custom_id' in interaction.data else 'N/A'}\n"  
-                        f"- Traceback:\n{tb}" 
+                        f"- Traceback:" 
                     )  
                     try:  
                         if isinstance(error, discord.HTTPException) and error.status == 404:  
@@ -69,7 +69,16 @@ class ButtonListener(commands.Cog):
                             if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):  
                                 await button_log_channel.send(f'{start.strftime("%H:%M:%S")} interaction errror hit on {customID}')
                         else:
-                            await log_channel.send(log_message)  
+                            await log_channel.send(log_message)
+                            while tb:
+                                if len(tb) < 1980:
+                                   await log_channel.send("```python\n" + tb + "\n```")
+                                   tb = ""
+                                else:
+                                    newline = tb.rfind("\n", 0, 1980)
+                                    await log_channel.send("```python\n" + tb[:newline] + "\n```")
+                                    tb = tb[newline+1:]
+                                    
                     except discord.Forbidden:  
                         logger.warning(f'Cannot send messages to the log channel "bot-log". Check permissions.')  
                     except discord.HTTPException as e:  
