@@ -526,6 +526,98 @@ class DrawHelper:
         return context
 
 
+    def display_turn_order(self):
+        context = Image.new("RGBA", (600, 270), (0,0,0,255))
+        if "activePlayerColor" in self.gamestate and len(self.gamestate["activePlayerColor"]) == 1:
+            activeColor = self.gamestate["activePlayerColor"][0]
+        else:
+            return context
+        for activePlayer in self.gamestate["players"].values():
+            if activePlayer["color"] == activeColor:
+                break
+        else:
+            return context
+
+        if len(self.gamestate.get("turn_order", [])) < self.gamestate["player_count"]:
+            listHS = [201,203,205,207,209,211]
+            playerHSID = activePlayer["home_planet"]
+            tileLocation = int(next((tile for tile in self.gamestate["board"] if self.gamestate["board"][tile]["sector"] == str(playerHSID)), None))
+            index = listHS.index(tileLocation)
+            if index is None:
+                return context
+            listHS = listHS[index:] + listHS[:index]
+            playerOrder = []
+            for number in listHS:
+                tileID = self.gamestate["board"][str(number)]["sector"]
+                nextPlayer = next((player for player in self.gamestate["players"].values() if player["home_planet"] == str(tileID)), None)
+                if nextPlayer is not None:
+                    playerOrder.append(nextPlayer)
+        else:
+            listPlayers = self.gamestate["turn_order"]
+            index = listPlayers.index(activePlayer["player_name"])
+            listPlayers = listPlayers[index:] + listPlayers[:index]
+            playerOrder = []
+            for player_name in listPlayers:
+                nextPlayer = next((player for player in self.gamestate["players"].values() if player["player_name"] == player_name), None)
+                if nextPlayer is not None:
+                    playerOrder.append(nextPlayer)
+
+        text_drawable_image = ImageDraw.Draw(context)
+        font = ImageFont.truetype("images/resources/arial.ttf", size=70)
+        font_smaller = ImageFont.truetype("images/resources/arial.ttf", size=35)
+        stroke_color = (0, 0, 0)
+        stroke_width = 2
+        text_drawable_image.text((0, 0), "Turn Order:", (0, 255, 0), font=font,
+                                 stroke_width=stroke_width, stroke_fill=stroke_color)
+
+        for n, player in enumerate(playerOrder):
+            border = 6
+            faction = self.get_short_faction_name(player["name"])
+            pop_path = f"images/resources/components/all_boards/popcube_{player['color']}.png"
+            pop_image = self.use_image(pop_path)
+            pop_image = pop_image.crop((32, 32, pop_image.width-32, pop_image.height-32))
+            pop_image = pop_image.resize((90, 90))
+            context.paste(pop_image, (95*n, 85), mask=pop_image)
+            face_tile_path = f"images/resources/components/factions/{faction}_board.png"
+            face_tile_image = self.use_image(face_tile_path)
+            face_tile_image = face_tile_image.crop((49, 252, 154, 357))
+            face_tile_image = face_tile_image.resize((90-2*border, 90-2*border))
+            context.paste(face_tile_image, (95*n+border, 85+border), mask=face_tile_image)
+            if player["passed"]:
+                draw = ImageDraw.Draw(context)
+                draw.line((95*n, 85, 95*n+90, 85+90), (0, 0, 0), 8)
+                draw.line((95*n, 85+90, 95*n+90, 85), (0, 0, 0), 8)
+                draw.line((95*n, 85, 95*n+90, 85+90), (255, 255, 255), 4)
+                draw.line((95*n, 85+90, 95*n+90, 85), (255, 255, 255), 4)
+
+        if len(self.gamestate.get("pass_order", [])) == 0:
+            return context
+
+        text_drawable_image.text((0, 195), "Next", (0, 255, 0), font=font_smaller,
+                                 stroke_width=stroke_width, stroke_fill=stroke_color)
+        text_drawable_image.text((0, 225), "Round:", (0, 255, 0), font=font_smaller,
+                                 stroke_width=stroke_width, stroke_fill=stroke_color)
+
+        for n, player_name in enumerate(self.gamestate["pass_order"]):
+            player = next((player for player in self.gamestate["players"].values() if player["player_name"] == player_name), None)
+            if player is None: continue
+            border = 4
+            faction = self.get_short_faction_name(player["name"])
+            pop_path = f"images/resources/components/all_boards/popcube_{player['color']}.png"
+            pop_image = self.use_image(pop_path)
+            pop_image = pop_image.crop((32, 32, pop_image.width-32, pop_image.height-32))
+            pop_image = pop_image.resize((60, 60))
+            context.paste(pop_image, (130+65*n, 200), mask=pop_image)
+            face_tile_path = f"images/resources/components/factions/{faction}_board.png"
+            face_tile_image = self.use_image(face_tile_path)
+            face_tile_image = face_tile_image.crop((49, 252, 154, 357))
+            face_tile_image = face_tile_image.convert("L").convert("RGBA")
+            face_tile_image = face_tile_image.resize((60-2*border, 60-2*border))
+            context.paste(face_tile_image, (130+65*n+border, 200+border), mask=face_tile_image)
+        
+        return context
+
+
     def display_remaining_tiles(self):
         context = Image.new("RGBA", (1800, 500), (0,0,0,255))
 
@@ -587,6 +679,10 @@ class DrawHelper:
                 tile_image = Image.open(f"images/resources/components/minor_species/minorspecies_{species.replace(' ','_').lower()}.png").convert("RGBA").resize((100, 100))
                 context.paste(tile_image, (1320+120*count,85), mask=tile_image)
                 count += 1
+
+        order_context = self.display_turn_order()
+        context.paste(order_context, (1300, 200))
+        
         return context
     
     def getPlayerObjectFromColor(self, color):
