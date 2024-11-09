@@ -416,8 +416,8 @@ class DrawHelper:
     def areTwoTilesAdjacent(self, tile1, tile2, configs):
 
         def is_adjacent(tile_a, tile_b):
-            for index, adjTile in enumerate(configs.get(tile_a)[0].split(",")):
-                if tile_a in self.gamestate["board"]:
+            if tile_a in configs and tile_a in self.gamestate["board"]:
+                for index, adjTile in enumerate(configs.get(tile_a)[0].split(",")):
                     tile_orientation_index = (index + 6 + int(int(self.gamestate["board"][tile_a]["orientation"]) / 60)) % 6
                     if adjTile == tile_b and "wormholes" in self.gamestate["board"][tile_a] and tile_orientation_index in self.gamestate["board"][tile_a]["wormholes"]:
                         return True
@@ -548,6 +548,8 @@ class DrawHelper:
             listHS = listHS[index:] + listHS[:index]
             playerOrder = []
             for number in listHS:
+                if str(number) not in self.gamestate["board"]:
+                    continue
                 tileID = self.gamestate["board"][str(number)]["sector"]
                 nextPlayer = next((player for player in self.gamestate["players"].values() if player["home_planet"] == str(tileID)), None)
                 if nextPlayer is not None:
