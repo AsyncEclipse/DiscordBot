@@ -75,6 +75,7 @@ class SearchCommands(commands.GroupCog, name="search"):
         app_commands.Choice(name="Ion Missile", value="iom"),
         app_commands.Choice(name="Ion Turret", value="iot"),
         app_commands.Choice(name="Jump Drive", value="jud"),
+        app_commands.Choice(name="Morph Shield", value="mos"),
         app_commands.Choice(name="Muon Source", value="mus")]
     part_choices_n_z = [
         app_commands.Choice(name="Nonlinear Drive", value="nod"),
