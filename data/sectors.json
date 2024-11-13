@@ -1656,6 +1656,93 @@
     "warp": 0,
     "type": "home"
   },
+  "234": {
+    "owner": 0,
+    "name": "Eta Geminorum",
+    "ring": 2,
+    "disctile": 0,
+    "player_ships": [],
+    "money_pop": [],
+    "money1_snap": [],
+    "money2_snap": [],
+    "moneyadv_pop": [
+      0
+    ],
+    "moneyadv1_snap": [
+      478,
+      212
+    ],
+    "moneyadv2_snap": [],
+    "science_pop": [],
+    "science1_snap": [],
+    "science2_snap": [],
+    "scienceadv_pop": [],
+    "scienceadv1_snap": [],
+    "scienceadv2_snap": [],
+    "material_pop": [
+      1
+    ],
+    "material1_snap": [
+      766,
+      683
+    ],
+    "material2_snap": [],
+    "materialadv_pop": [
+      0
+    ],
+    "materialadv1_snap": [
+      654,
+      683
+    ],
+    "materialadv2_snap": [],
+    "neutral_pop": [],
+    "neutral1_snap": [],
+    "neutral2_snap": [],
+    "neutraladv_pop": [],
+    "neutraladv1_snap": [],
+    "neutraladv2_snap": [],
+    "int_snap": [
+      348,
+      148
+    ],
+    "cru_snap": [
+      705,
+      109
+    ],
+    "drd_snap": [
+      320,
+      683
+    ],
+    "sb_snap": [
+      396,
+      762
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      232,
+      450
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
+    "vp": 3,
+    "artifact": 1,
+    "ancient": 0,
+    "guardian": 0,
+    "gcds": 0,
+    "warp": 0,
+    "type": "home"
+  },
   "238": {
     "owner": 0,
     "name": "Beta Lyrae",
