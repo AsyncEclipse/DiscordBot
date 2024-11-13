@@ -1743,6 +1743,96 @@
     "warp": 0,
     "type": "home"
   },
+  "236": {
+    "owner": 0,
+    "name": "Rho Indi",
+    "ring": 2,
+    "disctile": 0,
+    "player_ships": [],
+    "money_pop": [
+      1
+    ],
+    "money1_snap": [
+      610,
+      212
+    ],
+    "money2_snap": [],
+    "moneyadv_pop": [
+      0
+    ],
+    "moneyadv1_snap": [
+      478,
+      212
+    ],
+    "moneyadv2_snap": [],
+    "science_pop": [],
+    "science1_snap": [],
+    "science2_snap": [],
+    "scienceadv_pop": [
+      1
+    ],
+    "scienceadv1_snap": [
+      326,
+      666
+    ],
+    "scienceadv2_snap": [],
+    "material_pop": [1],
+    "material1_snap": [
+      670,
+      691
+    ],
+    "material2_snap": [],
+    "materialadv_pop": [],
+    "materialadv1_snap": [],
+    "materialadv2_snap": [],
+    "neutral_pop": [],
+    "neutral1_snap": [],
+    "neutral2_snap": [],
+    "neutraladv_pop": [],
+    "neutraladv1_snap": [],
+    "neutraladv2_snap": [],
+    "int_snap": [
+      238,
+      257
+    ],
+    "cru_snap": [
+      697,
+      138
+    ],
+    "drd_snap": [
+      506,
+      686
+    ],
+    "sb_snap": [
+      158,
+      450
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      356,
+      434
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [
+      0,
+      1,
+      3,
+      4
+    ],
+    "vp": 0,
+    "artifact": 1,
+    "ancient": 0,
+    "guardian": 0,
+    "gcds": 0,
+    "warp": 0,
+    "type": "home"
+  },
   "238": {
     "owner": 0,
     "name": "Beta Lyrae",
