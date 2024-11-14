@@ -16,7 +16,13 @@ class ReputationButtons:
             opt = randomList.pop()
             opts += " "+str(opt)
             highest = max(opt, highest)
-        msg = f"{player_helper.stats['player_name']}, you drew the tiles{opts} and selected {str(highest)}."
+        if player_helper.stats["name"] == "Rho Indi Syndicate":
+            player_helper.stats["money"] += (amount_of_options - 1)
+            msg = (f"{player_helper.stats['player_name']}, you drew the tiles{opts} and selected {str(highest)}. You "
+                   f"also gained {(amount_of_options - 1)} money.")
+        else:
+            msg = f"{player_helper.stats['player_name']}, you drew the tiles{opts} and selected {str(highest)}."
+
         found = False
         for x,tile in enumerate(player_helper.stats["reputation_track"]):
             if tile == "mixed":
