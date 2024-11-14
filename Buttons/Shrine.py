@@ -93,7 +93,7 @@ class ShrineButtons:
                                     custom_id=f"FCID{player['color']}_payAtRatio_{resource_type}")) 
             if player["colony_ships"] > 0 and game.get_short_faction_name(player["name"]) == "magellan":
                 emojiC = Emoji.getEmojiByName("colony_ship")
-                view.add_item(Button(label=f"Get 1 {resourceType}", style=discord.ButtonStyle.red, emoji=emojiC, custom_id=f"FCID{player['color']}_magColShipForResource_{resourceType}"))
+                view.add_item(Button(label=f"Get 1 {resourceType}", style=discord.ButtonStyle.red, emoji=emojiC, custom_id=f"FCID{player['color']}_magColShipForSpentResource_{resourceType}"))
             view.add_item(Button(label="Done Paying", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))  
             await interaction.channel.send(  
                 f"Attempted to pay a cost of {str(shrineCost)}\n Please pay the rest of the cost by trading other resources at your trade ratio ({trade_value}:1)"  

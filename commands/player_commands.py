@@ -285,7 +285,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         #view = Turn(interaction, player.id)
         game = GamestateHelper(interaction.channel)
         p1 = game.get_player(player.id)
-        view = TurnButtons.getStartTurnButtons(game,p1)
+        view = TurnButtons.getStartTurnButtons(game,p1, "dummy")
         game.initilizeKey("activePlayerColor")
         game.addToKey("activePlayerColor",p1["color"])
         await interaction.response.send_message("## "+game.getPlayerEmoji(p1)+" started their turn")

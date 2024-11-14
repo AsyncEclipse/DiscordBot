@@ -34,7 +34,7 @@ class MoveButtons:
         view = View()
         tiles = MoveButtons.getListOfUnpinnedShipTiles(game, player)
         for tile in tiles:
-            view.add_item(Button(label=tile, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_moveFrom_{tile}_{moveCount}"))
+            view.add_item(Button(label=tile, style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_moveFrom_{tile}_{moveCount}"))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_restartTurn"))
         if button:
             if moveCount == 1:

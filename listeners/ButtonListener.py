@@ -107,7 +107,7 @@ class ButtonListener(commands.Cog):
         if player != None:
             if customID.startswith("FCID"):
                 check = customID.split("_")[0]
-                if player["color"] != check.replace("FCID",""):
+                if player["color"] != check.replace("FCID","") and "dummy" != check.replace("FCID",""):
                     await interaction.followup.send(interaction.user.mention+" These buttons are not for you.", ephemeral=True)
                     return
                 customID = customID.replace(check+"_","")
@@ -143,9 +143,11 @@ class ButtonListener(commands.Cog):
             if round != round2:
                 await interaction.message.delete()
         if customID.startswith("finishAction"):
-            await TurnButtons.finishAction(player, game, interaction)
+            await TurnButtons.finishAction(player, game, interaction, player_helper)
         if customID.startswith("magColShipForResource"):
             await TurnButtons.magColShipForResource(game, interaction, player, customID, player_helper)
+        if customID.startswith("magColShipForSpentResource"):
+            await TurnButtons.magColShipForSpentResource(game, interaction, player, customID, player_helper)
         if customID.startswith("startExplore"):
             if "2" not in customID:
                 game.updateSaveFile()
