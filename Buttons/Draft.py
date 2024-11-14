@@ -182,7 +182,7 @@ class DraftButtons:
         
         
         asyncio.create_task(game.showUpdate("Start of Game",interaction))
-        view = TurnButtons.getStartTurnButtons(game, game.get_player(temp_player_list[0]))
+        view = TurnButtons.getStartTurnButtons(game, game.get_player(temp_player_list[0]), "dummy")
         game.initilizeKey("activePlayerColor")
         game.addToKey("activePlayerColor",game.get_player(temp_player_list[0])["color"])
         await interaction.channel.send("## "+game.getPlayerEmoji(game.get_player(temp_player_list[0]))+" started their turn")

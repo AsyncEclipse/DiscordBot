@@ -41,7 +41,10 @@ class Combat:
         for ship in player_ships:
             if "orb" in ship or "mon" in ship:
                 continue
+            
             shipType = ship.split("-")[1]
+            if "anc" in ship:
+                ship = "anc"
             if shipType not in ships:
                 ships.append(shipType)
         return ships

@@ -55,7 +55,7 @@ class ResearchButtons:
                                     custom_id=f"FCID{player['color']}_payAtRatio_{resource_type}")) 
             if player["colony_ships"] > 0 and game.get_short_faction_name(player["name"]) == "magellan":
                 emojiC = Emoji.getEmojiByName("colony_ship")
-                view.add_item(Button(label=f"Get 1 Science", style=discord.ButtonStyle.red, emoji=emojiC, custom_id=f"FCID{player['color']}_magColShipForResource_science"))
+                view.add_item(Button(label=f"Get 1 Science", style=discord.ButtonStyle.red, emoji=emojiC, custom_id=f"FCID{player['color']}_magColShipForSpentResource_science"))
             view.add_item(Button(label="Done Paying", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))  
             if val < cost:
                 view2 = View()

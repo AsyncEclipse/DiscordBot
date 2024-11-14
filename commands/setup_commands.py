@@ -288,7 +288,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
                              + " If the Discovery Tile allows you to place something in a Sector (such as Ancient Cruiser or Ancient Orbital), place it in your Starting Sector."
                              + " If you do not control your Starting Sector, you must take the tile as 2VP.",
                              "- 1 VP at the end of the game per Discovery Tile you used as a Ship Part.",
-                             "- At any time, you may flip unused Colony Ships to gain one Resource of your choice per Colony Ship flipped."])
+                             "- At any time, you may flip unused Colony Ships to gain one Resource of your choice per Colony Ship flipped. (Note: only refresh 1 colony ship with the influence action)"])
         await factionThread.send(message, file=drawing.get_file("images/resources/components/factions/magellan_board.png"))
         message = "\n".join(["# Enlightened of Lyra",
                              "- 1 VP per Shrine\\* you control at the end of the game.",
