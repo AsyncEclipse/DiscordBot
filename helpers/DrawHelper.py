@@ -1061,7 +1061,10 @@ class DrawHelper:
         if "discoveryTileBonusPointTiles" in player and "rep" in player["discoveryTileBonusPointTiles"]:
             points += int(reputationPoints/3)
         if "traitor" in player and player["traitor"] == True:
-            points -= 2
+            if player["name"] == "Rho Indi Syndicate":
+                pass
+            else:
+                points -= 2
         return points
    
     def show_game(self):
