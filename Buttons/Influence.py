@@ -134,7 +134,7 @@ class InfluenceButtons:
     async def finishInfluenceAction(game: GamestateHelper, player, interaction: discord.Interaction, player_helper:PlayerHelper):
         player_helper.spend_influence_on_action("influence")
         game.update_player(player_helper)
-        await TurnButtons.finishAction(player, game, interaction)
+        await TurnButtons.finishAction(player, game, interaction, player_helper)
 
     @staticmethod
     async def removeInfluenceStart(game: GamestateHelper, player, interaction: discord.Interaction):
