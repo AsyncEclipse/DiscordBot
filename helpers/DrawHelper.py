@@ -54,6 +54,10 @@ class DrawHelper:
             return "magellan"
         elif full_name == "Enlightened of Lyra":
             return "lyra"
+        elif full_name == "Rho Indi Syndicate":
+            return "rho"
+        elif full_name == "The Exiles":
+            return "exile"
         elif "Terran" in full_name:
             return full_name.lower().replace(" ","_")
 
