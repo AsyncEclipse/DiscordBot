@@ -317,6 +317,8 @@ class SetupCommands(commands.GroupCog, name="setup"):
                              "  - our destroyed Orbitals each add 1 to your opponent’s Reputation Tile draw (max 5).",
                              "- You cannot construct Starbases.",
                              "- Your Orbitals have Ship Blueprints."])
+        #await factionThread.send(message, file=drawing.get_file(
+        # "images/resources/components/factions/exile_board.png"))
 
         message = "\n".join(["# Rho Indi Syndicate",
                              "- Start with two Interceptors in your Starting Sector.",
@@ -333,6 +335,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
                              "  - **Interceptor: -1⬛",
                              "  - **Cruiser: -1⬛",
                              "  - **Dreadnought: -1⬛"])
+        await factionThread.send(message, file=drawing.get_file("images/resources/components/factions/rho_board.png"))
 
         message = "\n".join(["# Terrans"])
         await factionThread.send(message, file=drawing.get_file("images/resources/components/factions/terran_conglomerate_board.png"))
