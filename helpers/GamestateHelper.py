@@ -261,9 +261,9 @@ class GamestateHelper:
             return "magellan"
         elif fullName == "Enlightened of Lyra":
             return "lyra"
-        elif full_name == "Rho Indi Syndicate":
+        elif fullName == "Rho Indi Syndicate":
             return "rho"
-        elif full_name == "The Exiles":
+        elif fullName == "The Exiles":
             return "exile"
         elif "Terran" in fullName:
             return fullName.lower().replace(" ","_")
