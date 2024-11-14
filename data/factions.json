@@ -2123,9 +2123,9 @@
                 "reputation_track": [
                         "mixed",
                         "mixed",
-                        "rep",
-                        "rep",
-                        "rep"
+                        "mixed",
+                        "mixed",
+                        "mixed"
                 ],
                 "cost_orbital": 5,
                 "cost_monolith": 10,

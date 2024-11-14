@@ -31,6 +31,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         app_commands.Choice(name="Planta", value="pla"),
         app_commands.Choice(name="Wardens of Magellan", value="mag"),
         app_commands.Choice(name="Enlightened of Lyra", value="lyr"),
+        app_commands.Choice(name="Rho Indi Syndicate", value="rho"),
         app_commands.Choice(name="Terran Alliance (Orion)", value="ter1"),
         app_commands.Choice(name="Terran Conglomerate (Mech)", value="ter2"),
         app_commands.Choice(name="Terran Directorate (Eridian)", value="ter3"),
