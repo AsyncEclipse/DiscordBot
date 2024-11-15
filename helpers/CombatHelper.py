@@ -17,6 +17,13 @@ from jproperties import Properties
 class Combat:
 
     @staticmethod
+    def exile_orbital_exists(game:GamestateHelper, tile, color):
+        if (game.find_player_faction_name_from_color(color) == "The Exiles" and "orbital_pop" in
+                tile_map[pos] and (tile_map[pos]["orbital_pop"][0] == 1)):
+            return True
+        else:
+            return False
+    @staticmethod
     def findPlayersInTile(game:GamestateHelper,pos:str):
         tile_map = game.get_gamestate()["board"]
         if "player_ships" not in tile_map[pos]:
@@ -25,16 +32,12 @@ class Combat:
         players = []
         for ship in player_ships:
             color = ship.split("-")[0]
-            if (game.find_player_faction_name_from_color(color) == "The Exiles" and "orb" in ship and "orbital_pop" in
-                    tile_map[pos] and (tile_map[pos]["orbital_pop"][0]==1)):
-                pass
-            elif "orb" in ship or "mon" in ship:
+            if ("orb" in ship and not exile_orbital_exists(game, tile_map[pos], color)) or "mon" in ship:
                 continue
-
             if color not in players:
                 players.append(color)
         return players
-    
+
     @staticmethod
     def findShipTypesInTile(game:GamestateHelper,pos:str):
         tile_map = game.get_gamestate()["board"]
