@@ -24,9 +24,13 @@ class Combat:
         player_ships = tile_map[pos]["player_ships"][:]
         players = []
         for ship in player_ships:
-            if "orb" in ship or "mon" in ship:
-                continue
             color = ship.split("-")[0]
+            if (game.find_player_faction_name_from_color(color) == "The Exiles" and "orb" in ship and "orbital_pop" in
+                    tile_map[pos] and (tile_map[pos]["orbital_pop"][0]==1)):
+                pass
+            elif "orb" in ship or "mon" in ship:
+                continue
+
             if color not in players:
                 players.append(color)
         return players
@@ -39,7 +43,10 @@ class Combat:
         player_ships = tile_map[pos]["player_ships"][:]
         ships = []
         for ship in player_ships:
-            if "orb" in ship or "mon" in ship:
+            if (game.find_player_faction_name_from_color(color) == "The Exiles" and "orb" in ship and "orbital_pop" in
+                    tile_map[pos] and (tile_map[pos]["orbital_pop"][0]==1)):
+                pass
+            elif "orb" in ship or "mon" in ship:
                 continue
             
             shipType = ship.split("-")[1]
@@ -175,6 +182,7 @@ class Combat:
         for unit in playerShipsList:
             type = unit.split("-")[1]
             owner = unit.split('-')[0]
+
             if type == "orb" or type == "mon":
                 continue
             if colorOrAI == owner:
