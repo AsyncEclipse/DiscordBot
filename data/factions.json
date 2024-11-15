@@ -2045,9 +2045,9 @@
                         "nud"
                 ],
                 "orb_parts": [
-                        "hul",
-                        "iot",
-                        "elc"
+                        "iot_exile",
+                        "elc",
+                        "hul"
                 ]
         },
         "rho": {

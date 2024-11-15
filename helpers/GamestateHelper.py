@@ -807,6 +807,8 @@ class GamestateHelper:
                     self.gamestate["board"][home]["player_ships"].append(p1.stats["color"]+"-cru")
                 elif p1.stats["name"] == "Rho Indi Syndicate":
                     self.gamestate["board"][home]["player_ships"] = [p1.stats["color"]+"-int", p1.stats["color"]+"-int"]
+                elif p1.stats["name"] == "The Exiles":
+                    self.gamestate["board"][home]["player_ships"] = [p1.stats["color"]+"-orb"]
                 else:
                     self.gamestate["board"][home]["player_ships"].append(p1.stats["color"] + "-int")
 

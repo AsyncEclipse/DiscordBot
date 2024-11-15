@@ -736,5 +736,24 @@
     "hull": 0,
     "repair": 0,
     "external": 0
+  },
+  "iot_exile": {
+    "name": "Ion Turret Exile",
+    "description": "This is an Ancient Tech; it can only be added to a single Ship Blueprint slot, and then it is exhausted. During the Combat Phase, the Ion Turret rolls 2 yellow dice and deals 1 hits to a single target if 1) a yellow die rolls a Direct Hit, or 2) if a yellow die result + total Computers - total Shields of the target ship = 6 or greater. The Ion Turret requires 0 Energy. ",
+    "range": 0,
+    "speed": 0,
+    "nrg_use": 1,
+    "nrg_src": 0,
+    "tech_req": "none",
+    "dice": [
+      "yellow",
+      "yellow"
+    ],
+    "comp": 0,
+    "shield": 0,
+    "missile": [],
+    "hull": 0,
+    "repair": 0,
+    "external": 0
   }
 }

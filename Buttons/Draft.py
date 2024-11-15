@@ -23,7 +23,8 @@ class DraftButtons:
             member = interaction.guild.get_member(player[0])
             list += str(x+1)+". "+member.mention +"\n"
             game.addToKey("draftingPlayers",player[0])
-        list += """For your reference, the factions currently available in the bot are the following 8, plus the 6 terran equivalents. First timers are encouraged to use the terran factions, which are all the same and dont have as many quirks (the quirks are tame compared to TI4 asymmetry though):  
+        list += """For your reference, the factions currently available in the bot are the following 10, plus the 6 
+        terran equivalents. First timers are encouraged to use the terran factions, which are all the same and dont have as many quirks (the quirks are tame compared to TI4 asymmetry though):  
         1. Hydran Progress   
         2. Eridian Empire   
         3. Orion Hegemony   
