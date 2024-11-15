@@ -23,6 +23,8 @@ class UpgradeButtons:
         for ship in ships:
             if player['name'] == "Rho Indi Syndicate" and ship == "dread":
                 continue
+            if player['name'] == "The Exiles" and ship == "starbase":
+                continue
             shipEmoji = Emoji.getEmojiByName(player['color']+game.getShipShortName(ship))
             view.add_item(Button(label=ship.capitalize(), emoji = shipEmoji, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_upgradeShip_{actions}_{ship}_{discTileUpgrade}"))
         await interaction.followup.send(file=await asyncio.to_thread(drawing.show_player_ship_area,image),ephemeral=True)
