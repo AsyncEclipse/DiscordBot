@@ -487,7 +487,7 @@ class Combat:
         pos = buttonID.split("_")[1]
         colorOrAI = buttonID.split("_")[2]
         if colorOrAI == "ai":
-            Combat.rollDiceAI(game, buttonID, interaction)
+            await Combat.rollDiceAI(game, buttonID, interaction)
             return
         speed = int(buttonID.split("_")[3])
         oldLength = len(Combat.findPlayersInTile(game, pos))
