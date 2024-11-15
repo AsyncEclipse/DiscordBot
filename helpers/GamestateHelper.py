@@ -414,7 +414,7 @@ class GamestateHelper:
             return count
         else:
             for ship in self.gamestate["board"][position][key]:
-                if "anc" in ship  or ship == "sb" or ship == "int":
+                if "anc" in ship  or ship == "sb" or ship == "int" or ship == "orb":
                     count +=1
                 if ship == "cru" or "grd" in ship:
                     count += 2

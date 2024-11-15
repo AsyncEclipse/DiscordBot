@@ -1010,6 +1010,8 @@ class DrawHelper:
                 points += tile_map[tile]["vp"]
                 if "Lyra" in player["name"] and "shrines" in tile_map[tile]:
                     points += tile_map[tile]["shrines"]
+                if player["name"] == "The Exiles" and "orbital_pop" in tile_map[tile] and (tile_map[tile]["orbital_pop"][0]==1):
+                    points += 1
                 if "warpPoint" in tile_map[tile]:
                     points += tile_map[tile]["warpPoint"]
                 if "warpDisc" in tile_map[tile]:
