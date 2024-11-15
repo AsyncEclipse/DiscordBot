@@ -200,6 +200,15 @@ class PlayerCommands(commands.GroupCog, name="player"):
         p2 = game.getPlayerObjectFromColor(color.value)
         await DiplomaticRelationsButtons.breakRelationsWith(game, p1, p2, interaction)
 
+    @app_commands.command(name="break_minor_species")
+    async def break_minor_species(self, interaction: discord.Interaction):
+        player = interaction.user
+        game = GamestateHelper(interaction.channel)
+        p1 = game.get_player(player.id)
+        game.breakMinorSpecies(p1)
+        await interaction.response.send_message("Successfully broke relations with a minor species")
+
+
     @app_commands.command(name="form_relations")
     @app_commands.choices(color=color_choices)
     async def form_relations(self, interaction: discord.Interaction, color:app_commands.Choice[str]):

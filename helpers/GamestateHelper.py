@@ -1071,6 +1071,23 @@ class GamestateHelper:
 
         self.update()
 
+    def breakMinorSpecies(self, player1):
+        pID = self.get_player_from_color(player1['color'])
+        for x,tile in enumerate(player1["reputation_track"]):
+            if isinstance(tile, str) and "minor" in tile:
+                minorName = tile.split("-")[2]
+                self.gamestate["minor_species"].append(minorName)
+                if "Discount" in minorName and "Tech" not in minorName:
+                    discountedUnit = minorName.replace(" Discount","").replace("Dreadnought","dread").lower()
+                    discount = 1
+                    if "dread" in discountedUnit or "monolith" in discountedUnit:
+                        discount = 2
+                    self.gamestate["players"][pID]["cost_"+discountedUnit] += discount
+                self.gamestate["players"][pID]["reputation_track"][x]=tile.split("-")[0]
+                break
+
+        self.update()
+
     def addDiscTile(self, tile:str):
         self.gamestate["board"][tile]["disctile"]=1
         self.update()
