@@ -1,5 +1,6 @@
 import asyncio
 import json
+import time
 
 import discord
 import config
@@ -104,6 +105,9 @@ class GamestateHelper:
         if os.path.exists(file_path):   
             os.remove(file_path)  
     
+    def updatePingTime(self):
+        self.gamestate["lastPingTime"] = time.time()
+        self.update()
 
     def getWinner(self):
         winner = ""
@@ -1145,7 +1149,13 @@ class GamestateHelper:
         view = View()  
         view.add_item(Button(label="Show Game", style=discord.ButtonStyle.blurple, custom_id="showGame"))  
         view.add_item(Button(label="Show Reputation", style=discord.ButtonStyle.gray, custom_id="showReputation"))  
-        await thread.send(message,file=map_result,view=view)
+        message = await thread.send(message,file=map_result,view=view)
+ 
+        image_url = message.attachments[0].url  
+        button = discord.ui.Button(label="View Full Image", url=image_url)  
+        view = discord.ui.View()  
+        view.add_item(button)  
+        await thread.send(view=view)  
 
     async def showUpdate(self, message:str, interaction: discord.Interaction):
         if "-" in interaction.channel.name:
