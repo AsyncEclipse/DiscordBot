@@ -114,7 +114,7 @@ class PlayerShip(Ship):
             return ship_type
 
     def check_valid_ship(self):
-        if (self.range <= 0 and not self.ship_type == "starbase") or self.energy < 0 or (self.ship_type == "starbase" and self.range > 0):
+        if (self.range <= 0 and not self.ship_type == ("starbase" or "orb")) or self.energy < 0 or (self.ship_type==("starbase" or "orb") and self.range > 0):
             return False
         else:
             return True
