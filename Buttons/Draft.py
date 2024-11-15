@@ -31,7 +31,8 @@ class DraftButtons:
         5. Descendants of Draco   
         6. Planta  
         7. Wardens of Magellan
-        8. Enlightened of Lyra\n
+        8. Enlightened of Lyra
+        9. Rho Indi Syndicate\n
         """
         await channel.send(list)
         playerID = game.get_gamestate()["draftingPlayers"][0]
@@ -51,6 +52,7 @@ class DraftButtons:
         ("Planta", "pla"),
         ("Wardens of Magellan", "mag"),
         ("Enlightened of Lyra", "lyr"),
+        ("Rho Indi Syndicate", "rho"),
         ("Terran Alliance (Orion)", "ter1"),
         ("Terran Conglomerate (Mech)", "ter2"),
         ("Terran Directorate (Eridian)", "ter3"),
@@ -182,8 +184,9 @@ class DraftButtons:
         
         
         asyncio.create_task(game.showUpdate("Start of Game",interaction))
-        view = TurnButtons.getStartTurnButtons(game, game.get_player(temp_player_list[0]))
+        view = TurnButtons.getStartTurnButtons(game, game.get_player(temp_player_list[0]), "dummy")
         game.initilizeKey("activePlayerColor")
         game.addToKey("activePlayerColor",game.get_player(temp_player_list[0])["color"])
+        game.updatePingTime()
         await interaction.channel.send("## "+game.getPlayerEmoji(game.get_player(temp_player_list[0]))+" started their turn")
         await interaction.channel.send(f"{game.get_player(temp_player_list[0])['player_name']} use these buttons to do your turn. "+ game.displayPlayerStats(game.get_player(temp_player_list[0])),view=view)

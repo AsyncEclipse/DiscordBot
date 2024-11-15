@@ -55,7 +55,7 @@ class ResearchButtons:
                                     custom_id=f"FCID{player['color']}_payAtRatio_{resource_type}")) 
             if player["colony_ships"] > 0 and game.get_short_faction_name(player["name"]) == "magellan":
                 emojiC = Emoji.getEmojiByName("colony_ship")
-                view.add_item(Button(label=f"Get 1 Science", style=discord.ButtonStyle.red, emoji=emojiC, custom_id=f"FCID{player['color']}_magColShipForResource_science"))
+                view.add_item(Button(label=f"Get 1 Science", style=discord.ButtonStyle.red, emoji=emojiC, custom_id=f"FCID{player['color']}_magColShipForSpentResource_science"))
             view.add_item(Button(label="Done Paying", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_deleteMsg"))  
             if val < cost:
                 view2 = View()
@@ -63,10 +63,16 @@ class ResearchButtons:
                 await interaction.channel.send(f"Attempted to pay a cost of {str(cost)} but you did not have enough. Please restart the turn or manually adjust resources if for some reason you should have more",view=view2)
                 return
             msg = player_helper.adjust_science(-paid)  
-            game.update_player(player_helper) 
-            await interaction.channel.send(  
-                f"Attempted to pay a cost of {str(cost)}{msg}\n Please pay the rest of the cost by trading other resources at your trade ratio ({trade_value}:1)"  
-            )  
+            game.update_player(player_helper)
+            if player["name"] == "Rho Indi Syndicate":
+                await interaction.channel.send(
+                    f"Attempted to pay a cost of {str(cost)}{msg}\n Please pay the rest of the cost by trading other "
+                    f"resources at your materials ratio of 3:1 or your money ratio of 3:2"
+                )
+            else:
+                await interaction.channel.send(
+                    f"Attempted to pay a cost of {str(cost)}{msg}\n Please pay the rest of the cost by trading other resources at your trade ratio ({trade_value}:1)"
+                )
             await interaction.channel.send("Payment buttons",view=view)
         
         if tech_details["art_pt"] != 0:
@@ -130,7 +136,11 @@ class ResearchButtons:
         extra = 0
         if player["colony_ships"] > 0 and game.get_short_faction_name(player["name"]) == "magellan":
             extra +=player["colony_ships"]
-        return player["science"] + int(player["money"]/player["trade_value"]) + int(player["materials"]/player["trade_value"])+extra
+        money_value = int(player["money"] / player["trade_value"])
+        if player["name"] == "Rho Indi Syndicate":
+            money_value = money_value * 2
+
+        return player["science"] + money_value + int(player["materials"]/player["trade_value"])+extra
 
     @staticmethod  
     async def startResearch(game: GamestateHelper, player, player_helper: PlayerHelper, interaction: discord.Interaction, buttonCommand:bool):
@@ -192,7 +202,14 @@ class ResearchButtons:
                     else:
                         view2.add_item(Button(label=f"{tech_name} ({cost})", style=buttonStyle, emoji=Emoji.getEmojiByName(techName),custom_id=f"FCID{player['color']}_getTech_{tech}_{tech_type}"))
                     buttonCount+=1
-        await interaction.channel.send(f"{player['player_name']}, select the tech you would like to acquire. The discounted cost is in parentheses. You currently have {str(player['science'])} science, and can trade other resources for science at a {str(player['trade_value'])}:1 ratio", view=view)
+        if player["name"] == "Rho Indi Syndicate":
+            await interaction.channel.send(f"{player['player_name']}, select the tech you would like to acquire. The "
+                                           f"discounted cost is in parentheses. You currently have "
+                                           f"{str(player['science'])} science, and can trade materials at a 3:1 "
+                                           f"ratio or "
+                                           f"money at 3:2 ratio.", view=view)
+        else:
+            await interaction.channel.send(f"{player['player_name']}, select the tech you would like to acquire. The discounted cost is in parentheses. You currently have {str(player['science'])} science, and can trade other resources for science at a {str(player['trade_value'])}:1 ratio", view=view)
         if buttonCount > 26:
             await interaction.channel.send(view=view2)
         await interaction.followup.send(file=await asyncio.to_thread(drawing.show_available_techs),ephemeral=True)

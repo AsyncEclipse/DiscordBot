@@ -38,7 +38,7 @@ class TurnButtons:
             game.backUpToLastSaveFile()
             game = GamestateHelper(interaction.channel)
             player = game.get_player(interaction.user.id)  
-            view = TurnButtons.getStartTurnButtons(game, player)
+            view = TurnButtons.getStartTurnButtons(game, player, "dummy")
             game.saveLastButtonPressed("restart")
             await interaction.channel.send(player['player_name']+" has chosen to back up to last start of turn.")
             await interaction.channel.send(player["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(player),view=view)
@@ -56,9 +56,10 @@ class TurnButtons:
         start_time = time.perf_counter()
         nextPlayer = game.get_next_player(player)
         if nextPlayer != None and not game.is_everyone_passed():
-            view = TurnButtons.getStartTurnButtons(game,nextPlayer)
+            view = TurnButtons.getStartTurnButtons(game,nextPlayer, player["color"])
             game.initilizeKey("activePlayerColor")
             game.addToKey("activePlayerColor",nextPlayer["color"])
+            game.updatePingTime()
             await interaction.channel.send("## "+game.getPlayerEmoji(nextPlayer)+" started their turn")
             await interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(nextPlayer),view=view)
         else:
@@ -113,9 +114,10 @@ class TurnButtons:
         nextPlayer = game.get_next_player(player)
         game.addToPassOrder(player["player_name"])
         if nextPlayer != None and not game.is_everyone_passed():
-            view = TurnButtons.getStartTurnButtons(game,nextPlayer)
+            view = TurnButtons.getStartTurnButtons(game,nextPlayer, player["color"])
             game.initilizeKey("activePlayerColor")
             game.addToKey("activePlayerColor",nextPlayer["color"])
+            game.updatePingTime()
             await interaction.channel.send("## "+game.getPlayerEmoji(nextPlayer)+" started their turn")
             await interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(nextPlayer),view=view)
 
@@ -198,9 +200,10 @@ class TurnButtons:
             await interaction.channel.send("Tech At Start Of Round "+str(game.gamestate['roundNum']),file=await asyncio.to_thread(drawing.show_available_techs))
             nextPlayer = TurnButtons.getFirstPlayer(game)
             if nextPlayer != None:
-                view = TurnButtons.getStartTurnButtons(game,nextPlayer)
+                view = TurnButtons.getStartTurnButtons(game,nextPlayer,"dummy")
                 game.initilizeKey("activePlayerColor")
                 game.addToKey("activePlayerColor",nextPlayer["color"])
+                game.updatePingTime()
                 await interaction.channel.send("## "+game.getPlayerEmoji(nextPlayer)+" started their turn")
                 await interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do the first turn of the round"+game.displayPlayerStats(nextPlayer),view=view)
             else:
@@ -223,7 +226,12 @@ class TurnButtons:
     @staticmethod
     async def send_files(interaction, files, view, ephemeralStatus):
         for file in files:
-            await interaction.followup.send(file=file,ephemeral=ephemeralStatus, view=view)
+            message= await interaction.followup.send(file=file,ephemeral=ephemeralStatus, view=view)
+            image_url = message.attachments[0].url  
+            button = discord.ui.Button(label="View Full Image", url=image_url)  
+            view = discord.ui.View()  
+            view.add_item(button)  
+            await interaction.followup.send(view=view, ephemeral=ephemeralStatus)  
 
     @staticmethod
     async def send_file(interaction, file):
@@ -245,7 +253,7 @@ class TurnButtons:
         await TurnButtons.send_files(interaction, [map], view, ephemeralStatus)
 
     @staticmethod
-    def getStartTurnButtons(game: GamestateHelper,p1):
+    def getStartTurnButtons(game: GamestateHelper,p1, lastPlayerColor):
         view = View()
         player = p1
         player_helper = PlayerHelper(game.getPlayersID(player), player)
@@ -295,7 +303,7 @@ class TurnButtons:
         if not player_helper.isTraitor() and "minor_species" in game.gamestate and len(game.get_gamestate()["minor_species"]) > 0:
             view.add_item(Button(label="Minor Species Relations", style=discord.ButtonStyle.green, custom_id=f"FCID{p1['color']}_startMinorRelations"))
         if game.getNumberOfSaveFiles() > 0:
-            view.add_item(Button(label="Undo Last Turn", style=discord.ButtonStyle.red, custom_id=f"undoLastTurn"))
+            view.add_item(Button(label="Undo Last Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{lastPlayerColor}_undoLastTurn"))
         return view
     
 
@@ -309,6 +317,16 @@ class TurnButtons:
         await interaction.channel.send(player["player_name"]+ " exhausted 1 colony ship to get 1 "+resource +". They have "+str(player_helper.stats["colony_ships"])+" colony ships left."+player_helper.adjust_resource(resource,1))
         game.update_player(player_helper)
 
+    @staticmethod
+    async def magColShipForSpentResource(game: GamestateHelper, interaction: discord.Interaction,player, buttonID, player_helper :PlayerHelper):
+        resource = buttonID.split("_")[1]
+        if player["colony_ships"] < 1:
+            await interaction.followup.send("You do not have enough color ships for this")
+            return
+        player_helper.adjust_colony_ships(1)
+        await interaction.channel.send(player["player_name"]+ " exhausted 1 colony ship to get and then immediately spend 1 "+resource +". They have "+str(player_helper.stats["colony_ships"])+" colony ships left.")
+        game.update_player(player_helper)
+
 
     @staticmethod
     async def undoLastTurn(player, game:GamestateHelper, interaction: discord.Interaction):
@@ -319,7 +337,7 @@ class TurnButtons:
         await interaction.channel.send("Please confirm you want to undo the last turn. The person who took the last turn should be the one pressing this button",view=view)
 
     @staticmethod
-    async def finishAction(player, game:GamestateHelper, interaction: discord.Interaction):
+    async def finishAction(player, game:GamestateHelper, interaction: discord.Interaction, player_helper:PlayerHelper):
         view = View()
         view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_endTurn"))
         if len(PopulationButtons.findEmptyPopulation(game, player)) > 0 and player["colony_ships"] > 0:
@@ -329,6 +347,10 @@ class TurnButtons:
             view.add_item(Button(label=f"Get 1 Science", style=discord.ButtonStyle.red, emoji=emojiC, custom_id=f"FCID{player['color']}_magColShipForResource_science"))
             view.add_item(Button(label=f"Get 1 Money", style=discord.ButtonStyle.green,emoji=emojiC, custom_id=f"FCID{player['color']}_magColShipForResource_money"))
             view.add_item(Button(label=f"Get 1 Material", style=discord.ButtonStyle.blurple,emoji=emojiC, custom_id=f"FCID{player['color']}_magColShipForResource_materials"))
+        if game.get_gamestate()["player_count"] > 3 and not player_helper.isTraitor() and len(DiplomaticRelationsButtons.getPlayersWithWhichDiplomatcRelationsCanBeFormed(game, player)) > 0:
+            view.add_item(Button(label="Initiate Diplomatic Relations", style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}_startDiplomaticRelations"))
+        if not player_helper.isTraitor() and "minor_species" in game.gamestate and len(game.get_gamestate()["minor_species"]) > 0:
+            view.add_item(Button(label="Minor Species Relations", style=discord.ButtonStyle.green, custom_id=f"FCID{player['color']}_startMinorRelations"))
         await interaction.channel.send(f"Colony ships available: {player['colony_ships']}"
                                                 f"\nPlace population or end your turn.", view=view)
         await interaction.message.delete()

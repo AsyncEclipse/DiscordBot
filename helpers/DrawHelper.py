@@ -54,6 +54,10 @@ class DrawHelper:
             return "magellan"
         elif full_name == "Enlightened of Lyra":
             return "lyra"
+        elif full_name == "Rho Indi Syndicate":
+            return "rho"
+        elif full_name == "The Exiles":
+            return "exile"
         elif "Terran" in full_name:
             return full_name.lower().replace(" ","_")
 
@@ -682,8 +686,7 @@ class DrawHelper:
                 context.paste(tile_image, (1320+120*count,85), mask=tile_image)
                 count += 1
 
-        order_context = self.display_turn_order()
-        context.paste(order_context, (1300, 200))
+        
         
         return context
     
@@ -816,11 +819,17 @@ class DrawHelper:
         process_tech(player["grid_tech"], "grid", 285)
         process_tech(player["military_tech"], "military", 203)
 
+        if faction=="rho":
         # Last coord is for muon source exclusively
-        interceptCoord = [ (74, 39),(16, 86), (74, 97), (132, 86), (148, 39)]
-        cruiserCoord = [(221, 63), (279, 39),(337, 63),(221, 121), (279, 97),(337, 121), (353, 19)]
-        dreadCoord = [(435, 64), (493, 40),(551, 40),(609, 64),(435, 122), (493, 98),(551, 98),(609, 122), (628, 20)]
-        sbCoord = [(697, 39),(813, 39),(697, 97),(755, 66), (814, 97),(815, 0)]
+            interceptCoord = [(152, 39),(94, 86), (152, 97), (210, 86), (226, 39)]
+            cruiserCoord = [(360, 63), (418, 39),(476, 63),(360, 121), (418, 97),(476, 121), (492, 19)]
+            dreadCoord = [(435, 64), (493, 40),(551, 40),(609, 64),(435, 122), (493, 98),(551, 98),(609, 122), (628, 20)]
+            sbCoord = [(621, 39),(737, 39),(620, 97),(679, 66), (736, 97),(741, 0)]
+        else:
+            interceptCoord = [(74, 39), (16, 86), (74, 97), (132, 86), (148, 39)]
+            cruiserCoord = [(221, 63), (279, 39), (337, 63), (221, 121), (279, 97), (337, 121), (353, 19)]
+            dreadCoord = [(435, 64), (493, 40), (551, 40), (609, 64), (435, 122), (493, 98), (551, 98), (609, 122),(628, 20)]
+            sbCoord = [(697, 39), (813, 39), (697, 97), (755, 66), (814, 97), (815, 0)]
 
         if player["name"]=="Planta":
             interceptCoord.pop(2)
@@ -1051,7 +1060,10 @@ class DrawHelper:
         if "discoveryTileBonusPointTiles" in player and "rep" in player["discoveryTileBonusPointTiles"]:
             points += int(reputationPoints/3)
         if "traitor" in player and player["traitor"] == True:
-            points -= 2
+            if player["name"] == "Rho Indi Syndicate":
+                pass
+            else:
+                points -= 2
         return points
    
     def show_game(self):
@@ -1127,21 +1139,23 @@ class DrawHelper:
         context3 = context3.resize((width,500))
         context4 = self.display_remaining_tiles()
         context5 = self.display_remaining_discoveries()
+        context6 = self.display_turn_order()
         #context5 = self.display_cube_track_reference()
         pCount = len(self.gamestate["players"])
         width = 4150 if (pCount != 2 and pCount != 4) else 2800
         width = max(context2.size[0],context3.size[0]+context4.size[0]+150)
         width = max(width, cropped_context.size[0])
         width = max(width, context5.size[0])
-        height = cropped_context.size[1]+context2.size[1]+max(context3.size[1],context4.size[1])+90
+        height = cropped_context.size[1]+context2.size[1]+max(context3.size[1],context4.size[1])+90+context6.size[1]
         final_context = Image.new("RGBA", (width, height), (0, 0, 0, 255))
         centering = int((width - cropped_context.size[0])/2)
-        final_context.paste(cropped_context, (centering, 0))
-        final_context.paste(context2, (0, cropped_context.size[1]))
-        final_context.paste(context3, (0, cropped_context.size[1]+context2.size[1]))
+        final_context.paste(context6, (0, 0))
+        final_context.paste(cropped_context, (centering, context6.size[1]))
+        final_context.paste(context2, (0, cropped_context.size[1]+context6.size[1]))
+        final_context.paste(context3, (0, cropped_context.size[1]+context2.size[1]+context6.size[1]))
         #final_context.paste(context5, (50, context2.size[1]-20))
-        final_context.paste(context4, (context3.size[0]+150, cropped_context.size[1]+context2.size[1]))
-        final_context.paste(context5, (0, cropped_context.size[1]+context2.size[1]+max(context3.size[1],context4.size[1])))
+        final_context.paste(context4, (context3.size[0]+150, cropped_context.size[1]+context2.size[1]+context6.size[1]))
+        final_context.paste(context5, (0, cropped_context.size[1]+context2.size[1]+max(context3.size[1],context4.size[1]+context6.size[1])))
         bytes_io = BytesIO()
         final_context.save(bytes_io, format="WEBP")
         bytes_io.seek(0)

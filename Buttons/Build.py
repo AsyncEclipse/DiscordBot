@@ -150,7 +150,10 @@ class BuildButtons:
         money = int(buttonID.split("_")[6])
         spent = int(buttonID.split("_")[7])
         resource = buttonID.split("_")[8]
-        spent += 1
+        if player["name"] == "Rho Indi Syndicate" and resource == "Money":
+            spent += 2
+        else:
+            spent += 1
         if resource == "Science":
             science -= player["trade_value"]
         else:
@@ -180,7 +183,12 @@ class BuildButtons:
                     view.add_item(Button(label=f"{resource} ({str(tradeVal)}:1)", style=discord.ButtonStyle.gray, custom_id="_".join(buttonElements))) 
             if resource == "Money":
                 if int(money) >= tradeVal and int(spent) < int(cost):
-                    view.add_item(Button(label=f"{resource} ({str(tradeVal)}:1)", style=discord.ButtonStyle.gray, custom_id="_".join(buttonElements))) 
+                    if player["name"] == "Rho Indi Syndicate":
+                        ratio = 2
+                    else:
+                        ratio = 1
+                    view.add_item(Button(label=f"{resource} ({str(tradeVal)}:{ratio})", style=discord.ButtonStyle.gray,
+                                         custom_id="_".join(buttonElements)))
 
         buttonElements = [f"FCID{player['color']}","finishSpendForBuild", build, build_loc, material, science, money]
         if int(spent) >= int(cost):

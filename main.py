@@ -1,3 +1,5 @@
+import asyncio
+import os
 import discord
 import time
 from commands.game_commands import GameCommands
@@ -8,13 +10,18 @@ from commands.setup_commands import SetupCommands
 from commands.player_commands import PlayerCommands
 from commands.search_commands import SearchCommands
 from helpers import ImageCache
+from helpers.GamestateHelper import GamestateHelper
 from listeners.ButtonListener import ButtonListener
 from discord.ext import commands
 import logging
+import threading 
 
 class DiscordBot(commands.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    async def on_ready(self):  
+        self.loop.create_task(self.start_timer())
 
     async def setup_hook(self) -> None:
         print("Bot is starting")
@@ -33,6 +40,36 @@ class DiscordBot(commands.Bot):
         elapsed_time = end_time - start_time
         print(f"Total elapsed time for image load: {elapsed_time:.2f} seconds")
         print("Bot is now ready.")
+    
+    async def start_timer(self):  
+        while True:  
+            await self.checkGameTimers()  
+            await asyncio.sleep(3600*2)
+
+    async def checkGameTimers(self):  
+        guild = bot.get_guild(1254475918873985094)
+        if guild == None:
+            return
+        for x in range(0,999):
+            gameName = "aeb"+str(x)
+            if not os.path.exists(f"{config.gamestate_path}/{gameName}_saveFile.json"): 
+                continue
+            game = GamestateHelper(None,gameName)
+            if "activePlayerColor" in game.gamestate and game.gamestate["activePlayerColor"] != [] and "lastPingTime" in game.gamestate:
+                current_time_seconds = time.time()  
+                oldPingTime = game.gamestate["lastPingTime"]
+                if current_time_seconds - oldPingTime > 3600*12:
+                    actions_channel = discord.utils.get(guild.channels, name=game.game_id+"-actions")
+                    if actions_channel is not None and isinstance(actions_channel, discord.TextChannel):
+                        player = game.getPlayerObjectFromColor(game.gamestate["activePlayerColor"][0])
+                        await actions_channel.send(player["player_name"]+" This is a gentle reminder that it is your turn")
+                        game.updatePingTime()
+            
+                
+        pass  
+    
+    async def shutdown(self) -> None:    
+        await self.close() 
     
     async def shutdown(self)->None:    
         await self.close() 

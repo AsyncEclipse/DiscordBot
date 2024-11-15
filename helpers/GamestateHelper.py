@@ -1,5 +1,6 @@
 import asyncio
 import json
+import time
 
 import discord
 import config
@@ -104,6 +105,9 @@ class GamestateHelper:
         if os.path.exists(file_path):   
             os.remove(file_path)  
     
+    def updatePingTime(self):
+        self.gamestate["lastPingTime"] = time.time()
+        self.update()
 
     def getWinner(self):
         winner = ""
@@ -261,6 +265,10 @@ class GamestateHelper:
             return "magellan"
         elif fullName == "Enlightened of Lyra":
             return "lyra"
+        elif fullName == "Rho Indi Syndicate":
+            return "rho"
+        elif fullName == "The Exiles":
+            return "exile"
         elif "Terran" in fullName:
             return fullName.lower().replace(" ","_")
         
@@ -797,6 +805,8 @@ class GamestateHelper:
                 home = self.get_system_coord(p1.stats["home_planet"])
                 if p1.stats["name"] == "Orion Hegemony":
                     self.gamestate["board"][home]["player_ships"].append(p1.stats["color"]+"-cru")
+                elif p1.stats["name"] == "Rho Indi Syndicate":
+                    self.gamestate["board"][home]["player_ships"] = [p1.stats["color"]+"-int", p1.stats["color"]+"-int"]
                 else:
                     self.gamestate["board"][home]["player_ships"].append(p1.stats["color"] + "-int")
 
@@ -969,6 +979,10 @@ class GamestateHelper:
             return "magellan"
         elif full_name == "Enlightened of Lyra":
             return "lyra"
+        elif full_name == "Rho Indi Syndicate":
+            return "rho"
+        elif full_name == "The Exiles":
+            return "exile"
         elif "Terran" in full_name:
             return full_name.lower().replace(" ","_")
     
@@ -1061,6 +1075,23 @@ class GamestateHelper:
 
         self.update()
 
+    def breakMinorSpecies(self, player1):
+        pID = self.get_player_from_color(player1['color'])
+        for x,tile in enumerate(player1["reputation_track"]):
+            if isinstance(tile, str) and "minor" in tile:
+                minorName = tile.split("-")[2]
+                self.gamestate["minor_species"].append(minorName)
+                if "Discount" in minorName and "Tech" not in minorName:
+                    discountedUnit = minorName.replace(" Discount","").replace("Dreadnought","dread").lower()
+                    discount = 1
+                    if "dread" in discountedUnit or "monolith" in discountedUnit:
+                        discount = 2
+                    self.gamestate["players"][pID]["cost_"+discountedUnit] += discount
+                self.gamestate["players"][pID]["reputation_track"][x]=tile.split("-")[0]
+                break
+
+        self.update()
+
     def addDiscTile(self, tile:str):
         self.gamestate["board"][tile]["disctile"]=1
         self.update()
@@ -1118,7 +1149,13 @@ class GamestateHelper:
         view = View()  
         view.add_item(Button(label="Show Game", style=discord.ButtonStyle.blurple, custom_id="showGame"))  
         view.add_item(Button(label="Show Reputation", style=discord.ButtonStyle.gray, custom_id="showReputation"))  
-        await thread.send(message,file=map_result,view=view)
+        message = await thread.send(message,file=map_result,view=view)
+ 
+        image_url = message.attachments[0].url  
+        button = discord.ui.Button(label="View Full Image", url=image_url)  
+        view = discord.ui.View()  
+        view.add_item(button)  
+        await thread.send(view=view)  
 
     async def showUpdate(self, message:str, interaction: discord.Interaction):
         if "-" in interaction.channel.name:

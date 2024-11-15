@@ -105,6 +105,8 @@ class Emoji:
         "<:mechanematoken:1302090241007685692>",
         "<:oriontoken:1302090239401263144>",
         "<:plantatoken:1302090237555511376>",
+        "<:exiletoken:1306640565248458832>",
+        "<:rhotoken:1306640602917769288>",
         "<:terran_alliance_token:1302090255771373620>",
         "<:terran_conglomerate_token:1302090251086462996>",
         "<:terran_directorate_token:1302090265976246352>",

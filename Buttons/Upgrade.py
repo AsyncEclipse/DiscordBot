@@ -21,6 +21,8 @@ class UpgradeButtons:
         if not button:
             actions = "1"
         for ship in ships:
+            if player['name'] == "Rho Indi Syndicate" and ship == "dread":
+                continue
             shipEmoji = Emoji.getEmojiByName(player['color']+game.getShipShortName(ship))
             view.add_item(Button(label=ship.capitalize(), emoji = shipEmoji, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_upgradeShip_{actions}_{ship}_{discTileUpgrade}"))
         await interaction.followup.send(file=await asyncio.to_thread(drawing.show_player_ship_area,image),ephemeral=True)
@@ -54,8 +56,8 @@ class UpgradeButtons:
                 continue
             part_details = part_stats.get(i)
             partName = part_details["name"].lower().replace(" ", "_") if part_details else i
-            view.add_item(Button(label=part_stats[i]["name"], style=discord.ButtonStyle.blurple, emoji= Emoji.getEmojiByName(partName), custom_id=f"FCID{player['color']}_selectOldPart_{actions}_{ship}_{i}_{discTileUpgrade}"))
-        await interaction.message.edit(content=f"{interaction.user.mention}, pick which part to replace or remove.",
+            view.add_item(Button(label=part_stats[i]["name"], style=discord.ButtonStyle.red, emoji= Emoji.getEmojiByName(partName), custom_id=f"FCID{player['color']}_selectOldPart_{actions}_{ship}_{i}_{discTileUpgrade}"))
+        await interaction.message.edit(content=f"{interaction.user.mention}, pick which part of your {ship} to replace or remove.",
                                                 view=view)
     @staticmethod
     async def selectOldPart(game: GamestateHelper, player, interaction: discord.Interaction, customID : str, player_helper:PlayerHelper):
@@ -94,7 +96,7 @@ class UpgradeButtons:
             
             view.add_item(Button(label=part_stats[i]["name"], style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_chooseUpgrade_{actions}_{ship}_{oldPart}_{i}_{discTileUpgrade}", emoji=Emoji.getEmojiByName(partName)))
         await interaction.message.edit(content=f"{interaction.user.mention}, replace "
-                                                        f"{part_stats[oldPart]['name']} with which part? Remove as a free action by selecting 'Empty'.", view=view)
+                                                        f"{part_stats[oldPart]['name']} on your {ship} with which part? Remove as a free action by selecting 'Empty'.", view=view)
         view.add_item(Button(label="Go back 1 Step", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_upgradeShip_{actions}_{ship}_{discTileUpgrade}"))
         await interaction.followup.send("Available parts", file=await asyncio.to_thread(drawing.availablePartsFile,available_parts),ephemeral=True)
     @staticmethod

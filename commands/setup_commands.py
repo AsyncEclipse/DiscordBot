@@ -31,6 +31,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         app_commands.Choice(name="Planta", value="pla"),
         app_commands.Choice(name="Wardens of Magellan", value="mag"),
         app_commands.Choice(name="Enlightened of Lyra", value="lyr"),
+        app_commands.Choice(name="Rho Indi Syndicate", value="rho"),
         app_commands.Choice(name="Terran Alliance (Orion)", value="ter1"),
         app_commands.Choice(name="Terran Conglomerate (Mech)", value="ter2"),
         app_commands.Choice(name="Terran Directorate (Eridian)", value="ter3"),
@@ -288,7 +289,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
                              + " If the Discovery Tile allows you to place something in a Sector (such as Ancient Cruiser or Ancient Orbital), place it in your Starting Sector."
                              + " If you do not control your Starting Sector, you must take the tile as 2VP.",
                              "- 1 VP at the end of the game per Discovery Tile you used as a Ship Part.",
-                             "- At any time, you may flip unused Colony Ships to gain one Resource of your choice per Colony Ship flipped."])
+                             "- At any time, you may flip unused Colony Ships to gain one Resource of your choice per Colony Ship flipped. (Note: only refresh 1 colony ship with the influence action)"])
         await factionThread.send(message, file=drawing.get_file("images/resources/components/factions/magellan_board.png"))
         message = "\n".join(["# Enlightened of Lyra",
                              "- 1 VP per Shrine\\* you control at the end of the game.",
@@ -316,6 +317,8 @@ class SetupCommands(commands.GroupCog, name="setup"):
                              "  - our destroyed Orbitals each add 1 to your opponent’s Reputation Tile draw (max 5).",
                              "- You cannot construct Starbases.",
                              "- Your Orbitals have Ship Blueprints."])
+        #await factionThread.send(message, file=drawing.get_file(
+        # "images/resources/components/factions/exile_board.png"))
 
         message = "\n".join(["# Rho Indi Syndicate",
                              "- Start with two Interceptors in your Starting Sector.",
@@ -332,6 +335,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
                              "  - **Interceptor: -1⬛",
                              "  - **Cruiser: -1⬛",
                              "  - **Dreadnought: -1⬛"])
+        await factionThread.send(message, file=drawing.get_file("images/resources/components/factions/rho_board.png"))
 
         message = "\n".join(["# Terrans"])
         await factionThread.send(message, file=drawing.get_file("images/resources/components/factions/terran_conglomerate_board.png"))
