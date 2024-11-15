@@ -59,6 +59,7 @@ class TurnButtons:
             view = TurnButtons.getStartTurnButtons(game,nextPlayer, player["color"])
             game.initilizeKey("activePlayerColor")
             game.addToKey("activePlayerColor",nextPlayer["color"])
+            game.updatePingTime()
             await interaction.channel.send("## "+game.getPlayerEmoji(nextPlayer)+" started their turn")
             await interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(nextPlayer),view=view)
         else:
@@ -116,6 +117,7 @@ class TurnButtons:
             view = TurnButtons.getStartTurnButtons(game,nextPlayer, player["color"])
             game.initilizeKey("activePlayerColor")
             game.addToKey("activePlayerColor",nextPlayer["color"])
+            game.updatePingTime()
             await interaction.channel.send("## "+game.getPlayerEmoji(nextPlayer)+" started their turn")
             await interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do your turn"+ game.displayPlayerStats(nextPlayer),view=view)
 
@@ -201,6 +203,7 @@ class TurnButtons:
                 view = TurnButtons.getStartTurnButtons(game,nextPlayer,"dummy")
                 game.initilizeKey("activePlayerColor")
                 game.addToKey("activePlayerColor",nextPlayer["color"])
+                game.updatePingTime()
                 await interaction.channel.send("## "+game.getPlayerEmoji(nextPlayer)+" started their turn")
                 await interaction.channel.send(nextPlayer["player_name"]+ " use buttons to do the first turn of the round"+game.displayPlayerStats(nextPlayer),view=view)
             else:
@@ -223,7 +226,12 @@ class TurnButtons:
     @staticmethod
     async def send_files(interaction, files, view, ephemeralStatus):
         for file in files:
-            await interaction.followup.send(file=file,ephemeral=ephemeralStatus, view=view)
+            message= await interaction.followup.send(file=file,ephemeral=ephemeralStatus, view=view)
+            image_url = message.attachments[0].url  
+            button = discord.ui.Button(label="View Full Image", url=image_url)  
+            view = discord.ui.View()  
+            view.add_item(button)  
+            await interaction.followup.send(view=view, ephemeral=ephemeralStatus)  
 
     @staticmethod
     async def send_file(interaction, file):

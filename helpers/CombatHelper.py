@@ -106,6 +106,7 @@ class Combat:
         role = discord.utils.get(interaction.guild.roles, name=game.get_gamestate()["game_id"])  
         tiles = Combat.findTilesInConflict(game)
         game.createRoundNum()
+        game.initilizeKey("activePlayerColor")
         if "wa_ai" not in game.get_gamestate():
             game.initilizeKey("wa_ai")
         if "tilesToResolve" not in game.get_gamestate():
@@ -485,6 +486,9 @@ class Combat:
     async def rollDice(game:GamestateHelper, buttonID:str, interaction:discord.Interaction):
         pos = buttonID.split("_")[1]
         colorOrAI = buttonID.split("_")[2]
+        if colorOrAI == "ai":
+            Combat.rollDiceAI(game, buttonID, interaction)
+            return
         speed = int(buttonID.split("_")[3])
         oldLength = len(Combat.findPlayersInTile(game, pos))
         tile_map = game.get_gamestate()["board"]
@@ -494,16 +498,11 @@ class Combat:
         player = None
         ships = Combat.getCombatantShipsBySpeed(game, colorOrAI, player_ships)
         update = False
-        drawing = DrawHelper(game.gamestate)
         for ship in ships:
             if ship[0] == speed or speed == 99 or speed == 1000:
                 name = interaction.user.mention
-                if colorOrAI == "ai":
-                    shipModel = AI_Ship(ship[1], game.gamestate["advanced_ai"], game.gamestate["wa_ai"])
-                    name = "The AI"
-                else:
-                    player = game.get_player_from_color(colorOrAI)
-                    shipModel = PlayerShip(game.gamestate["players"][player], ship[1])
+                player = game.get_player_from_color(colorOrAI)
+                shipModel = PlayerShip(game.gamestate["players"][player], ship[1])
                 dice = shipModel.dice
                 missiles = ""
                 nonMissiles = " on initiative "+str(speed)
@@ -513,7 +512,6 @@ class Combat:
                     nonMissiles =""
                 if speed == 1000:
                     nonMissiles = " against the population"
-                
                 msg = name + " rolled the following "+missiles+"with their "+str(ship[2])+" "+Combat.translateShipAbrToName(ship[1])+"(s)"+nonMissiles+":\n"
                 dieFiles = []
                 dieNums = []
@@ -596,46 +594,19 @@ class Combat:
                             else:
                                 update = True
                                 if len(hittableShips) > 1:
-                                    if colorOrAI != "ai":
-                                        msg = interaction.user.mention + " choose what ship to hit with the die that rolled a "+str(dieNum)+". You will deal "+str(dieDam)+" damage. The bot has calculated that you can hit these ships"
-                                        view = View()
-                                        for ship in hittableShips:
-                                            shipType = ship.split("-")[1]
-                                            shipOwner = ship.split("-")[0]
-                                            label = "Hit "+Combat.translateShipAbrToName(shipType)
-                                            buttonID = "FCID"+colorOrAI+"_assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(dieDam)
-                                            view.add_item(Button(label=label, style=discord.ButtonStyle.red, custom_id=buttonID))
-                                        await interaction.channel.send(msg,view=view)
-                                        hitsToAssign = 1
-                                        if "unresolvedHits" in game.get_gamestate()["board"][pos]:
-                                            hitsToAssign = game.get_gamestate()["board"][pos]["unresolvedHits"]+1
-                                        game.setUnresolvedHits(hitsToAssign,pos)
-                                    else:
-                                        ship = hittableShips[0]
-                                        oldShipVal = 0
-                                        ableToKillSomething = False
-                                        for option in hittableShips:
-                                            damageOnShip = game.add_damage(option, pos, 0)
-                                            shipType = option.split("-")[1]
-                                            shipOwner = option.split("-")[0]
-                                            player = game.get_player_from_color(shipOwner)
-                                            shipModel = PlayerShip(game.gamestate["players"][player], shipType)
-                                            if ableToKillSomething:
-                                                if dieDam +damageOnShip> shipModel.hull and shipModel.cost > oldShipVal:
-                                                    oldShipVal = shipModel.cost
-                                                    ship = option
-                                            else:
-                                                if dieDam +damageOnShip> shipModel.hull:
-                                                    oldShipVal = shipModel.cost
-                                                    ship = option
-                                                    ableToKillSomething = True
-                                                else:
-                                                    if shipModel.cost > oldShipVal:
-                                                        oldShipVal = shipModel.cost
-                                                        ship = option
-
-                                        buttonID = "assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(dieDam)
-                                        await Combat.assignHitTo(game, buttonID, interaction, False)
+                                    msg = interaction.user.mention + " choose what ship to hit with the die that rolled a "+str(dieNum)+". You will deal "+str(dieDam)+" damage. The bot has calculated that you can hit these ships"
+                                    view = View()
+                                    for ship in hittableShips:
+                                        shipType = ship.split("-")[1]
+                                        shipOwner = ship.split("-")[0]
+                                        label = "Hit "+Combat.translateShipAbrToName(shipType)
+                                        buttonID = "FCID"+colorOrAI+"_assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(dieDam)
+                                        view.add_item(Button(label=label, style=discord.ButtonStyle.red, custom_id=buttonID))
+                                    await interaction.channel.send(msg,view=view)
+                                    hitsToAssign = 1
+                                    if "unresolvedHits" in game.get_gamestate()["board"][pos]:
+                                        hitsToAssign = game.get_gamestate()["board"][pos]["unresolvedHits"]+1
+                                    game.setUnresolvedHits(hitsToAssign,pos)
                                 else:
                                     ship = hittableShips[0]
                                     buttonID = "assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(dieDam)
