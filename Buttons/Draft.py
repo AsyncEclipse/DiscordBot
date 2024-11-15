@@ -31,7 +31,8 @@ class DraftButtons:
         5. Descendants of Draco   
         6. Planta  
         7. Wardens of Magellan
-        8. Enlightened of Lyra\n
+        8. Enlightened of Lyra
+        9. Rho Indi Syndicate\n
         """
         await channel.send(list)
         playerID = game.get_gamestate()["draftingPlayers"][0]
@@ -51,6 +52,7 @@ class DraftButtons:
         ("Planta", "pla"),
         ("Wardens of Magellan", "mag"),
         ("Enlightened of Lyra", "lyr"),
+        ("Rho Indi Syndicate", "rho"),
         ("Terran Alliance (Orion)", "ter1"),
         ("Terran Conglomerate (Mech)", "ter2"),
         ("Terran Directorate (Eridian)", "ter3"),

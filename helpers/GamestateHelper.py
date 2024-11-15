@@ -261,6 +261,10 @@ class GamestateHelper:
             return "magellan"
         elif fullName == "Enlightened of Lyra":
             return "lyra"
+        elif fullName == "Rho Indi Syndicate":
+            return "rho"
+        elif fullName == "The Exiles":
+            return "exile"
         elif "Terran" in fullName:
             return fullName.lower().replace(" ","_")
         
@@ -797,6 +801,8 @@ class GamestateHelper:
                 home = self.get_system_coord(p1.stats["home_planet"])
                 if p1.stats["name"] == "Orion Hegemony":
                     self.gamestate["board"][home]["player_ships"].append(p1.stats["color"]+"-cru")
+                elif p1.stats["name"] == "Rho Indi Syndicate":
+                    self.gamestate["board"][home]["player_ships"] = [p1.stats["color"]+"-int", p1.stats["color"]+"-int"]
                 else:
                     self.gamestate["board"][home]["player_ships"].append(p1.stats["color"] + "-int")
 
@@ -969,6 +975,10 @@ class GamestateHelper:
             return "magellan"
         elif full_name == "Enlightened of Lyra":
             return "lyra"
+        elif full_name == "Rho Indi Syndicate":
+            return "rho"
+        elif full_name == "The Exiles":
+            return "exile"
         elif "Terran" in full_name:
             return full_name.lower().replace(" ","_")
     

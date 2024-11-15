@@ -58,6 +58,17 @@ class PlayerShip(Ship):
         self.speed = player[f"base_{self.ship_type}_speed"]
         self.energy = player[f"base_{self.ship_type}_nrg"]
         self.computer = player[f"base_{self.ship_type}_comp"]
+
+        #added for Outcast factions
+        try:
+            self.shield = player[f"base_{self.ship_type}_shield"]
+        except KeyError:
+            pass
+        try:
+            self.hull = player[f"base_{self.ship_type}_hull"]
+        except KeyError:
+            pass
+
         self.ship_parts = player[f"{self.ship_type}_parts"]
         self.build_ship_stats(self.ship_parts)
         self.cost = player[f"cost_{self.ship_type}"]
