@@ -37,7 +37,7 @@ class BuildButtons:
         view = BuildButtons.buildBuildButtonsView(interaction,"",0,loc,view,player)
         await interaction.message.delete()
         buildApt = player["build_apt"]
-        if player["passed"]== True:
+        if player["passed"]== True or ("pulsarBuild" in player and player["pulsarBuild"] == True):
             buildApt = 1
         await interaction.channel.send(f"{player['player_name']}, you have {player['materials']} materials to "
                                                 f"spend on up to {str(buildApt)} units in this system.", view=view)
