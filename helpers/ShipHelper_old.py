@@ -82,9 +82,9 @@ class PlayerShip:
             self.external += part_stats["external"]
 
     def check_valid_ship(self):
-        return not any(self.range <= 0 and not self.ship_type == "starbase",
-                       self.energy < 0,
-                       self.ship_type == "starbase" and self.range > 0)
+        return not any([self.range <= 0 and not self.ship_type == "starbase",
+                        self.energy < 0,
+                        self.ship_type == "starbase" and self.range > 0])
 
     def take_damage(self, damage):
         self.hull -= damage

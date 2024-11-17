@@ -26,19 +26,19 @@ class GameCommands(commands.GroupCog, name="game"):
     async def set_advanced_ai(self, interaction: discord.Interaction, status: bool):
         game = GamestateHelper(interaction.channel)
         game.setAdvancedAI(status)
-        await interaction.response.send_message("Set AI Advanced status to "+str(status))
+        await interaction.response.send_message("Set AI Advanced status to " + str(status))
 
     @app_commands.command(name="set_fancy_ships")
     async def set_fancy_ships(self, interaction: discord.Interaction, status: bool):
         game = GamestateHelper(interaction.channel)
         game.setFancyShips(status)
-        await interaction.response.send_message("Set fancy ships status to "+str(status))
+        await interaction.response.send_message("Set fancy ships status to " + str(status))
 
     @app_commands.command(name="set_turns_in_passing_order")
     async def set_turns_in_passing_order(self, interaction: discord.Interaction, status: bool):
         game = GamestateHelper(interaction.channel)
         game.setTurnsInPassingOrder(status)
-        await interaction.response.send_message("Set Turn Order In Passing Order to "+str(status))
+        await interaction.response.send_message("Set Turn Order In Passing Order to " + str(status))
 
     @app_commands.command(name="add_specific_tile_to_deck")
     async def explore_specific_system_tile(self, interaction: discord.Interaction, system_num: str):
@@ -88,7 +88,7 @@ class GameCommands(commands.GroupCog, name="game"):
         game = GamestateHelper(interaction.channel)
         game.initilizeKey("turnOffLines")
         game.setAdvancedAI(status)
-        await interaction.response.send_message("Set Outlines status to "+str(status))
+        await interaction.response.send_message("Set Outlines status to " + str(status))
 
     @app_commands.command(name="disable_five_player_hyperlanes")
     async def disable_five_player_hyperlanes(self, interaction: discord.Interaction):
@@ -121,8 +121,8 @@ class GameCommands(commands.GroupCog, name="game"):
             await interaction.response.send_message("Successfully backed up to the last save file. "
                                                     "This generally means it backed up to the"
                                                     + " last start of someone's turn. "
-                                                    "They can run /player start_turn to get their buttons. "
-                                                    + str(game.getNumberOfSaveFiles())+" save files remain")
+                                                    "They may run /player start_turn to get their buttons. "
+                                                    + str(game.getNumberOfSaveFiles()) + " save files remain.")
             game.saveLastButtonPressed("restart")
         else:
             await interaction.response.send_message("Ran out of save files, could not back up")

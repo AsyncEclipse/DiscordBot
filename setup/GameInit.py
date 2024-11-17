@@ -14,7 +14,7 @@ class GameInit:
         self.turn_order_variant = turn_order_variant
 
     def create_game(self):
-        game_id = "aeb"+str(config.game_number)
+        game_id = f"aeb{config.game_number}"
         update_game_number()
 
         with open("data/basic_game.json", "r") as f:

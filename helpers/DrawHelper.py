@@ -17,13 +17,13 @@ class DrawHelper:
     def use_image(self, filename):
         image_cache = ImageCacheHelper("images/resources")  # Get the singleton instance
         image = image_cache.get_image(filename)
-        fineToGetOrig = any("Alone" in filename,
-                            "masks" in filename,
-                            "basic_ships" in filename,
-                            "factions" in filename,
-                            "reference" in filename,
-                            "technology" in filename,
-                            "upgrades" in filename)
+        fineToGetOrig = any(["Alone" in filename,
+                             "masks" in filename,
+                             "basic_ships" in filename,
+                             "factions" in filename,
+                             "reference" in filename,
+                             "technology" in filename,
+                             "upgrades" in filename])
         if image:
             if fineToGetOrig:
                 return image
@@ -81,13 +81,13 @@ class DrawHelper:
         closed_mask = self.use_image(closedpath)
         open_mask = self.use_image(openpath)
         for wormhole in wormholes:
-            wormholeCode = wormholeCode+str(wormhole)
+            wormholeCode += str(wormhole)
         for i in range(6):
             tile_orientation_index = (i + 6 + int(rotation / 60)) % 6
             if tile_orientation_index in wormholes:
-                tile_image.paste(open_mask, (int(154*mult), 0), mask=open_mask)
+                tile_image.paste(open_mask, (int(154 * mult), 0), mask=open_mask)
             else:
-                tile_image.paste(closed_mask, (int(154*mult), 0), mask=closed_mask)
+                tile_image.paste(closed_mask, (int(154 * mult), 0), mask=closed_mask)
             tile_image = tile_image.rotate(60)
         return tile_image
 
@@ -95,10 +95,10 @@ class DrawHelper:
         count = 1
         mult = 1
         context = Image.new("RGBA", (int(345 * 3 * 3 * mult),
-                                     int(300 * 3 * 2 * mult) + int(10*mult)),
+                                     int(300 * 3 * 2 * mult) + int(10 * mult)),
                             (255, 255, 255, 0))
         configs = Properties()
-        if "5playerhyperlane" in self.gamestate and self.gamestate["5playerhyperlane"]:
+        if self.gamestate.get("5playerhyperlane"):
             with open("data/tileAdjacencies_5p.properties", "rb") as f:
                 configs.load(f)
         else:
@@ -132,9 +132,9 @@ class DrawHelper:
                 if adjTile in playerTiles and adjTileWormholeNum in tile["wormholes"]:
                     for index2, adjTile2 in enumerate(configs.get(adjTile)[0].split(",")):
                         tile_orientation_index2 = (index2 +
-                                                   int(self.gamestate["board"][adjTile]["orientation"]) / 60) % 6
-                        if all(adjTile2 == position,
-                               tile_orientation_index2 in self.gamestate["board"][adjTile]["wormholes"]):
+                                                   int(self.gamestate["board"][adjTile]["orientation"]) // 60) % 6
+                        if all([adjTile2 == position,
+                                tile_orientation_index2 in self.gamestate["board"][adjTile]["wormholes"]]):
                             rotationWorks = True
                             break
             if rotationWorks:
@@ -147,12 +147,12 @@ class DrawHelper:
                                      style=discord.ButtonStyle.green,
                                      custom_id=f"FCID{player['color']}_placeTile_{position}_{tileID}_{rotation}"))
                 count += 1
-        bytes = BytesIO()
+        byteData = BytesIO()
         if count < 5:
             context = context.crop((0, 0, int(345 * 3 * (count - 1) * mult), int(300 * 3 * mult)))
-        context.save(bytes, format="WEBP")
-        bytes.seek(0)
-        file = discord.File(bytes, filename="tile_image.webp")
+        context.save(byteData, format="WEBP")
+        byteData.seek(0)
+        file = discord.File(byteData, filename="tile_image.webp")
         return view, file
 
     def base_tile_image_with_rotation_in_context(self, rotation, tileID, tile, count, configs, position):
@@ -199,14 +199,14 @@ class DrawHelper:
             x = count % result
             y = int(count / result)
             context.paste(part_image, (262 * x, 262 * y))
-        # context = Image.new("RGBA", (260*(len(available_parts)), 256), (255, 255, 255, 0))
+        # context = Image.new("RGBA", (260 * (len(available_parts)), 256), (255, 255, 255, 0))
 
         # for x,part in enumerate(available_parts):
         #     part_details = part_data.get(part)
         #     partName = part_details["name"].lower().replace(" ", "_") if part_details else part
         #     part_path = f"images/resources/components/upgrades/{partName}.png"
         #     part_image = Image.open(part_path).resize((256,256))
-        #     context.paste(part_image,(x*259, 0))
+        #     context.paste(part_image,(x * 259, 0))
 
         bytes_io = BytesIO()
         context.save(bytes_io, format="WEBP")
@@ -246,7 +246,7 @@ class DrawHelper:
 
             if int(position / 100) == 2 and int(position) % 2 == 1:
                 hsMask2 = Image.open("images/resources/masks/hsmaskTrip.png").convert("RGBA").resize((210, 210))
-                tile_image.paste(hsMask2, (int(138*mult), int(115*mult)), mask=hsMask2)
+                tile_image.paste(hsMask2, (int(138 * mult), int(115 * mult)), mask=hsMask2)
             if tile.get("disctile", 0) > 0:
                 discPath = "images/resources/components/discovery_tiles/discovery_2ptback.png"
                 discTile = self.use_image(discPath)
@@ -279,7 +279,7 @@ class DrawHelper:
             open_mask = self.use_image(openpath)
             green = self.use_image(greenpath)
             configs = Properties()
-            if "5playerhyperlane" in self.gamestate and self.gamestate["5playerhyperlane"]:
+            if self.gamestate.get("5playerhyperlane"):
                 with open("data/tileAdjacencies_5p.properties", "rb") as f:
                     configs.load(f)
             else:
@@ -287,7 +287,7 @@ class DrawHelper:
                     configs.load(f)
             if "wormholes" in tile:
                 for wormhole in tile["wormholes"]:
-                    wormholeCode = wormholeCode + str(wormhole)
+                    wormholeCode += str(wormhole)
                 for i in range(6):
                     tile_orientation_index = (i + int(rotation / 60)) % 6
                     if tile_orientation_index in tile["wormholes"]:
@@ -381,7 +381,7 @@ class DrawHelper:
 
             def paste_resourcecube(tile, tile_image, resource_type, color):
                 if tile.get(f"{resource_type}_pop", 0):
-                    if resource_type+"_shrine" in tile:
+                    if f"{resource_type}_shrine" in tile:
                         shrine_path = "images/resources/components/factions/shrine.png"
                         shrine_image = self.use_image(shrine_path).resize((60, 60))
                         coords = tile[f"{resource_type}1_snap"]
@@ -400,16 +400,16 @@ class DrawHelper:
                             if resource_type == "orbital":
                                 coords = tile["orb_snap"]
                             else:
-                                coords = tile[f"{resource_type}{x+1}_snap"]
-                            tile_image.paste(pop_image, (int(345 / 1024 * mult * coords[0] - int(18*mult)),
-                                                         int(345 / 1024 * mult * coords[1] - int(18*mult))),
+                                coords = tile[f"{resource_type}{x + 1}_snap"]
+                            tile_image.paste(pop_image, (int(345 / 1024 * mult * coords[0] - int(18 * mult)),
+                                                         int(345 / 1024 * mult * coords[1] - int(18 * mult))),
                                              mask=pop_image)
                             if "money" in resource_type or "science" in resource_type or "material" in resource_type:
                                 resource_type2 = resource_type.replace("adv", "") + "_Alone"
                                 pop_path = f"images/resources/components/resourcesymbols/{resource_type2}.png"
                                 pop_image = self.use_image(pop_path)
-                                tile_image.paste(pop_image, (int(345 / 1024 * mult * coords[0] - int(13*mult)),
-                                                             int(345 / 1024 * mult * coords[1] - int(13*mult))),
+                                tile_image.paste(pop_image, (int(345 / 1024 * mult * coords[0] - int(13 * mult)),
+                                                             int(345 / 1024 * mult * coords[1] - int(13 * mult))),
                                                  mask=pop_image)
 
             if tile.get("owner", 0) != 0:
@@ -436,15 +436,15 @@ class DrawHelper:
             if tile_a in configs and tile_a in self.gamestate["board"]:
                 for index, adjTile in enumerate(configs.get(tile_a)[0].split(",")):
                     tile_orientation_index = (index + int(self.gamestate["board"][tile_a]["orientation"] // 60)) % 6
-                    if all(adjTile == tile_b,
-                           tile_orientation_index in self.gamestate["board"][tile_a].get("wormholes", [])):
+                    if all([adjTile == tile_b,
+                            tile_orientation_index in self.gamestate["board"][tile_a].get("wormholes", [])]):
                         return True
             return False
 
         return is_adjacent(tile1, tile2) and is_adjacent(tile2, tile1)
 
     def display_techs(self):
-        context = Image.new("RGBA", (2500*3, 450*3), (0, 0, 0, 255))
+        context = Image.new("RGBA", (2500 * 3, 450 * 3), (0, 0, 0, 255))
         techsAvailable = self.gamestate["available_techs"]
         with open("data/techs.json", "r") as f:
             tech_data = json.load(f)
@@ -595,7 +595,7 @@ class DrawHelper:
             faction = self.get_short_faction_name(player["name"])
             pop_path = f"images/resources/components/all_boards/popcube_{player['color']}.png"
             pop_image = self.use_image(pop_path)
-            pop_image = pop_image.crop((32, 32, pop_image.width-32, pop_image.height-32))
+            pop_image = pop_image.crop((32, 32, pop_image.width - 32, pop_image.height - 32))
             pop_image = pop_image.resize((90, 90))
             context.paste(pop_image, (95*n, 85), mask=pop_image)
             face_tile_path = f"images/resources/components/factions/{faction}_board.png"
@@ -627,15 +627,15 @@ class DrawHelper:
             faction = self.get_short_faction_name(player["name"])
             pop_path = f"images/resources/components/all_boards/popcube_{player['color']}.png"
             pop_image = self.use_image(pop_path)
-            pop_image = pop_image.crop((32, 32, pop_image.width-32, pop_image.height-32))
+            pop_image = pop_image.crop((32, 32, pop_image.width - 32, pop_image.height - 32))
             pop_image = pop_image.resize((60, 60))
-            context.paste(pop_image, (130+65*n, 200), mask=pop_image)
+            context.paste(pop_image, (130 + 65 * n, 200), mask=pop_image)
             face_tile_path = f"images/resources/components/factions/{faction}_board.png"
             face_tile_image = self.use_image(face_tile_path)
             face_tile_image = face_tile_image.crop((49, 252, 154, 357))
             face_tile_image = face_tile_image.convert("L").convert("RGBA")
-            face_tile_image = face_tile_image.resize((60-2*border, 60-2*border))
-            context.paste(face_tile_image, (130+65*n+border, 200+border), mask=face_tile_image)
+            face_tile_image = face_tile_image.resize((60 - 2 * border, 60 - 2 * border))
+            context.paste(face_tile_image, (130 + 65 * n + border, 200 + border), mask=face_tile_image)
 
         return context
 
@@ -662,7 +662,7 @@ class DrawHelper:
             rnd = self.gamestate["roundNum"]
         else:
             rnd = 1
-        text_drawable_image.text((0, 0), "Round #"+str(rnd), (0, 255, 0), font=font,
+        text_drawable_image.text((0, 0), "Round #" + str(rnd), (0, 255, 0), font=font,
                                  stroke_width=stroke_width, stroke_fill=stroke_color)
 
         text_drawable_image.text((0, 270), "AI Stats:", (0, 255, 0), font=font,
@@ -672,7 +672,7 @@ class DrawHelper:
             adv = ""
             if self.gamestate["advanced_ai"]:
                 adv = "adv"
-            if "wa_ai" in self.gamestate and self.gamestate["wa_ai"]:
+            if self.gamestate.get("wa_ai"):
                 adv = "wa"
             ship = "ai-" + ship_type + adv
             filepathShip = f"images/resources/components/basic_ships/{ship}.png"
@@ -779,7 +779,7 @@ class DrawHelper:
 
     def player_area(self, player):
         faction = self.get_short_faction_name(player["name"])
-        filepath = "images/resources/components/factions/"+str(faction)+"_board.png"
+        filepath = "images/resources/components/factions/" + str(faction) + "_board.png"
         context = Image.new("RGBA", (1440, 625), (0, 0, 0, 255))
         board_image = self.use_image(filepath)
         context.paste(board_image, (0, 0))
@@ -790,8 +790,8 @@ class DrawHelper:
             context.paste(inf_image, (764 - int(38.5 * x), 450), mask=inf_image)
 
         for x, action in enumerate(["explore", "research", "upgrade", "build", "move", "influence"]):
-            if action+"_action_counters" in player:
-                num = player[action+"_action_counters"]
+            if f"{action}_action_counters" in player:
+                num = player[f"{action}_action_counters"]
                 if num > 0:
                     context.paste(inf_image, (12 + int(47 * x), 422), mask=inf_image)
                 if num > 1:
@@ -800,7 +800,7 @@ class DrawHelper:
                     color = (255, 255, 255)
                     stroke_width = 2
                     text_drawable_image = ImageDraw.Draw(context)
-                    text_drawable_image.text((17 + int(47 * x), 426), "x" + str(num), color, font=font,
+                    text_drawable_image.text((17 + int(47 * x), 426), f"x{num}", color, font=font,
                                              stroke_width=stroke_width, stroke_fill=stroke_color)
         if "shrine_in_storage" in player:
             shrine_board_path = "images/resources/components/factions/shrine_board.png"
@@ -892,7 +892,7 @@ class DrawHelper:
                     color = (0, 0, 0)
                     stroke_width = 2
                     text_drawable_image = ImageDraw.Draw(context)
-                    text_drawable_image.text((825 + 13, 172 + x * scaler-mod), str(reputation), color, font=font,
+                    text_drawable_image.text((825 + 13, 172 + x * scaler - mod), str(reputation), color, font=font,
                                              stroke_width=stroke_width, stroke_fill=stroke_color)
                 else:
                     context.paste(reputation_image, (825, 172 + x * scaler - mod), mask=reputation_image)
@@ -901,19 +901,19 @@ class DrawHelper:
                 color = reputation.split("-")[2]
 
                 if faction == "minor":
-                    amb_tile_path = ("images/resources/components/minor_species/minorspecies_" +
+                    amb_tile_path = ("images/resources/components/minor_species/minorspecies_"
                                      f"{color.replace(' ','_').lower()}.png")
                     amb_tile_image = self.use_image(amb_tile_path)
                 else:
                     amb_tile_path = f"images/resources/components/factions/{faction}_ambassador.png"
                     amb_tile_image = self.use_image(amb_tile_path)
-                context.paste(amb_tile_image, (825, 172 + x*scaler - mod), mask=amb_tile_image)
+                context.paste(amb_tile_image, (825, 172 + x * scaler - mod), mask=amb_tile_image)
                 if faction != "minor" or "cube" in color:
                     if "cube" in color:
                         color = player["color"]
                     pop_path = f"images/resources/components/all_boards/popcube_{color}.png"
                     pop_image = self.use_image(pop_path).resize((35, 35))
-                    context.paste(pop_image, (825+20, 172+x*scaler+25-mod), mask=pop_image)
+                    context.paste(pop_image, (825 + 20, 172 + x * scaler + 25 - mod), mask=pop_image)
 
         x = 925
         y = 0
@@ -928,8 +928,8 @@ class DrawHelper:
                                stroke_width=stroke_width, stroke_fill=stroke_color)
             text_image = text_image.rotate(45, expand=True)
             context.paste(text_image, (0, 0), text_image)
-        if all(len(self.gamestate.get("activePlayerColor", [])) == 1,
-               player["color"] == self.gamestate["activePlayerColor"][0]):
+        if all([len(self.gamestate.get("activePlayerColor", [])) == 1,
+                player["color"] == self.gamestate["activePlayerColor"][0]]):
             text_image = Image.new('RGBA', (500, 500), (0, 0, 0, 0))
             text_drawable = ImageDraw.Draw(text_image)
             text_drawable.text((0, 50), "Active", fill=(0, 255, 0), font=font,
@@ -955,7 +955,7 @@ class DrawHelper:
                                      stroke_width=stroke_width, stroke_fill=stroke_color)
 
         newY = y
-        newX = x+240
+        newX = x + 240
         with open("data/discoverytiles.json") as f:
             discTile_data = json.load(f)
 
@@ -1021,7 +1021,7 @@ class DrawHelper:
         tile_map = self.gamestate["board"]
         color = player["color"]
         for tile in tile_map:
-            if "owner" in tile_map[tile] and tile_map[tile]["owner"] == color:
+            if tile_map[tile].get("owner") == color:
                 points += tile_map[tile]["vp"]
                 if "Lyra" in player["name"] and "shrines" in tile_map[tile]:
                     points += tile_map[tile]["shrines"]
@@ -1029,9 +1029,9 @@ class DrawHelper:
                     points += tile_map[tile]["warpPoint"]
                 if "warpDisc" in tile_map[tile]:
                     points += tile_map[tile]["warpDisc"]
-                if all("discoveryTileBonusPointTiles" in player,
-                       "art" in player["discoveryTileBonusPointTiles"],
-                       tile_map[tile]["artifact"] == 1):
+                if all(["discoveryTileBonusPointTiles" in player,
+                        "art" in player["discoveryTileBonusPointTiles"],
+                        tile_map[tile]["artifact"] == 1]):
                     points += 1
                 if "player_ships" in tile_map[tile]:
                     for ship in tile_map[tile]["player_ships"]:
@@ -1081,7 +1081,7 @@ class DrawHelper:
             points += player["magPartPoints"]
 
         if "discoveryTileBonusPointTiles" in player and "rep" in player["discoveryTileBonusPointTiles"]:
-            points += int(reputationPoints/3)
+            points += reputationPoints // 3
         if player.get("traitor"):
             if player["name"] == "Rho Indi Syndicate":
                 pass
@@ -1121,7 +1121,7 @@ class DrawHelper:
             return min_x, min_y, max_x, max_y
         context = Image.new("RGBA", (4160, 5100), (0, 0, 0, 255))
         hyperlane5 = False
-        if "5playerhyperlane" in self.gamestate and self.gamestate["5playerhyperlane"]:
+        if self.gamestate.get("5playerhyperlane"):
             hyperlane5 = True
         min_x, min_y, max_x, max_y = paste_tiles(context, self.gamestate["board"], hyperlane5)
         cropped_context = context.crop((min_x, min_y, max_x, max_y))
@@ -1143,10 +1143,10 @@ class DrawHelper:
                     username = self.gamestate["players"][player]["username"]
 
                     if self.gamestate["players"][player].get("traitor"):
-                        username = username + " (TRAITOR)"
+                        username += " (TRAITOR)"
                     text_drawable_image.text((x, y), username, color, font=font,
                                              stroke_width=stroke_width, stroke_fill=stroke_color)
-                context2.paste(player_image, (x, y+50), mask=player_image)
+                context2.paste(player_image, (x, y + 50), mask=player_image)
                 count += 1
                 if count % 2 == 0 and pCount == 4:
                     x = 100
@@ -1167,20 +1167,19 @@ class DrawHelper:
         # context5 = self.display_cube_track_reference()
         pCount = len(self.gamestate["players"])
         width = 4150 if (pCount != 2 and pCount != 4) else 2800
-        width = max(context2.size[0], context3.size[0] + context4.size[0] + 150)
-        width = max(width, cropped_context.size[0])
-        width = max(width, context5.size[0])
+        width = max([context2.size[0], context3.size[0] + context4.size[0] + 150,
+                     cropped_context.size[0], context5.size[0]])
         height = (cropped_context.size[1] + context2.size[1] +
                   max(context3.size[1], context4.size[1]) + 90 + context6.size[1])
         final_context = Image.new("RGBA", (width, height), (0, 0, 0, 255))
         centering = int((width - cropped_context.size[0])/2)
         final_context.paste(context6, (0, 0))
         final_context.paste(cropped_context, (centering, context6.size[1]))
-        final_context.paste(context2, (0, cropped_context.size[1]+context6.size[1]))
-        final_context.paste(context3, (0, cropped_context.size[1]+context2.size[1]+context6.size[1]))
-        # final_context.paste(context5, (50, context2.size[1]-20))
+        final_context.paste(context2, (0, cropped_context.size[1] + context6.size[1]))
+        final_context.paste(context3, (0, cropped_context.size[1] + context2.size[1] + context6.size[1]))
+        # final_context.paste(context5, (50, context2.size[1] - 20))
         final_context.paste(context4, (context3.size[0] + 150,
-                                       cropped_context.size[1] + context2.size[1]+context6.size[1]))
+                                       cropped_context.size[1] + context2.size[1] + context6.size[1]))
         final_context.paste(context5,
                             (0, cropped_context.size[1] + context2.size[1] + max(context3.size[1],
                                                                                  context4.size[1] + context6.size[1])))
@@ -1215,7 +1214,7 @@ class DrawHelper:
         context = Image.new("RGBA", (4160, 5100), (0, 0, 0, 255))
         min_x, min_y, max_x, max_y = paste_tiles(context, self.gamestate["board"])
         cropped_context = context.crop((min_x, min_y, max_x, max_y))
-        # cropped_context=cropped_context.resize([int((max_x-min_x)/2),int((max_y-min_y)/2)])
+        # cropped_context=cropped_context.resize([int((max_x - min_x) / 2), int((max_y - min_y) / 2)])
         bytes_io = BytesIO()
         cropped_context.save(bytes_io, format="WEBP")
         bytes_io.seek(0)
@@ -1256,7 +1255,7 @@ class DrawHelper:
                     username = self.gamestate["players"][player]["username"]
 
                     if self.gamestate["players"][player].get("traitor"):
-                        username = username + " (TRAITOR)"
+                        username += " (TRAITOR)"
                     text_drawable_image.text((x, y), username, color, font=font,
                                              stroke_width=stroke_width, stroke_fill=stroke_color)
                 context2.paste(player_image, (x, y + 50), mask=player_image)
@@ -1282,8 +1281,8 @@ class DrawHelper:
                                   (0, 0, 0, 255))
         final_context.paste(context2, (0, 0))
         final_context.paste(context3, (0, context2.size[1]))
-        # final_context.paste(context5, (50, context2.size[1]-20))
-        final_context.paste(context4, (context3.size[0]+150, context2.size[1]))
+        # final_context.paste(context5, (50, context2.size[1] - 20))
+        final_context.paste(context4, (context3.size[0] + 150, context2.size[1]))
 
         bytes_io = BytesIO()
         final_context.save(bytes_io, format="WEBP")
@@ -1300,12 +1299,12 @@ class DrawHelper:
 
     def show_single_tile(self, tile_image):
         mult = 1024 / 345
-        context = Image.new("RGBA", (int(345*mult), int(299*mult)), (255, 255, 255, 0))
+        context = Image.new("RGBA", (int(345 * mult), int(299 * mult)), (255, 255, 255, 0))
         context.paste(tile_image, (0, 0), mask=tile_image)
-        bytes = BytesIO()
-        context.save(bytes, format="WEBP")
-        bytes.seek(0)
-        file = discord.File(bytes, filename="tile_image.webp")
+        byteData = BytesIO()
+        context.save(byteData, format="WEBP")
+        byteData.seek(0)
+        file = discord.File(byteData, filename="tile_image.webp")
         return file
 
     def show_minor_species(self):
@@ -1317,10 +1316,10 @@ class DrawHelper:
                                     f"{species.replace(' ','_').lower()}.png").convert("RGBA").resize((260, 260))
             context.paste(tile_image, (300 * count, 0), mask=tile_image)
             count += 1
-        bytes = BytesIO()
-        context.save(bytes, format="WEBP")
-        bytes.seek(0)
-        file = discord.File(bytes, filename="disc_tile_image.webp")
+        byteData = BytesIO()
+        context.save(byteData, format="WEBP")
+        byteData.seek(0)
+        file = discord.File(byteData, filename="disc_tile_image.webp")
         return file
 
     def show_shrine_board(self, player):
@@ -1333,18 +1332,18 @@ class DrawHelper:
         shrine_image = Image.open(shrine_path).resize((119, 119))
         for shrineCount, val in enumerate(player["shrine_in_storage"]):
             place = shrineCount
-            widthOfShrine = 24*5
-            xspacing = 23*5
-            yspacing = 28*5
-            xLoc = place % 3 * (xspacing + widthOfShrine)
+            widthOfShrine = 24 * 5
+            xspacing = 23 * 5
+            yspacing = 28 * 5
+            xLoc = (place % 3) * (xspacing + widthOfShrine)
             yLoc = (place // 3) * (yspacing + widthOfShrine)
             if val == 1:
-                context.paste(shrine_image, (26*5+xLoc, 25*5+yLoc))
+                context.paste(shrine_image, (26 * 5 + xLoc, 25 * 5 + yLoc))
 
-        bytes = BytesIO()
-        context.save(bytes, format="WEBP")
-        bytes.seek(0)
-        file = discord.File(bytes, filename="shrine_image.webp")
+        byteData = BytesIO()
+        context.save(byteData, format="WEBP")
+        byteData.seek(0)
+        file = discord.File(byteData, filename="shrine_image.webp")
         return file
 
     def show_disc_tile(self, disc_tile_name: str):
@@ -1352,25 +1351,25 @@ class DrawHelper:
         tile_image = Image.open("images/resources/components/discovery_tiles/discovery_" +
                                 f"{disc_tile_name.replace(' ','_').lower()}.png").convert("RGBA").resize((260, 260))
         context.paste(tile_image, (0, 0), mask=tile_image)
-        bytes = BytesIO()
-        context.save(bytes, format="WEBP")
-        bytes.seek(0)
-        file = discord.File(bytes, filename="disc_tile_image.webp")
+        byteData = BytesIO()
+        context.save(byteData, format="WEBP")
+        byteData.seek(0)
+        file = discord.File(byteData, filename="disc_tile_image.webp")
         return file
 
     def show_player_area(self, player_area):
-        bytes = BytesIO()
-        player_area.save(bytes, format="WEBP")
-        bytes.seek(0)
-        file = discord.File(bytes, filename="player_area.webp")
+        byteData = BytesIO()
+        player_area.save(byteData, format="WEBP")
+        byteData.seek(0)
+        file = discord.File(byteData, filename="player_area.webp")
         return file
 
     def show_player_ship_area(self, player_area):
         player_area = player_area.crop((0, 0, 895, 196))
-        bytes = BytesIO()
-        player_area.save(bytes, format="WEBP")
-        bytes.seek(0)
-        file = discord.File(bytes, filename="player_area.webp")
+        byteData = BytesIO()
+        player_area.save(byteData, format="WEBP")
+        byteData.seek(0)
+        file = discord.File(byteData, filename="player_area.webp")
         return file
 
     def show_player_ship(self, player_area, ship):
@@ -1383,18 +1382,18 @@ class DrawHelper:
             player_area = player_area.crop((435, 0, 680, 196))
         if "starbase" in ship:
             player_area = player_area.crop((696, 0, 875, 160))
-        bytes = BytesIO()
-        player_area.save(bytes, format="WEBP")
-        bytes.seek(0)
-        file = discord.File(bytes, filename="player_area.webp")
+        byteData = BytesIO()
+        player_area.save(byteData, format="WEBP")
+        byteData.seek(0)
+        file = discord.File(byteData, filename="player_area.webp")
         return file
 
     def show_AI_stats(self):
         ai_ships = self.display_remaining_tiles().crop((50, 350, 500, 500))
-        bytes = BytesIO()
-        ai_ships.save(bytes, format="WEBP")
-        bytes.seek(0)
-        file = discord.File(bytes, filename="ai_ships.webp")
+        byteData = BytesIO()
+        ai_ships.save(byteData, format="WEBP")
+        byteData.seek(0)
+        file = discord.File(byteData, filename="ai_ships.webp")
         return file
 
     @staticmethod
@@ -1403,10 +1402,10 @@ class DrawHelper:
         ref_image = Image.open(filepath)
         context = Image.new("RGBA", (1600, 2919), (255, 255, 255, 0))
         context.paste(ref_image, (0, 0), mask=ref_image)
-        bytes = BytesIO()
-        context.save(bytes, format="WEBP")
-        bytes.seek(0)
-        file = discord.File(bytes, filename="reference_image.webp")
+        byteData = BytesIO()
+        context.save(byteData, format="WEBP")
+        byteData.seek(0)
+        file = discord.File(byteData, filename="reference_image.webp")
         return file
 
     @staticmethod

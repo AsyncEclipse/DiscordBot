@@ -39,7 +39,7 @@ class TurnButtons:
             player = game.get_player(interaction.user.id)
             view = TurnButtons.getStartTurnButtons(game, player, "dummy")
             game.saveLastButtonPressed("restart")
-            await interaction.channel.send(player['player_name']+" has chosen to back up to last start of turn.")
+            await interaction.channel.send(player['player_name'] + " has chosen to back up to last start of turn.")
             await interaction.channel.send(player["player_name"] + " use buttons to do your turn"
                                            + game.displayPlayerStats(player), view=view)
         except discord.NotFound:
@@ -61,16 +61,16 @@ class TurnButtons:
         else:
             view = View()
             role = discord.utils.get(interaction.guild.roles, name=game.game_id)
-            msg = role.mention+" All players have passed, you can use this button to start the next round"
-            if any(len(Combat.findTilesInConflict(game)) > 0,
-                   len(Combat.findUnownedTilesToTakeOver(game)) > 0,
-                   len(Combat.findTilesInContention(game)) > 0):
+            msg = f"{role.mention}, all players have passed, you may use this button to start the next round"
+            if any([len(Combat.findTilesInConflict(game)) > 0,
+                    len(Combat.findUnownedTilesToTakeOver(game)) > 0,
+                    len(Combat.findTilesInContention(game)) > 0]):
                 asyncio.create_task(Combat.startCombatThreads(game, interaction))
                 msg += " after all battles are resolved"
             view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray,
                                  custom_id="startPopDrop"))
             view.add_item(Button(label="Run Upkeep", style=discord.ButtonStyle.blurple, custom_id="runUpkeep"))
-            asyncio.create_task(interaction.channel.send(msg+".", view=view))
+            asyncio.create_task(interaction.channel.send(msg + ".", view=view))
         msg = f"End of {interaction.user.name}'s turn."
         if "lastAction" in player and "detailsOflastAction" in player:
             msg = (f"End of {interaction.user.name}'s turn. "
@@ -78,7 +78,7 @@ class TurnButtons:
         await game.updateNamesAndOutRimTiles(interaction)
         await interaction.message.delete()
         if "-" in interaction.channel.name:
-            thread_name = interaction.channel.name.split("-")[0]+"-bot-map-updates"
+            thread_name = interaction.channel.name.split("-")[0] + "-bot-map-updates"
             thread = discord.utils.get(interaction.channel.threads, name=thread_name)
             if thread is not None:
                 asyncio.create_task(game.showGame(thread, msg))
@@ -94,7 +94,7 @@ class TurnButtons:
 
             if TurnButtons.noOneElsePassed(player, game):
                 player_helper.adjust_money(2)
-                await interaction.channel.send(f"{player['player_name']} you gained 2 money" +
+                await interaction.channel.send(f"{player['player_name']} you gained 2 money"
                                                " and the first player marker for next round for passing first.")
                 player_helper.setFirstPlayer(True)
                 for p2 in game.get_gamestate()["players"]:
@@ -121,26 +121,26 @@ class TurnButtons:
             view2 = View()
             view2.add_item(Button(label="Pass Unless Someone Attacks You",
                                   style=discord.ButtonStyle.green, custom_id="permanentlyPass"))
-            await interaction.followup.send(interaction.user.mention + " you can use this button to pass on reactions" +
+            await interaction.followup.send(interaction.user.mention + " you may use this button to pass on reactions"
                                             " unless someone invades your systems.", view=view2, ephemeral=True)
         else:
             view = View()
             role = discord.utils.get(interaction.guild.roles, name=game.game_id)
-            msg = role.mention+" All players have passed, you can use this button to start the next round"
-            if any(len(Combat.findTilesInConflict(game)) > 0,
-                   len(Combat.findUnownedTilesToTakeOver(game)) > 0,
-                   len(Combat.findTilesInContention(game)) > 0):
+            msg = f"{role.mention}, all players have passed, you may use this button to start the next round"
+            if any([len(Combat.findTilesInConflict(game)) > 0,
+                    len(Combat.findUnownedTilesToTakeOver(game)) > 0,
+                    len(Combat.findTilesInContention(game)) > 0]):
                 await Combat.startCombatThreads(game, interaction)
-                msg = msg + " after all battles are resolved"
+                msg += " after all battles are resolved"
             view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray,
                                  custom_id="startPopDrop"))
             view.add_item(Button(label="Run Upkeep", style=discord.ButtonStyle.blurple, custom_id="runUpkeep"))
-            await interaction.channel.send(msg, view=view)
+            await interaction.channel.send(msg + ".", view=view)
         msg2 = f"{interaction.user.name} Passing"
         await game.updateNamesAndOutRimTiles(interaction)
         await interaction.message.delete()
         if "-" in interaction.channel.name:
-            thread_name = interaction.channel.name.split("-")[0]+"-bot-map-updates"
+            thread_name = interaction.channel.name.split("-")[0] + "-bot-map-updates"
             thread = discord.utils.get(interaction.channel.threads, name=thread_name)
             if thread is not None:
                 asyncio.create_task(game.showGame(thread, msg2))
@@ -216,7 +216,7 @@ class TurnButtons:
                 game.initilizeKey("activePlayerColor")
                 game.addToKey("activePlayerColor", nextPlayer["color"])
                 game.updatePingTime()
-                await interaction.channel.send("## "+game.getPlayerEmoji(nextPlayer)+" started their turn")
+                await interaction.channel.send("## " + game.getPlayerEmoji(nextPlayer) + " started their turn")
                 message = (f"{nextPlayer['player_name']} use buttons to do the first turn of the round" +
                            game.displayPlayerStats(nextPlayer))
                 await interaction.channel.send(message, view=view)
@@ -234,7 +234,7 @@ class TurnButtons:
         msg = f"{interaction.user.mention} Your reputation tiles hold the following values: "
         for reputation in player["reputation_track"]:
             if reputation != "mixed" and reputation != "amb" and isinstance(reputation, int):
-                msg = msg + str(reputation)+" "
+                msg += str(reputation) + " "
 
         await interaction.followup.send(msg, ephemeral=True)
 
@@ -301,14 +301,14 @@ class TurnButtons:
                                      custom_id=f"FCID{player['color']}_startMove"))
                 view.add_item(Button(label=f"Influence ({p1['influence_apt']})", style=discord.ButtonStyle.gray,
                                      custom_id=f"FCID{player['color']}_startInfluence"))
-                view.add_item(Button(label=f"Pass ({number_passed+1}{ordinal(number_passed+1)})",
+                view.add_item(Button(label=f"Pass ({number_passed + 1}{ordinal(number_passed + 1)})",
                                      style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_passForRound"))
         else:
             if p1.get("passed"):
                 view.add_item(Button(label="Pass On Reaction", style=discord.ButtonStyle.red,
                                      custom_id=f"FCID{p1['color']}_passForRound"))
             else:
-                view.add_item(Button(label=f"Pass ({number_passed+1}{ordinal(number_passed+1)})",
+                view.add_item(Button(label=f"Pass ({number_passed + 1}{ordinal(number_passed + 1)})",
                                      style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_passForRound"))
         if not p1.get("passed"):
             pulsarView = PulsarButtons.findPulsarOptions(game, p1)
@@ -330,8 +330,8 @@ class TurnButtons:
         blackView = BlackHoleButtons.getBlackHoleShips(game, player)
         for child in blackView.children:
             view.add_item(child)
-        if all(game.get_gamestate()["player_count"] > 3, not player_helper.isTraitor(),
-               len(DiplomaticRelationsButtons.getPlayersWithWhichDiplomatcRelationsCanBeFormed(game, player)) > 0):
+        if all([game.get_gamestate()["player_count"] > 3, not player_helper.isTraitor(),
+                len(DiplomaticRelationsButtons.getPlayersWithWhichDiplomatcRelationsCanBeFormed(game, player)) > 0]):
             view.add_item(Button(label="Initiate Diplomatic Relations", style=discord.ButtonStyle.gray,
                                  custom_id=f"FCID{p1['color']}_startDiplomaticRelations"))
         if not player_helper.isTraitor() and len(game.get_gamestate().get("minor_species", [])) > 0:
@@ -396,14 +396,14 @@ class TurnButtons:
                                  custom_id=f"FCID{player['color']}_magColShipForResource_money"))
             view.add_item(Button(label="Get 1 Material", style=discord.ButtonStyle.blurple, emoji=emojiC,
                                  custom_id=f"FCID{player['color']}_magColShipForResource_materials"))
-        if all(game.get_gamestate()["player_count"] > 3,
-               not player_helper.isTraitor(),
-               len(DiplomaticRelationsButtons.getPlayersWithWhichDiplomatcRelationsCanBeFormed(game, player)) > 0):
+        if all([game.get_gamestate()["player_count"] > 3,
+                not player_helper.isTraitor(),
+                len(DiplomaticRelationsButtons.getPlayersWithWhichDiplomatcRelationsCanBeFormed(game, player)) > 0]):
             view.add_item(Button(label="Initiate Diplomatic Relations", style=discord.ButtonStyle.gray,
                                  custom_id=f"FCID{player['color']}_startDiplomaticRelations"))
-        if all(not player_helper.isTraitor(),
-               "minor_species" in game.gamestate,
-               len(game.get_gamestate()["minor_species"]) > 0):
+        if all([not player_helper.isTraitor(),
+                "minor_species" in game.gamestate,
+                len(game.get_gamestate()["minor_species"]) > 0]):
             view.add_item(Button(label="Minor Species Relations", style=discord.ButtonStyle.green,
                                  custom_id=f"FCID{player['color']}_startMinorRelations"))
         await interaction.channel.send(f"Colony ships available: {player['colony_ships']}\n"

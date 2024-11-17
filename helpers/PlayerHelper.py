@@ -17,7 +17,7 @@ class PlayerHelper:
         before = self.stats["materials"]
         self.stats["materials"] += adjustment
         emoji = Emoji.getEmojiByName("material")
-        return f"\n> Adjusted {emoji} from {before} to {before+adjustment}"
+        return f"\n> Adjusted {emoji} from {before} to {before + adjustment}"
 
     def adjust_science(self, adjustment):
         before = self.stats["science"]
@@ -37,7 +37,7 @@ class PlayerHelper:
         before = self.stats["money"]
         self.stats["money"] += adjustment
         emoji = Emoji.getEmojiByName("money")
-        return f"\n> Adjusted {emoji} from {before} to {before+adjustment}"
+        return f"\n> Adjusted {emoji} from {before} to {before + adjustment}"
 
     def getTechs(self):
         return self.stats["military_tech"] + self.stats["grid_tech"] + self.stats["nano_tech"]
@@ -75,7 +75,7 @@ class PlayerHelper:
 
     def adjust_influence(self, adjustment):
         before = self.stats["influence_discs"]
-        amount = max(0, self.stats["influence_discs"]+adjustment)
+        amount = max(0, self.stats["influence_discs"] + adjustment)
         amount = min(15, amount)
         self.stats["influence_discs"] = amount
         return (f"\n> Adjusted influence discs from {before} to {amount}")
@@ -84,24 +84,26 @@ class PlayerHelper:
         self.adjust_influence(-1)
         self.stats["lastAction"] = action
         self.stats["detailsOflastAction"] = ""
-        if action+"_action_counters" not in self.stats:
-            self.stats[action+"_action_counters"] = 0
-        self.stats[action+"_action_counters"] = self.stats[action + "_action_counters"] + 1
+        counters = f"{action}_action_counters"
+        if counters not in self.stats:
+            self.stats[counters] = 0
+        self.stats[counters] += 1
 
     def specifyDetailsOfAction(self, details: str):
-        if "detailsOflastAction" in self.stats and self.stats["detailsOflastAction"] != "":
+        if self.stats.get("detailsOflastAction", "") != "":
             self.stats["detailsOflastAction"] = self.stats["detailsOflastAction"] + " " + details
         else:
             self.stats["detailsOflastAction"] = details
 
     def adjust_influence_on_action(self, action: str, amount: int):
         self.adjust_influence(-amount)
-        if action + "_action_counters" not in self.stats:
-            self.stats[action+"_action_counters"] = 0
-        if self.stats[action+"_action_counters"] + amount > -1:
-            self.stats[action+"_action_counters"] = self.stats[action + "_action_counters"] + amount
+        counters = f"{action}_action_counters"
+        if counters not in self.stats:
+            self.stats[counters] = 0
+        if self.stats[counters] + amount >= 0:
+            self.stats[counters] += amount
         else:
-            self.stats[action+"_action_counters"] = 0
+            self.stats[counters] = 0
 
     def acquire_disc_tile_for_points(self):
         if "disc_tiles_for_points" not in self.stats:
@@ -164,7 +166,7 @@ class PlayerHelper:
         return self.money_income() - self.upkeepCosts() + self.stats["money"] < 0
 
     def upkeep(self):
-        self.adjust_money(self.money_income()-self.upkeepCosts())
+        self.adjust_money(self.money_income() - self.upkeepCosts())
         self.adjust_materials(self.materials_income())
         self.adjust_science(self.science_income())
         self.stats["colony_ships"] = self.stats["base_colony_ships"]
@@ -174,16 +176,17 @@ class PlayerHelper:
         neutralCubes = 0
         actions = ["influence", "build", "move", "upgrade", "explore", "research"]
         for action in actions:
-            if action+"_action_counters" not in self.stats:
-                self.stats[action+"_action_counters"] = 0
+            counters = f"{action}_action_counters"
+            if counters not in self.stats:
+                self.stats[counters] = 0
             else:
-                count = self.stats[action+"_action_counters"]
-                self.stats[action+"_action_counters"] = 0
+                count = self.stats[counters]
+                self.stats[counters] = 0
                 self.adjust_influence(count)
         if "graveYard" in self.stats:
             for cube in self.stats["graveYard"]:
                 if "neutral" not in cube and "orbital" not in cube:
-                    self.stats[cube+"_cubes"] = self.stats[cube+"_cubes"] + 1
+                    self.stats[cube + "_cubes"] = self.stats[cube + "_cubes"] + 1
                 else:
                     neutralCubes += 1
             self.stats["graveYard"] = []

@@ -204,18 +204,18 @@ class SetupCommands(commands.GroupCog, name="setup"):
             minorSpeciesList += species + "\n"
         await thread.send(role.mention + " pinging you here")
         await actions.send("Initial tech draw is as follows", file=drawing.show_available_techs())
-        await actions.send(role.mention+" Draft factions and turn position in the manner of your choice,"
+        await actions.send(f"{role.mention}, draft factions and turn position in the manner of your choice,"
                            + " then setup the game with /setup game. "
                            + "Enter the players in the order they should take turns in"
                            + " (i.e. enter first player first). "
-                           + "A draft has been started for you that you can use instead of the slash command.")
+                           + "A draft has been started for you that you may use instead of the slash command.")
         await actions.send("A common way to draft factions is to generate a random pick order"
                            + " and then have the turn order be the reverse of that pick order. "
                            + "For your convenience, the following random pick order was generated,"
-                           + " but you can ignore it. \n" +
+                           + " but you may ignore it. \n" +
                            "This game has been set to auto include minor species,"
                            + " 4 of which have been drawn at random below. "
-                           + "If you want to disable this, you can use `/game disable_minor_species`. "
+                           + "If you want to disable this, you may use `/game disable_minor_species`. "
                            + "The minor species are as follows:\n"
                            + minorSpeciesList,
                            file=drawing.show_minor_species())

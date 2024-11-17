@@ -35,8 +35,9 @@ class ResearchButtons:
             tech_data = json.load(f)
         tech_details = tech_data.get(tech)
         image = DrawHelper.show_tech_ref_image(tech_details["name"], tech_details['track'])
-        await interaction.channel.send(f"{player['player_name']} acquired the tech "+tech_details["name"], file=image)
-        player_helper.specifyDetailsOfAction("Researched "+tech_details["name"]+".")
+        await interaction.channel.send(f"{player['player_name']} acquired the tech {tech_details['name']}.",
+                                       file=image)
+        player_helper.specifyDetailsOfAction(f"Researched {tech_details['name']}.")
         if player["science"] >= cost:
             msg = player_helper.adjust_science(-cost)
             game.update_player(player_helper)
@@ -49,7 +50,7 @@ class ResearchButtons:
             for resource_type, button_style in [("materials", discord.ButtonStyle.gray),
                                                 ("money", discord.ButtonStyle.blurple)]:
                 if player[resource_type] >= trade_value:
-                    val += int(player[resource_type]/trade_value)
+                    val += player[resource_type] // trade_value
                     view.add_item(Button(label=f"Pay {trade_value} {resource_type.capitalize()}",
                                          style=button_style,
                                          custom_id=f"FCID{player['color']}_payAtRatio_{resource_type}"))
@@ -89,7 +90,7 @@ class ResearchButtons:
                                      custom_id=f"FCID{player['color']}_gain5resource_{resource_type}"))
             view.add_item(Button(label="Done Gaining", style=discord.ButtonStyle.red,
                                  custom_id=f"FCID{player['color']}_deleteMsg"))
-            await interaction.channel.send("You can gain 5 of any type of resource for each artifact you have",
+            await interaction.channel.send("You may gain 5 of any type of resource for each artifact you have.",
                                            view=view)
         if tech == "wap":
             view = View()
@@ -98,13 +99,13 @@ class ResearchButtons:
                 if tile not in seenTiles:
                     seenTiles.append(tile)
                     view.add_item(Button(label=tile, style=discord.ButtonStyle.blurple,
-                                         custom_id=f"FCID{player['color']}_placeWarpPortal_"+tile))
+                                         custom_id=f"FCID{player['color']}_placeWarpPortal_{tile}"))
             await interaction.channel.send("Choose which tile you would like to place the warp tile in", view=view)
         if tech_details["dtile"] != 0:
             game.addDiscTile(game.getLocationFromID(player["home_planet"]))
             await DiscoveryTileButtons.exploreDiscoveryTile(game, game.getLocationFromID(player["home_planet"]),
                                                             interaction, player)
-        lenTech = len(player[tech_type+"_tech"])
+        lenTech = len(player[f"{tech_type}_tech"])
         if lenTech == 4 and "magDiscTileUsed" in player and not player["magDiscTileUsed"]:
             await interaction.channel.send(player["player_name"] + " due to researching your fourth tech"
                                            " for the first time this game as Magellan, you get a discovery tile")
@@ -117,7 +118,7 @@ class ResearchButtons:
     async def placeWarpPortal(interaction: discord.Interaction, game: GamestateHelper, player, customID):
         loc = customID.split("_")[1]
         game.addWarpPortal(loc)
-        await interaction.channel.send(interaction.user.mention + " added a warp portal to tile "+loc)
+        await interaction.channel.send(interaction.user.mention + " added a warp portal to tile " + loc)
         await interaction.message.delete()
 
     @staticmethod
@@ -140,11 +141,11 @@ class ResearchButtons:
         extra = 0
         if player["colony_ships"] > 0 and game.get_short_faction_name(player["name"]) == "magellan":
             extra += player["colony_ships"]
-        money_value = int(player["money"] / player["trade_value"])
+        money_value = player["money"] // player["trade_value"]
         if player["name"] == "Rho Indi Syndicate":
-            money_value = money_value * 2
+            money_value *= 2
 
-        return player["science"] + money_value + int(player["materials"]/player["trade_value"])+extra
+        return player["science"] + money_value + (player["materials"] // player["trade_value"]) + extra
 
     @staticmethod
     async def startResearch(game: GamestateHelper, player, player_helper: PlayerHelper,
@@ -192,7 +193,7 @@ class ResearchButtons:
                 if cost > avalScience:
                     continue
                 tech_details = tech_data.get(tech)
-                techName = "tech_"+tech_details["name"].lower().replace(" ", "_") if tech_details else tech
+                techName = "tech_" + tech_details["name"].lower().replace(" ", "_") if tech_details else tech
                 buttonStyle = discord.ButtonStyle.red
                 if tech_type == "grid":
                     buttonStyle = discord.ButtonStyle.green

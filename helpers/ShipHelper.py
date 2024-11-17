@@ -115,9 +115,9 @@ class PlayerShip(Ship):
             return ship_type
 
     def check_valid_ship(self):
-        return not any(self.range <= 0 and not self.ship_type == "starbase",
-                       self.energy < 0,
-                       self.ship_type == "starbase" and self.range > 0)
+        return not any([self.range <= 0 and not self.ship_type == "starbase",
+                        self.energy < 0,
+                        self.ship_type == "starbase" and self.range > 0])
 
 
 class AI_Ship(Ship):
@@ -126,14 +126,14 @@ class AI_Ship(Ship):
         with open("data/AI_ships.json", "r") as f:
             AI_parts = json.load(f)
         if "ai-" not in ship_type:
-            ship_type = "ai-"+ship_type
+            ship_type = f"ai-{ship_type}"
         if advanced:
             if "adv" not in ship_type:
-                ship_type = ship_type + "adv"
+                ship_type += "adv"
             ship_parts = AI_parts[ship_type]
         if wa:
             if "wa" not in ship_type:
-                ship_type = ship_type + "wa"
+                ship_type += "wa"
             ship_parts = AI_parts[ship_type]
         else:
             ship_parts = AI_parts[ship_type]

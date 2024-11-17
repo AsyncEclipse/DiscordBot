@@ -16,7 +16,7 @@ class DraftButtons:
         game.initilizeKey("draftingPlayers")
         for x, player in enumerate(player_list):
             member = interaction.guild.get_member(player[0])
-            message.append(f"{x+1}. {member.mention}")
+            message.append(f"{x + 1}. {member.mention}")
             game.addToKey("draftingPlayers", player[0])
         message.append("For your reference, the factions currently available in the bot are the following 8,"
                        " plus the 6 Terran equivalents. First-timers are encouraged to use the Terran factions,"
@@ -30,7 +30,7 @@ class DraftButtons:
         await channel.send("\n".join(message))
         playerID = game.get_gamestate()["draftingPlayers"][0]
         member = interaction.guild.get_member(playerID)
-        await channel.send(member.mention+", please draft a faction from those available.",
+        await channel.send(f"{member.mention}, please draft a faction from those available.",
                            view=DraftButtons.getDraftButtons(game))
 
     @staticmethod
@@ -63,7 +63,7 @@ class DraftButtons:
             shortFaction = game.getShortFactionNameFromFull(shorterName)
             if "terran" in shortFaction:
                 shortFaction += "_"
-            emoji = Emoji.getEmojiByName(shortFaction+"token")
+            emoji = Emoji.getEmojiByName(shortFaction + "token")
             view.add_item(Button(label=f"{faction}", emoji=emoji, style=discord.ButtonStyle.gray,
                                  custom_id=f"draftFaction_{key}_{faction}"))
         return view
@@ -83,7 +83,7 @@ class DraftButtons:
         if len(game.get_gamestate()["draftingPlayers"]) > 0:
             playerID = game.get_gamestate()["draftingPlayers"][0]
             member = interaction.guild.get_member(playerID)
-            await interaction.channel.send(member.mention+", please draft a faction from those available",
+            await interaction.channel.send(f"{member.mention}, please draft a faction from those available.",
                                            view=DraftButtons.getDraftButtons(game))
         else:
             factionsList = []
@@ -125,7 +125,7 @@ class DraftButtons:
         listPlayerHomes = []
         x = -1
         for i in temp_player_list:
-            x = x+1
+            x += 1
             if i is not None and temp_faction_list[x] is not None:
                 player = i
                 faction = temp_faction_list[x]
@@ -137,7 +137,7 @@ class DraftButtons:
                 game.player_setup(player, faction, player_color)
                 home = game.get_player(player)["home_planet"]
                 listPlayerHomes.append([home, player_color])
-                count = count + 1
+                count += 1
 
         listOfTilesPos = ["201", "207", "205", "211", "203", "209"]
         tile_mapping = {
@@ -149,18 +149,18 @@ class DraftButtons:
         if count in tile_mapping:
             listOfTilesPos = tile_mapping[count]
         hyperlane5 = False
-        if "5playerhyperlane" in game.gamestate and game.gamestate["5playerhyperlane"]:
+        if game.gamestate.get("5playerhyperlane"):
             hyperlane5 = True
         listDefended = ["271", "272", "273", "274", "271"]
         random.shuffle(listDefended)
         game.add_tile("000", 0, "001")
         for i in range(count):
-            rotDet = ((180 - (int(listOfTilesPos[i])-201)/2 * 60)) % 360
+            rotDet = (180 - 30 * (int(listOfTilesPos[i]) - 201)) % 360
             game.add_tile(listOfTilesPos[i], rotDet, listPlayerHomes[i][0], listPlayerHomes[i][1])
         if not hyperlane5:
-            for i in range(6-count):
-                rotDet = ((180 - (int(listOfTilesPos[5-i])-201)/2 * 60) + 360) % 360
-                game.add_tile(listOfTilesPos[5-i], rotDet, listDefended[i])
+            for i in range(6 - count):
+                rotDet = (180 - 30 * (int(listOfTilesPos[5 - i]) - 201)) % 360
+                game.add_tile(listOfTilesPos[5 - i], rotDet, listDefended[i])
         for i in range(101, 107):
             if hyperlane5 and i == 104:
                 continue

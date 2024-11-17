@@ -64,7 +64,7 @@ class PopulationButtons:
             label = planetT.capitalize()
             if adv:
                 label = "Advanced " + label
-            label = label + f" (tile {tile})"
+            label += f" (tile {tile})"
             view.add_item(Button(label=label, style=discord.ButtonStyle.blurple, custom_id=buttonID))
         return view
 
@@ -77,7 +77,7 @@ class PopulationButtons:
                                            view=view)
         else:
             await interaction.channel.send(f"{interaction.user.mention},"
-                                           " the bot can find no empty planets which you can put population on.",
+                                           " the bot cannot find any empty planets for you to put population on.",
                                            view=view)
 
     @staticmethod
@@ -102,7 +102,7 @@ class PopulationButtons:
                             optionsForPop.remove("money")
                 optionsForPop2 = optionsForPop[:]
                 for planetT in optionsForPop2:
-                    if player[planetT+"_pop_cubes"] < 1:
+                    if player[f"{planetT}_pop_cubes"] < 1:
                         optionsForPop.remove(planetT)
                 if len(optionsForPop) > 1:
                     view = View()
@@ -130,7 +130,7 @@ class PopulationButtons:
             await interaction.message.edit(view=PopulationButtons.getPopButtons(game, player))
         drawing = DrawHelper(game.gamestate)
         resourceType = typeOfPop.replace('adv', '')
-        income = player["population_track"][player[resourceType+"_pop_cubes"]-1]
+        income = player["population_track"][player[resourceType + "_pop_cubes"] - 1]
         ships = game.gamestate["players"][game.get_player_from_color(player["color"])]["colony_ships"]
         asyncio.create_task(interaction.channel.send(f"Successfully added a {resourceType} population to tile {tile}. "
                                                      f"You now have an income of {str(income)} {resourceType}. {ships}"

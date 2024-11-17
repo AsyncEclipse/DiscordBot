@@ -37,19 +37,19 @@ class TileCommands(commands.GroupCog, name="tile"):
                             unit: app_commands.Choice[str],
                             color: Optional[app_commands.Choice[str]] = None):
         game = GamestateHelper(interaction.channel)
-        type = unit.value
+        unitType = unit.value
         if unit.value == "grd" or unit.value == "anc" or unit.value == "gcds":
             colorOrAI = "ai"
             if game.gamestate["advanced_ai"]:
-                type += "adv"
+                unitType += "adv"
         else:
             colorOrAI = color.value if color else game.get_player(str(interaction.user.id))["color"]
-        option = colorOrAI + "-"+type
+        option = colorOrAI + "-" + unitType
         game.add_damage(option, tile_position, 0)
         if damage_change > 0:
             game.add_damage(option, tile_position, damage_change)
         else:
-            for x in range(-1*damage_change):
+            for x in range(-damage_change):
                 game.repair_damage(option, tile_position)
         await interaction.response.defer(thinking=True)
         drawing = DrawHelper(game.gamestate)
@@ -104,9 +104,9 @@ class TileCommands(commands.GroupCog, name="tile"):
         adv = ""
         if game.gamestate["advanced_ai"]:
             adv = "adv"
-        process_units("gcds"+adv, gcds)
-        process_units("anc"+adv, ancients)
-        process_units("grd"+adv, guardians)
+        process_units("gcds" + adv, gcds)
+        process_units("anc" + adv, ancients)
+        process_units("grd" + adv, guardians)
 
         if added_units:
             game.add_units(added_units, tile_position)
@@ -196,18 +196,18 @@ class TileCommands(commands.GroupCog, name="tile"):
                 for x in range(neutralPop):
                     view = View()
                     for planetT in ["money", "science", "material"]:
-                        if playerObj[planetT+"_pop_cubes"] < 13:
+                        if playerObj[f"{planetT}_pop_cubes"] < 13:
                             view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple,
-                                                 custom_id=f"FCID{player_color}_addCubeToTrack_"+planetT))
+                                                 custom_id=f"FCID{player_color}_addCubeToTrack_{planetT}"))
                     await interaction.channel.send("A cube with no set track was removed, "
                                                    "please tell the bot what track you want it to go on", view=view)
             if orbitalPop > 0:
                 for x in range(orbitalPop):
                     view = View()
                     for planetT in ["money", "science"]:
-                        if playerObj[planetT+"_pop_cubes"] < 13:
+                        if playerObj[f"{planetT}_pop_cubes"] < 13:
                             view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple,
-                                                 custom_id=f"FCID{player_color}_addCubeToTrack_"+planetT))
+                                                 custom_id=f"FCID{player_color}_addCubeToTrack_{planetT}"))
                     await interaction.channel.send("An orbital cube was removed, "
                                                    "please tell the bot what track you want it to go on", view=view)
         if influence is not None:
@@ -279,7 +279,7 @@ class TileCommands(commands.GroupCog, name="tile"):
         game = GamestateHelper(interaction.channel)
         await interaction.response.defer(thinking=False)
         game.addDiscTile(tile_position)
-        await interaction.followup.send("Added a discovery tile to tile "+tile_position)
+        await interaction.followup.send("Added a discovery tile to tile " + tile_position)
 
     @app_commands.command(name="resolve_specific_discovery_tile")
     async def resolve_specific_discovery_tile(self, interaction: discord.Interaction,
@@ -291,14 +291,14 @@ class TileCommands(commands.GroupCog, name="tile"):
         with open("data/discoverytiles.json") as f:
             discTile_data = json.load(f)
         if disc not in discTile_data:
-            await interaction.followup.send(discovery_id+" is not a valid ID. "
+            await interaction.followup.send(f"{discovery_id} is not a valid ID. "
                                             "Ping someone who knows the code to find the correct ID.")
             return
         discName = discTile_data[disc]["name"]
         drawing = DrawHelper(game.gamestate)
         file = drawing.show_disc_tile(discName)
         msg = (f"{interaction.user.mention} you explored a discovery tile and found a {discName}. "
-               "You can keep it for 2 points at the end of the game or use it for its ability.")
+               "You may keep it for 2 points at the end of the game or use it for its ability.")
 
         view = View()
         view.add_item(Button(label="Use it for its ability", style=discord.ButtonStyle.green,

@@ -17,9 +17,9 @@ class ShrineButtons:
             targetType = shrinePlan.split("_")[0]
             tile = shrinePlan.split("_")[1]
             for count, shrineType in enumerate(player["shrine_type"]):
-                if all(type == shrineType or type == "neutral",
-                       player["shrine_in_storage"][count] == 1,
-                       player["shrine_cost"][count] <= ShrineButtons.getResourceAvailable(targetType, player, game)):
+                if all([type == shrineType or type == "neutral",
+                        player["shrine_in_storage"][count] == 1,
+                        player["shrine_cost"][count] <= ShrineButtons.getResourceAvailable(targetType, player, game)]):
                     view.add_item(Button(label=f"{type.capitalize()} (Tile {tile})",
                                          emoji=Emoji.getEmojiByName(targetType), style=discord.ButtonStyle.gray,
                                          custom_id=f"FCID{player['color']}_placeShrineInitial_{targetType}_{tile}"))
@@ -57,9 +57,9 @@ class ShrineButtons:
                            "moneyadv", "scienceadv", "materialadv", "neutraladv"]
             for planetT in planetTypes:
                 shrineType = planetT.replace("adv", "")
-                if all(tileState.get(f"{planetT}_pop", []) != [],
-                       f"{shrineType}_shrine" not in tileState,
-                       f"{shrineType}_{tile}" not in shrinePlanets):
+                if all([tileState.get(f"{planetT}_pop", []) != [],
+                        f"{shrineType}_shrine" not in tileState,
+                        f"{shrineType}_{tile}" not in shrinePlanets]):
                     shrinePlanets.append(f"{shrineType}_{tile}")
         return shrinePlanets
 
@@ -70,9 +70,9 @@ class ShrineButtons:
         view = View()
         drawing = DrawHelper(game.gamestate)
         for count, shrineType in enumerate(player["shrine_type"]):
-            if all(targetType == shrineType or type == "neutral",
-                   player["shrine_in_storage"][count] == 1,
-                   player["shrine_cost"][count] <= ShrineButtons.getResourceAvailable(targetType, player, game)):
+            if all([targetType == shrineType or type == "neutral",
+                    player["shrine_in_storage"][count] == 1,
+                    player["shrine_cost"][count] <= ShrineButtons.getResourceAvailable(targetType, player, game)]):
                 view.add_item(Button(label=f"{shrineType.capitalize()} (Cost {str(player['shrine_cost'][count])})",
                                      style=discord.ButtonStyle.gray, emoji=Emoji.getEmojiByName(targetType),
                                      custom_id=f"FCID{player['color']}_placeShrineFinal_{type}_{tile}_{str(count)}"))
@@ -119,13 +119,13 @@ class ShrineButtons:
         nums = [0, 1, 2]
         if any(count == n for n in nums):
             if all(player_helper.stats["shrine_in_storage"][n] == 0 for n in nums):
-                await interaction.channel.send(player["player_name"]+" placed the third shrine"
+                await interaction.channel.send(player["player_name"] + " placed the third shrine"
                                                " from a row on their shrine board"
                                                " and gains the Wormhole Generator ability.")
         nums = [3, 4, 5]
         if any(count == n for n in nums):
             if all(player_helper.stats["shrine_in_storage"][n] == 0 for n in nums):
-                await interaction.channel.send(player["player_name"]+" placed the third shrine"
+                await interaction.channel.send(player["player_name"] + " placed the third shrine"
                                                " from a row on their shrine board and gains a discovery tile.")
                 game.addDiscTile(game.getLocationFromID(player["home_planet"]))
                 await DiscoveryTileButtons.exploreDiscoveryTile(game, game.getLocationFromID(player["home_planet"]),

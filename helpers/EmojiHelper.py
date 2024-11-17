@@ -130,6 +130,6 @@ class Emoji:
                      "<:greenint:1301320116813697064>",
                      "<:whiteint:1301319925679390871>"]
         for emoj in emojiList:
-            if ":"+name+":" in emoj:
+            if f":{name}:" in emoj:
                 return emoj
         return "❓"

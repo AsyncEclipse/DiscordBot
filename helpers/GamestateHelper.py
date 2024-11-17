@@ -27,12 +27,12 @@ class GamestateHelper:
     def getPlayersID(self, player):
         return player["player_name"].replace(">@", "").replace(">", "")
 
-    def setRound(self, round: int):
-        self.gamestate["roundNum"] = round
+    def setRound(self, rnd: int):
+        self.gamestate["roundNum"] = rnd
         self.update()
 
-    def addShrine(self, tile, type):
-        self.gamestate["board"][tile][type+"_shrine"] = 1
+    def addShrine(self, tile, shrineType):
+        self.gamestate["board"][tile][f"{shrineType}_shrine"] = 1
         if "shrines" in self.gamestate["board"][tile]:
             self.gamestate["board"][tile]["shrines"] += 1
         else:
@@ -187,8 +187,8 @@ class GamestateHelper:
     def tile_draw(self, ring):
         ring = int(int(ring) / 100)
         ring = min(3, ring)
-        if all(len(self.gamestate[f"tile_deck_{ring}00"]) == 0,
-               len(self.gamestate.get(f"tile_discard_deck_{ring}00", [])) > 0):
+        if all([len(self.gamestate[f"tile_deck_{ring}00"]) == 0,
+                len(self.gamestate.get(f"tile_discard_deck_{ring}00", [])) > 0]):
             self.gamestate[f"tile_deck_{ring}00"] = self.gamestate[f"tile_discard_deck_{ring}00"]
             self.gamestate[f"tile_discard_deck_{ring}00"] = []
         random.shuffle(self.gamestate[f"tile_deck_{ring}00"])
@@ -217,7 +217,7 @@ class GamestateHelper:
         firstNum = min(3, firstNum)
         if "tile_discard_deck_" + str(firstNum) + "00" not in self.gamestate:
             self.gamestate["tile_discard_deck_" + str(firstNum) + "00"] = []
-        self.gamestate["tile_discard_deck_"+str(firstNum)+"00"].append(sector)
+        self.gamestate[f"tile_discard_deck_{firstNum}00"].append(sector)
         self.update()
 
     @staticmethod
@@ -288,7 +288,7 @@ class GamestateHelper:
 
     def rotate_tile(self, position, orientation):
         tile = self.gamestate["board"][position]
-        tile.update({"orientation": (tile["orientation"]+orientation) % 360})
+        tile.update({"orientation": (tile["orientation"] + orientation) % 360})
         self.gamestate["board"][position] = tile
         self.update()
 
@@ -316,9 +316,9 @@ class GamestateHelper:
                     adv = "adv"
                 anc, grd, gcds = tile["ancient"], tile["guardian"], tile["gcds"]
                 if anc:
-                    tile["player_ships"].append("ai-anc"+adv)
+                    tile["player_ships"].append("ai-anc" + adv)
                     if tile["ancient"] > 1:
-                        tile["player_ships"].append("ai-anc"+adv)
+                        tile["player_ships"].append("ai-anc" + adv)
                 if grd:
                     tile["player_ships"].append("ai-grd" + adv)
                 if gcds:
@@ -330,7 +330,7 @@ class GamestateHelper:
         self.gamestate["board"][position] = tile
 
         configs = Properties()
-        if "5playerhyperlane" in self.gamestate and self.gamestate["5playerhyperlane"]:
+        if self.gamestate.get("5playerhyperlane"):
             with open("data/tileAdjacencies_5p.properties", "rb") as f:
                 configs.load(f)
         else:
@@ -342,7 +342,7 @@ class GamestateHelper:
                 discard = 0
                 if "tile_discard_deck_300" in self.gamestate:
                     discard = len(self.gamestate["tile_discard_deck_300"])
-                if adjTile not in self.gamestate["board"] and len(self.gamestate["tile_deck_300"])+discard > 0:
+                if adjTile not in self.gamestate["board"] and len(self.gamestate["tile_deck_300"]) + discard > 0:
                     self.add_tile(adjTile, 0, "sector3back")
         self.update()
 
@@ -372,8 +372,8 @@ class GamestateHelper:
     def repair_damage(self, ship, position):
         damage = 0
         if "damage_tracker" in self.gamestate["board"][position]:
-            if all(ship in self.gamestate["board"][position]["damage_tracker"],
-                   self.gamestate["board"][position]["damage_tracker"][ship] > 0):
+            if all([ship in self.gamestate["board"][position]["damage_tracker"],
+                    self.gamestate["board"][position]["damage_tracker"][ship] > 0]):
                 damage = self.gamestate["board"][position]["damage_tracker"][ship] - 1
             else:
                 self.gamestate["board"][position]["damage_tracker"][ship] = [0]
@@ -398,17 +398,13 @@ class GamestateHelper:
 
     def cleanAllTheTiles(self):
         for position in self.gamestate["board"]:
-            if "damage_tracker" in self.gamestate["board"][position]:
-                del self.gamestate["board"][position]["damage_tracker"]
-            if "unitsToRetreat" in self.gamestate["board"][position]:
-                del self.gamestate["board"][position]["unitsToRetreat"]
+            self.gamestate["board"][position].pop("damage_tracker", None)
+            self.gamestate["board"][position].pop("unitsToRetreat", None)
             for player in self.gamestate["players"]:
                 color = self.gamestate["players"][player]["color"]
                 key = "ships_destroyed_by_" + color
-                if key in self.gamestate["board"][position]:
-                    del self.gamestate["board"][position][key]
-                if "retreatPenalty"+color in self.gamestate["board"][position]:
-                    del self.gamestate["board"][position]["retreatPenalty"+color]
+                self.gamestate["board"][position].pop(key, None)
+                self.gamestate["board"][position].pop("retreatPenalty" + color, None)
         self.update()
 
     def getReputationTilesToDraw(self, position, color):
@@ -453,8 +449,8 @@ class GamestateHelper:
                 self.gamestate["players"][player]["username"] = interaction.guild.get_member(int(player)).display_name
             tiles = self.gamestate["players"][player]["owned_tiles"][:]
             for tile in tiles:
-                if any("owner" not in self.gamestate["board"][tile],
-                       self.gamestate["board"][tile]["owner"] != self.gamestate["players"][player]["color"]):
+                if any(["owner" not in self.gamestate["board"][tile],
+                        self.gamestate["board"][tile]["owner"] != self.gamestate["players"][player]["color"]]):
                     self.gamestate["players"][player]["owned_tiles"].remove(tile)
 
         if len(self.gamestate["tile_deck_300"]) == 0:
@@ -494,8 +490,8 @@ class GamestateHelper:
                 self.gamestate["players"][player]["ship_stock"][2] -= 1
             if "sb" in i:
                 self.gamestate["players"][player]["ship_stock"][3] -= 1
-            if all(color == self.gamestate["board"][position]["owner"],
-                   len(self.gamestate["board"][position]["player_ships"]) > 0):
+            if all([color == self.gamestate["board"][position]["owner"],
+                    len(self.gamestate["board"][position]["player_ships"]) > 0]):
                 self.gamestate["board"][position]["player_ships"].insert(0, i)
             else:
                 self.gamestate["board"][position]["player_ships"].append(i)
@@ -503,10 +499,10 @@ class GamestateHelper:
 
     def displayPlayerStats(self, player):
         money = player["money"]
-        moneyIncrease = "+" + str(player["population_track"][player["money_pop_cubes"] - 1])
+        moneyIncrease = f"+{player['population_track'][player['money_pop_cubes'] - 1]}"
         moneyIncrease2 = "Error"
-        if player["money_pop_cubes"] - 2 > -1:
-            moneyIncrease2 = "+" + str(player["population_track"][player["money_pop_cubes"] - 2])
+        if player["money_pop_cubes"] - 2 >= 0:
+            moneyIncrease2 = f"+{player['population_track'][player['money_pop_cubes'] - 2]}"
         influence_track = [30, 25, 21, 17, 13, 10, 7, 5, 3, 2, 1, 0, 0, 0, 0, 0]
         moneyDecrease = str(influence_track[player["influence_discs"]])
         moneyDecrease2 = "Error"
@@ -519,18 +515,18 @@ class GamestateHelper:
         scienceEmoji = Emoji.getEmojiByName("science")
         materialEmoji = Emoji.getEmojiByName("material")
         scienceIncrease = player["population_track"][player["science_pop_cubes"] - 1]
-        scienceIncrease = "+"+str(scienceIncrease)
+        scienceIncrease = f"+{scienceIncrease}"
         materials = player["materials"]
         materialsIncrease = player["population_track"][player["material_pop_cubes"] - 1]
-        materialsIncrease = "+" + str(materialsIncrease)
+        materialsIncrease = f"+{materialsIncrease}"
         msg = "\n".join("Your current economic situation is as follows:",
                         f"{moneyEmoji}: {money} ({moneyIncrease} - {moneyDecrease})",
                         f"{scienceEmoji}: {science} ({scienceIncrease})",
                         f"{materialEmoji}: {materials} ({materialsIncrease})",
-                        ("If you spend another disk, your maintenance cost"
-                         f" will go from -{moneyDecrease} to -{moneyDecrease2}."),
-                        ("If you drop another money cube, your income"
-                         f" will go from {moneyIncrease} to {moneyIncrease2}."))
+                        "If you spend another disk, your maintenance cost"
+                        + f" will go from -{moneyDecrease} to -{moneyDecrease2}.",
+                        "If you drop another money cube, your income"
+                        + f" will go from {moneyIncrease} to {moneyIncrease2}.")
         return msg
 
     def setCombatants(self, players, pos):
@@ -542,7 +538,7 @@ class GamestateHelper:
         self.update()
 
     def setRetreatingPenalty(self, color, pos):
-        self.gamestate["board"][pos]["retreatPenalty"+color] = True
+        self.gamestate["board"][pos]["retreatPenalty" + color] = True
         self.update()
 
     def setRetreatingUnits(self, unitsToRetreat, pos):
@@ -611,7 +607,7 @@ class GamestateHelper:
         self.gamestate["board"][pos]["unresolvedHits"] = amount
         self.update()
 
-    def add_pop_specific(self, originalType: str, type: str, number: int, position: str, playerID):
+    def add_pop_specific(self, originalType: str, popType: str, number: int, position: str, playerID):
         if self.gamestate["players"][playerID]["colony_ships"] > 0:
             self.gamestate["players"][playerID]["colony_ships"] -= 1
         else:
@@ -620,8 +616,8 @@ class GamestateHelper:
             self.gamestate["board"][position][f"{originalType}_pop"][number] += 1
         else:
             self.gamestate["board"][position][f"{originalType}_pop"] = [1]
-        if type.replace("adv", "")+"_pop_cubes" in self.gamestate["players"][playerID]:
-            self.gamestate["players"][playerID][type.replace("adv", "")+"_pop_cubes"] -= 1
+        if popType.replace("adv", "") + "_pop_cubes" in self.gamestate["players"][playerID]:
+            self.gamestate["players"][playerID][popType.replace("adv", "") + "_pop_cubes"] -= 1
         self.update()
         return True
 
@@ -649,17 +645,17 @@ class GamestateHelper:
             if i in self.gamestate["board"][position]:
                 length = len(self.gamestate["board"][position][i])
             if "orbital" not in i:
-                if self.gamestate["board"][position][i][0]+1 <= length:
+                if self.gamestate["board"][position][i][0] + 1 <= length:
                     self.gamestate["board"][position][i][0] += 1
             else:
                 self.gamestate["board"][position][i] = [1]
                 length = len(self.gamestate["board"][position][i])
 
             if self.gamestate["board"][position][i][0] <= length:
-                if all("neutral" not in i,
-                       "orbital" not in i,
-                       self.gamestate["players"][playerID][i.replace("adv", "")+"_cubes"] > 1):
-                    self.gamestate["players"][playerID][i.replace("adv", "")+"_cubes"] -= 1
+                if all(["neutral" not in i,
+                        "orbital" not in i,
+                        self.gamestate["players"][playerID][i.replace("adv", "") + "_cubes"] > 1]):
+                    self.gamestate["players"][playerID][i.replace("adv", "") + "_cubes"] -= 1
                 else:
                     if "neutral" not in i:
                         orbitalPop += 1
@@ -681,10 +677,10 @@ class GamestateHelper:
                         break
             if found:
                 if not graveYard:
-                    if all("neutral" not in i,
-                           "orbital" not in i,
-                           self.gamestate["players"][playerID][i.replace("adv", "")+"_cubes"] < 13):
-                        self.gamestate["players"][playerID][i.replace("adv", "")+"_cubes"] += 1
+                    if all(["neutral" not in i,
+                            "orbital" not in i,
+                            self.gamestate["players"][playerID][i.replace("adv", "") + "_cubes"] < 13]):
+                        self.gamestate["players"][playerID][i.replace("adv", "") + "_cubes"] += 1
                     else:
                         if "neutral" not in i:
                             orbitalPop += 1
@@ -712,7 +708,7 @@ class GamestateHelper:
                     self.gamestate["players"][player]["ship_stock"][3] += 1
                 self.gamestate["board"][position]["player_ships"].remove(i)
             else:
-                if i+"adv" in self.gamestate["board"][position]["player_ships"]:
+                if i + "adv" in self.gamestate["board"][position]["player_ships"]:
                     self.gamestate["board"][position]["player_ships"].remove(i + "adv")
         self.update()
 
@@ -726,7 +722,7 @@ class GamestateHelper:
                 view = View()
                 planetTypes = ["money", "science", "material"]
                 for planetT in planetTypes:
-                    if p1.stats[planetT+"_pop_cubes"] < 12:
+                    if p1.stats[f"{planetT}_pop_cubes"] < 12:
                         view.add_item(Button(label=planetT.capitalize(),
                                              style=discord.ButtonStyle.blurple,
                                              custom_id=f"FCID{p1.stats['color']}_addCubeToTrack_{planetT}"))
@@ -735,7 +731,7 @@ class GamestateHelper:
                                                " please tell the bot what track you want it to go on",
                                                view=view)
 
-        tech_draws = self.gamestate["player_count"]+3
+        tech_draws = self.gamestate["player_count"] + 3
         while tech_draws > 0:
             random.shuffle(self.gamestate["tech_deck"])
             picked_tech = self.gamestate["tech_deck"].pop(0)
@@ -754,30 +750,30 @@ class GamestateHelper:
                 self.setTurnOrder(self.gamestate["pass_order"])
             self.gamestate["pass_order"] = []
 
-        round = 1
+        rnd = 1
         if "roundNum" in self.gamestate:
-            round = self.gamestate["roundNum"]
-        if "upkeepSupernovaCheck"+str(round) not in self.gamestate:
-            self.initilizeKey("upkeepSupernovaCheck"+str(round))
+            rnd = self.gamestate["roundNum"]
+        if "upkeepSupernovaCheck" + str(rnd) not in self.gamestate:
+            self.initilizeKey(f"upkeepSupernovaCheck{rnd}")
             tiles = self.gamestate["board"].copy()
             for position in tiles:
                 if self.gamestate["board"][position].get("type") == "supernova":
                     msg = f"Rolled the following dice for the supernova in position {position}: "
-                    sum = 0
+                    total = 0
                     for x in range(2):
                         random_number = random.randint(1, 6)
                         if random_number != 1 and random_number != 6:
-                            sum += random_number
+                            total += random_number
                         num = str(random_number).replace("1", "Miss").replace("6", ":boom:")
                         msg += str(num) + " "
                     if self.gamestate["board"][position]["owner"] != 0:
                         playerObj = self.getPlayerObjectFromColor(self.gamestate["board"][position]["owner"])
                         maxTech = max(len(playerObj["grid_tech"]), len(playerObj["military_tech"]))
                         maxTech = max(maxTech, len(playerObj["nano_tech"]))
-                        sum += maxTech
+                        total += maxTech
                     msg += (f"\nThe sum of that and the owners highest tech track ({sum})"
                             f" was compared against the round ({round}) and found to be ")
-                    if sum < round:
+                    if total < rnd:
                         msg += "lesser, so the supernova exploded."
                         if self.gamestate["board"][position]["owner"] != 0:
                             await InfluenceButtons.removeInfluenceFinish(self, interaction,
@@ -804,7 +800,7 @@ class GamestateHelper:
         shortFaction = self.getShortFactionNameFromFull(player["name"])
         if "terran" in shortFaction:
             shortFaction += "_"
-        emoji = Emoji.getEmojiByName(shortFaction+"token")
+        emoji = Emoji.getEmojiByName(f"{shortFaction}token")
         return emoji
 
     def createRoundNum(self):
@@ -827,8 +823,8 @@ class GamestateHelper:
         shortFaction = self.getShortFactionNameFromFull(self.gamestate["players"][str(player_id)]["name"])
         if "terran" in shortFaction:
             shortFaction += "_"
-        emoji = Emoji.getEmojiByName(shortFaction+"token")
-        self.gamestate["players"][str(player_id)]["player_name"] = name + " "+emoji
+        emoji = Emoji.getEmojiByName(f"{shortFaction}token")
+        self.gamestate["players"][str(player_id)]["player_name"] = f"{name} {emoji}"
         self.update()
         # return(f"{name} is now setup!")
 
@@ -841,9 +837,9 @@ class GamestateHelper:
                 p1 = PlayerHelper(i, self.get_player(i))
                 home = self.get_system_coord(p1.stats["home_planet"])
                 if p1.stats["name"] == "Orion Hegemony":
-                    self.gamestate["board"][home]["player_ships"].append(p1.stats["color"]+"-cru")
+                    self.gamestate["board"][home]["player_ships"].append(p1.stats["color"] + "-cru")
                 elif p1.stats["name"] == "Rho Indi Syndicate":
-                    self.gamestate["board"][home]["player_ships"] = [p1.stats["color"]+"-int", p1.stats["color"]+"-int"]
+                    self.gamestate["board"][home]["player_ships"] = 2 * [p1.stats["color"] + "-int"]
                 else:
                     self.gamestate["board"][home]["player_ships"].append(p1.stats["color"] + "-int")
 
@@ -911,9 +907,9 @@ class GamestateHelper:
     def setTurnsInPassingOrder(self, status: bool):
         self.gamestate["turnsInPassingOrder"] = status
 
-    def playerResearchTech(self, playerid, tech, type):
+    def playerResearchTech(self, playerid, tech, techType):
         self.gamestate["available_techs"].remove(tech)
-        self.gamestate["players"][playerid][type+"_tech"].append(tech)
+        self.gamestate["players"][playerid][f"{techType}_tech"].append(tech)
         with open("data/techs.json", "r") as f:
             tech_data = json.load(f)
         tech_details = tech_data.get(tech)
@@ -924,9 +920,9 @@ class GamestateHelper:
                 self.gamestate["players"][playerid][f"{tech_details['activ1']}_apt"] += 1
         self.update()
 
-    def playerReturnTech(self, playerid, tech, type):
+    def playerReturnTech(self, playerid, tech, techType):
         self.gamestate["available_techs"].append(tech)
-        self.gamestate["players"][playerid][type+"_tech"].remove(tech)
+        self.gamestate["players"][playerid][f"{techType}_tech"].remove(tech)
         with open("data/techs.json", "r") as f:
             tech_data = json.load(f)
         tech_details = tech_data.get(tech)
@@ -970,7 +966,7 @@ class GamestateHelper:
                     del saveFile[str(saveFile["oldestSaveNum"])]
                 saveFile["oldestSaveNum"] += 1
 
-            saveFile[str(saveFile["newestSaveNum"]+1)] = self.gamestate
+            saveFile[str(saveFile["newestSaveNum"] + 1)] = self.gamestate
             saveFile["newestSaveNum"] += 1
             json.dump(saveFile, f)
 
@@ -1031,9 +1027,8 @@ class GamestateHelper:
         found = False
         for x, tile in enumerate(player1["reputation_track"]):
             if isinstance(tile, str) and (tile == "amb" or tile == "mixed"):
-                self.gamestate["players"][pID]["reputation_track"][x] = (tile + "-" +
-                                                                         self.get_short_faction_name(player2["name"]) +
-                                                                         "-" + player2["color"])
+                track = f"{tile}-{self.get_short_faction_name(player2['name'])}-{player2['color']}"
+                self.gamestate["players"][pID]["reputation_track"][x] = track
                 found = True
                 break
         if not found:
@@ -1043,17 +1038,15 @@ class GamestateHelper:
                 if isinstance(tile, int) and tile < lowest:
                     loc = x
                     lowest = tile
-            self.gamestate["players"][pID]["reputation_track"][loc] = ("mixed-" +
-                                                                       self.get_short_faction_name(player2["name"]) +
-                                                                       "-" + player2["color"])
+            track = f"mixed-{self.get_short_faction_name(player2['name'])}-{player2['color']}"
+            self.gamestate["players"][pID]["reputation_track"][loc] = track
             self.gamestate["reputation_tiles"].append(lowest)
 
         found = False
         for x, tile in enumerate(player2["reputation_track"]):
             if isinstance(tile, str) and (tile == "amb" or tile == "mixed"):
-                self.gamestate["players"][pID2]["reputation_track"][x] = (tile + "-" +
-                                                                          self.get_short_faction_name(player1["name"]) +
-                                                                          "-" + player1["color"])
+                track = f"{tile}-{self.get_short_faction_name(player1['name'])}-{player1['color']}"
+                self.gamestate["players"][pID2]["reputation_track"][x] = track
                 found = True
                 break
         if not found:
@@ -1063,9 +1056,8 @@ class GamestateHelper:
                 if isinstance(tile, int) and tile < lowest:
                     loc = x
                     lowest = tile
-            self.gamestate["players"][pID2]["reputation_track"][loc] = ("mixed-" +
-                                                                        self.get_short_faction_name(player1["name"]) +
-                                                                        "-" + player1["color"])
+            track = f"mixed-{self.get_short_faction_name(player1['name'])}-{player1['color']}"
+            self.gamestate["players"][pID2]["reputation_track"][loc] = track
             self.gamestate["reputation_tiles"].append(lowest)
 
         self.update()
@@ -1085,14 +1077,14 @@ class GamestateHelper:
                 if isinstance(tile, int) and tile < lowest:
                     loc = x
                     lowest = tile
-            self.gamestate["players"][pID]["reputation_track"][loc] = tile+"-minor-"+minor_species_name
+            self.gamestate["players"][pID]["reputation_track"][loc] = f"{tile}-minor-{minor_species_name}"
             self.gamestate["reputation_tiles"].append(lowest)
         if "Discount" in minor_species_name and "Tech" not in minor_species_name:
             discountedUnit = minor_species_name.replace(" Discount", "").replace("Dreadnought", "dread").lower()
             discount = 1
             if "dread" in discountedUnit or "monolith" in discountedUnit:
                 discount = 2
-            self.gamestate["players"][pID]["cost_"+discountedUnit] -= discount
+            self.gamestate["players"][pID][f"cost_{discountedUnit}"] -= discount
         self.gamestate["minor_species"].remove(minor_species_name)
 
         self.update()
@@ -1133,7 +1125,7 @@ class GamestateHelper:
                     discount = 1
                     if "dread" in discountedUnit or "monolith" in discountedUnit:
                         discount = 2
-                    self.gamestate["players"][pID]["cost_"+discountedUnit] += discount
+                    self.gamestate["players"][pID][f"cost_{discountedUnit}"] += discount
                 self.gamestate["players"][pID]["reputation_track"][x] = tile.split("-")[0]
                 break
         self.update()
@@ -1183,7 +1175,7 @@ class GamestateHelper:
         color = player["color"]
         tiles = []
         for tile in tile_map:
-            if "owner" in tile_map[tile] and tile_map[tile]["owner"] == color:
+            if tile_map[tile].get("owner") == color:
                 tiles.append(tile)
         return tiles
 
@@ -1235,21 +1227,21 @@ class GamestateHelper:
             index = listHS.index(tileLocation)
             if index is None:
                 return None
-            newList = listHS[index+1:] + listHS[:index] + [listHS[index]]
+            newList = listHS[index + 1:] + listHS[:index] + [listHS[index]]
             for number in newList:
                 nextPlayer = self.getPlayerFromHSLocation(str(number))
-                if all(nextPlayer is not None,
-                       not self.get_gamestate()["players"].get(nextPlayer, {}).get("perma_passed", False)):
+                if all([nextPlayer is not None,
+                        not self.get_gamestate()["players"].get(nextPlayer, {}).get("perma_passed", False)]):
                     return self.get_gamestate()["players"][nextPlayer]
             return None
         else:
             listPlayers = self.get_gamestate()["turn_order"]
             index = listPlayers.index(player["player_name"])
-            newList = listPlayers[index+1:] + listPlayers[:index] + [listPlayers[index]]
+            newList = listPlayers[index + 1:] + listPlayers[:index] + [listPlayers[index]]
             for player_name in newList:
                 nextPlayer = self.getPlayerFromPlayerName(player_name)
-                if all(nextPlayer is not None,
-                       not self.get_gamestate()["players"].get(nextPlayer, {}).get("perma_passed", False)):
+                if all([nextPlayer is not None,
+                        not self.get_gamestate()["players"].get(nextPlayer, {}).get("perma_passed", False)]):
                     return self.get_gamestate()["players"][nextPlayer]
             return None
         # """
@@ -1260,7 +1252,7 @@ class GamestateHelper:
         # player_systems = []
         # player_home = player["home_planet"]
         # for i in ["201", "203", "205", "207", "209", "211"]:
-        #     if "owner" in self.gamestate["board"][i] and self.gamestate["board"][i]["owner"] != 0:
+        #     if self.gamestate["board"][i].get("owner", 0) != 0:
         #         player_systems.append(i)
         # tile = self.get_system_coord(player_home)
         # index = player_systems.index(tile) + 1

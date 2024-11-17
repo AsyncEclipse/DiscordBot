@@ -100,7 +100,7 @@ class BuildButtons:
             buttonElements = [f"FCID{player['color']}", "buildShip", build, str(cost), build_loc, ship]
             if remaining > 0:
                 if ship != "Orbital" and ship != "Monolith":
-                    shipEmoji = Emoji.getEmojiByName(player['color']+game.getShipShortName(ship))
+                    shipEmoji = Emoji.getEmojiByName(player['color'] + game.getShipShortName(ship))
                     view.add_item(Button(label=f"{ship} ({player[f'{key}']})", emoji=shipEmoji,
                                          style=discord.ButtonStyle.blurple, custom_id="_".join(buttonElements)))
                 else:
@@ -231,11 +231,11 @@ class BuildButtons:
 
             shortName = ship.split("-")[1]
             if shortName != "mon" and shortName != "orb":
-                shipEmoji = Emoji.getEmojiByName(player['color']+shortName)
+                shipEmoji = Emoji.getEmojiByName(player['color'] + shortName)
                 textSum += shipEmoji + " "
-            summary += " "+game.getShipFullName(shortName)
-            textSum += game.getShipFullName(shortName).capitalize()+"\n"
-        player_helper.specifyDetailsOfAction("Built "+summary+" in "+loc+".")
+            summary += " " + game.getShipFullName(shortName)
+            textSum += game.getShipFullName(shortName).capitalize() + "\n"
+        player_helper.specifyDetailsOfAction("Built " + summary + " in " + loc + ".")
         player_helper.stats["science"] = science
         player_helper.stats["materials"] = material
         player_helper.stats["money"] = money

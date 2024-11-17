@@ -22,8 +22,8 @@ class MoveButtons:
         tile_map = game.get_gamestate()["board"]
         tiles = []
         for tile in tile_map:
-            if all("player_ships" in tile_map[tile],
-                   ExploreButtons.doesPlayerHaveUnpinnedShips(player, tile_map[tile]["player_ships"], game)):
+            if all(["player_ships" in tile_map[tile],
+                    ExploreButtons.doesPlayerHaveUnpinnedShips(player, tile_map[tile]["player_ships"], game)]):
                 tiles.append(tile)
         return tiles
 
@@ -62,8 +62,8 @@ class MoveButtons:
             shipRange = ship.getRange()
             shipTest = f"{player_color}-{game.getShipShortName(shipType)}"
             if shipTest in game.get_gamestate()["board"][originT]["player_ships"] and shipRange > 0:
-                shipEmoji = Emoji.getEmojiByName(player['color']+game.getShipShortName(shipType))
-                view.add_item(Button(label=shipType.capitalize() + " (Range: "+str(shipRange)+")", emoji=shipEmoji,
+                shipEmoji = Emoji.getEmojiByName(player['color'] + game.getShipShortName(shipType))
+                view.add_item(Button(label=f"{shipType.capitalize()} (Range: {shipRange})", emoji=shipEmoji,
                                      style=discord.ButtonStyle.blurple,
                                      custom_id=f"FCID{player['color']}_moveThisShip_{originT}_{shipType}_{moveCount}"))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray,
@@ -75,7 +75,7 @@ class MoveButtons:
     @staticmethod
     def getTilesInRange(game: GamestateHelper, player, origin: str, shipRange: int, jumpDrivePresent: int):
         configs = Properties()
-        if "5playerhyperlane" in game.gamestate and game.gamestate["5playerhyperlane"]:
+        if game.gamestate.get("5playerhyperlane"):
             with open("data/tileAdjacencies_5p.properties", "rb") as f:
                 configs.load(f)
         else:
@@ -106,14 +106,14 @@ class MoveButtons:
                 return
 
             for adjTile in configs.get(pos)[0].split(","):
-                if all(adjTile in tile_map,
-                       InfluenceButtons.areTwoTilesAdjacent(game, pos, adjTile, configs, wormHoleGen)):
+                if all([adjTile in tile_map,
+                        InfluenceButtons.areTwoTilesAdjacent(game, pos, adjTile, configs, wormHoleGen)]):
                     recursive_search(adjTile, distance + 1, visited, jumpDriveAvailable)
                 elif jumpDriveAvailable and adjTile in tile_map and "wormholes" in tile_map[adjTile]:
                     recursive_search(adjTile, distance + 1, visited, False)
-            if "warp" in tile_map[pos] and tile_map[pos]["warp"] == 1:
+            if tile_map[pos].get("warp", 0) == 1:
                 for tile in tile_map:
-                    if "warp" in tile_map[tile] and tile_map[tile]["warp"] == 1:
+                    if tile_map[tile].get("warp", 0) == 1:
                         recursive_search(tile, distance + 1, visited, jumpDriveAvailable)
 
         visited_tiles = set()
@@ -179,7 +179,7 @@ class MoveButtons:
             player_helper2 = PlayerHelper(game.get_player_from_color(owner), p2)
             player_helper2.permanentlyPassTurn(False)
             game.update_player(player_helper2)
-            await interaction.channel.send(p2["player_name"]+" your system has been invaded")
+            await interaction.channel.send(p2["player_name"] + " your system has been invaded")
         for tile in player["reputation_track"]:
             if isinstance(tile, str) and "-" in tile and "minor" not in tile:
                 color = tile.split("-")[2]
@@ -224,7 +224,7 @@ class MoveButtons:
                     msg += f"go away for now and return next round on one of your actions, teleporting to {location}."
                     if "blackHoleReturn" not in player_helper.stats:
                         player_helper.stats["blackHoleReturn"] = []
-                    player_helper.stats["blackHoleReturn"].append(f"{bhtype}_{shipName}_{roundNum+1}")
+                    player_helper.stats["blackHoleReturn"].append(f"{bhtype}_{shipName}_{roundNum + 1}")
                     game.update_player(player_helper)
             else:
                 if roundNum > 6:
@@ -233,13 +233,13 @@ class MoveButtons:
                     msg += "go away for now and return in 2 rounds on one of your actions, teleporting to {location}."
                     if "blackHoleReturn" not in player_helper.stats:
                         player_helper.stats["blackHoleReturn"] = []
-                    player_helper.stats["blackHoleReturn"].append(f"{bhtype}_{shipName}_{roundNum+2}")
+                    player_helper.stats["blackHoleReturn"].append(f"{bhtype}_{shipName}_{roundNum + 2}")
                     game.update_player(player_helper)
             await interaction.channel.send(msg)
 
             if random_number == 1 or random_number == 6:
                 if "teleport" in msg:
-                    await interaction.channel.send(player["player_name"]+" Select a tile to return the ship to",
+                    await interaction.channel.send(player["player_name"] + " Select a tile to return the ship to",
                                                    view=BlackHoleButtons.findBlackHoleOptions(game, player, shipName,
                                                                                               bhtype, "damage"))
             if game.get_gamestate()["board"][destination]["disctile"] > 0:
@@ -252,10 +252,10 @@ class MoveButtons:
         await interaction.message.delete()
         if player["move_apt"] > moveCount and not player.get("passed"):
             view.add_item(Button(label="Move an additional ship", style=discord.ButtonStyle.green,
-                                 custom_id=f"FCID{player['color']}_startMove_"+str(moveCount+1)))
+                                 custom_id=f"FCID{player['color']}_startMove_{moveCount + 1}"))
         view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                              custom_id=f"FCID{player['color']}_finishAction"))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray,
                              custom_id=f"FCID{player['color']}_restartTurn"))
-        await interaction.channel.send(f"{interaction.user.mention} you can move an additional ship"
-                                       " if you still have move activations or end your action.", view=view)
+        await interaction.channel.send(f"{interaction.user.mention} you may move an additional ship"
+                                       " if you still have move activations, or end your action.", view=view)

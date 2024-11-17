@@ -45,22 +45,22 @@ class DiscordBot(commands.Bot):
     async def start_timer(self):
         while True:
             await self.checkGameTimers()
-            await asyncio.sleep(3600*2)
+            await asyncio.sleep(3600 * 2)
 
     async def checkGameTimers(self):
         guild = bot.get_guild(1254475918873985094)
         if guild is None:
             return
         for x in range(0, 999):
-            gameName = "aeb"+str(x)
+            gameName = f"aeb{x}"
             if not os.path.exists(f"{config.gamestate_path}/{gameName}_saveFile.json"):
                 continue
             game = GamestateHelper(None, gameName)
             if len(game.gamestate.get("activePlayerColor", [])) > 0 and "lastPingTime" in game.gamestate:
                 current_time_seconds = time.time()
                 oldPingTime = game.gamestate["lastPingTime"]
-                if current_time_seconds - oldPingTime > 3600*12:
-                    actions_channel = discord.utils.get(guild.channels, name=game.game_id+"-actions")
+                if current_time_seconds - oldPingTime > 3600 * 12:
+                    actions_channel = discord.utils.get(guild.channels, name=f"{game.game_id}-actions")
                     if actions_channel is not None and isinstance(actions_channel, discord.TextChannel):
                         player = game.getPlayerObjectFromColor(game.gamestate["activePlayerColor"][0])
                         message = f"{player['player_name']}, this is a gentle reminder that it is your turn."

@@ -21,8 +21,8 @@ class InfluenceButtons:
                     if tile_orientation_index in game.gamestate["board"][tile_a].get("wormholes", []):
                         return True
             if tile_a in game.gamestate["board"] and tile_b in game.gamestate["board"]:
-                if "warp" in game.gamestate["board"][tile_a] and game.gamestate["board"][tile_a]["warp"] == 1:
-                    if "warp" in game.gamestate["board"][tile_b] and game.gamestate["board"][tile_b]["warp"] == 1:
+                if game.gamestate["board"][tile_a].get("warp", 0) == 1:
+                    if game.gamestate["board"][tile_b].get("warp", 0) == 1:
                         return True
             return False
 
@@ -34,7 +34,7 @@ class InfluenceButtons:
     @staticmethod
     def getTilesToInfluence(game: GamestateHelper, player):
         configs = Properties()
-        if "5playerhyperlane" in game.gamestate and game.gamestate["5playerhyperlane"]:
+        if game.gamestate.get("5playerhyperlane"):
             with open("data/tileAdjacencies_5p.properties", "rb") as f:
                 configs.load(f)
         else:
@@ -102,9 +102,9 @@ class InfluenceButtons:
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray,
                              custom_id=f"FCID{p1['color']}_restartTurn"))
         await interaction.message.delete()
-        await interaction.channel.send(f"{p1['player_name']} you can remove up to two disks"
-                                       " and influence up to 2 spaces. You can also refresh colony ships"
-                                       " or put down population at any time during this resolution", view=view)
+        await interaction.channel.send(f"{p1['player_name']} you may remove up to two disks"
+                                       " and influence up to 2 spaces. You may also refresh colony ships"
+                                       " or put down population at any time during this resolution.", view=view)
 
     @staticmethod
     async def addInfluenceStart(game: GamestateHelper, p1, interaction: discord.Interaction):
@@ -112,7 +112,7 @@ class InfluenceButtons:
         tiles = InfluenceButtons.getTilesToInfluence(game, p1)
         for tile in tiles:
             view.add_item(Button(label=tile, style=discord.ButtonStyle.blurple,
-                                 custom_id=f"FCID{p1['color']}_addInfluenceFinish_"+tile))
+                                 custom_id=f"FCID{p1['color']}_addInfluenceFinish_" + tile))
         await interaction.channel.send(f"{p1['player_name']} choose the tile you would like to influence", view=view)
         drawing = DrawHelper(game.gamestate)
         if len(tiles) > 0:
@@ -157,7 +157,7 @@ class InfluenceButtons:
         tiles = game.get_owned_tiles(player)
         for tile in tiles:
             view.add_item(Button(label=tile, style=discord.ButtonStyle.blurple,
-                                 custom_id=f"FCID{player['color']}_removeInfluenceFinish_"+tile+"_normal"))
+                                 custom_id=f"FCID{player['color']}_removeInfluenceFinish_{tile}_normal"))
         await interaction.channel.send(f"{player['player_name']}, choose the tile"
                                        " you would like to remove influence from", view=view)
 
@@ -179,13 +179,13 @@ class InfluenceButtons:
         game.remove_control(p1["color"], tileLoc)
         await interaction.channel.send(f"{p1['player_name']} lost control of {tileLoc}.")
         for pop in PopulationButtons.findFullPopulation(game, tileLoc):
-            neutralCubes, orbitalCubes = game.remove_pop([pop+"_pop"], tileLoc,
+            neutralCubes, orbitalCubes = game.remove_pop([f"{pop}_pop"], tileLoc,
                                                          game.get_player_from_color(p1["color"]), graveYard)
             if neutralCubes > 0:
                 view = View()
                 planetTypes = ["money", "science", "material"]
                 for planetT in planetTypes:
-                    if p1[planetT+"_pop_cubes"] < 12:
+                    if p1[f"{planetT}_pop_cubes"] < 12:
                         view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple,
                                              custom_id=f"FCID{p1['color']}_addCubeToTrack_{planetT}"))
                 await interaction.channel.send("A neutral cube was removed, "
@@ -194,9 +194,9 @@ class InfluenceButtons:
                 view = View()
                 planetTypes = ["money", "science"]
                 for planetT in planetTypes:
-                    if p1[planetT+"_pop_cubes"] < 12:
+                    if p1[f"{planetT}_pop_cubes"] < 12:
                         view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple,
-                                             custom_id=f"FCID{p1['color']}_addCubeToTrack_"+planetT))
+                                             custom_id=f"FCID{p1['color']}_addCubeToTrack_{planetT}"))
                 await interaction.channel.send("An orbital cube was removed, "
                                                "please tell the bot what track you want it to go on.", view=view)
             else:
@@ -207,11 +207,11 @@ class InfluenceButtons:
     @staticmethod
     async def addCubeToTrack(game: GamestateHelper, p1, interaction: discord.Interaction, buttonID: str):
         pop = buttonID.split("_")[1]
-        cubes = p1[pop+"_pop_cubes"]
+        cubes = p1[f"{pop}_pop_cubes"]
         if cubes > 12:
-            await interaction.channel.send("The "+pop + " track is full. Cannot add more cubes to this track")
+            await interaction.channel.send(f"The {pop} track is full. Cannot add more cubes to this track.")
             return
-        game.remove_pop([pop+"_pop"], "dummy", game.get_player_from_color(p1["color"]), False)
+        game.remove_pop([f"{pop}_pop"], "dummy", game.get_player_from_color(p1["color"]), False)
         await interaction.channel.send(f"{p1['player_name']} added 1 {pop.replace('adv', '')}"
                                        " population back to its track.")
         await interaction.message.delete()

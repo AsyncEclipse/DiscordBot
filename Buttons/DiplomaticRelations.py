@@ -25,13 +25,13 @@ class DiplomaticRelationsButtons:
     async def startMinorRelations(game: GamestateHelper, player, interaction: discord.Interaction):
         view = View()
         drawing = DrawHelper(game.gamestate)
-        money = player["money"] + player["science"]//player["trade_value"] + player["materials"]//player["trade_value"]
+        money = player["money"] + player["science"] // player["trade_value"] + player["materials"] // player["trade_value"]
         if player["colony_ships"] > 0 and game.get_short_faction_name(player["name"]) == "magellan":
             money += player["colony_ships"]
         for minor in game.gamestate["minor_species"]:
-            buttonID = f"FCID{player['color']}_formMinorRelations_"+minor
+            buttonID = f"FCID{player['color']}_formMinorRelations_" + minor
             cost = DiplomaticRelationsButtons.getMinorSpeciesCost(minor)
-            label = minor + " ("+str(cost)+")"
+            label = f"{minor} ({cost})"
             if cost <= money:
                 view.add_item(Button(label=label, style=discord.ButtonStyle.blurple, custom_id=buttonID))
         await interaction.channel.send(f"{player['player_name']}, "
@@ -56,7 +56,7 @@ class DiplomaticRelationsButtons:
             for resource_type, button_style in [("materials", discord.ButtonStyle.gray),
                                                 ("science", discord.ButtonStyle.blurple)]:
                 if player[resource_type] >= trade_value:
-                    val += int(player[resource_type]/trade_value)
+                    val += player[resource_type] // trade_value
                     view.add_item(Button(label=f"Pay {trade_value} {resource_type.capitalize()}",
                                          style=button_style,
                                          custom_id=f"FCID{player['color']}_payAtRatio_{resource_type}"))
@@ -89,7 +89,7 @@ class DiplomaticRelationsButtons:
     async def startDiplomaticRelations(game: GamestateHelper, player, interaction: discord.Interaction):
         view = View()
         for p2 in DiplomaticRelationsButtons.getPlayersWithWhichDiplomatcRelationsCanBeFormed(game, player):
-            buttonID = f"FCID{player['color']}_offerRelationsTo_"+game.get_gamestate()["players"][p2]["color"]
+            buttonID = f"FCID{player['color']}_offerRelationsTo_" + game.get_gamestate()["players"][p2]["color"]
             label = f"{game.get_gamestate()['players'][p2]['name']}"
             view.add_item(Button(label=label, style=discord.ButtonStyle.blurple, custom_id=buttonID))
         await interaction.channel.send(f"{player['player_name']}, choose which player you would like to offer"
@@ -129,8 +129,8 @@ class DiplomaticRelationsButtons:
     async def offerRelationsTo(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
         view = View()
         p2 = buttonID.split("_")[1]
-        buttonID1 = f"FCID{p2}_acceptRelationsWith_"+player["color"]
-        buttonID2 = f"FCID{p2}_declineRelationsWith_"+player["color"]
+        buttonID1 = f"FCID{p2}_acceptRelationsWith_" + player["color"]
+        buttonID2 = f"FCID{p2}_declineRelationsWith_" + player["color"]
         view.add_item(Button(label="Accept", style=discord.ButtonStyle.green, custom_id=buttonID1))
         view.add_item(Button(label="Decline", style=discord.ButtonStyle.red, custom_id=buttonID2))
         await interaction.channel.send("{game.get_gamestate()['players'][pID]['player_name']}, choose whether"
@@ -183,9 +183,9 @@ class DiplomaticRelationsButtons:
             view = View()
             planetTypes = ["money", "science", "material"]
             for planetT in planetTypes:
-                if p[planetT+"_pop_cubes"] < 13:
+                if p[f"{planetT}_pop_cubes"] < 13:
                     view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple,
-                                         custom_id=f"FCID{p['color']}_addCubeToTrack_"+planetT))
+                                         custom_id=f"FCID{p['color']}_addCubeToTrack_" + planetT))
             await interaction.channel.send(f"{p['player_name']}, a cube with no set track was removed, "
                                            "please tell the bot what track you want it to go on.", view=view)
 

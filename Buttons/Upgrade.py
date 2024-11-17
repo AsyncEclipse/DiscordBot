@@ -23,7 +23,7 @@ class UpgradeButtons:
         for ship in ships:
             if player['name'] == "Rho Indi Syndicate" and ship == "dread":
                 continue
-            shipEmoji = Emoji.getEmojiByName(player['color']+game.getShipShortName(ship))
+            shipEmoji = Emoji.getEmojiByName(player['color'] + game.getShipShortName(ship))
             view.add_item(Button(label=ship.capitalize(), emoji=shipEmoji, style=discord.ButtonStyle.blurple,
                                  custom_id=f"FCID{player['color']}_upgradeShip_{actions}_{ship}_{discTileUpgrade}"))
         await interaction.followup.send(file=await asyncio.to_thread(drawing.show_player_ship_area, image),
@@ -162,7 +162,7 @@ class UpgradeButtons:
         if actions > 0 and ("passed" not in player or not player["passed"]):
             ships = ["interceptor", "cruiser", "dread", "starbase"]
             for ship2 in ships:
-                shipEmoji = Emoji.getEmojiByName(player['color']+game.getShipShortName(ship2))
+                shipEmoji = Emoji.getEmojiByName(player['color'] + game.getShipShortName(ship2))
                 view.add_item(Button(label=ship2.capitalize(), emoji=shipEmoji, style=discord.ButtonStyle.blurple,
                                      custom_id=f"FCID{player['color']}_upgradeShip_{str(actions)}_{ship2}_dummy"))
         view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,

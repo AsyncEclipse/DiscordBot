@@ -38,13 +38,13 @@ class ExploreButtons:
                         opponentShips += 99
         researchedTechs = player_helper.getTechs()
         if "clo" in researchedTechs or "cld" in researchedTechs:
-            playerShipsCount = playerShipsCount*2
+            playerShipsCount *= 2
         return playerShipsCount > opponentShips
 
     @staticmethod
     def getTilesToExplore(game: GamestateHelper, player):
         configs = Properties()
-        if "5playerhyperlane" in game.gamestate and game.gamestate["5playerhyperlane"]:
+        if game.gamestate.get("5playerhyperlane"):
             with open("data/tileAdjacencies_5p.properties", "rb") as f:
                 configs.load(f)
         else:
@@ -89,7 +89,7 @@ class ExploreButtons:
             view2.add_item(Button(label="Decline 2nd Explore", style=discord.ButtonStyle.red,
                                   custom_id=f"FCID{player['color']}_deleteMsg"))
             await interaction.channel.send(f"{player['player_name']} after exploring the first time, "
-                                           "you can use this button to explore again.", view=view2)
+                                           "you may use this button to explore again.", view=view2)
         await interaction.message.delete()
 
     @staticmethod
@@ -105,7 +105,7 @@ class ExploreButtons:
         else:
             tileID = game.tile_draw(msg[1])
             if player["name"] == "Descendants of Draco":
-                ring = min(3, int(msg[1])//100)
+                ring = min(3, int(msg[1]) // 100)
                 discard = 0
                 if "tile_discard_deck_300" in game.get_gamestate():
                     discard = len(game.gamestate["tile_discard_deck_300"])
@@ -155,7 +155,7 @@ class ExploreButtons:
                                                "at which point a die will be rolled and it might teleport.")
             else:
                 view.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple,
-                                     custom_id=f"FCID{player['color']}_addInfluenceFinish_"+msg[1]))
+                                     custom_id=f"FCID{player['color']}_addInfluenceFinish_" + msg[1]))
                 view.add_item(Button(label="Decline Influence Placement", style=discord.ButtonStyle.red,
                                      custom_id=f"FCID{player['color']}_deleteMsg"))
                 await interaction.channel.send(f"{player['player_name']}, choose whether or not"

@@ -41,15 +41,15 @@ class PlayerCommands(commands.GroupCog, name="player"):
                     colony_ships: Optional[int], player: Optional[discord.Member] = None):
         """
 
-        :param materials: Materials resource count - can use +1/-1 to add/subtract
-        :param science: Science resource count - can use +1/-1 to add/subtract
-        :param money: Money resource count - can use +1/-1 to add/subtract
-        :param influence: Influence disc count - can use +1/-1 to add/subtract
-        :param material_cubes: Material cube count - can use +1/-1 to add/subtract
-        :param science_cubes: Science cube count - can use +1/-1 to add/subtract
-        :param money_cubes: Money cube count - can use +1/-1 to add/subtract
-        :param influence: Influence disc count - can use +1/-1 to add/subtract
-        :param colony_ships: Ready colony ship count - can use +1/-1 to add/subtract
+        :param materials: Materials resource count - may use +1/-1 to add/subtract
+        :param science: Science resource count - may use +1/-1 to add/subtract
+        :param money: Money resource count - may use +1/-1 to add/subtract
+        :param influence: Influence disc count - may use +1/-1 to add/subtract
+        :param material_cubes: Material cube count - may use +1/-1 to add/subtract
+        :param science_cubes: Science cube count - may use +1/-1 to add/subtract
+        :param money_cubes: Money cube count - may use +1/-1 to add/subtract
+        :param influence: Influence disc count - may use +1/-1 to add/subtract
+        :param colony_ships: Ready colony ship count - may use +1/-1 to add/subtract
         :return:
         """
         if player is None:
@@ -172,7 +172,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         game.changeColor(player["color"], color.value)
         await interaction.response.defer(thinking=False)
         drawing = DrawHelper(game.gamestate)
-        await interaction.followup.send("Successfully changed color to "+color.value,
+        await interaction.followup.send("Successfully changed color to " + color.value,
                                         file=await asyncio.to_thread(drawing.show_game))
 
     @app_commands.command(name="upgrade")
@@ -296,7 +296,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         game.initilizeKey("activePlayerColor")
         game.addToKey("activePlayerColor", p1["color"])
         game.updatePingTime()
-        await interaction.response.send_message("## "+game.getPlayerEmoji(p1) + " started their turn")
+        await interaction.response.send_message(f"## {game.getPlayerEmoji(p1)} started their turn.")
         await interaction.channel.send((f"{p1['player_name']} use these buttons to do your turn. "
                                         "The number of activations you have for each action"
                                         " is listed in brackets `()`" + game.displayPlayerStats(p1)), view=view)

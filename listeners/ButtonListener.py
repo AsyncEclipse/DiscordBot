@@ -84,7 +84,7 @@ class ButtonListener(commands.Cog):
                                 else:
                                     newline = tb.rfind("\n", 0, 1980)
                                     await log_channel.send("```python\n" + tb[:newline] + "\n```")
-                                    tb = tb[newline+1:]
+                                    tb = tb[newline + 1:]
 
                     except discord.Forbidden:
                         logger.warning("Cannot send messages to the log channel `#bot-log`. Check permissions.")
@@ -126,7 +126,7 @@ class ButtonListener(commands.Cog):
                     await interaction.followup.send(interaction.user.mention + ", these buttons are not for you.",
                                                     ephemeral=True)
                     return
-                customID = customID.replace(check+"_", "")
+                customID = customID.replace(check + "_", "")
 
         if "deleteMsg" in customID:
             await interaction.message.delete()

@@ -31,7 +31,7 @@ class BlackHoleButtons:
     async def blackHoleReturnStart(game: GamestateHelper, player, customID: str, player_helper: PlayerHelper,
                                    interaction: discord.Interaction):
         shipKey = customID.replace("blackHoleReturnStart_", "")
-        shipKey = shipKey.split("_")[0]+"_"+shipKey.split("_")[1]+"_"+shipKey.split("_")[2]
+        shipKey = shipKey.split("_")[0] + "_" + shipKey.split("_")[1] + "_" + shipKey.split("_")[2]
         if "blackHoleReturn" in player and shipKey in player["blackHoleReturn"]:
             player_helper.stats["blackHoleReturn"].remove(shipKey)
             game.update_player(player_helper)
@@ -39,7 +39,7 @@ class BlackHoleButtons:
             return
         locationType = shipKey.split("_")[0]
         ship = shipKey.split("_")[1]
-        await interaction.channel.send(player["player_name"]+", select a tile to return the ship to.",
+        await interaction.channel.send(player["player_name"] + ", select a tile to return the ship to.",
                                        view=BlackHoleButtons.findBlackHoleOptions(game, player, ship,
                                                                                   locationType, "no"))
 
@@ -48,7 +48,7 @@ class BlackHoleButtons:
         view = View()
         if "border" in locationType:
             configs = Properties()
-            if "5playerhyperlane" in game.gamestate and game.gamestate["5playerhyperlane"]:
+            if game.gamestate.get("5playerhyperlane"):
                 with open("data/tileAdjacencies_5p.properties", "rb") as f:
                     configs.load(f)
             else:
@@ -112,5 +112,5 @@ class BlackHoleButtons:
                     player_helper.setTraitor(True)
                     game.update_player(player_helper)
                     await interaction.channel.send(f"{player['player_name']}, you broke relations with {color}"
-                                                   " and now are a traitor.")
+                                                   " and now are the Traitor.")
         await interaction.message.delete()

@@ -15,7 +15,7 @@ class ReputationButtons:
         highest = 0
         for x in range(amount_of_options):
             opt = randomList.pop()
-            opts += " "+str(opt)
+            opts += " " + str(opt)
             highest = max(opt, highest)
         if player_helper.stats["name"] == "Rho Indi Syndicate":
             player_helper.stats["money"] += (amount_of_options - 1)
@@ -52,7 +52,7 @@ class ReputationButtons:
         else:
             threadName = (f"{game.get_gamestate()['game_id']}-Round {game.get_gamestate()['roundNum']}, "
                           f"Queued Draw for {player_helper.stats['color']}")
-            actions_channel = discord.utils.get(interaction.guild.channels, name=game.game_id+"-actions")
+            actions_channel = discord.utils.get(interaction.guild.channels, name=f"{game.game_id}-actions")
             if actions_channel is not None and isinstance(actions_channel, discord.TextChannel):
                 channel = actions_channel
                 thread = await channel.create_thread(
