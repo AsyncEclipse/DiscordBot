@@ -314,7 +314,7 @@
     "name": "Soliton Missile",
     "description": "This is an Ancient Tech; it can only be added to a single Ship Blueprint slot, and then it is exhausted.  A Soliton Missile box rolls 1 die at the beginning of Combat Phase during the Fire Missiles step. The Soliton Missile deals 3 hits to a single target if 1) the blue die rolls a Direct Hit, or 2) if the blue die result + total Computers - total Shields of the target ship = 6 or greater. Does not fire during the Repeated Engagement Rounds. Each Soliton Missile box requires 0 Energy.",
     "range": 0,
-    "speed": 0,
+    "speed": 1,
     "nrg_use": 0,
     "nrg_src": 0,
     "tech_req": "none",

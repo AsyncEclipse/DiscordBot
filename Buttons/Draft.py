@@ -119,6 +119,10 @@ class DraftButtons:
             return "orange"
         if faction == "lyr":
             return "black"
+        if faction == "rho":
+            return "teal"
+        if faction == "exl":
+            return "pink"
         return "green"
     
     @staticmethod
