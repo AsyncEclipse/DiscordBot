@@ -10,7 +10,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 1
+    "description": "Place the Ancient Ship Part Soliton Charger on any of your Ship Blueprints, following the normal rules for placing Ship Parts. Or, keep them next to your Species Board, and place with a future Upgrade Action."
+    "num": 1,
   },
   "axc": {
     "name": "Axion Computer",
@@ -23,7 +24,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 1
+    "num": 1,
+    "description": "Place the Ancient Ship Part Axion Computer on any of your Ship Blueprints, following the normal rules for placing Ship Parts. Or, keep them next to your Species Board, and place with a future Upgrade Action."
   },
   "cru": {
     "name": "Ancient Cruiser",
@@ -36,7 +38,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 3
+    "num": 3,
+    "description": "Place 1 Cruiser from your Supply on this Sector Hex."
   },
   "iod": {
     "name": "Ion Disruptor",
@@ -49,7 +52,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 1
+    "num": 1,
+    "description": "Place the Ancient Ship Part Ion Disruptor on any of your Ship Blueprints, following the normal rules for placing Ship Parts. Or, keep them next to your Species Board, and place with a future Upgrade Action."
   },
   "cod": {
     "name": "Conformal Drive",
@@ -62,7 +66,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 1
+    "num": 1,
+    "description": "Place the Ancient Ship Part Conformal Drive on any of your Ship Blueprints, following the normal rules for placing Ship Parts. Or, keep them next to your Species Board, and place with a future Upgrade Action."
   },
   "jud": {
     "name": "Jump Drive",
@@ -75,7 +80,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 1
+    "num": 1,
+    "description": "Place the Ancient Ship Part Jump Drive on any of your Ship Blueprints, following the normal rules for placing Ship Parts. Or, keep them next to your Species Board, and place with a future Upgrade Action. This Ship may Jump to any neighbouring Sector once per Movement Activation. Counts as 1 Drive."
   },
   "nod": {
     "name": "Nonlinear Drive",
@@ -88,7 +94,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 1
+    "num": 1,
+    "description": "Place the Ancient Ship Part Nonlinear Drive on any of your Ship Blueprints, following the normal rules for placing Ship Parts. Or, keep them next to your Species Board, and place with a future Upgrade Action."
   },
   "shh": {
     "name": "Shard Hull",
@@ -101,7 +108,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 1
+    "num": 1,
+    "description": "Place the Ancient Ship Part Shard Hull on any of your Ship Blueprints, following the normal rules for placing Ship Parts. Or, keep them next to your Species Board, and place with a future Upgrade Action."
   },
   "iot": {
     "name": "Ion Turret",
@@ -114,7 +122,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 1
+    "num": 1,
+    "description": "Place the Ancient Ship Part Ion Turret on any of your Ship Blueprints, following the normal rules for placing Ship Parts. Or, keep them next to your Species Board, and place with a future Upgrade Action."
   },
   "mat": {
     "name": "Material Gain",
@@ -127,7 +136,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 3
+    "num": 3,
+    "description": "Gain 6 Materials."
   },
   "anm": {
     "name": "Antimatter Missile",
@@ -140,7 +150,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 1
+    "num": 1,
+    "description": "Place the Ancient Ship Part Anitmatter Missile on any of your Ship Blueprints, following the normal rules for placing Ship Parts. Or, keep them next to your Species Board, and place with a future Upgrade Action."
   },
   "iom": {
     "name": "Ion Missile",
@@ -153,7 +164,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 1
+    "num": 1,
+    "description": "Place the Ancient Ship Part Ion Missile on any of your Ship Blueprints, following the normal rules for placing Ship Parts. Or, keep them next to your Species Board, and place with a future Upgrade Action."
   },
   "som": {
     "name": "Soliton Missile",
@@ -166,7 +178,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 1
+    "num": 1,
+    "description": "Place the Ancient Ship Part Soliton Missile on any of your Ship Blueprints, following the normal rules for placing Ship Parts. Or, keep them next to your Species Board, and place with a future Upgrade Action."
   },
   "mog": {
     "name": "Money Gain",
@@ -179,7 +192,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 3
+    "num": 3,
+    "description": "Gain 8 Money."
   },
   "mix": {
     "name": "Money and Wild Gain",
@@ -192,7 +206,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 1
+    "num": 1,
+    "description": "Gain 3 Money and 3 identical Resources of your choice."
   },
   "all": {
     "name": "All Income Gain",
@@ -205,7 +220,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 2
+    "num": 2,
+    "description": "Gain 3 Money, 2 Materials and 2 Science."
   },
   "mon": {
     "name": "Monolith",
@@ -218,7 +234,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 1
+    "num": 1,
+    "description": "Place 1 Monolith from your Supply on this Sector Hex."
   },
   "orb": {
     "name": "Orbital",
@@ -231,7 +248,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 2
+    "num": 2,
+    "description": "Place 1 Orbital from your Supply on this Sector Hex, and gain 2 Materials."
   },
   "art": {
     "name": "Artifact Codex",
@@ -244,7 +262,8 @@
     "gain1": 0,
     "art_pt1": 1,
     "rep_pt1": 0,
-    "num": 1
+    "num": 1,
+    "description": "Gain 1 VP for each Artifact on Sector Hexes you Control."
   },
   "rep": {
     "name": "Ancient Might",
@@ -257,7 +276,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 3,
-    "num": 1
+    "num": 1,
+    "description": "Gain 1 VP for every 3 Points of Reputation you’ve gained."
   },
   "ricon": {
     "name": "Rift Conductor",
@@ -270,7 +290,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 1
+    "num": 1,
+    "description": "Place the Ancient Ship Part Rift Conductor on any of your Ship Blueprints, following the normal rules for placing Ship Parts. Or, keep them next to your Species Board, and place with a future Upgrade Action."
   },
   "sci": {
     "name": "Science Gain",
@@ -283,7 +304,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 3
+    "num": 3,
+    "description": "Gain 5 Science."
   },
   "fls": {
     "name": "Flux Shield",
@@ -296,7 +318,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 1
+    "num": 1,
+    "description": "Place the Ancient Ship Part Flux Shield on any of your Ship Blueprints, following the normal rules for placing Ship Parts. Or, keep them next to your Species Board, and place with a future Upgrade Action."
   },
   "ins": {
     "name": "Inversion Shield",
@@ -309,7 +332,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 1
+    "num": 1,
+    "description": "Place the Ancient Ship Part Inversion Shield on any of your Ship Blueprints, following the normal rules for placing Ship Parts. Or, keep them next to your Species Board, and place with a future Upgrade Action."
   },
   "mos": {
     "name": "Morph Shield",
@@ -322,7 +346,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 1
+    "num": 1,
+    "description": "Place the Ancient Ship Part Morph Shield on any of your Ship Blueprints, following the normal rules for placing Ship Parts. Or, keep them next to your Species Board, and place with a future Upgrade Action. Gives a -1 Shield. Repairs 1 Damage Cube from each of the Ships it is equipped to at the end of each Engagement Round."
   },
   "hyg": {
     "name": "Hypergrid Source",
@@ -335,7 +360,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 1
+    "num": 1,
+    "description": "Place the Ancient Ship Part Hypergrid Source on any of your Ship Blueprints, following the normal rules for placing Ship Parts. Or, keep them next to your Species Board, and place with a future Upgrade Action."
   },
   "mus": {
     "name": "Muon Source",
@@ -348,7 +374,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 1
+    "num": 1,
+    "description": "Place the Ancient Ship Part Muon Source outside of 1 of your Ship Blueprints."
   },
   "tec": {
     "name": "Tech Gain",
@@ -361,7 +388,8 @@
     "gain1": "tech",
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 3
+    "num": 3,
+    "description": "Take 1 regular Tech Tile, with the lowest printed cost you don’t already have from the Tech Tray. Place it for free."
   },
   "plt": {
     "name": "Plasma Turret",
@@ -374,7 +402,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 1
+    "num": 1,
+    "description": "Place the Ancient Ship Part Plasma Turret on any of your Ship Blueprints, following the normal rules for placing Ship Parts. Or, keep them next to your Species Board, and place with a future Upgrade Action."
   },
   "wap": {
     "name": "Warp Portal",
@@ -387,6 +416,7 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "num": 1
+    "num": 1,
+    "description": "Place this Ancient Warp Portal on this Sector Hex. It connects to all other Warp Portals, and is worth 2 VP if Controlled."
   }
 }
