@@ -10,8 +10,8 @@
     "gain1": 0,
     "art_pt1": 0,
     "rep_pt1": 0,
-    "description": "Place the Ancient Ship Part Soliton Charger on any of your Ship Blueprints, following the normal rules for placing Ship Parts. Or, keep them next to your Species Board, and place with a future Upgrade Action."
-    "num": 1,
+    "description": "Place the Ancient Ship Part Soliton Charger on any of your Ship Blueprints, following the normal rules for placing Ship Parts. Or, keep them next to your Species Board, and place with a future Upgrade Action.",
+    "num": 1
   },
   "axc": {
     "name": "Axion Computer",
