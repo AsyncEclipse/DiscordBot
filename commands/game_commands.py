@@ -99,7 +99,7 @@ class GameCommands(commands.GroupCog, name="game"):
     @app_commands.command(name="set_round")
     async def set_round(self, interaction: discord.Interaction, rnd: int):
         game = GamestateHelper(interaction.channel)
-        game.setRound(round)
+        game.setRound(rnd)
         await interaction.response.send_message(f"Set the round number to {rnd}.")
 
     @app_commands.command(name="show_game")

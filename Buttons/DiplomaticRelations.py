@@ -25,7 +25,8 @@ class DiplomaticRelationsButtons:
     async def startMinorRelations(game: GamestateHelper, player, interaction: discord.Interaction):
         view = View()
         drawing = DrawHelper(game.gamestate)
-        money = player["money"] + player["science"] // player["trade_value"] + player["materials"] // player["trade_value"]
+        money = (player["money"] + player["science"] // player["trade_value"]
+                 + player["materials"] // player["trade_value"])
         if player["colony_ships"] > 0 and game.get_short_faction_name(player["name"]) == "magellan":
             money += player["colony_ships"]
         for minor in game.gamestate["minor_species"]:
@@ -192,13 +193,13 @@ class DiplomaticRelationsButtons:
     @staticmethod
     async def reducePopFor(game: GamestateHelper, player_helper: PlayerHelper,
                            interaction: discord.Interaction, buttonID: str):
-        type = buttonID.split("_")[1]
-        if type == "money":
+        resourceType = buttonID.split("_")[1]
+        if resourceType == "money":
             player_helper.adjust_money_cube(-1)
-        if type == "science":
+        if resourceType == "science":
             player_helper.adjust_science_cube(-1)
-        if type == "material":
+        if resourceType == "material":
             player_helper.adjust_material_cube(-1)
         game.update_player(player_helper)
-        await interaction.channel.send(f"{interaction.user.mention} put a {type} cube down")
+        await interaction.channel.send(f"{interaction.user.mention} put a {resourceType} cube down")
         await interaction.message.delete()

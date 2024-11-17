@@ -14,17 +14,17 @@ class BlackHoleButtons:
             count = 1
             for shipKey in player["blackHoleReturn"]:
                 count += 1
-                type = shipKey.split("_")[0]
+                shipType = shipKey.split("_")[0]
                 ship = shipKey.split("_")[1]
-                round = int(shipKey.split("_")[2])
+                rnd = int(shipKey.split("_")[2])
                 roundNum = 1
                 if "roundNum" in game.gamestate:
                     roundNum = game.gamestate["roundNum"]
-                if round != roundNum:
+                if rnd != roundNum:
                     continue
                 view.add_item(Button(label=f"Return Black Hole Ship ({game.getShipFullName(ship.split('-')[1])})",
                                      style=discord.ButtonStyle.gray, custom_id=f"FCID{player['color']}"
-                                     f"_blackHoleReturnStart_{type}_{ship}_{str(round)}_{str(count)}"))
+                                     f"_blackHoleReturnStart_{shipType}_{ship}_{str(rnd)}_{str(count)}"))
         return view
 
     @staticmethod

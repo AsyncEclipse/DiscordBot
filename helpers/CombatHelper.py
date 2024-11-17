@@ -34,7 +34,7 @@ class Combat:
         tile_map = game.get_gamestate()["board"]
         if "player_ships" not in tile_map[pos]:
             return []
-        player_ships = tile_map[pos]["player_ships"][:]
+            player_ships = tile_map[pos]["player_ships"][:]
         ships = []
         for ship in player_ships:
             if "orb" in ship or "mon" in ship:
@@ -206,9 +206,9 @@ class Combat:
     def getCombatantShipsBySpeed(game: GamestateHelper, colorOrAI: str, playerShipsList):
         ships = []
         for unit in playerShipsList:
-            type = unit.split("-")[1]
+            unitType = unit.split("-")[1]
             owner = unit.split('-')[0]
-            if type == "orb" or type == "mon":
+            if unitType == "orb" or unitType == "mon":
                 continue
             if colorOrAI == owner:
                 if colorOrAI == "ai":
@@ -216,8 +216,8 @@ class Combat:
                     ships.append((ship.speed, unit))
                 else:
                     player = game.get_player_from_color(colorOrAI)
-                    ship = PlayerShip(game.gamestate["players"][player], type)
-                    ships.append((ship.speed, type))
+                    ship = PlayerShip(game.gamestate["players"][player], unitType)
+                    ships.append((ship.speed, unitType))
         sorted_ships = sorted(ships, key=lambda x: x[0], reverse=True)
         sorted_ships_grouped = []
         seen_ships = []
@@ -295,9 +295,9 @@ class Combat:
     @staticmethod
     def doesCombatantHaveMissiles(game: GamestateHelper, colorOrAI: str, playerShipsList):
         for unit in playerShipsList:
-            type = unit.split("-")[1]
+            unitType = unit.split("-")[1]
             owner = unit.split('-')[0]
-            if type == "orb" or type == "mon":
+            if unitType == "orb" or unitType == "mon":
                 continue
             if colorOrAI == owner:
                 if colorOrAI == "ai":
@@ -306,7 +306,7 @@ class Combat:
                         return True
                 else:
                     player = game.get_player_from_color(colorOrAI)
-                    ship = PlayerShip(game.gamestate["players"][player], type)
+                    ship = PlayerShip(game.gamestate["players"][player], unitType)
                     if len(ship.missile) > 0:
                         return True
         return False

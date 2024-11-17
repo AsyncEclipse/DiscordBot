@@ -1044,12 +1044,12 @@ class DrawHelper:
                     if "anc" in ship:
                         points += 1
         techTypes = ["military_tech", "grid_tech", "nano_tech"]
-        for type in techTypes:
-            if type in player and len(player[type]) > 3:
-                if len(player[type]) == 7:
+        for tType in techTypes:
+            if tType in player and len(player[tType]) > 3:
+                if len(player[tType]) == 7:
                     points += 5
                 else:
-                    points += len(player[type]) - 3
+                    points += len(player[tType]) - 3
         if "disc_tiles_for_points" in player:
             points += player["disc_tiles_for_points"] * 2
         reputationPoints = 0

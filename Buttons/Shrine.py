@@ -17,10 +17,10 @@ class ShrineButtons:
             targetType = shrinePlan.split("_")[0]
             tile = shrinePlan.split("_")[1]
             for count, shrineType in enumerate(player["shrine_type"]):
-                if all([type == shrineType or type == "neutral",
+                if all([targetType == shrineType or targetType == "neutral",
                         player["shrine_in_storage"][count] == 1,
                         player["shrine_cost"][count] <= ShrineButtons.getResourceAvailable(targetType, player, game)]):
-                    view.add_item(Button(label=f"{type.capitalize()} (Tile {tile})",
+                    view.add_item(Button(label=f"{targetType.capitalize()} (Tile {tile})",
                                          emoji=Emoji.getEmojiByName(targetType), style=discord.ButtonStyle.gray,
                                          custom_id=f"FCID{player['color']}_placeShrineInitial_{targetType}_{tile}"))
                     break
@@ -70,13 +70,14 @@ class ShrineButtons:
         view = View()
         drawing = DrawHelper(game.gamestate)
         for count, shrineType in enumerate(player["shrine_type"]):
-            if all([targetType == shrineType or type == "neutral",
+            if all([targetType == shrineType or targetType == "neutral",
                     player["shrine_in_storage"][count] == 1,
                     player["shrine_cost"][count] <= ShrineButtons.getResourceAvailable(targetType, player, game)]):
                 view.add_item(Button(label=f"{shrineType.capitalize()} (Cost {str(player['shrine_cost'][count])})",
                                      style=discord.ButtonStyle.gray, emoji=Emoji.getEmojiByName(targetType),
-                                     custom_id=f"FCID{player['color']}_placeShrineFinal_{type}_{tile}_{str(count)}"))
-        await interaction.channel.send("Please select the shrine type and cost you would like to pay", view=view,
+                                     custom_id=(f"FCID{player['color']}_placeShrineFinal"
+                                                f"_{targetType}_{tile}_{str(count)}")))
+        await interaction.channel.send("Please select the shrine type and cost you would like to pay.", view=view,
                                        file=await asyncio.to_thread(drawing.show_shrine_board, player))
         await interaction.message.delete()
 

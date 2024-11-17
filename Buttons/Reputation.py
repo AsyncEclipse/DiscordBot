@@ -55,10 +55,8 @@ class ReputationButtons:
             actions_channel = discord.utils.get(interaction.guild.channels, name=f"{game.game_id}-actions")
             if actions_channel is not None and isinstance(actions_channel, discord.TextChannel):
                 channel = actions_channel
-                thread = await channel.create_thread(
-                    name=threadName,
-                    auto_archive_duration=1440,
-                    type=discord.ChannelType.private_thread,
-                    invitable=False,
-                )
+                thread = await channel.create_thread(name=threadName,
+                                                     auto_archive_duration=1440,
+                                                     type=discord.ChannelType.private_thread,
+                                                     invitable=False)
                 await thread.send(msg)

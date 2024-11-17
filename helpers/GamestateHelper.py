@@ -772,7 +772,7 @@ class GamestateHelper:
                         maxTech = max(maxTech, len(playerObj["nano_tech"]))
                         total += maxTech
                     msg += (f"\nThe sum of that and the owners highest tech track ({sum})"
-                            f" was compared against the round ({round}) and found to be ")
+                            f" was compared against the round ({rnd}) and found to be ")
                     if total < rnd:
                         msg += "lesser, so the supernova exploded."
                         if self.gamestate["board"][position]["owner"] != 0:
