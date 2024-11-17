@@ -573,6 +573,8 @@ class DrawHelper:
                     playerOrder.append(nextPlayer)
         else:
             listPlayers = self.gamestate["turn_order"]
+            if activePlayer["player_name"] not in listPlayers:
+                return context
             index = listPlayers.index(activePlayer["player_name"])
             listPlayers = listPlayers[index:] + listPlayers[:index]
             playerOrder = []

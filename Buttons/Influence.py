@@ -208,10 +208,12 @@ class InfluenceButtons:
     async def addCubeToTrack(game: GamestateHelper, p1, interaction: discord.Interaction, buttonID: str):
         pop = buttonID.split("_")[1]
         cubes = p1[f"{pop}_pop_cubes"]
+        player = game.getPlayerObjectFromColor(p1["color"])
+        oldIncome = player["population_track"][player[f"{pop}_pop_cubes"] - 1]
         if cubes > 12:
             await interaction.channel.send(f"The {pop} track is full. Cannot add more cubes to this track.")
             return
-        game.remove_pop([f"{pop}_pop"], "dummy", game.get_player_from_color(p1["color"]), False)
-        await interaction.channel.send(f"{p1['player_name']} added 1 {pop.replace('adv', '')}"
-                                       " population back to its track.")
+        game.remove_pop([f"{pop}_pop"], "dummy", player, False)
+        income = player["population_track"][player[f"{pop}_pop_cubes"] - 1]
+        await interaction.channel.send(f"{p1['player_name']} added 1 {pop.replace('adv', '')} population back to its track. Income went from {income} to {oldIncome}.")
         await interaction.message.delete()
