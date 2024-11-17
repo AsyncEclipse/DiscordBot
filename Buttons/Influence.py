@@ -215,5 +215,7 @@ class InfluenceButtons:
             return
         game.remove_pop([f"{pop}_pop"], "dummy", player, False)
         income = player["population_track"][player[f"{pop}_pop_cubes"] - 1]
-        await interaction.channel.send(f"{p1['player_name']} added 1 {pop.replace('adv', '')} population back to its track. Income went from {income} to {oldIncome}.")
+        await interaction.channel.send(f"{p1['player_name']} added 1 {pop.replace('adv', '')}"
+                                       f" population back to its track. "
+                                       f"Income went from {income} to {oldIncome}.")
         await interaction.message.delete()

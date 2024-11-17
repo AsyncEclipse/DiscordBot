@@ -721,12 +721,14 @@ class GamestateHelper:
             p1 = PlayerHelper(player, self.get_player(player))
             neutrals, orbitals = p1.upkeep()
             for cube in range(orbitals):
-                view=View()
-                planetTypes = ["money","science"]
+                view = View()
+                planetTypes = ["money", "science"]
                 for planetT in planetTypes:
-                    if p1.stats[planetT+"_pop_cubes"] < 12:
-                        view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{p1.stats['color']}_addCubeToTrack_"+planetT))
-                await interaction.channel.send( f"{p1.stats['player_name']} An orbital cube was found in your graveyard, please tell the bot what track you want it to go on", view=view)
+                    if p1.stats[f"{planetT}_pop_cubes"] < 12:
+                        view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple,
+                                             custom_id=f"FCID{p1.stats['color']}_addCubeToTrack_"+planetT))
+                await interaction.channel.send(f"{p1.stats['player_name']} An orbital cube was found in your graveyard,"
+                                               " please tell the bot what track you want it to go on", view=view)
             for cube in range(neutrals):
                 view = View()
                 planetTypes = ["money", "science", "material"]

@@ -192,6 +192,6 @@ class PlayerHelper:
                     if "neutral" not in cube:
                         orbitalCubes += 1
                     else:
-                        neutralCubes +=1
+                        neutralCubes += 1
             self.stats["graveYard"] = []
         return neutralCubes, orbitalCubes
