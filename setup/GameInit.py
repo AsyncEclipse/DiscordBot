@@ -14,10 +14,8 @@ class GameInit:
         self.turn_order_variant = turn_order_variant
 
     def create_game(self):
-        
         game_id = "aeb"+str(config.game_number)
         update_game_number()
-        
 
         with open("data/basic_game.json", "r") as f:
             self.gamestate = json.load(f)
@@ -28,8 +26,7 @@ class GameInit:
         for i in self.player_list:
             self.gamestate["players"].update({i[0]: {"player_name": f"<@{str(i[0])}>"}})
 
-        #Load discovery tiles
-
+        # Load discovery tiles
         listOfDisc = []
         with open("data/discoverytiles.json") as f:
             discTile_data = json.load(f)
@@ -39,18 +36,18 @@ class GameInit:
         random.shuffle(listOfDisc)
         self.gamestate["discTiles"] = listOfDisc
 
-        #Loading of variants here
-        if self.ai_ship_type=="adv":
+        # Loading of variants here
+        if self.ai_ship_type == "adv":
             self.gamestate["advanced_ai"] = 1
-        if self.ai_ship_type=="wa":
+        if self.ai_ship_type == "wa":
             self.gamestate["wa_ai"] = 1
         self.gamestate["turnsInPassingOrder"] = self.turn_order_variant
-        if self.rift_cannon == False:
+        if not self.rift_cannon:
             self.gamestate["tech_deck"].remove("rican")
             self.gamestate["discTiles"].remove("ricon")
 
-
         with open(f"{config.gamestate_path}/{self.gamestate['game_id']}.json", "w") as f:
             json.dump(self.gamestate, f)
+
     def update_num(self):
-        config.game_number +=1
+        config.game_number += 1

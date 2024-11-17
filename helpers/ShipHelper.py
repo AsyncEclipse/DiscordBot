@@ -1,5 +1,6 @@
 import json
 
+
 class Ship:
     def __init__(self):
         self.range = 0
@@ -16,7 +17,6 @@ class Ship:
         self.jumpdrive = 0
 
     def build_ship_stats(self, ship_parts):
-
         with open("data/parts.json", "r") as f:
             part_dict = json.load(f)
         for part in ship_parts:
@@ -44,10 +44,12 @@ class Ship:
     def take_damage(self, damage):
         self.hull -= damage
         return self.hull
+
     def is_destroyed(self):
         if self.hull < 0:
             return True
         return False
+
 
 class PlayerShip(Ship):
     def __init__(self, player, ship_type):
@@ -59,7 +61,7 @@ class PlayerShip(Ship):
         self.energy = player[f"base_{self.ship_type}_nrg"]
         self.computer = player[f"base_{self.ship_type}_comp"]
 
-        #added for Outcast factions
+        # added for Outcast factions
         try:
             self.shield = player[f"base_{self.ship_type}_shield"]
         except KeyError:
@@ -73,10 +75,9 @@ class PlayerShip(Ship):
         self.build_ship_stats(self.ship_parts)
         self.cost = player[f"cost_{self.ship_type}"]
 
-
     def getRange(self):
         return self.range
-    
+
     def getJumpDrive(self):
         return self.jumpdrive
     '''
@@ -114,10 +115,10 @@ class PlayerShip(Ship):
             return ship_type
 
     def check_valid_ship(self):
-        if (self.range <= 0 and not self.ship_type == "starbase") or self.energy < 0 or (self.ship_type == "starbase" and self.range > 0):
-            return False
-        else:
-            return True
+        return not any(self.range <= 0 and not self.ship_type == "starbase",
+                       self.energy < 0,
+                       self.ship_type == "starbase" and self.range > 0)
+
 
 class AI_Ship(Ship):
     def __init__(self, ship_type, advanced=False, wa=False):
@@ -126,11 +127,11 @@ class AI_Ship(Ship):
             AI_parts = json.load(f)
         if "ai-" not in ship_type:
             ship_type = "ai-"+ship_type
-        if advanced == True:
+        if advanced:
             if "adv" not in ship_type:
                 ship_type = ship_type + "adv"
             ship_parts = AI_parts[ship_type]
-        if wa == True:
+        if wa:
             if "wa" not in ship_type:
                 ship_type = ship_type + "wa"
             ship_parts = AI_parts[ship_type]
