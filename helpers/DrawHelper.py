@@ -1353,16 +1353,25 @@ class DrawHelper:
         file = discord.File(bytes, filename="player_area.webp")
         return file
 
-    def show_player_ship(self, player_area, ship):
+    def show_player_ship(self, player_area, ship, factionName):
         player_area = player_area.crop((0,0,895, 196))
         if "intercept" in ship:
-            player_area = player_area.crop((16,0,200, 170))
+            if "Rho" in factionName:
+                player_area = player_area.crop((90,0,273, 160))
+            else:
+                player_area = player_area.crop((16,0,200, 170))
         if "cru" in ship:
-            player_area = player_area.crop((221,0,405, 196))
+            if "Rho" in factionName:
+                player_area = player_area.crop((354,0,537, 186))
+            else:
+                player_area = player_area.crop((221,0,405, 196))
         if "dread" in ship:
             player_area = player_area.crop((435,0,680, 196))
         if "starbase" in ship or "orb" in ship:
-            player_area = player_area.crop((696,0,875, 160))
+            if "Rho" in factionName:
+                player_area = player_area.crop((616,0,795, 170))
+            else:
+                player_area = player_area.crop((696,0,875, 160))
         bytes = BytesIO()
         player_area.save(bytes, format="WEBP")
         bytes.seek(0)

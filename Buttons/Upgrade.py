@@ -154,7 +154,7 @@ class UpgradeButtons:
         view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                              custom_id=f"FCID{player['color']}_finishAction"))
         await interaction.message.delete()
-        await interaction.channel.send(f"{player['player_name']} replaced {oldName} with {part_stats[newPart]['name']} on their {ship.capitalize()} which now looks like this",file=await asyncio.to_thread(drawing.show_player_ship,image, ship))
+        await interaction.channel.send(f"{player['player_name']} replaced {oldName} with {part_stats[newPart]['name']} on their {ship.capitalize()} which now looks like this",file=await asyncio.to_thread(drawing.show_player_ship,image, ship, player_helper.stats["name"]))
         if discTileUpgrade == "dummy":
             await interaction.channel.send(
                 f"{player['player_name']}, choose which ship you would like to upgrade or finish your action.",
