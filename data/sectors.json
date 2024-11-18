@@ -1768,13 +1768,17 @@
     "science_pop": [],
     "science1_snap": [],
     "science2_snap": [],
-    "scienceadv_pop": [],
+    "scienceadv_pop": [
+      0
+    ],
     "scienceadv1_snap": [
       326,
       666
     ],
     "scienceadv2_snap": [],
-    "material_pop": [1],
+    "material_pop": [
+      1
+    ],
     "material1_snap": [
       670,
       691
