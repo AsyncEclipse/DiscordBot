@@ -97,7 +97,40 @@ class SearchCommands(commands.GroupCog, name="search"):
         app_commands.Choice(name="Tachyon Source", value="tas"),
         app_commands.Choice(name="Transition Drive", value="trd"),
         app_commands.Choice(name="Zero Point Source", value="zes")]
+    disc_tiles_ancient_ship_parts_choices = [
+        app_commands.Choice(name="Antimatter Missile", value="anm"),
+        app_commands.Choice(name="Axion Computer", value="acx"),
+        app_commands.Choice(name="Conformal Drive", value="cod"),
+        app_commands.Choice(name="Flux Shield", value="fls"),
+        app_commands.Choice(name="Hypergrid Source", value="hyg"),
+        app_commands.Choice(name="Inversion Shield", value="ins"),
+        app_commands.Choice(name="Ion Disruptor", value="iod"),
+        app_commands.Choice(name="Ion Missile", value="iom"),
+        app_commands.Choice(name="Ion Turret", value="iot"),
+        app_commands.Choice(name="Jump Drive", value="jud"),
+        app_commands.Choice(name="Morph Shield", value="mos"),
+        app_commands.Choice(name="Muon Source", value="mus"),
+        app_commands.Choice(name="Nonlinear Drive", value="nod"),
+        app_commands.Choice(name="Plasma Turret", value="plt"),
+        app_commands.Choice(name="Shard Hull", value="shh"),
+        app_commands.Choice(name="Soliton Charger", value="socha"),
+        app_commands.Choice(name="Soliton Missile", value="som"),
+        app_commands.Choice(name="Rift Conductor", value="ricon")]
+    discovery_tiles_other_choices = [
+        app_commands.Choice(name="All Income Gain", value="all"),
+        app_commands.Choice(name="Artifact Codex", value="art"),
+        app_commands.Choice(name="Ancient Cruiser", value="cru"),
+        app_commands.Choice(name="Ancient Might", value="rep"),
+        app_commands.Choice(name="Material Gain", value="mat"),
+        app_commands.Choice(name="Money and Wild Gain", value="mix"),
+        app_commands.Choice(name="Money Gain", value="mog"),
+        app_commands.Choice(name="Monolith", value="mon"),
+        app_commands.Choice(name="Orbital", value="orb"),
+        app_commands.Choice(name="Science Gain", value="sci"),
+        app_commands.Choice(name="Tech Gain", value="tec"),
+        app_commands.Choice(name="Warp Portal", value="wap")]
 
+    
     @app_commands.command(name="upgrade_reference")
     async def upgrade_reference(self, interaction: discord.Interaction):
         await interaction.response.defer(thinking=True, ephemeral=True)
@@ -117,7 +150,8 @@ class SearchCommands(commands.GroupCog, name="search"):
                                         f"\n> Min Cost: {tech_info['min_cost']}"
                                         f"\n> Tech track: {tech_info['track']}"
                                         f"\n> Total number: {tech_info['num']}"
-                                        f"\n> Description: {tech_info['description']}",
+                                        f"\n> Description: {tech_info['description']}"
+                                        f"\n> Reference Code: {tech_choice.value}",
                                         file=image)
 
     @app_commands.command(name="tech_o_to_z", description="Tech information O through Z")
@@ -133,7 +167,8 @@ class SearchCommands(commands.GroupCog, name="search"):
                                         f"\n> Min Cost: {tech_info['min_cost']}"
                                         f"\n> Tech track: {tech_info['track']}"
                                         f"\n> Total number: {tech_info['num']}"
-                                        f"\n> Description: {tech_info['description']}",
+                                        f"\n> Description: {tech_info['description']}"
+                                        f"\n> Reference Code: {tech_choice.value}",
                                         file=image)
 
     @app_commands.command(name="parts_a_to_m", description="Part information A through M")
@@ -147,7 +182,8 @@ class SearchCommands(commands.GroupCog, name="search"):
         await interaction.followup.send(f"{part_info['name']}"
                                         f"\n> Energy Cost: {part_info['nrg_use']}"
                                         f"\n> Initiative: {part_info['speed']}"
-                                        f"\n> Description: {part_info['description']}",
+                                        f"\n> Description: {part_info['description']}"
+                                        f"\n> Reference Code: {part_choice.value}",
                                         file=image)
 
     @app_commands.command(name="parts_n_to_z", description="Part information N through Z")
@@ -161,5 +197,34 @@ class SearchCommands(commands.GroupCog, name="search"):
         await interaction.followup.send(f"{part_info['name']}"
                                         f"\n> Energy Cost: {part_info['nrg_use']}"
                                         f"\n> Initiative: {part_info['speed']}"
-                                        f"\n> Description: {part_info['description']}",
+                                        f"\n> Description: {part_info['description']}"
+                                        f"\n> Reference Code: {part_choice.value}",
+                                        file=image)
+
+    @app_commands.command(name="ancient_disc_tiles", description="Ancient part disc tiles")
+    @app_commands.choices(tile_choice=disc_tiles_ancient_ship_parts_choices)
+    async def ancient_disc_tiles(self, interaction: discord.Interaction, tile_choice: app_commands.Choice[str]):
+        with open("data/discoverytiles.json", "r") as f:
+            data = json.load(f)
+        tile_info = data[tile_choice.value]
+        await interaction.response.defer(thinking=True)
+        image = DrawHelper.show_disc_tile_ref_image(tile_choice.name)
+        await interaction.followup.send(f"{tile_info['name']}"
+                                        f"\n> Total Available: {tile_info['num']}"
+                                        f"\n> Description: {tile_info['description']}"
+                                        f"\n> Reference Code: {tile_choice.value}",
+                                        file=image)
+
+    @app_commands.command(name="discovery_tiles", description="Non ancient discovery tiles")
+    @app_commands.choices(tile_choice=discovery_tiles_other_choices)
+    async def discovery_tiles(self, interaction: discord.Interaction, tile_choice: app_commands.Choice[str]):
+        with open("data/discoverytiles.json", "r") as f:
+            data = json.load(f)
+        tile_info = data[tile_choice.value]
+        await interaction.response.defer(thinking=True)
+        image = DrawHelper.show_disc_tile_ref_image(tile_choice.name)
+        await interaction.followup.send(f"{tile_info['name']}"
+                                        f"\n> Total Available: {tile_info['num']}"
+                                        f"\n> Description: {tile_info['description']}"
+                                        f"\n> Reference Code: {tile_choice.value}",
                                         file=image)

@@ -95,11 +95,11 @@
     "hull": 3
   },
   "ai-gcdswa": {
-    "dice": [],
-    "missile": [
+    "dice": [
       "orange",
       "orange"
     ],
+    "missile": [],
     "speed": 3,
     "computer": 2,
     "shield": 2,

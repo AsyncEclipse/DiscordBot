@@ -172,6 +172,7 @@ class PlayerHelper:
         self.stats["perma_passed"] = False
         self.stats["activatedPulsars"] = []
         neutralCubes = 0
+        orbitalCubes = 0
         actions = ["influence","build","move","upgrade","explore","research"]
         for action in actions:
             if action+"_action_counters" not in self.stats:
@@ -185,6 +186,9 @@ class PlayerHelper:
                 if "neutral" not in cube and "orbital" not in cube:
                     self.stats[cube+"_cubes"] = self.stats[cube+"_cubes"]+1
                 else:
-                    neutralCubes +=1
+                    if "neutral" not in cube:
+                        orbitalCubes += 1
+                    else:
+                        neutralCubes +=1
             self.stats["graveYard"]=[]
-        return neutralCubes
+        return neutralCubes, orbitalCubes
