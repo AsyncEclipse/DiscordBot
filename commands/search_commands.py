@@ -97,7 +97,6 @@ class SearchCommands(commands.GroupCog, name="search"):
         app_commands.Choice(name="Transition Drive", value="trd"),
         app_commands.Choice(name="Zero Point Source", value="zes")]
 
-
     @app_commands.command(name="upgrade_reference")
     async def upgrade_reference(self, interaction: discord.Interaction):
         await interaction.response.defer(thinking=True, ephemeral=True)
