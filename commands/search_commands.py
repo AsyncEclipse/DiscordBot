@@ -209,8 +209,8 @@ class SearchCommands(commands.GroupCog, name="search"):
                                         f"\n> Description: {disc_info['description']}",
                                         file=image)
 
- @app_commands.command(name="discovery_tiles_ancient_other", description="Discovery Tile information for all tiles that are not ancient ship parts.")
-    @app_commands.choices(disc_choice= discovery_other_choices)
+    @app_commands.command(name="discovery_tiles_ancient_other", description="Discovery Tile information for all tiles that are not ancient ship parts.")
+    @app_commands.choices(disc_choice= discovery_tiles_other_choices)
     async def discovery_tiles_ancient_ship_parts(self, interaction: discord.Interaction, disc_choice: app_commands.Choice[str]):
         with open("data/discoverytiles.json", "r") as f:
             data = json.load(f)
