@@ -404,7 +404,7 @@ class GamestateHelper:
                     del self.gamestate["board"][position][key]
                 if "retreatPenalty"+color in self.gamestate["board"][position]:
                     del self.gamestate["board"][position]["retreatPenalty"+color]
-            self.fixshipsOrder()
+            self.fixshipsOrder(position)
         self.update()
 
     def getReputationTilesToDraw(self, position, color):
