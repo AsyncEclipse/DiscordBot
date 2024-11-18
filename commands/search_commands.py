@@ -97,7 +97,7 @@ class SearchCommands(commands.GroupCog, name="search"):
         app_commands.Choice(name="Tachyon Source", value="tas"),
         app_commands.Choice(name="Transition Drive", value="trd"),
         app_commands.Choice(name="Zero Point Source", value="zes")]
-     discovery_tiles_ancient_ship_parts_choices = [
+    discovery_tiles_ancient_ship_parts_choices = [
         app_commands.Choice(name="Soliton Charger", value="socha"),
         app_commands.Choice(name="Axion Computer", value="acx"),
         app_commands.Choice(name="Ion Disruptor", value="iod"),
@@ -115,8 +115,8 @@ class SearchCommands(commands.GroupCog, name="search"):
         app_commands.Choice(name="Morph Shield", value="mos"),
         app_commands.Choice(name="Hypergrid Source", value="hyg"),
         app_commands.Choice(name="Muon Source", value="mus"),
-        app_commands.Choice(name="Plasma Turret", value="plt"),]
-        discovery_tiles_other_choices = [
+        app_commands.Choice(name="Plasma Turret", value="plt")]
+    discovery_tiles_other_choices = [
         app_commands.Choice(name="Ancient Cruiser", value="cru"),
         app_commands.Choice(name="Material Gain", value="mat"),
         app_commands.Choice(name="Money Gain", value="mog"),
@@ -128,7 +128,7 @@ class SearchCommands(commands.GroupCog, name="search"):
         app_commands.Choice(name="Ancient Might", value="rep"),
         app_commands.Choice(name="Science Gain", value="sci"),
         app_commands.Choice(name="Tech Gain", value="tec"),
-        app_commands.Choice(name="Warp Portal", value="wap"),]
+        app_commands.Choice(name="Warp Portal", value="wap")]
 
     
     @app_commands.command(name="upgrade_reference")
