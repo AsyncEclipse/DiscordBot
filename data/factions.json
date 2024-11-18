@@ -1924,7 +1924,7 @@
                 "materials": 4,
                 "science": 2,
                 "money": 3,
-                "colony_ships": 3,
+                "colony_ships": 4,
                 "base_colony_ships": 3,
                 "home_planet": "234",
                 "owned_tiles": [],
@@ -1975,9 +1975,13 @@
                         2,
                         0
                 ],
-                "military_tech": ["cld"],
+                "military_tech": [
+                        "cld"
+                ],
                 "grid_tech": [],
-                "nano_tech": ["orb"],
+                "nano_tech": [
+                        "orb"
+                ],
                 "ancient_parts": [],
                 "tech_track": [
                         -8,
@@ -2106,8 +2110,12 @@
                         2,
                         0
                 ],
-                "military_tech": ["stb"],
-                "grid_tech": ["gas"],
+                "military_tech": [
+                        "stb"
+                ],
+                "grid_tech": [
+                        "gas"
+                ],
                 "nano_tech": [],
                 "ancient_parts": [],
                 "tech_track": [

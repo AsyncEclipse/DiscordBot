@@ -71,7 +71,10 @@ class PlayerShip(Ship):
 
         self.ship_parts = player[f"{self.ship_type}_parts"]
         self.build_ship_stats(self.ship_parts)
-        self.cost = player[f"cost_{self.ship_type}"]
+        if "orb" in self.ship_type:
+            self.cost = 5
+        else:
+            self.cost = player[f"cost_{self.ship_type}"]
 
 
     def getRange(self):
@@ -114,7 +117,7 @@ class PlayerShip(Ship):
             return ship_type
 
     def check_valid_ship(self):
-        if (self.range <= 0 and not self.ship_type == ("starbase" or "orb")) or self.energy < 0 or (self.ship_type==("starbase" or "orb") and self.range > 0):
+        if (self.range <= 0 and not self.ship_type in ["starbase", "orb"]) or self.energy < 0 or (self.ship_type in ["starbase", "orb"] and self.range > 0):
             return False
         else:
             return True

@@ -1359,7 +1359,7 @@ class DrawHelper:
             player_area = player_area.crop((221,0,405, 196))
         if "dread" in ship:
             player_area = player_area.crop((435,0,680, 196))
-        if "starbase" in ship:
+        if "starbase" in ship or "orb" in ship:
             player_area = player_area.crop((696,0,875, 160))
         bytes = BytesIO()
         player_area.save(bytes, format="WEBP")

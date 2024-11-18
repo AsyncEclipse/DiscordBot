@@ -13,7 +13,7 @@ class UpgradeButtons:
 
     @staticmethod
     async def startUpgrade(game: GamestateHelper, player, interaction: discord.Interaction, button:bool, discTileUpgrade:str):
-        ships = ["interceptor","cruiser","dread","starbase"]
+        ships = ["interceptor","cruiser","dread","starbase", "orb"]
         drawing = DrawHelper(game.gamestate)
         image = await asyncio.to_thread(drawing.player_area,player)
         view = View()
@@ -24,6 +24,8 @@ class UpgradeButtons:
             if player['name'] == "Rho Indi Syndicate" and ship == "dread":
                 continue
             if player['name'] == "The Exiles" and ship == "starbase":
+                continue
+            if player['name'] != "The Exiles" and ship == "orb":
                 continue
             shipEmoji = Emoji.getEmojiByName(player['color']+game.getShipShortName(ship))
             view.add_item(Button(label=ship.capitalize(), emoji = shipEmoji, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_upgradeShip_{actions}_{ship}_{discTileUpgrade}"))
@@ -139,8 +141,14 @@ class UpgradeButtons:
         image = await asyncio.to_thread(drawing.player_area,player_helper.stats)
         view = View()
         if actions > 0 and ("passed" not in player or player["passed"] != True):
-            ships = ["interceptor","cruiser","dread","starbase"]
+            ships = ["interceptor","cruiser","dread","starbase","orb"]
             for ship2 in ships:
+                if player['name'] == "Rho Indi Syndicate" and ship2 == "dread":
+                    continue
+                if player['name'] == "The Exiles" and ship2 == "starbase":
+                    continue
+                if player['name'] != "The Exiles" and ship2 == "orb":
+                    continue
                 shipEmoji = Emoji.getEmojiByName(player['color']+game.getShipShortName(ship2))
                 view.add_item(Button(label=ship2.capitalize(),emoji=shipEmoji, style=discord.ButtonStyle.blurple, custom_id=f"FCID{player['color']}_upgradeShip_{str(actions)}_{ship2}_dummy"))
         view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,

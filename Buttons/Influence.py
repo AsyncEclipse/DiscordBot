@@ -164,14 +164,14 @@ class InfluenceButtons:
                 view=View()
                 planetTypes = ["money","science","material"]
                 for planetT in planetTypes:
-                    if p1[planetT+"_pop_cubes"] < 12:
+                    if p1[planetT+"_pop_cubes"] < 13:
                         view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{p1['color']}_addCubeToTrack_"+planetT))
                 await interaction.channel.send( f"A neutral cube was removed, please tell the bot what track you want it to go on", view=view)
             if orbitalCubes > 0:
                 view=View()
                 planetTypes = ["money","science"]
                 for planetT in planetTypes:
-                    if p1[planetT+"_pop_cubes"] < 12:
+                    if p1[planetT+"_pop_cubes"] < 13:
                         view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{p1['color']}_addCubeToTrack_"+planetT))
                 await interaction.channel.send( f"An orbital cube was removed, please tell the bot what track you want it to go on", view=view)
             else:

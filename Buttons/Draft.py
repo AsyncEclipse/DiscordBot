@@ -54,6 +54,7 @@ class DraftButtons:
         ("Wardens of Magellan", "mag"),
         ("Enlightened of Lyra", "lyr"),
         ("Rho Indi Syndicate", "rho"),
+        ("The Exiles","exl"),
         ("Terran Alliance (Orion)", "ter1"),
         ("Terran Conglomerate (Mech)", "ter2"),
         ("Terran Directorate (Eridian)", "ter3"),

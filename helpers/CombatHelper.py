@@ -330,7 +330,9 @@ class Combat:
                         checker="FCID"+defender+"_"
                     view.add_item(Button(label="(Defender) Roll Initative "+str(i)+" Ships", style=discord.ButtonStyle.green, custom_id=f"{checker}rollDice_{pos}_{defender}_{str(i)}_defender"))
                 if i in attackerSpeeds:
-                    checker="FCID"+attacker+"_"
+                    checker = ""
+                    if attacker != "ai":
+                        checker="FCID"+attacker+"_"
                     view.add_item(Button(label="(Attacker) Roll Initative "+str(i)+" Ships", style=discord.ButtonStyle.red, custom_id=f"{checker}rollDice_{pos}_{attacker}_{str(i)}_attacker"))
         view.add_item(Button(label="Refresh Image", style=discord.ButtonStyle.blurple, custom_id=f"refreshImage_{pos}"))
         view.add_item(Button(label="Remove Units", style=discord.ButtonStyle.gray, custom_id=f"removeUnits_{pos}"))
@@ -830,7 +832,10 @@ class Combat:
                     view.add_item(Button(label="Retreat "+initiative+" Ships", style=discord.ButtonStyle.red, custom_id=f"{checker}startToRetreatUnits_{pos}_{nextOwner}_{str(nextSpeed)}"))
             else:
                 view.add_item(Button(label="Roll "+initiative+" Ships For AI", style=discord.ButtonStyle.green, custom_id=f"{checker}rollDice_{pos}_{nextOwner}_{str(nextSpeed)}_deleteMsg"))
-                playerObj = game.getPlayerObjectFromColor(attacker)
+                if attacker != "ai":
+                    playerObj = game.getPlayerObjectFromColor(attacker)
+                else:
+                    playerObj = game.getPlayerObjectFromColor(defender)
                 msg = playerObj["player_name"] + " please roll the dice for the AI ships with "+initiative
         await channel.send(msg, view = view)
         
