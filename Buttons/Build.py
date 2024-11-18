@@ -75,7 +75,7 @@ class BuildButtons:
         shipsShort = ["int","cru","drd","sb"]
         ultimateC = 0
                 
-        if "stb" not in player["military_tech"]:
+        if "stb" not in player["military_tech"] or player["name"] == "The Exiles":
             ships.remove("Starbase")
         if "orb" not in player["nano_tech"]or "orb" in build:
             ships.remove("Orbital")

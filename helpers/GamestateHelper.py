@@ -375,8 +375,12 @@ class GamestateHelper:
         self.update()
         return damage
 
-    def destroy_ship(self, ship, position, destroyer):
-        self.remove_units([ship],position)
+    def destroy_ship(self, ship:str, position, destroyer):
+        if "orb" not in ship:
+            self.remove_units([ship],position)
+        else:
+            self.remove_pop(["orbital_pop"],position, self.get_player_from_color(self.gamestate["board"][position]["owner"]),True)
+
         if "damage_tracker" in self.gamestate["board"][position]:
             if ship in self.gamestate["board"][position]["damage_tracker"]:
                 del self.gamestate["board"][position]["damage_tracker"][ship]
@@ -415,7 +419,7 @@ class GamestateHelper:
             return count
         else:
             for ship in self.gamestate["board"][position][key]:
-                if "anc" in ship  or ship == "sb" or ship == "int":
+                if "anc" in ship  or ship == "sb" or ship == "int" or ship == "orb":
                     count +=1
                 if ship == "cru" or "grd" in ship:
                     count += 2
@@ -709,7 +713,7 @@ class GamestateHelper:
                 view=View()
                 planetTypes = ["money","science","material"]
                 for planetT in planetTypes:
-                    if p1.stats[planetT+"_pop_cubes"] < 12:
+                    if p1.stats[planetT+"_pop_cubes"] < 13:
                         view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple, custom_id=f"FCID{p1.stats['color']}_addCubeToTrack_"+planetT))
                 await interaction.channel.send( f"{p1.stats['player_name']} A neutral cube was found in your graveyard, please tell the bot what track you want it to go on", view=view)
 
@@ -818,6 +822,8 @@ class GamestateHelper:
                     self.gamestate["board"][home]["player_ships"].append(p1.stats["color"]+"-cru")
                 elif p1.stats["name"] == "Rho Indi Syndicate":
                     self.gamestate["board"][home]["player_ships"] = [p1.stats["color"]+"-int", p1.stats["color"]+"-int"]
+                elif p1.stats["name"] == "The Exiles":
+                    self.gamestate["board"][home]["player_ships"] = [p1.stats["color"]+"-orb"]
                 else:
                     self.gamestate["board"][home]["player_ships"].append(p1.stats["color"] + "-int")
 

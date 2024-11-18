@@ -831,7 +831,10 @@ class DrawHelper:
             interceptCoord = [(74, 39), (16, 86), (74, 97), (132, 86), (148, 39)]
             cruiserCoord = [(221, 63), (279, 39), (337, 63), (221, 121), (279, 97), (337, 121), (353, 19)]
             dreadCoord = [(435, 64), (493, 40), (551, 40), (609, 64), (435, 122), (493, 98), (551, 98), (609, 122),(628, 20)]
-            sbCoord = [(697, 39), (813, 39), (697, 97), (755, 66), (814, 97), (815, 0)]
+            if faction == "exile":
+                orbCoord = [(753, 68), (810, 40), (694, 97), (811, 100)]
+            else:
+                sbCoord = [(697, 39), (813, 39), (697, 97), (755, 66), (814, 97), (815, 0)]
 
         if player["name"]=="Planta":
             interceptCoord.pop(2)
@@ -856,7 +859,10 @@ class DrawHelper:
         process_parts(player["interceptor_parts"], interceptCoord)
         process_parts(player["cruiser_parts"], cruiserCoord)
         process_parts(player["dread_parts"], dreadCoord)
-        process_parts(player["starbase_parts"], sbCoord)
+        if faction == "exile":
+            process_parts(player["orb_parts"], orbCoord)
+        else:
+            process_parts(player["starbase_parts"], sbCoord)
 
         sizeR = 58
         reputation_path = f"images/resources/components/all_boards/reputation.png"
@@ -1006,6 +1012,8 @@ class DrawHelper:
                 points += tile_map[tile]["vp"]
                 if "Lyra" in player["name"] and "shrines" in tile_map[tile]:
                     points += tile_map[tile]["shrines"]
+                if player["name"] == "The Exiles" and "orbital_pop" in tile_map[tile] and (tile_map[tile]["orbital_pop"][0]==1):
+                    points += 1
                 if "warpPoint" in tile_map[tile]:
                     points += tile_map[tile]["warpPoint"]
                 if "warpDisc" in tile_map[tile]:
@@ -1353,7 +1361,7 @@ class DrawHelper:
             player_area = player_area.crop((221,0,405, 196))
         if "dread" in ship:
             player_area = player_area.crop((435,0,680, 196))
-        if "starbase" in ship:
+        if "starbase" in ship or "orb" in ship:
             player_area = player_area.crop((696,0,875, 160))
         bytes = BytesIO()
         player_area.save(bytes, format="WEBP")
