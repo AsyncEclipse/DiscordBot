@@ -33,7 +33,8 @@ class DraftButtons:
         6. Planta  
         7. Wardens of Magellan
         8. Enlightened of Lyra
-        9. Rho Indi Syndicate\n
+        9. Rho Indi Syndicate
+        10. The Exiles\n
         """
         await channel.send(list)
         playerID = game.get_gamestate()["draftingPlayers"][0]
