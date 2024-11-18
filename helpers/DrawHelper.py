@@ -1401,9 +1401,21 @@ class DrawHelper:
         context = Image.new("RGBA", (256, 256), (255, 255, 255, 0))
         fixed_name = part_name.lower().replace(" ", "_")
         filepath = f"images/resources/components/upgrades/{fixed_name}.png"
-        part_image = Image.open(filepath)
+        part_image = Image.open(filepath).convert("RGBA")
         context.paste(part_image, (0, 0), mask=part_image)
         bytes_io = BytesIO()
         context.save(bytes_io, format="WEBP")
         bytes_io.seek(0)
         return discord.File(bytes_io, filename="part_image.webp")
+
+    @staticmethod
+    def show_disc_tile_ref_image(tile_name):
+        context = Image.new("RGBA", (256, 256), (255, 255, 255, 0))
+        fixed_name = "discovery_"+tile_name.lower().replace(" ", "_")
+        filepath = f"images/resources/components/discovery_tiles/{fixed_name}.png"
+        tile_image = Image.open(filepath).convert("RGBA")
+        context.paste(tile_image, (0, 0), mask=tile_image)
+        bytes_io = BytesIO()
+        context.save(bytes_io, format="WEBP")
+        bytes_io.seek(0)
+        return discord.File(bytes_io, filename="tile_image.webp")
