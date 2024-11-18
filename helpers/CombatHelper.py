@@ -55,6 +55,7 @@ class Combat:
         tiles = []
         for tile in tile_map:
             if len(Combat.findPlayersInTile(game,tile)) > 1:
+                game.fixshipsOrder(tile)
                 #Dont start combat between draco and ancients
                 if(len(Combat.findPlayersInTile(game,tile)) == 2 and "anc" in Combat.findShipTypesInTile(game,tile)):
                     if "Draco" in game.find_player_faction_name_from_color(Combat.findPlayersInTile(game,tile)[1]) or "Draco" in game.find_player_faction_name_from_color(Combat.findPlayersInTile(game,tile)[0]):
@@ -115,6 +116,7 @@ class Combat:
             game.initilizeKey("queuedDraws")
             
         for tile in tiles:
+
             game.setCombatants(Combat.findPlayersInTile(game, tile[1]), tile[1])
             message_to_send = "Combat will occur in system "+str(tile[0])+", position "+tile[1]  
             message = await channel.send(message_to_send) 
@@ -1017,8 +1019,10 @@ class Combat:
                 await Combat.promptNextSpeed(game, pos, interaction.channel, True)
 
 
+ 
+
     @staticmethod
-    async def resolveQueue(game:GamestateHelper, interaction:discord.Interaction):
+    async def resolveQueue(game:GamestateHelper, interaction:discord.Interaction, forcedResolve=False):
         foundNoSuccess = False
         success = 1
         while not foundNoSuccess and success < 20:
@@ -1029,7 +1033,7 @@ class Combat:
                 for system2 in game.get_gamestate()["tilesToResolve"]:
                     if system2 > system:
                         systemAheadNeedsToResolve = True
-                if not systemAheadNeedsToResolve:
+                if not systemAheadNeedsToResolve or forcedResolve:
                     goodToResolve = True
                     for system2, drawOrder2, color2, num_options2 in game.get_gamestate()["queuedDraws"]:
                         if int(system2) > int(system) or (int(system2) == int(system) and drawOrder > drawOrder2):

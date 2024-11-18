@@ -75,12 +75,14 @@ class GameCommands(commands.GroupCog, name="game"):
         game = GamestateHelper(interaction.channel)
         await interaction.response.defer(thinking=False)
         await Combat.startCombatThreads(game, interaction)
+        await interaction.followup.send("Started Combats")
 
     @app_commands.command(name="upkeep")
     async def upkeep(self,interaction: discord.Interaction):
         await interaction.response.defer(thinking=False)
         game = GamestateHelper(interaction.channel)
         await TurnButtons.runUpkeep(game, interaction)
+        await interaction.followup.send("Ran Upkeep")
 
     @app_commands.command(name="disable_minor_species")
     async def disable_minor_species(self,interaction: discord.Interaction):
@@ -91,8 +93,14 @@ class GameCommands(commands.GroupCog, name="game"):
     async def set_outlines_status(self,interaction: discord.Interaction, status:bool):
         game = GamestateHelper(interaction.channel)
         game.initilizeKey("turnOffLines")
-        game.setAdvancedAI(status)
+        game.setOutlines(status)
         await interaction.response.send_message("Set Outlines status to "+str(status))
+    
+    @app_commands.command(name="force_queue")
+    async def force_queue(self,interaction: discord.Interaction):
+        game = GamestateHelper(interaction.channel)
+        await Combat.resolveQueue(game, interaction, True)
+        await interaction.response.send_message("Queue has been force resolved")
 
     @app_commands.command(name="disable_five_player_hyperlanes")
     async def disable_five_player_hyperlanes(self,interaction: discord.Interaction):
