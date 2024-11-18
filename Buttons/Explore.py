@@ -16,26 +16,32 @@ class ExploreButtons:
         for tile in tile_map:
             if any([tile_map[tile].get("owner") == player["color"],
                     all(["player_ships" in tile_map[tile],
-                         ExploreButtons.doesPlayerHaveUnpinnedShips(player, tile_map[tile]["player_ships"], game)])]):
+                         ExploreButtons.doesPlayerHaveUnpinnedShips(player, tile_map[tile]["player_ships"],
+                                                                    game, tile)])]):
                 tiles.append(tile)
         return tiles
 
     @staticmethod
-    def doesPlayerHaveUnpinnedShips(player, playerShips, game):
+    def doesPlayerHaveUnpinnedShips(player, playerShips, game, tile):
         player_helper = PlayerHelper(game.get_player_from_color(player['color']), player)
         playerShipsCount = 0
         opponentShips = 0
         if len(playerShips) == 0:
             return False
         for ship in playerShips:
-            if "orb" not in ship and "mon" not in ship:
-                if player["color"] in ship:
-                    playerShipsCount += 1
+            if "mon" not in ship:
+                if player["color"] in ship and "orb" not in ship:
+                    playerShipsCount = playerShipsCount + 1
                 else:
-                    if "anc" not in ship or "Draco" not in player["name"]:
-                        opponentShips += 1
                     if "gcds" in ship:
                         opponentShips += 99
+                    if "orb" in ship and ship.split("-")[0] is not player["color"]:
+                        color = game.gamestate["board"][tile]["owner"]
+                        if all([game.find_player_faction_name_from_color(color) == "The Exiles",
+                                game.gamestate["board"][tile].get("orbital_pop", [0])[0] == 1]):
+                            opponentShips += 1
+                    elif "anc" not in ship or "Draco" not in player["name"]:
+                        opponentShips = opponentShips + 1
         researchedTechs = player_helper.getTechs()
         if "clo" in researchedTechs or "cld" in researchedTechs:
             playerShipsCount *= 2

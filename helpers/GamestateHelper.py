@@ -132,7 +132,7 @@ class GamestateHelper:
         self.gamestate["advanced_ai"] = status
         self.update()
 
-    def setLines(self, status: bool):
+    def setOutlines(self, status: bool):
         self.gamestate["turnOffLines"] = not status
         self.update()
 
@@ -384,8 +384,13 @@ class GamestateHelper:
         self.update()
         return damage
 
-    def destroy_ship(self, ship, position, destroyer):
-        self.remove_units([ship], position)
+    def destroy_ship(self, ship: str, position, destroyer):
+        if "orb" not in ship:
+            self.remove_units([ship], position)
+        else:
+            self.remove_pop(["orbital_pop"], position,
+                            self.get_player_from_color(self.gamestate["board"][position]["owner"]), True)
+
         if "damage_tracker" in self.gamestate["board"][position]:
             if ship in self.gamestate["board"][position]["damage_tracker"]:
                 del self.gamestate["board"][position]["damage_tracker"][ship]
@@ -405,6 +410,8 @@ class GamestateHelper:
                 key = "ships_destroyed_by_" + color
                 self.gamestate["board"][position].pop(key, None)
                 self.gamestate["board"][position].pop("retreatPenalty" + color, None)
+            if "player_ships" in self.gamestate["board"][position]:
+                self.fixshipsOrder(position)
         self.update()
 
     def getReputationTilesToDraw(self, position, color):
@@ -419,7 +426,7 @@ class GamestateHelper:
             return count
         else:
             for ship in self.gamestate["board"][position][key]:
-                if "anc" in ship or ship == "sb" or ship == "int":
+                if "anc" in ship or ship == "sb" or ship == "int" or ship == "orb":
                     count += 1
                 if ship == "cru" or "grd" in ship:
                     count += 2
@@ -563,6 +570,8 @@ class GamestateHelper:
     def fixshipsOrder(self, pos):
         from collections import OrderedDict
 
+        if "player_ships" not in self.gamestate["board"][pos]:
+            return
         arr = self.gamestate["board"][pos]["player_ships"]
         if len(arr) < 2:
             return
@@ -584,11 +593,8 @@ class GamestateHelper:
             if color not in colors_seen:
                 colors_seen[color] = len(colors_seen)
 
-        sorted = []
-        for item in arr:
-            sorted.append(item)
-        sorted.sort(key=lambda x: colors_seen[x.split('-')[0]])
-        self.gamestate["board"][pos]["player_ships"] = sorted
+        self.gamestate["board"][pos]["player_ships"] = sorted([s.replace("adv", "") for s in arr],
+                                                              key=lambda x: colors_seen[x.split('-')[0]])
         self.update()
 
     def setCurrentRoller(self, roller, pos):
@@ -733,7 +739,7 @@ class GamestateHelper:
                 view = View()
                 planetTypes = ["money", "science", "material"]
                 for planetT in planetTypes:
-                    if p1.stats[f"{planetT}_pop_cubes"] < 12:
+                    if p1.stats[f"{planetT}_pop_cubes"] < 13:
                         view.add_item(Button(label=planetT.capitalize(),
                                              style=discord.ButtonStyle.blurple,
                                              custom_id=f"FCID{p1.stats['color']}_addCubeToTrack_{planetT}"))
@@ -851,6 +857,9 @@ class GamestateHelper:
                     self.gamestate["board"][home]["player_ships"].append(p1.stats["color"] + "-cru")
                 elif p1.stats["name"] == "Rho Indi Syndicate":
                     self.gamestate["board"][home]["player_ships"] = 2 * [p1.stats["color"] + "-int"]
+                elif p1.stats["name"] == "The Exiles":
+                    self.gamestate["board"][home]["player_ships"] = [p1.stats["color"] + "-orb",
+                                                                     p1.stats["color"] + "-int"]
                 else:
                     self.gamestate["board"][home]["player_ships"].append(p1.stats["color"] + "-int")
 

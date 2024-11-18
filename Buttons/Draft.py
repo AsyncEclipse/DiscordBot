@@ -18,14 +18,14 @@ class DraftButtons:
             member = interaction.guild.get_member(player[0])
             message.append(f"{x + 1}. {member.mention}")
             game.addToKey("draftingPlayers", player[0])
-        message.append("For your reference, the factions currently available in the bot are the following 8,"
+        message.append("For your reference, the factions currently available in the bot are the following 10,"
                        " plus the 6 Terran equivalents. First-timers are encouraged to use the Terran factions,"
                        " which are all the same and don't have as many quirks"
                        " (the quirks are tame compared to TI4 asymmetry though).")
         message.extend(["1. Hydran Progress", "2. Eridian Empire", "3. Orion Hegemony",
                         "4. Mechanema", "5. Descendants of Draco", "6. Planta",
                         "7. Wardens of Magellan", "8. Enlightened of Lyra",
-                        "9. Rho Indi Syndicate"])
+                        "9. Rho Indi Syndicate", "10. The Exiles"])
 
         await channel.send("\n".join(message))
         playerID = game.get_gamestate()["draftingPlayers"][0]
@@ -45,6 +45,7 @@ class DraftButtons:
                              ("Wardens of Magellan", "mag"),
                              ("Enlightened of Lyra", "lyr"),
                              ("Rho Indi Syndicate", "rho"),
+                             ("The Exiles", "exl"),
                              ("Terran Alliance (Orion)", "ter1"),
                              ("Terran Conglomerate (Mech)", "ter2"),
                              ("Terran Directorate (Eridian)", "ter3"),

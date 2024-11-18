@@ -848,6 +848,8 @@ class DrawHelper:
             cruiserCoord = [(221, 63), (279, 39), (337, 63), (221, 121), (279, 97), (337, 121), (353, 19)]
             dreadCoord = [(435, 64), (493, 40), (551, 40), (609, 64), (435, 122),
                           (493, 98), (551, 98), (609, 122), (628, 20)]
+            if faction == "exile":
+                orbCoord = [(753, 68), (810, 40), (694, 97), (811, 100)]
             sbCoord = [(697, 39), (813, 39), (697, 97), (755, 66), (814, 97), (815, 0)]
 
         if player["name"] == "Planta":
@@ -874,7 +876,10 @@ class DrawHelper:
         process_parts(player["interceptor_parts"], interceptCoord)
         process_parts(player["cruiser_parts"], cruiserCoord)
         process_parts(player["dread_parts"], dreadCoord)
-        process_parts(player["starbase_parts"], sbCoord)
+        if faction == "exile":
+            process_parts(player["orb_parts"], orbCoord)
+        else:
+            process_parts(player["starbase_parts"], sbCoord)
 
         reputation_path = "images/resources/components/all_boards/reputation.png"
         reputation_image = self.use_image(reputation_path)
@@ -1027,6 +1032,8 @@ class DrawHelper:
                 points += tile_map[tile]["vp"]
                 if "Lyra" in player["name"] and "shrines" in tile_map[tile]:
                     points += tile_map[tile]["shrines"]
+                if player["name"] == "The Exiles" and tile_map[tile].get("orbital_pop", [0])[0] == 1:
+                    points += 1
                 if "warpPoint" in tile_map[tile]:
                     points += tile_map[tile]["warpPoint"]
                 if "warpDisc" in tile_map[tile]:
@@ -1374,16 +1381,25 @@ class DrawHelper:
         file = discord.File(byteData, filename="player_area.webp")
         return file
 
-    def show_player_ship(self, player_area, ship):
+    def show_player_ship(self, player_area, ship, factionName):
         player_area = player_area.crop((0, 0, 895, 196))
         if "intercept" in ship:
-            player_area = player_area.crop((16, 0, 200, 170))
+            if "Rho" in factionName:
+                player_area = player_area.crop((90, 0, 273, 160))
+            else:
+                player_area = player_area.crop((16, 0, 200, 170))
         if "cru" in ship:
-            player_area = player_area.crop((221, 0, 405, 196))
+            if "Rho" in factionName:
+                player_area = player_area.crop((354, 0, 537, 186))
+            else:
+                player_area = player_area.crop((221, 0, 405, 196))
         if "dread" in ship:
             player_area = player_area.crop((435, 0, 680, 196))
         if "starbase" in ship:
-            player_area = player_area.crop((696, 0, 875, 160))
+            if "Rho" in factionName:
+                player_area = player_area.crop((616, 0, 795, 170))
+            else:
+                player_area = player_area.crop((696, 0, 875, 160))
         byteData = BytesIO()
         player_area.save(byteData, format="WEBP")
         byteData.seek(0)
@@ -1430,9 +1446,21 @@ class DrawHelper:
         context = Image.new("RGBA", (256, 256), (255, 255, 255, 0))
         fixed_name = part_name.lower().replace(" ", "_")
         filepath = f"images/resources/components/upgrades/{fixed_name}.png"
-        part_image = Image.open(filepath)
+        part_image = Image.open(filepath).convert("RGBA")
         context.paste(part_image, (0, 0), mask=part_image)
         bytes_io = BytesIO()
         context.save(bytes_io, format="WEBP")
         bytes_io.seek(0)
         return discord.File(bytes_io, filename="part_image.webp")
+
+    @staticmethod
+    def show_disc_tile_ref_image(tile_name):
+        context = Image.new("RGBA", (256, 256), (255, 255, 255, 0))
+        fixed_name = "discovery_"+tile_name.lower().replace(" ", "_")
+        filepath = f"images/resources/components/discovery_tiles/{fixed_name}.png"
+        tile_image = Image.open(filepath).convert("RGBA")
+        context.paste(tile_image, (0, 0), mask=tile_image)
+        bytes_io = BytesIO()
+        context.save(bytes_io, format="WEBP")
+        bytes_io.seek(0)
+        return discord.File(bytes_io, filename="tile_image.webp")

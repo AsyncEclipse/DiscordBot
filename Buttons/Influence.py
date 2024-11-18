@@ -63,14 +63,14 @@ class InfluenceButtons:
                     playerShips = game.get_gamestate()["board"][adjTile]["player_ships"]
                     playerShips.append(player["color"])
                     if all([game.get_gamestate()["board"][adjTile].get("owner") == 0,
-                            ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game)]):
+                            ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, tile)]):
                         tilesToInfluence.append(adjTile)
             if tile not in tilesViewed:
                 tilesViewed.append(tile)
                 playerShips = game.get_gamestate()["board"][tile]["player_ships"]
                 playerShips.append(player["color"])
                 if all([game.get_gamestate()["board"][tile].get("owner") == 0,
-                        ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game)]):
+                        ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, tile)]):
                     if any("ai" in s for s in playerShips):
                         if any("anc" in s for s in playerShips):
                             if "Draco" not in player["name"]:
@@ -185,7 +185,7 @@ class InfluenceButtons:
                 view = View()
                 planetTypes = ["money", "science", "material"]
                 for planetT in planetTypes:
-                    if p1[f"{planetT}_pop_cubes"] < 12:
+                    if p1[f"{planetT}_pop_cubes"] < 13:
                         view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple,
                                              custom_id=f"FCID{p1['color']}_addCubeToTrack_{planetT}"))
                 await interaction.channel.send("A neutral cube was removed, "
@@ -194,7 +194,7 @@ class InfluenceButtons:
                 view = View()
                 planetTypes = ["money", "science"]
                 for planetT in planetTypes:
-                    if p1[f"{planetT}_pop_cubes"] < 12:
+                    if p1[f"{planetT}_pop_cubes"] < 13:
                         view.add_item(Button(label=planetT.capitalize(), style=discord.ButtonStyle.blurple,
                                              custom_id=f"FCID{p1['color']}_addCubeToTrack_{planetT}"))
                 await interaction.channel.send("An orbital cube was removed, "

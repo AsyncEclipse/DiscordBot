@@ -23,6 +23,10 @@ class UpgradeButtons:
         for ship in ships:
             if player['name'] == "Rho Indi Syndicate" and ship == "dread":
                 continue
+            if player['name'] == "The Exiles" and ship == "starbase":
+                continue
+            if player['name'] != "The Exiles" and ship == "orb":
+                continue
             shipEmoji = Emoji.getEmojiByName(player['color'] + game.getShipShortName(ship))
             view.add_item(Button(label=ship.capitalize(), emoji=shipEmoji, style=discord.ButtonStyle.blurple,
                                  custom_id=f"FCID{player['color']}_upgradeShip_{actions}_{ship}_{discTileUpgrade}"))
@@ -162,6 +166,12 @@ class UpgradeButtons:
         if actions > 0 and not player.get("passed"):
             ships = ["interceptor", "cruiser", "dread", "starbase"]
             for ship2 in ships:
+                if player['name'] == "Rho Indi Syndicate" and ship2 == "dread":
+                    continue
+                if player['name'] == "The Exiles" and ship2 == "starbase":
+                    continue
+                if player['name'] != "The Exiles" and ship2 == "orb":
+                    continue
                 shipEmoji = Emoji.getEmojiByName(player['color'] + game.getShipShortName(ship2))
                 view.add_item(Button(label=ship2.capitalize(), emoji=shipEmoji, style=discord.ButtonStyle.blurple,
                                      custom_id=f"FCID{player['color']}_upgradeShip_{str(actions)}_{ship2}_dummy"))
@@ -169,7 +179,7 @@ class UpgradeButtons:
                              custom_id=f"FCID{player['color']}_finishAction"))
         await interaction.message.delete()
         await interaction.channel.send(f"{player['player_name']} replaced {oldName} with {part_stats[newPart]['name']}"
-                                       f" on their {ship.capitalize()} which now looks like this",
+                                       f" on their {ship.capitalize()} which now looks like this:",
                                        file=await asyncio.to_thread(drawing.show_player_ship, image, ship))
         if discTileUpgrade == "dummy":
             await interaction.channel.send(f"{player['player_name']}, choose which ship you would like to upgrade "

@@ -101,12 +101,9 @@ class TileCommands(commands.GroupCog, name="tile"):
         process_units("sb", starbase)
         process_units("orb", orbitals)
         process_units("mon", monoliths)
-        adv = ""
-        if game.gamestate["advanced_ai"]:
-            adv = "adv"
-        process_units("gcds" + adv, gcds)
-        process_units("anc" + adv, ancients)
-        process_units("grd" + adv, guardians)
+        process_units("gcds", gcds)
+        process_units("anc", ancients)
+        process_units("grd", guardians)
 
         if added_units:
             game.add_units(added_units, tile_position)
