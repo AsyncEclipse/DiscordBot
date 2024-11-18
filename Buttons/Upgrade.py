@@ -95,7 +95,7 @@ class UpgradeButtons:
                 available_parts.append(tech)
             if tech in player["nano_tech"]:
                 available_parts.append(tech)
-            if "ancient_parts" in player and tech in player["ancient_parts"]:
+            if tech in player.get("ancient_parts", []):
                 available_parts.append(tech)
         available_parts = set(available_parts)
         with open("data/parts.json", "r") as f:
@@ -159,7 +159,7 @@ class UpgradeButtons:
         drawing = DrawHelper(game.gamestate)
         image = await asyncio.to_thread(drawing.player_area, player_helper.stats)
         view = View()
-        if actions > 0 and ("passed" not in player or not player["passed"]):
+        if actions > 0 and not player.get("passed"):
             ships = ["interceptor", "cruiser", "dread", "starbase"]
             for ship2 in ships:
                 shipEmoji = Emoji.getEmojiByName(player['color'] + game.getShipShortName(ship2))

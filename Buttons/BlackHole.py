@@ -32,7 +32,7 @@ class BlackHoleButtons:
                                    interaction: discord.Interaction):
         shipKey = customID.replace("blackHoleReturnStart_", "")
         shipKey = shipKey.split("_")[0] + "_" + shipKey.split("_")[1] + "_" + shipKey.split("_")[2]
-        if "blackHoleReturn" in player and shipKey in player["blackHoleReturn"]:
+        if shipKey in player.get("blackHoleReturn", []):
             player_helper.stats["blackHoleReturn"].remove(shipKey)
             game.update_player(player_helper)
         else:

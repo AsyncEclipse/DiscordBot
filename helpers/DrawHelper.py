@@ -301,7 +301,7 @@ class DrawHelper:
                             tile_image.paste(open_mask, (int(152 * mult), 0), mask=open_mask)
                     else:
                         tile_image.paste(closed_mask, (int(152 * mult), 0), mask=closed_mask)
-                    if "owner" in tile and isinstance(tile["owner"], str):
+                    if isinstance(tile.get("owner"), str):
                         if not self.gamestate.get("turnOffLines"):
                             colorOwner = tile["owner"]
                             playerObj = self.getPlayerObjectFromColor(colorOwner)
@@ -317,7 +317,7 @@ class DrawHelper:
                 warppath = "images/resources/all_boards/Warp_picture.png"
                 warp_mask = self.use_image(warppath)
                 tile_image.paste(warp_mask, (int(20 * mult), int(140 * mult)), mask=warp_mask)
-            if "player_ships" in tile and len(tile["player_ships"]) > 0:
+            if len(tile.get("player_ships", [])) > 0:
                 counts = {}  # To track counts for each ship type
                 countsShips = {}
                 for ship in tile["player_ships"]:
@@ -543,7 +543,7 @@ class DrawHelper:
 
     def display_turn_order(self):
         context = Image.new("RGBA", (600, 270), (0, 0, 0, 255))
-        if "activePlayerColor" in self.gamestate and len(self.gamestate["activePlayerColor"]) == 1:
+        if len(self.gamestate.get("activePlayerColor", [])) == 1:
             activeColor = self.gamestate["activePlayerColor"][0]
         else:
             return context
@@ -691,7 +691,7 @@ class DrawHelper:
         ref_image = self.use_image(filepathRef)
         context.paste(ref_image, (970, 85), mask=ref_image)
 
-        if "minor_species" in self.gamestate and len(self.gamestate["minor_species"]) > 0:
+        if len(self.gamestate.get("minor_species", [])) > 0:
             text_drawable_image.text((1300, 0), "Minor Species:", (0, 255, 0), font=font,
                                      stroke_width=stroke_width, stroke_fill=stroke_color)
             minor_species = self.gamestate["minor_species"]
@@ -1047,7 +1047,7 @@ class DrawHelper:
                         points += 1
         techTypes = ["military_tech", "grid_tech", "nano_tech"]
         for tType in techTypes:
-            if tType in player and len(player[tType]) > 3:
+            if len(player.get(tType, [])) > 3:
                 if len(player[tType]) == 7:
                     points += 5
                 else:
@@ -1082,7 +1082,7 @@ class DrawHelper:
         if "magPartPoints" in player:
             points += player["magPartPoints"]
 
-        if "discoveryTileBonusPointTiles" in player and "rep" in player["discoveryTileBonusPointTiles"]:
+        if "rep" in player.get("discoveryTileBonusPointTiles", []):
             points += reputationPoints // 3
         if player.get("traitor"):
             if player["name"] == "Rho Indi Syndicate":

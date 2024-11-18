@@ -106,7 +106,7 @@ class ResearchButtons:
             await DiscoveryTileButtons.exploreDiscoveryTile(game, game.getLocationFromID(player["home_planet"]),
                                                             interaction, player)
         lenTech = len(player[f"{tech_type}_tech"])
-        if lenTech == 4 and "magDiscTileUsed" in player and not player["magDiscTileUsed"]:
+        if lenTech == 4 and not player.get("magDiscTileUsed"):
             await interaction.channel.send(player["player_name"] + " due to researching your fourth tech"
                                            " for the first time this game as Magellan, you get a discovery tile")
             game.addDiscTile(game.getLocationFromID(player["home_planet"]))

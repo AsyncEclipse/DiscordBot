@@ -12,7 +12,7 @@ class PulsarButtons:
         for tile in game.gamestate["board"]:
             if all(["currentAction" in game.gamestate["board"][tile],
                    game.gamestate["board"][tile]["owner"] == player["color"],
-                   "activatedPulsars" not in player or tile not in player["activatedPulsars"]]):
+                   tile not in player.get("activatedPulsars", [])]):
                 for action in actions:
                     if action == game.gamestate["board"][tile]["currentAction"]:
                         continue

@@ -44,12 +44,12 @@ class GamestateHelper:
         self.update()
 
     def removeFromKey(self, key, deletion):
-        if key in self.gamestate and deletion in self.gamestate[key]:
+        if deletion in self.gamestate.get(key, []):
             self.gamestate[key].remove(deletion)
             self.update()
 
     def addToKey(self, key, addition):
-        if key in self.gamestate and addition not in self.gamestate[key]:
+        if addition not in self.gamestate.get(key, []):
             self.gamestate[key].append(addition)
             self.update()
 
@@ -455,7 +455,7 @@ class GamestateHelper:
 
         if len(self.gamestate["tile_deck_300"]) == 0:
             role = discord.utils.get(interaction.guild.roles, name=self.game_id)
-            if "tile_discard_deck_300" in self.gamestate and len(self.gamestate["tile_discard_deck_300"]) > 0:
+            if len(self.gamestate.get("tile_discard_deck_300", [])) > 0:
                 self.gamestate["tile_deck_300"] = self.gamestate["tile_discard_deck_300"]
                 self.gamestate["tile_discard_deck_300"] = []
                 if role:
@@ -1212,7 +1212,7 @@ class GamestateHelper:
                 asyncio.create_task(self.showGame(thread, message))
 
     def getPlayerFromHSLocation(self, location):
-        if location not in self.get_gamestate()["board"] or "sector" not in self.get_gamestate()["board"][location]:
+        if "sector" not in self.get_gamestate()["board"].get(location, []):
             return None
         tileID = self.get_gamestate()["board"][location]["sector"]
         return next((player for player in self.get_gamestate()["players"]
@@ -1231,7 +1231,7 @@ class GamestateHelper:
         return True
 
     def get_next_player(self, player):
-        if "turn_order" not in self.get_gamestate() or player["player_name"] not in self.get_gamestate()["turn_order"]:
+        if player["player_name"] not in self.get_gamestate().get("turn_order", []):
             listHS = [201, 203, 205, 207, 209, 211]
             playerHSID = player["home_planet"]
             tileLocation = int(self.getLocationFromID(playerHSID))
