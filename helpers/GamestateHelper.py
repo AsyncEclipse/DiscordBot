@@ -404,7 +404,8 @@ class GamestateHelper:
                     del self.gamestate["board"][position][key]
                 if "retreatPenalty"+color in self.gamestate["board"][position]:
                     del self.gamestate["board"][position]["retreatPenalty"+color]
-            self.fixshipsOrder(position)
+            if "player_ships" in self.gamestate["board"][position]:
+                self.fixshipsOrder(position)
         self.update()
 
     def getReputationTilesToDraw(self, position, color):
@@ -553,6 +554,8 @@ class GamestateHelper:
     def fixshipsOrder(self, pos):
         from collections import OrderedDict  
 
+        if "player_ships" not in self.gamestate["board"][pos]:
+            return
         arr = self.gamestate["board"][pos]["player_ships"]
         if len(arr) < 2:
             return
