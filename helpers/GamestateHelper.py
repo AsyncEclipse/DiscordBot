@@ -131,7 +131,7 @@ class GamestateHelper:
     def setAdvancedAI(self, status:bool):
         self.gamestate["advanced_ai"] = status
         self.update()
-    def setAdvancedAI(self, status:bool):
+    def setOutlines(self, status:bool):
         self.gamestate["turnOffLines"] = not status
         self.update()
     def setFancyShips(self, status:bool):
@@ -400,6 +400,7 @@ class GamestateHelper:
                     del self.gamestate["board"][position][key]
                 if "retreatPenalty"+color in self.gamestate["board"][position]:
                     del self.gamestate["board"][position]["retreatPenalty"+color]
+            self.fixshipsOrder()
         self.update()
 
     def getReputationTilesToDraw(self, position, color):
@@ -573,7 +574,8 @@ class GamestateHelper:
         for item in arr:  
             sorted.append(item)  
         sorted.sort(key=lambda x: colors_seen[x.split('-')[0]])  
-        self.gamestate["board"][pos]["player_ships"] = sorted
+        cleanedShips = [s.replace("adv", "") for s in sorted] 
+        self.gamestate["board"][pos]["player_ships"] = cleanedShips
         self.update()
 
 
