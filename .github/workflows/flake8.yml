@@ -24,4 +24,4 @@ jobs:
 
       - name: Run Flake8
         run: |
-          flake8 --max-line-length .  # Run Flake8 on the current repository
+          flake8 --max-line-length=120 .  # Run Flake8 on the current repository
