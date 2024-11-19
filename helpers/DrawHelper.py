@@ -535,7 +535,8 @@ class DrawHelper:
             discTile_data = json.load(f)
         for tile in sorted_tiles:
             discName = discTile_data[tile]["name"]
-            part_path = f"images/resources/components/discovery_tiles/discovery_{discName.replace(' ','_').lower()}.png"
+            part_path = ("images/resources/components/discovery_tiles/discovery"
+                         f"_{discName.replace(' ', '_').lower()}.png")
             part_image = self.use_image(part_path).resize((80, 80))
             context.paste(part_image, (85 * count, 0), mask=part_image)
             count += 1
@@ -698,7 +699,7 @@ class DrawHelper:
             count = 0
             for species in minor_species:
                 tile_image = Image.open("images/resources/components/minor_species/minorspecies_" +
-                                        f"{species.replace(' ','_').lower()}.png").convert("RGBA").resize((100, 100))
+                                        f"{species.replace(' ', '_').lower()}.png").convert("RGBA").resize((100, 100))
                 context.paste(tile_image, (1320 + 120 * count, 85), mask=tile_image)
                 count += 1
 
@@ -909,7 +910,7 @@ class DrawHelper:
 
                 if faction == "minor":
                     amb_tile_path = ("images/resources/components/minor_species/minorspecies_"
-                                     f"{color.replace(' ','_').lower()}.png")
+                                     f"{color.replace(' ', '_').lower()}.png")
                     amb_tile_image = self.use_image(amb_tile_path)
                 else:
                     amb_tile_path = f"images/resources/components/factions/{faction}_ambassador.png"
@@ -970,7 +971,8 @@ class DrawHelper:
             listOfAncient = listOfAncient + player["discoveryTileBonusPointTiles"]
         for part in listOfAncient:
             discName = discTile_data[part]["name"]
-            part_path = f"images/resources/components/discovery_tiles/discovery_{discName.replace(' ','_').lower()}.png"
+            part_path = ("images/resources/components/discovery_tiles/discovery"
+                         f"_{discName.replace(' ', '_').lower()}.png")
             part_image = self.use_image(part_path).resize((80, 80))
             context.paste(part_image, (newX, newY), mask=part_image)
             newY += 85
@@ -1320,7 +1322,7 @@ class DrawHelper:
         count = 0
         for species in minor_species:
             tile_image = Image.open("images/resources/components/minor_species/minorspecies_" +
-                                    f"{species.replace(' ','_').lower()}.png").convert("RGBA").resize((260, 260))
+                                    f"{species.replace(' ', '_').lower()}.png").convert("RGBA").resize((260, 260))
             context.paste(tile_image, (300 * count, 0), mask=tile_image)
             count += 1
         byteData = BytesIO()
@@ -1356,7 +1358,7 @@ class DrawHelper:
     def show_disc_tile(self, disc_tile_name: str):
         context = Image.new("RGBA", (260, 260), (255, 255, 255, 0))
         tile_image = Image.open("images/resources/components/discovery_tiles/discovery_" +
-                                f"{disc_tile_name.replace(' ','_').lower()}.png").convert("RGBA").resize((260, 260))
+                                f"{disc_tile_name.replace(' ', '_').lower()}.png").convert("RGBA").resize((260, 260))
         context.paste(tile_image, (0, 0), mask=tile_image)
         byteData = BytesIO()
         context.save(byteData, format="WEBP")
