@@ -265,21 +265,21 @@ class SetupCommands(commands.GroupCog, name="setup"):
 
         message = "\n".join(["# Mechanema",
                              "- Cheaper Building costs (instead of):",
-                             "  - **Interceptor: 2🔧 (3)",
-                             "  - **Cruiser: 4🔧 (5)",
-                             "  - **Dreadnought: 7🔧 (8)",
-                             "  - **Starbase: 2🔧 (3)",
-                             "  - **Orbital: 3🔧 (4)",
-                             "  - **Monolith: 8🔧 (10)"])
+                             "  - **Interceptor**: 2🔧 (3)",
+                             "  - **Cruiser**: 4🔧 (5)",
+                             "  - **Dreadnought**: 7🔧 (8)",
+                             "  - **Starbase**: 2🔧 (3)",
+                             "  - **Orbital**: 3🔧 (4)",
+                             "  - **Monolith**: 8🔧 (10)"])
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "mechanema_board.png"))
 
         message = "\n".join(["# Orion Hegemony",
                              "- Start with a Cruiser in your Starting Sector instead of an Interceptor.",
                              "- All Ship Blueprints have increased Initiative Bonuses.",
                              "- These Ship Blueprints have additional Energy Production:",
-                             "  - **Interceptor: 1⚡",
-                             "  - **Cruiser: 2⚡",
-                             "  - **Dreadnought: 3⚡"])
+                             "  - **Interceptor**: 1⚡",
+                             "  - **Cruiser**: 2⚡",
+                             "  - **Dreadnought**: 3⚡"])
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "orion_board.png"))
 
         message = "\n".join(["# Wardens of Magellan",
@@ -299,7 +299,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
                              "- 1 VP per Shrine\\* you control at the end of the game.",
                              "- During the Combat Phase, you may flip unused Colony Ships"
                              + " to reroll one of your own dice per Colony Ship flipped.",
-                             "- ## \\*Shrines",
+                             "## - \\*Shrines",
                              "- You start the game with nine Shrines (special Structures)"
                              + " on the indicated spaces of your Shrine Board])",
                              "- With each **Research** Action, you may additionally place "
@@ -341,14 +341,14 @@ class SetupCommands(commands.GroupCog, name="setup"):
                              "- You do not lose VP for holding the Traitor Card at the end of the game.",
                              "- You cannot construct Dreadnoughts.",
                              "- Increased Building costs (instead of):",
-                             "  - **Interceptor: 4🔧 (3)",
-                             "  - **Cruiser: 6🔧 (5)",
-                             "  - **Starbase: 4🔧 (3)",
+                             "  - **Interceptor**: 4🔧 (3)",
+                             "  - **Cruiser**: 6🔧 (5)",
+                             "  - **Starbase**: 4🔧 (3)",
                              "- Interceptor and Cruiser Ship Blueprints have increased Initiative Bonuses.",
                              "- All Ship Blueprints have additional **Gauss Shields**:",
-                             "  - **Interceptor: -1⬛",
-                             "  - **Cruiser: -1⬛",
-                             "  - **Dreadnought: -1⬛"])
+                             "  - **Interceptor**: -1⬛",
+                             "  - **Cruiser**: -1⬛",
+                             "  - **Dreadnought**: -1⬛"])
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "rho_board.png"))
 
         message = "\n".join(["# Terrans"])

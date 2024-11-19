@@ -16,7 +16,7 @@ class ExploreButtons:
         for tile in tile_map:
             if any([tile_map[tile].get("owner") == player["color"],
                     all(["player_ships" in tile_map[tile],
-                         ExploreButtons.doesPlayerHaveUnpinnedShips(player, tile_map[tile]["player_ships"],
+                         ExploreButtons.doesPlayerHaveUnpinnedShips(player, tile_map[tile].get("player_ships", []),
                                                                     game, tile)])]):
                 tiles.append(tile)
         return tiles

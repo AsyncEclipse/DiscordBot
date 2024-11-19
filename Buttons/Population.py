@@ -17,7 +17,7 @@ class PopulationButtons:
             planetTypes = ["money", "science", "material", "neutral",
                            "moneyadv", "scienceadv", "materialadv", "neutraladv", "orbital"]
             for planetT in planetTypes:
-                if "neutral" not in planetT and player[planetT.replace("adv", "") + "_pop_cubes"] < 2:
+                if "neutral" not in planetT and player.get(planetT.replace("adv", "") + "_pop_cubes", 0) < 2:
                     continue
                 if f"{planetT}_pop" in tileState:
                     for i, val in enumerate(tileState[f"{planetT}_pop"]):

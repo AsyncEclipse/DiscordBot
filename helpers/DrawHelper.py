@@ -244,7 +244,7 @@ class DrawHelper:
             tile = self.gamestate["board"][position]
             rotation = int(tile["orientation"])
 
-            if int(position / 100) == 2 and int(position) % 2 == 1:
+            if int(position) // 100 == 2 and int(position) % 2 == 1:
                 hsMask2 = Image.open("images/resources/masks/hsmaskTrip.png").convert("RGBA").resize((210, 210))
                 tile_image.paste(hsMask2, (int(138 * mult), int(115 * mult)), mask=hsMask2)
             if tile.get("disctile", 0) > 0:
@@ -935,8 +935,7 @@ class DrawHelper:
                                stroke_width=stroke_width, stroke_fill=stroke_color)
             text_image = text_image.rotate(45, expand=True)
             context.paste(text_image, (0, 0), text_image)
-        if all([len(self.gamestate.get("activePlayerColor", [])) == 1,
-                player["color"] == self.gamestate["activePlayerColor"][0]]):
+        if player["color"] == self.gamestate.get("activePlayerColor", [None])[0]:
             text_image = Image.new('RGBA', (500, 500), (0, 0, 0, 0))
             text_drawable = ImageDraw.Draw(text_image)
             text_drawable.text((0, 50), "Active", fill=(0, 255, 0), font=font,
@@ -1038,8 +1037,7 @@ class DrawHelper:
                     points += tile_map[tile]["warpPoint"]
                 if "warpDisc" in tile_map[tile]:
                     points += tile_map[tile]["warpDisc"]
-                if all(["discoveryTileBonusPointTiles" in player,
-                        "art" in player["discoveryTileBonusPointTiles"],
+                if all(["art" in player.get("discoveryTileBonusPointTiles", []),
                         tile_map[tile]["artifact"] == 1]):
                     points += 1
                 if "player_ships" in tile_map[tile]:

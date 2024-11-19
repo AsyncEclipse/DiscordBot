@@ -337,7 +337,7 @@ class GamestateHelper:
             with open("data/tileAdjacencies.properties", "rb") as f:
                 configs.load(f)
         if position is not None and sector != "sector3back":
-            tiles = configs.get(position)[0].split(", ")
+            tiles = configs.get(position)[0].split(",")
             for adjTile in tiles:
                 discard = 0
                 if "tile_discard_deck_300" in self.gamestate:
@@ -526,14 +526,14 @@ class GamestateHelper:
         materials = player["materials"]
         materialsIncrease = player["population_track"][player["material_pop_cubes"] - 1]
         materialsIncrease = f"+{materialsIncrease}"
-        msg = "\n".join("Your current economic situation is as follows:",
-                        f"{moneyEmoji}: {money} ({moneyIncrease} - {moneyDecrease})",
-                        f"{scienceEmoji}: {science} ({scienceIncrease})",
-                        f"{materialEmoji}: {materials} ({materialsIncrease})",
-                        "If you spend another disk, your maintenance cost"
-                        + f" will go from -{moneyDecrease} to -{moneyDecrease2}.",
-                        "If you drop another money cube, your income"
-                        + f" will go from {moneyIncrease} to {moneyIncrease2}.")
+        msg = "\n".join(["Your current economic situation is as follows:",
+                         f"{moneyEmoji}: {money} ({moneyIncrease} - {moneyDecrease})",
+                         f"{scienceEmoji}: {science} ({scienceIncrease})",
+                         f"{materialEmoji}: {materials} ({materialsIncrease})",
+                         "If you spend another disk, your maintenance cost"
+                         + f" will go from -{moneyDecrease} to -{moneyDecrease2}.",
+                         "If you drop another money cube, your income"
+                         + f" will go from {moneyIncrease} to {moneyIncrease2}."])
         return msg
 
     def setCombatants(self, players, pos):
