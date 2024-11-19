@@ -1,5 +1,6 @@
 import json
 
+
 class PlayerShip:
     """
     Class to represent ships and contain easy functions for checking ship stats.
@@ -22,7 +23,6 @@ class PlayerShip:
         self.repair = 0
         self.external = 0
         self.build_ship_stats(self.ship_parts)
-
 
     '''
     Parameters
@@ -58,7 +58,6 @@ class PlayerShip:
         else:
             return ship_type
 
-
     def build_ship_stats(self, ship_parts):
 
         with open("data/parts.json", "r") as f:
@@ -83,10 +82,9 @@ class PlayerShip:
             self.external += part_stats["external"]
 
     def check_valid_ship(self):
-        if (self.range <= 0 and not self.ship_type == "starbase") or self.energy < 0 or (self.ship_type == "starbase" and self.range > 0):
-            return False
-        else:
-            return True
+        return not any([self.range <= 0 and not self.ship_type == "starbase",
+                        self.energy < 0,
+                        self.ship_type == "starbase" and self.range > 0])
 
     def take_damage(self, damage):
         self.hull -= damage

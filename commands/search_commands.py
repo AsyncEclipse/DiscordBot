@@ -2,9 +2,8 @@ import discord
 import json
 from discord.ext import commands
 from discord import app_commands
-from discord.ui import View, Button
-from helpers.GamestateHelper import GamestateHelper
 from helpers.DrawHelper import DrawHelper
+
 
 class SearchCommands(commands.GroupCog, name="search"):
     def __init__(self, bot):
@@ -130,7 +129,6 @@ class SearchCommands(commands.GroupCog, name="search"):
         app_commands.Choice(name="Tech Gain", value="tec"),
         app_commands.Choice(name="Warp Portal", value="wap")]
 
-    
     @app_commands.command(name="upgrade_reference")
     async def upgrade_reference(self, interaction: discord.Interaction):
         await interaction.response.defer(thinking=True, ephemeral=True)
