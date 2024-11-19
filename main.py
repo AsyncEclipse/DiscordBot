@@ -40,7 +40,7 @@ class DiscordBot(commands.Bot):
         end_time = time.perf_counter()
         elapsed_time = end_time - start_time
         print(f"Total elapsed time for image load: {elapsed_time:.2f} seconds")
-        print("Bot is now ready.")
+        print("Bot is now ready.""Bot is now ready.""Bot is now ready.""Bot is now ready.""Bot is now ready.""Bot is now ready.""Bot is now ready.""Bot is now ready.""Bot is now ready.""Bot is now ready.""Bot is now ready.""Bot is now ready.""Bot is now ready.""Bot is now ready.""Bot is now ready.""Bot is now ready.""Bot is now ready.")
 
     async def start_timer(self):
         while True:
