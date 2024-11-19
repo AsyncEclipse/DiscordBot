@@ -60,7 +60,7 @@ class BlackHoleButtons:
                         tile_orientation_index = (index + int(game.gamestate["board"][tile]["orientation"]) // 60) % 6
                         if tile_orientation_index in game.gamestate["board"][tile]["wormholes"]:
                             if any([adjTile not in game.gamestate["board"],
-                                    "back" in game.gamestate["board"]["adjTile"]["sector"]]):
+                                    "back" in game.gamestate["board"][adjTile]["sector"]]):
                                 view.add_item(Button(label=f"Add ship to Tile {tile}", style=discord.ButtonStyle.gray,
                                                      custom_id=f"FCID{player['color']}_blackHoleFinish"
                                                      f"_{ship}_{tile}_{damage}"))
