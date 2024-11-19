@@ -1010,7 +1010,7 @@ class Combat:
         actions_channel = discord.utils.get(interaction.guild.channels, name=game.game_id + "-actions")
         if actions_channel is not None and isinstance(actions_channel, discord.TextChannel):
             await actions_channel.send(f"Combat in tile {pos} has concluded. "
-                                       "There are {len(Combat.findTilesInConflict(game))} tiles left in conflict.")
+                                       f"There are {len(Combat.findTilesInConflict(game))} tiles left in conflict.")
             if len(Combat.findTilesInConflict(game)) == 0:
                 role = discord.utils.get(interaction.guild.roles, name=game.game_id)
                 view = View()
