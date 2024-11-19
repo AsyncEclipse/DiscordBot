@@ -77,7 +77,7 @@ class BuildButtons:
                 
         if "stb" not in player["military_tech"] or player["name"] == "The Exiles":
             ships.remove("Starbase")
-        if "orb" not in player["nano_tech"]or "orb" in build:
+        if "orb" not in player["nano_tech"] or "orb" in build:
             ships.remove("Orbital")
         if "mon" not in player["nano_tech"] or "mon" in build:
             ships.remove("Monolith")
@@ -90,7 +90,7 @@ class BuildButtons:
         for counter,ship in enumerate(ships):
             key = f"cost_{ship.lower()}"
             remaining = 10
-            if counter < len(player["ship_stock"]):
+            if counter < len(player["ship_stock"]) and "Orb" not in ship:
                 remaining = player["ship_stock"][counter]
                 if shipsShort[counter] in build:
                     remaining -= build.count(shipsShort[counter])

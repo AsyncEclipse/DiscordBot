@@ -54,8 +54,6 @@ class TileCommands(commands.GroupCog, name="tile"):
         type = unit.value
         if unit.value == "grd" or unit.value == "anc" or unit.value == "gcds":
             colorOrAI = "ai"
-            if game.gamestate["advanced_ai"]:
-                type += "adv"
         else:
             colorOrAI = color.value if color else game.get_player(str(interaction.user.id))["color"]
         option = colorOrAI + "-"+type

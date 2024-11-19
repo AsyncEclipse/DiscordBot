@@ -571,7 +571,9 @@ class Combat:
                     #await interaction.channel.send(msg,file=drawing.append_images(dieFiles))
                     await interaction.channel.send(msg+msg2)
                     oldNumPeeps = len(Combat.findPlayersInTile(game, pos))
+                    counter = 0
                     for die in dieNums:
+                        counter = counter + 1
                         tile_map = game.get_gamestate()["board"]
                         player_ships = tile_map[pos]["player_ships"][:]
                         dieNum = die[0]
@@ -586,9 +588,9 @@ class Combat:
                                 if player != None and "Lyra" in game.gamestate["players"][player]["name"] and game.gamestate["players"][player]["colony_ships"] > 0 and oldNumPeeps == len(Combat.findPlayersInTile(game, pos)):
                                     viewLyr = View()
                                     label = "Reroll Die"
-                                    buttonID = "FCID"+colorOrAI+"_rerollDie_"+pos+"_"+colorOrAI+"_"+str(shipModel.computer)+"_"+dieColor
+                                    buttonID = "FCID"+colorOrAI+"_rerollDie_"+pos+"_"+colorOrAI+"_"+str(shipModel.computer)+"_"+dieColor +"_"+str(counter)
                                     viewLyr.add_item(Button(label=label, style=discord.ButtonStyle.green, custom_id=buttonID))
-                                    viewLyr.add_item(Button(label="Decline", style=discord.ButtonStyle.red, custom_id="FCID"+colorOrAI+"_deleteMsg"))
+                                    viewLyr.add_item(Button(label="Decline", style=discord.ButtonStyle.red, custom_id="FCID"+colorOrAI+"_deleteMsg"+"_"+str(counter)))
                                     asyncio.create_task(interaction.channel.send(game.gamestate["players"][player]["player_name"]+" You can reroll a "+dieColor+" die that missed using one of your colony ships.", view=viewLyr))
                                 continue
                         else:
@@ -622,7 +624,7 @@ class Combat:
                                         shipType = ship.split("-")[1]
                                         shipOwner = ship.split("-")[0]
                                         label = "Hit "+Combat.translateShipAbrToName(shipType)
-                                        buttonID = "FCID"+colorOrAI+"_assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(dieDam)
+                                        buttonID = "FCID"+colorOrAI+"_assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(dieDam)+"_"+str(counter)
                                         view.add_item(Button(label=label, style=discord.ButtonStyle.red, custom_id=buttonID))
                                     await interaction.channel.send(msg,view=view)
                                     hitsToAssign = 1
@@ -933,6 +935,7 @@ class Combat:
                 role = discord.utils.get(interaction.guild.roles, name=game.game_id)
                 view = View()
                 view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"startPopDrop"))
+                view.add_item(Button(label="Run Upkeep",style=discord.ButtonStyle.blurple, custom_id="runUpkeep"))
                 await actions_channel.send(role.mention+" Please run upkeep after all post combat events are resolved. You can use this button to drop pop after taking control of a tile", view = view)
         if "combatants" in game.gamestate["board"][pos]:
             players = game.gamestate["board"][pos]["combatants"]
@@ -1004,8 +1007,6 @@ class Combat:
         shipOwner = ship.split("-")[0]
         if shipOwner == "ai":
             shipModel = AI_Ship(shipType, game.gamestate["advanced_ai"], game.gamestate["wa_ai"])
-            if "ai-" in ship and "adv" not in "ship" and game.gamestate["advanced_ai"]:
-                ship = ship +"adv"
         else:
             player = game.get_player_from_color(shipOwner)
             shipModel = PlayerShip(game.gamestate["players"][player], shipType)
