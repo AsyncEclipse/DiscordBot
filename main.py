@@ -10,6 +10,7 @@ from commands.setup_commands import SetupCommands
 from commands.player_commands import PlayerCommands
 from commands.search_commands import SearchCommands
 # from helpers import ImageCache
+from helpers import ImageCache
 from helpers.GamestateHelper import GamestateHelper
 from listeners.ButtonListener import ButtonListener
 from discord.ext import commands
@@ -36,7 +37,7 @@ class DiscordBot(commands.Bot):
         await self.tree.sync()
         start_time = time.perf_counter()
         print("Starting to load images")
-        # imageCache = ImageCache.ImageCacheHelper("images/resources")
+        imageCache = ImageCache.ImageCacheHelper("images/resources")
         end_time = time.perf_counter()
         elapsed_time = end_time - start_time
         print(f"Total elapsed time for image load: {elapsed_time:.2f} seconds")

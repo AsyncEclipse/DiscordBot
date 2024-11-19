@@ -39,7 +39,7 @@ class Combat:
         tile_map = game.get_gamestate()["board"]
         if "player_ships" not in tile_map[pos]:
             return []
-            player_ships = tile_map[pos]["player_ships"][:]
+        player_ships = tile_map[pos]["player_ships"][:]
         ships = []
         for ship in player_ships:
             if all([game.find_player_faction_name_from_color(tile_map[pos]["owner"]) == "The Exiles",

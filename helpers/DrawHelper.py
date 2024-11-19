@@ -935,7 +935,10 @@ class DrawHelper:
                                stroke_width=stroke_width, stroke_fill=stroke_color)
             text_image = text_image.rotate(45, expand=True)
             context.paste(text_image, (0, 0), text_image)
-        if player["color"] == self.gamestate.get("activePlayerColor", [None])[0]:
+        colorActive = "nada"
+        if "activePlayerColor" in self.gamestate:
+            colorActive = self.gamestate.get("activePlayerColor")
+        if player["color"] == colorActive:
             text_image = Image.new('RGBA', (500, 500), (0, 0, 0, 0))
             text_drawable = ImageDraw.Draw(text_image)
             text_drawable.text((0, 50), "Active", fill=(0, 255, 0), font=font,
