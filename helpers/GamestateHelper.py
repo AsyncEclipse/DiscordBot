@@ -312,9 +312,7 @@ class GamestateHelper:
 
             if tile["ancient"] or tile["guardian"] or tile["gcds"]:
                 adv = ""
-                if self.gamestate["advanced_ai"]:
-                    adv = "adv"
-                anc, grd, gcds = tile["ancient"], tile["guardian"], tile["gcds"]
+                anc, grd, gcds = tile["ancient"],tile["guardian"], tile["gcds"]
                 if anc:
                     tile["player_ships"].append("ai-anc" + adv)
                     if tile["ancient"] > 1:
@@ -355,8 +353,6 @@ class GamestateHelper:
         self.update()
 
     def add_damage(self, ship, position, damage):
-        if "ai-" in ship and "adv" not in "ship" and self.gamestate["advanced_ai"]:
-            ship += "adv"
         if "damage_tracker" in self.gamestate["board"][position]:
             if ship in self.gamestate["board"][position]["damage_tracker"]:
                 damage = self.gamestate["board"][position]["damage_tracker"][ship] + damage

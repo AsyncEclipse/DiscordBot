@@ -91,7 +91,7 @@ class BuildButtons:
         for counter, ship in enumerate(ships):
             key = f"cost_{ship.lower()}"
             remaining = 10
-            if counter < len(player["ship_stock"]):
+            if counter < len(player["ship_stock"]) and "Orb" not in ship:
                 remaining = player["ship_stock"][counter]
                 if shipsShort[counter] in build:
                     remaining -= build.count(shipsShort[counter])
