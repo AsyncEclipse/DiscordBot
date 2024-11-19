@@ -6,15 +6,16 @@ from helpers.PlayerHelper import PlayerHelper
 
 
 class ReputationButtons:
-    @staticmethod 
-    async def resolveGainingReputation(game: GamestateHelper, amount_of_options:int, interaction: discord.Interaction, player_helper:PlayerHelper, queue:bool):
+    @staticmethod
+    async def resolveGainingReputation(game: GamestateHelper, amount_of_options: int,
+                                       interaction: discord.Interaction, player_helper: PlayerHelper, queue: bool):
         randomList = game.gamestate["reputation_tiles"][:]
         random.shuffle(randomList)
         opts = ""
         highest = 0
         for x in range(amount_of_options):
             opt = randomList.pop()
-            opts += " "+str(opt)
+            opts += " " + str(opt)
             highest = max(opt, highest)
         if player_helper.stats["name"] == "Rho Indi Syndicate":
             player_helper.stats["money"] += (amount_of_options - 1)
@@ -24,7 +25,7 @@ class ReputationButtons:
             msg = f"{player_helper.stats['player_name']}, you drew the tiles{opts} and selected {str(highest)}."
 
         found = False
-        for x,tile in enumerate(player_helper.stats["reputation_track"]):
+        for x, tile in enumerate(player_helper.stats["reputation_track"]):
             if tile == "mixed":
                 player_helper.stats["reputation_track"][x] = highest
                 game.gamestate["reputation_tiles"].remove(highest)
@@ -33,7 +34,7 @@ class ReputationButtons:
         if not found:
             lowest = highest
             loc = 0
-            for x,tile in enumerate(player_helper.stats["reputation_track"]):
+            for x, tile in enumerate(player_helper.stats["reputation_track"]):
                 if isinstance(tile, int) and tile < lowest:
                     loc = x
                     lowest = tile
@@ -47,16 +48,15 @@ class ReputationButtons:
         game.update_player(player_helper)
         game.update()
         if not queue:
-            await interaction.followup.send(msg,ephemeral=True)
+            await interaction.followup.send(msg, ephemeral=True)
         else:
-            threadName = game.get_gamestate()["game_id"]+"-Round "+str(game.get_gamestate()["roundNum"])+", Queued Draw for "+player_helper.stats["color"]
-            actions_channel = discord.utils.get(interaction.guild.channels, name=game.game_id+"-actions") 
+            threadName = (f"{game.get_gamestate()['game_id']}-Round {game.get_gamestate()['roundNum']}, "
+                          f"Queued Draw for {player_helper.stats['color']}")
+            actions_channel = discord.utils.get(interaction.guild.channels, name=f"{game.game_id}-actions")
             if actions_channel is not None and isinstance(actions_channel, discord.TextChannel):
                 channel = actions_channel
-                thread = await channel.create_thread(  
-                    name=threadName,  
-                    auto_archive_duration=1440,  
-                    type=discord.ChannelType.private_thread,  
-                    invitable=False,    
-                )  
+                thread = await channel.create_thread(name=threadName,
+                                                     auto_archive_duration=1440,
+                                                     type=discord.ChannelType.private_thread,
+                                                     invitable=False)
                 await thread.send(msg)
