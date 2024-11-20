@@ -401,11 +401,11 @@ class TurnButtons:
                 len(DiplomaticRelationsButtons.getPlayersWithWhichDiplomatcRelationsCanBeFormed(game, player)) > 0]):
             view.add_item(Button(label="Initiate Diplomatic Relations", style=discord.ButtonStyle.gray,
                                  custom_id=f"FCID{player['color']}_startDiplomaticRelations"))
-        if all([not player_helper.isTraitor(),
-                "minor_species" in game.gamestate,
-                len(game.get_gamestate()["minor_species"]) > 0]):
-            view.add_item(Button(label="Minor Species Relations", style=discord.ButtonStyle.green,
-                                 custom_id=f"FCID{player['color']}_startMinorRelations"))
+        if "minor_species" in game.gamestate:
+            if all([not player_helper.isTraitor(),
+                    len(game.get_gamestate()["minor_species"]) > 0]):
+                    view.add_item(Button(label="Minor Species Relations", style=discord.ButtonStyle.green,
+                                         custom_id=f"FCID{player['color']}_startMinorRelations"))
         await interaction.channel.send(f"Colony ships available: {player['colony_ships']}\n"
                                        "Place population or end your turn.", view=view)
         await interaction.message.delete()

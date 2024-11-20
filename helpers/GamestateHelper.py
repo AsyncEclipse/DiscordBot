@@ -681,10 +681,10 @@ class GamestateHelper:
                 found = True
             if found:
                 if not graveYard:
-                    if all(["neutral" not in i,
-                            "orbital" not in i,
-                            self.gamestate["players"][playerID][i.replace("adv", "") + "_cubes"] < 13]):
-                        self.gamestate["players"][playerID][i.replace("adv", "") + "_cubes"] += 1
+                    if "neurtal" not in i:
+                        if all(["orbital" not in i,
+                                self.gamestate["players"][playerID][i.replace("adv", "") + "_cubes"] < 13]):
+                            self.gamestate["players"][playerID][i.replace("adv", "") + "_cubes"] += 1
                     else:
                         if "neutral" not in i:
                             orbitalPop += 1

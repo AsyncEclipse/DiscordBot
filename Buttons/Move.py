@@ -22,9 +22,9 @@ class MoveButtons:
         tile_map = game.get_gamestate()["board"]
         tiles = []
         for tile in tile_map:
-            if all(["player_ships" in tile_map[tile],
-                    ExploreButtons.doesPlayerHaveUnpinnedShips(player, tile_map[tile]["player_ships"], game, tile)]):
-                tiles.append(tile)
+            if "player_ships" in tile_map[tile]:
+                if ExploreButtons.doesPlayerHaveUnpinnedShips(player, tile_map[tile]["player_ships"], game, tile):
+                    tiles.append(tile)
         return tiles
 
     @staticmethod
