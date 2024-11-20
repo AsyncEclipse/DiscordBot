@@ -71,7 +71,7 @@ class ButtonListener(commands.Cog):
                     try:
                         if isinstance(error, discord.HTTPException) and error.status == 404:
                             await log_channel.send(f"Unknown Interaction error on {customID}. "
-                                                   "Interaction was receieved at {start.strftime('%H:%M:%S')}")
+                                                   f"Interaction was received at {start.strftime('%H:%M:%S')}")
                             if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):
                                 await button_log_channel.send(f"{start.strftime('%H:%M:%S')}"
                                                               " interaction errror hit on {customID}")
