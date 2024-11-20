@@ -823,8 +823,7 @@ class Combat:
                     player = game.get_player_from_color(playerColor)
                     shipModel = PlayerShip(game.gamestate["players"][player], ship[1])
                     shipName = playerColor + "-" + ship[1]
-                    if all([shipModel.repair > 0, "damage_tracker" in game.gamestate["board"][pos],
-                            shipName in game.gamestate["board"][pos]["damage_tracker"]]):
+                    if shipModel.repair > 0 and "damage_tracker" in game.gamestate["board"][pos] and shipName in game.gamestate["board"][pos]["damage_tracker"]:
                         if game.gamestate["board"][pos]["damage_tracker"][shipName] > 0:
                             game.repair_damage(shipName, pos)
                             message = (f"{game.gamestate['players'][player]['player_name']} repaired 1 damage"
@@ -1098,8 +1097,13 @@ class Combat:
 
     @staticmethod
     async def assignHitTo(game: GamestateHelper, buttonID: str, interaction: discord.Interaction, button: bool):
-        _, pos, colorOrAI, ship, dieNum, dieDam = buttonID.split("_")
-        shipType, shipOwner = ship.split("-")
+        pos = buttonID.split("_")[1]
+        colorOrAI = buttonID.split("_")[2]
+        ship = buttonID.split("_")[3]
+        dieNum = buttonID.split("_")[4]
+        dieDam = buttonID.split("_")[5]
+        shipType = ship.split("-")[1]
+        shipOwner = ship.split("-")[0]
         if shipOwner == "ai":
             shipModel = AI_Ship(shipType, game.gamestate["advanced_ai"], game.gamestate["wa_ai"])
         else:
