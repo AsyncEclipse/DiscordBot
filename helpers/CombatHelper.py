@@ -131,7 +131,7 @@ class Combat:
             message_to_send = f"Combat will occur in system {tile[0]}, position {tile[1]}."
             message = await channel.send(message_to_send)
             threadName = (f"{game.get_gamestate()['game_id']}-Round {game.get_gamestate()['roundNum']}, "
-                          "Tile {tile[1]}, Combat")
+                          f"Tile {tile[1]}, Combat")
             thread = await message.create_thread(name=threadName)
             drawing = DrawHelper(game.gamestate)
             await thread.send(role.mention + "Combat will occur in this tile",
@@ -1127,10 +1127,7 @@ class Combat:
                 msg += (f"The AI destroyed the {Combat.translateShipAbrToName(shipType)}"
                         f" due to the damage exceeding the ships hull.")
             await interaction.channel.send(msg)
-            playerColor = Combat.findPlayersInTile(game, pos)[1]
-            dracoNAnc = all([len(Combat.findPlayersInTile(game, pos)) == 2,
-                             "anc" in Combat.findShipTypesInTile(game, pos),
-                             "Draco" in game.find_player_faction_name_from_color(playerColor)])
+            dracoNAnc = len(Combat.findPlayersInTile(game, pos)) == 2 and "anc" in Combat.findShipTypesInTile(game, pos) and "Draco" in game.find_player_faction_name_from_color(Combat.findPlayersInTile(game, pos)[1])
             if len(Combat.findPlayersInTile(game, pos)) < 2 or dracoNAnc:
                 await Combat.declareAWinner(game, interaction, pos)
             elif oldLength != len(Combat.findPlayersInTile(game, pos)):
