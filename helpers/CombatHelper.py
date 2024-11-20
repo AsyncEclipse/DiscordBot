@@ -90,10 +90,11 @@ class Combat:
         tile_map = game.get_gamestate()["board"]
         tiles = []
         for tile in tile_map:
-            if all([len(Combat.findPlayersInTile(game, tile)) == 1,
-                    tile_map[tile]["owner"] == 0,
-                    Combat.findPlayersInTile(game, tile)[0] != "ai"]):
-                tiles.append((int(tile_map[tile]["sector"]), tile))
+            if "owner" in tile_map[tile]:
+                if all([len(Combat.findPlayersInTile(game, tile)) == 1,
+                        tile_map[tile]["owner"] == 0,
+                        Combat.findPlayersInTile(game, tile)[0] != "ai"]):
+                    tiles.append((int(tile_map[tile]["sector"]), tile))
         sorted_tiles = sorted(tiles, key=lambda x: x[0], reverse=True)
         return sorted_tiles
 
