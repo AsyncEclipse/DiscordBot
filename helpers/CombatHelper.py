@@ -147,7 +147,7 @@ class Combat:
             message_to_send = f"Bombing may occur in system {tile2[0]}, position {tile2[1]}."
             message = await channel.send(message_to_send)
             threadName = (f"{game.get_gamestate()['game_id']}-Round {game.get_gamestate()['roundNum']}, "
-                          "Tile {tile2[1]}, Bombing")
+                          f"Tile {tile2[1]}, Bombing")
             thread2 = await message.create_thread(name=threadName)
             drawing = DrawHelper(game.gamestate)
             await thread2.send(role.mention + " population bombing may occur in this tile",

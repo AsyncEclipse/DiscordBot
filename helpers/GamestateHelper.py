@@ -791,7 +791,7 @@ class GamestateHelper:
                         maxTech = max(len(playerObj["grid_tech"]), len(playerObj["military_tech"]))
                         maxTech = max(maxTech, len(playerObj["nano_tech"]))
                         total += maxTech
-                    msg += (f"\nThe sum of that and the owners highest tech track ({sum})"
+                    msg += (f"\nThe sum of that and the owners highest tech track ({str(total)})"
                             f" was compared against the round ({rnd}) and found to be ")
                     if total < rnd:
                         msg += "lesser, so the supernova exploded."
