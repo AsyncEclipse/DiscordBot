@@ -57,13 +57,14 @@ class GameCommands(commands.GroupCog, name="game"):
             if game.game_id in channel.name:
                 try:
                     await channel.set_permissions(user, read_messages=True, send_messages=True)
-                    await interaction.response.send_message(f"Added {user.mention} to {channel.name}")
+                    await interaction.channel.send(f"Added {user.mention} to {channel.name}")
                 except discord.Forbidden:
                     await interaction.channel.send(f"Failed to add {user.mention} to {channel.name}:"
                                                    " Missing permissions.")
                 except discord.HTTPException as e:
                     await interaction.channel.send("An error occurred when adding"
                                                    f" {user.mention} to {channel.name}: {str(e)}")
+        interaction.response.defer()
 
     @app_commands.command(name="start_combats")
     async def start_combats(self, interaction: discord.Interaction):

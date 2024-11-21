@@ -221,7 +221,7 @@ class Combat:
             view4 = View()
             view4.add_item(Button(label="Ready for Upkeep", style=discord.ButtonStyle.green,
                                   custom_id=f"readyForUpkeep"))
-            message = (f"The game will require everyone ({str(len(game.get_gamestate()["peopleToCheckWith"]))} players) involved in an end of round thread to hit this button before upkeep can be run.")
+            message = (f"The game will require everyone ({str(len(game.get_gamestate()['peopleToCheckWith']))} players) involved in an end of round thread to hit this button before upkeep can be run.")
             await interaction.channel.send(message, view=view4)
 
 
