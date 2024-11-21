@@ -77,10 +77,7 @@ class Combat:
         tile_map = game.get_gamestate()["board"]
         tiles = []
         for tile in tile_map:
-            if all([len(Combat.findPlayersInTile(game, tile)) == 1,
-                    tile_map[tile]["owner"] != 0,
-                    tile_map[tile]["owner"] != Combat.findPlayersInTile(game, tile)[0],
-                    Combat.findPlayersInTile(game, tile)[0] != "ai"]):
+            if len(Combat.findPlayersInTile(game, tile)) == 1 and tile_map[tile]["owner"] != 0 and tile_map[tile]["owner"] != Combat.findPlayersInTile(game, tile)[0] and Combat.findPlayersInTile(game, tile)[0] != "ai":
                 tiles.append((int(tile_map[tile]["sector"]), tile))
         sorted_tiles = sorted(tiles, key=lambda x: x[0], reverse=True)
         return sorted_tiles
@@ -91,9 +88,7 @@ class Combat:
         tiles = []
         for tile in tile_map:
             if "owner" in tile_map[tile]:
-                if all([len(Combat.findPlayersInTile(game, tile)) == 1,
-                        tile_map[tile]["owner"] == 0,
-                        Combat.findPlayersInTile(game, tile)[0] != "ai"]):
+                if len(Combat.findPlayersInTile(game, tile)) == 1 and tile_map[tile]["owner"] == 0 and Combat.findPlayersInTile(game, tile)[0] != "ai":
                     tiles.append((int(tile_map[tile]["sector"]), tile))
         sorted_tiles = sorted(tiles, key=lambda x: x[0], reverse=True)
         return sorted_tiles
@@ -136,7 +131,7 @@ class Combat:
             message_to_send = f"Combat will occur in system {tile[0]}, position {tile[1]}."
             message = await channel.send(message_to_send)
             threadName = (f"{game.get_gamestate()['game_id']}-Round {game.get_gamestate()['roundNum']}, "
-                          "Tile {tile[1]}, Combat")
+                          f"Tile {tile[1]}, Combat")
             thread = await message.create_thread(name=threadName)
             drawing = DrawHelper(game.gamestate)
             await thread.send(role.mention + "Combat will occur in this tile",
@@ -828,8 +823,7 @@ class Combat:
                     player = game.get_player_from_color(playerColor)
                     shipModel = PlayerShip(game.gamestate["players"][player], ship[1])
                     shipName = playerColor + "-" + ship[1]
-                    if all([shipModel.repair > 0, "damage_tracker" in game.gamestate["board"][pos],
-                            shipName in game.gamestate["board"][pos]["damage_tracker"]]):
+                    if shipModel.repair > 0 and "damage_tracker" in game.gamestate["board"][pos] and shipName in game.gamestate["board"][pos]["damage_tracker"]:
                         if game.gamestate["board"][pos]["damage_tracker"][shipName] > 0:
                             game.repair_damage(shipName, pos)
                             message = (f"{game.gamestate['players'][player]['player_name']} repaired 1 damage"
@@ -1103,8 +1097,13 @@ class Combat:
 
     @staticmethod
     async def assignHitTo(game: GamestateHelper, buttonID: str, interaction: discord.Interaction, button: bool):
-        _, pos, colorOrAI, ship, dieNum, dieDam = buttonID.split("_")
-        shipType, shipOwner = ship.split("-")
+        pos = buttonID.split("_")[1]
+        colorOrAI = buttonID.split("_")[2]
+        ship = buttonID.split("_")[3]
+        dieNum = buttonID.split("_")[4]
+        dieDam = buttonID.split("_")[5]
+        shipType = ship.split("-")[1]
+        shipOwner = ship.split("-")[0]
         if shipOwner == "ai":
             shipModel = AI_Ship(shipType, game.gamestate["advanced_ai"], game.gamestate["wa_ai"])
         else:
@@ -1128,10 +1127,7 @@ class Combat:
                 msg += (f"The AI destroyed the {Combat.translateShipAbrToName(shipType)}"
                         f" due to the damage exceeding the ships hull.")
             await interaction.channel.send(msg)
-            playerColor = Combat.findPlayersInTile(game, pos)[1]
-            dracoNAnc = all([len(Combat.findPlayersInTile(game, pos)) == 2,
-                             "anc" in Combat.findShipTypesInTile(game, pos),
-                             "Draco" in game.find_player_faction_name_from_color(playerColor)])
+            dracoNAnc = len(Combat.findPlayersInTile(game, pos)) == 2 and "anc" in Combat.findShipTypesInTile(game, pos) and "Draco" in game.find_player_faction_name_from_color(Combat.findPlayersInTile(game, pos)[1])
             if len(Combat.findPlayersInTile(game, pos)) < 2 or dracoNAnc:
                 await Combat.declareAWinner(game, interaction, pos)
             elif oldLength != len(Combat.findPlayersInTile(game, pos)):

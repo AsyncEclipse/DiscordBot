@@ -134,5 +134,5 @@ class PopulationButtons:
         ships = game.gamestate["players"][game.get_player_from_color(player["color"])]["colony_ships"]
         asyncio.create_task(interaction.channel.send(f"Successfully added a {resourceType} population to tile {tile}. "
                                                      f"You now have an income of {str(income)} {resourceType}. {ships}"
-                                                     " colony ship{'s' if ships == 1 else 's'} left unexhausted.",
+                                                     f" colony ship{'s' if ships == 1 else 's'} left unexhausted.",
                                                      file=await asyncio.to_thread(drawing.board_tile_image_file, tile)))

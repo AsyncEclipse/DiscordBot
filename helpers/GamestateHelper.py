@@ -522,7 +522,7 @@ class GamestateHelper:
         materials = player["materials"]
         materialsIncrease = player["population_track"][player["material_pop_cubes"] - 1]
         materialsIncrease = f"+{materialsIncrease}"
-        msg = "\n".join(["Your current economic situation is as follows:",
+        msg = "\n".join([". Your current economic situation is as follows:",
                          f"{moneyEmoji}: {money} ({moneyIncrease} - {moneyDecrease})",
                          f"{scienceEmoji}: {science} ({scienceIncrease})",
                          f"{materialEmoji}: {materials} ({materialsIncrease})",
