@@ -688,7 +688,7 @@ class GamestateHelper:
                 found = True
             if found:
                 if not graveYard:
-                    if "neurtal" not in i:
+                    if "neutral" not in i:
                         if all(["orbital" not in i,
                                 self.gamestate["players"][playerID][i.replace("adv", "") + "_cubes"] < 13]):
                             self.gamestate["players"][playerID][i.replace("adv", "") + "_cubes"] += 1
