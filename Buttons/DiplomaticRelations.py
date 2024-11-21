@@ -130,11 +130,12 @@ class DiplomaticRelationsButtons:
     async def offerRelationsTo(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
         view = View()
         p2 = buttonID.split("_")[1]
+        pID = game.get_player_from_color(p2)
         buttonID1 = f"FCID{p2}_acceptRelationsWith_" + player["color"]
         buttonID2 = f"FCID{p2}_declineRelationsWith_" + player["color"]
         view.add_item(Button(label="Accept", style=discord.ButtonStyle.green, custom_id=buttonID1))
         view.add_item(Button(label="Decline", style=discord.ButtonStyle.red, custom_id=buttonID2))
-        await interaction.channel.send("{game.get_gamestate()['players'][pID]['player_name']}, choose whether"
+        await interaction.channel.send(f"{game.get_gamestate()['players'][pID]['player_name']}, choose whether"
                                        f" you will accept diplomatic relations from {interaction.user.mention}",
                                        view=view)
         await interaction.message.delete()
