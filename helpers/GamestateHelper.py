@@ -57,6 +57,13 @@ class GamestateHelper:
         self.gamestate["lastButton"] = buttonID
         self.update()
 
+    def setLockedStatus(self, statusOfLock: bool):
+        if statusOfLock:
+            self.gamestate["gameLocked"] = "yes"
+        else:
+            self.gamestate["gameLocked"] = "no"
+        self.update()
+
     def changeColor(self, colorOld, colorNew):
         def replace_string_in_dict(original_dict, old_string, new_string):
             new_dict = {}

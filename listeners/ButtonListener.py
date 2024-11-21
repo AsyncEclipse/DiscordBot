@@ -50,7 +50,8 @@ class ButtonListener(commands.Cog):
                                                     " please wait 5-10 seconds for the map to generate",
                                                     ephemeral=True)
 
-                await asyncio.create_task(self.resolveButton(interaction))
+                await self.resolveButton(interaction)
+
 #                if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):
 #                    end_time = time.perf_counter()
 #                    elapsed_time = end_time - start_time
@@ -108,13 +109,22 @@ class ButtonListener(commands.Cog):
             player_helper = None
         if game.gamestate.get("lastButton") == customID:
             if not any(substring in customID for substring in ["showGame", "AtRatio", "gain5", "showReputation",
-                                                               "rollDice", "magColShip", "rerollDie"]):
+                                                               "rollDice", "magColShip", "rerollDie", "readyForUpkeep"]):
                 await interaction.followup.send(f"{interaction.user.mention}, this button ({customID}) was pressed"
                                                 " most recently, and we are attempting to prevent an accidental"
                                                 " double press. Try hitting show game first and then hitting this"
                                                 " button, if for some reason you need to press this button.",
                                                 ephemeral=True)
                 return
+        
+        if game.gamestate.get("gameLocked") == "yes":
+            await interaction.followup.send(f"{interaction.user.mention}, the game was processing another request when you hit this button. Try again now",
+                                                ephemeral=True)
+            await asyncio.sleep(1)
+            game = GamestateHelper(interaction.channel)
+            game.setLockedStatus(False)
+            return
+        game.setLockedStatus(True)
         game.saveLastButtonPressed(customID)
         # If we want to prevent others from touching someone else's buttons,
         # we can attach FCID{color}_ to the start of the button ID as a check.
@@ -149,6 +159,8 @@ class ButtonListener(commands.Cog):
             await TurnButtons.restartTurn(player, game, interaction)
         if customID == "undoLastTurn":
             await TurnButtons.undoLastTurn(player, game, interaction)
+        if customID == "readyForUpkeep":
+            await TurnButtons.readyForUpkeep(game, player, interaction,player_helper)
         if customID == "runUpkeep":
             game.createRoundNum()
             rnd = game.get_gamestate()["roundNum"]
@@ -304,5 +316,7 @@ class ButtonListener(commands.Cog):
             await BlackHoleButtons.blackHoleFinish(game, player, customID, player_helper, interaction)
         end_time = time.perf_counter()
         elapsed_time = end_time - start_time
+        game = GamestateHelper(interaction.channel)
+        game.setLockedStatus(False)
         if elapsed_time > 5:
             print(f"Total elapsed time for {customID} button press in side thread: {elapsed_time:.2f} seconds")

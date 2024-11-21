@@ -7,6 +7,7 @@ from Buttons.Influence import InfluenceButtons
 from Buttons.Population import PopulationButtons
 from Buttons.Reputation import ReputationButtons
 from helpers.DrawHelper import DrawHelper
+from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 from helpers.ShipHelper import AI_Ship, PlayerShip
@@ -120,10 +121,10 @@ class Combat:
         game.initilizeKey("activePlayerColor")
         if "wa_ai" not in game.get_gamestate():
             game.initilizeKey("wa_ai")
-        if "tilesToResolve" not in game.get_gamestate():
-            game.initilizeKey("tilesToResolve")
-            game.initilizeKey("queuedQuestions")
-            game.initilizeKey("queuedDraws")
+        game.initilizeKey("tilesToResolve")
+        game.initilizeKey("queuedQuestions")
+        game.initilizeKey("queuedDraws")
+        game.initilizeKey("peopleToCheckWith")
 
         for tile in tiles:
 
@@ -139,6 +140,9 @@ class Combat:
                               file=await asyncio.to_thread(drawing.board_tile_image_file, tile[1]))
             await Combat.startCombat(game, thread, tile[1])
             game.addToKey("tilesToResolve", tile[0])
+            for combatatant in Combat.findPlayersInTile(game, tile[1]):
+                if combatatant not in game.get_gamestate()["peopleToCheckWith"] and combatatant != "ai":
+                    game.addToKey("peopleToCheckWith", combatatant)
         for tile2 in Combat.findTilesInContention(game):
             message_to_send = f"Bombing may occur in system {tile2[0]}, position {tile2[1]}."
             message = await channel.send(message_to_send)
@@ -182,6 +186,9 @@ class Combat:
                                      custom_id=f"FCID{winner}_rollDice_{pos}_{winner}_1000"))
                 message = f"{playerName}, you may roll to attempt to kill enemy population."
                 await thread2.send(message, view=view)
+            for combatatant in Combat.findPlayersInTile(game, tile2[1]):
+                if combatatant not in game.get_gamestate()["peopleToCheckWith"] and combatatant != "ai":
+                    game.addToKey("peopleToCheckWith", combatatant)
         for tile3 in Combat.findUnownedTilesToTakeOver(game):
             message_to_send = f"An influence disc may be placed in system {tile3[0]}, position {tile3[1]}."
             message = await channel.send(message_to_send)
@@ -204,9 +211,22 @@ class Combat:
             message = (f"{playerName}, if you have enough colony ships, "
                        "you may use this to drop population after taking control of the sector.")
             await thread3.send(message, view=view3)
+            for combatatant in Combat.findPlayersInTile(game, tile3[1]):
+                if combatatant not in game.get_gamestate()["peopleToCheckWith"] and combatatant != "ai":
+                    game.addToKey("peopleToCheckWith", combatatant)
         message = ("Resolve the combats simultaneously if you wish"
                    " -- any reputation draws will be queued to resolve correctly.")
-        asyncio.create_task(channel.send(message))
+        await channel.send(message)
+        if len(game.get_gamestate()["peopleToCheckWith"]) > 0:
+            view4 = View()
+            view4.add_item(Button(label="Ready for Upkeep", style=discord.ButtonStyle.green,
+                                  custom_id=f"readyForUpkeep"))
+            message = (f"The game will require everyone ({str(len(game.get_gamestate()["peopleToCheckWith"]))} players) involved in an end of round thread to hit this button before upkeep can be run.")
+            await interaction.channel.send(message, view=view4)
+
+
+    
+
 
     @staticmethod
     def getCombatantShipsBySpeed(game: GamestateHelper, colorOrAI: str, playerShipsList, pos):
@@ -1010,7 +1030,6 @@ class Combat:
                 role = discord.utils.get(interaction.guild.roles, name=game.game_id)
                 view = View()
                 view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"startPopDrop"))
-                view.add_item(Button(label="Run Upkeep",style=discord.ButtonStyle.blurple, custom_id="runUpkeep"))
                 await actions_channel.send(role.mention+" Please run upkeep after all post combat events are resolved. You can use this button to drop pop after taking control of a tile", view = view)
         if "combatants" in game.gamestate["board"][pos]:
             players = game.gamestate["board"][pos]["combatants"]
