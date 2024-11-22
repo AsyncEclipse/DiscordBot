@@ -200,7 +200,7 @@ class TurnButtons:
             msg += " Still waiting on the following factions to press the ready for upkeep button:\n"
             for color2 in game.get_gamestate()["peopleToCheckWith"]:
                 p2 = game.getPlayerObjectFromColor(color2)
-                msg += p2["name"]+"\n"
+                msg += p2["player_name"]+"\n"
             await interaction.channel.send(msg)
         else:
             view = View()
