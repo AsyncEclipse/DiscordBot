@@ -25,7 +25,9 @@ class PlayerCommands(commands.GroupCog, name="player"):
         app_commands.Choice(name="Yellow", value="yellow"),
         app_commands.Choice(name="Purple", value="purple"),
         app_commands.Choice(name="Green", value="green"),
-        app_commands.Choice(name="White", value="white")
+        app_commands.Choice(name="White", value="white"),
+        app_commands.Choice(name="Pink", value="pink"),
+        app_commands.Choice(name="Brown", value="brown")
     ]
 
     @app_commands.command(name="stats", description="Anything to do with player stats")
