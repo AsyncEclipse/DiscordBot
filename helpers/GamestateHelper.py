@@ -336,8 +336,15 @@ class GamestateHelper:
 
         configs = Properties()
         if self.gamestate.get("5playerhyperlane"):
-            with open("data/tileAdjacencies_5p.properties", "rb") as f:
-                configs.load(f)
+            if self.gamestate.get("player_count") == 5:
+                with open("data/tileAdjacencies_5p.properties", "rb") as f:
+                    configs.load(f)
+            elif self.gamestate.get("player_count") == 4:
+                with open("data/tileAdjacencies_4p.properties", "rb") as f:
+                    configs.load(f)
+            else:
+                with open("data/tileAdjacencies.properties", "rb") as f:
+                    configs.load(f)
         else:
             with open("data/tileAdjacencies.properties", "rb") as f:
                 configs.load(f)
@@ -347,7 +354,7 @@ class GamestateHelper:
                 discard = 0
                 if "tile_discard_deck_300" in self.gamestate:
                     discard = len(self.gamestate["tile_discard_deck_300"])
-                if adjTile not in self.gamestate["board"] and len(self.gamestate["tile_deck_300"]) + discard > 0:
+                if adjTile not in self.gamestate["board"] and len(self.gamestate["tile_deck_300"]) + discard > 0 and adjTile in configs:
                     self.add_tile(adjTile, 0, "sector3back")
         self.update()
 
@@ -752,6 +759,7 @@ class GamestateHelper:
                                                view=view)
 
         tech_draws = self.gamestate["player_count"] + 3
+        tech_draws = min(tech_draws,11)
         while tech_draws > 0:
             random.shuffle(self.gamestate["tech_deck"])
             picked_tech = self.gamestate["tech_deck"].pop(0)
@@ -875,13 +883,13 @@ class GamestateHelper:
         self.gamestate["setup_finished"] = 1
         self.update()
 
-    def setup_techs_and_outer_rim(self, count: int, galactic_events):
+    def setup_techs_and_outer_rim(self, count: int, galactic_events ,hyperlane):
         self.gamestate["player_count"] = count
-        draw_count = {2: [5, 12], 3: [8, 14], 4: [14, 16], 5: [16, 18], 6: [18, 20]}
+        draw_count = {2: [5, 12], 3: [8, 14], 4: [14, 16], 5: [16, 18], 6: [18, 20],7:[22,22],8:[24,24],9:[24,26]}
 
         third_sector_tiles = ["301", "302", "303", "304", "305", "306", "307", "308", "309", "310", "311", "312", "313",
                               "314", "315", "316", "317", "318", "381", "382", "398", "397", "399", "396", "394", "393"]
-        if not galactic_events:
+        if not galactic_events and count < 7:
             third_sector_tiles = ["301", "302", "303", "304", "305", "306", "307", "308", "309", "310",
                                   "311", "312", "313", "314", "315", "316", "317", "318", "381", "382"]
         else:
@@ -917,7 +925,7 @@ class GamestateHelper:
                          "Tech Discount", "Population Cube",
                          "Three Points", "Point Per Ambassador", "Point Per Reputation Tile"]
         self.gamestate["minor_species"] = []
-        if count == 5:
+        if hyperlane:
             self.gamestate["5playerhyperlane"] = True
         else:
             self.gamestate["5playerhyperlane"] = False
@@ -1236,6 +1244,8 @@ class GamestateHelper:
 
     def is_everyone_passed(self):
         listHS = [201, 203, 205, 207, 209, 211]
+        if self.gamestate["player_count"] > 6:
+                listHS = [302,304,306,308,310,312,314,316,318]
         for number in listHS:
             nextPlayer = self.getPlayerFromHSLocation(str(number))
             if nextPlayer is not None and not self.get_gamestate()["players"].get(nextPlayer, {}).get("passed", False):
@@ -1245,6 +1255,8 @@ class GamestateHelper:
     def get_next_player(self, player):
         if player["player_name"] not in self.get_gamestate().get("turn_order", []):
             listHS = [201, 203, 205, 207, 209, 211]
+            if self.gamestate["player_count"] > 6:
+                listHS = [302,304,306,308,310,312,314,316,318]
             playerHSID = player["home_planet"]
             tileLocation = int(self.getLocationFromID(playerHSID))
             index = listHS.index(tileLocation)

@@ -99,9 +99,9 @@ class GameCommands(commands.GroupCog, name="game"):
         await Combat.resolveQueue(game, interaction, True)
         await interaction.response.send_message("Queue has been force resolved")
 
-    @app_commands.command(name="disable_five_player_hyperlanes")
-    async def disable_five_player_hyperlanes(self, interaction: discord.Interaction):
-        await interaction.response.send_message("The hyperlanes for 5 player mode have been disabled")
+    @app_commands.command(name="disable_hyperlanes")
+    async def disable_hyperlanes(self, interaction: discord.Interaction):
+        await interaction.response.send_message("The hyperlanes have been disabled")
         game = GamestateHelper(interaction.channel)
         game.initilizeKey("5playerhyperlane")
 

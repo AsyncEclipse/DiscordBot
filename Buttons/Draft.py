@@ -145,36 +145,55 @@ class DraftButtons:
             3: ["201", "205", "209", "211", "203", "207"],
             4: ["201", "205", "207", "211", "203", "209"],
             5: ["201", "203", "205", "209", "211", "207"],
-            6: ["201", "203", "205", "207", "209", "211"]
+            6: ["201", "203", "205", "207", "209", "211"],
+            7: ["302","304","308","310","312","314","318","316","306"],
+            8: ["302","304","308","310","312","314","316","318","306"],
+            9: ["302","304","306","308","310","312","314","316","318"]
         }
         if count in tile_mapping:
             listOfTilesPos = tile_mapping[count]
         hyperlane5 = False
         if game.gamestate.get("5playerhyperlane"):
             hyperlane5 = True
+        if count == 4 and hyperlane5:
+            listOfTilesPos =["203", "205", "209", "211", "207", "201"]
         listDefended = ["271", "272", "273", "274", "271"]
         random.shuffle(listDefended)
         game.add_tile("000", 0, "001")
         for i in range(count):
             rotDet = (180 - 30 * (int(listOfTilesPos[i]) - 201)) % 360
+            if count > 6: 
+                rotDet = 0
             game.add_tile(listOfTilesPos[i], rotDet, listPlayerHomes[i][0], listPlayerHomes[i][1])
         if not hyperlane5:
-            for i in range(6 - count):
+            for i in range(len(listOfTilesPos) - count):
                 rotDet = (180 - 30 * (int(listOfTilesPos[5 - i]) - 201)) % 360
-                game.add_tile(listOfTilesPos[5 - i], rotDet, listDefended[i])
+                if count > 6: 
+                    rotDet = 0
+                game.add_tile(listOfTilesPos[len(listOfTilesPos)-1 - i], rotDet, listDefended[i])
         for i in range(101, 107):
             if hyperlane5 and i == 104:
+                continue
+            if hyperlane5 and count == 4 and i == 101:
                 continue
             game.add_tile(str(i), 0, "sector1back")
         for i in range(201, 213):
             if hyperlane5 and (i == 206 or i == 207):
+                continue
+            if hyperlane5 and count == 4 and (i == 211 or i == 212):
                 continue
             if str(i) not in listOfTilesPos:
                 game.add_tile(str(i), 0, "sector2back")
         for i in range(301, 319):
             if hyperlane5 and (i == 309 or i == 310 or i == 311):
                 continue
-            game.add_tile(str(i), 0, "sector3back")
+            if hyperlane5 and count == 4 and (i == 301 or i == 302 or i ==318):
+                continue
+            if str(i) not in listOfTilesPos:
+                game.add_tile(str(i), 0, "sector3back")
+        if count > 6:
+            for i in range(401,425):
+                game.add_tile(str(i), 0, "sector3back")
         if game.gamestate["setup_finished"] != 1:
             game.setup_finished()
         # game.fillInDiscTiles()
@@ -187,5 +206,5 @@ class DraftButtons:
         game.updatePingTime()
         player = game.get_player(temp_player_list[0])
         await interaction.channel.send(f"## {game.getPlayerEmoji(player)} started their turn.")
-        await interaction.channel.send(f"{player['player_name']} use these buttons to do your turn. "
+        await interaction.channel.send(f"{player['player_name']} use these buttons to do your turn"
                                        + game.displayPlayerStats(player), view=view)
