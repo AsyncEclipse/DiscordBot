@@ -303,7 +303,7 @@ class GamestateHelper:
         tile = self.gamestate["board"][position]
         tile.update({"warp": 1})
         tile["warpPoint"] = 1
-        self.gamestate["board"][posgition] = tile
+        self.gamestate["board"][position] = tile
         self.update()
 
     def add_tile(self, position, orientation, sector, owner=None):
