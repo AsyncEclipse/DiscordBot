@@ -959,9 +959,7 @@ class Combat:
         await interaction.message.delete()
         await interaction.channel.send(f"{playerObj['player_name']} has retreated all ships"
                                        f" with initiative {speed} to {destination}.")
-        dracoNAnc = all([len(Combat.findPlayersInTile(game, pos)) == 2,
-                         "anc" in Combat.findShipTypesInTile(game, pos),
-                         "Draco" in game.find_player_faction_name_from_color(Combat.findPlayersInTile(game, pos)[1])])
+        dracoNAnc = len(Combat.findPlayersInTile(game, pos)) == 2 and "anc" in Combat.findShipTypesInTile(game, pos) and "Draco" in game.find_player_faction_name_from_color(Combat.findPlayersInTile(game, pos)[1])
         if len(Combat.findPlayersInTile(game, pos)) < 2 or dracoNAnc:
             await Combat.declareAWinner(game, interaction, pos)
         elif oldLength != len(Combat.findPlayersInTile(game, pos)):

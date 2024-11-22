@@ -113,15 +113,15 @@ class DraftButtons:
         if faction == "lyr":
             return "brown"
         if faction == "rho":
-            return "teal"
-        if faction == "exl":
             return "pink"
+        if faction == "exl":
+            return "teal"
         return "green"
 
     @staticmethod
     async def generalSetup(interaction: discord.Interaction, game: GamestateHelper,
                            temp_player_list, temp_faction_list):
-        colors = ["blue", "red", "green", "yellow", "purple", "white","pink","brown"]
+        colors = ["blue", "red", "green", "yellow", "purple", "white","pink","brown", "teal"]
         count = 0
         listPlayerHomes = []
         x = -1
