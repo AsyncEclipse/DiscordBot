@@ -215,6 +215,13 @@ class TurnButtons:
             await interaction.channel.send("It appears some tiles are still in conflict. "
                                            "Please resolve them before running upkeep")
             return
+        if "peopleToCheckWith" in game.gamestate and len(game.get_gamestate()["peopleToCheckWith"]) > 0:
+            msg = " Still waiting on the following players to hit the ready for upkeep button:\n"
+            for color2 in game.get_gamestate()["peopleToCheckWith"]:
+                p2 = game.getPlayerObjectFromColor(color2)
+                msg += p2["player_name"]+"\n"
+            await interaction.channel.send(msg)
+            return
         for player in game.gamestate["players"]:
             p1 = PlayerHelper(player, game.get_player(player))
             if p1.checkBankrupt():

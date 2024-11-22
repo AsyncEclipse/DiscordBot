@@ -50,7 +50,8 @@ class ButtonListener(commands.Cog):
                                                     " please wait 5-10 seconds for the map to generate",
                                                     ephemeral=True)
 
-                await asyncio.create_task(self.resolveButton(interaction))
+                await self.resolveButton(interaction)
+
 #                if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):
 #                    end_time = time.perf_counter()
 #                    elapsed_time = end_time - start_time
@@ -71,7 +72,7 @@ class ButtonListener(commands.Cog):
                     try:
                         if isinstance(error, discord.HTTPException) and error.status == 404:
                             await log_channel.send(f"Unknown Interaction error on {customID}. "
-                                                   "Interaction was receieved at {start.strftime('%H:%M:%S')}")
+                                                   f"Interaction was received at {start.strftime('%H:%M:%S')}")
                             if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):
                                 await button_log_channel.send(f"{start.strftime('%H:%M:%S')}"
                                                               " interaction errror hit on {customID}")
@@ -317,5 +318,7 @@ class ButtonListener(commands.Cog):
             await BlackHoleButtons.blackHoleFinish(game, player, customID, player_helper, interaction)
         end_time = time.perf_counter()
         elapsed_time = end_time - start_time
+        game = GamestateHelper(interaction.channel)
+        game.setLockedStatus(False)
         if elapsed_time > 5:
             print(f"Total elapsed time for {customID} button press in side thread: {elapsed_time:.2f} seconds")

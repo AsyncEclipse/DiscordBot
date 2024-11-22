@@ -2049,7 +2049,7 @@
                         "nud"
                 ],
                 "orb_parts": [
-                        "iot_exile",
+                        "iotexile",
                         "elc",
                         "hul"
                 ]
@@ -2135,7 +2135,7 @@
                         "mixed",
                         "mixed"
                 ],
-                "cost_orbital": 5,
+                "cost_orbital": 4,
                 "cost_monolith": 10,
                 "cost_interceptor": 4,
                 "cost_cruiser": 6,

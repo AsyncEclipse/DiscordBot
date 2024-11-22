@@ -18,6 +18,7 @@ class TileCommands(commands.GroupCog, name="tile"):
     color_choices = [app_commands.Choice(name="Blue", value="blue"),
                      app_commands.Choice(name="Red", value="red"),
                      app_commands.Choice(name="Yellow", value="yellow"),
+                     app_commands.Choice(name="Teal", value="teal"),
                      app_commands.Choice(name="Purple", value="purple"),
                      app_commands.Choice(name="Green", value="green"),
                      app_commands.Choice(name="Pink", value="pink"),
@@ -42,8 +43,6 @@ class TileCommands(commands.GroupCog, name="tile"):
         unitType = unit.value
         if unit.value == "grd" or unit.value == "anc" or unit.value == "gcds":
             colorOrAI = "ai"
-            if game.gamestate["advanced_ai"]:
-                unitType += "adv"
         else:
             colorOrAI = color.value if color else game.get_player(str(interaction.user.id))["color"]
         option = colorOrAI + "-" + unitType

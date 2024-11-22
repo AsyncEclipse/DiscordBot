@@ -57,6 +57,13 @@ class GamestateHelper:
         self.gamestate["lastButton"] = buttonID
         self.update()
 
+    def setLockedStatus(self, statusOfLock: bool):
+        if statusOfLock:
+            self.gamestate["gameLocked"] = "yes"
+        else:
+            self.gamestate["gameLocked"] = "no"
+        self.update()
+
     def changeColor(self, colorOld, colorNew):
         def replace_string_in_dict(original_dict, old_string, new_string):
             new_dict = {}
@@ -296,7 +303,7 @@ class GamestateHelper:
         tile = self.gamestate["board"][position]
         tile.update({"warp": 1})
         tile["warpPoint"] = 1
-        self.gamestate["board"][position] = tile
+        self.gamestate["board"][posgition] = tile
         self.update()
 
     def add_tile(self, position, orientation, sector, owner=None):
@@ -353,8 +360,6 @@ class GamestateHelper:
         self.update()
 
     def add_damage(self, ship, position, damage):
-        if "ai-" in ship and "adv" not in "ship" and self.gamestate["advanced_ai"]:
-            ship += "adv"
         if "damage_tracker" in self.gamestate["board"][position]:
             if ship in self.gamestate["board"][position]["damage_tracker"]:
                 damage = self.gamestate["board"][position]["damage_tracker"][ship] + damage
@@ -524,7 +529,7 @@ class GamestateHelper:
         materials = player["materials"]
         materialsIncrease = player["population_track"][player["material_pop_cubes"] - 1]
         materialsIncrease = f"+{materialsIncrease}"
-        msg = "\n".join(["Your current economic situation is as follows:",
+        msg = "\n".join([". Your current economic situation is as follows:",
                          f"{moneyEmoji}: {money} ({moneyIncrease} - {moneyDecrease})",
                          f"{scienceEmoji}: {science} ({scienceIncrease})",
                          f"{materialEmoji}: {materials} ({materialsIncrease})",
@@ -683,10 +688,10 @@ class GamestateHelper:
                 found = True
             if found:
                 if not graveYard:
-                    if all(["neutral" not in i,
-                            "orbital" not in i,
-                            self.gamestate["players"][playerID][i.replace("adv", "") + "_cubes"] < 13]):
-                        self.gamestate["players"][playerID][i.replace("adv", "") + "_cubes"] += 1
+                    if "neutral" not in i:
+                        if all(["orbital" not in i,
+                                self.gamestate["players"][playerID][i.replace("adv", "") + "_cubes"] < 13]):
+                            self.gamestate["players"][playerID][i.replace("adv", "") + "_cubes"] += 1
                     else:
                         if "neutral" not in i:
                             orbitalPop += 1
@@ -786,7 +791,7 @@ class GamestateHelper:
                         maxTech = max(len(playerObj["grid_tech"]), len(playerObj["military_tech"]))
                         maxTech = max(maxTech, len(playerObj["nano_tech"]))
                         total += maxTech
-                    msg += (f"\nThe sum of that and the owners highest tech track ({sum})"
+                    msg += (f"\nThe sum of that and the owners highest tech track ({str(total)})"
                             f" was compared against the round ({rnd}) and found to be ")
                     if total < rnd:
                         msg += "lesser, so the supernova exploded."

@@ -332,8 +332,8 @@ class DrawHelper:
                         size = int(110 * mult)
                     if ship_type == "orb" or ship_type == "mon":
                         ship = ship_type
-
-                    if self.gamestate.get("fancy_ships"):
+                    filepathShip = f"images/resources/components/fancy_ships/fancy_{ship}.png"
+                    if self.gamestate.get("fancy_ships") and os.path.exists(filepathShip):
                         filepathShip = f"images/resources/components/fancy_ships/fancy_{ship}.png"
                     else:
                         filepathShip = f"images/resources/components/basic_ships/{ship}.png"
@@ -735,10 +735,10 @@ class DrawHelper:
              "images/resources/components/all_boards/popcube_orange.png",
              "money_pop_cubes", (0, 0)),
             ("images/resources/components/resourcesymbols/science.png",
-             "images/resources/components/all_boards/popcube_pink.png",
+             "images/resources/components/all_boards/science_pink.png",
              "science_pop_cubes", (0, 95)),
             ("images/resources/components/resourcesymbols/material.png",
-             "images/resources/components/all_boards/popcube_brown.png",
+             "images/resources/components/all_boards/mats_brown.png",
              "material_pop_cubes", (35, 95))
         ]
 
@@ -936,7 +936,10 @@ class DrawHelper:
                                stroke_width=stroke_width, stroke_fill=stroke_color)
             text_image = text_image.rotate(45, expand=True)
             context.paste(text_image, (0, 0), text_image)
-        if player["color"] == self.gamestate.get("activePlayerColor", [None])[0]:
+        colorActive = "nada"
+        if "activePlayerColor" in self.gamestate:
+            colorActive = self.gamestate.get("activePlayerColor")
+        if player["color"] == colorActive:
             text_image = Image.new('RGBA', (500, 500), (0, 0, 0, 0))
             text_drawable = ImageDraw.Draw(text_image)
             text_drawable.text((0, 50), "Active", fill=(0, 255, 0), font=font,
@@ -1004,7 +1007,8 @@ class DrawHelper:
         ships = ["int", "cru", "drd", "sb"]
         ultimateC = 0
         for counter, ship in enumerate(ships):
-            if self.gamestate.get("fancy_ships"):
+            filepath = f"images/resources/components/fancy_ships/fancy_{player['color']}-{ship}.png"
+            if self.gamestate.get("fancy_ships") and os.path.exists(filepath):
                 filepath = f"images/resources/components/fancy_ships/fancy_{player['color']}-{ship}.png"
             else:
                 filepath = f"images/resources/components/basic_ships/{player['color']}-{ship}.png"
@@ -1191,7 +1195,7 @@ class DrawHelper:
                                        cropped_context.size[1] + context2.size[1]))
         final_context.paste(context5,
                             (0, cropped_context.size[1] + context2.size[1] + max(context3.size[1],
-                                                                                 context4.size[1] + context6.size[1])))
+                                                                                 context4.size[1])))
         bytes_io = BytesIO()
         final_context.save(bytes_io, format="WEBP")
         bytes_io.seek(0)

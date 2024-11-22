@@ -7,6 +7,7 @@ from Buttons.Influence import InfluenceButtons
 from Buttons.Population import PopulationButtons
 from Buttons.Reputation import ReputationButtons
 from helpers.DrawHelper import DrawHelper
+from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 from helpers.ShipHelper import AI_Ship, PlayerShip
@@ -39,7 +40,7 @@ class Combat:
         tile_map = game.get_gamestate()["board"]
         if "player_ships" not in tile_map[pos]:
             return []
-            player_ships = tile_map[pos]["player_ships"][:]
+        player_ships = tile_map[pos]["player_ships"][:]
         ships = []
         for ship in player_ships:
             if all([game.find_player_faction_name_from_color(tile_map[pos]["owner"]) == "The Exiles",
@@ -127,10 +128,10 @@ class Combat:
         game.initilizeKey("activePlayerColor")
         if "wa_ai" not in game.get_gamestate():
             game.initilizeKey("wa_ai")
-        if "tilesToResolve" not in game.get_gamestate():
-            game.initilizeKey("tilesToResolve")
-            game.initilizeKey("queuedQuestions")
-            game.initilizeKey("queuedDraws")
+        game.initilizeKey("tilesToResolve")
+        game.initilizeKey("queuedQuestions")
+        game.initilizeKey("queuedDraws")
+        game.initilizeKey("peopleToCheckWith")
 
         for tile in tiles:
 
@@ -138,7 +139,7 @@ class Combat:
             message_to_send = f"Combat will occur in system {tile[0]}, position {tile[1]}."
             message = await channel.send(message_to_send)
             threadName = (f"{game.get_gamestate()['game_id']}-Round {game.get_gamestate()['roundNum']}, "
-                          "Tile {tile[1]}, Combat")
+                          f"Tile {tile[1]}, Combat")
             thread = await message.create_thread(name=threadName)
             drawing = DrawHelper(game.gamestate)
             await thread.send(role.mention + "Combat will occur in this tile",
@@ -146,11 +147,14 @@ class Combat:
                               file=await asyncio.to_thread(drawing.board_tile_image_file, tile[1]))
             await Combat.startCombat(game, thread, tile[1])
             game.addToKey("tilesToResolve", tile[0])
+            for combatatant in Combat.findPlayersInTile(game, tile[1]):
+                if combatatant not in game.get_gamestate()["peopleToCheckWith"] and combatatant != "ai":
+                    game.addToKey("peopleToCheckWith", combatatant)
         for tile2 in Combat.findTilesInContention(game):
             message_to_send = f"Bombing may occur in system {tile2[0]}, position {tile2[1]}."
             message = await channel.send(message_to_send)
             threadName = (f"{game.get_gamestate()['game_id']}-Round {game.get_gamestate()['roundNum']}, "
-                          "Tile {tile2[1]}, Bombing")
+                          f"Tile {tile2[1]}, Bombing")
             thread2 = await message.create_thread(name=threadName)
             drawing = DrawHelper(game.gamestate)
             await thread2.send(role.mention + " population bombing may occur in this tile",
@@ -189,6 +193,9 @@ class Combat:
                                      custom_id=f"FCID{winner}_rollDice_{pos}_{winner}_1000"))
                 message = f"{playerName}, you may roll to attempt to kill enemy population."
                 await thread2.send(message, view=view)
+            for combatatant in Combat.findPlayersInTile(game, tile2[1]):
+                if combatatant not in game.get_gamestate()["peopleToCheckWith"] and combatatant != "ai":
+                    game.addToKey("peopleToCheckWith", combatatant)
         for tile3 in Combat.findUnownedTilesToTakeOver(game):
             message_to_send = f"An influence disc may be placed in system {tile3[0]}, position {tile3[1]}."
             message = await channel.send(message_to_send)
@@ -211,6 +218,9 @@ class Combat:
             message = (f"{playerName}, if you have enough colony ships, "
                        "you may use this to drop population after taking control of the sector.")
             await thread3.send(message, view=view3)
+            for combatatant in Combat.findPlayersInTile(game, tile3[1]):
+                if combatatant not in game.get_gamestate()["peopleToCheckWith"] and combatatant != "ai":
+                    game.addToKey("peopleToCheckWith", combatatant)
         message = ("Resolve the combats simultaneously if you wish"
                    " -- any reputation draws will be queued to resolve correctly.")
         await channel.send(message)
@@ -631,7 +641,9 @@ class Combat:
                     # await interaction.channel.send(msg,file=drawing.append_images(dieFiles))
                     await interaction.channel.send(msg + msg2)
                     oldNumPeeps = len(Combat.findPlayersInTile(game, pos))
+                    counter = 0
                     for die in dieNums:
+                        counter = counter + 1
                         tile_map = game.get_gamestate()["board"]
                         player_ships = tile_map[pos]["player_ships"][:]
                         dieNum = die[0]
@@ -1029,7 +1041,7 @@ class Combat:
         actions_channel = discord.utils.get(interaction.guild.channels, name=game.game_id + "-actions")
         if actions_channel is not None and isinstance(actions_channel, discord.TextChannel):
             await actions_channel.send(f"Combat in tile {pos} has concluded. "
-                                       "There are {len(Combat.findTilesInConflict(game))} tiles left in conflict.")
+                                       f"There are {len(Combat.findTilesInConflict(game))} tiles left in conflict.")
             if len(Combat.findTilesInConflict(game)) == 0:
                 role = discord.utils.get(interaction.guild.roles, name=game.game_id)
                 view = View()
@@ -1123,12 +1135,15 @@ class Combat:
 
     @staticmethod
     async def assignHitTo(game: GamestateHelper, buttonID: str, interaction: discord.Interaction, button: bool):
-        _, pos, colorOrAI, ship, dieNum, dieDam = buttonID.split("_")
-        shipType, shipOwner = ship.split("-")
+        pos = buttonID.split("_")[1]
+        colorOrAI = buttonID.split("_")[2]
+        ship = buttonID.split("_")[3]
+        dieNum = buttonID.split("_")[4]
+        dieDam = buttonID.split("_")[5]
+        shipType = ship.split("-")[1]
+        shipOwner = ship.split("-")[0]
         if shipOwner == "ai":
             shipModel = AI_Ship(shipType, game.gamestate["advanced_ai"], game.gamestate["wa_ai"])
-            if "ai-" in ship and "adv" not in "ship" and game.gamestate["advanced_ai"]:
-                ship += "adv"
         else:
             player = game.get_player_from_color(shipOwner)
             shipModel = PlayerShip(game.gamestate["players"][player], shipType)

@@ -10,6 +10,7 @@ from commands.setup_commands import SetupCommands
 from commands.player_commands import PlayerCommands
 from commands.search_commands import SearchCommands
 # from helpers import ImageCache
+from helpers import ImageCache
 from helpers.GamestateHelper import GamestateHelper
 from listeners.ButtonListener import ButtonListener
 from discord.ext import commands

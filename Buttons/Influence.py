@@ -213,7 +213,7 @@ class InfluenceButtons:
         if cubes > 12:
             await interaction.channel.send(f"The {pop} track is full. Cannot add more cubes to this track.")
             return
-        game.remove_pop([f"{pop}_pop"], "dummy", player, False)
+        game.remove_pop([f"{pop}_pop"], "dummy", game.get_player_from_color(p1["color"]), False)
         income = player["population_track"][player[f"{pop}_pop_cubes"] - 1]
         await interaction.channel.send(f"{p1['player_name']} added 1 {pop.replace('adv', '')}"
                                        f" population back to its track. "

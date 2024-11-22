@@ -69,6 +69,7 @@ class Emoji:
                      "<:tech_neutron_absorber:1301316514510667788>",
                      "<:tech_neutron_bombs:1301316380057931786>",
                      "<:tech_orbital:1301316452778905652>",
+                     "<:orb:1309308991398215721>",
                      "<:tech_phase_shield:1301316382213804142>",
                      "<:tech_pico_modulator:1301316516364419164>",
                      "<:tech_plasma_cannon:1301316384172544030>",
@@ -94,6 +95,10 @@ class Emoji:
                      "<:material:1301746857051029577>",
                      "<:money:1301746858376298496>",
                      "<:yellowdrd:1301319879441256559>",
+                     "<:tealcru:1309368616893812836>",
+                     "<:tealdrd:1309368614675157033>",
+                     "<:tealint:1309368615610486784>",
+                     "<:tealsb:1309368618345037845>",
                      "<:dracotoken:1302090247735349330>",
                      "<:eridanitoken:1302090245805703220>",
                      "<:colony_ship:1302428460198924388>",
@@ -139,5 +144,7 @@ class Emoji:
                      "<:whiteint:1301319925679390871>"]
         for emoj in emojiList:
             if f":{name}:" in emoj:
+                return emoj
+            if "orb" in name and "_" not in name and ":orb:" in emoj:
                 return emoj
         return "❓"

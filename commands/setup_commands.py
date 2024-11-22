@@ -22,6 +22,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
                       app_commands.Choice(name="Wardens of Magellan", value="mag"),
                       app_commands.Choice(name="Enlightened of Lyra", value="lyr"),
                       app_commands.Choice(name="Rho Indi Syndicate", value="rho"),
+                      app_commands.Choice(name="The Exiles", value="exl"),
                       app_commands.Choice(name="Terran Alliance (Orion)", value="ter1"),
                       app_commands.Choice(name="Terran Conglomerate (Mech)", value="ter2"),
                       app_commands.Choice(name="Terran Directorate (Eridian)", value="ter3"),
@@ -70,7 +71,8 @@ class SetupCommands(commands.GroupCog, name="setup"):
         player_list = []
         for i in temp_player_list:
             if i is not None:
-                player_list.append(i.mention)
+                player = game.get_player(i.id)
+                player_list.append(player["player_name"])
         game.setTurnOrder(player_list)
         await interaction.response.send_message("Successfully set turn order")
 
