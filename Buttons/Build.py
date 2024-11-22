@@ -99,8 +99,10 @@ class BuildButtons:
                 key = "cost_dread"
             buttonElements = [f"FCID{player['color']}", "buildShip", build, str(cost), build_loc, ship]
             if remaining > 0:
-                if ship != "Orbital" and ship != "Monolith":
+                if ship != "Monolith":
                     shipEmoji = Emoji.getEmojiByName(player['color'] + game.getShipShortName(ship))
+                    if ship == "Orbital":
+                        shipEmoji = Emoji.getEmojiByName("orb")
                     view.add_item(Button(label=f"{ship} ({player[f'{key}']})", emoji=shipEmoji,
                                          style=discord.ButtonStyle.blurple, custom_id="_".join(buttonElements)))
                 else:
