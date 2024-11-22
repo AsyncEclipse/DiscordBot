@@ -734,10 +734,10 @@ class DrawHelper:
              "images/resources/components/all_boards/popcube_orange.png",
              "money_pop_cubes", (0, 0)),
             ("images/resources/components/resourcesymbols/science.png",
-             "images/resources/components/all_boards/popcube_pink.png",
+             "images/resources/components/all_boards/science_pink.png",
              "science_pop_cubes", (0, 95)),
             ("images/resources/components/resourcesymbols/material.png",
-             "images/resources/components/all_boards/popcube_brown.png",
+             "images/resources/components/all_boards/mats_brown.png",
              "material_pop_cubes", (35, 95))
         ]
 

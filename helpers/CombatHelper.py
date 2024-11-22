@@ -147,7 +147,7 @@ class Combat:
             message_to_send = f"Bombing may occur in system {tile2[0]}, position {tile2[1]}."
             message = await channel.send(message_to_send)
             threadName = (f"{game.get_gamestate()['game_id']}-Round {game.get_gamestate()['roundNum']}, "
-                          "Tile {tile2[1]}, Bombing")
+                          f"Tile {tile2[1]}, Bombing")
             thread2 = await message.create_thread(name=threadName)
             drawing = DrawHelper(game.gamestate)
             await thread2.send(role.mention + " population bombing may occur in this tile",
@@ -221,7 +221,10 @@ class Combat:
             view4 = View()
             view4.add_item(Button(label="Ready for Upkeep", style=discord.ButtonStyle.green,
                                   custom_id=f"readyForUpkeep"))
-            message = (f"The game will require everyone ({str(len(game.get_gamestate()['peopleToCheckWith']))} players) involved in an end of round thread to hit this button before upkeep can be run.")
+            message = (f"The game will require everyone ({str(len(game.get_gamestate()['peopleToCheckWith']))} players) involved in an end of round thread to hit this button before upkeep can be run. The players who will need to press are: \n")
+            for color2 in game.get_gamestate()['peopleToCheckWith']:
+                p2 = game.getPlayerObjectFromColor(color2)
+                message += p2["player_name"]+"\n"
             await interaction.channel.send(message, view=view4)
 
 

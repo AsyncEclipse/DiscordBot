@@ -69,6 +69,7 @@ class Emoji:
                      "<:tech_neutron_absorber:1301316514510667788>",
                      "<:tech_neutron_bombs:1301316380057931786>",
                      "<:tech_orbital:1301316452778905652>",
+                     "<:orb:1309308991398215721>",
                      "<:tech_phase_shield:1301316382213804142>",
                      "<:tech_pico_modulator:1301316516364419164>",
                      "<:tech_plasma_cannon:1301316384172544030>",
@@ -124,6 +125,14 @@ class Emoji:
                      "<:purplesb:1301320055191244891>",
                      "<:greensb:1301320120898945105>",
                      "<:blueint:1301320105556185221>",
+                     "<:pinkcru:1309307935431593984>",
+                    "<:pinkdrd:1309307937428078673>",
+                    "<:pinkint:1309307940401975427>",
+                    "<:pinksb:1309307939634544650>",
+                    "<:browncru:1309307933947068547>",
+                    "<:browndrd:1309307928888475791>",
+                    "<:brownint:1309307930276794429>",
+                    "<:brownsb:1309307932185329735>",
                      "<:purpleint:1301320052519211142>",
                      "<:redint:1301319918041567273>",
                      "<:yellowint:1301319881047674934>",
@@ -131,5 +140,7 @@ class Emoji:
                      "<:whiteint:1301319925679390871>"]
         for emoj in emojiList:
             if f":{name}:" in emoj:
+                return emoj
+            if "orb" in name and "_" not in name and ":orb:" in emoj:
                 return emoj
         return "❓"
