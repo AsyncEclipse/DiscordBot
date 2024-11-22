@@ -24,6 +24,8 @@ class TurnButtons:
     @staticmethod
     def getFirstPlayer(game: GamestateHelper):
         listHS = [201, 203, 205, 207, 209, 211]
+        if game.gamestate["player_count"] > 6:
+                listHS = [302,304,306,308,310,312,314,316,318]
         for number in listHS:
             nextPlayer = game.getPlayerFromHSLocation(str(number))
             if nextPlayer is not None and game.get_gamestate()["players"].get(nextPlayer, {}).get("firstPlayer", False):
