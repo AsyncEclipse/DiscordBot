@@ -71,7 +71,8 @@ class SetupCommands(commands.GroupCog, name="setup"):
         player_list = []
         for i in temp_player_list:
             if i is not None:
-                player_list.append(i.mention)
+                player = game.get_player(i.id)
+                player_list.append(player["player_name"])
         game.setTurnOrder(player_list)
         await interaction.response.send_message("Successfully set turn order")
 

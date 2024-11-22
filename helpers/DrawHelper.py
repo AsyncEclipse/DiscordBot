@@ -332,8 +332,8 @@ class DrawHelper:
                         size = int(110 * mult)
                     if ship_type == "orb" or ship_type == "mon":
                         ship = ship_type
-
-                    if self.gamestate.get("fancy_ships"):
+                    filepathShip = f"images/resources/components/fancy_ships/fancy_{ship}.png"
+                    if self.gamestate.get("fancy_ships") and os.path.exists(filepathShip):
                         filepathShip = f"images/resources/components/fancy_ships/fancy_{ship}.png"
                     else:
                         filepathShip = f"images/resources/components/basic_ships/{ship}.png"
@@ -1005,7 +1005,8 @@ class DrawHelper:
         ships = ["int", "cru", "drd", "sb"]
         ultimateC = 0
         for counter, ship in enumerate(ships):
-            if self.gamestate.get("fancy_ships"):
+            filepath = f"images/resources/components/fancy_ships/fancy_{player['color']}-{ship}.png"
+            if self.gamestate.get("fancy_ships") and os.path.exists(filepath):
                 filepath = f"images/resources/components/fancy_ships/fancy_{player['color']}-{ship}.png"
             else:
                 filepath = f"images/resources/components/basic_ships/{player['color']}-{ship}.png"
@@ -1180,19 +1181,19 @@ class DrawHelper:
         width = max([context2.size[0], context3.size[0] + context4.size[0] + 150,
                      cropped_context.size[0], context5.size[0]])
         height = (cropped_context.size[1] + context2.size[1] +
-                  max(context3.size[1], context4.size[1]) + 90 + context6.size[1])
+                  max(context3.size[1], context4.size[1]) + 90 )
         final_context = Image.new("RGBA", (width, height), (0, 0, 0, 255))
         centering = int((width - cropped_context.size[0])/2)
         final_context.paste(context6, (0, 0))
-        final_context.paste(cropped_context, (centering, context6.size[1]))
-        final_context.paste(context2, (0, cropped_context.size[1] + context6.size[1]))
-        final_context.paste(context3, (0, cropped_context.size[1] + context2.size[1] + context6.size[1]))
+        final_context.paste(cropped_context, (centering,0))
+        final_context.paste(context2, (0, cropped_context.size[1] ))
+        final_context.paste(context3, (0, cropped_context.size[1] + context2.size[1]))
         # final_context.paste(context5, (50, context2.size[1] - 20))
         final_context.paste(context4, (context3.size[0] + 150,
-                                       cropped_context.size[1] + context2.size[1] + context6.size[1]))
+                                       cropped_context.size[1] + context2.size[1] ))
         final_context.paste(context5,
                             (0, cropped_context.size[1] + context2.size[1] + max(context3.size[1],
-                                                                                 context4.size[1] + context6.size[1])))
+                                                                                 context4.size[1])))
         bytes_io = BytesIO()
         final_context.save(bytes_io, format="WEBP")
         bytes_io.seek(0)
