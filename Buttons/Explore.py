@@ -63,9 +63,7 @@ class ExploreButtons:
                 tile_orientation_index = (index + int(game.get_gamestate()["board"][tile]["orientation"]) // 60) % 6
                 if all([adjTile not in tilesViewed,
                         tile_orientation_index in game.get_gamestate()["board"][tile]["wormholes"],
-                        str(adjTile) in game.get_gamestate()["board"],
-                        "sector" in game.get_gamestate()["board"][str(adjTile)],
-                        "back" in game.get_gamestate()["board"][str(adjTile)]["sector"]]):
+                        "back" in game.get_gamestate().get("board", {}).get(str(adjTile), {}).get("sector", [])]):
                     if int(adjTile) > 299 and len(game.get_gamestate()["tile_deck_300"]) == 0:
                         continue
                     tilesViewed.append(adjTile)

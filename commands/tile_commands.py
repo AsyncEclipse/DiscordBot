@@ -20,6 +20,8 @@ class TileCommands(commands.GroupCog, name="tile"):
                      app_commands.Choice(name="Yellow", value="yellow"),
                      app_commands.Choice(name="Purple", value="purple"),
                      app_commands.Choice(name="Green", value="green"),
+                     app_commands.Choice(name="Pink", value="pink"),
+                     app_commands.Choice(name="Brown", value="brown"),
                      app_commands.Choice(name="White", value="white")]
 
     unit_choices = [app_commands.Choice(name="interceptor", value="int"),
