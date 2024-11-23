@@ -7,7 +7,6 @@ from Buttons.Influence import InfluenceButtons
 from Buttons.Population import PopulationButtons
 from Buttons.Reputation import ReputationButtons
 from helpers.DrawHelper import DrawHelper
-from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 from helpers.ShipHelper import AI_Ship, PlayerShip
@@ -78,7 +77,12 @@ class Combat:
         tile_map = game.get_gamestate()["board"]
         tiles = []
         for tile in tile_map:
-            if len(Combat.findPlayersInTile(game, tile)) == 1 and tile_map[tile]["owner"] != 0 and tile_map[tile]["owner"] != Combat.findPlayersInTile(game, tile)[0] and Combat.findPlayersInTile(game, tile)[0] != "ai":
+            playersInTile = Combat.findPlayersInTile(game, tile)
+            if len(playersInTile) != 1:
+                continue
+            if all([tile_map[tile]["owner"] != 0,
+                    tile_map[tile]["owner"] != playersInTile[0],
+                    playersInTile[0] != "ai"]):
                 tiles.append((int(tile_map[tile]["sector"]), tile))
         sorted_tiles = sorted(tiles, key=lambda x: x[0], reverse=True)
         return sorted_tiles
@@ -88,11 +92,13 @@ class Combat:
         tile_map = game.get_gamestate()["board"]
         tiles = []
         for tile in tile_map:
+            playersInTile = Combat.findPlayersInTile(game, tile)
+            if len(playersInTile) != 1:
+                continue
             if "owner" in tile_map[tile]:
-                if len(Combat.findPlayersInTile(game, tile)) == 1 and tile_map[tile]["owner"] == 0 and Combat.findPlayersInTile(game, tile)[0] != "ai":
+                if tile_map[tile]["owner"] == 0 and playersInTile[0] != "ai":
                     tiles.append((int(tile_map[tile]["sector"]), tile))
-        sorted_tiles = sorted(tiles, key=lambda x: x[0], reverse=True)
-        return sorted_tiles
+        return sorted(tiles, key=lambda x: x[0], reverse=True)
 
     @staticmethod
     async def startCombat(game: GamestateHelper, channel, pos):
@@ -220,16 +226,15 @@ class Combat:
         if len(game.get_gamestate()["peopleToCheckWith"]) > 0:
             view4 = View()
             view4.add_item(Button(label="Ready for Upkeep", style=discord.ButtonStyle.green,
-                                  custom_id=f"readyForUpkeep"))
-            message = (f"The game will require everyone ({str(len(game.get_gamestate()['peopleToCheckWith']))} players) involved in an end of round thread to hit this button before upkeep can be run. The players who will need to press are: \n")
+                                  custom_id="readyForUpkeep"))
+            message = (f"The game will require everyone"
+                       f" ({str(len(game.get_gamestate()['peopleToCheckWith']))} players)"
+                       f" involved in an end of round thread to hit this button before upkeep can be run. "
+                       f"The players who will need to press are: \n")
             for color2 in game.get_gamestate()['peopleToCheckWith']:
                 p2 = game.getPlayerObjectFromColor(color2)
-                message += p2["player_name"]+"\n"
+                message += p2["player_name"] + "\n"
             await interaction.channel.send(message, view=view4)
-
-
-    
-
 
     @staticmethod
     def getCombatantShipsBySpeed(game: GamestateHelper, colorOrAI: str, playerShipsList, pos):
@@ -660,10 +665,15 @@ class Combat:
                                         oldNumPeeps == len(Combat.findPlayersInTile(game, pos))]):
                                     viewLyr = View()
                                     label = "Reroll Die"
-                                    buttonID = "FCID"+colorOrAI+"_rerollDie_"+pos+"_"+colorOrAI+"_"+str(shipModel.computer)+"_"+dieColor +"_"+str(counter)
-                                    viewLyr.add_item(Button(label=label, style=discord.ButtonStyle.green, custom_id=buttonID))
-                                    viewLyr.add_item(Button(label="Decline", style=discord.ButtonStyle.red, custom_id="FCID"+colorOrAI+"_deleteMsg"+"_"+str(counter)))
-                                    asyncio.create_task(interaction.channel.send(game.gamestate["players"][player]["player_name"]+" You can reroll a "+dieColor+" die that missed using one of your colony ships.", view=viewLyr))
+                                    buttonID = (f"FCID{colorOrAI}_rerollDie_{pos}_{colorOrAI}"
+                                                f"_{shipModel.computer}_{dieColor}_{counter}")
+                                    viewLyr.add_item(Button(label=label, style=discord.ButtonStyle.green,
+                                                            custom_id=buttonID))
+                                    viewLyr.add_item(Button(label="Decline", style=discord.ButtonStyle.red,
+                                                            custom_id="FCID"+colorOrAI+"_deleteMsg"+"_"+str(counter)))
+                                    message = (game.gamestate["players"][player]["player_name"] + ", you can reroll a"
+                                               f" {dieColor} die that missed using one of your colony ships.")
+                                    asyncio.create_task(interaction.channel.send(message, view=viewLyr))
                                 continue
                         else:
                             if dieNum == 2 or dieNum == 3:
@@ -697,11 +707,13 @@ class Combat:
                                     view = View()
                                     for ship in hittableShips:
                                         shipType = ship.split("-")[1]
-                                        shipOwner = ship.split("-")[0]
-                                        label = "Hit "+Combat.translateShipAbrToName(shipType)
-                                        buttonID = "FCID"+colorOrAI+"_assignHitTo_"+pos+"_"+colorOrAI+"_"+ship+"_"+str(dieNum)+"_"+str(dieDam)+"_"+str(counter)
-                                        view.add_item(Button(label=label, style=discord.ButtonStyle.red, custom_id=buttonID))
-                                    await interaction.channel.send(msg,view=view)
+                                        # shipOwner = ship.split("-")[0]
+                                        label = "Hit " + Combat.translateShipAbrToName(shipType)
+                                        buttonID = (f"FCID{colorOrAI}_assignHitTo_{pos}_{colorOrAI}"
+                                                    f"_{ship}_{dieNum}_{dieDam}_{counter}")
+                                        view.add_item(Button(label=label, style=discord.ButtonStyle.red,
+                                                             custom_id=buttonID))
+                                    await interaction.channel.send(msg, view=view)
                                     hitsToAssign = 1
                                     if "unresolvedHits" in game.get_gamestate()["board"][pos]:
                                         hitsToAssign = game.get_gamestate()["board"][pos]["unresolvedHits"] + 1
@@ -846,7 +858,7 @@ class Combat:
                     player = game.get_player_from_color(playerColor)
                     shipModel = PlayerShip(game.gamestate["players"][player], ship[1])
                     shipName = playerColor + "-" + ship[1]
-                    if shipModel.repair > 0 and "damage_tracker" in game.gamestate["board"][pos] and shipName in game.gamestate["board"][pos]["damage_tracker"]:
+                    if shipModel.repair > 0 and shipName in game.gamestate["board"][pos].get("damage_tracker", []):
                         if game.gamestate["board"][pos]["damage_tracker"][shipName] > 0:
                             game.repair_damage(shipName, pos)
                             message = (f"{game.gamestate['players'][player]['player_name']} repaired 1 damage"
@@ -959,7 +971,9 @@ class Combat:
         await interaction.message.delete()
         await interaction.channel.send(f"{playerObj['player_name']} has retreated all ships"
                                        f" with initiative {speed} to {destination}.")
-        dracoNAnc = len(Combat.findPlayersInTile(game, pos)) == 2 and "anc" in Combat.findShipTypesInTile(game, pos) and "Draco" in game.find_player_faction_name_from_color(Combat.findPlayersInTile(game, pos)[1])
+        dracoNAnc = (len(Combat.findPlayersInTile(game, pos)) == 2
+                     and "anc" in Combat.findShipTypesInTile(game, pos)
+                     and "Draco" in game.find_player_faction_name_from_color(Combat.findPlayersInTile(game, pos)[1]))
         if len(Combat.findPlayersInTile(game, pos)) < 2 or dracoNAnc:
             await Combat.declareAWinner(game, interaction, pos)
         elif oldLength != len(Combat.findPlayersInTile(game, pos)):
@@ -1037,8 +1051,11 @@ class Combat:
             if len(Combat.findTilesInConflict(game)) == 0:
                 role = discord.utils.get(interaction.guild.roles, name=game.game_id)
                 view = View()
-                view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray, custom_id=f"startPopDrop"))
-                await actions_channel.send(role.mention+" Please run upkeep after all post combat events are resolved. You can use this button to drop pop after taking control of a tile", view = view)
+                view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray,
+                                     custom_id="startPopDrop"))
+                await actions_channel.send(role.mention+" Please run upkeep after all post combat events are resolved. "
+                                           "You can use this button to drop pop after taking control of a tile",
+                                           view=view)
         if "combatants" in game.gamestate["board"][pos]:
             players = game.gamestate["board"][pos]["combatants"]
         else:
@@ -1154,7 +1171,10 @@ class Combat:
                 msg += (f"The AI destroyed the {Combat.translateShipAbrToName(shipType)}"
                         f" due to the damage exceeding the ships hull.")
             await interaction.channel.send(msg)
-            dracoNAnc = len(Combat.findPlayersInTile(game, pos)) == 2 and "anc" in Combat.findShipTypesInTile(game, pos) and "Draco" in game.find_player_faction_name_from_color(Combat.findPlayersInTile(game, pos)[1])
+            dracoNAnc = (len(Combat.findPlayersInTile(game, pos)) == 2
+                         and "anc" in Combat.findShipTypesInTile(game, pos)
+                         and "Draco" in game.find_player_faction_name_from_color(Combat.findPlayersInTile(game,
+                                                                                                          pos)[1]))
             if len(Combat.findPlayersInTile(game, pos)) < 2 or dracoNAnc:
                 await Combat.declareAWinner(game, interaction, pos)
             elif oldLength != len(Combat.findPlayersInTile(game, pos)):

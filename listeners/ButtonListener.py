@@ -108,18 +108,20 @@ class ButtonListener(commands.Cog):
         else:
             player_helper = None
         if game.gamestate.get("lastButton") == customID:
-            if not any(substring in customID for substring in ["showGame", "AtRatio", "gain5", "showReputation",
-                                                               "rollDice", "magColShip", "rerollDie", "readyForUpkeep"]):
+            if not any(substring in customID for substring in ["showGame", "AtRatio", "gain5",
+                                                               "showReputation", "rollDice", "magColShip",
+                                                               "rerollDie", "readyForUpkeep"]):
                 await interaction.followup.send(f"{interaction.user.mention}, this button ({customID}) was pressed"
                                                 " most recently, and we are attempting to prevent an accidental"
                                                 " double press. Try hitting show game first and then hitting this"
                                                 " button, if for some reason you need to press this button.",
                                                 ephemeral=True)
                 return
-        
+
         if game.gamestate.get("gameLocked") == "yes":
-            await interaction.followup.send(f"{interaction.user.mention}, the game was processing another request when you hit this button. Try again now",
-                                                ephemeral=True)
+            await interaction.followup.send((f"{interaction.user.mention}, the game was processing"
+                                             " another request when you hit this button. Try again now"),
+                                            ephemeral=True)
             await asyncio.sleep(1)
             game = GamestateHelper(interaction.channel)
             game.setLockedStatus(False)
@@ -160,7 +162,7 @@ class ButtonListener(commands.Cog):
         if customID == "undoLastTurn":
             await TurnButtons.undoLastTurn(player, game, interaction)
         if customID == "readyForUpkeep":
-            await TurnButtons.readyForUpkeep(game, player, interaction,player_helper)
+            await TurnButtons.readyForUpkeep(game, player, interaction, player_helper)
         if customID == "runUpkeep":
             game.createRoundNum()
             rnd = game.get_gamestate()["roundNum"]

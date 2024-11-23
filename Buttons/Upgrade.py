@@ -13,7 +13,7 @@ class UpgradeButtons:
     @staticmethod
     async def startUpgrade(game: GamestateHelper, player, interaction: discord.Interaction,
                            button: bool, discTileUpgrade: str):
-        ships = ["interceptor", "cruiser", "dread", "starbase","orb"]
+        ships = ["interceptor", "cruiser", "dread", "starbase", "orb"]
         drawing = DrawHelper(game.gamestate)
         image = await asyncio.to_thread(drawing.player_area, player)
         view = View()
@@ -164,7 +164,7 @@ class UpgradeButtons:
         image = await asyncio.to_thread(drawing.player_area, player_helper.stats)
         view = View()
         if actions > 0 and not player.get("passed"):
-            ships = ["interceptor", "cruiser", "dread", "starbase","orb"]
+            ships = ["interceptor", "cruiser", "dread", "starbase", "orb"]
             for ship2 in ships:
                 if player['name'] == "Rho Indi Syndicate" and ship2 == "dread":
                     continue
