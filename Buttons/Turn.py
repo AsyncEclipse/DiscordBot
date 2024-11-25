@@ -73,9 +73,12 @@ class TurnButtons:
                                  custom_id="startPopDrop"))
             view.add_item(Button(label="Run Upkeep", style=discord.ButtonStyle.blurple, custom_id="runUpkeep"))
             asyncio.create_task(interaction.channel.send(msg + ".", view=view))
-        msg = f"End of {player['username']}'s turn."
+        userN = interaction.user.display_name
+        if "username" in player:
+            userN =player['username']
+        msg = f"End of {userN}'s turn."
         if "lastAction" in player and "detailsOflastAction" in player:
-            msg = (f"End of {player['username']}'s turn. "
+            msg = (f"End of {userN}'s turn. "
                    f"They used their action to {player['lastAction']}. {player['detailsOflastAction']}")
         await game.updateNamesAndOutRimTiles(interaction)
         await interaction.message.delete()
