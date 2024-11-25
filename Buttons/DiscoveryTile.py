@@ -47,7 +47,7 @@ class DiscoveryTileButtons:
             discTile_data = json.load(f)
         discName = discTile_data[disc]["name"]
         await interaction.message.edit(view=None)
-        await interaction.channel.send(f"{player['player_name']} chose to use '{discName}'DiscoveryTile.py")
+        await interaction.channel.send(f"{player['player_name']} chose to use the '{discName}' ability")
         if disc == "rep" or disc == "art":
             if "discoveryTileBonusPointTiles" not in player_helper.stats:
                 player_helper.stats["discoveryTileBonusPointTiles"] = []
