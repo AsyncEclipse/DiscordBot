@@ -29,6 +29,8 @@ class PulsarButtons:
         from Buttons.Upgrade import UpgradeButtons
         tile = customID.split("_")[1]
         action = customID.split("_")[2]
+        player_helper.stats["lastAction"] = action
+        player_helper.stats["detailsOflastAction"] = ""
         if "activatedPulsars" not in player_helper.stats:
             player_helper.stats["activatedPulsars"] = []
         player_helper.stats["activatedPulsars"].append(tile)
@@ -42,6 +44,6 @@ class PulsarButtons:
             game.update_player(player_helper)
             await BuildButtons.startBuild(game, player, interaction, "startBuild2", player_helper)
         if action == "upgrade":
-            await UpgradeButtons.startUpgrade(game, player, interaction, False, "dummy")
+            await UpgradeButtons.startUpgrade(game, player, interaction, False, "dummy","dum")
         if action == "move":
             await MoveButtons.startMove(game, player, interaction, "startMove_8", False)

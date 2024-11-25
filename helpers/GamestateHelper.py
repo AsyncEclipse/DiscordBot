@@ -142,6 +142,10 @@ class GamestateHelper:
     def setOutlines(self, status: bool):
         self.gamestate["turnOffLines"] = not status
         self.update()
+    
+    def setCommunityMode(self, status: bool):
+        self.gamestate["communityMode"] = status
+        self.update()
 
     def setFancyShips(self, status: bool):
         self.gamestate["fancy_ships"] = status
@@ -463,7 +467,10 @@ class GamestateHelper:
     async def updateNamesAndOutRimTiles(self, interaction: discord.Interaction):
         for player in self.gamestate["players"]:
             if "username" not in self.gamestate["players"][player]:
-                self.gamestate["players"][player]["username"] = interaction.guild.get_member(int(player)).display_name
+                if not self.gamestate.get("communityMode",False):
+                    self.gamestate["players"][player]["username"] = interaction.guild.get_member(int(player)).display_name
+                else:
+                    self.gamestate["players"][player]["username"] = "Team "+self.gamestate["players"][player]["color"]
             tiles = self.gamestate["players"][player]["owned_tiles"][:]
             for tile in tiles:
                 if any(["owner" not in self.gamestate["board"][tile],
@@ -542,7 +549,7 @@ class GamestateHelper:
                          f"{materialEmoji}: {materials} ({materialsIncrease})",
                          "If you spend another disk, your maintenance cost"
                          + f" will go from -{moneyDecrease} to -{moneyDecrease2}.",
-                         "If you drop another money cube, your income"
+                         "If you find a way to drop another money cube, your income"
                          + f" will go from {moneyIncrease} to {moneyIncrease2}."])
         return msg
 
@@ -695,9 +702,8 @@ class GamestateHelper:
                 found = True
             if found:
                 if not graveYard:
-                    if "neutral" not in i:
-                        if all(["orbital" not in i,
-                                self.gamestate["players"][playerID][i.replace("adv", "") + "_cubes"] < 13]):
+                    if "neutral" not in i and "orbital" not in i:
+                        if  self.gamestate["players"][playerID][i.replace("adv", "") + "_cubes"] < 13:
                             self.gamestate["players"][playerID][i.replace("adv", "") + "_cubes"] += 1
                     else:
                         if "neutral" not in i:
@@ -836,7 +842,7 @@ class GamestateHelper:
             self.gamestate["roundNum"] = 1
             self.update()
 
-    def player_setup(self, player_id, faction, color):
+    def player_setup(self, player_id, faction, color, interaction: discord.Interaction):
         if self.gamestate["setup_finished"] == 1:
             return ("The game has already been setup!")
 
@@ -853,6 +859,10 @@ class GamestateHelper:
             shortFaction += "_"
         emoji = Emoji.getEmojiByName(f"{shortFaction}token")
         self.gamestate["players"][str(player_id)]["player_name"] = f"{name} {emoji}"
+        if self.gamestate.get("communityMode",False):
+             role = discord.utils.get(interaction.guild.roles, name=self.gamestate["players"][str(player_id)]["color"])
+             if role != None:
+                self.gamestate["players"][str(player_id)]["player_name"] = f"{role.mention} {emoji}"
         self.update()
         # return(f"{name} is now setup!")
 
@@ -1001,8 +1011,17 @@ class GamestateHelper:
             saveFile["newestSaveNum"] += 1
             json.dump(saveFile, f)
 
-    def get_player(self, player_id):
+    def get_player(self, player_id, interaction=None):
         if str(player_id) not in self.gamestate["players"]:
+            if interaction != None:
+                member = interaction.guild.get_member(player_id) 
+                roles = member.roles
+                role_names = [role.name for role in roles if role.name != "@everyone"]
+                colors = ["blue", "red", "green", "yellow", "purple", "white", "pink", "brown", "teal"]
+                for role_name in role_names:
+                    for color in colors:
+                        if color in role_name.lower():
+                            return self.getPlayerObjectFromColor(color)
             return None
         return self.gamestate["players"][str(player_id)]
 
@@ -1188,7 +1207,11 @@ class GamestateHelper:
 
     def update_player(self, *args):
         for ar in args:
-            self.gamestate["players"][ar.player_id] = ar.stats
+            if ar.player_id in self.gamestate["players"]:
+                self.gamestate["players"][ar.player_id] = ar.stats
+            else:
+                playerID = self.get_player_from_color(ar.stats["color"])
+                self.gamestate["players"][playerID] = ar.stats
         self.update()
 
     def update_pulsar_action(self, tile, action):

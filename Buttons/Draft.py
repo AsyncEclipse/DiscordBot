@@ -135,7 +135,7 @@ class DraftButtons:
                     colors.remove(player_color)
                 else:
                     player_color = colors.pop(0)
-                game.player_setup(player, faction, player_color)
+                game.player_setup(player, faction, player_color, interaction)
                 home = game.get_player(player)["home_planet"]
                 listPlayerHomes.append([home, player_color])
                 count += 1
@@ -200,11 +200,11 @@ class DraftButtons:
         await interaction.channel.send("Done With Setup!")
 
         asyncio.create_task(game.showUpdate("Start of Game", interaction))
-        view = TurnButtons.getStartTurnButtons(game, game.get_player(temp_player_list[0]), "dummy")
+        view = TurnButtons.getStartTurnButtons(game, game.get_player(temp_player_list[0],interaction), "dummy")
         game.initilizeKey("activePlayerColor")
-        game.addToKey("activePlayerColor", game.get_player(temp_player_list[0])["color"])
+        game.addToKey("activePlayerColor", game.get_player(temp_player_list[0],interaction)["color"])
         game.updatePingTime()
-        player = game.get_player(temp_player_list[0])
+        player = game.get_player(temp_player_list[0],interaction)
         await interaction.channel.send(f"## {game.getPlayerEmoji(player)} started their turn.")
         await interaction.channel.send(f"{player['player_name']} use these buttons to do your turn"
                                        + game.displayPlayerStats(player), view=view)

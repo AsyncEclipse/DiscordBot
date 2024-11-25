@@ -186,7 +186,7 @@ class DiplomaticRelationsButtons:
     async def breakRelationsWith(game: GamestateHelper, player, p2, interaction: discord.Interaction):
 
         await interaction.followup.send(f"{p2['player_name']}, your relations with"
-                                        f" {interaction.user.mention} have been broken.")
+                                        f" {player['player_name']} have been broken.")
         game.breakRelationsBetween(player, p2)
         for p in [player, p2]:
             view = View()
