@@ -43,7 +43,7 @@ class MoveButtons:
             if moveCount == 1:
                 await interaction.channel.send(f"{player['player_name']} is using their turn to move")
             await interaction.message.delete()
-        await interaction.channel.send(f"{interaction.user.mention} Select the tile you would like to move from",
+        await interaction.channel.send(f"{player['player_name']} Select the tile you would like to move from",
                                        view=view)
         drawing = DrawHelper(game.gamestate)
         if len(tiles) > 0:
@@ -69,7 +69,7 @@ class MoveButtons:
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray,
                              custom_id=f"FCID{player['color']}_restartTurn"))
         await interaction.message.delete()
-        await interaction.channel.send(f"{interaction.user.mention}, select the ship"
+        await interaction.channel.send(f"{player['player_name']}, select the ship"
                                        f" you would like to move from {originT}", view=view)
 
     @staticmethod
@@ -154,7 +154,7 @@ class MoveButtons:
                              custom_id=f"FCID{player['color']}_restartTurn"))
 
         await interaction.message.delete()
-        await interaction.channel.send(f"{interaction.user.mention}, select the tile you would like to move "
+        await interaction.channel.send(f"{player['player_name']}, select the tile you would like to move "
                                        f"a {shipType} from {originT} to.", view=view)
         if count > 24:
             await interaction.channel.send("Additional Options", view=view2)
@@ -178,8 +178,6 @@ class MoveButtons:
         drawing = DrawHelper(game.gamestate)
         await interaction.channel.send(f"{player['player_name']} Moved a {shipType} from {originT} to {destination}.",
                                        file=await asyncio.to_thread(drawing.board_tile_image_file, destination))
-        player_helper.specifyDetailsOfAction(f"Moved a {shipType} from {originT} to {destination}.")
-        game.update_player(player_helper)
         owner = game.gamestate["board"][destination]["owner"]
         if owner != 0 and isinstance(owner, str) and owner != player["color"]:
             p2 = game.getPlayerObjectFromColor(owner)
@@ -255,6 +253,8 @@ class MoveButtons:
         if moveCount == 1:
             player_helper.spend_influence_on_action("move")
             game.update_player(player_helper)
+        player_helper.specifyDetailsOfAction(f"Moved a {shipType} from {originT} to {destination}.")
+        game.update_player(player_helper)
         view = View()
         await interaction.message.delete()
         if player["move_apt"] > moveCount and not player.get("passed"):

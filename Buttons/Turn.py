@@ -38,7 +38,7 @@ class TurnButtons:
             await interaction.message.delete()
             game.backUpToLastSaveFile()
             game = GamestateHelper(interaction.channel)
-            player = game.get_player(interaction.user.id)
+            player = game.get_player(interaction.user.id,interaction)
             view = TurnButtons.getStartTurnButtons(game, player, "dummy")
             game.saveLastButtonPressed("restart")
             await interaction.channel.send(player['player_name'] + " has chosen to back up to last start of turn.")
@@ -73,9 +73,9 @@ class TurnButtons:
                                  custom_id="startPopDrop"))
             view.add_item(Button(label="Run Upkeep", style=discord.ButtonStyle.blurple, custom_id="runUpkeep"))
             asyncio.create_task(interaction.channel.send(msg + ".", view=view))
-        msg = f"End of {interaction.user.name}'s turn."
+        msg = f"End of {player['username']}'s turn."
         if "lastAction" in player and "detailsOflastAction" in player:
-            msg = (f"End of {interaction.user.name}'s turn. "
+            msg = (f"End of {player['username']}'s turn. "
                    f"They used their action to {player['lastAction']}. {player['detailsOflastAction']}")
         await game.updateNamesAndOutRimTiles(interaction)
         await interaction.message.delete()
@@ -138,7 +138,7 @@ class TurnButtons:
                                  custom_id="startPopDrop"))
             view.add_item(Button(label="Run Upkeep", style=discord.ButtonStyle.blurple, custom_id="runUpkeep"))
             await interaction.channel.send(msg + ".", view=view)
-        msg2 = f"{interaction.user.name} Passing"
+        msg2 = f"{player['username']} Passing"
         await game.updateNamesAndOutRimTiles(interaction)
         await interaction.message.delete()
         if "-" in interaction.channel.name:
@@ -230,7 +230,7 @@ class TurnButtons:
                 view = View()
                 trade_value = p1.stats['trade_value']
                 view.add_item(Button(label="Remove Control of A Sector", style=discord.ButtonStyle.blurple,
-                                     custom_id=f"FCID{game.get_player(player)['color']}_removeInfluenceStart"))
+                                     custom_id=f"FCID{p1.stats['color']}_removeInfluenceStart"))
                 for resource_type, button_style in [("materials", discord.ButtonStyle.gray),
                                                     ("science", discord.ButtonStyle.gray)]:
                     if p1.stats[resource_type] >= trade_value:
@@ -456,5 +456,5 @@ class TurnButtons:
                 view.add_item(Button(label="Minor Species Relations", style=discord.ButtonStyle.green,
                                      custom_id=f"FCID{player['color']}_startMinorRelations"))
         await interaction.channel.send(f"Colony ships available: {player['colony_ships']}\n"
-                                       "Place population or end your turn.", view=view)
+                                       "Do any end of turn abilities and then end your turn.", view=view)
         await interaction.message.delete()

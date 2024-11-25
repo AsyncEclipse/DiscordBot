@@ -58,7 +58,7 @@ class DiscoveryTileButtons:
             if "magPartPoints" in player_helper.stats:
                 player_helper.stats["magPartPoints"] += 1
             game.update_player(player_helper)
-            await UpgradeButtons.startUpgrade(game, player, interaction, False, str(discTile_data[disc]["part"]))
+            await UpgradeButtons.startUpgrade(game, player, interaction, False, str(discTile_data[disc]["part"]),"dum")
         elif discTile_data[disc]["gain1"] != 0:
             techsAvailable = game.get_gamestate()["available_techs"]
             with open("data/techs.json", "r") as f:

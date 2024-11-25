@@ -102,9 +102,23 @@ class ButtonListener(commands.Cog):
         customID = interaction.data["custom_id"]
         start_time = time.perf_counter()
         game = GamestateHelper(interaction.channel)
-        player = game.get_player(interaction.user.id)
+        userID = interaction.user.id
+        player = game.get_player(interaction.user.id,interaction)
+        if player == None and game.gamestate.get("communityMode",False):
+            member = interaction.guild.get_member(userID) 
+            roles = member.roles
+            role_names = [role.name for role in roles if role.name != "@everyone"]
+            colors = ["blue", "red", "green", "yellow", "purple", "white", "pink", "brown", "teal"]
+            for role_name in role_names:
+                for color in colors:
+                    if color in role_name.lower():
+                        player = game.getPlayerObjectFromColor(color)
+                        userID = game.get_player_from_color(color)
+                        break
+                if player != None:
+                    break
         if player is not None:
-            player_helper = PlayerHelper(interaction.user.id, player)
+            player_helper = PlayerHelper(userID, player)
         else:
             player_helper = None
         if game.gamestate.get("lastButton") == customID:
@@ -127,7 +141,6 @@ class ButtonListener(commands.Cog):
             game.setLockedStatus(False)
             return
         game.setLockedStatus(True)
-        game.saveLastButtonPressed(customID)
         # If we want to prevent others from touching someone else's buttons,
         # we can attach FCID{color}_ to the start of the button ID as a check.
         # We then remove this check so it doesnt interfere with the rest of the resolution.
@@ -137,6 +150,7 @@ class ButtonListener(commands.Cog):
                 if player["color"] != check.replace("FCID", "") and "dummy" != check.replace("FCID", ""):
                     await interaction.followup.send(interaction.user.mention + ", these buttons are not for you.",
                                                     ephemeral=True)
+                    game.setLockedStatus(False)
                     return
                 customID = customID.replace(check + "_", "")
 
@@ -145,7 +159,9 @@ class ButtonListener(commands.Cog):
         if customID == "showGame":
             await TurnButtons.showGame(game, interaction)
         if player is None:
+            game.setLockedStatus(False)
             return
+        game.saveLastButtonPressed(customID)
         if customID.startswith("tradeAtRatio"):
             await TurnButtons.tradeAtRatio(game, player, player_helper, interaction, customID)
         if customID == "showReputation":
@@ -226,7 +242,12 @@ class ButtonListener(commands.Cog):
             await BuildButtons.finishSpendForBuild(game, player, interaction, customID, player_helper)
         if customID.startswith("startUpgrade"):
             game.updateSaveFile()
-            await UpgradeButtons.startUpgrade(game, player, interaction, True, "dummy")
+            await UpgradeButtons.startUpgrade(game, player, interaction, True, "dummy","dum")
+        if customID.startswith("chooseDifferentShip"):
+            actions = customID.split("_")[1]
+            discTile = customID.split("_")[2]
+            await interaction.message.delete()
+            await UpgradeButtons.startUpgrade(game, player, interaction, False, discTile,actions)
         if customID.startswith("upgradeShip"):
             await UpgradeButtons.upgradeShip(game, player, interaction, customID, player_helper)
         if customID.startswith("selectOldPart"):
@@ -311,6 +332,7 @@ class ButtonListener(commands.Cog):
             await DraftButtons.draftFaction(game, interaction, customID)
         if customID.startswith("pulsarAction"):
             game.updateSaveFile()
+            
             await PulsarButtons.pulsarAction(game, player, interaction, player_helper, customID)
         if customID.startswith("blackHoleReturnStart"):
             await BlackHoleButtons.blackHoleReturnStart(game, player, customID, player_helper, interaction)

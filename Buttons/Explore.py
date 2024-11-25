@@ -107,7 +107,7 @@ class ExploreButtons:
     async def exploreTile(game: GamestateHelper, player, interaction: discord.Interaction, customID: str):
         drawing = DrawHelper(game.gamestate)
         view = View()
-        player = game.get_player(interaction.user.id)
+        player = game.get_player(interaction.user.id,interaction)
         msg = customID.split("_")
         position = msg[1]
         if len(msg) > 2:

@@ -28,7 +28,7 @@ class Emoji:
                      "<:plasma_missile:1301315636550697020>",
                      "<:soliton_missile:1301314860864241734>",
                      "<:hull:1301314806535422113>",
-                     "<:hull_conifoldfield:1301315777328058408>",
+                     "<:conifoldfield:1301315777328058408>",
                      "<:improved_hull:1301314814534221986>",
                      "<:sentient_hull:1301315639142776843>",
                      "<:shard_hull:1301314854900072459>",

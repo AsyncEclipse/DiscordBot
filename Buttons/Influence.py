@@ -33,6 +33,7 @@ class InfluenceButtons:
 
     @staticmethod
     def getTilesToInfluence(game: GamestateHelper, player):
+        from helpers.CombatHelper import Combat
         configs = Properties()
         if game.gamestate.get("5playerhyperlane"):
             if game.gamestate.get("player_count") == 5:
@@ -70,7 +71,8 @@ class InfluenceButtons:
                     playerShips = game.get_gamestate()["board"][adjTile]["player_ships"]
                     playerShips.append(player["color"])
                     if all([game.get_gamestate()["board"][adjTile].get("owner") == 0,
-                            ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, tile)]):
+                            ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, tile), 
+                            Combat.findPlayersInTile(game, adjTile) < 2]):
                         tilesToInfluence.append(adjTile)
             if tile not in tilesViewed:
                 tilesViewed.append(tile)

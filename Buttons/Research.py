@@ -29,7 +29,7 @@ class ResearchButtons:
                                              player, tech_details, tech_type, tech):
         cost = ResearchButtons.calculate_cost(tech_details, tech_type, player)
         game.playerResearchTech(str(interaction.user.id), tech, tech_type)
-        player = game.get_player(interaction.user.id)
+        player = game.get_player(interaction.user.id,interaction)
         player_helper = PlayerHelper(interaction.user.id, player)
         with open("data/techs.json", "r") as f:
             tech_data = json.load(f)
@@ -151,13 +151,13 @@ class ResearchButtons:
     async def startResearch(game: GamestateHelper, player, player_helper: PlayerHelper,
                             interaction: discord.Interaction, buttonCommand: bool):
         game = GamestateHelper(interaction.channel)
-        player = game.get_player(interaction.user.id)
+        player = game.get_player(interaction.user.id,interaction)
         await interaction.channel.send(f"{player['player_name']} is using their turn to research")
         player_helper = PlayerHelper(interaction.user.id, player)
         if buttonCommand:
             player_helper.spend_influence_on_action("research")
             game.update_player(player_helper)
-        player = game.get_player(interaction.user.id)
+        player = game.get_player(interaction.user.id,interaction)
         drawing = DrawHelper(game.gamestate)
         view = View()
         view2 = View()
@@ -260,7 +260,7 @@ class ResearchButtons:
         tech = buttonID.split("_")[1]
         tech_type = buttonID.split("_")[2]
         view = View()
-        player = game.get_player(interaction.user.id)
+        player = game.get_player(interaction.user.id,interaction)
         with open("data/techs.json", "r") as f:
             tech_data = json.load(f)
         tech_details = tech_data.get(tech)

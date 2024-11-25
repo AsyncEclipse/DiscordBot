@@ -44,7 +44,7 @@ class TileCommands(commands.GroupCog, name="tile"):
         if unit.value == "grd" or unit.value == "anc" or unit.value == "gcds":
             colorOrAI = "ai"
         else:
-            colorOrAI = color.value if color else game.get_player(str(interaction.user.id))["color"]
+            colorOrAI = color.value if color else game.get_player(str(interaction.user.id),interaction)["color"]
         option = colorOrAI + "-" + unitType
         game.add_damage(option, tile_position, 0)
         if damage_change > 0:
@@ -82,7 +82,7 @@ class TileCommands(commands.GroupCog, name="tile"):
         :return:
         """
         game = GamestateHelper(interaction.channel)
-        player_color = color.value if color else game.get_player(str(interaction.user.id))["color"]
+        player_color = color.value if color else game.get_player(str(interaction.user.id),interaction)["color"]
 
         added_units, removed_units = [], []
 
@@ -145,7 +145,7 @@ class TileCommands(commands.GroupCog, name="tile"):
         :return:
         """
         game = GamestateHelper(interaction.channel)
-        player_color = color.value if color else game.get_player(str(interaction.user.id))["color"]
+        player_color = color.value if color else game.get_player(str(interaction.user.id),interaction)["color"]
         playerID = game.get_player_from_color(player_color)
         playerObj = game.getPlayerObjectFromColor(player_color)
         added_pop, removed_pop = [], []
@@ -226,7 +226,7 @@ class TileCommands(commands.GroupCog, name="tile"):
     async def add_influence(self, interaction: discord.Interaction, tile_position: str,
                             color: Optional[app_commands.Choice[str]] = None):
         game = GamestateHelper(interaction.channel)
-        player_color = color.value if color else game.get_player(str(interaction.user.id))["color"]
+        player_color = color.value if color else game.get_player(str(interaction.user.id),interaction)["color"]
         if game.gamestate["board"][tile_position]["owner"] != 0:
             await interaction.response.send_message("Please remove the current influence disc first")
             return
@@ -309,7 +309,7 @@ class TileCommands(commands.GroupCog, name="tile"):
         game = GamestateHelper(interaction.channel)
         await interaction.response.defer(thinking=False)
         await DiscoveryTileButtons.exploreDiscoveryTile(game, tile_position, interaction,
-                                                        game.get_player(interaction.user.id))
+                                                        game.get_player(interaction.user.id,interaction))
 
     @app_commands.command(name="show")
     async def show(self, interaction: discord.Interaction, tile_position: str):
