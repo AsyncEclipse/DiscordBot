@@ -319,7 +319,7 @@ class GamestateHelper:
 
             if tile["ancient"] or tile["guardian"] or tile["gcds"]:
                 adv = ""
-                anc, grd, gcds = tile["ancient"],tile["guardian"], tile["gcds"]
+                anc, grd, gcds = tile["ancient"], tile["guardian"], tile["gcds"]
                 if anc:
                     tile["player_ships"].append("ai-anc" + adv)
                     if tile["ancient"] > 1:

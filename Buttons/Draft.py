@@ -121,7 +121,7 @@ class DraftButtons:
     @staticmethod
     async def generalSetup(interaction: discord.Interaction, game: GamestateHelper,
                            temp_player_list, temp_faction_list):
-        colors = ["blue", "red", "green", "yellow", "purple", "white","pink","brown", "teal"]
+        colors = ["blue", "red", "green", "yellow", "purple", "white", "pink", "brown", "teal"]
         count = 0
         listPlayerHomes = []
         x = -1
