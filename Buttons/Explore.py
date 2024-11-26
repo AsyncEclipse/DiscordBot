@@ -51,8 +51,15 @@ class ExploreButtons:
     def getTilesToExplore(game: GamestateHelper, player):
         configs = Properties()
         if game.gamestate.get("5playerhyperlane"):
-            with open("data/tileAdjacencies_5p.properties", "rb") as f:
-                configs.load(f)
+            if game.gamestate.get("player_count") == 5:
+                with open("data/tileAdjacencies_5p.properties", "rb") as f:
+                    configs.load(f)
+            elif game.gamestate.get("player_count") == 4:
+                with open("data/tileAdjacencies_4p.properties", "rb") as f:
+                    configs.load(f)
+            else:
+                with open("data/tileAdjacencies.properties", "rb") as f:
+                    configs.load(f)
         else:
             with open("data/tileAdjacencies.properties", "rb") as f:
                 configs.load(f)
@@ -63,9 +70,7 @@ class ExploreButtons:
                 tile_orientation_index = (index + int(game.get_gamestate()["board"][tile]["orientation"]) // 60) % 6
                 if all([adjTile not in tilesViewed,
                         tile_orientation_index in game.get_gamestate()["board"][tile]["wormholes"],
-                        str(adjTile) in game.get_gamestate()["board"],
-                        str(adjTile) in game.get_gamestate()["board"] and "sector" in game.get_gamestate()["board"][str(adjTile)],
-                        str(adjTile) in game.get_gamestate()["board"] and "sector" in game.get_gamestate()["board"][str(adjTile)] and "back" in game.get_gamestate()["board"][str(adjTile)]["sector"]]):
+                        "back" in game.get_gamestate().get("board", {}).get(str(adjTile), {}).get("sector", [])]):
                     if int(adjTile) > 299 and len(game.get_gamestate()["tile_deck_300"]) == 0:
                         continue
                     tilesViewed.append(adjTile)
@@ -102,7 +107,7 @@ class ExploreButtons:
     async def exploreTile(game: GamestateHelper, player, interaction: discord.Interaction, customID: str):
         drawing = DrawHelper(game.gamestate)
         view = View()
-        player = game.get_player(interaction.user.id)
+        player = game.get_player(interaction.user.id,interaction)
         msg = customID.split("_")
         position = msg[1]
         if len(msg) > 2:

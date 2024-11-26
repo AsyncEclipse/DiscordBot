@@ -24,6 +24,8 @@ class TurnButtons:
     @staticmethod
     def getFirstPlayer(game: GamestateHelper):
         listHS = [201, 203, 205, 207, 209, 211]
+        if game.gamestate["player_count"] > 6:
+                listHS = [302,304,306,308,310,312,314,316,318]
         for number in listHS:
             nextPlayer = game.getPlayerFromHSLocation(str(number))
             if nextPlayer is not None and game.get_gamestate()["players"].get(nextPlayer, {}).get("firstPlayer", False):
@@ -36,7 +38,7 @@ class TurnButtons:
             await interaction.message.delete()
             game.backUpToLastSaveFile()
             game = GamestateHelper(interaction.channel)
-            player = game.get_player(interaction.user.id)
+            player = game.get_player(interaction.user.id,interaction)
             view = TurnButtons.getStartTurnButtons(game, player, "dummy")
             game.saveLastButtonPressed("restart")
             await interaction.channel.send(player['player_name'] + " has chosen to back up to last start of turn.")
@@ -71,9 +73,12 @@ class TurnButtons:
                                  custom_id="startPopDrop"))
             view.add_item(Button(label="Run Upkeep", style=discord.ButtonStyle.blurple, custom_id="runUpkeep"))
             asyncio.create_task(interaction.channel.send(msg + ".", view=view))
-        msg = f"End of {interaction.user.name}'s turn."
+        userN = interaction.user.display_name
+        if "username" in player:
+            userN =player['username']
+        msg = f"End of {userN}'s turn."
         if "lastAction" in player and "detailsOflastAction" in player:
-            msg = (f"End of {interaction.user.name}'s turn. "
+            msg = (f"End of {userN}'s turn. "
                    f"They used their action to {player['lastAction']}. {player['detailsOflastAction']}")
         await game.updateNamesAndOutRimTiles(interaction)
         await interaction.message.delete()
@@ -136,7 +141,7 @@ class TurnButtons:
                                  custom_id="startPopDrop"))
             view.add_item(Button(label="Run Upkeep", style=discord.ButtonStyle.blurple, custom_id="runUpkeep"))
             await interaction.channel.send(msg + ".", view=view)
-        msg2 = f"{interaction.user.name} Passing"
+        msg2 = f"{player['username']} Passing"
         await game.updateNamesAndOutRimTiles(interaction)
         await interaction.message.delete()
         if "-" in interaction.channel.name:
@@ -169,31 +174,31 @@ class TurnButtons:
         await interaction.channel.send(msg2)
 
     @staticmethod
-    async def readyForUpkeep(game: GamestateHelper, player, interaction:discord.Interaction, p1:PlayerHelper):
+    async def readyForUpkeep(game: GamestateHelper, player, interaction: discord.Interaction, p1: PlayerHelper):
         color = player["color"]
         game.removeFromKey("peopleToCheckWith", color)
         if p1.checkBankrupt():
             view = View()
             trade_value = p1.stats['trade_value']
             view.add_item(Button(label="Remove Control of A Sector", style=discord.ButtonStyle.blurple,
-                                    custom_id=f"FCID{player['color']}_removeInfluenceStart"))
+                                 custom_id=f"FCID{player['color']}_removeInfluenceStart"))
             for resource_type, button_style in [("materials", discord.ButtonStyle.gray),
                                                 ("science", discord.ButtonStyle.gray)]:
                 if p1.stats[resource_type] >= trade_value:
                     view.add_item(Button(label=f"Trade {trade_value} {resource_type.capitalize()}",
-                                            style=button_style,
-                                            custom_id=f"FCID{p1.stats['color']}_tradeAtRatio_{resource_type}_money"))
+                                         style=button_style,
+                                         custom_id=f"FCID{p1.stats['color']}_tradeAtRatio_{resource_type}_money"))
             if p1.stats["colony_ships"] > 0 and game.get_short_faction_name(p1.stats["name"]) == "magellan":
                 emojiC = Emoji.getEmojiByName("colony_ship")
                 view.add_item(Button(label="Get 1 Money", style=discord.ButtonStyle.red, emoji=emojiC,
-                                        custom_id=f"FCID{p1.stats['color']}_magColShipForResource_money"))
+                                     custom_id=f"FCID{p1.stats['color']}_magColShipForResource_money"))
             view.add_item(Button(label="Done Resolving", style=discord.ButtonStyle.red,
-                                    custom_id=f"FCID{player['color']}_deleteMsg"))
+                                 custom_id=f"FCID{player['color']}_deleteMsg"))
             message = (f"It appears that {p1.name} would be bankrupt (negative money). "
-                        f"They currently have {p1.stats['money']} money and will get {p1.money_income()} in income, "
-                        f"but they owe {p1.upkeepCosts()} money. "
-                        "Please adjust the money or systems controlled so that upkeep"
-                        " can be run without the player entering negative money")
+                       f"They currently have {p1.stats['money']} money and will get {p1.money_income()} in income, "
+                       f"but they owe {p1.upkeepCosts()} money. "
+                       "Please adjust the money or systems controlled so that upkeep"
+                       " can be run without the player entering negative money")
             await interaction.channel.send(message, view=view)
         msg = f"{player['player_name']} has marked themselves as ready for upkeep."
         if len(game.get_gamestate()["peopleToCheckWith"]) > 0:
@@ -204,10 +209,10 @@ class TurnButtons:
             await interaction.channel.send(msg)
         else:
             view = View()
-            view.add_item(Button(label="Run Upkeep",style=discord.ButtonStyle.blurple, custom_id="runUpkeep"))
+            view.add_item(Button(label="Run Upkeep", style=discord.ButtonStyle.blurple, custom_id="runUpkeep"))
             msg += " Everyone is now ready for upkeep, please press the button"
             await interaction.channel.send(msg, view=view)
-    
+
     @staticmethod
     async def runUpkeep(game: GamestateHelper, interaction: discord.Interaction):
         from helpers.CombatHelper import Combat
@@ -228,7 +233,7 @@ class TurnButtons:
                 view = View()
                 trade_value = p1.stats['trade_value']
                 view.add_item(Button(label="Remove Control of A Sector", style=discord.ButtonStyle.blurple,
-                                     custom_id=f"FCID{game.get_player(player)['color']}_removeInfluenceStart"))
+                                     custom_id=f"FCID{p1.stats['color']}_removeInfluenceStart"))
                 for resource_type, button_style in [("materials", discord.ButtonStyle.gray),
                                                     ("science", discord.ButtonStyle.gray)]:
                     if p1.stats[resource_type] >= trade_value:
@@ -451,8 +456,8 @@ class TurnButtons:
         if "minor_species" in game.gamestate:
             if all([not player_helper.isTraitor(),
                     len(game.get_gamestate()["minor_species"]) > 0]):
-                    view.add_item(Button(label="Minor Species Relations", style=discord.ButtonStyle.green,
-                                         custom_id=f"FCID{player['color']}_startMinorRelations"))
+                view.add_item(Button(label="Minor Species Relations", style=discord.ButtonStyle.green,
+                                     custom_id=f"FCID{player['color']}_startMinorRelations"))
         await interaction.channel.send(f"Colony ships available: {player['colony_ships']}\n"
-                                       "Place population or end your turn.", view=view)
+                                       "Do any end of turn abilities and then end your turn.", view=view)
         await interaction.message.delete()

@@ -12,14 +12,16 @@ from helpers.ShipHelper import PlayerShip
 class UpgradeButtons:
     @staticmethod
     async def startUpgrade(game: GamestateHelper, player, interaction: discord.Interaction,
-                           button: bool, discTileUpgrade: str):
-        ships = ["interceptor", "cruiser", "dread", "starbase","orb"]
+                           button: bool, discTileUpgrade: str, action:str):
+        ships = ["interceptor", "cruiser", "dread", "starbase", "orb"]
         drawing = DrawHelper(game.gamestate)
         image = await asyncio.to_thread(drawing.player_area, player)
         view = View()
         actions = str(player['upgrade_apt'])
         if not button:
             actions = "1"
+        if action != "dum":
+            actions = action
         for ship in ships:
             if player['name'] == "Rho Indi Syndicate" and ship == "dread":
                 continue
@@ -69,7 +71,16 @@ class UpgradeButtons:
             view.add_item(Button(label=part_stats[i]["name"], style=discord.ButtonStyle.red,
                                  emoji=Emoji.getEmojiByName(partName),
                                  custom_id=(f"FCID{player['color']}_selectOldPart_"
-                                            f"{actions}_{ship}_{i}_{discTileUpgrade}")))
+                                            f"{actions}_{ship}_{i.replace('_','')}_{discTileUpgrade}")))
+            if i == "iot_exile":
+                player_helper.stats[f"{ship}_parts"] = ["iotexile" if s == "iot_exile" else s for s in player_helper.stats[f"{ship}_parts"]]  
+                game.update_player(player_helper)
+        view.add_item(Button(label="Choose Different Ship", style=discord.ButtonStyle.gray,
+                                 custom_id=(f"FCID{player['color']}_chooseDifferentShip_"
+                                            f"{actions}_{discTileUpgrade}")))
+        if discTileUpgrade != "dummy":
+            view.add_item(Button(label="Save For Future Upgrade Action", style=discord.ButtonStyle.red,
+                                 custom_id=f"FCID{player['color']}_deleteMsg"))
         await interaction.message.edit(content=(f"{interaction.user.mention}, "
                                                 f"pick which part of your {ship} to replace or remove."),
                                        view=view)
@@ -164,7 +175,7 @@ class UpgradeButtons:
         image = await asyncio.to_thread(drawing.player_area, player_helper.stats)
         view = View()
         if actions > 0 and not player.get("passed"):
-            ships = ["interceptor", "cruiser", "dread", "starbase","orb"]
+            ships = ["interceptor", "cruiser", "dread", "starbase", "orb"]
             for ship2 in ships:
                 if player['name'] == "Rho Indi Syndicate" and ship2 == "dread":
                     continue

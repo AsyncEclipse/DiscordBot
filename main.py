@@ -37,7 +37,7 @@ class DiscordBot(commands.Bot):
         await self.tree.sync()
         start_time = time.perf_counter()
         print("Starting to load images")
-        imageCache = ImageCache.ImageCacheHelper("images/resources")
+        ImageCache.ImageCacheHelper("images/resources")
         end_time = time.perf_counter()
         elapsed_time = end_time - start_time
         print(f"Total elapsed time for image load: {elapsed_time:.2f} seconds")

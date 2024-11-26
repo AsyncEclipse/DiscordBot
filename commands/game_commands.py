@@ -92,6 +92,13 @@ class GameCommands(commands.GroupCog, name="game"):
         game.initilizeKey("turnOffLines")
         game.setOutlines(status)
         await interaction.response.send_message("Set Outlines status to " + str(status))
+    
+    @app_commands.command(name="set_community_mode")
+    async def set_community_mode(self, interaction: discord.Interaction, status: bool):
+        game = GamestateHelper(interaction.channel)
+        game.initilizeKey("communityMode")
+        game.setCommunityMode(status)
+        await interaction.response.send_message("Set Community Mode to " + str(status))
 
     @app_commands.command(name="force_queue")
     async def force_queue(self, interaction: discord.Interaction):
@@ -99,9 +106,9 @@ class GameCommands(commands.GroupCog, name="game"):
         await Combat.resolveQueue(game, interaction, True)
         await interaction.response.send_message("Queue has been force resolved")
 
-    @app_commands.command(name="disable_five_player_hyperlanes")
-    async def disable_five_player_hyperlanes(self, interaction: discord.Interaction):
-        await interaction.response.send_message("The hyperlanes for 5 player mode have been disabled")
+    @app_commands.command(name="disable_hyperlanes")
+    async def disable_hyperlanes(self, interaction: discord.Interaction):
+        await interaction.response.send_message("The hyperlanes have been disabled")
         game = GamestateHelper(interaction.channel)
         game.initilizeKey("5playerhyperlane")
 

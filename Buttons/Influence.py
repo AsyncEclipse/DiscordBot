@@ -33,10 +33,18 @@ class InfluenceButtons:
 
     @staticmethod
     def getTilesToInfluence(game: GamestateHelper, player):
+        from helpers.CombatHelper import Combat
         configs = Properties()
         if game.gamestate.get("5playerhyperlane"):
-            with open("data/tileAdjacencies_5p.properties", "rb") as f:
-                configs.load(f)
+            if game.gamestate.get("player_count") == 5:
+                with open("data/tileAdjacencies_5p.properties", "rb") as f:
+                    configs.load(f)
+            elif game.gamestate.get("player_count") == 4:
+                with open("data/tileAdjacencies_4p.properties", "rb") as f:
+                    configs.load(f)
+            else:
+                with open("data/tileAdjacencies.properties", "rb") as f:
+                    configs.load(f)
         else:
             with open("data/tileAdjacencies.properties", "rb") as f:
                 configs.load(f)
@@ -63,7 +71,8 @@ class InfluenceButtons:
                     playerShips = game.get_gamestate()["board"][adjTile]["player_ships"]
                     playerShips.append(player["color"])
                     if all([game.get_gamestate()["board"][adjTile].get("owner") == 0,
-                            ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, tile)]):
+                            ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, tile), 
+                            len(Combat.findPlayersInTile(game, adjTile)) < 2]):
                         tilesToInfluence.append(adjTile)
             if tile not in tilesViewed:
                 tilesViewed.append(tile)
@@ -217,5 +226,5 @@ class InfluenceButtons:
         income = player["population_track"][player[f"{pop}_pop_cubes"] - 1]
         await interaction.channel.send(f"{p1['player_name']} added 1 {pop.replace('adv', '')}"
                                        f" population back to its track. "
-                                       f"Income went from {income} to {oldIncome}.")
+                                       f"Income went from {oldIncome} to {income}.")
         await interaction.message.delete()

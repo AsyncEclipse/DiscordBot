@@ -142,6 +142,10 @@ class GamestateHelper:
     def setOutlines(self, status: bool):
         self.gamestate["turnOffLines"] = not status
         self.update()
+    
+    def setCommunityMode(self, status: bool):
+        self.gamestate["communityMode"] = status
+        self.update()
 
     def setFancyShips(self, status: bool):
         self.gamestate["fancy_ships"] = status
@@ -319,7 +323,7 @@ class GamestateHelper:
 
             if tile["ancient"] or tile["guardian"] or tile["gcds"]:
                 adv = ""
-                anc, grd, gcds = tile["ancient"],tile["guardian"], tile["gcds"]
+                anc, grd, gcds = tile["ancient"], tile["guardian"], tile["gcds"]
                 if anc:
                     tile["player_ships"].append("ai-anc" + adv)
                     if tile["ancient"] > 1:
@@ -336,8 +340,15 @@ class GamestateHelper:
 
         configs = Properties()
         if self.gamestate.get("5playerhyperlane"):
-            with open("data/tileAdjacencies_5p.properties", "rb") as f:
-                configs.load(f)
+            if self.gamestate.get("player_count") == 5:
+                with open("data/tileAdjacencies_5p.properties", "rb") as f:
+                    configs.load(f)
+            elif self.gamestate.get("player_count") == 4:
+                with open("data/tileAdjacencies_4p.properties", "rb") as f:
+                    configs.load(f)
+            else:
+                with open("data/tileAdjacencies.properties", "rb") as f:
+                    configs.load(f)
         else:
             with open("data/tileAdjacencies.properties", "rb") as f:
                 configs.load(f)
@@ -347,7 +358,7 @@ class GamestateHelper:
                 discard = 0
                 if "tile_discard_deck_300" in self.gamestate:
                     discard = len(self.gamestate["tile_discard_deck_300"])
-                if adjTile not in self.gamestate["board"] and len(self.gamestate["tile_deck_300"]) + discard > 0:
+                if adjTile not in self.gamestate["board"] and len(self.gamestate["tile_deck_300"]) + discard > 0 and adjTile in configs:
                     self.add_tile(adjTile, 0, "sector3back")
         self.update()
 
@@ -456,7 +467,10 @@ class GamestateHelper:
     async def updateNamesAndOutRimTiles(self, interaction: discord.Interaction):
         for player in self.gamestate["players"]:
             if "username" not in self.gamestate["players"][player]:
-                self.gamestate["players"][player]["username"] = interaction.guild.get_member(int(player)).display_name
+                if not self.gamestate.get("communityMode",False):
+                    self.gamestate["players"][player]["username"] = interaction.guild.get_member(int(player)).display_name
+                else:
+                    self.gamestate["players"][player]["username"] = "Team "+self.gamestate["players"][player]["color"]
             tiles = self.gamestate["players"][player]["owned_tiles"][:]
             for tile in tiles:
                 if any(["owner" not in self.gamestate["board"][tile],
@@ -535,7 +549,7 @@ class GamestateHelper:
                          f"{materialEmoji}: {materials} ({materialsIncrease})",
                          "If you spend another disk, your maintenance cost"
                          + f" will go from -{moneyDecrease} to -{moneyDecrease2}.",
-                         "If you drop another money cube, your income"
+                         "If you find a way to drop another money cube, your income"
                          + f" will go from {moneyIncrease} to {moneyIncrease2}."])
         return msg
 
@@ -688,9 +702,8 @@ class GamestateHelper:
                 found = True
             if found:
                 if not graveYard:
-                    if "neutral" not in i:
-                        if all(["orbital" not in i,
-                                self.gamestate["players"][playerID][i.replace("adv", "") + "_cubes"] < 13]):
+                    if "neutral" not in i and "orbital" not in i:
+                        if  self.gamestate["players"][playerID][i.replace("adv", "") + "_cubes"] < 13:
                             self.gamestate["players"][playerID][i.replace("adv", "") + "_cubes"] += 1
                     else:
                         if "neutral" not in i:
@@ -752,6 +765,7 @@ class GamestateHelper:
                                                view=view)
 
         tech_draws = self.gamestate["player_count"] + 3
+        tech_draws = min(tech_draws,11)
         while tech_draws > 0:
             random.shuffle(self.gamestate["tech_deck"])
             picked_tech = self.gamestate["tech_deck"].pop(0)
@@ -828,7 +842,7 @@ class GamestateHelper:
             self.gamestate["roundNum"] = 1
             self.update()
 
-    def player_setup(self, player_id, faction, color):
+    def player_setup(self, player_id, faction, color, interaction: discord.Interaction):
         if self.gamestate["setup_finished"] == 1:
             return ("The game has already been setup!")
 
@@ -845,6 +859,10 @@ class GamestateHelper:
             shortFaction += "_"
         emoji = Emoji.getEmojiByName(f"{shortFaction}token")
         self.gamestate["players"][str(player_id)]["player_name"] = f"{name} {emoji}"
+        if self.gamestate.get("communityMode",False):
+             role = discord.utils.get(interaction.guild.roles, name=self.gamestate["players"][str(player_id)]["color"])
+             if role != None:
+                self.gamestate["players"][str(player_id)]["player_name"] = f"{role.mention} {emoji}"
         self.update()
         # return(f"{name} is now setup!")
 
@@ -875,13 +893,13 @@ class GamestateHelper:
         self.gamestate["setup_finished"] = 1
         self.update()
 
-    def setup_techs_and_outer_rim(self, count: int, galactic_events):
+    def setup_techs_and_outer_rim(self, count: int, galactic_events ,hyperlane):
         self.gamestate["player_count"] = count
-        draw_count = {2: [5, 12], 3: [8, 14], 4: [14, 16], 5: [16, 18], 6: [18, 20]}
+        draw_count = {2: [5, 12], 3: [8, 14], 4: [14, 16], 5: [16, 18], 6: [18, 20],7:[22,22],8:[24,24],9:[24,26]}
 
         third_sector_tiles = ["301", "302", "303", "304", "305", "306", "307", "308", "309", "310", "311", "312", "313",
                               "314", "315", "316", "317", "318", "381", "382", "398", "397", "399", "396", "394", "393"]
-        if not galactic_events:
+        if not galactic_events and count < 7:
             third_sector_tiles = ["301", "302", "303", "304", "305", "306", "307", "308", "309", "310",
                                   "311", "312", "313", "314", "315", "316", "317", "318", "381", "382"]
         else:
@@ -917,7 +935,7 @@ class GamestateHelper:
                          "Tech Discount", "Population Cube",
                          "Three Points", "Point Per Ambassador", "Point Per Reputation Tile"]
         self.gamestate["minor_species"] = []
-        if count == 5:
+        if hyperlane:
             self.gamestate["5playerhyperlane"] = True
         else:
             self.gamestate["5playerhyperlane"] = False
@@ -993,8 +1011,17 @@ class GamestateHelper:
             saveFile["newestSaveNum"] += 1
             json.dump(saveFile, f)
 
-    def get_player(self, player_id):
+    def get_player(self, player_id, interaction=None):
         if str(player_id) not in self.gamestate["players"]:
+            if interaction != None:
+                member = interaction.guild.get_member(player_id) 
+                roles = member.roles
+                role_names = [role.name for role in roles if role.name != "@everyone"]
+                colors = ["blue", "red", "green", "yellow", "purple", "white", "pink", "brown", "teal"]
+                for role_name in role_names:
+                    for color in colors:
+                        if color in role_name.lower():
+                            return self.getPlayerObjectFromColor(color)
             return None
         return self.gamestate["players"][str(player_id)]
 
@@ -1180,7 +1207,11 @@ class GamestateHelper:
 
     def update_player(self, *args):
         for ar in args:
-            self.gamestate["players"][ar.player_id] = ar.stats
+            if ar.player_id in self.gamestate["players"]:
+                self.gamestate["players"][ar.player_id] = ar.stats
+            else:
+                playerID = self.get_player_from_color(ar.stats["color"])
+                self.gamestate["players"][playerID] = ar.stats
         self.update()
 
     def update_pulsar_action(self, tile, action):
@@ -1236,6 +1267,8 @@ class GamestateHelper:
 
     def is_everyone_passed(self):
         listHS = [201, 203, 205, 207, 209, 211]
+        if self.gamestate["player_count"] > 6:
+                listHS = [302,304,306,308,310,312,314,316,318]
         for number in listHS:
             nextPlayer = self.getPlayerFromHSLocation(str(number))
             if nextPlayer is not None and not self.get_gamestate()["players"].get(nextPlayer, {}).get("passed", False):
@@ -1245,6 +1278,8 @@ class GamestateHelper:
     def get_next_player(self, player):
         if player["player_name"] not in self.get_gamestate().get("turn_order", []):
             listHS = [201, 203, 205, 207, 209, 211]
+            if self.gamestate["player_count"] > 6:
+                listHS = [302,304,306,308,310,312,314,316,318]
             playerHSID = player["home_planet"]
             tileLocation = int(self.getLocationFromID(playerHSID))
             index = listHS.index(tileLocation)

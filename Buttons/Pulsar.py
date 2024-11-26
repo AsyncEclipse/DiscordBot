@@ -10,7 +10,9 @@ class PulsarButtons:
         view = View()
         actions = ["build", "move", "upgrade"]
         for tile in game.gamestate["board"]:
-            if "currentAction" in game.gamestate["board"][tile] and game.gamestate["board"][tile].get("owner") == player["color"] and tile not in player.get("activatedPulsars", []):
+            if all(["currentAction" in game.gamestate["board"][tile],
+                    game.gamestate["board"][tile].get("owner") == player["color"],
+                    tile not in player.get("activatedPulsars", [])]):
                 for action in actions:
                     if action == game.gamestate["board"][tile]["currentAction"]:
                         continue
@@ -27,6 +29,8 @@ class PulsarButtons:
         from Buttons.Upgrade import UpgradeButtons
         tile = customID.split("_")[1]
         action = customID.split("_")[2]
+        player_helper.stats["lastAction"] = action
+        player_helper.stats["detailsOflastAction"] = ""
         if "activatedPulsars" not in player_helper.stats:
             player_helper.stats["activatedPulsars"] = []
         player_helper.stats["activatedPulsars"].append(tile)
@@ -40,6 +44,6 @@ class PulsarButtons:
             game.update_player(player_helper)
             await BuildButtons.startBuild(game, player, interaction, "startBuild2", player_helper)
         if action == "upgrade":
-            await UpgradeButtons.startUpgrade(game, player, interaction, False, "dummy")
+            await UpgradeButtons.startUpgrade(game, player, interaction, False, "dummy","dum")
         if action == "move":
             await MoveButtons.startMove(game, player, interaction, "startMove_8", False)

@@ -102,8 +102,15 @@ class DiplomaticRelationsButtons:
         players = []
         configs = Properties()
         if game.gamestate.get("5playerhyperlane"):
-            with open("data/tileAdjacencies_5p.properties", "rb") as f:
-                configs.load(f)
+            if game.gamestate.get("player_count") == 5:
+                with open("data/tileAdjacencies_5p.properties", "rb") as f:
+                    configs.load(f)
+            elif game.gamestate.get("player_count") == 4:
+                with open("data/tileAdjacencies_4p.properties", "rb") as f:
+                    configs.load(f)
+            else:
+                with open("data/tileAdjacencies.properties", "rb") as f:
+                    configs.load(f)
         else:
             with open("data/tileAdjacencies.properties", "rb") as f:
                 configs.load(f)
@@ -179,7 +186,7 @@ class DiplomaticRelationsButtons:
     async def breakRelationsWith(game: GamestateHelper, player, p2, interaction: discord.Interaction):
 
         await interaction.followup.send(f"{p2['player_name']}, your relations with"
-                                        f" {interaction.user.mention} have been broken.")
+                                        f" {player['player_name']} have been broken.")
         game.breakRelationsBetween(player, p2)
         for p in [player, p2]:
             view = View()

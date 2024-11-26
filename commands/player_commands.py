@@ -118,7 +118,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
     async def remove_tech(self, interaction: discord.Interaction, tech: str, player: Optional[discord.Member] = None):
         """:param tech: The ID of the tech to be removed. Type help to get a list of your tech IDs"""
         game = GamestateHelper(interaction.channel)
-        player = game.get_player(interaction.user.id)
+        player = game.get_player(interaction.user.id, interaction)
         player_helper = PlayerHelper(interaction.user.id, player)
         with open("data/techs.json", "r") as f:
             tech_data = json.load(f)
@@ -157,7 +157,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
     @app_commands.command(name="research")
     async def research(self, interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)
-        player = game.get_player(interaction.user.id)
+        player = game.get_player(interaction.user.id,interaction)
         player_helper = PlayerHelper(interaction.user.id, player)
         await interaction.response.defer(thinking=False)
         await ResearchButtons.startResearch(game, player, player_helper, interaction, False)
@@ -166,7 +166,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
     @app_commands.choices(color=color_choices)
     async def change_color(self, interaction: discord.Interaction, color: app_commands.Choice[str]):
         game = GamestateHelper(interaction.channel)
-        player = game.get_player(interaction.user.id)
+        player = game.get_player(interaction.user.id,interaction)
         for p2 in game.get_gamestate()["players"]:
             if game.get_gamestate()["players"][p2]["color"] == color.value:
                 await interaction.channel.send("Another player already uses that color")
@@ -181,14 +181,14 @@ class PlayerCommands(commands.GroupCog, name="player"):
     @app_commands.command(name="upgrade")
     async def upgrade(self, interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)
-        player = game.get_player(interaction.user.id)
+        player = game.get_player(interaction.user.id,interaction)
         await interaction.response.defer(thinking=False)
-        await UpgradeButtons.startUpgrade(game, player, interaction, False, "dummy")
+        await UpgradeButtons.startUpgrade(game, player, interaction, False, "dummy","dum")
 
     @app_commands.command(name="move")
     async def move(self, interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)
-        player = game.get_player(interaction.user.id)
+        player = game.get_player(interaction.user.id,interaction)
         await interaction.response.defer(thinking=False)
         await MoveButtons.startMove(game, player, interaction, "startMove_8", False)
 
@@ -198,7 +198,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         player = interaction.user
         await interaction.response.defer(thinking=False)
         game = GamestateHelper(interaction.channel)
-        p1 = game.get_player(player.id)
+        p1 = game.get_player(player.id, interaction)
         p2 = game.getPlayerObjectFromColor(color.value)
         await DiplomaticRelationsButtons.breakRelationsWith(game, p1, p2, interaction)
 
@@ -206,7 +206,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
     async def break_minor_species(self, interaction: discord.Interaction):
         player = interaction.user
         game = GamestateHelper(interaction.channel)
-        p1 = game.get_player(player.id)
+        p1 = game.get_player(player.id,interaction)
         game.breakMinorSpecies(p1)
         await interaction.response.send_message("Successfully broke relations with a minor species.")
 
@@ -216,7 +216,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         player = interaction.user
         await interaction.response.defer(thinking=False)
         game = GamestateHelper(interaction.channel)
-        p1 = game.get_player(player.id)
+        p1 = game.get_player(player.id,interaction)
         await DiplomaticRelationsButtons.acceptRelationsWith(game, p1, interaction, "dummy_" + color.value)
 
     @app_commands.command(name="show_player_area")
@@ -224,7 +224,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         if player is None:
             player = interaction.user
         game = GamestateHelper(interaction.channel)
-        p1 = game.get_player(player.id)
+        p1 = game.get_player(player.id,interaction)
         drawing = DrawHelper(game.gamestate)
         image = drawing.player_area(p1)
         await interaction.response.defer(thinking=True)
@@ -238,7 +238,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         if permanent is None:
             permanent = passed
         game = GamestateHelper(interaction.channel)
-        p1 = game.get_player(player.id)
+        p1 = game.get_player(player.id,interaction)
         player_helper = PlayerHelper(player.id, p1)
         player_helper.permanentlyPassTurn(permanent)
         player_helper.passTurn(passed)
@@ -253,7 +253,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         if player is None:
             player = interaction.user
         game = GamestateHelper(interaction.channel)
-        p1 = game.get_player(player.id)
+        p1 = game.get_player(player.id,interaction)
         player_helper = PlayerHelper(player.id, p1)
         game.makeEveryoneNotTraitor()
         player_helper.setTraitor(traitor)
@@ -263,7 +263,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
     @app_commands.command(name="draw_reputation")
     async def draw_reputation(self, interaction: discord.Interaction, num_options: int):
         game = GamestateHelper(interaction.channel)
-        player = game.get_player(interaction.user.id)
+        player = game.get_player(interaction.user.id,interaction)
         player_helper = PlayerHelper(interaction.user.id, player)
         await interaction.response.defer(thinking=True, ephemeral=True)
         await ReputationButtons.resolveGainingReputation(game, num_options, interaction, player_helper, False)
@@ -272,7 +272,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
     @app_commands.command(name="return_reputation")
     async def return_reputation(self, interaction: discord.Interaction, rep_value: int):
         game = GamestateHelper(interaction.channel)
-        player = game.get_player(interaction.user.id)
+        player = game.get_player(interaction.user.id,interaction)
         game.returnReputation(rep_value, player)
         message = f"{interaction.user.name} returned a reputation tile with value {rep_value}."
         await interaction.response.send_message(message, ephemeral=True)
@@ -282,7 +282,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         if player is None:
             player = interaction.user
         game = GamestateHelper(interaction.channel)
-        p1 = game.get_player(player.id)
+        p1 = game.get_player(player.id,interaction)
         drawing = DrawHelper(game.gamestate)
         image = drawing.player_area(p1)
         await interaction.response.defer(thinking=True)
@@ -294,7 +294,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
             player = interaction.user
         # view = Turn(interaction, player.id)
         game = GamestateHelper(interaction.channel)
-        p1 = game.get_player(player.id)
+        p1 = game.get_player(player.id,interaction)
         view = TurnButtons.getStartTurnButtons(game, p1, "dummy")
         game.initilizeKey("activePlayerColor")
         game.addToKey("activePlayerColor", p1["color"])

@@ -36,22 +36,25 @@ class SetupCommands(commands.GroupCog, name="setup"):
 
     @app_commands.command(name="game")
     @app_commands.choices(faction1=factionChoices, faction2=factionChoices, faction3=factionChoices,
-                          faction4=factionChoices, faction5=factionChoices, faction6=factionChoices)
+                          faction4=factionChoices, faction5=factionChoices, faction6=factionChoices,faction7=factionChoices,faction8=factionChoices,faction9=factionChoices)
     async def game(self, interaction: discord.Interaction,
                    player1: discord.Member, faction1: app_commands.Choice[str],
                    player2: discord.Member, faction2: app_commands.Choice[str],
                    player3: Optional[discord.Member] = None, faction3: Optional[app_commands.Choice[str]] = None,
                    player4: Optional[discord.Member] = None, faction4: Optional[app_commands.Choice[str]] = None,
                    player5: Optional[discord.Member] = None, faction5: Optional[app_commands.Choice[str]] = None,
-                   player6: Optional[discord.Member] = None, faction6: Optional[app_commands.Choice[str]] = None):
+                   player6: Optional[discord.Member] = None, faction6: Optional[app_commands.Choice[str]] = None,
+                   player7: Optional[discord.Member] = None, faction7: Optional[app_commands.Choice[str]] = None,
+                   player8: Optional[discord.Member] = None, faction8: Optional[app_commands.Choice[str]] = None,
+                   player9: Optional[discord.Member] = None, faction9: Optional[app_commands.Choice[str]] = None,):
 
-        temp_player_list = [player1, player2, player3, player4, player5, player6]
+        temp_player_list = [player1, player2, player3, player4, player5, player6,player7, player8,player9]
         temp_playerID_list = []
         temp_factionID_list = []
         for player in temp_player_list:
             if player is not None:
                 temp_playerID_list.append(player.id)
-        temp_faction_list = [faction1, faction2, faction3, faction4, faction5, faction6]
+        temp_faction_list = [faction1, faction2, faction3, faction4, faction5, faction6, faction7, faction8, faction9]
         for faction in temp_faction_list:
             if faction is not None:
                 temp_factionID_list.append(faction.value)
@@ -121,18 +124,23 @@ class SetupCommands(commands.GroupCog, name="setup"):
                               player4: Optional[discord.Member] = None,
                               player5: Optional[discord.Member] = None,
                               player6: Optional[discord.Member] = None,
+                              player7: Optional[discord.Member] = None,
+                              player8: Optional[discord.Member] = None,
+                              player9: Optional[discord.Member] = None,
                               ai_ship_type: Optional[app_commands.Choice[str]] = None,
                               rift_cannon: Optional[bool] = True,
                               turn_order_variant: Optional[bool] = True,
-                              galactic_event_tiles: Optional[bool] = True):
+                              galactic_event_tiles: Optional[bool] = False,
+                              hyperlanes: Optional[bool] = False):
         """
         :param ai_ship_type: Choose which type of AI ships to use.
         :param rift_cannon: Rift cannons are enabled by default.
         :param turn_order_variant: Pass turn order is enabled by default.
-        :param galactic_event_tiles: Supernova/black-holes/Pulsars are enabled by default.
+        :param galactic_event_tiles: Supernova/black-holes/Pulsars are disabled by default.
+        :param hyperlanes: Hyperlanes for 4p and 5p are default off.
         :return:
         """
-        temp_player_list = [player1, player2, player3, player4, player5, player6]
+        temp_player_list = [player1, player2, player3, player4, player5, player6,player7,player8,player9]
         player_list = []
         await interaction.response.defer(thinking=True)
         for i in temp_player_list:
@@ -196,9 +204,9 @@ class SetupCommands(commands.GroupCog, name="setup"):
         game = GamestateHelper(actions)
         if player_count < 2:
             player_count = 2
-        if player_count > 6:
-            player_count = 6
-        game.setup_techs_and_outer_rim(player_count, galactic_event_tiles)
+        if player_count > 9:
+            player_count = 9
+        game.setup_techs_and_outer_rim(player_count, galactic_event_tiles, hyperlanes)
         drawing = DrawHelper(game.gamestate)
 
         minorSpeciesList = ""

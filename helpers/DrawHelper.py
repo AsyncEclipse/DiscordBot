@@ -99,8 +99,15 @@ class DrawHelper:
                             (255, 255, 255, 0))
         configs = Properties()
         if self.gamestate.get("5playerhyperlane"):
-            with open("data/tileAdjacencies_5p.properties", "rb") as f:
-                configs.load(f)
+            if self.gamestate.get("player_count") == 5:
+                with open("data/tileAdjacencies_5p.properties", "rb") as f:
+                    configs.load(f)
+            elif self.gamestate.get("player_count") == 4:
+                with open("data/tileAdjacencies_4p.properties", "rb") as f:
+                    configs.load(f)
+            else:
+                with open("data/tileAdjacencies.properties", "rb") as f:
+                    configs.load(f)
         else:
             with open("data/tileAdjacencies.properties", "rb") as f:
                 configs.load(f)
@@ -244,7 +251,7 @@ class DrawHelper:
             tile = self.gamestate["board"][position]
             rotation = int(tile["orientation"])
 
-            if int(position) // 100 == 2 and int(position) % 2 == 1:
+            if int(position) // 100 == 2 and int(position) % 2 == 1 and self.gamestate["player_count"] < 7:
                 hsMask2 = Image.open("images/resources/masks/hsmaskTrip.png").convert("RGBA").resize((210, 210))
                 tile_image.paste(hsMask2, (int(138 * mult), int(115 * mult)), mask=hsMask2)
             if tile.get("disctile", 0) > 0:
@@ -280,8 +287,15 @@ class DrawHelper:
             green = self.use_image(greenpath)
             configs = Properties()
             if self.gamestate.get("5playerhyperlane"):
-                with open("data/tileAdjacencies_5p.properties", "rb") as f:
-                    configs.load(f)
+                if self.gamestate.get("player_count") == 5:
+                    with open("data/tileAdjacencies_5p.properties", "rb") as f:
+                        configs.load(f)
+                elif self.gamestate.get("player_count") == 4:
+                    with open("data/tileAdjacencies_4p.properties", "rb") as f:
+                        configs.load(f)
+                else:
+                    with open("data/tileAdjacencies.properties", "rb") as f:
+                        configs.load(f)
             else:
                 with open("data/tileAdjacencies.properties", "rb") as f:
                     configs.load(f)
@@ -535,14 +549,15 @@ class DrawHelper:
             discTile_data = json.load(f)
         for tile in sorted_tiles:
             discName = discTile_data[tile]["name"]
-            part_path = f"images/resources/components/discovery_tiles/discovery_{discName.replace(' ','_').lower()}.png"
+            part_path = ("images/resources/components/discovery_tiles/discovery"
+                         f"_{discName.replace(' ', '_').lower()}.png")
             part_image = self.use_image(part_path).resize((80, 80))
             context.paste(part_image, (85 * count, 0), mask=part_image)
             count += 1
         return context
 
     def display_turn_order(self):
-        context = Image.new("RGBA", (600, 270), (0, 0, 0, 255))
+        context = Image.new("RGBA", (900, 270), (0, 0, 0, 255))
         if len(self.gamestate.get("activePlayerColor", [])) == 1:
             activeColor = self.gamestate["activePlayerColor"][0]
         else:
@@ -555,6 +570,8 @@ class DrawHelper:
 
         if len(self.gamestate.get("turn_order", [])) < self.gamestate["player_count"]:
             listHS = [201, 203, 205, 207, 209, 211]
+            if self.gamestate["player_count"] > 6:
+                listHS = [302,304,306,308,310,312,314,316,318]
             playerHSID = activePlayer["home_planet"]
             tileLocation = int(next((tile for tile in self.gamestate["board"]
                                      if self.gamestate["board"][tile]["sector"] == str(playerHSID)), None))
@@ -698,7 +715,7 @@ class DrawHelper:
             count = 0
             for species in minor_species:
                 tile_image = Image.open("images/resources/components/minor_species/minorspecies_" +
-                                        f"{species.replace(' ','_').lower()}.png").convert("RGBA").resize((100, 100))
+                                        f"{species.replace(' ', '_').lower()}.png").convert("RGBA").resize((100, 100))
                 context.paste(tile_image, (1320 + 120 * count, 85), mask=tile_image)
                 count += 1
 
@@ -909,7 +926,7 @@ class DrawHelper:
 
                 if faction == "minor":
                     amb_tile_path = ("images/resources/components/minor_species/minorspecies_"
-                                     f"{color.replace(' ','_').lower()}.png")
+                                     f"{color.replace(' ', '_').lower()}.png")
                     amb_tile_image = self.use_image(amb_tile_path)
                 else:
                     amb_tile_path = f"images/resources/components/factions/{faction}_ambassador.png"
@@ -973,7 +990,8 @@ class DrawHelper:
             listOfAncient = listOfAncient + player["discoveryTileBonusPointTiles"]
         for part in listOfAncient:
             discName = discTile_data[part]["name"]
-            part_path = f"images/resources/components/discovery_tiles/discovery_{discName.replace(' ','_').lower()}.png"
+            part_path = ("images/resources/components/discovery_tiles/discovery"
+                         f"_{discName.replace(' ', '_').lower()}.png")
             part_image = self.use_image(part_path).resize((80, 80))
             context.paste(part_image, (newX, newY), mask=part_image)
             newY += 85
@@ -1107,7 +1125,7 @@ class DrawHelper:
                 configs.load(f)
             return configs
 
-        def paste_tiles(context, tile_map, hyperlane):
+        def paste_tiles(context, tile_map, hyperlane, player_count):
             configs = load_tile_coordinates()
             min_x = float('inf')
             min_y = float('inf')
@@ -1116,8 +1134,11 @@ class DrawHelper:
             if hyperlane:
                 hyperImage = self.use_image("images/resources/hexes/5playerhyperlane.png").resize((1125, 900))
                 context.paste(hyperImage, (1820, 2850), mask=hyperImage)
-                min_x = min(min_x, 1820)
-                min_y = min(min_y, 2850)
+                if player_count == 4:
+                    hyperImageRot = self.use_image("images/resources/hexes/5playerhyperlane.png").resize((1125, 900)).rotate(180)
+                    context.paste(hyperImageRot, (1560,1650), mask=hyperImageRot)
+                min_x = min(min_x, 1560)
+                min_y = min(min_y, 1650)
                 max_x = max(max_x, 1820 + hyperImage.width)
                 max_y = max(max_y, 2850 + hyperImage.height)
             for tile in tile_map:
@@ -1134,12 +1155,14 @@ class DrawHelper:
         hyperlane5 = False
         if self.gamestate.get("5playerhyperlane"):
             hyperlane5 = True
-        min_x, min_y, max_x, max_y = paste_tiles(context, self.gamestate["board"], hyperlane5)
+        min_x, min_y, max_x, max_y = paste_tiles(context, self.gamestate["board"], hyperlane5, self.gamestate["player_count"])
         cropped_context = context.crop((min_x, min_y, max_x, max_y))
 
         def create_player_area():
             pCount = len(self.gamestate["players"])
             player_area_length = 1500 if pCount > 3 else 750
+            if pCount > 6:
+                player_area_length = 2250
             width = 4420 if (pCount != 2 and pCount != 4) else 2980
             context2 = Image.new("RGBA", (width, player_area_length), (0, 0, 0, 255))
             x, y, count = 100, 50, 0
@@ -1181,16 +1204,16 @@ class DrawHelper:
         width = max([context2.size[0], context3.size[0] + context4.size[0] + 150,
                      cropped_context.size[0], context5.size[0]])
         height = (cropped_context.size[1] + context2.size[1] +
-                  max(context3.size[1], context4.size[1]) + 90 )
+                  max(context3.size[1], context4.size[1]) + 90)
         final_context = Image.new("RGBA", (width, height), (0, 0, 0, 255))
         centering = int((width - cropped_context.size[0])/2)
         final_context.paste(context6, (0, 0))
-        final_context.paste(cropped_context, (centering,0))
-        final_context.paste(context2, (0, cropped_context.size[1] ))
+        final_context.paste(cropped_context, (centering, 0))
+        final_context.paste(context2, (0, cropped_context.size[1]))
         final_context.paste(context3, (0, cropped_context.size[1] + context2.size[1]))
         # final_context.paste(context5, (50, context2.size[1] - 20))
         final_context.paste(context4, (context3.size[0] + 150,
-                                       cropped_context.size[1] + context2.size[1] ))
+                                       cropped_context.size[1] + context2.size[1]))
         final_context.paste(context5,
                             (0, cropped_context.size[1] + context2.size[1] + max(context3.size[1],
                                                                                  context4.size[1])))
@@ -1324,7 +1347,7 @@ class DrawHelper:
         count = 0
         for species in minor_species:
             tile_image = Image.open("images/resources/components/minor_species/minorspecies_" +
-                                    f"{species.replace(' ','_').lower()}.png").convert("RGBA").resize((260, 260))
+                                    f"{species.replace(' ', '_').lower()}.png").convert("RGBA").resize((260, 260))
             context.paste(tile_image, (300 * count, 0), mask=tile_image)
             count += 1
         byteData = BytesIO()
@@ -1360,7 +1383,7 @@ class DrawHelper:
     def show_disc_tile(self, disc_tile_name: str):
         context = Image.new("RGBA", (260, 260), (255, 255, 255, 0))
         tile_image = Image.open("images/resources/components/discovery_tiles/discovery_" +
-                                f"{disc_tile_name.replace(' ','_').lower()}.png").convert("RGBA").resize((260, 260))
+                                f"{disc_tile_name.replace(' ', '_').lower()}.png").convert("RGBA").resize((260, 260))
         context.paste(tile_image, (0, 0), mask=tile_image)
         byteData = BytesIO()
         context.save(byteData, format="WEBP")
