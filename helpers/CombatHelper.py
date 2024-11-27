@@ -585,6 +585,7 @@ class Combat:
         player = None
         ships = Combat.getCombatantShipsBySpeed(game, colorOrAI, player_ships, pos)
         update = False
+        popRiftProtector = True
         for ship in ships:
             if ship[0] == speed or speed == 99 or speed == 1000:
                 name = interaction.user.mention
@@ -681,7 +682,11 @@ class Combat:
                             if dieNum == 1 or dieNum == 6:
                                 ship = Combat.getShipToSelfHitWithRiftCannon(game, colorOrAI, player_ships, pos)
                                 buttonID = f"assignHitTo_{pos}_{colorOrAI}_{ship}_{dieNum}_1"
-                                await Combat.assignHitTo(game, buttonID, interaction, False)
+                                if dieNum != 6 or popRiftProtector:
+                                    await Combat.assignHitTo(game, buttonID, interaction, False)
+                                if dieNum == 6 and speed == 1000:
+                                    popRiftProtector = False
+                                
                             if dieNum > 3:
                                 hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships,
                                                                                     6, shipModel.computer, pos, speed)
