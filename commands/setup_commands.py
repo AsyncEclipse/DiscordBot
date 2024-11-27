@@ -131,13 +131,15 @@ class SetupCommands(commands.GroupCog, name="setup"):
                               rift_cannon: Optional[bool] = True,
                               turn_order_variant: Optional[bool] = True,
                               galactic_event_tiles: Optional[bool] = False,
-                              hyperlanes: Optional[bool] = False):
+                              hyperlanes: Optional[bool] = False,
+                              tournament: Optional[bool] = False):
         """
         :param ai_ship_type: Choose which type of AI ships to use.
         :param rift_cannon: Rift cannons are enabled by default.
         :param turn_order_variant: Pass turn order is enabled by default.
         :param galactic_event_tiles: Supernova/black-holes/Pulsars are disabled by default.
         :param hyperlanes: Hyperlanes for 4p and 5p are default off.
+        :param tournament: Used to keep track of tournament games.
         :return:
         """
         temp_player_list = [player1, player2, player3, player4, player5, player6,player7,player8,player9]
@@ -207,7 +209,11 @@ class SetupCommands(commands.GroupCog, name="setup"):
         if player_count > 9:
             player_count = 9
         game.setup_techs_and_outer_rim(player_count, galactic_event_tiles, hyperlanes)
+        if tournament:
+            game.initilizeKey("Tournament Game")
+            game.addToKey("Tournament Game","Yes")
         drawing = DrawHelper(game.gamestate)
+
 
         minorSpeciesList = ""
         for species in game.get_gamestate()["minor_species"]:
