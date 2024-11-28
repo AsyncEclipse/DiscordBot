@@ -464,6 +464,18 @@ class GamestateHelper:
         self.gamestate["board"][position]["warpDisc"] = 2
         self.update()
 
+    def updatePlayerNames(self, interaction: discord.Interaction):
+        if self.gamestate.get("communityMode",False):
+            for player in self.gamestate["players"]:
+                shortFaction = self.getShortFactionNameFromFull(self.gamestate["players"][player]["name"])
+                if "terran" in shortFaction:
+                    shortFaction += "_"
+                emoji = Emoji.getEmojiByName(f"{shortFaction}token")
+                role = discord.utils.get(interaction.guild.roles, name=self.gamestate["players"][player]["color"])
+                if role != None:
+                    self.gamestate["players"][player]["player_name"] = f"{role.mention} {emoji}"
+        self.update()
+
     async def updateNamesAndOutRimTiles(self, interaction: discord.Interaction):
         for player in self.gamestate["players"]:
             if "username" not in self.gamestate["players"][player]:
