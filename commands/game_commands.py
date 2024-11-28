@@ -99,6 +99,11 @@ class GameCommands(commands.GroupCog, name="game"):
         game.initilizeKey("communityMode")
         game.setCommunityMode(status)
         await interaction.response.send_message("Set Community Mode to " + str(status))
+    @app_commands.command(name="update_player_names")
+    async def update_player_names(self, interaction: discord.Interaction):
+        game = GamestateHelper(interaction.channel)
+        game.updatePlayerNames(interaction)
+        await interaction.response.send_message("Updated Player Names")
 
     @app_commands.command(name="force_queue")
     async def force_queue(self, interaction: discord.Interaction):
