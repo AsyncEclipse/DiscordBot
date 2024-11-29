@@ -52,6 +52,7 @@ class TurnButtons:
     async def endTurn(player, game: GamestateHelper, interaction: discord.Interaction):
         from helpers.CombatHelper import Combat
         nextPlayer = game.get_next_player(player)
+        game.initilizeKey("20MinReminder")
         if nextPlayer is not None and not game.is_everyone_passed():
             view = TurnButtons.getStartTurnButtons(game, nextPlayer, player["color"])
             game.initilizeKey("activePlayerColor")
@@ -460,4 +461,6 @@ class TurnButtons:
                                      custom_id=f"FCID{player['color']}_startMinorRelations"))
         await interaction.channel.send(f"Colony ships available: {player['colony_ships']}\n"
                                        "Do any end of turn abilities and then end your turn.", view=view)
+        game.initilizeKey("20MinReminder")
+        game.addToKey("20MinReminder",player["color"])
         await interaction.message.delete()

@@ -953,7 +953,7 @@ class Combat:
                                      custom_id=f"{checker}rollDice_{pos}_{nextOwner}_{nextSpeed}_deleteMsg"))
                 playerObj = game.getPlayerObjectFromColor(defender if attacker == "ai" else attacker)
                 msg = f"{playerObj['player_name']}, please roll the dice for the AI ships with {initiative}."
-        await channel.send(msg, view=view)
+        asyncio.create_task(channel.send(msg, view=view))
 
     @staticmethod
     async def finishRetreatingUnits(game: GamestateHelper, buttonID: str, interaction: discord.Interaction, playerObj):
@@ -1168,7 +1168,17 @@ class Combat:
         msg += f"The damaged ship has {shipModel.hull - damage + 1}/{shipModel.hull + 1} hp left. "
         oldLength = len(Combat.findPlayersInTile(game, pos))
         if shipModel.hull < damage:
-            game.destroy_ship(ship, pos, colorOrAI)
+            if colorOrAI not in ship:
+                game.destroy_ship(ship, pos, colorOrAI)
+            else:
+                dummyKiller = "ai"
+                attacker = game.get_gamestate()["board"][pos].get("attacker",None)
+                defender = game.get_gamestate()["board"][pos].get("defender",None)
+                if attacker != None and attacker != colorOrAI:
+                    dummyKiller = attacker
+                if defender  != None and defender  != colorOrAI:
+                    dummyKiller = defender
+                game.destroy_ship(ship, pos, dummyKiller)
             if colorOrAI != "ai":
                 msg += (f"{interaction.user.name} destroyed the"
                         f" {Combat.translateShipAbrToName(shipType)} due to the damage exceeding the ships hull.")
@@ -1181,12 +1191,12 @@ class Combat:
                          and "Draco" in game.find_player_faction_name_from_color(Combat.findPlayersInTile(game,
                                                                                                           pos)[1]))
             if len(Combat.findPlayersInTile(game, pos)) < 2 or dracoNAnc:
-                await Combat.declareAWinner(game, interaction, pos)
+                asyncio.create_task(Combat.declareAWinner(game, interaction, pos))
             elif oldLength != len(Combat.findPlayersInTile(game, pos)):
                 drawing = DrawHelper(game.gamestate)
                 await interaction.channel.send("Updated view", view=Combat.getCombatButtons(game, pos),
                                                file=await asyncio.to_thread(drawing.board_tile_image_file, pos))
-                await Combat.startCombat(game, interaction.channel, pos)
+                asyncio.create_task(Combat.startCombat(game, interaction.channel, pos))
         else:
             await interaction.channel.send(msg)
         if button:

@@ -67,6 +67,12 @@ class DiscordBot(commands.Bot):
                         message = f"{player['player_name']}, this is a gentle reminder that it is your turn."
                         await actions_channel.send(message)
                         game.updatePingTime()
+                else:
+                    if "20minReminder" in game.gamestate and game.gamestate["activePlayerColor"][0] == game.gamestate["20minReminder"][0]:
+                        player = game.getPlayerObjectFromColor(game.gamestate["activePlayerColor"][0])
+                        message = f"{player['player_name']}, this is a gentle reminder to end your turn."
+                        await actions_channel.send(message)
+                        game.initilizeKey("20minReminder")
 
     async def shutdown(self) -> None:
         await self.close()
