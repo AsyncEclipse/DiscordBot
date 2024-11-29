@@ -159,6 +159,7 @@ class DiplomaticRelationsButtons:
     async def acceptRelationsWith(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
         p2 = buttonID.split("_")[1]
         pID = game.get_player_from_color(p2)
+        alreadyFriends = False
         for rep in game.get_gamestate()["players"][pID]["reputation_track"]:
             if isinstance(rep, str) and player["color"] in rep:
                 alreadyFriends = True
