@@ -15,7 +15,7 @@ from jproperties import Properties
 
 class Combat:
     @staticmethod
-    def exile_orbital_exists(game: GamestateHelper, pos, color):
+    def exile_orbital_exists(game: GamestateHelper, pos):
         return all([game.find_player_faction_name_from_color(game.gamestate["board"][pos]["owner"]) == "The Exiles",
                     game.gamestate["board"][pos].get("orbital_pop", [0])[0] == 1])
 
