@@ -408,7 +408,7 @@ class GamestateHelper:
         if "damage_tracker" in self.gamestate["board"][position]:
             if ship in self.gamestate["board"][position]["damage_tracker"]:
                 del self.gamestate["board"][position]["damage_tracker"][ship]
-        if destroyer != "ai":
+        if destroyer != "ai" and destroyer not in ship:
             key = "ships_destroyed_by_" + destroyer
             if key not in self.gamestate["board"][position]:
                 self.gamestate["board"][position][key] = []

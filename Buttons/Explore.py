@@ -185,7 +185,7 @@ class ExploreButtons:
         view2.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                               custom_id=f"FCID{player['color']}_finishAction"))
         await interaction.channel.send(f"{player['player_name']} when you're finished resolving your action, "
-                                       "you may end turn with this button.", view=view2)
+                                       "you proceed to end of turn things with this button.", view=view2)
         await interaction.message.delete()
 
     @staticmethod

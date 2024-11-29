@@ -133,13 +133,16 @@ class ButtonListener(commands.Cog):
                 return
 
         if game.gamestate.get("gameLocked") == "yes":
-            await interaction.followup.send((f"{interaction.user.mention}, the game was processing"
-                                             " another request when you hit this button. Try again now"),
-                                            ephemeral=True)
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.5)
             game = GamestateHelper(interaction.channel)
-            game.setLockedStatus(False)
-            return
+            if game.gamestate.get("gameLocked") == "yes":
+                await interaction.followup.send((f"{interaction.user.mention}, the game was processing"
+                                                " another request when you hit this button. Try again now"),
+                                                ephemeral=True)
+                await asyncio.sleep(0.5)
+                game = GamestateHelper(interaction.channel)
+                game.setLockedStatus(False)
+                return
         game.setLockedStatus(True)
         # If we want to prevent others from touching someone else's buttons,
         # we can attach FCID{color}_ to the start of the button ID as a check.
