@@ -352,7 +352,7 @@ class GamestateHelper:
         else:
             with open("data/tileAdjacencies.properties", "rb") as f:
                 configs.load(f)
-        if position is not None and sector != "sector3back":
+        if position is not None and sector != "sector3back" and sector != "explodedSupernova":
             tiles = configs.get(position)[0].split(",")
             for adjTile in tiles:
                 discard = 0
@@ -829,6 +829,7 @@ class GamestateHelper:
                         for unit in units:
                             self.remove_units([unit], position)
                         del self.gamestate["board"][position]
+                        self.add_tile(position, 0, "supernovaExploded")
                     else:
                         msg += " equal to or greater, and so the supernova is safe, for now."
                     await interaction.channel.send(msg)
@@ -1301,7 +1302,8 @@ class GamestateHelper:
             for number in newList:
                 nextPlayer = self.getPlayerFromHSLocation(str(number))
                 if all([nextPlayer is not None,
-                        not self.get_gamestate()["players"].get(nextPlayer, {}).get("perma_passed", False)]):
+                        not self.get_gamestate()["players"].get(nextPlayer, {}).get("perma_passed", False),
+                        not self.get_gamestate()["players"].get(nextPlayer, {}).get("eliminated", False)]):
                     return self.get_gamestate()["players"][nextPlayer]
             return None
         else:
@@ -1311,7 +1313,8 @@ class GamestateHelper:
             for player_name in newList:
                 nextPlayer = self.getPlayerFromPlayerName(player_name)
                 if all([nextPlayer is not None,
-                        not self.get_gamestate()["players"].get(nextPlayer, {}).get("perma_passed", False)]):
+                        not self.get_gamestate()["players"].get(nextPlayer, {}).get("perma_passed", False),
+                        not self.get_gamestate()["players"].get(nextPlayer, {}).get("eliminated", False)]):
                     return self.get_gamestate()["players"][nextPlayer]
             return None
         # """

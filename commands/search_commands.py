@@ -267,11 +267,11 @@ class SearchCommands(commands.GroupCog, name="search"):
         for faction, count in total_faction_drafts.most_common():  
             await interaction.channel.send(f"{faction_data[faction]['name']}: {count}")  
         
-        await interaction.channel.send("\nPositional Faction Draft Counts:")  
-        for position, counter in enumerate(positional_drafts, 1):  
-            await interaction.channel.send(f"\nPosition {position}:")  
-            for faction, count in counter.most_common():  
-                await interaction.channel.send(f"{faction_data[faction]['name']}: {count}") 
+        # await interaction.channel.send("\nPositional Faction Draft Counts:")  
+        # for position, counter in enumerate(positional_drafts, 1):  
+        #     await interaction.channel.send(f"\nPosition {position}:")  
+        #     for faction, count in counter.most_common():  
+        #         await interaction.channel.send(f"{faction_data[faction]['name']}: {count}") 
         
         if tourney_only:
             await interaction.followup.send("Round Progression:")  

@@ -1,11 +1,13 @@
 import asyncio
 import discord
+from Buttons.Influence import InfluenceButtons
 from Buttons.Turn import TurnButtons
 from discord.ext import commands
 from discord import app_commands
 from helpers.CombatHelper import Combat
 from helpers.GamestateHelper import GamestateHelper
 from helpers.DrawHelper import DrawHelper
+from helpers.PlayerHelper import PlayerHelper
 
 
 class GameCommands(commands.GroupCog, name="game"):
@@ -157,40 +159,6 @@ class GameCommands(commands.GroupCog, name="game"):
         except KeyError:
             await interaction.response.send_message("That player is not in this game.")
             return
-        for tile in game.gamestate["board"]:
-            if "back" in game.gamestate["board"][tile]["sector"]:
-                continue
-            if game.gamestate["board"][tile]["owner"] == player_color:
-                game.gamestate["board"][tile]["owner"] = 0
-                if len(game.gamestate["board"][tile]["money_pop"]) > 0:
-                    game.gamestate["board"][tile]["money_pop"][0] = 0
-                if len(game.gamestate["board"][tile]["science_pop"]) > 0:
-                    game.gamestate["board"][tile]["science_pop"][0] = 0
-                if len(game.gamestate["board"][tile]["material_pop"]) > 0:
-                    game.gamestate["board"][tile]["material_pop"][0] = 0
-                if len(game.gamestate["board"][tile]["neutral_pop"]) > 0:
-                    game.gamestate["board"][tile]["neutral_pop"][0] = 0
-                if len(game.gamestate["board"][tile]["moneyadv_pop"]) > 0:
-                    game.gamestate["board"][tile]["moneyadv_pop"][0] = 0
-                if len(game.gamestate["board"][tile]["scienceadv_pop"]) > 0:
-                    game.gamestate["board"][tile]["scienceadv_pop"][0] = 0
-                if len(game.gamestate["board"][tile]["materialadv_pop"]) > 0:
-                    game.gamestate["board"][tile]["materialadv_pop"][0] = 0
-                if len(game.gamestate["board"][tile]["neutraladv_pop"]) > 0:
-                    game.gamestate["board"][tile]["neutraladv_pop"][0] = 0
-                game.gamestate["board"][tile]["player_ships"] = [e
-                                                                 for e in game.gamestate["board"][tile]["player_ships"]
-                                                                 if player_color not in e]
-        try:
-            if player_name in game.gamestate["pass_order"]:
-                game.gamestate["pass_order"].remove(player_name)
-        except KeyError:
-            pass
-        try:
-            if player_name in game.gamestate["turn_order"]:
-                game.gamestate["turn_order"].remove(player_name)
-        except KeyError:
-            pass
-        del game.gamestate["players"][str(player.id)]
-        await interaction.response.send_message(f"{player_name} has been removed from the game.")
-        game.update()
+        pObj=game.getPlayerObjectFromColor(player_color)
+        player_helper = PlayerHelper(player.id,pObj)
+        await InfluenceButtons.eliminatePlayer(game, pObj,interaction,player_helper, False)

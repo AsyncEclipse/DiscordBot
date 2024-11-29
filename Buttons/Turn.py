@@ -17,6 +17,8 @@ class TurnButtons:
     @staticmethod
     def noOneElsePassed(player, game: GamestateHelper):
         for p2 in game.get_gamestate()["players"]:
+            if game.get_gamestate()["players"][p2].get("eliminated"):
+                continue
             if game.get_gamestate()["players"][p2].get("passed"):
                 return False
         return True
@@ -105,6 +107,8 @@ class TurnButtons:
                 player_helper.setFirstPlayer(True)
                 for p2 in game.get_gamestate()["players"]:
                     if game.get_gamestate()["players"][p2]["color"] == player["color"]:
+                        continue
+                    if game.get_gamestate()["players"][p2].get("eliminated"):
                         continue
                     player_helper2 = PlayerHelper(p2, game.get_gamestate()["players"][p2])
                     player_helper2.setFirstPlayer(False)
@@ -229,6 +233,8 @@ class TurnButtons:
             await interaction.channel.send(msg)
             return
         for player in game.gamestate["players"]:
+            if game.get_gamestate()["players"][player].get("eliminated"):
+                continue
             p1 = PlayerHelper(player, game.get_player(player))
             if p1.checkBankrupt():
                 view = View()
@@ -433,8 +439,45 @@ class TurnButtons:
                                        view=view)
 
     @staticmethod
+    async def checkTraitor(game: GamestateHelper, player, interaction: discord.Interaction, player_helper: PlayerHelper):
+        for destination in game.gamestate["board"]:
+            playerPresent = False
+            if "player_ships" not in game.gamestate["board"][destination]:
+                continue
+            for ship in game.gamestate["board"][destination]["player_ships"]:
+                if "orb" in ship or "mon" in ship:
+                    continue
+                if player['color'] in ship:
+                    playerPresent = True
+            if playerPresent:
+                for tile in player["reputation_track"]:
+                    if isinstance(tile, str) and "-" in tile and "minor" not in tile:
+                        color = tile.split("-")[2]
+                        p2 = game.getPlayerObjectFromColor(color)
+                        broken = False
+                        if destination in p2["owned_tiles"]:
+                            broken = True
+                        for ship in game.gamestate["board"][destination]["player_ships"]:
+                            if "orb" in ship or "mon" in ship:
+                                continue
+                            if color in ship:
+                                broken = True
+                        if broken:
+                            await DiplomaticRelationsButtons.breakRelationsWith(game, player, p2, interaction)
+                            game.makeEveryoneNotTraitor()
+                            player_helper.setTraitor(True)
+                            game.update_player(player_helper)
+                            await interaction.channel.send(f"{player['player_name']}, you broke relations with {color}"
+                                                        " and now are the Traitor.")
+                            return
+
+
+
+
+    @staticmethod
     async def finishAction(player, game: GamestateHelper, interaction: discord.Interaction,
                            player_helper: PlayerHelper):
+        await TurnButtons.checkTraitor(game, player, interaction, player_helper)
         view = View()
         view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red,
                              custom_id=f"FCID{player['color']}_endTurn"))

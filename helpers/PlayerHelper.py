@@ -125,6 +125,9 @@ class PlayerHelper:
 
     def setTraitor(self, traitor: bool):
         self.stats["traitor"] = traitor
+    
+    def setEliminated(self, eliminated: bool):
+        self.stats["eliminated"] = eliminated
 
     def permanentlyPassTurn(self, passed: bool):
         self.stats["perma_passed"] = passed

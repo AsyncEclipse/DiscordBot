@@ -66,6 +66,8 @@ class InfluenceButtons:
                         continue
                     if "bh" in game.get_gamestate()["board"][adjTile].get("type", ""):
                         continue
+                    if "exploded" in game.get_gamestate()["board"][adjTile].get("type", ""):
+                        continue
                     if "player_ships" not in game.get_gamestate()["board"][adjTile]:
                         continue
                     playerShips = game.get_gamestate()["board"][adjTile]["player_ships"]
@@ -212,6 +214,63 @@ class InfluenceButtons:
                 await interaction.channel.send(f"{p1['username']} Removed 1 {pop.replace('adv', '')} population.")
         if delete:
             await interaction.message.delete()
+        p1 = game.getPlayerObjectFromColor(owner)
+        if len(p1["owned_tiles"]) == 0:
+            view = View()
+            view.add_item(Button(label="Confirm Elimination", style=discord.ButtonStyle.red,
+                                            custom_id=f"FCID{p1['color']}_eliminatePlayer"))
+            view.add_item(Button(label="False Alarm", style=discord.ButtonStyle.gray,
+                                            custom_id=f"FCID{p1['color']}_deleteMsg"))
+            await interaction.channel.send(f"{p1['player_name']} you lost control of your last sector, and may be eliminated if you "
+                                           "cannot afford upkeep or if you have no more ships on the board. "
+                                           "Press this button to confirm elimination", view=view)
+
+    @staticmethod
+    async def eliminatePlayer(game: GamestateHelper, player, interaction: discord.Interaction,
+                                    player_helper: PlayerHelper, delete:bool):
+        await interaction.followup.send(f"{player['username']} was eliminated.")
+        player_helper.setEliminated(True)
+        game.update_player(player_helper)
+        if delete:
+            await interaction.message.delete()
+        game = GamestateHelper(interaction.channel)
+        player_name = player["player_name"]
+        player_color = player["color"]
+        for tile in game.gamestate["board"]:
+            if "back" in game.gamestate["board"][tile]["sector"] or "owner" not in game.gamestate["board"][tile]:
+                continue
+            if game.gamestate["board"][tile]["owner"] == player_color:
+                game.gamestate["board"][tile]["owner"] = 0
+                if len(game.gamestate["board"][tile]["money_pop"]) > 0:
+                    game.gamestate["board"][tile]["money_pop"][0] = 0
+                if len(game.gamestate["board"][tile]["science_pop"]) > 0:
+                    game.gamestate["board"][tile]["science_pop"][0] = 0
+                if len(game.gamestate["board"][tile]["material_pop"]) > 0:
+                    game.gamestate["board"][tile]["material_pop"][0] = 0
+                if len(game.gamestate["board"][tile]["neutral_pop"]) > 0:
+                    game.gamestate["board"][tile]["neutral_pop"][0] = 0
+                if len(game.gamestate["board"][tile]["moneyadv_pop"]) > 0:
+                    game.gamestate["board"][tile]["moneyadv_pop"][0] = 0
+                if len(game.gamestate["board"][tile]["scienceadv_pop"]) > 0:
+                    game.gamestate["board"][tile]["scienceadv_pop"][0] = 0
+                if len(game.gamestate["board"][tile]["materialadv_pop"]) > 0:
+                    game.gamestate["board"][tile]["materialadv_pop"][0] = 0
+                if len(game.gamestate["board"][tile]["neutraladv_pop"]) > 0:
+                    game.gamestate["board"][tile]["neutraladv_pop"][0] = 0
+            game.gamestate["board"][tile]["player_ships"] = [e
+                                                            for e in game.gamestate["board"][tile]["player_ships"]
+                                                            if (player_color not in e or "mon" in e or "orb" in e)]
+        try:
+            if player_name in game.gamestate["pass_order"]:
+                game.gamestate["pass_order"].remove(player_name)
+        except KeyError:
+            pass
+        try:
+            if player_name in game.gamestate["turn_order"]:
+                game.gamestate["turn_order"].remove(player_name)
+        except KeyError:
+            pass
+        game.update()
 
     @staticmethod
     async def addCubeToTrack(game: GamestateHelper, p1, interaction: discord.Interaction, buttonID: str):

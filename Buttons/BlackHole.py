@@ -101,23 +101,4 @@ class BlackHoleButtons:
             player_helper2.permanentlyPassTurn(False)
             game.update_player(player_helper2)
             await interaction.channel.send(p2["player_name"] + " your system has been invaded")
-        for tile in player["reputation_track"]:
-            if isinstance(tile, str) and "-" in tile and "minor" not in tile:
-                color = tile.split("-")[2]
-                p2 = game.getPlayerObjectFromColor(color)
-                broken = False
-                if destination in p2["owned_tiles"]:
-                    broken = True
-                for ship in game.gamestate["board"][destination]["player_ships"]:
-                    if "orb" in ship or "mon" in ship:
-                        continue
-                    if color in ship:
-                        broken = True
-                if broken:
-                    await DiplomaticRelationsButtons.breakRelationsWith(game, player, p2, interaction)
-                    game.makeEveryoneNotTraitor()
-                    player_helper.setTraitor(True)
-                    game.update_player(player_helper)
-                    await interaction.channel.send(f"{player['player_name']}, you broke relations with {color}"
-                                                   " and now are the Traitor.")
         await interaction.message.delete()
