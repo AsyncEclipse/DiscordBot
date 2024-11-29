@@ -1,8 +1,12 @@
+from collections import Counter
+import os
 import discord
 import json
 from discord.ext import commands
 from discord import app_commands
+import config
 from helpers.DrawHelper import DrawHelper
+from helpers.GamestateHelper import GamestateHelper
 
 
 class SearchCommands(commands.GroupCog, name="search"):
@@ -226,3 +230,51 @@ class SearchCommands(commands.GroupCog, name="search"):
                                         f"\n> Description: {tile_info['description']}"
                                         f"\n> Reference Code: {tile_choice.value}",
                                         file=image)
+        
+
+    @app_commands.command(name="draft_stats", description="Stats for the drafted factions")
+    async def draft_stats(self, interaction: discord.Interaction, tourney_only:bool=False):
+        total_faction_drafts = Counter()    
+        round_count = Counter() 
+        positional_drafts = [Counter() for _ in range(6)] 
+        await interaction.response.defer(thinking=True)
+        lowerLim = 100
+        higherLim = 999
+        if tourney_only:
+            higherLim = 288
+            lowerLim = 254
+        for x in range(lowerLim, higherLim):
+            gameName = f"aeb{x}"
+            if not os.path.exists(f"{config.gamestate_path}/{gameName}.json"):
+                continue
+            game = GamestateHelper(None, gameName)
+            if "draftedFactions" not in game.gamestate:
+                continue
+        
+            for position, idNFaction in enumerate(game.gamestate['draftedFactions']):  
+                faction = idNFaction[1]
+                total_faction_drafts[faction] += 1  
+                positional_drafts[position][faction] += 1  
+            if tourney_only:
+                if "roundNum" not in game.gamestate:
+                    round_count["Round 1"] +=1
+                else:
+                    round_count["Round "+str(game.gamestate["roundNum"])] +=1
+            
+        with open("data/factions.json", "r") as f:
+            faction_data = json.load(f)
+        await interaction.followup.send("Total Faction Draft Counts:")  
+        for faction, count in total_faction_drafts.most_common():  
+            await interaction.channel.send(f"{faction_data[faction]['name']}: {count}")  
+        
+        await interaction.channel.send("\nPositional Faction Draft Counts:")  
+        for position, counter in enumerate(positional_drafts, 1):  
+            await interaction.channel.send(f"\nPosition {position}:")  
+            for faction, count in counter.most_common():  
+                await interaction.channel.send(f"{faction_data[faction]['name']}: {count}") 
+        
+        if tourney_only:
+            await interaction.followup.send("Round Progression:")  
+            for round, count in round_count.most_common():  
+                await interaction.channel.send(f"{round}: {count} games")  
+    
