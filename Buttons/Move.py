@@ -163,6 +163,9 @@ class MoveButtons:
             asyncio.create_task(interaction.followup.send(file=await asyncio.to_thread(drawing.mergeLocationsFile,
                                                                                        tiles), ephemeral=True))
 
+
+    
+
     @staticmethod
     async def moveTo(game: GamestateHelper, player, interaction: discord.Interaction,
                      buttonID: str, player_helper: PlayerHelper):
@@ -185,25 +188,6 @@ class MoveButtons:
             player_helper2.permanentlyPassTurn(False)
             game.update_player(player_helper2)
             await interaction.channel.send(p2["player_name"] + " your system has been invaded")
-        for tile in player["reputation_track"]:
-            if isinstance(tile, str) and "-" in tile and "minor" not in tile:
-                color = tile.split("-")[2]
-                p2 = game.getPlayerObjectFromColor(color)
-                broken = False
-                if destination in p2["owned_tiles"]:
-                    broken = True
-                for ship in game.gamestate["board"][destination]["player_ships"]:
-                    if "orb" in ship or "mon" in ship:
-                        continue
-                    if color in ship:
-                        broken = True
-                if broken:
-                    await DiplomaticRelationsButtons.breakRelationsWith(game, player, p2, interaction)
-                    game.makeEveryoneNotTraitor()
-                    player_helper.setTraitor(True)
-                    game.update_player(player_helper)
-                    await interaction.channel.send(f"{player['player_name']}, you broke relations with {color}"
-                                                   " and now are the Traitor.")
         if "bh" in game.get_gamestate()["board"][destination].get("type", ""):
             bhtype = game.get_gamestate()["board"][destination]["type"]
             random_number = random.randint(1, 6)

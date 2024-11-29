@@ -28,7 +28,7 @@ class ResearchButtons:
     async def handle_specific_tech_selection(interaction: discord.Interaction, game: GamestateHelper,
                                              player, tech_details, tech_type, tech):
         cost = ResearchButtons.calculate_cost(tech_details, tech_type, player)
-        game.playerResearchTech(str(interaction.user.id), tech, tech_type)
+        game.playerResearchTech(game.get_player_from_color(player["color"]), tech, tech_type)
         player = game.get_player(interaction.user.id,interaction)
         player_helper = PlayerHelper(interaction.user.id, player)
         with open("data/techs.json", "r") as f:
