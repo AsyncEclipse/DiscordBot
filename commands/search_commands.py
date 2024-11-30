@@ -264,8 +264,10 @@ class SearchCommands(commands.GroupCog, name="search"):
         with open("data/factions.json", "r") as f:
             faction_data = json.load(f)
         await interaction.followup.send("Total Faction Draft Counts:")  
+        summary = ""
         for faction, count in total_faction_drafts.most_common():  
-            await interaction.channel.send(f"{faction_data[faction]['name']}: {count}")  
+            summary += f"{faction_data[faction]['name']}: {count}\n"
+        await interaction.channel.send(summary)  
         
         # await interaction.channel.send("\nPositional Faction Draft Counts:")  
         # for position, counter in enumerate(positional_drafts, 1):  
@@ -275,6 +277,8 @@ class SearchCommands(commands.GroupCog, name="search"):
         
         if tourney_only:
             await interaction.followup.send("Round Progression:")  
+            summary = ""
             for round, count in round_count.most_common():  
-                await interaction.channel.send(f"{round}: {count} games")  
+                summary += f"{round}: {count} games\n"
+            await interaction.channel.send(summary)  
     
