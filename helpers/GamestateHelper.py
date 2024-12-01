@@ -352,7 +352,7 @@ class GamestateHelper:
         else:
             with open("data/tileAdjacencies.properties", "rb") as f:
                 configs.load(f)
-        if position is not None and sector != "sector3back" and sector != "explodedSupernova":
+        if position is not None and sector != "sector3back" and sector != "supernovaExploded":
             tiles = configs.get(position)[0].split(",")
             for adjTile in tiles:
                 discard = 0

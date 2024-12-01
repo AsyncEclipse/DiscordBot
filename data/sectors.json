@@ -5869,7 +5869,7 @@
     "warp": 0,
     "type": "supernova"
   },
-  "explodedSupernova": {
+  "supernovaExploded": {
     "owner": 0,
     "name": "Betelgeuse",
     "ring": 3,

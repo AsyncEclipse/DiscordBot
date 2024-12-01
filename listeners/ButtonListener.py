@@ -75,7 +75,7 @@ class ButtonListener(commands.Cog):
                                                    f"Interaction was received at {start.strftime('%H:%M:%S')}")
                             if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):
                                 await button_log_channel.send(f"{start.strftime('%H:%M:%S')}"
-                                                              " interaction errror hit on {customID}")
+                                                              f" interaction errror hit on {customID}")
                         else:
                             await log_channel.send(log_message)
                             while tb:
