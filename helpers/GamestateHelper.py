@@ -352,7 +352,7 @@ class GamestateHelper:
         else:
             with open("data/tileAdjacencies.properties", "rb") as f:
                 configs.load(f)
-        if position is not None and sector != "sector3back":
+        if position is not None and sector != "sector3back" and sector != "supernovaExploded":
             tiles = configs.get(position)[0].split(",")
             for adjTile in tiles:
                 discard = 0
@@ -408,7 +408,7 @@ class GamestateHelper:
         if "damage_tracker" in self.gamestate["board"][position]:
             if ship in self.gamestate["board"][position]["damage_tracker"]:
                 del self.gamestate["board"][position]["damage_tracker"][ship]
-        if destroyer != "ai":
+        if destroyer != "ai" and destroyer not in ship:
             key = "ships_destroyed_by_" + destroyer
             if key not in self.gamestate["board"][position]:
                 self.gamestate["board"][position][key] = []
@@ -462,6 +462,18 @@ class GamestateHelper:
     def add_warp(self, position):
         self.gamestate["board"][position]["warp"] = 1
         self.gamestate["board"][position]["warpDisc"] = 2
+        self.update()
+
+    def updatePlayerNames(self, interaction: discord.Interaction):
+        if self.gamestate.get("communityMode",False):
+            for player in self.gamestate["players"]:
+                shortFaction = self.getShortFactionNameFromFull(self.gamestate["players"][player]["name"])
+                if "terran" in shortFaction:
+                    shortFaction += "_"
+                emoji = Emoji.getEmojiByName(f"{shortFaction}token")
+                role = discord.utils.get(interaction.guild.roles, name=self.gamestate["players"][player]["color"])
+                if role != None:
+                    self.gamestate["players"][player]["player_name"] = f"{role.mention} {emoji}"
         self.update()
 
     async def updateNamesAndOutRimTiles(self, interaction: discord.Interaction):
@@ -817,6 +829,7 @@ class GamestateHelper:
                         for unit in units:
                             self.remove_units([unit], position)
                         del self.gamestate["board"][position]
+                        self.add_tile(position, 0, "supernovaExploded")
                     else:
                         msg += " equal to or greater, and so the supernova is safe, for now."
                     await interaction.channel.send(msg)
@@ -1289,7 +1302,8 @@ class GamestateHelper:
             for number in newList:
                 nextPlayer = self.getPlayerFromHSLocation(str(number))
                 if all([nextPlayer is not None,
-                        not self.get_gamestate()["players"].get(nextPlayer, {}).get("perma_passed", False)]):
+                        not self.get_gamestate()["players"].get(nextPlayer, {}).get("perma_passed", False),
+                        not self.get_gamestate()["players"].get(nextPlayer, {}).get("eliminated", False)]):
                     return self.get_gamestate()["players"][nextPlayer]
             return None
         else:
@@ -1299,7 +1313,8 @@ class GamestateHelper:
             for player_name in newList:
                 nextPlayer = self.getPlayerFromPlayerName(player_name)
                 if all([nextPlayer is not None,
-                        not self.get_gamestate()["players"].get(nextPlayer, {}).get("perma_passed", False)]):
+                        not self.get_gamestate()["players"].get(nextPlayer, {}).get("perma_passed", False),
+                        not self.get_gamestate()["players"].get(nextPlayer, {}).get("eliminated", False)]):
                     return self.get_gamestate()["players"][nextPlayer]
             return None
         # """

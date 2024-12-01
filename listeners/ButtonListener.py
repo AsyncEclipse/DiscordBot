@@ -75,7 +75,7 @@ class ButtonListener(commands.Cog):
                                                    f"Interaction was received at {start.strftime('%H:%M:%S')}")
                             if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):
                                 await button_log_channel.send(f"{start.strftime('%H:%M:%S')}"
-                                                              " interaction errror hit on {customID}")
+                                                              f" interaction errror hit on {customID}")
                         else:
                             await log_channel.send(log_message)
                             while tb:
@@ -133,13 +133,16 @@ class ButtonListener(commands.Cog):
                 return
 
         if game.gamestate.get("gameLocked") == "yes":
-            await interaction.followup.send((f"{interaction.user.mention}, the game was processing"
-                                             " another request when you hit this button. Try again now"),
-                                            ephemeral=True)
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.5)
             game = GamestateHelper(interaction.channel)
-            game.setLockedStatus(False)
-            return
+            if game.gamestate.get("gameLocked") == "yes":
+                await interaction.followup.send((f"{interaction.user.mention}, the game was processing"
+                                                " another request when you hit this button. Try again now"),
+                                                ephemeral=True)
+                await asyncio.sleep(0.5)
+                game = GamestateHelper(interaction.channel)
+                game.setLockedStatus(False)
+                return
         game.setLockedStatus(True)
         # If we want to prevent others from touching someone else's buttons,
         # we can attach FCID{color}_ to the start of the button ID as a check.
@@ -263,6 +266,8 @@ class ButtonListener(commands.Cog):
             await InfluenceButtons.startInfluence(game, player, interaction)
         if customID.startswith("addInfluenceStart"):
             await InfluenceButtons.addInfluenceStart(game, player, interaction)
+        if customID.startswith("eliminatePlayer"):
+            await InfluenceButtons.eliminatePlayer(game, player, interaction,player_helper,True)
         if customID.startswith("addInfluenceFinish"):
             await InfluenceButtons.addInfluenceFinish(game, player, interaction, customID)
         if customID.startswith("removeInfluenceStart"):

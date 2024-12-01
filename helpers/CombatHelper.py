@@ -15,8 +15,8 @@ from jproperties import Properties
 
 class Combat:
     @staticmethod
-    def exile_orbital_exists(game: GamestateHelper, pos, color):
-        return all([game.find_player_faction_name_from_color(color) == "The Exiles",
+    def exile_orbital_exists(game: GamestateHelper, pos):
+        return all([game.find_player_faction_name_from_color(game.gamestate["board"][pos]["owner"]) == "The Exiles",
                     game.gamestate["board"][pos].get("orbital_pop", [0])[0] == 1])
 
     @staticmethod
@@ -28,7 +28,7 @@ class Combat:
         players = []
         for ship in player_ships:
             color = ship.split("-")[0]
-            if ("orb" in ship and not Combat.exile_orbital_exists(game, pos, color)) or "mon" in ship:
+            if ("orb" in ship and not Combat.exile_orbital_exists(game, pos)) or "mon" in ship:
                 continue
             if color not in players:
                 players.append(color)
@@ -274,10 +274,10 @@ class Combat:
     @staticmethod
     def getBothCombatantShipsBySpeed(game: GamestateHelper, defender: str, attacker: str, playerShipsList, pos):
         ships = []
-        if Combat.doesCombatantHaveMissiles(game, defender, playerShipsList):
-            ships.append((99, defender))
-        if Combat.doesCombatantHaveMissiles(game, attacker, playerShipsList):
-            ships.append((99, attacker))
+        # if Combat.doesCombatantHaveMissiles(game, defender, playerShipsList):
+        #     ships.append((99, defender))
+        # if Combat.doesCombatantHaveMissiles(game, attacker, playerShipsList):
+        #     ships.append((99, attacker))
         for unit in playerShipsList:
             unitType = unit.split("-")[1]
             owner = unit.split('-')[0]
@@ -292,11 +292,17 @@ class Combat:
                     ship = AI_Ship(unit, game.gamestate["advanced_ai"], game.gamestate["wa_ai"])
                     if (ship.speed, owner) not in ships:
                         ships.append((ship.speed, owner))
+                    if len(ship.missile) > 0:
+                        if (ship.speed+99, owner) not in ships:
+                            ships.append((ship.speed+99, owner))
                 else:
                     player = game.get_player_from_color(owner)
                     ship = PlayerShip(game.gamestate["players"][player], unitType)
                     if (ship.speed, owner) not in ships:
                         ships.append((ship.speed, owner))
+                    if len(ship.missile) > 0:
+                        if (ship.speed+99, owner) not in ships:
+                            ships.append((ship.speed+99, owner))
         sorted_ships = sorted(ships, key=lambda x: (x[0], x[1] == defender), reverse=True)
         return sorted_ships
 
@@ -490,14 +496,16 @@ class Combat:
         ships = Combat.getCombatantShipsBySpeed(game, colorOrAI, player_ships, pos)
         update = False
         for ship in ships:
-            if ship[0] == speed or speed == 99:
+            if ship[0] == speed or (speed == ship[0]+99):
                 shipModel = AI_Ship(ship[1], game.gamestate["advanced_ai"], game.gamestate["wa_ai"])
                 name = "The AI"
                 dice = shipModel.dice
                 missiles = ""
                 nonMissiles = " on initiative " + str(speed)
-                if speed == 99:
+                if speed > 98 and speed < 1000:
                     dice = shipModel.missile
+                    if len(shipModel.missile) <1 and speed > 98 and speed < 1000:
+                        continue
                     missiles = "missiles "
                     nonMissiles = ""
                 msg = (f"{name} rolled the following {missiles}with their {ship[2]}"
@@ -587,16 +595,18 @@ class Combat:
         update = False
         popRiftProtector = True
         for ship in ships:
-            if ship[0] == speed or speed == 99 or speed == 1000:
+            if ship[0] == speed or (speed == ship[0]+99) or speed == 1000:
                 name = interaction.user.mention
                 player = game.get_player_from_color(colorOrAI)
                 shipModel = PlayerShip(game.gamestate["players"][player], ship[1])
                 dice = shipModel.dice
                 missiles = ""
                 nonMissiles = " on initiative " + str(speed)
-                if speed == 99:
+                if speed > 98 and speed < 1000:
                     dice = shipModel.missile
-                    missiles = "missiles "
+                    if len(shipModel.missile) <1 and speed > 98 and speed < 1000:
+                        continue
+                    missiles = "missiles "" on initiative " + str(speed)
                     nonMissiles = ""
                 if speed == 1000:
                     nonMissiles = " against the population"
@@ -898,7 +908,7 @@ class Combat:
         if nextSpeed == -1:
             await Combat.checkForMorphShield(game, pos, channel, ships, [attacker, defender])
             for speed, owner in sortedSpeeds:
-                if speed != 99:
+                if speed < 99:
                     nextSpeed = speed
                     nextOwner = owner
                     break
@@ -911,8 +921,8 @@ class Combat:
         game.setCurrentRoller(nextOwner, pos)
         game.setCurrentSpeed(nextSpeed, pos)
         initiative = f"Initiative {nextSpeed}"
-        if nextSpeed == 99:
-            initiative = "missiles"
+        if nextSpeed > 98:
+            initiative = "Initiative" + str(nextSpeed-99)+" missiles"
 
         if [nextSpeed, nextOwner] in game.getRetreatingUnits(pos):
             checker = "FCID" + nextOwner + "_"
@@ -934,13 +944,13 @@ class Combat:
 
                 view.add_item(Button(label=f"Roll {initiative} Ships", style=discord.ButtonStyle.green,
                                      custom_id=f"{checker}rollDice_{pos}_{nextOwner}_{str(nextSpeed)}_deleteMsg"))
-                if nextSpeed != 99 and len(Combat.getRetreatTiles(game, pos, nextOwner)) > 0:
+                if nextSpeed < 99 and len(Combat.getRetreatTiles(game, pos, nextOwner)) > 0:
                     msg += "You may also alternatively choose to start to retreat them. "
                     shipsSpeeds = Combat.getCombatantShipsBySpeed(game, nextOwner, ships, pos)
                     newSpeeds = 0
                     for ship in shipsSpeeds:
                         speed2 = ship[0]
-                        if speed2 != 99 and speed2 != int(speed):
+                        if speed2 < 99 and speed2 != int(speed):
                             newSpeeds += 1
                             break
                     if newSpeeds < 1:
@@ -953,7 +963,7 @@ class Combat:
                                      custom_id=f"{checker}rollDice_{pos}_{nextOwner}_{nextSpeed}_deleteMsg"))
                 playerObj = game.getPlayerObjectFromColor(defender if attacker == "ai" else attacker)
                 msg = f"{playerObj['player_name']}, please roll the dice for the AI ships with {initiative}."
-        await channel.send(msg, view=view)
+        asyncio.create_task(channel.send(msg, view=view))
 
     @staticmethod
     async def finishRetreatingUnits(game: GamestateHelper, buttonID: str, interaction: discord.Interaction, playerObj):
@@ -1035,7 +1045,7 @@ class Combat:
         newSpeeds = 0
         for ship in ships:
             speed2 = ship[0]
-            if speed2 != 99 and speed2 != int(speed):
+            if speed2 < 99 and speed2 != int(speed):
                 newSpeeds += 1
                 break
         if newSpeeds < 1:
@@ -1168,7 +1178,17 @@ class Combat:
         msg += f"The damaged ship has {shipModel.hull - damage + 1}/{shipModel.hull + 1} hp left. "
         oldLength = len(Combat.findPlayersInTile(game, pos))
         if shipModel.hull < damage:
-            game.destroy_ship(ship, pos, colorOrAI)
+            if colorOrAI not in ship:
+                game.destroy_ship(ship, pos, colorOrAI)
+            else:
+                dummyKiller = "ai"
+                attacker = game.get_gamestate()["board"][pos].get("attacker",None)
+                defender = game.get_gamestate()["board"][pos].get("defender",None)
+                if attacker != None and attacker != colorOrAI:
+                    dummyKiller = attacker
+                if defender  != None and defender  != colorOrAI:
+                    dummyKiller = defender
+                game.destroy_ship(ship, pos, dummyKiller)
             if colorOrAI != "ai":
                 msg += (f"{interaction.user.name} destroyed the"
                         f" {Combat.translateShipAbrToName(shipType)} due to the damage exceeding the ships hull.")
@@ -1181,12 +1201,12 @@ class Combat:
                          and "Draco" in game.find_player_faction_name_from_color(Combat.findPlayersInTile(game,
                                                                                                           pos)[1]))
             if len(Combat.findPlayersInTile(game, pos)) < 2 or dracoNAnc:
-                await Combat.declareAWinner(game, interaction, pos)
+                asyncio.create_task(Combat.declareAWinner(game, interaction, pos))
             elif oldLength != len(Combat.findPlayersInTile(game, pos)):
                 drawing = DrawHelper(game.gamestate)
                 await interaction.channel.send("Updated view", view=Combat.getCombatButtons(game, pos),
                                                file=await asyncio.to_thread(drawing.board_tile_image_file, pos))
-                await Combat.startCombat(game, interaction.channel, pos)
+                asyncio.create_task(Combat.startCombat(game, interaction.channel, pos))
         else:
             await interaction.channel.send(msg)
         if button:

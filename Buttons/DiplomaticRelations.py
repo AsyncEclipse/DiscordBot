@@ -159,6 +159,16 @@ class DiplomaticRelationsButtons:
     async def acceptRelationsWith(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
         p2 = buttonID.split("_")[1]
         pID = game.get_player_from_color(p2)
+        alreadyFriends = False
+        for rep in game.get_gamestate()["players"][pID]["reputation_track"]:
+            if isinstance(rep, str) and player["color"] in rep:
+                alreadyFriends = True
+        if alreadyFriends:
+            await interaction.followup.send(f"{game.get_gamestate()['players'][pID]['player_name']} "
+                                        f" already has relations with {player['player_name']}")
+            if "dummy" not in buttonID:
+                await interaction.message.delete()
+            return
         await interaction.followup.send(f"{game.get_gamestate()['players'][pID]['player_name']} your"
                                         f" relations have been accepted by {player['player_name']}")
         p2 = game.get_gamestate()["players"][pID]

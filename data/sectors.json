@@ -5869,6 +5869,73 @@
     "warp": 0,
     "type": "supernova"
   },
+  "supernovaExploded": {
+    "owner": 0,
+    "name": "Betelgeuse",
+    "ring": 3,
+    "disctile": 0,
+    "player_ships": [],
+    "money_pop": [],
+    "money1_snap": [],
+    "money2_snap": [],
+    "moneyadv_pop": [],
+    "moneyadv1_snap": [],
+    "moneyadv2_snap": [],
+    "science_pop": [],
+    "science1_snap": [],
+    "science2_snap": [],
+    "scienceadv_pop": [],
+    "scienceadv1_snap": [],
+    "scienceadv2_snap": [],
+    "material_pop": [],
+    "material1_snap": [],
+    "material2_snap": [],
+    "materialadv_pop": [],
+    "materialadv1_snap": [],
+    "materialadv2_snap": [],
+    "neutral_pop": [],
+    "neutral1_snap": [],
+    "neutral2_snap": [],
+    "neutraladv_pop": [],
+    "neutraladv1_snap": [],
+    "neutraladv2_snap": [],
+    "int_snap": [
+      382,
+      141
+    ],
+    "cru_snap": [
+      550,
+      126
+    ],
+    "drd_snap": [
+      772,
+      553
+    ],
+    "sb_snap": [
+      457,
+      696
+    ],
+    "mon_snap": [
+      513,
+      450
+    ],
+    "orb_snap": [
+      244,
+      505
+    ],
+    "ai_snap": [
+      513,
+      450
+    ],
+    "wormholes": [],
+    "vp": 0,
+    "artifact": 0,
+    "ancient": 0,
+    "guardian": 0,
+    "gcds": 0,
+    "warp": 0,
+    "type": "exploded"
+  },
   "398": {
     "owner": 0,
     "name": "Deneb",

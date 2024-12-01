@@ -952,6 +952,14 @@ class DrawHelper:
                                stroke_width=stroke_width, stroke_fill=stroke_color)
             text_image = text_image.rotate(45, expand=True)
             context.paste(text_image, (0, 0), text_image)
+        
+        if player.get("eliminated"):
+            text_image = Image.new('RGBA', (500, 500), (0, 0, 0, 0))
+            text_drawable = ImageDraw.Draw(text_image)
+            text_drawable.text((0, 50), "Eliminated", fill=(255, 0, 0), font=font,
+                               stroke_width=stroke_width, stroke_fill=stroke_color)
+            text_image = text_image.rotate(45, expand=True)
+            context.paste(text_image, (0, 0), text_image)
         colorActive = "nada"
         if "activePlayerColor" in self.gamestate:
             colorActive = self.gamestate.get("activePlayerColor")

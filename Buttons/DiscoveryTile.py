@@ -123,7 +123,7 @@ class DiscoveryTileButtons:
         with open("data/techs.json", "r") as f:
             tech_data = json.load(f)
         tech_type = tech_data.get(tech)["track"]
-        game.playerResearchTech(str(interaction.user.id), tech, tech_type)
+        game.playerResearchTech(game.get_player_from_color(player["color"]), tech, tech_type)
         tech_details = tech_data.get(tech)
         image = DrawHelper.show_tech_ref_image(tech_details["name"], tech_details['track'])
         if "spoof" in buttonID:
