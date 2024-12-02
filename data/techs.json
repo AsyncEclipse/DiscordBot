@@ -35,6 +35,18 @@
     "num": 5,
     "description": "You may upgrade your Ship Blueprints with Improved Hull Ship Parts. Improved Hull panels can each absorb up to 2 hits during the Combat phase."
   },
+  "imhmod": {
+    "name": "Improved Hull Mod",
+    "base_cost": 6,
+    "min_cost": 4,
+    "track": "grid",
+    "activ1": 0,
+    "art_pt": 0,
+    "infdisc": 0,
+    "dtile": 0,
+    "num": 5,
+    "description": "You may upgrade your Ship Blueprints with modded Improved Hull Ship Parts. Improved Hull panels can each absorb up to 2 hits during the Combat phase but subtract 1 from your initiative."
+  },
   "poc": {
     "name": "Positron Computer",
     "base_cost": 8,
@@ -142,6 +154,18 @@
     "dtile": 0,
     "num": 5,
     "description": "You may upgrade your Ship Blueprints with Phase Shield Ship Parts. Reduces die rolls against this ship by 2, with no effect on Direct Hits. Each Phase Shield requires 1 Energy."
+  },
+  "phsmod": {
+    "name": "Phase Shield Mod",
+    "base_cost": 8,
+    "min_cost": 5,
+    "track": "military",
+    "activ1": 0,
+    "art_pt": 0,
+    "infdisc": 0,
+    "dtile": 0,
+    "num": 5,
+    "description": "You may upgrade your Ship Blueprints with modded Phase Shield Ship Parts. Reduces die rolls against this ship by 2, with no effect on Direct Hits. Each Phase Shield requires 1 Energy but also increases initiative by 1."
   },
   "adm": {
     "name": "Advanced Mining",
