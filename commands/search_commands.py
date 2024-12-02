@@ -132,6 +132,10 @@ class SearchCommands(commands.GroupCog, name="search"):
         app_commands.Choice(name="Science Gain", value="sci"),
         app_commands.Choice(name="Tech Gain", value="tec"),
         app_commands.Choice(name="Warp Portal", value="wap")]
+    community_part_choices = [
+        app_commands.Choice(name="Improved Hull mod", value="imhmod"),
+        app_commands.Choice(name="Phase Shield mod", value="phsmod")
+    ]
 
     @app_commands.command(name="upgrade_reference")
     async def upgrade_reference(self, interaction: discord.Interaction):
@@ -191,6 +195,21 @@ class SearchCommands(commands.GroupCog, name="search"):
     @app_commands.command(name="parts_n_to_z", description="Part information N through Z")
     @app_commands.choices(part_choice=part_choices_n_z)
     async def parts_n_to_z(self, interaction: discord.Interaction, part_choice: app_commands.Choice[str]):
+        with open("data/parts.json", "r") as f:
+            data = json.load(f)
+        part_info = data[part_choice.value]
+        await interaction.response.defer(thinking=True)
+        image = DrawHelper.show_part_ref_image(part_choice.name)
+        await interaction.followup.send(f"{part_info['name']}"
+                                        f"\n> Energy Cost: {part_info['nrg_use']}"
+                                        f"\n> Initiative: {part_info['speed']}"
+                                        f"\n> Description: {part_info['description']}"
+                                        f"\n> Reference Code: {part_choice.value}",
+                                        file=image)
+
+    @app_commands.command(name="community_parts", description="Community balanced parts")
+    @app_commands.choices(part_choice=community_part_choices)
+    async def community_parts(self, interaction: discord.Interaction, part_choice: app_commands.Choice[str]):
         with open("data/parts.json", "r") as f:
             data = json.load(f)
         part_info = data[part_choice.value]
