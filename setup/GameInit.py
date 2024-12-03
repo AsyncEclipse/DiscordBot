@@ -5,13 +5,14 @@ import random
 
 
 class GameInit:
-    def __init__(self, game_name, player_list, ai_ship_type, rift_cannon, turn_order_variant):
+    def __init__(self, game_name, player_list, ai_ship_type, rift_cannon, turn_order_variant, community_parts):
         self.game_name = game_name
         self.player_list = player_list
         self.gamestate = []
         self.ai_ship_type = ai_ship_type
         self.rift_cannon = rift_cannon
         self.turn_order_variant = turn_order_variant
+        self.community_parts = community_parts
 
     def create_game(self):
         game_id = f"aeb{config.game_number}"
@@ -45,6 +46,13 @@ class GameInit:
         if not self.rift_cannon:
             self.gamestate["tech_deck"].remove("rican")
             self.gamestate["discTiles"].remove("ricon")
+        if self.community_parts:
+            while "imh" in self.gamestate["tech_deck"]:
+                self.gamestate["tech_deck"].remove("imh")
+                self.gamestate["tech_deck"].append("imhmod")
+            while "phs" in self.gamestate["tech_deck"]:
+                self.gamestate["tech_deck"].remove("phs")
+                self.gamestate["tech_deck"].append("phsmod")
 
         with open(f"{config.gamestate_path}/{self.gamestate['game_id']}.json", "w") as f:
             json.dump(self.gamestate, f)
