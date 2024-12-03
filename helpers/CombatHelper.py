@@ -29,6 +29,7 @@ class Combat:
         for ship in player_ships:
             color = ship.split("-")[0]
             if ("orb" in ship and not Combat.exile_orbital_exists(game, pos)) or "mon" in ship:
+                print(players)
                 continue
             if color not in players:
                 players.append(color)

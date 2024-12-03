@@ -729,6 +729,10 @@ class GamestateHelper:
         self.update()
         return neutralPop, orbitalPop
 
+    def is_population_gone(self, pos):
+        tile = game.gamestate["board"][pos]
+
+
     def remove_units(self, unit_list, position):
         color = unit_list[0].split("-")[0]
         player = self.get_player_from_color(color)
