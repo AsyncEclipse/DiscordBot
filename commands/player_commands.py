@@ -151,7 +151,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         player_helper = PlayerHelper(player.id, gamestate.get_player(player.id))
         player_helper.adjust_influence_on_action(action.value, amount_to_change)
         game.update_player(player_helper)
-        message = f"{player['player_name']} adjusted action disks for {action.value} by {amount_to_change}."
+        message = f"{player.mention} adjusted action disks for {action.value} by {amount_to_change}."
         await interaction.response.send_message(message)
 
     @app_commands.command(name="research")
