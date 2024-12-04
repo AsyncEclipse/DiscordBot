@@ -29,7 +29,6 @@ class Combat:
         for ship in player_ships:
             color = ship.split("-")[0]
             if ("orb" in ship and not Combat.exile_orbital_exists(game, pos)) or "mon" in ship:
-                print(players)
                 continue
             if color not in players:
                 players.append(color)
@@ -169,11 +168,12 @@ class Combat:
             player_helper = PlayerHelper(game.get_player_from_color(playerColor), player)
             player_helper2 = PlayerHelper(game.get_player_from_color(p2["color"]), p2)
             if any([p2["name"] == "Planta",
+                    game.is_population_gone(pos),
                     "neb" in player_helper.getTechs() and "nea" not in player_helper2.getTechs()]):
                 view = View()
                 view.add_item(Button(label="Destroy All Population", style=discord.ButtonStyle.green,
                                      custom_id=f"FCID{winner}_removeInfluenceFinish_{pos}_graveYard"))
-                message = f"{playerName}, you may destroy all enemy population automatically."
+                message = f"{playerName}, you may destroy all enemy influence and population automatically."
                 asyncio.create_task(thread2.send(message, view=view))
                 view2 = View()
                 view2.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple,
@@ -1129,12 +1129,11 @@ class Combat:
                 p2 = game.getPlayerObjectFromColor(owner)
                 player_helper = PlayerHelper(game.get_player_from_color(player["color"]), player)
                 player_helper2 = PlayerHelper(game.get_player_from_color(p2["color"]), p2)
-                if any([p2["name"] == "Planta",
-                        "neb" in player_helper.getTechs() and "nea" not in player_helper2.getTechs()]):
+                if (p2["name"] == "Planta" or game.is_population_gone(pos) or ("neb" in player_helper.getTechs() and "nea" not in player_helper2.getTechs())):
                     view = View()
                     view.add_item(Button(label="Destroy All Population", style=discord.ButtonStyle.green,
                                          custom_id=f"FCID{winner}_removeInfluenceFinish_{pos}_graveYard"))
-                    message = f"{playerName}, you may destroy all enemy population automatically."
+                    message = f"{playerName}, you may destroy all enemy influence and population automatically."
                     asyncio.create_task(interaction.channel.send(message, view=view))
                     view2 = View()
                     view2.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple,
