@@ -16,10 +16,10 @@ class TurnButtons:
 
     @staticmethod
     def noOneElsePassed(player, game: GamestateHelper):
-        for p2 in game.get_gamestate()["players"]:
-            if game.get_gamestate()["players"][p2].get("eliminated"):
+        for p2 in game.gamestate["players"]:
+            if game.gamestate["players"][p2].get("eliminated"):
                 continue
-            if game.get_gamestate()["players"][p2].get("passed"):
+            if game.gamestate["players"][p2].get("passed"):
                 return False
         return True
 
@@ -30,8 +30,8 @@ class TurnButtons:
                 listHS = [302,304,306,308,310,312,314,316,318]
         for number in listHS:
             nextPlayer = game.getPlayerFromHSLocation(str(number))
-            if nextPlayer is not None and game.get_gamestate()["players"].get(nextPlayer, {}).get("firstPlayer", False):
-                return game.get_gamestate()["players"][nextPlayer]
+            if nextPlayer is not None and game.gamestate["players"].get(nextPlayer, {}).get("firstPlayer", False):
+                return game.gamestate["players"][nextPlayer]
         return None
 
     @staticmethod
@@ -74,6 +74,12 @@ class TurnButtons:
                 msg += " after all battles are resolved"
             view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray,
                                  custom_id="startPopDrop"))
+            if game.gamestate["player_count"] > 3:
+                view.add_item(Button(label="Initiate Diplomatic Relations", style=discord.ButtonStyle.gray,
+                                    custom_id=f"startDiplomaticRelations"))
+            if "minor_species" in game.gamestate and len(game.gamestate["minor_species"]) > 0:
+                view.add_item(Button(label="Minor Species Relations", style=discord.ButtonStyle.green,
+                                    custom_id=f"startMinorRelations"))
             view.add_item(Button(label="Run Upkeep", style=discord.ButtonStyle.blurple, custom_id="runUpkeep"))
             asyncio.create_task(interaction.channel.send(msg + ".", view=view))
         userN = interaction.user.display_name
@@ -105,12 +111,12 @@ class TurnButtons:
                 await interaction.channel.send(f"{player['player_name']} you gained 2 money"
                                                " and the first player marker for next round for passing first.")
                 player_helper.setFirstPlayer(True)
-                for p2 in game.get_gamestate()["players"]:
-                    if game.get_gamestate()["players"][p2]["color"] == player["color"]:
+                for p2 in game.gamestate["players"]:
+                    if game.gamestate["players"][p2]["color"] == player["color"]:
                         continue
-                    if game.get_gamestate()["players"][p2].get("eliminated"):
+                    if game.gamestate["players"][p2].get("eliminated"):
                         continue
-                    player_helper2 = PlayerHelper(p2, game.get_gamestate()["players"][p2])
+                    player_helper2 = PlayerHelper(p2, game.gamestate["players"][p2])
                     player_helper2.setFirstPlayer(False)
                     game.update_player(player_helper2)
             else:
@@ -145,6 +151,12 @@ class TurnButtons:
             view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray,
                                  custom_id="startPopDrop"))
             view.add_item(Button(label="Run Upkeep", style=discord.ButtonStyle.blurple, custom_id="runUpkeep"))
+            if game.gamestate["player_count"] > 3:
+                view.add_item(Button(label="Initiate Diplomatic Relations", style=discord.ButtonStyle.gray,
+                                    custom_id=f"startDiplomaticRelations"))
+            if "minor_species" in game.gamestate and len(game.gamestate["minor_species"]) > 0:
+                view.add_item(Button(label="Minor Species Relations", style=discord.ButtonStyle.green,
+                                    custom_id=f"startMinorRelations"))
             await interaction.channel.send(msg + ".", view=view)
         msg2 = f"{player['username']} Passing"
         await game.updateNamesAndOutRimTiles(interaction)
@@ -206,9 +218,9 @@ class TurnButtons:
                        " can be run without the player entering negative money")
             await interaction.channel.send(message, view=view)
         msg = f"{player['player_name']} has marked themselves as ready for upkeep."
-        if len(game.get_gamestate()["peopleToCheckWith"]) > 0:
+        if len(game.gamestate["peopleToCheckWith"]) > 0:
             msg += " Still waiting on the following factions to press the ready for upkeep button:\n"
-            for color2 in game.get_gamestate()["peopleToCheckWith"]:
+            for color2 in game.gamestate["peopleToCheckWith"]:
                 p2 = game.getPlayerObjectFromColor(color2)
                 msg += p2["player_name"]+"\n"
             await interaction.channel.send(msg)
@@ -225,15 +237,15 @@ class TurnButtons:
             await interaction.channel.send("It appears some tiles are still in conflict. "
                                            "Please resolve them before running upkeep")
             return
-        if "peopleToCheckWith" in game.gamestate and len(game.get_gamestate()["peopleToCheckWith"]) > 0:
+        if "peopleToCheckWith" in game.gamestate and len(game.gamestate["peopleToCheckWith"]) > 0:
             msg = " Still waiting on the following players to hit the ready for upkeep button:\n"
-            for color2 in game.get_gamestate()["peopleToCheckWith"]:
+            for color2 in game.gamestate["peopleToCheckWith"]:
                 p2 = game.getPlayerObjectFromColor(color2)
                 msg += p2["player_name"]+"\n"
             await interaction.channel.send(msg)
             return
         for player in game.gamestate["players"]:
-            if game.get_gamestate()["players"][player].get("eliminated"):
+            if game.gamestate["players"][player].get("eliminated"):
                 continue
             p1 = PlayerHelper(player, game.get_player(player))
             if p1.checkBankrupt():
@@ -333,8 +345,8 @@ class TurnButtons:
         player_helper = PlayerHelper(game.getPlayersID(player), player)
         number_passed = 0
         ordinal = lambda n: "tsnrhtdd"[(n//10%10!=1)*(n%10<4)*n%10::4]  # noqa
-        for p2 in game.get_gamestate()["players"]:
-            if game.get_gamestate()["players"][p2].get("passed"):
+        for p2 in game.gamestate["players"]:
+            if game.gamestate["players"][p2].get("passed"):
                 number_passed += 1
         if player["influence_discs"] != 0:
             if p1.get("passed"):
@@ -389,11 +401,11 @@ class TurnButtons:
         blackView = BlackHoleButtons.getBlackHoleShips(game, player)
         for child in blackView.children:
             view.add_item(child)
-        if all([game.get_gamestate()["player_count"] > 3, not player_helper.isTraitor(),
+        if all([game.gamestate["player_count"] > 3, not player_helper.isTraitor(),
                 len(DiplomaticRelationsButtons.getPlayersWithWhichDiplomatcRelationsCanBeFormed(game, player)) > 0]):
             view.add_item(Button(label="Initiate Diplomatic Relations", style=discord.ButtonStyle.gray,
                                  custom_id=f"FCID{p1['color']}_startDiplomaticRelations"))
-        if not player_helper.isTraitor() and len(game.get_gamestate().get("minor_species", [])) > 0:
+        if not player_helper.isTraitor() and len(game.gamestate.get("minor_species", [])) > 0:
             view.add_item(Button(label="Minor Species Relations", style=discord.ButtonStyle.green,
                                  custom_id=f"FCID{p1['color']}_startMinorRelations"))
         if game.getNumberOfSaveFiles() > 0:
@@ -492,16 +504,18 @@ class TurnButtons:
                                  custom_id=f"FCID{player['color']}_magColShipForResource_money"))
             view.add_item(Button(label="Get 1 Material", style=discord.ButtonStyle.blurple, emoji=emojiC,
                                  custom_id=f"FCID{player['color']}_magColShipForResource_materials"))
-        if all([game.get_gamestate()["player_count"] > 3,
+        if all([game.gamestate["player_count"] > 3,
                 not player_helper.isTraitor(),
                 len(DiplomaticRelationsButtons.getPlayersWithWhichDiplomatcRelationsCanBeFormed(game, player)) > 0]):
             view.add_item(Button(label="Initiate Diplomatic Relations", style=discord.ButtonStyle.gray,
                                  custom_id=f"FCID{player['color']}_startDiplomaticRelations"))
         if "minor_species" in game.gamestate:
             if all([not player_helper.isTraitor(),
-                    len(game.get_gamestate()["minor_species"]) > 0]):
+                    len(game.gamestate["minor_species"]) > 0]):
                 view.add_item(Button(label="Minor Species Relations", style=discord.ButtonStyle.green,
                                      custom_id=f"FCID{player['color']}_startMinorRelations"))
+        view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray,
+                             custom_id=f"FCID{player['color']}_restartTurn"))
         await interaction.channel.send(f"Colony ships available: {player['colony_ships']}\n"
                                        "Do any end of turn abilities and then end your turn.", view=view)
         game.initilizeKey("20MinReminder")

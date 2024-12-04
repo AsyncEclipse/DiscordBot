@@ -11,13 +11,11 @@ from jproperties import Properties
 class ExploreButtons:
     @staticmethod
     def getListOfTilesPlayerIsIn(game, player):
-        tile_map = game.get_gamestate()["board"]
+        tile_map = game.gamestate["board"]
         tiles = []
         for tile in tile_map:
             if any([tile_map[tile].get("owner") == player["color"],
-                    all(["player_ships" in tile_map[tile],
-                         ExploreButtons.doesPlayerHaveUnpinnedShips(player, tile_map[tile].get("player_ships", []),
-                                                                    game, tile)])]):
+                    ExploreButtons.doesPlayerHaveUnpinnedShips(player, tile_map[tile].get("player_ships", []),game, tile)]):
                 tiles.append(tile)
         return tiles
 
@@ -67,11 +65,11 @@ class ExploreButtons:
         playerTiles = ExploreButtons.getListOfTilesPlayerIsIn(game, player)
         for tile in playerTiles:
             for index, adjTile in enumerate(configs.get(tile)[0].split(",")):
-                tile_orientation_index = (index + int(game.get_gamestate()["board"][tile]["orientation"]) // 60) % 6
+                tile_orientation_index = (index + int(game.gamestate["board"][tile]["orientation"]) // 60) % 6
                 if all([adjTile not in tilesViewed,
-                        tile_orientation_index in game.get_gamestate()["board"][tile]["wormholes"],
-                        "back" in game.get_gamestate().get("board", {}).get(str(adjTile), {}).get("sector", [])]):
-                    if int(adjTile) > 299 and len(game.get_gamestate()["tile_deck_300"]) == 0:
+                        tile_orientation_index in game.gamestate["board"][tile]["wormholes"],
+                        "back" in game.gamestate.get("board", {}).get(str(adjTile), {}).get("sector", [])]):
+                    if int(adjTile) > 299 and len(game.gamestate["tile_deck_300"]) == 0:
                         continue
                     tilesViewed.append(adjTile)
         return tilesViewed
@@ -118,7 +116,7 @@ class ExploreButtons:
             if player["name"] == "Descendants of Draco":
                 ring = min(3, int(msg[1]) // 100)
                 discard = 0
-                if "tile_discard_deck_300" in game.get_gamestate():
+                if "tile_discard_deck_300" in game.gamestate:
                     discard = len(game.gamestate["tile_discard_deck_300"])
                 if ring != 3 or discard + len(game.gamestate["tile_deck_300"]) > 0:
                     tileID2 = game.tile_draw(msg[1])
@@ -158,9 +156,9 @@ class ExploreButtons:
         view2 = View()
         game.update_player(player_helper)
         await interaction.channel.send(f"Tile added to position {msg[1]}")
-        if game.get_gamestate()["board"][msg[1]]["ancient"] == 0 or player["name"] == "Descendants of Draco":
+        if game.gamestate["board"][msg[1]]["ancient"] == 0 or player["name"] == "Descendants of Draco":
             view = View()
-            if "bh" in game.get_gamestate()["board"][msg[1]].get("type", ""):
+            if "bh" in game.gamestate["board"][msg[1]].get("type", ""):
                 await interaction.channel.send("This is a black hole tile, "
                                                "so its discovery tile cannot be claimed until a ship moves in, "
                                                "at which point a die will be rolled and it might teleport.")
@@ -172,13 +170,13 @@ class ExploreButtons:
                 await interaction.channel.send(f"{player['player_name']}, choose whether or not"
                                                " to place influence in the tile." + game.displayPlayerStats(player),
                                                view=view)
-                if all([game.get_gamestate()["board"][msg[1]]["ancient"] == 0,
-                        game.get_gamestate()["board"][msg[1]]["disctile"] > 0]):
+                if all([game.gamestate["board"][msg[1]]["ancient"] == 0,
+                        game.gamestate["board"][msg[1]]["disctile"] > 0]):
                     await DiscoveryTileButtons.exploreDiscoveryTile(game, msg[1], interaction, player)
                 view2.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray,
                                       custom_id=f"FCID{player['color']}_startPopDrop"))
         else:
-            ancients = game.get_gamestate()["board"][msg[1]]["ancient"]
+            ancients = game.gamestate["board"][msg[1]]["ancient"]
             await interaction.channel.send(f"There are {ancients} ancients in this tile, "
                                            "so you will not be able to claim it until you fight and destroy them.")
 

@@ -28,7 +28,7 @@ class DraftButtons:
                         "9. Rho Indi Syndicate", "10. The Exiles"])
 
         await channel.send("\n".join(message))
-        playerID = game.get_gamestate()["draftingPlayers"][0]
+        playerID = game.gamestate["draftingPlayers"][0]
         member = interaction.guild.get_member(playerID)
         await channel.send(f"{member.mention}, please draft a faction from those available.",
                            view=DraftButtons.getDraftButtons(game))
@@ -71,7 +71,7 @@ class DraftButtons:
 
     @staticmethod
     async def draftFaction(game: GamestateHelper, interaction: discord.Interaction, customID: str):
-        playerID = game.get_gamestate()["draftingPlayers"][0]
+        playerID = game.gamestate["draftingPlayers"][0]
         if interaction.user.id != playerID:
             await interaction.followup.send("These buttons are not for you", ephemeral=True)
             return
@@ -81,15 +81,15 @@ class DraftButtons:
         await interaction.message.delete()
         game.removeFromKey("draftingPlayers", playerID)
         game.addToKey("draftedFactions", (playerID, factionKey))
-        if len(game.get_gamestate()["draftingPlayers"]) > 0:
-            playerID = game.get_gamestate()["draftingPlayers"][0]
+        if len(game.gamestate["draftingPlayers"]) > 0:
+            playerID = game.gamestate["draftingPlayers"][0]
             member = interaction.guild.get_member(playerID)
             await interaction.channel.send(f"{member.mention}, please draft a faction from those available.",
                                            view=DraftButtons.getDraftButtons(game))
         else:
             factionsList = []
             playerIDList = []
-            for player, faction in game.get_gamestate()["draftedFactions"]:
+            for player, faction in game.gamestate["draftedFactions"]:
                 playerIDList.insert(0, player)
                 factionsList.insert(0, faction)
             await DraftButtons.generalSetup(interaction, game, playerIDList, factionsList)

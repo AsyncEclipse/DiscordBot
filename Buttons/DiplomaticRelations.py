@@ -90,8 +90,8 @@ class DiplomaticRelationsButtons:
     async def startDiplomaticRelations(game: GamestateHelper, player, interaction: discord.Interaction):
         view = View()
         for p2 in DiplomaticRelationsButtons.getPlayersWithWhichDiplomatcRelationsCanBeFormed(game, player):
-            buttonID = f"FCID{player['color']}_offerRelationsTo_" + game.get_gamestate()["players"][p2]["color"]
-            label = f"{game.get_gamestate()['players'][p2]['name']}"
+            buttonID = f"FCID{player['color']}_offerRelationsTo_" + game.gamestate["players"][p2]["color"]
+            label = f"{game.gamestate['players'][p2]['name']}"
             view.add_item(Button(label=label, style=discord.ButtonStyle.blurple, custom_id=buttonID))
         await interaction.channel.send(f"{player['player_name']}, choose which player you would like to offer"
                                        " diplomatic relations to", view=view)
@@ -114,17 +114,17 @@ class DiplomaticRelationsButtons:
         else:
             with open("data/tileAdjacencies.properties", "rb") as f:
                 configs.load(f)
-        for p2 in game.get_gamestate()["players"]:
-            if game.get_gamestate()["players"][p2]["color"] == player["color"]:
+        for p2 in game.gamestate["players"]:
+            if game.gamestate["players"][p2]["color"] == player["color"]:
                 continue
-            if game.get_gamestate()["players"][p2].get("traitor"):
+            if game.gamestate["players"][p2].get("traitor"):
                 continue
             allowable = False
             alreadyFriends = False
-            for tile in game.get_gamestate()["players"][p2]["owned_tiles"]:
+            for tile in game.gamestate["players"][p2]["owned_tiles"]:
                 for tile2 in player["owned_tiles"]:
                     if InfluenceButtons.areTwoTilesAdjacent(game, tile, tile2, configs, False):
-                        for rep in game.get_gamestate()["players"][p2]["reputation_track"]:
+                        for rep in game.gamestate["players"][p2]["reputation_track"]:
                             if isinstance(rep, str) and player["color"] in rep:
                                 alreadyFriends = True
                         allowable = True
@@ -142,7 +142,7 @@ class DiplomaticRelationsButtons:
         buttonID2 = f"FCID{p2}_declineRelationsWith_" + player["color"]
         view.add_item(Button(label="Accept", style=discord.ButtonStyle.green, custom_id=buttonID1))
         view.add_item(Button(label="Decline", style=discord.ButtonStyle.red, custom_id=buttonID2))
-        await interaction.channel.send(f"{game.get_gamestate()['players'][pID]['player_name']}, choose whether"
+        await interaction.channel.send(f"{game.gamestate['players'][pID]['player_name']}, choose whether"
                                        f" you will accept diplomatic relations from {interaction.user.mention}",
                                        view=view)
         await interaction.message.delete()
@@ -151,7 +151,7 @@ class DiplomaticRelationsButtons:
     async def declineRelationsWith(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
         p2 = buttonID.split("_")[1]
         pID = game.get_player_from_color(p2)
-        await interaction.channel.send(f"{game.get_gamestate()['players'][pID]['player_name']} your"
+        await interaction.channel.send(f"{game.gamestate['players'][pID]['player_name']} your"
                                        f" relations have been refused by {player['player_name']}")
         await interaction.message.delete()
 
@@ -160,18 +160,18 @@ class DiplomaticRelationsButtons:
         p2 = buttonID.split("_")[1]
         pID = game.get_player_from_color(p2)
         alreadyFriends = False
-        for rep in game.get_gamestate()["players"][pID]["reputation_track"]:
+        for rep in game.gamestate["players"][pID]["reputation_track"]:
             if isinstance(rep, str) and player["color"] in rep:
                 alreadyFriends = True
         if alreadyFriends:
-            await interaction.followup.send(f"{game.get_gamestate()['players'][pID]['player_name']} "
+            await interaction.followup.send(f"{game.gamestate['players'][pID]['player_name']} "
                                         f" already has relations with {player['player_name']}")
             if "dummy" not in buttonID:
                 await interaction.message.delete()
             return
-        await interaction.followup.send(f"{game.get_gamestate()['players'][pID]['player_name']} your"
+        await interaction.followup.send(f"{game.gamestate['players'][pID]['player_name']} your"
                                         f" relations have been accepted by {player['player_name']}")
-        p2 = game.get_gamestate()["players"][pID]
+        p2 = game.gamestate["players"][pID]
         game.formRelationsBetween(player, p2)
 
         for p in [player, p2]:

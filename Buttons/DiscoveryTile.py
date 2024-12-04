@@ -11,7 +11,7 @@ from discord.ui import View, Button
 class DiscoveryTileButtons:
     @staticmethod
     async def exploreDiscoveryTile(game: GamestateHelper, tile: str, interaction: discord.Interaction, player):
-        # if "discTiles" not in game.get_gamestate():
+        # if "discTiles" not in game.gamestate:
         #    game.fillInDiscTiles()
         if game.gamestate["board"][tile]["disctile"] == 0:
             await interaction.followup.send("No discovery tile in tile " + tile)
@@ -60,7 +60,7 @@ class DiscoveryTileButtons:
             game.update_player(player_helper)
             await UpgradeButtons.startUpgrade(game, player, interaction, False, str(discTile_data[disc]["part"]),"dum")
         elif discTile_data[disc]["gain1"] != 0:
-            techsAvailable = game.get_gamestate()["available_techs"]
+            techsAvailable = game.gamestate["available_techs"]
             with open("data/techs.json", "r") as f:
                 tech_data = json.load(f)
             minCost = 20

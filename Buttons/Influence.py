@@ -49,6 +49,7 @@ class InfluenceButtons:
             with open("data/tileAdjacencies.properties", "rb") as f:
                 configs.load(f)
         tilesViewed = []
+        tile_map = game.gamestate["board"]
         player_helper = PlayerHelper(game.get_player_from_color(player["color"]), player)
         techsResearched = player_helper.getTechs()
         wormHoleGen = "wog" in techsResearched
@@ -56,31 +57,49 @@ class InfluenceButtons:
             if all(player_helper.stats["shrine_in_storage"][n] == 0 for n in [0, 1, 2]):
                 wormHoleGen = True
         tilesToInfluence = []
-        playerTiles = ExploreButtons.getListOfTilesPlayerIsIn(game, player)
+        playerTiles = InfluenceButtons.getListOfTilesPlayerIsInForInfluence(game, player)
         for tile in playerTiles:
             for adjTile in configs.get(tile)[0].split(","):
                 if adjTile not in tilesViewed and InfluenceButtons.areTwoTilesAdjacent(game, tile, adjTile,
                                                                                        configs, wormHoleGen):
                     tilesViewed.append(adjTile)
-                    if adjTile not in game.get_gamestate()["board"]:
+                    if adjTile not in game.gamestate["board"]:
                         continue
-                    if "bh" in game.get_gamestate()["board"][adjTile].get("type", ""):
+                    if "bh" in game.gamestate["board"][adjTile].get("type", ""):
                         continue
-                    if "exploded" in game.get_gamestate()["board"][adjTile].get("type", ""):
+                    if "exploded" in game.gamestate["board"][adjTile].get("type", ""):
                         continue
-                    if "player_ships" not in game.get_gamestate()["board"][adjTile]:
+                    if "player_ships" not in game.gamestate["board"][adjTile]:
                         continue
-                    playerShips = game.get_gamestate()["board"][adjTile]["player_ships"]
+                    playerShips = game.gamestate["board"][adjTile]["player_ships"]
                     playerShips.append(player["color"])
-                    if all([game.get_gamestate()["board"][adjTile].get("owner") == 0,
-                            ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, tile), 
+                    if all([game.gamestate["board"][adjTile].get("owner") == 0,
+                            ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, adjTile), 
                             len(Combat.findPlayersInTile(game, adjTile)) < 2]):
                         tilesToInfluence.append(adjTile)
+            if tile_map[tile].get("warp", 0) == 1:
+                for tile2 in tile_map:
+                    if tile2 not in tilesViewed and tile_map[tile2].get("warp", 0) == 1:
+                        tilesViewed.append(adjTile)
+                        if adjTile not in game.gamestate["board"]:
+                            continue
+                        if "bh" in game.gamestate["board"][adjTile].get("type", ""):
+                            continue
+                        if "exploded" in game.gamestate["board"][adjTile].get("type", ""):
+                            continue
+                        if "player_ships" not in game.gamestate["board"][adjTile]:
+                            continue
+                        playerShips = game.gamestate["board"][adjTile]["player_ships"]
+                        playerShips.append(player["color"])
+                        if all([game.gamestate["board"][adjTile].get("owner") == 0,
+                                ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, adjTile), 
+                                len(Combat.findPlayersInTile(game, adjTile)) < 2]):
+                            tilesToInfluence.append(adjTile)
             if tile not in tilesViewed:
                 tilesViewed.append(tile)
-                playerShips = game.get_gamestate()["board"][tile]["player_ships"]
+                playerShips = game.gamestate["board"][tile]["player_ships"]
                 playerShips.append(player["color"])
-                if all([game.get_gamestate()["board"][tile].get("owner") == 0,
+                if all([game.gamestate["board"][tile].get("owner") == 0,
                         ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, tile)]):
                     if any("ai" in s for s in playerShips):
                         if any("anc" in s for s in playerShips):
@@ -90,6 +109,26 @@ class InfluenceButtons:
                             continue
                     tilesToInfluence.append(tile)
         return tilesToInfluence
+
+    @staticmethod
+    def getListOfTilesPlayerIsInForInfluence(game, player):
+        tile_map = game.gamestate["board"]
+        tiles = []
+        for tile in tile_map:
+            if any([tile_map[tile].get("owner") == player["color"],
+                    InfluenceButtons.doesPlayerHaveShips(player, tile_map[tile].get("player_ships", []))]):
+                tiles.append(tile)
+        return tiles
+    @staticmethod
+    def doesPlayerHaveShips(player, playerShips):
+        playerShipsCount = 0
+        if len(playerShips) == 0:
+            return False
+        for ship in playerShips:
+            if "mon" not in ship:
+                if player["color"] in ship and "orb" not in ship:
+                    playerShipsCount = playerShipsCount + 1
+        return playerShipsCount > 0
 
     @staticmethod
     async def startInfluence(game: GamestateHelper, p1, interaction: discord.Interaction):
@@ -133,7 +172,10 @@ class InfluenceButtons:
     @staticmethod
     async def addInfluenceFinish(game: GamestateHelper, p1, interaction: discord.Interaction, buttonID: str):
         tileLoc = buttonID.split("_")[1]
-        if game.get_gamestate()["board"][tileLoc]["owner"] != 0:
+        if p1["influence_discs"] < 1:
+            await interaction.channel.send(f"{p1['player_name']} does not have any more influence disks.")
+            return
+        if game.gamestate["board"][tileLoc]["owner"] != 0:
             await interaction.channel.send(f"Someone else controls {tileLoc}. "
                                            "Remove their control via valid means first.")
             return
@@ -181,7 +223,7 @@ class InfluenceButtons:
     async def removeInfluenceFinish(game: GamestateHelper, interaction: discord.Interaction,
                                     buttonID: str, delete: bool):
         tileLoc = buttonID.split("_")[1]
-        owner = game.get_gamestate()["board"][tileLoc]["owner"]
+        owner = game.gamestate["board"][tileLoc]["owner"]
         if owner == 0:
             await interaction.channel.send(f"No owner found of {tileLoc}.")
             return

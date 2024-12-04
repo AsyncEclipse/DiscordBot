@@ -21,7 +21,7 @@ class Combat:
 
     @staticmethod
     def findPlayersInTile(game: GamestateHelper, pos: str):
-        tile_map = game.get_gamestate()["board"]
+        tile_map = game.gamestate["board"]
         if "player_ships" not in tile_map[pos]:
             return []
         player_ships = tile_map[pos]["player_ships"][:]
@@ -36,7 +36,7 @@ class Combat:
 
     @staticmethod
     def findShipTypesInTile(game: GamestateHelper, pos: str):
-        tile_map = game.get_gamestate()["board"]
+        tile_map = game.gamestate["board"]
         if "player_ships" not in tile_map[pos]:
             return []
         player_ships = tile_map[pos]["player_ships"][:]
@@ -57,7 +57,7 @@ class Combat:
 
     @staticmethod
     def findTilesInConflict(game: GamestateHelper):
-        tile_map = game.get_gamestate()["board"]
+        tile_map = game.gamestate["board"]
         tiles = []
         for tile in tile_map:
             if len(Combat.findPlayersInTile(game, tile)) > 1:
@@ -74,7 +74,7 @@ class Combat:
 
     @staticmethod
     def findTilesInContention(game: GamestateHelper):
-        tile_map = game.get_gamestate()["board"]
+        tile_map = game.gamestate["board"]
         tiles = []
         for tile in tile_map:
             playersInTile = Combat.findPlayersInTile(game, tile)
@@ -89,7 +89,7 @@ class Combat:
 
     @staticmethod
     def findUnownedTilesToTakeOver(game: GamestateHelper):
-        tile_map = game.get_gamestate()["board"]
+        tile_map = game.gamestate["board"]
         tiles = []
         for tile in tile_map:
             playersInTile = Combat.findPlayersInTile(game, tile)
@@ -121,11 +121,11 @@ class Combat:
     @staticmethod
     async def startCombatThreads(game: GamestateHelper, interaction: discord.Interaction):
         channel = interaction.channel
-        role = discord.utils.get(interaction.guild.roles, name=game.get_gamestate()["game_id"])
+        role = discord.utils.get(interaction.guild.roles, name=game.gamestate["game_id"])
         tiles = Combat.findTilesInConflict(game)
         game.createRoundNum()
         game.initilizeKey("activePlayerColor")
-        if "wa_ai" not in game.get_gamestate():
+        if "wa_ai" not in game.gamestate:
             game.initilizeKey("wa_ai")
         game.initilizeKey("tilesToResolve")
         game.initilizeKey("queuedQuestions")
@@ -137,7 +137,7 @@ class Combat:
             game.setCombatants(Combat.findPlayersInTile(game, tile[1]), tile[1])
             message_to_send = f"Combat will occur in system {tile[0]}, position {tile[1]}."
             message = await channel.send(message_to_send)
-            threadName = (f"{game.get_gamestate()['game_id']}-Round {game.get_gamestate()['roundNum']}, "
+            threadName = (f"{game.gamestate['game_id']}-Round {game.gamestate['roundNum']}, "
                           f"Tile {tile[1]}, Combat")
             thread = await message.create_thread(name=threadName)
             drawing = DrawHelper(game.gamestate)
@@ -147,18 +147,18 @@ class Combat:
             await Combat.startCombat(game, thread, tile[1])
             game.addToKey("tilesToResolve", tile[0])
             for combatatant in Combat.findPlayersInTile(game, tile[1]):
-                if combatatant not in game.get_gamestate()["peopleToCheckWith"] and combatatant != "ai":
+                if combatatant not in game.gamestate["peopleToCheckWith"] and combatatant != "ai":
                     game.addToKey("peopleToCheckWith", combatatant)
         for tile2 in Combat.findTilesInContention(game):
             message_to_send = f"Bombing may occur in system {tile2[0]}, position {tile2[1]}."
             message = await channel.send(message_to_send)
-            threadName = (f"{game.get_gamestate()['game_id']}-Round {game.get_gamestate()['roundNum']}, "
+            threadName = (f"{game.gamestate['game_id']}-Round {game.gamestate['roundNum']}, "
                           f"Tile {tile2[1]}, Bombing")
             thread2 = await message.create_thread(name=threadName)
             drawing = DrawHelper(game.gamestate)
             await thread2.send(role.mention + " population bombing may occur in this tile",
                                file=await asyncio.to_thread(drawing.board_tile_image_file, tile2[1]))
-            owner = game.get_gamestate()["board"][tile2[1]]["owner"]
+            owner = game.gamestate["board"][tile2[1]]["owner"]
             playerColor = Combat.findPlayersInTile(game, tile2[1])[0]
             winner = playerColor
             pos = tile2[1]
@@ -193,12 +193,12 @@ class Combat:
                 message = f"{playerName}, you may roll to attempt to kill enemy population."
                 await thread2.send(message, view=view)
             for combatatant in Combat.findPlayersInTile(game, tile2[1]):
-                if combatatant not in game.get_gamestate()["peopleToCheckWith"] and combatatant != "ai":
+                if combatatant not in game.gamestate["peopleToCheckWith"] and combatatant != "ai":
                     game.addToKey("peopleToCheckWith", combatatant)
         for tile3 in Combat.findUnownedTilesToTakeOver(game):
             message_to_send = f"An influence disc may be placed in system {tile3[0]}, position {tile3[1]}."
             message = await channel.send(message_to_send)
-            threadName = (f"{game.get_gamestate()['game_id']}-Round {game.get_gamestate()['roundNum']},"
+            threadName = (f"{game.gamestate['game_id']}-Round {game.gamestate['roundNum']},"
                           f" Tile {tile3[1]} Influence")
             thread3 = await message.create_thread(name=threadName)
             playerColor = Combat.findPlayersInTile(game, tile3[1])[0]
@@ -218,20 +218,20 @@ class Combat:
                        "you may use this to drop population after taking control of the sector.")
             await thread3.send(message, view=view3)
             for combatatant in Combat.findPlayersInTile(game, tile3[1]):
-                if combatatant not in game.get_gamestate()["peopleToCheckWith"] and combatatant != "ai":
+                if combatatant not in game.gamestate["peopleToCheckWith"] and combatatant != "ai":
                     game.addToKey("peopleToCheckWith", combatatant)
         message = ("Resolve the combats simultaneously if you wish"
                    " -- any reputation draws will be queued to resolve correctly.")
         await channel.send(message)
-        if len(game.get_gamestate()["peopleToCheckWith"]) > 0:
+        if len(game.gamestate["peopleToCheckWith"]) > 0:
             view4 = View()
             view4.add_item(Button(label="Ready for Upkeep", style=discord.ButtonStyle.green,
                                   custom_id="readyForUpkeep"))
             message = (f"The game will require everyone"
-                       f" ({str(len(game.get_gamestate()['peopleToCheckWith']))} players)"
+                       f" ({str(len(game.gamestate['peopleToCheckWith']))} players)"
                        f" involved in an end of round thread to hit this button before upkeep can be run. "
                        f"The players who will need to press are: \n")
-            for color2 in game.get_gamestate()['peopleToCheckWith']:
+            for color2 in game.gamestate['peopleToCheckWith']:
                 p2 = game.getPlayerObjectFromColor(color2)
                 message += p2["player_name"] + "\n"
             await interaction.channel.send(message, view=view4)
@@ -375,9 +375,9 @@ class Combat:
         players = Combat.findPlayersInTile(game, pos)[-2:]
         game.setAttackerAndDefender(players[1], players[0], pos)
         if len(players) > 1:
-            attacker = game.get_gamestate()["board"][pos]["attacker"]
-            defender = game.get_gamestate()["board"][pos]["defender"]
-            tile_map = game.get_gamestate()["board"]
+            attacker = game.gamestate["board"][pos]["attacker"]
+            defender = game.gamestate["board"][pos]["defender"]
+            tile_map = game.gamestate["board"]
             player_ships = tile_map[pos]["player_ships"][:]
             defenderSpeeds = Combat.getCombatantSpeeds(game, defender, player_ships, pos)
             attackerSpeeds = Combat.getCombatantSpeeds(game, attacker, player_ships, pos)
@@ -409,7 +409,7 @@ class Combat:
     @staticmethod
     def getRemovalButtons(game: GamestateHelper, pos: str, player):
         view = View()
-        tile_map = game.get_gamestate()["board"]
+        tile_map = game.gamestate["board"]
         player_ships = tile_map[pos]["player_ships"][:]
         shownShips = []
         checker = "FCID" + player["color"] + "_"
@@ -488,7 +488,7 @@ class Combat:
         colorOrAI = buttonID.split("_")[2]
         speed = int(buttonID.split("_")[3])
         oldLength = len(Combat.findPlayersInTile(game, pos))
-        tile_map = game.get_gamestate()["board"]
+        tile_map = game.gamestate["board"]
         player_ships = tile_map[pos]["player_ships"][:]
         game.setCurrentRoller(colorOrAI, pos)
         game.setCurrentSpeed(speed, pos)
@@ -506,7 +506,7 @@ class Combat:
                     dice = shipModel.missile
                     if len(shipModel.missile) <1 and speed > 98 and speed < 1000:
                         continue
-                    missiles = "missiles "
+                    missiles = "missiles on initiative " + str(speed-99)+" "
                     nonMissiles = ""
                 msg = (f"{name} rolled the following {missiles}with their {ship[2]}"
                        f" {Combat.translateShipAbrToName(ship[1])}{'' if ship[2] == 1 else 's'}{nonMissiles}:\n")
@@ -528,7 +528,7 @@ class Combat:
                 await interaction.channel.send(msg + msg2)
                 oldNumPeeps = len(Combat.findPlayersInTile(game, pos))
                 for die in dieNums:
-                    tile_map = game.get_gamestate()["board"]
+                    tile_map = game.gamestate["board"]
                     player_ships = tile_map[pos]["player_ships"][:]
                     dieNum = die[0]
                     dieDam = die[1]
@@ -572,8 +572,8 @@ class Combat:
                             buttonID = f"assignHitTo_{pos}_{colorOrAI}_{ship}_{dieNum}_{dieDam}"
                             await Combat.assignHitTo(game, buttonID, interaction, False)
         hitsToAssign = 0
-        if "unresolvedHits" in game.get_gamestate()["board"][pos]:
-            hitsToAssign = game.get_gamestate()["board"][pos]["unresolvedHits"]
+        if "unresolvedHits" in game.gamestate["board"][pos]:
+            hitsToAssign = game.gamestate["board"][pos]["unresolvedHits"]
         if hitsToAssign == 0 and oldLength == len(Combat.findPlayersInTile(game, pos)):
             await Combat.promptNextSpeed(game, pos, interaction.channel, update)
 
@@ -586,7 +586,7 @@ class Combat:
             return
         speed = int(buttonID.split("_")[3])
         oldLength = len(Combat.findPlayersInTile(game, pos))
-        tile_map = game.get_gamestate()["board"]
+        tile_map = game.gamestate["board"]
         player_ships = tile_map[pos]["player_ships"][:]
         game.setCurrentRoller(colorOrAI, pos)
         game.setCurrentSpeed(speed, pos)
@@ -606,7 +606,7 @@ class Combat:
                     dice = shipModel.missile
                     if len(shipModel.missile) <1 and speed > 98 and speed < 1000:
                         continue
-                    missiles = "missiles "" on initiative " + str(speed)
+                    missiles = "missiles on initiative " + str(speed-99)+" "
                     nonMissiles = ""
                 if speed == 1000:
                     nonMissiles = " against the population"
@@ -654,7 +654,7 @@ class Combat:
                     counter = 0
                     for die in dieNums:
                         counter = counter + 1
-                        tile_map = game.get_gamestate()["board"]
+                        tile_map = game.gamestate["board"]
                         player_ships = tile_map[pos]["player_ships"][:]
                         dieNum = die[0]
                         dieDam = die[1]
@@ -730,8 +730,8 @@ class Combat:
                                                              custom_id=buttonID))
                                     await interaction.channel.send(msg, view=view)
                                     hitsToAssign = 1
-                                    if "unresolvedHits" in game.get_gamestate()["board"][pos]:
-                                        hitsToAssign = game.get_gamestate()["board"][pos]["unresolvedHits"] + 1
+                                    if "unresolvedHits" in game.gamestate["board"][pos]:
+                                        hitsToAssign = game.gamestate["board"][pos]["unresolvedHits"] + 1
                                     game.setUnresolvedHits(hitsToAssign, pos)
                                 else:
                                     ship = hittableShips[0]
@@ -740,8 +740,8 @@ class Combat:
 
         hitsToAssign = 0
         if speed != 1000:
-            if "unresolvedHits" in game.get_gamestate()["board"][pos]:
-                hitsToAssign = game.get_gamestate()["board"][pos]["unresolvedHits"]
+            if "unresolvedHits" in game.gamestate["board"][pos]:
+                hitsToAssign = game.gamestate["board"][pos]["unresolvedHits"]
             if hitsToAssign == 0 and oldLength == len(Combat.findPlayersInTile(game, pos)):
                 await Combat.promptNextSpeed(game, pos, interaction.channel, update)
 
@@ -752,7 +752,7 @@ class Combat:
         colorOrAI = buttonID.split("_")[2]
         colorDie = buttonID.split("_")[4]
         computerVal = int(buttonID.split("_")[3])
-        tile_map = game.get_gamestate()["board"]
+        tile_map = game.gamestate["board"]
         ships = player_helper.adjust_colony_ships(1)
         player_ships = tile_map[pos]["player_ships"][:]
         name = interaction.user.mention
@@ -780,7 +780,7 @@ class Combat:
 
         oldNumPeeps = len(Combat.findPlayersInTile(game, pos))
         for die in dieNums:
-            tile_map = game.get_gamestate()["board"]
+            tile_map = game.gamestate["board"]
             player_ships = tile_map[pos]["player_ships"][:]
             dieNum, dieDam, dieColor = die
             hittableShips = []
@@ -829,8 +829,8 @@ class Combat:
                             view.add_item(Button(label=label, style=discord.ButtonStyle.red, custom_id=buttonID))
                         asyncio.create_task(interaction.channel.send(msg, view=view))
                         hitsToAssign = 1
-                        if "unresolvedHits" in game.get_gamestate()["board"][pos]:
-                            hitsToAssign = game.get_gamestate()["board"][pos]["unresolvedHits"] + 1
+                        if "unresolvedHits" in game.gamestate["board"][pos]:
+                            hitsToAssign = game.gamestate["board"][pos]["unresolvedHits"] + 1
                         game.setUnresolvedHits(hitsToAssign, pos)
                 else:
                     ship = hittableShips[0]
@@ -842,7 +842,7 @@ class Combat:
     async def killPop(game: GamestateHelper, buttonID: str, interaction: discord.Interaction, player):
         pos = buttonID.split("_")[1]
         cube = buttonID.split("_")[2]
-        owner = game.get_gamestate()["board"][pos]["owner"]
+        owner = game.gamestate["board"][pos]["owner"]
         advanced = ""
         if "adv" in cube:
             advanced = "advanced "
@@ -884,14 +884,14 @@ class Combat:
     @staticmethod
     async def promptNextSpeed(game: GamestateHelper, pos: str, channel, update: bool):
         currentSpeed = None
-        if "currentSpeed" in game.get_gamestate()["board"][pos]:
-            currentSpeed = game.get_gamestate()["board"][pos]["currentSpeed"]
+        if "currentSpeed" in game.gamestate["board"][pos]:
+            currentSpeed = game.gamestate["board"][pos]["currentSpeed"]
         currentRoller = None
-        if "currentRoller" in game.get_gamestate()["board"][pos]:
-            currentRoller = game.get_gamestate()["board"][pos]["currentRoller"]
-        attacker = game.get_gamestate()["board"][pos]["attacker"]
-        defender = game.get_gamestate()["board"][pos]["defender"]
-        ships = game.get_gamestate()["board"][pos]["player_ships"]
+        if "currentRoller" in game.gamestate["board"][pos]:
+            currentRoller = game.gamestate["board"][pos]["currentRoller"]
+        attacker = game.gamestate["board"][pos]["attacker"]
+        defender = game.gamestate["board"][pos]["defender"]
+        ships = game.gamestate["board"][pos]["player_ships"]
         sortedSpeeds = Combat.getBothCombatantShipsBySpeed(game, defender, attacker, ships, pos)
 
         found = False
@@ -973,7 +973,7 @@ class Combat:
         destination = buttonID.split("_")[4]
         oldLength = len(Combat.findPlayersInTile(game, pos))
         game.removeCertainRetreatingUnits((int(speed), colorOrAI), pos)
-        tile_map = game.get_gamestate()["board"]
+        tile_map = game.gamestate["board"]
         player_ships = tile_map[pos]["player_ships"][:]
         for ship in player_ships:
             if colorOrAI in ship and "orb" not in ship and "mon" not in ship and "sb" not in ship:
@@ -1034,7 +1034,7 @@ class Combat:
         colorOrAI = buttonID.split("_")[2]
         speed = buttonID.split("_")[3]
         game.setRetreatingUnits((int(speed), colorOrAI), pos)
-        tile_map = game.get_gamestate()["board"]
+        tile_map = game.gamestate["board"]
         player_ships = tile_map[pos]["player_ships"][:]
         player = game.getPlayerObjectFromColor(colorOrAI)
         await interaction.message.delete()
@@ -1095,7 +1095,7 @@ class Combat:
                    "If other battles/players need to resolve first, "
                    "your draw will be queued after you click this button")
             if int(count) > 0:
-                if "tilesToResolve" in game.get_gamestate():
+                if "tilesToResolve" in game.gamestate:
                     game.addToKey("queuedQuestions", [int(game.gamestate["board"][pos]["sector"]),
                                                       countDraw, playerColor])
                     countDraw += 1
@@ -1182,8 +1182,8 @@ class Combat:
                 game.destroy_ship(ship, pos, colorOrAI)
             else:
                 dummyKiller = "ai"
-                attacker = game.get_gamestate()["board"][pos].get("attacker",None)
-                defender = game.get_gamestate()["board"][pos].get("defender",None)
+                attacker = game.gamestate["board"][pos].get("attacker",None)
+                defender = game.gamestate["board"][pos].get("defender",None)
                 if attacker != None and attacker != colorOrAI:
                     dummyKiller = attacker
                 if defender  != None and defender  != colorOrAI:
@@ -1212,8 +1212,8 @@ class Combat:
         if button:
             await interaction.message.delete()
             hitsToAssign = 0
-            if "unresolvedHits" in game.get_gamestate()["board"][pos]:
-                hitsToAssign = max(game.get_gamestate()["board"][pos]["unresolvedHits"] - 1, 0)
+            if "unresolvedHits" in game.gamestate["board"][pos]:
+                hitsToAssign = max(game.gamestate["board"][pos]["unresolvedHits"] - 1, 0)
             game.setUnresolvedHits(hitsToAssign, pos)
             if hitsToAssign == 0 and oldLength == len(Combat.findPlayersInTile(game, pos)):
                 await Combat.promptNextSpeed(game, pos, interaction.channel, True)
@@ -1224,18 +1224,18 @@ class Combat:
         success = 1
         while not foundNoSuccess and success < 20:
             foundNoSuccess = True
-            queuedDraws = game.get_gamestate()["queuedDraws"][:]
+            queuedDraws = game.gamestate["queuedDraws"][:]
             for system, drawOrder, color, num_options in queuedDraws:
                 systemAheadNeedsToResolve = False
-                for system2 in game.get_gamestate()["tilesToResolve"]:
+                for system2 in game.gamestate["tilesToResolve"]:
                     if system2 > system:
                         systemAheadNeedsToResolve = True
                 if not systemAheadNeedsToResolve or forcedResolve:
                     goodToResolve = True
-                    for system2, drawOrder2, color2, num_options2 in game.get_gamestate()["queuedDraws"]:
+                    for system2, drawOrder2, color2, num_options2 in game.gamestate["queuedDraws"]:
                         if int(system2) > int(system) or (int(system2) == int(system) and drawOrder > drawOrder2):
                             goodToResolve = False
-                    for system2, drawOrder2, color2 in game.get_gamestate()["queuedQuestions"]:
+                    for system2, drawOrder2, color2 in game.gamestate["queuedQuestions"]:
                         if int(system2) > int(system) or (int(system2) == int(system) and drawOrder > drawOrder2):
                             goodToResolve = False
                     if goodToResolve:

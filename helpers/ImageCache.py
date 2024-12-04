@@ -56,6 +56,8 @@ class ImageCacheHelper:
                 return (187, 171)
             elif "shrine" in filename.lower():
                 return (24, 24)
+            elif "reference" in filename.lower():
+                return Image.open(os.path.join(folder, filename)).convert("RGBA").size
             else:
                 return (895, 500)
         elif "minor_species" in folder.lower():

@@ -50,7 +50,7 @@ class ReputationButtons:
         if not queue:
             await interaction.followup.send(msg, ephemeral=True)
         else:
-            threadName = (f"{game.get_gamestate()['game_id']}-Round {game.get_gamestate()['roundNum']}, "
+            threadName = (f"{game.gamestate['game_id']}-Round {game.gamestate['roundNum']}, "
                           f"Queued Draw for {player_helper.stats['color']}")
             actions_channel = discord.utils.get(interaction.guild.channels, name=f"{game.game_id}-actions")
             if actions_channel is not None and isinstance(actions_channel, discord.TextChannel):

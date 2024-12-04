@@ -69,6 +69,8 @@ class ButtonListener(commands.Cog):
                         f"- Component Custom ID: {interaction.data.get('custom_id', 'N/A')}\n"
                         f"- Traceback:"
                     )
+                    game = GamestateHelper(interaction.channel)
+                    game.setLockedStatus(False)
                     try:
                         if isinstance(error, discord.HTTPException) and error.status == 404:
                             await log_channel.send(f"Unknown Interaction error on {customID}. "
@@ -139,11 +141,8 @@ class ButtonListener(commands.Cog):
                 await interaction.followup.send((f"{interaction.user.mention}, the game was processing"
                                                 " another request when you hit this button. Try again now"),
                                                 ephemeral=True)
-                await asyncio.sleep(0.5)
-                game = GamestateHelper(interaction.channel)
-                game.setLockedStatus(False)
                 return
-        game.setLockedStatus(True)
+        
         # If we want to prevent others from touching someone else's buttons,
         # we can attach FCID{color}_ to the start of the button ID as a check.
         # We then remove this check so it doesnt interfere with the rest of the resolution.
@@ -153,7 +152,6 @@ class ButtonListener(commands.Cog):
                 if player["color"] != check.replace("FCID", "") and "dummy" != check.replace("FCID", ""):
                     await interaction.followup.send(interaction.user.mention + ", these buttons are not for you.",
                                                     ephemeral=True)
-                    game.setLockedStatus(False)
                     return
                 customID = customID.replace(check + "_", "")
 
@@ -161,187 +159,186 @@ class ButtonListener(commands.Cog):
             await interaction.message.delete()
         if customID == "showGame":
             await TurnButtons.showGame(game, interaction)
+        if customID.startswith("refreshImage"):
+            await Combat.refreshImage(game, customID, interaction)
         if player is None:
-            game.setLockedStatus(False)
             return
+        game.setLockedStatus(True)
         game.saveLastButtonPressed(customID)
         if customID.startswith("tradeAtRatio"):
             await TurnButtons.tradeAtRatio(game, player, player_helper, interaction, customID)
-        if customID == "showReputation":
+        elif customID == "showReputation":
             await TurnButtons.showReputation(game, interaction, player)
-        if customID == "passForRound":
+        elif customID == "passForRound":
             game.updateSaveFile()
             await TurnButtons.passForRound(player, game, interaction, player_helper)
-        if customID == "permanentlyPass":
+        elif customID == "permanentlyPass":
             await TurnButtons.permanentlyPass(player, game, interaction, player_helper)
-        if customID == "endTurn":
+        elif customID == "endTurn":
             await TurnButtons.endTurn(player, game, interaction)
-        if customID == "restartTurn":
+        elif customID == "restartTurn":
             await TurnButtons.restartTurn(player, game, interaction)
-        if customID == "undoLastTurn":
+        elif customID == "undoLastTurn":
             await TurnButtons.undoLastTurn(player, game, interaction)
-        if customID == "readyForUpkeep":
+        elif customID == "readyForUpkeep":
             await TurnButtons.readyForUpkeep(game, player, interaction, player_helper)
-        if customID == "runUpkeep":
+        elif customID == "runUpkeep":
             game.createRoundNum()
-            rnd = game.get_gamestate()["roundNum"]
+            rnd = game.gamestate["roundNum"]
             await TurnButtons.runUpkeep(game, interaction)
             game.updateSaveFile()
-            round2 = game.get_gamestate()["roundNum"]
+            round2 = game.gamestate["roundNum"]
             if rnd != round2:
                 await interaction.message.delete()
-        if customID.startswith("finishAction"):
+        elif customID.startswith("finishAction"):
             await TurnButtons.finishAction(player, game, interaction, player_helper)
-        if customID.startswith("magColShipForResource"):
+        elif customID.startswith("magColShipForResource"):
             await TurnButtons.magColShipForResource(game, interaction, player, customID, player_helper)
-        if customID.startswith("magColShipForSpentResource"):
+        elif customID.startswith("magColShipForSpentResource"):
             await TurnButtons.magColShipForSpentResource(game, interaction, player, customID, player_helper)
-        if customID.startswith("startExplore"):
+        elif customID.startswith("startExplore"):
             if "2" not in customID:
                 game.updateSaveFile()
             await ExploreButtons.startExplore(game, player, player_helper, interaction, customID)
-        if customID.startswith("exploreTile"):
+        elif customID.startswith("exploreTile"):
             await ExploreButtons.exploreTile(game, player, interaction, customID)
-        if customID.startswith("placeTile"):
+        elif customID.startswith("placeTile"):
             await ExploreButtons.placeTile(game, interaction, player, customID, player_helper)
-        if customID.startswith("discardTile"):
+        elif customID.startswith("discardTile"):
             await ExploreButtons.discardTile(game, interaction, player, customID)
-        if customID.startswith("keepDiscForPoints"):
+        elif customID.startswith("keepDiscForPoints"):
             await DiscoveryTileButtons.keepDiscForPoints(game, player_helper, interaction)
-        if customID.startswith("exploreDiscoveryTile"):
+        elif customID.startswith("exploreDiscoveryTile"):
             await DiscoveryTileButtons.exploreDiscoveryTile(game, customID.split("_")[1], interaction, player)
-        if customID.startswith("usedDiscForAbility"):
+        elif customID.startswith("usedDiscForAbility"):
             await DiscoveryTileButtons.usedDiscForAbility(game, player_helper, interaction, customID, player)
-        if customID.startswith("getFreeTech"):
+        elif customID.startswith("getFreeTech"):
             await DiscoveryTileButtons.getFreeTech(game, interaction, customID, player)
-        if customID.startswith("startResearch"):
+        elif customID.startswith("startResearch"):
             game.updateSaveFile()
             await ResearchButtons.startResearch(game, player, player_helper, interaction, True)
-        if customID.startswith("getTech"):
+        elif customID.startswith("getTech"):
             await ResearchButtons.getTech(game, player, player_helper, interaction, customID)
-        if customID.startswith("placeWarpPortal"):
+        elif customID.startswith("placeWarpPortal"):
             await ResearchButtons.placeWarpPortal(interaction, game, player, customID)
-        if customID.startswith("payAtRatio"):
+        elif customID.startswith("payAtRatio"):
             await ResearchButtons.payAtRatio(game, player, player_helper, interaction, customID)
-        if customID.startswith("gain5resource"):
+        elif customID.startswith("gain5resource"):
             await ResearchButtons.gain5resource(game, player, player_helper, interaction, customID)
-        if customID.startswith("gain3resource"):
+        elif customID.startswith("gain3resource"):
             await ResearchButtons.gain3resource(game, player, player_helper, interaction, customID)
-        if customID.startswith("startBuild"):
+        elif customID.startswith("startBuild"):
             if "2" not in customID:
                 game.updateSaveFile()
             await BuildButtons.startBuild(game, player, interaction, customID, player_helper)
-        if customID.startswith("buildIn"):
+        elif customID.startswith("buildIn"):
             await BuildButtons.buildIn(game, player, interaction, customID)
-        if customID.startswith("buildShip"):
+        elif customID.startswith("buildShip"):
             await BuildButtons.buildShip(game, player, interaction, customID)
-        if customID.startswith("spendMaterial"):
+        elif customID.startswith("spendMaterial"):
             await BuildButtons.spendMaterial(game, player, interaction, customID)
-        if customID.startswith("convertResource"):
+        elif customID.startswith("convertResource"):
             await BuildButtons.convertResource(game, player, interaction, customID)
-        if customID.startswith("finishBuild"):
+        elif customID.startswith("finishBuild"):
             await BuildButtons.finishBuild(game, player, interaction, customID)
-        if customID.startswith("finishSpendForBuild"):
+        elif customID.startswith("finishSpendForBuild"):
             await BuildButtons.finishSpendForBuild(game, player, interaction, customID, player_helper)
-        if customID.startswith("startUpgrade"):
+        elif customID.startswith("startUpgrade"):
             game.updateSaveFile()
             await UpgradeButtons.startUpgrade(game, player, interaction, True, "dummy","dum")
-        if customID.startswith("chooseDifferentShip"):
+        elif customID.startswith("chooseDifferentShip"):
             actions = customID.split("_")[1]
             discTile = customID.split("_")[2]
             await interaction.message.delete()
             await UpgradeButtons.startUpgrade(game, player, interaction, False, discTile,actions)
-        if customID.startswith("upgradeShip"):
+        elif customID.startswith("upgradeShip"):
             await UpgradeButtons.upgradeShip(game, player, interaction, customID, player_helper)
-        if customID.startswith("selectOldPart"):
+        elif customID.startswith("selectOldPart"):
             await UpgradeButtons.selectOldPart(game, player, interaction, customID, player_helper)
-        if customID.startswith("chooseUpgrade"):
+        elif customID.startswith("chooseUpgrade"):
             await UpgradeButtons.chooseUpgrade(game, player, interaction, customID, player_helper)
-        if customID.startswith("startPopDrop"):
+        elif customID.startswith("startPopDrop"):
             await PopulationButtons.startPopDrop(game, player, interaction)
-        if customID.startswith("fillPopulation"):
+        elif customID.startswith("fillPopulation"):
             await PopulationButtons.fillPopulation(game, player, interaction, customID)
-        if customID.startswith("startInfluence"):
+        elif customID.startswith("startInfluence"):
             game.updateSaveFile()
             await InfluenceButtons.startInfluence(game, player, interaction)
-        if customID.startswith("addInfluenceStart"):
+        elif customID.startswith("addInfluenceStart"):
             await InfluenceButtons.addInfluenceStart(game, player, interaction)
-        if customID.startswith("eliminatePlayer"):
+        elif customID.startswith("eliminatePlayer"):
             await InfluenceButtons.eliminatePlayer(game, player, interaction,player_helper,True)
-        if customID.startswith("addInfluenceFinish"):
+        elif customID.startswith("addInfluenceFinish"):
             await InfluenceButtons.addInfluenceFinish(game, player, interaction, customID)
-        if customID.startswith("removeInfluenceStart"):
+        elif customID.startswith("removeInfluenceStart"):
             await InfluenceButtons.removeInfluenceStart(game, player, interaction)
-        if customID.startswith("removeInfluenceFinish"):
+        elif customID.startswith("removeInfluenceFinish"):
             await InfluenceButtons.removeInfluenceFinish(game, interaction, customID, True)
-        if customID.startswith("addCubeToTrack"):
+        elif customID.startswith("addCubeToTrack"):
             await InfluenceButtons.addCubeToTrack(game, player, interaction, customID)
-        if customID.startswith("refreshPopShips"):
+        elif customID.startswith("refreshPopShips"):
             await InfluenceButtons.refreshPopShips(game, player, interaction, customID)
-        if customID.startswith("finishInfluenceAction"):
+        elif customID.startswith("finishInfluenceAction"):
             await InfluenceButtons.finishInfluenceAction(game, player, interaction, player_helper)
-        if customID.startswith("startDiplomaticRelations"):
+        elif customID.startswith("startDiplomaticRelations"):
             game.updateSaveFile()
             await DiplomaticRelationsButtons.startDiplomaticRelations(game, player, interaction)
-        if customID.startswith("startMinorRelations"):
+        elif customID.startswith("startMinorRelations"):
             await DiplomaticRelationsButtons.startMinorRelations(game, player, interaction)
-        if customID.startswith("offerRelationsTo"):
+        elif customID.startswith("offerRelationsTo"):
             await DiplomaticRelationsButtons.offerRelationsTo(game, player, interaction, customID)
-        if customID.startswith("declineRelationsWith"):
+        elif customID.startswith("declineRelationsWith"):
             await DiplomaticRelationsButtons.declineRelationsWith(game, player, interaction, customID)
-        if customID.startswith("acceptRelationsWith"):
+        elif customID.startswith("acceptRelationsWith"):
             await DiplomaticRelationsButtons.acceptRelationsWith(game, player, interaction, customID)
-        if customID.startswith("formMinorRelations"):
+        elif customID.startswith("formMinorRelations"):
             await DiplomaticRelationsButtons.formMinorRelations(game, player, interaction, customID, player_helper)
-        if customID.startswith("reducePopFor"):
+        elif customID.startswith("reducePopFor"):
             await DiplomaticRelationsButtons.reducePopFor(game, player_helper, interaction, customID)
-        if customID.startswith("startMove"):
+        elif customID.startswith("startMove"):
             if customID == "startMove":
                 game.updateSaveFile()
             await MoveButtons.startMove(game, player, interaction, customID, True)
-        if customID.startswith("moveFrom"):
+        elif customID.startswith("moveFrom"):
             await MoveButtons.moveFrom(game, player, interaction, customID)
-        if customID.startswith("moveThisShip"):
+        elif customID.startswith("moveThisShip"):
             await MoveButtons.moveThisShip(game, player, interaction, customID)
-        if customID.startswith("moveTo"):
+        elif customID.startswith("moveTo"):
             await MoveButtons.moveTo(game, player, interaction, customID, player_helper)
-        if customID.startswith("endGame"):
+        elif customID.startswith("endGame"):
             await game.endGame(interaction)
-        if customID.startswith("declareWinner"):
+        elif customID.startswith("declareWinner"):
             await game.declareWinner(interaction)
-        if customID.startswith("rollDice"):
+        elif customID.startswith("rollDice"):
             await Combat.rollDice(game, customID, interaction)
-        if customID.startswith("rerollDie"):
+        elif customID.startswith("rerollDie"):
             await Combat.rerollDie(game, customID, interaction, player, player_helper)
-        if customID.startswith("refreshImage"):
-            await Combat.refreshImage(game, customID, interaction)
-        if customID.startswith("removeUnits"):
+        elif customID.startswith("removeUnits"):
             await Combat.removeUnits(game, customID, player, interaction)
-        if customID.startswith("assignHitTo"):
+        elif customID.startswith("assignHitTo"):
             await Combat.assignHitTo(game, customID, interaction, True)
-        if customID.startswith("drawReputation"):
+        elif customID.startswith("drawReputation"):
             await Combat.drawReputation(game, customID, interaction, player_helper)
-        if customID.startswith("removeThisUnit"):
+        elif customID.startswith("removeThisUnit"):
             await Combat.removeThisUnit(game, customID, player, interaction)
-        if customID.startswith("startToRetreatUnits"):
+        elif customID.startswith("startToRetreatUnits"):
             await Combat.startToRetreatUnits(game, customID, interaction)
-        if customID.startswith("finishRetreatingUnits"):
+        elif customID.startswith("finishRetreatingUnits"):
             await Combat.finishRetreatingUnits(game, customID, interaction, player)
-        if customID.startswith("killPop"):
+        elif customID.startswith("killPop"):
             await Combat.killPop(game, customID, interaction, player)
-        if customID.startswith("placeShrineInitial"):
+        elif customID.startswith("placeShrineInitial"):
             await ShrineButtons.placeShrineInitial(game, player, interaction, customID)
-        if customID.startswith("placeShrineFinal"):
+        elif customID.startswith("placeShrineFinal"):
             await ShrineButtons.placeShrineFinal(game, player, interaction, customID, player_helper)
-        if customID.startswith("draftFaction"):
+        elif customID.startswith("draftFaction"):
             await DraftButtons.draftFaction(game, interaction, customID)
-        if customID.startswith("pulsarAction"):
+        elif customID.startswith("pulsarAction"):
             game.updateSaveFile()
-            
             await PulsarButtons.pulsarAction(game, player, interaction, player_helper, customID)
-        if customID.startswith("blackHoleReturnStart"):
+        elif customID.startswith("blackHoleReturnStart"):
             await BlackHoleButtons.blackHoleReturnStart(game, player, customID, player_helper, interaction)
-        if customID.startswith("blackHoleFinish"):
+        elif customID.startswith("blackHoleFinish"):
             await BlackHoleButtons.blackHoleFinish(game, player, customID, player_helper, interaction)
         end_time = time.perf_counter()
         elapsed_time = end_time - start_time

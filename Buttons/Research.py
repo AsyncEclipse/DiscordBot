@@ -161,7 +161,7 @@ class ResearchButtons:
         drawing = DrawHelper(game.gamestate)
         view = View()
         view2 = View()
-        techsAvailable = game.get_gamestate()["available_techs"]
+        techsAvailable = game.gamestate["available_techs"]
         with open("data/techs.json", "r") as f:
             tech_data = json.load(f)
 
