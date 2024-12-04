@@ -70,7 +70,7 @@ class TurnButtons:
             if any([len(Combat.findTilesInConflict(game)) > 0,
                     len(Combat.findUnownedTilesToTakeOver(game)) > 0,
                     len(Combat.findTilesInContention(game)) > 0]):
-                asyncio.create_task(Combat.startCombatThreads(game, interaction))
+                Combat.startCombatThreads(game, interaction)
                 msg += " after all battles are resolved"
             view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray,
                                  custom_id="startPopDrop"))
@@ -90,7 +90,7 @@ class TurnButtons:
             msg = (f"End of {userN}'s turn. "
                    f"They used their action to {player['lastAction']}. {player['detailsOflastAction']}")
         await game.updateNamesAndOutRimTiles(interaction)
-        await interaction.message.delete()
+        asyncio.create_task(interaction.message.delete())
         if "-" in interaction.channel.name:
             thread_name = interaction.channel.name.split("-")[0] + "-bot-map-updates"
             thread = discord.utils.get(interaction.channel.threads, name=thread_name)

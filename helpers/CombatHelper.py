@@ -141,9 +141,9 @@ class Combat:
                           f"Tile {tile[1]}, Combat")
             thread = await message.create_thread(name=threadName)
             drawing = DrawHelper(game.gamestate)
-            await thread.send(role.mention + "Combat will occur in this tile",
+            asyncio.create_task(thread.send(role.mention + "Combat will occur in this tile",
                               view=Combat.getCombatButtons(game, tile[1]),
-                              file=await asyncio.to_thread(drawing.board_tile_image_file, tile[1]))
+                              file=await asyncio.to_thread(drawing.board_tile_image_file, tile[1])))
             await Combat.startCombat(game, thread, tile[1])
             game.addToKey("tilesToResolve", tile[0])
             for combatatant in Combat.findPlayersInTile(game, tile[1]):
@@ -156,8 +156,8 @@ class Combat:
                           f"Tile {tile2[1]}, Bombing")
             thread2 = await message.create_thread(name=threadName)
             drawing = DrawHelper(game.gamestate)
-            await thread2.send(role.mention + " population bombing may occur in this tile",
-                               file=await asyncio.to_thread(drawing.board_tile_image_file, tile2[1]))
+            asyncio.create_task(thread2.send(role.mention + " population bombing may occur in this tile",
+                               file=await asyncio.to_thread(drawing.board_tile_image_file, tile2[1])))
             owner = game.gamestate["board"][tile2[1]]["owner"]
             playerColor = Combat.findPlayersInTile(game, tile2[1])[0]
             winner = playerColor
@@ -191,7 +191,7 @@ class Combat:
                 view.add_item(Button(label="Roll to Destroy Population", style=discord.ButtonStyle.green,
                                      custom_id=f"FCID{winner}_rollDice_{pos}_{winner}_1000"))
                 message = f"{playerName}, you may roll to attempt to kill enemy population."
-                await thread2.send(message, view=view)
+                asyncio.create_task(thread2.send(message, view=view))
             for combatatant in Combat.findPlayersInTile(game, tile2[1]):
                 if combatatant not in game.gamestate["peopleToCheckWith"] and combatatant != "ai":
                     game.addToKey("peopleToCheckWith", combatatant)
@@ -210,19 +210,19 @@ class Combat:
             view2.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple,
                                   custom_id=f"FCID{winner}_addInfluenceFinish_{pos}"))
             message = (f"{playerName}, you may place your influence on the tile after destroying the enemy population.")
-            await thread3.send(message, view=view2)
+            asyncio.create_task(thread3.send(message, view=view2))
             view3 = View()
             view3.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray,
                                   custom_id=f"FCID{player['color']}_startPopDrop"))
             message = (f"{playerName}, if you have enough colony ships, "
                        "you may use this to drop population after taking control of the sector.")
-            await thread3.send(message, view=view3)
+            asyncio.create_task(thread3.send(message, view=view3))
             for combatatant in Combat.findPlayersInTile(game, tile3[1]):
                 if combatatant not in game.gamestate["peopleToCheckWith"] and combatatant != "ai":
                     game.addToKey("peopleToCheckWith", combatatant)
         message = ("Resolve the combats simultaneously if you wish"
                    " -- any reputation draws will be queued to resolve correctly.")
-        await channel.send(message)
+        asyncio.create_task(channel.send(message))
         if len(game.gamestate["peopleToCheckWith"]) > 0:
             view4 = View()
             view4.add_item(Button(label="Ready for Upkeep", style=discord.ButtonStyle.green,
@@ -234,7 +234,7 @@ class Combat:
             for color2 in game.gamestate['peopleToCheckWith']:
                 p2 = game.getPlayerObjectFromColor(color2)
                 message += p2["player_name"] + "\n"
-            await interaction.channel.send(message, view=view4)
+            asyncio.create_task(interaction.channel.send(message, view=view4))
 
     @staticmethod
     def getCombatantShipsBySpeed(game: GamestateHelper, colorOrAI: str, playerShipsList, pos):
@@ -1068,9 +1068,9 @@ class Combat:
                 view = View()
                 view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray,
                                      custom_id="startPopDrop"))
-                await actions_channel.send(role.mention+" Please run upkeep after all post combat events are resolved. "
+                asyncio.create_task(actions_channel.send(role.mention+" Please run upkeep after all post combat events are resolved. "
                                            "You can use this button to drop pop after taking control of a tile",
-                                           view=view)
+                                           view=view))
         if "combatants" in game.gamestate["board"][pos]:
             players = game.gamestate["board"][pos]["combatants"]
         else:
@@ -1201,12 +1201,12 @@ class Combat:
                          and "Draco" in game.find_player_faction_name_from_color(Combat.findPlayersInTile(game,
                                                                                                           pos)[1]))
             if len(Combat.findPlayersInTile(game, pos)) < 2 or dracoNAnc:
-                asyncio.create_task(Combat.declareAWinner(game, interaction, pos))
+                await Combat.declareAWinner(game, interaction, pos)
             elif oldLength != len(Combat.findPlayersInTile(game, pos)):
                 drawing = DrawHelper(game.gamestate)
-                await interaction.channel.send("Updated view", view=Combat.getCombatButtons(game, pos),
-                                               file=await asyncio.to_thread(drawing.board_tile_image_file, pos))
-                asyncio.create_task(Combat.startCombat(game, interaction.channel, pos))
+                asyncio.create_task(interaction.channel.send("Updated view", view=Combat.getCombatButtons(game, pos),
+                                               file=await asyncio.to_thread(drawing.board_tile_image_file, pos)))
+                await Combat.startCombat(game, interaction.channel, pos)
         else:
             await interaction.channel.send(msg)
         if button:
