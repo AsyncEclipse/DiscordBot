@@ -40,8 +40,8 @@ class ButtonListener(commands.Cog):
             button_log_channel = discord.utils.get(interaction.guild.channels, name="button-log")
             customID = interaction.data["custom_id"]
             if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):
-                await button_log_channel.send(f"{start.strftime('%H:%M:%S')} {customID} pressed:"
-                                              f" {interaction.message.jump_url}")
+                asyncio.create_task(button_log_channel.send(f"{start.strftime('%H:%M:%S')} {customID} pressed:"
+                                              f" {interaction.message.jump_url}"))
 
             try:
                 await interaction.response.defer(thinking=False)
@@ -73,8 +73,8 @@ class ButtonListener(commands.Cog):
                     game.setLockedStatus(False)
                     try:
                         if isinstance(error, discord.HTTPException) and error.status == 404:
-                            await log_channel.send(f"Unknown Interaction error on {customID}. "
-                                                   f"Interaction was received at {start.strftime('%H:%M:%S')}")
+                            asyncio.create_task(log_channel.send(f"Unknown Interaction error on {customID}. "
+                                                   f"Interaction was received at {start.strftime('%H:%M:%S')}"))
                             if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):
                                 await button_log_channel.send(f"{start.strftime('%H:%M:%S')}"
                                                               f" interaction errror hit on {customID}")
