@@ -119,6 +119,13 @@ class GameCommands(commands.GroupCog, name="game"):
         game = GamestateHelper(interaction.channel)
         game.initilizeKey("5playerhyperlane")
 
+
+    @app_commands.command(name="unlock_hold")
+    async def unlock_hold(self, interaction: discord.Interaction):
+        await interaction.response.send_message("The hold on actions has been released")
+        game = GamestateHelper(interaction.channel)
+        game.setLockedStatus(False)
+
     @app_commands.command(name="set_round")
     async def set_round(self, interaction: discord.Interaction, rnd: int):
         game = GamestateHelper(interaction.channel)
