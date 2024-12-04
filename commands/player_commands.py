@@ -167,8 +167,8 @@ class PlayerCommands(commands.GroupCog, name="player"):
     async def change_color(self, interaction: discord.Interaction, color: app_commands.Choice[str]):
         game = GamestateHelper(interaction.channel)
         player = game.get_player(interaction.user.id,interaction)
-        for p2 in game.get_gamestate()["players"]:
-            if game.get_gamestate()["players"][p2]["color"] == color.value:
+        for p2 in game.gamestate["players"]:
+            if game.gamestate["players"][p2]["color"] == color.value:
                 await interaction.channel.send("Another player already uses that color")
                 return
 

@@ -82,7 +82,7 @@ class BuildButtons:
             ships.remove("Orbital")
         if "mon" not in player["nano_tech"] or "mon" in build:
             ships.remove("Monolith")
-        player_ships = game.get_gamestate()["board"][build_loc]["player_ships"]
+        player_ships = game.gamestate["board"][build_loc]["player_ships"]
         for shipInTile in player_ships:
             if "orb" in shipInTile and "Orbital" in ships:
                 ships.remove("Orbital")
@@ -258,6 +258,6 @@ class BuildButtons:
                                   custom_id="startBuild2_deleteMsg"))
         view2.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                               custom_id=f"FCID{player['color']}_finishAction"))
-        await interaction.channel.send(f"{player['player_name']} use buttons to finish turn or"
+        await interaction.channel.send(f"{player['player_name']} use buttons to finish the action or"
                                        " potentially build somewhere else.", view=view2)
         await interaction.message.delete()

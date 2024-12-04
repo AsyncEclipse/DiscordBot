@@ -19,7 +19,7 @@ from helpers.ShipHelper import PlayerShip
 class MoveButtons:
     @staticmethod
     def getListOfUnpinnedShipTiles(game: GamestateHelper, player):
-        tile_map = game.get_gamestate()["board"]
+        tile_map = game.gamestate["board"]
         tiles = []
         for tile in tile_map:
             if "player_ships" in tile_map[tile]:
@@ -61,7 +61,7 @@ class MoveButtons:
             ship = PlayerShip(player, shipType)
             shipRange = ship.getRange()
             shipTest = f"{player_color}-{game.getShipShortName(shipType)}"
-            if shipTest in game.get_gamestate()["board"][originT]["player_ships"] and shipRange > 0:
+            if shipTest in game.gamestate["board"][originT]["player_ships"] and shipRange > 0:
                 shipEmoji = Emoji.getEmojiByName(player['color'] + game.getShipShortName(shipType))
                 view.add_item(Button(label=f"{shipType.capitalize()} (Range: {shipRange})", emoji=shipEmoji,
                                      style=discord.ButtonStyle.blurple,
@@ -88,7 +88,7 @@ class MoveButtons:
         else:
             with open("data/tileAdjacencies.properties", "rb") as f:
                 configs.load(f)
-        tile_map = game.get_gamestate()["board"]
+        tile_map = game.gamestate["board"]
         player_helper = PlayerHelper(game.get_player_from_color(player["color"]), player)
         techsResearched = player_helper.getTechs()
         wormHoleGen = "wog" in techsResearched
@@ -188,8 +188,8 @@ class MoveButtons:
             player_helper2.permanentlyPassTurn(False)
             game.update_player(player_helper2)
             await interaction.channel.send(p2["player_name"] + " your system has been invaded")
-        if "bh" in game.get_gamestate()["board"][destination].get("type", ""):
-            bhtype = game.get_gamestate()["board"][destination]["type"]
+        if "bh" in game.gamestate["board"][destination].get("type", ""):
+            bhtype = game.gamestate["board"][destination]["type"]
             random_number = random.randint(1, 6)
             roundNum = 1
             game.remove_units([shipName], destination)
@@ -197,7 +197,7 @@ class MoveButtons:
             if "roundNum" in game.gamestate:
                 roundNum = game.gamestate["roundNum"]
             location = " any inner (first ring) sector"
-            if "border" in game.get_gamestate()["board"][destination]["type"]:
+            if "border" in game.gamestate["board"][destination]["type"]:
                 location = " any tile with a wormhole facing an empty space."
             msg = f"This is a black hole tile, and the ship rolled a {random_number}. That means it will "
             if random_number == 1 or random_number == 6:
@@ -231,7 +231,7 @@ class MoveButtons:
                     await interaction.channel.send(player["player_name"] + " Select a tile to return the ship to",
                                                    view=BlackHoleButtons.findBlackHoleOptions(game, player, shipName,
                                                                                               bhtype, "damage"))
-            if game.get_gamestate()["board"][destination]["disctile"] > 0:
+            if game.gamestate["board"][destination]["disctile"] > 0:
                 await DiscoveryTileButtons.exploreDiscoveryTile(game, destination, interaction, player)
 
         if moveCount == 1:

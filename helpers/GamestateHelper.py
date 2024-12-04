@@ -542,8 +542,8 @@ class GamestateHelper:
         influence_track = [30, 25, 21, 17, 13, 10, 7, 5, 3, 2, 1, 0, 0, 0, 0, 0]
         moneyDecrease = str(influence_track[player["influence_discs"]])
         moneyDecrease2 = "Error"
-        if player["influence_discs"] - 1 > -1:
-            moneyDecrease2 = str(influence_track[player["influence_discs"] - 1])
+        if player["influence_discs"] > 0:
+            moneyDecrease2 = "-"+str(influence_track[player["influence_discs"] - 1])
         else:
             moneyDecrease2 = "Illegal (discs have run out)"
         science = player["science"]
@@ -558,11 +558,15 @@ class GamestateHelper:
         msg = "\n".join([". Your current economic situation is as follows:",
                          f"{moneyEmoji}: {money} ({moneyIncrease} - {moneyDecrease})",
                          f"{scienceEmoji}: {science} ({scienceIncrease})",
-                         f"{materialEmoji}: {materials} ({materialsIncrease})",
-                         "If you spend another disk, your maintenance cost"
-                         + f" will go from -{moneyDecrease} to -{moneyDecrease2}.",
-                         "If you find a way to drop another money cube, your income"
-                         + f" will go from {moneyIncrease} to {moneyIncrease2}."])
+                         f"{materialEmoji}: {materials} ({materialsIncrease})"])
+        if player["influence_discs"] > 0:
+            msg +=f"\nIf you spend another disk, your maintenance cost will go from -{moneyDecrease} to {moneyDecrease2}."
+        else:
+            msg += "\nYou cannot do more actions because you are out of influence disks"
+        if player['money_pop_cubes'] > 1:
+            msg += f"\nIf you find a way to drop another money cube, your income will go from {moneyIncrease} to {moneyIncrease2}."
+        else:
+            msg += "\nYou cannot place more money cubes because they have all been placed."
         return msg
 
     def setCombatants(self, players, pos):
@@ -1268,15 +1272,15 @@ class GamestateHelper:
                 asyncio.create_task(self.showGame(thread, message))
 
     def getPlayerFromHSLocation(self, location):
-        if "sector" not in self.get_gamestate()["board"].get(location, []):
+        if "sector" not in self.gamestate["board"].get(location, []):
             return None
-        tileID = self.get_gamestate()["board"][location]["sector"]
-        return next((player for player in self.get_gamestate()["players"]
-                     if str(self.get_gamestate()["players"][player]["home_planet"]) == tileID), None)
+        tileID = self.gamestate["board"][location]["sector"]
+        return next((player for player in self.gamestate["players"]
+                     if str(self.gamestate["players"][player]["home_planet"]) == tileID), None)
 
     def getPlayerFromPlayerName(self, player_name):
-        return next((player for player in self.get_gamestate()["players"]
-                     if str(self.get_gamestate()["players"][player]["player_name"]) == player_name), None)
+        return next((player for player in self.gamestate["players"]
+                     if str(self.gamestate["players"][player]["player_name"]) == player_name), None)
 
     def is_everyone_passed(self):
         listHS = [201, 203, 205, 207, 209, 211]
@@ -1284,12 +1288,12 @@ class GamestateHelper:
                 listHS = [302,304,306,308,310,312,314,316,318]
         for number in listHS:
             nextPlayer = self.getPlayerFromHSLocation(str(number))
-            if nextPlayer is not None and not self.get_gamestate()["players"].get(nextPlayer, {}).get("passed", False):
+            if nextPlayer is not None and not self.gamestate["players"].get(nextPlayer, {}).get("passed", False):
                 return False
         return True
 
     def get_next_player(self, player):
-        if player["player_name"] not in self.get_gamestate().get("turn_order", []):
+        if player["player_name"] not in self.gamestate.get("turn_order", []):
             listHS = [201, 203, 205, 207, 209, 211]
             if self.gamestate["player_count"] > 6:
                 listHS = [302,304,306,308,310,312,314,316,318]
@@ -1302,20 +1306,20 @@ class GamestateHelper:
             for number in newList:
                 nextPlayer = self.getPlayerFromHSLocation(str(number))
                 if all([nextPlayer is not None,
-                        not self.get_gamestate()["players"].get(nextPlayer, {}).get("perma_passed", False),
-                        not self.get_gamestate()["players"].get(nextPlayer, {}).get("eliminated", False)]):
-                    return self.get_gamestate()["players"][nextPlayer]
+                        not self.gamestate["players"].get(nextPlayer, {}).get("perma_passed", False),
+                        not self.gamestate["players"].get(nextPlayer, {}).get("eliminated", False)]):
+                    return self.gamestate["players"][nextPlayer]
             return None
         else:
-            listPlayers = self.get_gamestate()["turn_order"]
+            listPlayers = self.gamestate["turn_order"]
             index = listPlayers.index(player["player_name"])
             newList = listPlayers[index + 1:] + listPlayers[:index] + [listPlayers[index]]
             for player_name in newList:
                 nextPlayer = self.getPlayerFromPlayerName(player_name)
                 if all([nextPlayer is not None,
-                        not self.get_gamestate()["players"].get(nextPlayer, {}).get("perma_passed", False),
-                        not self.get_gamestate()["players"].get(nextPlayer, {}).get("eliminated", False)]):
-                    return self.get_gamestate()["players"][nextPlayer]
+                        not self.gamestate["players"].get(nextPlayer, {}).get("perma_passed", False),
+                        not self.gamestate["players"].get(nextPlayer, {}).get("eliminated", False)]):
+                    return self.gamestate["players"][nextPlayer]
             return None
         # """
 

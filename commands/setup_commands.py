@@ -218,7 +218,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
 
 
         minorSpeciesList = ""
-        for species in game.get_gamestate()["minor_species"]:
+        for species in game.gamestate["minor_species"]:
             minorSpeciesList += species + "\n"
         await thread.send(role.mention + " pinging you here")
         await actions.send("Initial tech draw is as follows", file=drawing.show_available_techs())
@@ -371,6 +371,15 @@ class SetupCommands(commands.GroupCog, name="setup"):
 
         message = "\n".join(["# Terrans"])
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "terran_conglomerate_board.png"))
+
+        message = "\n".join(["Rift Reference"])
+        await factionThread.send(message, file=drawing.get_file(boardPrefix + "Rift_Reference.png"))
+
+        message = "\n".join(["Minor Species Reference"])
+        await factionThread.send(message, file=drawing.get_file(boardPrefix + "Minor_Species_Reference.png"))
+
+        message = "\n".join(["Discovery Reference"])
+        await factionThread.send(message, file=drawing.get_file(boardPrefix + "Discovery_Reference.png"))
 
         await factionThread.send(role.mention + " pinging you here, which contains all the faction sheets")
         await interaction.followup.send("\n".join(["New game created! Here are the channels:",

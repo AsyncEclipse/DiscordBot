@@ -299,7 +299,7 @@ class DrawHelper:
             else:
                 with open("data/tileAdjacencies.properties", "rb") as f:
                     configs.load(f)
-            if "wormholes" in tile:
+            if "wormholes" in tile and tile.get("type","")!="exploded":
                 for wormhole in tile["wormholes"]:
                     wormholeCode += str(wormhole)
                 for i in range(6):
