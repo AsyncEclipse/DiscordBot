@@ -80,21 +80,21 @@ class InfluenceButtons:
             if tile_map[tile].get("warp", 0) == 1:
                 for tile2 in tile_map:
                     if tile2 not in tilesViewed and tile_map[tile2].get("warp", 0) == 1:
-                        tilesViewed.append(adjTile)
+                        tilesViewed.append(tile2)
                         if adjTile not in game.gamestate["board"]:
                             continue
-                        if "bh" in game.gamestate["board"][adjTile].get("type", ""):
+                        if "bh" in game.gamestate["board"][tile2].get("type", ""):
                             continue
-                        if "exploded" in game.gamestate["board"][adjTile].get("type", ""):
+                        if "exploded" in game.gamestate["board"][tile2].get("type", ""):
                             continue
-                        if "player_ships" not in game.gamestate["board"][adjTile]:
+                        if "player_ships" not in game.gamestate["board"][tile2]:
                             continue
-                        playerShips = game.gamestate["board"][adjTile]["player_ships"][:]
+                        playerShips = game.gamestate["board"][tile2]["player_ships"][:]
                         playerShips.append(player["color"])
-                        if all([game.gamestate["board"][adjTile].get("owner") == 0,
-                                ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, adjTile), 
-                                len(Combat.findPlayersInTile(game, adjTile)) < 2]):
-                            tilesToInfluence.append(adjTile)
+                        if all([game.gamestate["board"][tile2].get("owner") == 0,
+                                ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, tile2), 
+                                len(Combat.findPlayersInTile(game, tile2)) < 2]):
+                            tilesToInfluence.append(tile2)
             if tile not in tilesViewed:
                 tilesViewed.append(tile)
                 playerShips = game.gamestate["board"][tile]["player_ships"][:]
