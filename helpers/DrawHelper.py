@@ -335,6 +335,8 @@ class DrawHelper:
                 counts = {}  # To track counts for each ship type
                 countsShips = {}
                 for ship in tile["player_ships"]:
+                    if "-" not in ship:
+                        continue
                     ship_type = ship.split("-")[1]  # Extract ship type
                     size = int(70 * mult)
                     if ship not in countsShips:

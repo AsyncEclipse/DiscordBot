@@ -605,11 +605,12 @@ class GamestateHelper:
 
         if "player_ships" not in self.gamestate["board"][pos]:
             return
+        self.gamestate["board"][pos]["player_ships"] = [s for s in self.gamestate["board"][pos]["player_ships"] if "-" in s]
         arr = self.gamestate["board"][pos]["player_ships"]
         if len(arr) < 2:
             return
         colors_seen = OrderedDict()
-
+        
         excludedColors = []
         colors_seen["ai"] = 0
 
