@@ -154,6 +154,7 @@ class GameCommands(commands.GroupCog, name="game"):
                                                     "They may run /player start_turn to get their buttons. "
                                                     + str(game.getNumberOfSaveFiles()) + " save files remain.")
             game.saveLastButtonPressed("restart")
+            game.setLockedStatus(False)
         else:
             await interaction.response.send_message("Ran out of save files, could not back up")
 
