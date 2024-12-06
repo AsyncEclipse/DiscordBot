@@ -575,8 +575,11 @@ class DrawHelper:
             if self.gamestate["player_count"] > 6:
                 listHS = [302,304,306,308,310,312,314,316,318]
             playerHSID = activePlayer["home_planet"]
-            tileLocation = int(next((tile for tile in self.gamestate["board"]
-                                     if self.gamestate["board"][tile]["sector"] == str(playerHSID)), None))
+            tileLoc = next((tile for tile in self.gamestate["board"]
+                                     if self.gamestate["board"][tile]["sector"] == str(playerHSID)), None)
+            if tileLoc == None:
+                return context
+            tileLocation = int(tileLoc)
             index = listHS.index(tileLocation)
             if index is None:
                 return context

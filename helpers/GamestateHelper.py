@@ -514,6 +514,12 @@ class GamestateHelper:
                 self.gamestate["players"][player]["traitor"] = False
         self.update()
 
+    def add_units_illegal(self, unit_list, position):
+        color = unit_list[0].split("-")[0]
+        for i in unit_list:
+            self.gamestate["board"][position]["player_ships"].append(i)
+        self.update()
+
     def add_units(self, unit_list, position):
         color = unit_list[0].split("-")[0]
         player = self.get_player_from_color(color)
@@ -660,6 +666,33 @@ class GamestateHelper:
             self.gamestate["players"][playerID][popType.replace("adv", "") + "_pop_cubes"] -= 1
         self.update()
         return True
+    
+
+    def lookAtAllTheTiles(self, color):
+        self.updateSaveFile()
+        tiles = ["301", "302", "303", "304", "305", "306", "307", "308", "309", "310", "311", "312", "313",
+                              "314", "315", "316", "317", "318", "381", "382", "398", "397", "399", "396", "394", "393",
+                              "201","202","203","204","205","206","207","208","209","210","211","214","281","101","102",
+                              "103","104","105","106","107","108","109","110"]
+        ships = [color+"-int", color+"-int",color+"-int",color+"-int",color+"-int", color+"-int",color+"-int",color+"-int",
+                 color+"-cru",color+"-cru",color+"-cru",color+"-cru", color+"-sb",
+                  color+"-sb",color+"-sb",color+"-sb", color+"-drd",color+"-drd"]
+        tileCount = 101
+        for tile in tiles:
+            self.add_tile(str(tileCount), 0, tile)
+            self.add_units_illegal(ships,str(tileCount))
+            if tileCount == 106:
+                tileCount = 201
+            elif tileCount == 212:
+                tileCount = 301
+            elif tileCount == 318:
+                tileCount = 401
+            elif tileCount == 424:
+                tileCount = 501
+            elif tileCount == 530:
+                tileCount = 601
+            else:
+                tileCount = tileCount + 1
 
     def refresh_two_colony_ships(self,  playerID):
         # "base_colony_ships"
@@ -1183,10 +1216,22 @@ class GamestateHelper:
         for x, tile in enumerate(player1["reputation_track"]):
             if isinstance(tile, str) and player2["color"] in tile:
                 self.gamestate["players"][pID]["reputation_track"][x] = tile.split("-")[0]
+                if tile.split("-")[0] == "amb":
+                    for x2, tile2 in enumerate(self.gamestate["players"][pID]["reputation_track"]):
+                        if isinstance(tile2, str) and "mixed-" in tile2:
+                            self.gamestate["players"][pID]["reputation_track"][x] = self.gamestate["players"][pID]["reputation_track"][x2].replace("mixed-","amb-")
+                            self.gamestate["players"][pID]["reputation_track"][x2] = "mixed"
+                            break
                 break
         for x, tile in enumerate(player2["reputation_track"]):
             if isinstance(tile, str) and player1["color"] in tile:
                 self.gamestate["players"][pID2]["reputation_track"][x] = tile.split("-")[0]
+                if tile.split("-")[0] == "amb":
+                    for x2, tile2 in enumerate(self.gamestate["players"][pID2]["reputation_track"]):
+                        if isinstance(tile2, str) and "mixed-" in tile2:
+                            self.gamestate["players"][pID2]["reputation_track"][x] = self.gamestate["players"][pID2]["reputation_track"][x2].replace("mixed-","amb-")
+                            self.gamestate["players"][pID2]["reputation_track"][x2] = "mixed"
+                            break
                 break
         self.update()
 

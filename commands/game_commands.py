@@ -74,6 +74,15 @@ class GameCommands(commands.GroupCog, name="game"):
         await interaction.response.defer(thinking=False)
         await Combat.startCombatThreads(game, interaction)
         await interaction.followup.send("Started Combats")
+    color_choices = [app_commands.Choice(name="Blue", value="blue"),
+                     app_commands.Choice(name="Red", value="red"),
+                     app_commands.Choice(name="Yellow", value="yellow"),
+                     app_commands.Choice(name="Teal", value="teal"),
+                     app_commands.Choice(name="Purple", value="purple"),
+                     app_commands.Choice(name="Green", value="green"),
+                     app_commands.Choice(name="Pink", value="pink"),
+                     app_commands.Choice(name="Brown", value="brown"),
+                     app_commands.Choice(name="White", value="white")]
 
     @app_commands.command(name="upkeep")
     async def upkeep(self, interaction: discord.Interaction):
@@ -125,6 +134,14 @@ class GameCommands(commands.GroupCog, name="game"):
         await interaction.response.send_message("The hold on actions has been released")
         game = GamestateHelper(interaction.channel)
         game.setLockedStatus(False)
+    
+
+    @app_commands.command(name="test_all_the_tiles")
+    @app_commands.choices(color=color_choices)
+    async def test_all_the_tiles(self, interaction: discord.Interaction, color: app_commands.Choice[str]):
+        await interaction.response.send_message("All tiles have been loaded")
+        game = GamestateHelper(interaction.channel)
+        game.lookAtAllTheTiles(color.value)
 
     @app_commands.command(name="set_round")
     async def set_round(self, interaction: discord.Interaction, rnd: int):

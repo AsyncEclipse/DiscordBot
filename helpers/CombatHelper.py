@@ -536,8 +536,7 @@ class Combat:
                     hittableShips = []
                     hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships,
                                                                         dieNum, shipModel.computer, pos, speed)
-                    if all([dieNum + shipModel.computer > 5, len(hittableShips) == 0,
-                            oldNumPeeps == len(Combat.findPlayersInTile(game, pos))]):
+                    if all([dieNum + shipModel.computer > 5, len(hittableShips) == 0, oldNumPeeps == len(Combat.findPlayersInTile(game, pos))]):
                         message = (f"The computer bonus for a die that rolled a {dieNum}"
                                    " was cancelled by the shields on each of the opponents ships.")
                         await interaction.channel.send(message)
@@ -552,19 +551,19 @@ class Combat:
                                 shipType = option.split("-")[1]
                                 shipOwner = option.split("-")[0]
                                 player = game.get_player_from_color(shipOwner)
-                                shipModel = PlayerShip(game.gamestate["players"][player], shipType)
+                                shipModel2 = PlayerShip(game.gamestate["players"][player], shipType)
                                 if ableToKillSomething:
-                                    if dieDam + damageOnShip > shipModel.hull and shipModel.cost > oldShipVal:
-                                        oldShipVal = shipModel.cost
+                                    if dieDam + damageOnShip > shipModel2.hull and shipModel2.cost > oldShipVal:
+                                        oldShipVal = shipModel2.cost
                                         ship = option
                                 else:
-                                    if dieDam + damageOnShip > shipModel.hull:
-                                        oldShipVal = shipModel.cost
+                                    if dieDam + damageOnShip > shipModel2.hull:
+                                        oldShipVal = shipModel2.cost
                                         ship = option
                                         ableToKillSomething = True
                                     else:
-                                        if shipModel.cost > oldShipVal:
-                                            oldShipVal = shipModel.cost
+                                        if shipModel2.cost > oldShipVal:
+                                            oldShipVal = shipModel2.cost
                                             ship = option
                             buttonID = f"assignHitTo_{pos}_{colorOrAI}_{ship}_{dieNum}_{dieDam}"
                             await Combat.assignHitTo(game, buttonID, interaction, False)
@@ -1089,7 +1088,8 @@ class Combat:
                         f"{game.gamestate['board'][pos]['sector']}_{countDraw}_{playerColor}")
             view.add_item(Button(label=label, style=discord.ButtonStyle.green, custom_id=buttonID))
             label = "Decline"
-            buttonID = f"FCID{playerColor}_deleteMsg"
+            buttonID = (f"FCID{playerColor}_dontDrawReputation_"
+                        f"{game.gamestate['board'][pos]['sector']}_{countDraw}_{playerColor}")
             view.add_item(Button(label=label, style=discord.ButtonStyle.red, custom_id=buttonID))
             msg = (f"{player['player_name']}, the bot believes you should draw {count} reputation tiles here. "
                    "Click to do so or press decline if the bot messed up. "
@@ -1246,6 +1246,16 @@ class Combat:
                                                                          player_helper, True)
                         game.removeFromKey("queuedDraws", [system, drawOrder, color, num_options])
                         success += 1
+
+    @staticmethod
+    async def dontDrawReputation(game: GamestateHelper, buttonID: str, interaction: discord.Interaction, player_helper):
+        system = int(buttonID.split("_")[1])
+        drawOrder = int(buttonID.split("_")[2])
+        color = buttonID.split("_")[3]
+        if "tilesToResolve" in game.gamestate:
+            game.removeFromKey("queuedQuestions", [system, drawOrder, color])
+            await Combat.resolveQueue(game, interaction)
+        await interaction.message.delete()
 
     @staticmethod
     async def drawReputation(game: GamestateHelper, buttonID: str, interaction: discord.Interaction, player_helper):
