@@ -1,3 +1,4 @@
+import asyncio
 import discord
 from Buttons.Draft import DraftButtons
 import config
@@ -237,6 +238,8 @@ class SetupCommands(commands.GroupCog, name="setup"):
                            + "The minor species are as follows:\n"
                            + minorSpeciesList,
                            file=drawing.show_minor_species())
+        file = await asyncio.to_thread(drawing.show_AI_stats)
+        await actions.send("AI stats look like this", file=file)
         await DraftButtons.startDraft(game, player_list, interaction, actions)
 
         factionThread = await actions.create_thread(name="Faction Reference", auto_archive_duration=10080)
