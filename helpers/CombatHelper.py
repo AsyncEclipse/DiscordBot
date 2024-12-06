@@ -390,7 +390,7 @@ class Combat:
                 view.add_item(Button(label="(Attacker) Roll Missiles",
                                      style=discord.ButtonStyle.red,
                                      custom_id=f"rollDice_{pos}_{attacker}_99_attacker"))
-            for i in range(20, -1, -1):
+            for i in range(20, -20, -1):
                 if i in defenderSpeeds:
                     checker = ""
                     if defender != "ai":
