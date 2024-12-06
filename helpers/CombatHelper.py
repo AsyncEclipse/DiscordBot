@@ -905,7 +905,7 @@ class Combat:
                 break
             if speed == currentSpeed and currentRoller == owner:
                 found = True
-        if nextSpeed == -1:
+        if nextSpeed == -20:
             await Combat.checkForMorphShield(game, pos, channel, ships, [attacker, defender])
             for speed, owner in sortedSpeeds:
                 if speed < 99:
