@@ -895,7 +895,7 @@ class Combat:
         sortedSpeeds = Combat.getBothCombatantShipsBySpeed(game, defender, attacker, ships, pos)
 
         found = False
-        nextSpeed = -1
+        nextSpeed = -20
         nextOwner = ""
         for speed, owner in sortedSpeeds:
             if any([found, currentSpeed is None, currentRoller is None,
