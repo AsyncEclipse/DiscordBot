@@ -90,7 +90,7 @@ class Emoji:
                      "<:phase_shield_mod:1313256850334158889>",
                      "<:improved_hull_mod:1313256775897583716>",
                      "<:tech_phase_shield_mod:1313258080695484457>",
-                     "<:tech_improved_hull_mod: 1313258044309635072 >",
+                     "<:tech_improved_hull_mod:1313258044309635072>",
                      "<:bluedrd:1301320104331448482>",
                      "<:greendrd:1301320115597607005>",
                      "<:purpledrd:1301319978749919243>",
