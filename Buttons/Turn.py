@@ -54,6 +54,7 @@ class TurnButtons:
     async def endTurn(player, game: GamestateHelper, interaction: discord.Interaction):
         from helpers.CombatHelper import Combat
         nextPlayer = game.get_next_player(player)
+        await game.updateNamesAndOutRimTiles(interaction)
         game.initilizeKey("20MinReminder")
         if nextPlayer is not None and not game.is_everyone_passed():
             view = TurnButtons.getStartTurnButtons(game, nextPlayer, player["color"])
@@ -89,7 +90,6 @@ class TurnButtons:
         if "lastAction" in player and "detailsOflastAction" in player:
             msg = (f"End of {userN}'s turn. "
                    f"They used their action to {player['lastAction']}. {player['detailsOflastAction']}")
-        await game.updateNamesAndOutRimTiles(interaction)
         asyncio.create_task(interaction.message.delete())
         if "-" in interaction.channel.name:
             thread_name = interaction.channel.name.split("-")[0] + "-bot-map-updates"
@@ -279,7 +279,7 @@ class TurnButtons:
         await game.upkeep(interaction)
         drawing = DrawHelper(game.gamestate)
         if game.gamestate["roundNum"] < 9:
-            await interaction.channel.send(f"Tech At Start Of Round {game.gamestate['roundNum']}",
+            await interaction.channel.send(f"Tech Available At Start Of Round {game.gamestate['roundNum']}",
                                            file=await asyncio.to_thread(drawing.show_available_techs))
             nextPlayer = TurnButtons.getFirstPlayer(game)
             if nextPlayer is not None:

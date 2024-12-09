@@ -348,6 +348,13 @@ class DrawHelper:
                         size = int(110 * mult)
                     if ship_type == "orb" or ship_type == "mon":
                         ship = ship_type
+                        if ship_type == "orb":
+                            size = int(110 * mult)
+                            if tile["owner"] != 0:
+                                if all([self.getPlayerObjectFromColor(tile["owner"])['name'] == "The Exiles",
+                                            tile.get("orbital_pop", [0])[0] == 1]):
+                                    ship = "exile_orb"
+                                
                     filepathShip = f"images/resources/components/fancy_ships/fancy_{ship}.png"
                     if self.gamestate.get("fancy_ships") and os.path.exists(filepathShip):
                         filepathShip = f"images/resources/components/fancy_ships/fancy_{ship}.png"
@@ -459,9 +466,9 @@ class DrawHelper:
 
         return is_adjacent(tile1, tile2) and is_adjacent(tile2, tile1)
 
-    def display_techs(self):
+    def display_techs(self, message:str, techs):
         context = Image.new("RGBA", (2500 * 3, 450 * 3), (0, 0, 0, 255))
-        techsAvailable = self.gamestate["available_techs"]
+        techsAvailable = techs
         with open("data/techs.json", "r") as f:
             tech_data = json.load(f)
         with open("data/parts.json", "r") as f:
@@ -490,7 +497,7 @@ class DrawHelper:
         font = ImageFont.truetype("images/resources/arial.ttf", size=100)
         stroke_color = (0, 0, 0)
         stroke_width = 2
-        text_drawable_image.text((60, 0), "Available Techs", (255, 0, 0), font=font,
+        text_drawable_image.text((60, 0), message, (255, 0, 0), font=font,
                                  stroke_width=stroke_width, stroke_fill=stroke_color)
         for tech_type in tech_groups:
             sorted_techs = sorted(tech_groups[tech_type], key=lambda x: x[2])  # Sort by cost
@@ -1205,7 +1212,7 @@ class DrawHelper:
                     x += 1440
             return context2
         context2 = create_player_area()
-        context3 = self.display_techs()
+        context3 = self.display_techs("Available Techs",self.gamestate["available_techs"])
         width = int(context3.size[0] * 500/context3.size[1])
         context3 = context3.resize((width, 500))
         context4 = self.display_remaining_tiles()
@@ -1317,7 +1324,7 @@ class DrawHelper:
                     x += 1440
             return context2
         context2 = create_player_area()
-        context3 = self.display_techs()
+        context3 = self.display_techs("Available Techs",self.gamestate["available_techs"])
         context4 = self.display_remaining_tiles()
         # context5 = self.display_cube_track_reference()
         pCount = len(self.gamestate["players"])
@@ -1337,7 +1344,16 @@ class DrawHelper:
         return discord.File(bytes_io, filename="stats_image.webp")
 
     def show_available_techs(self):
-        context = self.display_techs()
+        context = self.display_techs("Available Techs",self.gamestate["available_techs"])
+        bytes_io = BytesIO()
+        context.save(bytes_io, format="WEBP")
+        bytes_io.seek(0)
+
+        return discord.File(bytes_io, filename="techs_image.webp")
+    
+
+    def show_select_techs(self, message:str, techs):
+        context = self.display_techs(message,techs)
         bytes_io = BytesIO()
         context.save(bytes_io, format="WEBP")
         bytes_io.seek(0)
