@@ -573,6 +573,7 @@ class GamestateHelper:
             msg += f"\nIf you find a way to drop another money cube, your income will go from {moneyIncrease} to {moneyIncrease2}."
         else:
             msg += "\nYou cannot place more money cubes because they have all been placed."
+        msg += f"\nYou have {player['colony_ships']}/{player['base_colony_ships']} colony ships ready at this time."
         return msg
 
     def setCombatants(self, players, pos):
@@ -676,7 +677,7 @@ class GamestateHelper:
                               "103","104","105","106","107","108","109","110"]
         ships = [color+"-int", color+"-int",color+"-int",color+"-int",color+"-int", color+"-int",color+"-int",color+"-int",
                  color+"-cru",color+"-cru",color+"-cru",color+"-cru", color+"-sb",
-                  color+"-sb",color+"-sb",color+"-sb", color+"-drd",color+"-drd"]
+                  color+"-sb",color+"-sb",color+"-sb", color+"-drd",color+"-drd",color+"-orb",color+"-mon"]
         tileCount = 101
         for tile in tiles:
             self.add_tile(str(tileCount), 0, tile)
@@ -824,19 +825,23 @@ class GamestateHelper:
 
         tech_draws = self.gamestate["player_count"] + 3
         tech_draws = min(tech_draws,11)
+        newTechs = []
         while tech_draws > 0:
             random.shuffle(self.gamestate["tech_deck"])
             picked_tech = self.gamestate["tech_deck"].pop(0)
             if picked_tech == "clo":
                 picked_tech = "cld"
             self.gamestate["available_techs"].append(picked_tech)
+            newTechs.append(picked_tech)
             with open("data/techs.json", "r") as f:
                 tech_data = json.load(f)
             if tech_data[picked_tech]["track"] == "any":
                 pass
             else:
                 tech_draws -= 1
-
+        drawing = DrawHelper(self.gamestate)
+        await interaction.channel.send(f"Tech drawn at the end of the round",
+                                           file=await asyncio.to_thread(drawing.show_select_techs,"New Techs",newTechs))
         if "turnsInPassingOrder" in self.gamestate and "pass_order" in self.gamestate:
             if self.gamestate["turnsInPassingOrder"]:
                 self.setTurnOrder(self.gamestate["pass_order"])

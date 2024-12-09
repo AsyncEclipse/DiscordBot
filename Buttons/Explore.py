@@ -29,15 +29,21 @@ class ExploreButtons:
         for ship in playerShips:
             if "mon" not in ship:
                 if player["color"] in ship and "orb" not in ship:
-                    playerShipsCount = playerShipsCount + 1
+                    playerShipsCount += 1
                 else:
                     if "gcds" in ship:
                         opponentShips += 99
-                    if "orb" in ship and ship.split("-")[0] is not player["color"]:
-                        color = game.gamestate["board"][tile]["owner"]
-                        if all([game.find_player_faction_name_from_color(color) == "The Exiles",
-                                game.gamestate["board"][tile].get("orbital_pop", [0])[0] == 1]):
-                            opponentShips += 1
+                    if "orb" in ship:
+                        if game.gamestate["board"][tile]["owner"] is not player["color"]:
+                            color = game.gamestate["board"][tile]["owner"]
+                            if all([game.find_player_faction_name_from_color(color) == "The Exiles",
+                                    game.gamestate["board"][tile].get("orbital_pop", [0])[0] == 1]):
+                                opponentShips += 1
+                        else:
+                            color = player["color"]
+                            if all([game.find_player_faction_name_from_color(color) == "The Exiles",
+                                    game.gamestate["board"][tile].get("orbital_pop", [0])[0] == 1]):
+                                playerShipsCount += 1
                     elif "anc" not in ship or "Draco" not in player["name"]:
                         opponentShips = opponentShips + 1
         researchedTechs = player_helper.getTechs()

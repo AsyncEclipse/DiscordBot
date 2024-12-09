@@ -83,7 +83,7 @@ class ImageCacheHelper:
                 return (80, 80)
         elif "basic_ships" in folder.lower() or "fancy_ships" in folder.lower():
             if any(substring in filename.lower().replace("fancy", "")
-                   for substring in ["gcds", "gcdsadv", "anc", "ancadv", "grd", "grdadv"]):
+                   for substring in ["gcds", "gcdsadv", "anc", "ancadv", "grd", "grdadv","orb"]):
                 if "ai" in filename.lower():
                     return (int(140), int(140))
                 else:
