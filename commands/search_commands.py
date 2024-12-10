@@ -252,9 +252,14 @@ class SearchCommands(commands.GroupCog, name="search"):
         
 
     @app_commands.command(name="draft_stats", description="Stats for the drafted factions")
-    async def draft_stats(self, interaction: discord.Interaction, tourney_only:bool=False):
+    async def stats(self, interaction: discord.Interaction, tourney_only:bool=False):
+        userID = str(interaction.user.id)
+        if userID != "488681163146133504" and userID != "265561667293675521":
+            await interaction.response.send_message("You are not authorised to use this command.")
+            return
         total_faction_drafts = Counter()    
         round_count = Counter() 
+        vp_count = Counter()
         positional_drafts = [Counter() for _ in range(6)] 
         await interaction.response.defer(thinking=True)
         lowerLim = 100
@@ -267,6 +272,7 @@ class SearchCommands(commands.GroupCog, name="search"):
             if not os.path.exists(f"{config.gamestate_path}/{gameName}.json"):
                 continue
             game = GamestateHelper(None, gameName)
+            drawing = DrawHelper(game.gamestate)
             if "draftedFactions" not in game.gamestate:
                 continue
         
@@ -276,17 +282,25 @@ class SearchCommands(commands.GroupCog, name="search"):
                 positional_drafts[position][faction] += 1  
             if tourney_only:
                 if "roundNum" not in game.gamestate:
-                    round_count["Round 1"] +=1
+                    continue
                 else:
                     round_count["Round "+str(game.gamestate["roundNum"])] +=1
+                highestVP = 1
+                for player in game.gamestate["players"]:
+                    if drawing.get_public_points(game.gamestate["players"][player], True) > highestVP:
+                        highestVP = drawing.get_public_points(game.gamestate["players"][player], True)
+                for player in game.gamestate["players"]:
+                    username = game.gamestate["players"][player]["username"]
+                    vp_count[username] += int(100*drawing.get_public_points(game.gamestate["players"][player], True)/highestVP)
+
             
         with open("data/factions.json", "r") as f:
             faction_data = json.load(f)
-        await interaction.followup.send("Total Faction Draft Counts:")  
-        summary = ""
-        for faction, count in total_faction_drafts.most_common():  
-            summary += f"{faction_data[faction]['name']}: {count}\n"
-        await interaction.channel.send(summary)  
+        # await interaction.followup.send("Total Faction Draft Counts:")  
+        # summary = ""
+        # for faction, count in total_faction_drafts.most_common():  
+        #     summary += f"{faction_data[faction]['name']}: {count}\n"
+        # await interaction.channel.send(summary)  
         
         # await interaction.channel.send("\nPositional Faction Draft Counts:")  
         # for position, counter in enumerate(positional_drafts, 1):  
@@ -300,4 +314,9 @@ class SearchCommands(commands.GroupCog, name="search"):
             for round, count in round_count.most_common():  
                 summary += f"{round}: {count} games\n"
             await interaction.channel.send(summary)  
+            summary = ""
+            await interaction.followup.send("Point Progression:") 
+            for username, count in vp_count.most_common():  
+                summary += f"{username}: {count}/300 VPs\n"
+            await interaction.channel.send(summary) 
     

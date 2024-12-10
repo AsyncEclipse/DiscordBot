@@ -123,7 +123,7 @@ class GamestateHelper:
         for player in self.gamestate["players"]:
             playerObj = self.get_player(player)
             drawing = DrawHelper(self.gamestate)
-            points = drawing.get_public_points(playerObj)
+            points = drawing.get_public_points(playerObj, False)
             totalResources = playerObj["science"] + playerObj["money"] + playerObj["materials"]
             if points > highestScore:
                 highestScore = points

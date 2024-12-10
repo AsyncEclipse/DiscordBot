@@ -1024,7 +1024,7 @@ class DrawHelper:
         for i in range(player["colony_ships"]):
             context.paste(colonyShip, (x + 50 * i, y + 10), colonyShip)
 
-        publicPoints = self.get_public_points(player)
+        publicPoints = self.get_public_points(player,False)
         pointsPath = "images/resources/components/all_boards/points.png"
         points = self.use_image(pointsPath)
         context.paste(points, (x + 250, y + 10), points)
@@ -1064,7 +1064,7 @@ class DrawHelper:
         context.paste(context2, (0, 500))
         return context
 
-    def get_public_points(self, player):
+    def get_public_points(self, player, showPrivateRegardless:bool):
         points = 0
         tile_map = self.gamestate["board"]
         color = player["color"]
@@ -1109,7 +1109,7 @@ class DrawHelper:
         for reputation in player["reputation_track"]:
             if isinstance(reputation, int):
                 repu += 1
-                if "gameEnded" in self.gamestate:
+                if "gameEnded" in self.gamestate or showPrivateRegardless:
                     points += reputation
                     reputationPoints += reputation
             if not isinstance(reputation, int) and "-" in reputation:
