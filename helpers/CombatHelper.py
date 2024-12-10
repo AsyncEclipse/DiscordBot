@@ -30,6 +30,9 @@ class Combat:
             color = ship.split("-")[0]
             if ("orb" in ship and not Combat.exile_orbital_exists(game, pos)) or "mon" in ship:
                 continue
+            else:
+                if "orb" in ship:
+                    color = game.gamestate["board"][pos]["owner"]
             if color not in players:
                 players.append(color)
         return players
