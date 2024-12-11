@@ -98,6 +98,9 @@ class DrawHelper:
                                      int(300 * 3 * 2 * mult) + int(10 * mult)),
                             (255, 255, 255, 0))
         configs = Properties()
+        configs2 = Properties()
+        with open("data/tileAdjacencies.properties", "rb") as f:
+                configs2.load(f)
         if self.gamestate.get("5playerhyperlane"):
             if self.gamestate.get("player_count") == 5:
                 with open("data/tileAdjacencies_5p.properties", "rb") as f:
@@ -146,7 +149,7 @@ class DrawHelper:
                             break
             if rotationWorks:
                 context2 = self.base_tile_image_with_rotation_in_context(rotation, tileID, tile, count,
-                                                                         configs, position)
+                                                                         configs, position, configs2)
                 context.paste(context2, (int(345 * 3 * ((count - 1) % 3) * mult),
                                          int(910 * (int((count - 1) / 3)) * mult)),
                               mask=context2)
@@ -162,7 +165,7 @@ class DrawHelper:
         file = discord.File(byteData, filename="tile_image.webp")
         return view, file
 
-    def base_tile_image_with_rotation_in_context(self, rotation, tileID, tile, count, configs, position):
+    def base_tile_image_with_rotation_in_context(self, rotation, tileID, tile, count, configs, position, configs2):
         mult = 1
         context = Image.new("RGBA", (int(345 * 3 * mult), int(300 * 3 * mult)), (255, 255, 255, 0))
         image = self.base_tile_image_with_rotation(tileID, rotation, tile["wormholes"]).resize((345, 300))
@@ -173,9 +176,15 @@ class DrawHelper:
                   (int(345 * mult), int(600 * mult)),
                   (int(85 * mult), int(450 * mult)),
                   (int(85 * mult), int(150 * mult))]
+        additionalRot = 0
         for index, adjTile in enumerate(configs.get(position)[0].split(",")):
+            adjTile2 = configs2.get(position)[0].split(",")[index]
+            if adjTile != adjTile2:
+                additionalRot = 60
+                if position in ["105", "208", "312","415", "303","202","102","403"]:
+                    additionalRot = -60
             if adjTile in self.gamestate["board"]:
-                adjTileImage = self.board_tile_image(adjTile).resize((345, 300))
+                adjTileImage = self.board_tile_image(adjTile, additionalRot).resize((345, 300))
                 context.paste(adjTileImage, coords[index], mask=adjTileImage)
         font = ImageFont.truetype("images/resources/arial.ttf", size=80)
         ImageDraw.Draw(context).text((10, 10), f"Option #{count}", (255, 255, 255), font=font,
@@ -237,7 +246,7 @@ class DrawHelper:
         bytes_io.seek(0)
         return discord.File(bytes_io, filename="tiles.webp")
 
-    def board_tile_image(self, position):
+    def board_tile_image(self, position, additionalRot:int=0):
         sector = self.gamestate["board"][position]["sector"]
         filepath2 = f"images/resources/hexes/{sector}.png"
         filepath = f"images/resources/hexes/numberless/{sector}.png"
@@ -249,7 +258,7 @@ class DrawHelper:
         if os.path.exists(filepath):
             tile_image = self.use_image(filepath)
             tile = self.gamestate["board"][position]
-            rotation = int(tile["orientation"])
+            rotation = (int(tile["orientation"])+additionalRot+360)%360
 
             if int(position) // 100 == 2 and int(position) % 2 == 1 and self.gamestate["player_count"] < 7:
                 hsMask2 = Image.open("images/resources/masks/hsmaskTrip.png").convert("RGBA").resize((210, 210))
@@ -307,7 +316,7 @@ class DrawHelper:
                     if tile_orientation_index in tile["wormholes"]:
                         found = False
                         for x, adjTile in enumerate(configs.get(position)[0].split(",")):
-                            if x == i and self.areTwoTilesAdjacent(position, adjTile, configs):
+                            if x == i and self.areTwoTilesAdjacent(position, adjTile, configs) and additionalRot==0:
                                 tile_image.paste(green, (int(152 * mult), 0), mask=green)
                                 found = True
                                 break
