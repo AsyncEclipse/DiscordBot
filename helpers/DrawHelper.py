@@ -176,8 +176,9 @@ class DrawHelper:
                   (int(345 * mult), int(600 * mult)),
                   (int(85 * mult), int(450 * mult)),
                   (int(85 * mult), int(150 * mult))]
-        additionalRot = 0
+        
         for index, adjTile in enumerate(configs.get(position)[0].split(",")):
+            additionalRot = 0
             adjTile2 = configs2.get(position)[0].split(",")[index]
             if adjTile != adjTile2:
                 additionalRot = 60

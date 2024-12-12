@@ -46,7 +46,7 @@ class DiscordBot(commands.Bot):
     async def start_timer(self):
         while True:
             await self.checkGameTimers()
-            await asyncio.sleep(3600 * 2)
+            await asyncio.sleep(600 * 2)
 
     async def checkGameTimers(self):
         guild = bot.get_guild(1254475918873985094)
