@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 import os
 import discord
 import time
@@ -15,6 +16,7 @@ from helpers.GamestateHelper import GamestateHelper
 from listeners.ButtonListener import ButtonListener
 from discord.ext import commands
 import logging
+logging.basicConfig(level=logging.INFO)
 # import threading
 
 
@@ -50,6 +52,7 @@ class DiscordBot(commands.Bot):
 
     async def checkGameTimers(self):
         guild = bot.get_guild(1254475918873985094)
+        start_time = time.perf_counter()
         if guild is None:
             return
         for x in range(0, 999):
@@ -75,6 +78,11 @@ class DiscordBot(commands.Bot):
                         if actions_channel is not None and isinstance(actions_channel, discord.TextChannel):
                             await actions_channel.send(message)
                             game.initilizeKey("20MinReminder")
+        end_time = time.perf_counter()
+        elapsed_time = end_time - start_time
+        button_log_channel = discord.utils.get(guild.channels, name="button-log")
+        if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):
+            asyncio.create_task(button_log_channel.send(f"Took {elapsed_time:.2f} seconds to run the auto-ping"))
 
     async def shutdown(self) -> None:
         await self.close()

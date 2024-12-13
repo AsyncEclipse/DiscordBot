@@ -671,7 +671,7 @@ class Combat:
                                     oldNumPeeps == len(Combat.findPlayersInTile(game, pos))]):
                                 message = (f"The computer bonus for a die that rolled a {dieNum} was"
                                            " cancelled by the shields on each of the opponents ships.")
-                                await interaction.channel.send(message)
+                                asyncio.create_task( interaction.channel.send(message))
                             if len(hittableShips) == 0 or oldNumPeeps > len(Combat.findPlayersInTile(game, pos)):
                                 if all([player is not None,
                                         "Lyra" in game.gamestate["players"][player]["name"],
@@ -715,7 +715,7 @@ class Combat:
                                     buttonID = f"FCID{colorOrAI}_killPop_{pos}_{cube}_{count}"
                                     view.add_item(Button(label=label, style=discord.ButtonStyle.gray,
                                                          custom_id=buttonID))
-                                await interaction.channel.send(msg, view=view)
+                                asyncio.create_task(interaction.channel.send(msg, view=view))
                             else:
                                 update = True
                                 if len(hittableShips) > 1:

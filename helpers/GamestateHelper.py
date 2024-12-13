@@ -104,7 +104,7 @@ class GamestateHelper:
             drawing = DrawHelper(self.gamestate)
             map = await asyncio.to_thread(drawing.show_game)
             await thread.send(file=map)
-            winner, highestScore = self.getWinner()
+            winner, highestScore, faction = self.getWinner()
             await thread.send(f"{role.mention} final state here. {winner} won with {highestScore} points.")
         if role:
             await role.delete()
@@ -118,6 +118,7 @@ class GamestateHelper:
 
     def getWinner(self):
         winner = ""
+        winnerFaction = ""
         highestScore = 0
         resources = 0
         for player in self.gamestate["players"]:
@@ -128,12 +129,14 @@ class GamestateHelper:
             if points > highestScore:
                 highestScore = points
                 winner = playerObj["player_name"]
+                winnerFaction = playerObj["name"]
                 resources = totalResources
             if points == highestScore:
                 if totalResources > resources:
                     winner = playerObj["player_name"]
+                    winnerFaction = playerObj["name"]
                     resources = totalResources
-        return (winner, highestScore)
+        return (winner, highestScore, winnerFaction)
 
     def setAdvancedAI(self, status: bool):
         self.gamestate["advanced_ai"] = status
@@ -155,7 +158,7 @@ class GamestateHelper:
         self.gamestate["gameEnded"] = True
         self.update()
         drawing = DrawHelper(self.gamestate)
-        winner, highestScore = self.getWinner()
+        winner, highestScore, faction = self.getWinner()
         if interaction.message:
             await interaction.message.delete()
         guild = interaction.guild

@@ -1,3 +1,4 @@
+import asyncio
 from collections import Counter
 import os
 import discord
@@ -260,6 +261,10 @@ class SearchCommands(commands.GroupCog, name="search"):
         total_faction_drafts = Counter()    
         round_count = Counter() 
         vp_count = Counter()
+        faction_victory_count = Counter()
+        faction_performance = Counter()
+        max_faction_performance = Counter()
+        relative_faction_performance = Counter()
         positional_drafts = [Counter() for _ in range(6)] 
         await interaction.response.defer(thinking=True)
         lowerLim = 100
@@ -292,8 +297,13 @@ class SearchCommands(commands.GroupCog, name="search"):
                 for player in game.gamestate["players"]:
                     username = game.gamestate["players"][player]["username"]
                     vp_count[username] += int(100*drawing.get_public_points(game.gamestate["players"][player], True)/highestVP)
-
-            
+                if game.gamestate["roundNum"] == 9:
+                    winner, highestScore, faction = game.getWinner()
+                    faction_victory_count[faction] += 1
+                    for player in game.gamestate["players"]:
+                        factionVP = drawing.get_public_points(game.gamestate["players"][player], True)
+                        faction_performance[game.gamestate["players"][player]["name"]] += int(100*factionVP/highestScore)
+                        max_faction_performance[game.gamestate["players"][player]["name"]] +=100
         with open("data/factions.json", "r") as f:
             faction_data = json.load(f)
         # await interaction.followup.send("Total Faction Draft Counts:")  
@@ -309,14 +319,25 @@ class SearchCommands(commands.GroupCog, name="search"):
         #         await interaction.channel.send(f"{faction_data[faction]['name']}: {count}") 
         
         if tourney_only:
-            await interaction.followup.send("Round Progression:")  
+            asyncio.create_task(interaction.followup.send("Round Progression:")  )
             summary = ""
             for round, count in round_count.most_common():  
                 summary += f"{round}: {count} games\n"
-            await interaction.channel.send(summary)  
+            asyncio.create_task(interaction.channel.send(summary) )
             summary = ""
-            await interaction.followup.send("Point Progression:") 
+            asyncio.create_task(interaction.followup.send("Point Progression:") )
             for username, count in vp_count.most_common():  
                 summary += f"{username}: {count}/300 VPs\n"
-            await interaction.channel.send(summary) 
+            asyncio.create_task(interaction.channel.send(summary) )
+            summary = ""
+            asyncio.create_task(interaction.followup.send("Faction Wins:") )
+            for faction, count in faction_victory_count.most_common():  
+                summary += f"{faction}: {count} wins\n"
+            asyncio.create_task(interaction.channel.send(summary) )
+            for faction, count in faction_performance:
+                relative_faction_performance[faction] += int(count/max_faction_performance[faction] * 100)
+            asyncio.create_task(interaction.followup.send("Faction Performance:") )
+            for faction, count in relative_faction_performance.most_common():  
+                summary += f"{faction}: {count} out of 100 possible points\n"
+            asyncio.create_task(interaction.channel.send(summary) )
     
