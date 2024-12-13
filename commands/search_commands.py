@@ -302,8 +302,9 @@ class SearchCommands(commands.GroupCog, name="search"):
                     faction_victory_count[faction] += 1
                     for player in game.gamestate["players"]:
                         factionVP = drawing.get_public_points(game.gamestate["players"][player], True)
-                        faction_performance[game.gamestate["players"][player]["name"]] += int(100*factionVP/highestScore)
-                        max_faction_performance[game.gamestate["players"][player]["name"]] +=100
+                        faction = game.gamestate["players"][player]["name"]
+                        faction_performance[faction] += int(100*factionVP/highestScore)
+                        max_faction_performance[faction] +=100
         with open("data/factions.json", "r") as f:
             faction_data = json.load(f)
         # await interaction.followup.send("Total Faction Draft Counts:")  
@@ -334,7 +335,7 @@ class SearchCommands(commands.GroupCog, name="search"):
             for faction, count in faction_victory_count.most_common():  
                 summary += f"{faction}: {count} wins\n"
             asyncio.create_task(interaction.channel.send(summary) )
-            for faction, count in faction_performance:
+            for faction, count in faction_performance.most_common():
                 relative_faction_performance[faction] += int(count/max_faction_performance[faction] * 100)
             asyncio.create_task(interaction.followup.send("Faction Performance:") )
             for faction, count in relative_faction_performance.most_common():  
