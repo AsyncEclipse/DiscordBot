@@ -150,7 +150,6 @@ class ResearchButtons:
     @staticmethod
     async def startResearch(game: GamestateHelper, player, player_helper: PlayerHelper,
                             interaction: discord.Interaction, buttonCommand: bool):
-        game = GamestateHelper(interaction.channel)
         player = game.get_player(interaction.user.id,interaction)
         await interaction.channel.send(f"{player['player_name']} is using their turn to research")
         player_helper = PlayerHelper(interaction.user.id, player)
@@ -256,7 +255,6 @@ class ResearchButtons:
     async def getTech(game: GamestateHelper, player, player_helper: PlayerHelper,
                       interaction: discord.Interaction, buttonID: str):
         await interaction.message.delete()
-        game = GamestateHelper(interaction.channel)
         tech = buttonID.split("_")[1]
         tech_type = buttonID.split("_")[2]
         view = View()
@@ -275,7 +273,6 @@ class ResearchButtons:
     @staticmethod
     async def payAtRatio(game: GamestateHelper, player, player_helper: PlayerHelper,
                          interaction: discord.Interaction,  buttonID: str):
-        game = GamestateHelper(interaction.channel)
         resource_type = buttonID.split("_")[1]
         trade_value = player["trade_value"]
         if trade_value > player[resource_type]:
@@ -288,7 +285,6 @@ class ResearchButtons:
     @staticmethod
     async def gain5resource(game: GamestateHelper, player, player_helper: PlayerHelper,
                             interaction: discord.Interaction, buttonID: str):
-        game = GamestateHelper(interaction.channel)
         resource_type = buttonID.split("_")[1]
         msg = player_helper.adjust_resource(resource_type, 5)
         game.update_player(player_helper)
@@ -297,7 +293,6 @@ class ResearchButtons:
     @staticmethod
     async def gain3resource(game: GamestateHelper, player, player_helper: PlayerHelper,
                             interaction: discord.Interaction, buttonID: str):
-        game = GamestateHelper(interaction.channel)
         resource_type = buttonID.split("_")[1]
         msg = player_helper.adjust_resource(resource_type, 3)
         game.update_player(player_helper)

@@ -36,7 +36,7 @@ class BuildButtons:
     async def buildIn(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
         loc = buttonID.split("_")[1]
         view = View()
-        view = BuildButtons.buildBuildButtonsView(interaction, "", 0, loc, view, player)
+        view = BuildButtons.buildBuildButtonsView(interaction, "", 0, loc, view, player, game)
         await interaction.message.delete()
         buildApt = player["build_apt"]
         if player.get("passed") or player.get("pulsarBuild"):
@@ -65,15 +65,14 @@ class BuildButtons:
             key = "cost_dread"
         cost += player[key]
         view = View()
-        view = BuildButtons.buildBuildButtonsView(interaction, ";".join(build), cost, loc, view, player)
+        view = BuildButtons.buildBuildButtonsView(interaction, ";".join(build), cost, loc, view, player, game)
         await interaction.message.edit(content=f"Total cost so far of {cost}", view=view)
 
     @staticmethod
-    def buildBuildButtonsView(interaction: discord.Interaction, build: str, cost, build_loc, view: View, player):
+    def buildBuildButtonsView(interaction: discord.Interaction, build: str, cost, build_loc, view: View, player, game:GamestateHelper):
         ships = ["Interceptor", "Cruiser", "Dreadnought", "Starbase", "Orbital", "Monolith"]
         if build == "":
             build = "none"
-        game = GamestateHelper(interaction.channel)
         shipsShort = ["int", "cru", "drd", "sb"]
 
         if "stb" not in player["military_tech"] or player["name"] == "The Exiles":

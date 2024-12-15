@@ -335,6 +335,7 @@ class SearchCommands(commands.GroupCog, name="search"):
             for faction, count in faction_victory_count.most_common():  
                 summary += f"{faction}: {count} wins\n"
             asyncio.create_task(interaction.channel.send(summary) )
+            summary = ""
             for faction, count in faction_performance.most_common():
                 relative_faction_performance[faction] += int(count/max_faction_performance[faction] * 100)
             asyncio.create_task(interaction.followup.send("Faction Performance:") )
