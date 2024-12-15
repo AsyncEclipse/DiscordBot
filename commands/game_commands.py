@@ -132,7 +132,7 @@ class GameCommands(commands.GroupCog, name="game"):
     @app_commands.command(name="unlock_hold")
     async def unlock_hold(self, interaction: discord.Interaction):
         await interaction.response.send_message("The hold on actions has been released")
-        game = GamestateHelper(interaction.channel)
+        game = GamestateHelper(interaction.channel, interaction.channel.name, True)
         game.setLockedStatus(False)
     
 

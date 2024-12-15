@@ -275,7 +275,6 @@ class InfluenceButtons:
         game.update_player(player_helper)
         if delete:
             await interaction.message.delete()
-        game = GamestateHelper(interaction.channel)
         player_name = player["player_name"]
         player_color = player["color"]
         for tile in game.gamestate["board"]:

@@ -40,8 +40,8 @@ class ButtonListener(commands.Cog):
             button_log_channel = discord.utils.get(interaction.guild.channels, name="button-log")
             customID = interaction.data["custom_id"]
             if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):
-                asyncio.create_task(button_log_channel.send(f"{start.strftime('%H:%M:%S')} {customID} pressed:"
-                                              f" {interaction.message.jump_url}"))
+                asyncio.create_task(button_log_channel.send(f"{start.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]} {customID} pressed:"
+                                              f" {interaction.message.jump_url} by {interaction.user.display_name}"))
 
             try:
                 await interaction.response.defer(thinking=False)
@@ -69,8 +69,6 @@ class ButtonListener(commands.Cog):
                         f"- Component Custom ID: {interaction.data.get('custom_id', 'N/A')}\n"
                         f"- Traceback:"
                     )
-                    game = GamestateHelper(interaction.channel)
-                    game.setLockedStatus(False)
                     try:
                         if isinstance(error, discord.HTTPException) and error.status == 404:
                             asyncio.create_task(log_channel.send(f"Unknown Interaction error on {customID}. "
@@ -88,7 +86,8 @@ class ButtonListener(commands.Cog):
                                     newline = tb.rfind("\n", 0, 1980)
                                     await log_channel.send("```python\n" + tb[:newline] + "\n```")
                                     tb = tb[newline + 1:]
-
+                        game = GamestateHelper(interaction.channel, interaction.channel.name,True)
+                        game.setLockedStatus(False)
                     except discord.Forbidden:
                         logger.warning("Cannot send messages to the log channel `#bot-log`. Check permissions.")
                     except discord.HTTPException as e:
@@ -129,19 +128,19 @@ class ButtonListener(commands.Cog):
                                                                "rerollDie", "readyForUpkeep"]):
                 await interaction.followup.send(f"{interaction.user.mention}, this button ({customID}) was pressed"
                                                 " most recently, and we are attempting to prevent an accidental"
-                                                " double press. Try hitting show game first and then hitting this"
+                                                " double press. Try hitting show reputation first and then hitting this"
                                                 " button, if for some reason you need to press this button.",
                                                 ephemeral=True)
                 return
 
-        if game.gamestate.get("gameLocked") == "yes":
-            await asyncio.sleep(0.5)
-            game = GamestateHelper(interaction.channel)
-            if game.gamestate.get("gameLocked") == "yes":
-                await interaction.followup.send((f"{interaction.user.mention}, the game was processing"
-                                                " another request when you hit this button. Try again now"),
-                                                ephemeral=True)
-                return
+        # if game.gamestate.get("gameLocked") == "yes":
+        #     await asyncio.sleep(0.5)
+        #     game = GamestateHelper(interaction.channel)
+        #     if game.gamestate.get("gameLocked") == "yes":
+        #         await interaction.followup.send((f"{interaction.user.mention}, the game was processing"
+        #                                         " another request when you hit this button. Try again now"),
+        #                                         ephemeral=True)
+        #         return
         
         # If we want to prevent others from touching someone else's buttons,
         # we can attach FCID{color}_ to the start of the button ID as a check.
@@ -159,11 +158,18 @@ class ButtonListener(commands.Cog):
             await interaction.message.delete()
         if customID == "showGame":
             await TurnButtons.showGame(game, interaction)
+            return
         if customID.startswith("refreshImage"):
             await Combat.refreshImage(game, customID, interaction)
+            return
         if player is None:
             return
-        game.setLockedStatus(True)
+        game.file = game.setLockedStatus(True)
+        if game.file == None: 
+            await interaction.followup.send((f"{interaction.user.mention}, the game was processing"
+                                                " another request when you hit this button. Try again now"),
+                                                ephemeral=True)
+            return
         game.saveLastButtonPressed(customID)
         if customID.startswith("tradeAtRatio"):
             await TurnButtons.tradeAtRatio(game, player, player_helper, interaction, customID)
@@ -344,7 +350,6 @@ class ButtonListener(commands.Cog):
             await BlackHoleButtons.blackHoleFinish(game, player, customID, player_helper, interaction)
         end_time = time.perf_counter()
         elapsed_time = end_time - start_time
-        game = GamestateHelper(interaction.channel)
         game.setLockedStatus(False)
         if elapsed_time > 5:
             print(f"Total elapsed time for {customID} button press in side thread: {elapsed_time:.2f} seconds")

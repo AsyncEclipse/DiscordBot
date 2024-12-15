@@ -39,6 +39,7 @@ class TurnButtons:
         try:
             await interaction.message.delete()
             game.backUpToLastSaveFile()
+            game.release_lock()
             game = GamestateHelper(interaction.channel)
             player = game.get_player(interaction.user.id,interaction)
             view = TurnButtons.getStartTurnButtons(game, player, "dummy")
@@ -177,7 +178,6 @@ class TurnButtons:
     @staticmethod
     async def tradeAtRatio(game: GamestateHelper, player, player_helper: PlayerHelper,
                            interaction: discord.Interaction,  buttonID: str):
-        game = GamestateHelper(interaction.channel)
         resource_type = buttonID.split("_")[1]
         resource_type2 = buttonID.split("_")[2]
         trade_value = player["trade_value"]
