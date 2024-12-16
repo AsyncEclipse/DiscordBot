@@ -1336,6 +1336,16 @@ class GamestateHelper:
         self.gamestate["board"][tile]["currentAction"] = action
         self.update()
 
+    def ai_eliminated(self, pos):
+        ships = self.gamestate["board"][pos]["player_ships"]
+        if len(ships) == 0:
+            return True
+        for i in ships:
+            if i.split()[0] == "ai":
+                return False
+        return True
+
+
     def get_system_coord(self, sector):
         for i in (self.gamestate["board"]):
             if self.gamestate["board"][i]["sector"] == sector:

@@ -1241,14 +1241,20 @@ class Combat:
                 asyncio.create_task(interaction.channel.send(msg, view=view))
         winner = Combat.findPlayersInTile(game, pos)[0]
         owner = game.gamestate["board"][pos]["owner"]
+        player = game.getPlayerObjectFromColor(winner)
+        old_owner = game.getPlayerObjectFromColor(owner)
+        playerName = player["player_name"]
 
         if winner != "ai" and owner != winner:
-            player = game.getPlayerObjectFromColor(winner)
-            playerName = player["player_name"]
-            if game.gamestate["board"][pos]["disctile"] != 0:
+            if old_owner["name"] == "Descendants of Draco" and game.gamestate["board"][pos]["disctile"] != 0:
+                await interaction.channel.send(f"Bombing must occur first to determine who draws the discovery tile. "
+                                               f"If they Draco population are not removed they will win the "
+                                               f"tile. This is not fully automated yet so please use the discovery "
+                                               f"tile draw command once the winner is decided.")
+            elif game.gamestate["board"][pos]["disctile"] != 0:
                 view = View()
                 view.add_item(Button(label="Explore Discovery Tile", style=discord.ButtonStyle.green,
-                                     custom_id=f"FCID{winner}_exploreDiscoveryTile_{pos}_deleteMsg"))
+                                    custom_id=f"FCID{winner}_exploreDiscoveryTile_{pos}_deleteMsg"))
                 message = f"{playerName}, you may explore the discovery tile."
                 asyncio.create_task(interaction.channel.send(message, view=view))
             if owner == 0:
@@ -1291,6 +1297,17 @@ class Combat:
                                          custom_id=f"FCID{winner}_rollDice_{pos}_{winner}_1000"))
                     message = f"{playerName}, you may roll to attempt to kill enemy population."
                     asyncio.create_task(interaction.channel.send(message, view=view))
+        elif all([winner != "ai",
+                  winner == owner,
+                  game.getPlayerObjectFromColor(winner)["name"] == "Descendants of Draco",
+                  game.gamestate["board"][pos]["disctile"] != 0,
+                  game.ai_eliminated(pos)]):
+            view = View()
+            view.add_item(Button(label="Explore Discovery Tile", style=discord.ButtonStyle.green,
+                                custom_id=f"FCID{winner}_exploreDiscoveryTile_{pos}_deleteMsg"))
+            message = f"{playerName}, you may explore the discovery tile."
+            asyncio.create_task(interaction.channel.send(message, view=view))
+
 
     @staticmethod
     async def assignHitTo(game: GamestateHelper, buttonID: str, interaction: discord.Interaction, button: bool):
