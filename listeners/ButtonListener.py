@@ -86,8 +86,8 @@ class ButtonListener(commands.Cog):
                                     newline = tb.rfind("\n", 0, 1980)
                                     await log_channel.send("```python\n" + tb[:newline] + "\n```")
                                     tb = tb[newline + 1:]
-                        game = GamestateHelper(interaction.channel, interaction.channel.name,True)
-                        game.setLockedStatus(False)
+                        # game = GamestateHelper(interaction.channel, interaction.channel.name,True)
+                        # game.setLockedStatus(False)
                     except discord.Forbidden:
                         logger.warning("Cannot send messages to the log channel `#bot-log`. Check permissions.")
                     except discord.HTTPException as e:
@@ -125,7 +125,7 @@ class ButtonListener(commands.Cog):
         if game.gamestate.get("lastButton") == customID:
             if not any(substring in customID for substring in ["showGame", "AtRatio", "gain5",
                                                                "showReputation", "rollDice", "magColShip",
-                                                               "rerollDie", "readyForUpkeep"]):
+                                                               "rerollDie", "readyForUpkeep","draftFaction"]):
                 await interaction.followup.send(f"{interaction.user.mention}, this button ({customID}) was pressed"
                                                 " most recently, and we are attempting to prevent an accidental"
                                                 " double press. Try hitting show reputation first and then hitting this"
@@ -335,6 +335,8 @@ class ButtonListener(commands.Cog):
             await Combat.finishRetreatingUnits(game, customID, interaction, player)
         elif customID.startswith("killPop"):
             await Combat.killPop(game, customID, interaction, player)
+        elif customID.startswith("resolveLyraRiftRoll"):
+            await Combat.resolveLyraRiftRoll(game, customID, interaction)
         elif customID.startswith("placeShrineInitial"):
             await ShrineButtons.placeShrineInitial(game, player, interaction, customID)
         elif customID.startswith("placeShrineFinal"):

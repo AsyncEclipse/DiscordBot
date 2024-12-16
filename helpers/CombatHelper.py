@@ -580,6 +580,79 @@ class Combat:
         if hitsToAssign == 0 and oldLength == len(Combat.findPlayersInTile(game, pos)):
             await Combat.promptNextSpeed(game, pos, interaction.channel, update)
 
+
+    @staticmethod
+    async def resolveLyraRiftRoll(game: GamestateHelper, buttonID: str, interaction: discord.Interaction):
+        pos = buttonID.split("_")[1]
+        colorOrAI = buttonID.split("_")[2]
+        dieNum = int(buttonID.split("_")[3])
+        speed = int(buttonID.split("_")[4])
+        dieDam = int(buttonID.split("_")[5])
+        counter = int(buttonID.split("_")[6])
+        oldLength = len(Combat.findPlayersInTile(game, pos))
+        tile_map = game.gamestate["board"]
+        player_ships = tile_map[pos]["player_ships"][:]
+        hittableShips = []
+        hitsToAssign = 0
+        if "unresolvedHits" in game.gamestate["board"][pos]:
+            hitsToAssign = max(game.gamestate["board"][pos]["unresolvedHits"] - 1, 0)
+        game.setUnresolvedHits(hitsToAssign, pos)
+        if dieNum == 1 or dieNum == 6:
+            ship = Combat.getShipToSelfHitWithRiftCannon(game, colorOrAI, player_ships, pos)
+            buttonID = f"assignHitTo_{pos}_{colorOrAI}_{ship}_{dieNum}_1"
+            if dieNum != 6 or popRiftProtector:
+                await Combat.assignHitTo(game, buttonID, interaction, False)
+            if dieNum == 6 and speed == 1000:
+                popRiftProtector = False
+            
+        if dieNum > 3:
+            hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships,
+                                                                6, 0, pos, speed)
+        if len(hittableShips) > 0:
+            if speed == 1000:
+                msg = (f"{interaction.user.name}, choose what population to hit"
+                        f" with the die that rolled a {dieNum}.")
+
+                view = View()
+                for count, cube in enumerate(hittableShips):
+                    advanced = "advanced " if "adv" in cube else ""
+                    label = f"Hit {advanced}{cube.replace('adv', '')} population"
+                    buttonID = f"FCID{colorOrAI}_killPop_{pos}_{cube}_{count}"
+                    view.add_item(Button(label=label, style=discord.ButtonStyle.gray,
+                                            custom_id=buttonID))
+                asyncio.create_task(interaction.channel.send(msg, view=view))
+            else:
+                update = True
+                if len(hittableShips) > 1:
+                    msg = (f"{interaction.user.mention}, choose what ship to hit"
+                            f" with the die that rolled a {dieNum}. You will deal {dieDam} damage. "
+                            "The bot has calculated that you can hit these ships.")
+                    view = View()
+                    for ship in hittableShips:
+                        shipType = ship.split("-")[1]
+                        # shipOwner = ship.split("-")[0]
+                        label = "Hit " + Combat.translateShipAbrToName(shipType)
+                        buttonID = (f"FCID{colorOrAI}_assignHitTo_{pos}_{colorOrAI}"
+                                    f"_{ship}_{dieNum}_{dieDam}_{counter}")
+                        view.add_item(Button(label=label, style=discord.ButtonStyle.red,
+                                                custom_id=buttonID))
+                    await interaction.channel.send(msg, view=view)
+                    hitsToAssign = 1
+                    if "unresolvedHits" in game.gamestate["board"][pos]:
+                        hitsToAssign = game.gamestate["board"][pos]["unresolvedHits"] + 1
+                    game.setUnresolvedHits(hitsToAssign, pos)
+                else:
+                    ship = hittableShips[0]
+                    buttonID = f"assignHitTo_{pos}_{colorOrAI}_{ship}_{dieNum}_{dieDam}"
+                    await Combat.assignHitTo(game, buttonID, interaction, False)
+
+            hitsToAssign = 0
+        if speed != 1000:
+            if "unresolvedHits" in game.gamestate["board"][pos]:
+                hitsToAssign = game.gamestate["board"][pos]["unresolvedHits"]
+            if hitsToAssign == 0 and oldLength == len(Combat.findPlayersInTile(game, pos)):
+                await Combat.promptNextSpeed(game, pos, interaction.channel, update)
+        await interaction.message.delete()
     @staticmethod
     async def rollDice(game: GamestateHelper, buttonID: str, interaction: discord.Interaction):
         pos = buttonID.split("_")[1]
@@ -632,7 +705,7 @@ class Combat:
                         # dieFiles.append(drawing.use_image("images/resources/components/dice_faces/dice_" +
                         #                                   Combat.translateColorToName(die) +
                         #                                   "_" + str(random_number) + ".png"))
-                        if all([missiles == "", colorOrAI != "ai",
+                        if all([missiles == "",
                                 Combat.translateColorToDamage(die, random_number) == 4]):
                             player = game.get_player_from_color(colorOrAI)
                             playerObj = game.getPlayerObjectFromColor(colorOrAI)
@@ -690,6 +763,35 @@ class Combat:
                                     asyncio.create_task(interaction.channel.send(message, view=viewLyr))
                                 continue
                         else:
+                            if all([player is not None,
+                                        "Lyra" in game.gamestate["players"][player]["name"],
+                                        game.gamestate["players"][player]["colony_ships"] > 0,
+                                        oldNumPeeps == len(Combat.findPlayersInTile(game, pos))]):
+                                    viewLyr = View()
+                                    label = "Reroll Die"
+                                    buttonID = (f"FCID{colorOrAI}_rerollDie_{pos}_{colorOrAI}"
+                                                f"_{shipModel.computer}_{dieColor}_{counter}")
+                                    riftButtonID = (f"FCID{colorOrAI}_resolveLyraRiftRoll_{pos}_{colorOrAI}"
+                                                f"_{str(dieNum)}_{str(speed)}_{str(dieDam)}_{counter}")
+                                    viewLyr.add_item(Button(label=label, style=discord.ButtonStyle.green,
+                                                            custom_id=buttonID))
+                                    viewLyr.add_item(Button(label="Decline Reroll", style=discord.ButtonStyle.red,
+                                                            custom_id=riftButtonID))
+                                    emojiStr = str(dieNum)
+                                    emojiName = f"dice_{Combat.translateColorToName("pink")}_{dieNum}"
+                                    guild_emojis = interaction.guild.emojis
+                                    matching_emojis = [emoji for emoji in guild_emojis if emoji.name == emojiName]
+                                    msg += str(num) + " "
+                                    if len(matching_emojis) > 0:
+                                        emojiStr = str(matching_emojis[0]) 
+                                    message = (game.gamestate["players"][player]["player_name"] + ", you can reroll a"
+                                               f" rift die that rolled a {emojiStr} using one of your colony ships.")
+                                    asyncio.create_task(interaction.channel.send(message, view=viewLyr))
+                                    hitsToAssign = 1
+                                    if "unresolvedHits" in game.gamestate["board"][pos]:
+                                        hitsToAssign = game.gamestate["board"][pos]["unresolvedHits"] + 1
+                                    game.setUnresolvedHits(hitsToAssign, pos)
+                                    continue
                             if dieNum == 2 or dieNum == 3:
                                 continue
                             if dieNum == 1 or dieNum == 6:
@@ -755,6 +857,7 @@ class Combat:
         colorOrAI = buttonID.split("_")[2]
         colorDie = buttonID.split("_")[4]
         computerVal = int(buttonID.split("_")[3])
+        speed = game.gamestate["board"][pos]["currentSpeed"]
         tile_map = game.gamestate["board"]
         ships = player_helper.adjust_colony_ships(1)
         player_ships = tile_map[pos]["player_ships"][:]
@@ -809,6 +912,38 @@ class Combat:
                         await interaction.channel.send(message, view=viewLyr)
                     continue
             else:
+                if "unresolvedHits" in game.gamestate["board"][pos]:
+                    hitsToAssign = max(game.gamestate["board"][pos]["unresolvedHits"] - 1, 0)
+                game.setUnresolvedHits(hitsToAssign, pos)
+                if all([player is not None,
+                                        "Lyra" in player["name"],
+                                        player["colony_ships"] > 0,
+                                    oldNumPeeps == len(Combat.findPlayersInTile(game, pos))]):
+                        viewLyr = View()
+                        label = "Reroll Die"
+                        buttonID = (f"FCID{colorOrAI}_rerollDie_{pos}_{colorOrAI}"
+                                    f"_{0}_{dieColor}_{5}")
+                        riftButtonID = (f"FCID{colorOrAI}_resolveLyraRiftRoll_{pos}_{colorOrAI}"
+                                    f"_{str(dieNum)}_{str(speed)}_{str(dieDam)}_{5}")
+                        viewLyr.add_item(Button(label=label, style=discord.ButtonStyle.green,
+                                                custom_id=buttonID))
+                        viewLyr.add_item(Button(label="Decline Reroll", style=discord.ButtonStyle.red,
+                                                custom_id=riftButtonID))
+                        emojiStr = str(dieNum)
+                        emojiName = f"dice_{Combat.translateColorToName("pink")}_{dieNum}"
+                        guild_emojis = interaction.guild.emojis
+                        matching_emojis = [emoji for emoji in guild_emojis if emoji.name == emojiName]
+                        msg += str(num) + " "
+                        if len(matching_emojis) > 0:
+                            emojiStr = str(matching_emojis[0]) 
+                        message = (player["player_name"] + ", you can reroll a"
+                                    f" rift die that rolled a {emojiStr} using one of your colony ships.")
+                        asyncio.create_task(interaction.channel.send(message, view=viewLyr))
+                        hitsToAssign = 1
+                        if "unresolvedHits" in game.gamestate["board"][pos]:
+                            hitsToAssign = game.gamestate["board"][pos]["unresolvedHits"] + 1
+                        game.setUnresolvedHits(hitsToAssign, pos)
+                        continue
                 if dieNum == 2 or dieNum == 3:
                     continue
                 if dieNum == 1 or dieNum == 6:
