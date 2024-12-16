@@ -78,6 +78,9 @@ class DraftButtons:
         factionKey = customID.split("_")[1]
         factionName = customID.split("_")[2]
         await interaction.channel.send(f"{interaction.user.mention} drafted {factionName}.")
+        if factionKey == "exl":
+            await interaction.followup.send(f"REMINDER {interaction.user.mention}: You start with one extra colony "
+                                            f"ship to be used on your first turn to populate your starting orbital.")
         await interaction.message.delete()
         game.removeFromKey("draftingPlayers", playerID)
         game.addToKey("draftedFactions", (playerID, factionKey))
