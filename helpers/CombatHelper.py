@@ -1247,10 +1247,11 @@ class Combat:
 
         if winner != "ai" and owner != winner:
             if old_owner["name"] == "Descendants of Draco" and game.gamestate["board"][pos]["disctile"] != 0:
-                await interaction.channel.send(f"Bombing must occur first to determine who draws the discovery tile. "
-                                               f"If they Draco population are not removed they will win the "
-                                               f"tile. This is not fully automated yet so please use the discovery "
-                                               f"tile draw command once the winner is decided.")
+                await interaction.channel.send(f"**REMINDER: Do not resolve the discovery tile until bombing "
+                                               f"population has been resolved. In the case that Draco has population "
+                                               f"remaining after bombardment, they will gain the discovery tile. This "
+                                               f"is not fully automated yet so please use the draw tile command "
+                                               f"once the winner is decided.**")
             elif game.gamestate["board"][pos]["disctile"] != 0:
                 view = View()
                 view.add_item(Button(label="Explore Discovery Tile", style=discord.ButtonStyle.green,
