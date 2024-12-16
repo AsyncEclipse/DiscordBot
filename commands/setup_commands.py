@@ -383,7 +383,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
 
         message = "\n".join(["Discovery Reference"])
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "Discovery_Reference.png"))
-
+        game.release_lock()
         await factionThread.send(role.mention + " pinging you here, which contains all the faction sheets")
         await interaction.followup.send("\n".join(["New game created! Here are the channels:",
                                                    tabletalk.jump_url, actions.jump_url]))
