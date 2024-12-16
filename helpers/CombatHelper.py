@@ -778,7 +778,7 @@ class Combat:
                                     viewLyr.add_item(Button(label="Decline Reroll", style=discord.ButtonStyle.red,
                                                             custom_id=riftButtonID))
                                     emojiStr = str(dieNum)
-                                    emojiName = f"dice_{Combat.translateColorToName("pink")}_{dieNum}"
+                                    emojiName = f"dice_{Combat.translateColorToName('pink')}_{dieNum}"
                                     guild_emojis = interaction.guild.emojis
                                     matching_emojis = [emoji for emoji in guild_emojis if emoji.name == emojiName]
                                     msg += str(num) + " "
@@ -930,7 +930,7 @@ class Combat:
                         viewLyr.add_item(Button(label="Decline Reroll", style=discord.ButtonStyle.red,
                                                 custom_id=riftButtonID))
                         emojiStr = str(dieNum)
-                        emojiName = f"dice_{Combat.translateColorToName("pink")}_{dieNum}"
+                        emojiName = f"dice_{Combat.translateColorToName('pink')}_{dieNum}"
                         guild_emojis = interaction.guild.emojis
                         matching_emojis = [emoji for emoji in guild_emojis if emoji.name == emojiName]
                         msg += str(num) + " "
