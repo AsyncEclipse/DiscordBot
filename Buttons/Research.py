@@ -92,6 +92,8 @@ class ResearchButtons:
                                  custom_id=f"FCID{player['color']}_deleteMsg"))
             await interaction.channel.send("You may gain 5 of any type of resource for each artifact you have.",
                                            view=view)
+        if tech_details["infdisc"] != 0:
+            await interaction.channel.send(f"{interaction.user.mention}, after researching this tech your upkeep cost is now -{player_helper.upkeepCosts()}.")
         if tech == "wap":
             view = View()
             seenTiles = []
