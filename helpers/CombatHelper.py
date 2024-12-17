@@ -1242,13 +1242,13 @@ class Combat:
         if winner != "ai" and owner != winner:
             player = game.getPlayerObjectFromColor(winner)
             playerName = player["player_name"]
-            if game.gamestate["board"][pos]["disctile"] != 0:
-                view = View()
-                view.add_item(Button(label="Explore Discovery Tile", style=discord.ButtonStyle.green,
-                                     custom_id=f"FCID{winner}_exploreDiscoveryTile_{pos}_deleteMsg"))
-                message = f"{playerName}, you may explore the discovery tile."
-                asyncio.create_task(interaction.channel.send(message, view=view))
             if owner == 0:
+                if game.gamestate["board"][pos]["disctile"] != 0:
+                    view = View()
+                    view.add_item(Button(label="Explore Discovery Tile", style=discord.ButtonStyle.green,
+                                         custom_id=f"FCID{winner}_exploreDiscoveryTile_{pos}_deleteMsg"))
+                    message = f"{playerName}, you may explore the discovery tile."
+                    asyncio.create_task(interaction.channel.send(message, view=view))
                 view2 = View()
                 view2.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple,
                                       custom_id=f"FCID{winner}_addInfluenceFinish_{pos}"))
@@ -1265,6 +1265,12 @@ class Combat:
                 player_helper = PlayerHelper(game.get_player_from_color(player["color"]), player)
                 player_helper2 = PlayerHelper(game.get_player_from_color(p2["color"]), p2)
                 if (p2["name"] == "Planta" or game.is_population_gone(pos) or ("neb" in player_helper.getTechs() and "nea" not in player_helper2.getTechs())):
+                    if game.gamestate["board"][pos]["disctile"] != 0:
+                        view4 = View()
+                        view4.add_item(Button(label="Explore Discovery Tile", style=discord.ButtonStyle.green,
+                                             custom_id=f"FCID{winner}_exploreDiscoveryTile_{pos}_deleteMsg"))
+                        message = f"{playerName}, you may explore the discovery tile."
+                        asyncio.create_task(interaction.channel.send(message, view=view4))
                     view = View()
                     view.add_item(Button(label="Destroy All Population", style=discord.ButtonStyle.green,
                                          custom_id=f"FCID{winner}_removeInfluenceFinish_{pos}_graveYard"))
@@ -1283,11 +1289,18 @@ class Combat:
                                " you may use this to drop population after taking control of the sector.")
                     asyncio.create_task(interaction.channel.send(message, view=view3))
                 else:
+                    if p2["name"] == "Descendants of Draco" and game.gamestate["board"][pos]["disctile"] != 0:
+                        await interaction.channel.send(f"**REMINDER: Do not resolve the discovery tile until bombing "
+                                                       f"population has been resolved. In the case that Draco has population "
+                                                       f"remaining after bombardment, they will gain the discovery tile. This "
+                                                       f"is not fully automated yet so please use the draw tile command "
+                                                       f"once the winner is decided.**")
                     view = View()
                     view.add_item(Button(label="Roll to Destroy Population", style=discord.ButtonStyle.green,
                                          custom_id=f"FCID{winner}_rollDice_{pos}_{winner}_1000"))
                     message = f"{playerName}, you may roll to attempt to kill enemy population."
                     asyncio.create_task(interaction.channel.send(message, view=view))
+
 
     @staticmethod
     async def assignHitTo(game: GamestateHelper, buttonID: str, interaction: discord.Interaction, button: bool):
