@@ -1,4 +1,5 @@
 
+import asyncio
 import random
 import discord
 from helpers.GamestateHelper import GamestateHelper
@@ -48,7 +49,7 @@ class ReputationButtons:
         game.update_player(player_helper)
         game.update()
         if not queue:
-            await interaction.followup.send(msg, ephemeral=True)
+            asyncio.create_task(interaction.followup.send(msg, ephemeral=True))
         else:
             threadName = (f"{game.gamestate['game_id']}-Round {game.gamestate['roundNum']}, "
                           f"Queued Draw for {player_helper.stats['color']}")
@@ -59,4 +60,4 @@ class ReputationButtons:
                                                      auto_archive_duration=1440,
                                                      type=discord.ChannelType.private_thread,
                                                      invitable=False)
-                await thread.send(msg)
+                asyncio.create_task(thread.send(msg))

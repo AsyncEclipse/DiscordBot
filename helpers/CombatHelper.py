@@ -600,10 +600,7 @@ class Combat:
         if dieNum == 1 or dieNum == 6:
             ship = Combat.getShipToSelfHitWithRiftCannon(game, colorOrAI, player_ships, pos)
             buttonID = f"assignHitTo_{pos}_{colorOrAI}_{ship}_{dieNum}_1"
-            if dieNum != 6 or popRiftProtector:
-                await Combat.assignHitTo(game, buttonID, interaction, False)
-            if dieNum == 6 and speed == 1000:
-                popRiftProtector = False
+            await Combat.assignHitTo(game, buttonID, interaction, False)
             
         if dieNum > 3:
             hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships,
@@ -1406,13 +1403,13 @@ class Combat:
             game.addToKey("queuedDraws", [system, drawOrder, color, num_options])
             await Combat.resolveQueue(game, interaction)
             if [system, drawOrder, color, num_options] in game.gamestate["queuedDraws"]:
-                await interaction.channel.send(f"{interaction.user.name}, your reputation draw has been queued")
+                asyncio.create_task(interaction.channel.send(f"{interaction.user.name}, your reputation draw has been queued"))
             else:
-                await interaction.channel.send(f"{interaction.user.name} drew {num_options} reputation tiles.")
+                asyncio.create_task(interaction.channel.send(f"{interaction.user.name} drew {num_options} reputation tiles."))
         else:
             await ReputationButtons.resolveGainingReputation(game, num_options, interaction, player_helper, False)
-            await interaction.channel.send(f"{interaction.user.name} drew {num_options} reputation tiles.")
-        await interaction.message.delete()
+            asyncio.create_task(interaction.channel.send(f"{interaction.user.name} drew {num_options} reputation tiles."))
+        asyncio.create_task(interaction.message.delete())
 
     @staticmethod
     async def refreshImage(game: GamestateHelper, buttonID: str, interaction: discord.Interaction):
