@@ -1341,7 +1341,7 @@ class GamestateHelper:
         if len(ships) == 0:
             return True
         for i in ships:
-            if i.split()[0] == "ai":
+            if i.split("-")[0] == "ai":
                 return False
         return True
 
