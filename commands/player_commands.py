@@ -41,7 +41,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
                     money_cubes: Optional[int],
                     discovery_tiles_kept: Optional[int],
                     influence: Optional[int],
-                    colony_ships: Optional[int], player: Optional[discord.Member] = None):
+                    colony_ships: Optional[int],mag_points: Optional[int], player: Optional[discord.Member] = None):
         """
 
         :param materials: Materials resource count - may use +1/-1 to add/subtract
@@ -53,6 +53,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         :param money_cubes: Money cube count - may use +1/-1 to add/subtract
         :param influence: Influence disc count - may use +1/-1 to add/subtract
         :param colony_ships: Ready colony ship count - may use +1/-1 to add/subtract
+        :param mag_points: Points for Magellan kept parts - may use +1/-1 to add/subtract
         :return:
         """
         if player is None:
@@ -98,6 +99,8 @@ class PlayerCommands(commands.GroupCog, name="player"):
             response += (p1.adjust_money_cube(money_cubes))
         if influence:
             response += (p1.adjust_influence(influence))
+        if mag_points:
+            response += (p1.adjust_mag_points(mag_points))
         if colony_ships:
             before = p1.stats['colony_ships']
             p1.adjust_colony_ships(-colony_ships)
