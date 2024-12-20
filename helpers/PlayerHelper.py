@@ -79,6 +79,12 @@ class PlayerHelper:
         amount = min(15, amount)
         self.stats["influence_discs"] = amount
         return (f"\n> Adjusted influence discs from {before} to {amount}")
+    
+    def adjust_mag_points(self, adjustment):
+        before = self.stats.get("magPartPoints",0)
+        amount = max(0, self.stats.get("magPartPoints",0) + adjustment)
+        self.stats["magPartPoints"] = amount
+        return (f"\n> Adjusted magellan points for kept parts from {before} to {amount}")
 
     def spend_influence_on_action(self, action: str):
         self.adjust_influence(-1)

@@ -601,7 +601,7 @@ class Combat:
             ship = Combat.getShipToSelfHitWithRiftCannon(game, colorOrAI, player_ships, pos)
             buttonID = f"assignHitTo_{pos}_{colorOrAI}_{ship}_{dieNum}_1"
             await Combat.assignHitTo(game, buttonID, interaction, False)
-            
+        update = False
         if dieNum > 3:
             hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships,
                                                                 6, 0, pos, speed)

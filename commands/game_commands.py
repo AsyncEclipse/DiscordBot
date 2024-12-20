@@ -66,7 +66,7 @@ class GameCommands(commands.GroupCog, name="game"):
                 except discord.HTTPException as e:
                     await interaction.channel.send("An error occurred when adding"
                                                    f" {user.mention} to {channel.name}: {str(e)}")
-        interaction.response.defer()
+        await interaction.response.defer()
 
     @app_commands.command(name="start_combats")
     async def start_combats(self, interaction: discord.Interaction):

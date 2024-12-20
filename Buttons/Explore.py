@@ -34,7 +34,8 @@ class ExploreButtons:
                     if "gcds" in ship:
                         opponentShips += 99
                     if "orb" in ship:
-                        if game.gamestate["board"][tile]["owner"] is not player["color"]:
+                        
+                        if game.gamestate["board"][tile]["owner"] != player["color"]:
                             color = game.gamestate["board"][tile]["owner"]
                             if all([game.find_player_faction_name_from_color(color) == "The Exiles",
                                     game.gamestate["board"][tile].get("orbital_pop", [0])[0] == 1]):
