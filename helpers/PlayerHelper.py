@@ -81,8 +81,8 @@ class PlayerHelper:
         return (f"\n> Adjusted influence discs from {before} to {amount}")
     
     def adjust_mag_points(self, adjustment):
-        before = self.stats["magPartPoints"]
-        amount = max(0, self.stats["magPartPoints"] + adjustment)
+        before = self.stats.get("magPartPoints",0)
+        amount = max(0, self.stats.get("magPartPoints",0) + adjustment)
         self.stats["magPartPoints"] = amount
         return (f"\n> Adjusted magellan points for kept parts from {before} to {amount}")
 

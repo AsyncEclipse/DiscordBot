@@ -61,11 +61,11 @@ class PlayerCommands(commands.GroupCog, name="player"):
         gamestate = GamestateHelper(interaction.channel)
         p1 = PlayerHelper(player.id, gamestate.get_player(player.id))
         options = [materials, science, money, material_cubes, science_cubes, money_cubes,
-                   influence, colony_ships, discovery_tiles_kept]
+                   influence, colony_ships, discovery_tiles_kept, mag_points]
 
         if all(x is None for x in options):
             top_response = (f"{p1.name} player stats:")
-            response = "\n".join(f"> Faction: {p1.stats['name']}",
+            response = "\n".join([f"> Faction: {p1.stats['name']}",
                                  f"> Materials: {p1.stats['materials']}",
                                  f"> Material income: {p1.materials_income()}",
                                  f"> Science: {p1.stats['science']}",
@@ -75,7 +75,8 @@ class PlayerCommands(commands.GroupCog, name="player"):
                                  f"> Influence dics: {p1.stats['influence_discs']}",
                                  f"> Upkeep: {p1.upkeepCosts()}",
                                  f"> Colony Ships: {p1.stats['colony_ships']}",
-                                 f"> Discovery Tiles Kept For Points: {p1.stats['disc_tiles_for_points']}")
+                                 f"> Perma_Passed: {p1.stats.get('perma_passed','False')}",
+                                 f"> Discovery Tiles Kept For Points: {p1.stats.get('disc_tiles_for_points','0')}"])
             await interaction.response.send_message(top_response)
             await interaction.channel.send(response)
             return

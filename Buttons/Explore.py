@@ -27,7 +27,6 @@ class ExploreButtons:
         if len(playerShips) == 0:
             return False
         for ship in playerShips:
-            print(ship)
             if "mon" not in ship:
                 if player["color"] in ship and "orb" not in ship:
                     playerShipsCount += 1
