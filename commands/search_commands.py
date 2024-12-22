@@ -261,6 +261,7 @@ class SearchCommands(commands.GroupCog, name="search"):
         total_faction_drafts = Counter()    
         round_count = Counter() 
         vp_count = Counter()
+        finished_tourney_games = Counter()
         faction_victory_count = Counter()
         faction_performance = Counter()
         max_faction_performance = Counter()
@@ -297,6 +298,10 @@ class SearchCommands(commands.GroupCog, name="search"):
                 for player in game.gamestate["players"]:
                     username = game.gamestate["players"][player]["username"]
                     vp_count[username] += int(100*drawing.get_public_points(game.gamestate["players"][player], True)/highestVP)
+                    if game.gamestate["roundNum"] == 9:
+                        finished_tourney_games[username] += 1
+                    else:
+                        finished_tourney_games[username] += 0
                 if game.gamestate["roundNum"] == 9:
                     winner, highestScore, faction = game.getWinner()
                     if "Terran" in faction:
@@ -330,7 +335,7 @@ class SearchCommands(commands.GroupCog, name="search"):
             asyncio.create_task(interaction.channel.send(summary) )
             summary = "Point Progression:\n"
             for username, count in vp_count.most_common():  
-                summary += f"{username}: {count}/300 VPs\n"
+                summary += f"{username}: {count}/300 VPs ({str(finished_tourney_games[username])} games finished)\n"
             asyncio.create_task(interaction.channel.send(summary) )
             summary = "Faction Wins:\n"
             for faction, count in faction_victory_count.most_common():  
