@@ -22,7 +22,7 @@ class DraftButtons:
                        " plus the 6 Terran equivalents. First-timers are encouraged to use the Terran factions,"
                        " which are all the same and don't have as many quirks"
                        " (the quirks are tame compared to TI4 asymmetry though).")
-        message.extend(["1. Hydran Progress", "2. Eridian Empire", "3. Orion Hegemony",
+        message.extend(["1. Hydran Progress", "2. Eridani Empire", "3. Orion Hegemony",
                         "4. Mechanema", "5. Descendants of Draco", "6. Planta",
                         "7. Wardens of Magellan", "8. Enlightened of Lyra",
                         "9. Rho Indi Syndicate", "10. The Exiles"])
@@ -37,7 +37,7 @@ class DraftButtons:
     def getDraftButtons(game: GamestateHelper):
         view = View()
         factionsAvailable = [("Hydran Progress", "hyd"),
-                             ("Eridian Empire", "eri"),
+                             ("Eridani Empire", "eri"),
                              ("Orion Hegemony", "ori"),
                              ("Descendants of Draco", "dra"),
                              ("Mechanema", "mec"),
@@ -48,7 +48,7 @@ class DraftButtons:
                              ("The Exiles", "exl"),
                              ("Terran Alliance (Orion)", "ter1"),
                              ("Terran Conglomerate (Mech)", "ter2"),
-                             ("Terran Directorate (Eridian)", "ter3"),
+                             ("Terran Directorate (Eridani)", "ter3"),
                              ("Terran Federation (Hydran)", "ter4"),
                              ("Terran Republic (Draco)", "ter5"),
                              ("Terran Union (Planta)", "ter6")]

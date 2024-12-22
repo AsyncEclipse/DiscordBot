@@ -15,7 +15,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         self.bot = bot
 
     factionChoices = [app_commands.Choice(name="Hydran Progress", value="hyd"),
-                      app_commands.Choice(name="Eridian Empire", value="eri"),
+                      app_commands.Choice(name="Eridani Empire", value="eri"),
                       app_commands.Choice(name="Orion Hegemony", value="ori"),
                       app_commands.Choice(name="Descendants of Draco", value="dra"),
                       app_commands.Choice(name="Mechanema", value="mec"),
@@ -26,7 +26,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
                       app_commands.Choice(name="The Exiles", value="exl"),
                       app_commands.Choice(name="Terran Alliance (Orion)", value="ter1"),
                       app_commands.Choice(name="Terran Conglomerate (Mech)", value="ter2"),
-                      app_commands.Choice(name="Terran Directorate (Eridian)", value="ter3"),
+                      app_commands.Choice(name="Terran Directorate (Eridani)", value="ter3"),
                       app_commands.Choice(name="Terran Federation (Hydran)", value="ter4"),
                       app_commands.Choice(name="Terran Republic (Draco)", value="ter5"),
                       app_commands.Choice(name="Terran Union (Planta)", value="ter6"),]
