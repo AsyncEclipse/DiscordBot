@@ -675,9 +675,9 @@ class Combat:
                 dice = shipModel.dice
                 missiles = ""
                 nonMissiles = " on initiative " + str(speed)
-                if speed > 98 and speed < 1000:
+                if speed > 90 and speed < 1000:
                     dice = shipModel.missile
-                    if len(shipModel.missile) <1 and speed > 98 and speed < 1000:
+                    if len(shipModel.missile) <1 and speed > 90 and speed < 1000:
                         continue
                     missiles = "missiles on initiative " + str(speed-99)+" "
                     nonMissiles = ""
@@ -1043,7 +1043,7 @@ class Combat:
         if nextSpeed == -20:
             await Combat.checkForMorphShield(game, pos, channel, ships, [attacker, defender])
             for speed, owner in sortedSpeeds:
-                if speed < 99:
+                if speed < 90:
                     nextSpeed = speed
                     nextOwner = owner
                     break
@@ -1056,8 +1056,8 @@ class Combat:
         game.setCurrentRoller(nextOwner, pos)
         game.setCurrentSpeed(nextSpeed, pos)
         initiative = f"Initiative {nextSpeed}"
-        if nextSpeed > 98:
-            initiative = "Initiative" + str(nextSpeed-99)+" missiles"
+        if nextSpeed > 90:
+            initiative = "Initiative " + str(nextSpeed-99)+" missiles"
 
         if [nextSpeed, nextOwner] in game.getRetreatingUnits(pos):
             checker = "FCID" + nextOwner + "_"

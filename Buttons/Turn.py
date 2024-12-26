@@ -126,6 +126,7 @@ class TurnButtons:
         game.update_player(player_helper)
         nextPlayer = game.get_next_player(player)
         game.addToPassOrder(player["player_name"])
+        sendPermaPassButton = False
         if nextPlayer is not None and not game.is_everyone_passed():
             view = TurnButtons.getStartTurnButtons(game, nextPlayer, player["color"])
             game.initilizeKey("activePlayerColor")
@@ -134,12 +135,8 @@ class TurnButtons:
             await interaction.channel.send("## " + game.getPlayerEmoji(nextPlayer) + " started their turn")
             await interaction.channel.send(nextPlayer["player_name"] + " use buttons to do your turn"
                                            + game.displayPlayerStats(nextPlayer), view=view)
-
-            view2 = View()
-            view2.add_item(Button(label="Pass Unless Someone Attacks You",
-                                  style=discord.ButtonStyle.green, custom_id="permanentlyPass"))
-            await interaction.followup.send(interaction.user.mention + " you may use this button to pass on reactions"
-                                            " unless someone invades your systems.", view=view2, ephemeral=True)
+            sendPermaPassButton = True
+            
         else:
             view = View()
             role = discord.utils.get(interaction.guild.roles, name=game.game_id)
@@ -167,6 +164,12 @@ class TurnButtons:
             thread = discord.utils.get(interaction.channel.threads, name=thread_name)
             if thread is not None:
                 asyncio.create_task(game.showGame(thread, msg2))
+        if sendPermaPassButton:
+            view2 = View()
+            view2.add_item(Button(label="Pass Unless Someone Attacks You",
+                                  style=discord.ButtonStyle.green, custom_id="permanentlyPass"))
+            await interaction.followup.send(interaction.user.mention + " you may use this button to pass on reactions"
+                                            " unless someone invades your systems.", view=view2, ephemeral=True)
 
     @staticmethod
     async def permanentlyPass(player, game: GamestateHelper, interaction:
@@ -462,7 +465,8 @@ class TurnButtons:
                 if player['color'] in ship:
                     playerPresent = True
             if playerPresent:
-                for tile in player["reputation_track"]:
+                repTrack = player["reputation_track"][:]
+                for tile in repTrack:
                     if isinstance(tile, str) and "-" in tile and "minor" not in tile:
                         color = tile.split("-")[2]
                         p2 = game.getPlayerObjectFromColor(color)
@@ -481,7 +485,7 @@ class TurnButtons:
                             game.update_player(player_helper)
                             await interaction.channel.send(f"{player['player_name']}, you broke relations with {color}"
                                                         " and now are the Traitor.")
-                            return
+                            
 
 
 
