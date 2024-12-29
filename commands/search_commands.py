@@ -298,7 +298,7 @@ class SearchCommands(commands.GroupCog, name="search"):
                 for player in game.gamestate["players"]:
                     username = game.gamestate["players"][player]["username"]
                     if "(" in username:
-                        username = username.split("(")[0]
+                        username = username.split("(")[0].replace(" ","")
                     vp_count[username] += int(100*drawing.get_public_points(game.gamestate["players"][player], True)/highestVP)
                     if game.gamestate["roundNum"] == 9:
                         finished_tourney_games[username] += 1
