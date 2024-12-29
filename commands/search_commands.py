@@ -333,8 +333,8 @@ class SearchCommands(commands.GroupCog, name="search"):
         
         if tourney_only:
             summary = "Round Progression:\n"
-            for round, count in round_count.most_common():  
-                summary += f"{round}: {count} games\n"
+            for roundN, count in round_count.most_common():  
+                summary += f"{roundN}: {count} games\n"
             asyncio.create_task(interaction.channel.send(summary) )
             summary = "Point Progression:\n"
             for username, count in vp_count.most_common():  
