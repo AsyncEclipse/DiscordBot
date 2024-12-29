@@ -168,6 +168,7 @@ class TurnButtons:
             view2 = View()
             view2.add_item(Button(label="Pass Unless Someone Attacks You",
                                   style=discord.ButtonStyle.green, custom_id="permanentlyPass"))
+            await asyncio.sleep(1)
             await interaction.followup.send(interaction.user.mention + " you may use this button to pass on reactions"
                                             " unless someone invades your systems.", view=view2, ephemeral=True)
 
