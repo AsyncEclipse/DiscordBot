@@ -268,6 +268,7 @@ class SearchCommands(commands.GroupCog, name="search"):
         relative_faction_performance = Counter()
         positional_drafts = [Counter() for _ in range(6)] 
         await interaction.response.defer(thinking=True)
+        await interaction.followup.send("Here are your stats")
         lowerLim = 100
         higherLim = 999
         if tourney_only:
