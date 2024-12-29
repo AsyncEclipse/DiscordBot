@@ -298,8 +298,8 @@ class SearchCommands(commands.GroupCog, name="search"):
                 for player in game.gamestate["players"]:
                     username = game.gamestate["players"][player]["username"]
                     if "(" in username:
-                        username = username.split("(")[0]
-                    vp_count[username] += int(100*drawing.get_public_points(game.gamestate["players"][player], True)/highestVP)
+                        username = username.split("(")[0].replace(" ","")
+                    vp_count[username] += float(100.0*drawing.get_public_points(game.gamestate["players"][player], True)/highestVP)
                     if game.gamestate["roundNum"] == 9:
                         finished_tourney_games[username] += 1
                     else:
@@ -347,6 +347,6 @@ class SearchCommands(commands.GroupCog, name="search"):
             for faction, count in faction_performance.most_common():
                 relative_faction_performance[faction] += int(count/max_faction_performance[faction] * 100)
             for faction, count in relative_faction_performance.most_common():  
-                summary += f"{faction}: {count} out of 100 possible points\n"
+                summary += f"{faction}: {count} out of 100 possible points (in {str(max_faction_performance[faction]/100)} games)\n"
             asyncio.create_task(interaction.channel.send(summary) )
     
