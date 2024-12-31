@@ -338,7 +338,7 @@ class SearchCommands(commands.GroupCog, name="search"):
             asyncio.create_task(interaction.channel.send(summary) )
             summary = "Point Progression:\n"
             for username, count in vp_count.most_common():  
-                summary += f"{username}: {count}/300 VPs ({str(finished_tourney_games[username])} games)\n"
+                summary += f"{username}: {round(count,2)}/300 VPs ({str(finished_tourney_games[username])} games)\n"
             asyncio.create_task(interaction.channel.send(summary) )
             summary = "Faction Wins:\n"
             for faction, count in faction_victory_count.most_common():  
