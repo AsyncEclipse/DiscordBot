@@ -193,7 +193,7 @@ class Combat:
             else:
                 view = View()
                 view.add_item(Button(label="Roll to Destroy Population", style=discord.ButtonStyle.green,
-                                     custom_id=f"FCID{winner}_rollDice_{pos}_{winner}_1000"))
+                                     custom_id=f"FCID{winner}_rollDice_{pos}_{winner}_1000_deleteMsg"))
                 message = f"{playerName}, you may roll to attempt to kill enemy population."
                 asyncio.create_task(thread2.send(message, view=view))
             for combatatant in Combat.findPlayersInTile(game, tile2[1]):
@@ -385,14 +385,14 @@ class Combat:
             player_ships = tile_map[pos]["player_ships"][:]
             defenderSpeeds = Combat.getCombatantSpeeds(game, defender, player_ships, pos)
             attackerSpeeds = Combat.getCombatantSpeeds(game, attacker, player_ships, pos)
-            if Combat.doesCombatantHaveMissiles(game, defender, player_ships):
-                view.add_item(Button(label="(Defender) Roll Missiles",
-                                     style=discord.ButtonStyle.green,
-                                     custom_id=f"rollDice_{pos}_{defender}_99_defender"))
-            if Combat.doesCombatantHaveMissiles(game, attacker, player_ships):
-                view.add_item(Button(label="(Attacker) Roll Missiles",
-                                     style=discord.ButtonStyle.red,
-                                     custom_id=f"rollDice_{pos}_{attacker}_99_attacker"))
+            # if Combat.doesCombatantHaveMissiles(game, defender, player_ships):
+            #     view.add_item(Button(label="(Defender) Roll Missiles",
+            #                          style=discord.ButtonStyle.green,
+            #                          custom_id=f"rollDice_{pos}_{defender}_99_defender"))
+            # if Combat.doesCombatantHaveMissiles(game, attacker, player_ships):
+            #     view.add_item(Button(label="(Attacker) Roll Missiles",
+            #                          style=discord.ButtonStyle.red,
+            #                          custom_id=f"rollDice_{pos}_{attacker}_99_attacker"))
             for i in range(20, -20, -1):
                 if i in defenderSpeeds:
                     checker = ""
@@ -1297,7 +1297,7 @@ class Combat:
                                                        f"once the winner is decided.**")
                     view = View()
                     view.add_item(Button(label="Roll to Destroy Population", style=discord.ButtonStyle.green,
-                                         custom_id=f"FCID{winner}_rollDice_{pos}_{winner}_1000"))
+                                         custom_id=f"FCID{winner}_rollDice_{pos}_{winner}_1000_deleteMsg"))
                     message = f"{playerName}, you may roll to attempt to kill enemy population."
                     asyncio.create_task(interaction.channel.send(message, view=view))
 

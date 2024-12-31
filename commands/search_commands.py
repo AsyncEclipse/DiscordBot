@@ -261,6 +261,9 @@ class SearchCommands(commands.GroupCog, name="search"):
         total_faction_drafts = Counter()    
         round_count = Counter() 
         vp_count = Counter()
+        from collections import defaultdict  
+
+        scores_dict = defaultdict(list)  
         finished_tourney_games = Counter()
         faction_victory_count = Counter()
         faction_performance = Counter()
@@ -337,8 +340,10 @@ class SearchCommands(commands.GroupCog, name="search"):
                 summary += f"{roundN}: {count} games\n"
             asyncio.create_task(interaction.channel.send(summary) )
             summary = "Point Progression:\n"
+            rank = 1
             for username, count in vp_count.most_common():  
-                summary += f"{username}: {round(count,2)}/300 VPs ({str(finished_tourney_games[username])} games)\n"
+                summary += f"{rank}. {username}: {round(count,2)}/300 VPs ({str(finished_tourney_games[username])} games)\n"
+                rank += 1
             asyncio.create_task(interaction.channel.send(summary) )
             summary = "Faction Wins:\n"
             for faction, count in faction_victory_count.most_common():  
