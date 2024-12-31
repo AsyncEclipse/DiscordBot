@@ -28,7 +28,7 @@ class DiscoveryTileButtons:
         view = View()
         view.add_item(Button(label="Use it for its ability", style=discord.ButtonStyle.green,
                              custom_id=f"FCID{player['color']}_usedDiscForAbility_{disc}_{tile}"))
-        view.add_item(Button(label="Get 2 Points", style=discord.ButtonStyle.red, custom_id="keepDiscForPoints"))
+        view.add_item(Button(label="Get 2 Points", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_keepDiscForPoints"))
         asyncio.create_task(interaction.channel.send(msg, view=view, file=file))
 
     @staticmethod
