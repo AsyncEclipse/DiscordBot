@@ -485,7 +485,6 @@ class Combat:
                         ship = option
         return ship
 
-    # Not currently in use, will be built to improve AI targetting in future
     @staticmethod
     async def rollDiceAI(game: GamestateHelper, buttonID: str, interaction: discord.Interaction):
         pos = buttonID.split("_")[1]
@@ -500,7 +499,7 @@ class Combat:
         ships = Combat.getCombatantShipsBySpeed(game, colorOrAI, player_ships, pos)
         update = False
         for ship in ships:
-            if ship[0] == speed or (speed == ship[0]+99):
+            if ship[0] == speed or int(ship[0]+99) == speed:
                 shipModel = AI_Ship(ship[1], game.gamestate["advanced_ai"], game.gamestate["wa_ai"])
                 name = "The AI"
                 dice = shipModel.dice
@@ -508,7 +507,8 @@ class Combat:
                 nonMissiles = " on initiative " + str(speed)
                 if speed > 98 and speed < 1000:
                     dice = shipModel.missile
-                    if len(shipModel.missile) <1 and speed > 98 and speed < 1000:
+                    if len(shipModel.missile) < 1 and speed > 98 and speed < 1000:
+                        await interaction.channel.send("Something went wrong and no missiles were found for this AI")
                         continue
                     missiles = "missiles on initiative " + str(speed-99)+" "
                     nonMissiles = ""
@@ -668,7 +668,7 @@ class Combat:
         update = False
         popRiftProtector = True
         for ship in ships:
-            if ship[0] == speed or (speed == ship[0]+99) or speed == 1000:
+            if ship[0] == speed or speed == (ship[0]+99) or speed == 1000:
                 name = interaction.user.mention
                 player = game.get_player_from_color(colorOrAI)
                 shipModel = PlayerShip(game.gamestate["players"][player], ship[1])
