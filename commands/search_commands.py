@@ -275,6 +275,7 @@ class SearchCommands(commands.GroupCog, name="search"):
         lowerLim = 100
         higherLim = 999
         gameSumString = ""
+        gameFactionString = ""
         if tourney_only:
             higherLim = 288
             lowerLim = 254
@@ -299,6 +300,10 @@ class SearchCommands(commands.GroupCog, name="search"):
                 if game.gamestate["roundNum"] != 9:
                     continue
                 gameSumString += f"{gameName}:   "
+                gameFactionString += f"{gameName}:   "
+                if game.gamestate.get("5playerhyperlane"):
+                    gameSumString += "(Hyperlane)   "
+                    gameFactionString += "(5p Hyperlane)   "
                 highestVP = 1
                 for player in game.gamestate["players"]:
                     if drawing.get_public_points(game.gamestate["players"][player], True) > highestVP:
@@ -309,6 +314,7 @@ class SearchCommands(commands.GroupCog, name="search"):
                         username = username.split("(")[0].replace(" ","")
                     vp_count[username] += round(float(100.0*drawing.get_public_points(game.gamestate["players"][player], True)/highestVP),2)
                     gameSumString += f"{username}: {str(drawing.get_public_points(game.gamestate['players'][player], True))}    "
+                    gameSumString += f"{game.gamestate['players'][player]["name"]}: {str(drawing.get_public_points(game.gamestate['players'][player], True))}    "
                     if game.gamestate["roundNum"] == 9:
                         finished_tourney_games[username] += 1
                     else:
@@ -326,6 +332,7 @@ class SearchCommands(commands.GroupCog, name="search"):
                         faction_performance[faction] += int(100*factionVP/highestScore)
                         max_faction_performance[faction] +=100
                 gameSumString += "\n"
+                gameFactionString += "\n"
         with open("data/factions.json", "r") as f:
             faction_data = json.load(f)
         # await interaction.followup.send("Total Faction Draft Counts:")  
@@ -364,4 +371,5 @@ class SearchCommands(commands.GroupCog, name="search"):
             # for faction, count in relative_faction_performance.most_common():  
             #     summary += f"{faction}: {count} out of 100 possible points (in {str(int(max_faction_performance[faction]/100))} games)\n"
             asyncio.create_task(send_long_message(interaction, gameSumString))
+            asyncio.create_task(send_long_message(interaction, gameFactionString))
     
