@@ -186,4 +186,6 @@ class GameCommands(commands.GroupCog, name="game"):
             return
         pObj=game.getPlayerObjectFromColor(player_color)
         player_helper = PlayerHelper(player.id,pObj)
+        await interaction.response.defer(thinking=True)
         await InfluenceButtons.eliminatePlayer(game, pObj,interaction,player_helper, False)
+        await interaction.followup.send(f"{player_name} was eliminated.")

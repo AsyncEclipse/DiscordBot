@@ -270,7 +270,6 @@ class InfluenceButtons:
     @staticmethod
     async def eliminatePlayer(game: GamestateHelper, player, interaction: discord.Interaction,
                                     player_helper: PlayerHelper, delete:bool):
-        await interaction.followup.send(f"{player['username']} was eliminated.")
         player_helper.setEliminated(True)
         game.update_player(player_helper)
         if delete:
@@ -312,6 +311,7 @@ class InfluenceButtons:
         except KeyError:
             pass
         game.update()
+
 
     @staticmethod
     async def addCubeToTrack(game: GamestateHelper, p1, interaction: discord.Interaction, buttonID: str):
