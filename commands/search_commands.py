@@ -339,7 +339,10 @@ class SearchCommands(commands.GroupCog, name="search"):
         #     await interaction.channel.send(f"\nPosition {position}:")  
         #     for faction, count in counter.most_common():  
         #         await interaction.channel.send(f"{faction_data[faction]['name']}: {count}") 
-        
+        async def send_long_message(interaction, message):  
+            chunks = [message[i:i+1990] for i in range(0, len(message), 1990)]  
+            for chunk in chunks:  
+                await interaction.channel.send(chunk) 
         if tourney_only:
             # summary = "Round Progression:\n"
             # for roundN, count in round_count.most_common():  
@@ -360,5 +363,5 @@ class SearchCommands(commands.GroupCog, name="search"):
             #     relative_faction_performance[faction] += int(count/max_faction_performance[faction] * 100)
             # for faction, count in relative_faction_performance.most_common():  
             #     summary += f"{faction}: {count} out of 100 possible points (in {str(int(max_faction_performance[faction]/100))} games)\n"
-            asyncio.create_task(interaction.channel.send(gameSumString))
+            asyncio.create_task(send_long_message(interaction, gameSumString))
     
