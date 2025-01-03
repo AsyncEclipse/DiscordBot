@@ -310,6 +310,11 @@ class InfluenceButtons:
                 game.gamestate["turn_order"].remove(player_name)
         except KeyError:
             pass
+        try:
+            if player_color in game.gamestate["peopleToCheckWith"]:
+                game.gamestate["peopleToCheckWith"].remove(player_color)
+        except KeyError:
+            pass
         game.update()
 
 
