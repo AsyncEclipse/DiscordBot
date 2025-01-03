@@ -308,7 +308,7 @@ class SearchCommands(commands.GroupCog, name="search"):
                     if "(" in username:
                         username = username.split("(")[0].replace(" ","")
                     vp_count[username] += round(float(100.0*drawing.get_public_points(game.gamestate["players"][player], True)/highestVP),2)
-                    gameSumString += f"{username}: {drawing.get_public_points(game.gamestate["players"][player], True)}    "
+                    gameSumString += f"{username}: {str(drawing.get_public_points(game.gamestate['players'][player], True))}    "
                     if game.gamestate["roundNum"] == 9:
                         finished_tourney_games[username] += 1
                     else:
