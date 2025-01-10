@@ -133,8 +133,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
                               turn_order_variant: Optional[bool] = True,
                               galactic_event_tiles: Optional[bool] = False,
                               hyperlanes: Optional[bool] = False,
-                              community_parts: Optional[bool] = False,
-                              tournament: Optional[bool] = False):
+                              community_parts: Optional[bool] = False):
         """
         :param ai_ship_type: Choose which type of AI ships to use.
         :param rift_cannon: Rift cannons are enabled by default.
@@ -204,7 +203,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         actions = await interaction.guild.create_text_channel(f'aeb{config.game_number}-actions',
                                                               category=category, overwrites=overwrites)
         thread_name = f'aeb{config.game_number}-bot-map-updates'
-        thread = await actions.create_thread(name=thread_name, auto_archive_duration=10080)
+        thread = await actions.create_thread(name=thread_name, auto_archive_duration=10080,type=discord.ChannelType.public_thread)
         new_game.update_num()
         game = GamestateHelper(actions)
         if player_count < 2:
@@ -212,9 +211,6 @@ class SetupCommands(commands.GroupCog, name="setup"):
         if player_count > 9:
             player_count = 9
         game.setup_techs_and_outer_rim(player_count, galactic_event_tiles, hyperlanes)
-        if tournament:
-            game.initilizeKey("Tournament Game")
-            game.addToKey("Tournament Game","Yes")
         drawing = DrawHelper(game.gamestate)
 
 

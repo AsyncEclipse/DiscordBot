@@ -166,6 +166,21 @@ class PlayerCommands(commands.GroupCog, name="player"):
         await interaction.response.defer(thinking=False)
         await ResearchButtons.startResearch(game, player, player_helper, interaction, False)
 
+    @app_commands.command(name="change_player")
+    @app_commands.choices(color=color_choices)
+    async def change_player(self, interaction: discord.Interaction, color: app_commands.Choice[str], new_player: discord.Member):
+        game = GamestateHelper(interaction.channel)
+        player = None
+        for p2 in game.gamestate["players"]:
+            if game.gamestate["players"][p2]["color"] == color.value:
+                player = p2
+        if player != None:
+            game.change_player(p2, new_player.id, new_player.display_name, new_player.mention)
+        await interaction.response.defer(thinking=False)
+        drawing = DrawHelper(game.gamestate)
+        await interaction.followup.send("Successfully changed player owner to " + new_player.display_name,
+                                        file=await asyncio.to_thread(drawing.show_game))
+
     @app_commands.command(name="change_color")
     @app_commands.choices(color=color_choices)
     async def change_color(self, interaction: discord.Interaction, color: app_commands.Choice[str]):
