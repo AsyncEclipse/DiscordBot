@@ -156,19 +156,18 @@ class TurnButtons:
                 view.add_item(Button(label="Minor Species Relations", style=discord.ButtonStyle.green,
                                     custom_id=f"startMinorRelations"))
             await interaction.channel.send(msg + ".", view=view)
-        msg2 = f"{player['username']} Passing"
+        msg2 = f"{player['username']} Passed"
         await game.updateNamesAndOutRimTiles(interaction)
         await interaction.message.delete()
         if "-" in interaction.channel.name:
             thread_name = interaction.channel.name.split("-")[0] + "-bot-map-updates"
             thread = discord.utils.get(interaction.channel.threads, name=thread_name)
             if thread is not None:
-                asyncio.create_task(game.showGame(thread, msg2))
+                asyncio.create_task(thread.send(msg2))
         if sendPermaPassButton:
             view2 = View()
             view2.add_item(Button(label="Pass Unless Someone Attacks You",
                                   style=discord.ButtonStyle.green, custom_id="permanentlyPass"))
-            await asyncio.sleep(1)
             await interaction.followup.send(interaction.user.mention + " you may use this button to pass on reactions"
                                             " unless someone invades your systems.", view=view2, ephemeral=True)
 

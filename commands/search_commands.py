@@ -355,11 +355,11 @@ class SearchCommands(commands.GroupCog, name="search"):
             # for roundN, count in round_count.most_common():  
             #     summary += f"{roundN}: {count} games\n"
             # asyncio.create_task(interaction.channel.send(summary) )
-            # summary = "Point Progression:\n"
-            # rank = 1
-            # for username, count in vp_count.most_common():  
-            #     summary += f"{rank}. {username}: {round(count,2)}/300 VPs ({str(finished_tourney_games[username])} games)\n"
-            #     rank += 1
+            summary = "Point Progression:\n"
+            rank = 1
+            for username, count in vp_count.most_common():  
+                summary += f"{rank}. {username}: {round(count,2)}/300 VPs ({str(finished_tourney_games[username])} games)\n"
+                rank += 1
             # asyncio.create_task(interaction.channel.send(summary) )
             # summary = "Faction Wins:\n"
             # for faction, count in faction_victory_count.most_common():  

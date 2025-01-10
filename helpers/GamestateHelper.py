@@ -1332,6 +1332,14 @@ class GamestateHelper:
                 self.gamestate["players"][playerID] = ar.stats
         self.update()
 
+    def change_player(self, player_id, new_player_id, new_username, new_player_name):
+        stats = self.gamestate["players"][player_id]
+        del self.gamestate["players"][player_id]
+        self.gamestate["players"][new_player_id] = stats
+        self.gamestate["players"][new_player_id]["player_name"] = new_player_name
+        self.gamestate["players"][new_player_id]["username"] = new_username
+        self.update()
+
     def update_pulsar_action(self, tile, action):
         self.gamestate["board"][tile]["currentAction"] = action
         self.update()
