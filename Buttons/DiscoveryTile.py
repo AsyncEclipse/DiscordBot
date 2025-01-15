@@ -123,13 +123,24 @@ class DiscoveryTileButtons:
         with open("data/techs.json", "r") as f:
             tech_data = json.load(f)
         tech_type = tech_data.get(tech)["track"]
+        if "spoof" not in buttonID:
+            await interaction.message.delete()
+        if tech_type == "any":
+            if len(buttonID.split("_")) == 3:
+                tech_type = buttonID.split("_")[2]
+            else:
+                view = View()
+                view.add_item(Button(label="Military (Pink)", style=discord.ButtonStyle.red,
+                                         custom_id=f"FCID{player['color']}_getFreeTech_{tech}_military"))
+                view.add_item(Button(label="Grid (Green)", style=discord.ButtonStyle.green,
+                                         custom_id=f"FCID{player['color']}_getFreeTech_{tech}_grid"))
+                view.add_item(Button(label="Nano (Yellow)", style=discord.ButtonStyle.gray,
+                                         custom_id=f"FCID{player['color']}_getFreeTech_{tech}_nano"))
+                await interaction.channel.send(f"{player['player_name']} please choose the track this ancient tech should go on.",
+                                           view=view)
+                return
         game.playerResearchTech(game.get_player_from_color(player["color"]), tech, tech_type)
         tech_details = tech_data.get(tech)
         image = DrawHelper.show_tech_ref_image(tech_details["name"], tech_details['track'])
-        if "spoof" in buttonID:
-            await interaction.channel.send(f"{player['player_name']} acquired the tech {tech_details['name']}.",
-                                           file=image)
-        else:
-            await interaction.message.delete()
-            await interaction.channel.send(f"{player['player_name']} acquired the tech {tech_details['name']}.",
-                                           file=image)
+        await interaction.channel.send(f"{player['player_name']} acquired the tech {tech_details['name']}.",
+                                        file=image)
