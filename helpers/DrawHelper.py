@@ -826,6 +826,8 @@ class DrawHelper:
         context.paste(board_image, (0, 0))
         inf_path = "images/resources/components/all_boards/influence_disc_" + player["color"] + ".png"
         inf_image = self.use_image(inf_path).resize((40, 40))
+        with open("data/parts.json", "r") as f:
+            part_data = json.load(f)
 
         for x in range(player["influence_discs"]):
             context.paste(inf_image, (764 - int(38.5 * x), 450), mask=inf_image)
@@ -870,6 +872,10 @@ class DrawHelper:
                     tech_path = f"images/resources/components/technology/rare/tech_{techName}.png"
                 tech_image = self.use_image(tech_path)
                 context.paste(tech_image, (299 + 71 * counter, start_y), mask=tech_image)
+                if part_data.get(tech, {}).get("nrg_use", 0) > 0:
+                    energy_image = self.use_image("images/resources/components/energy/" +
+                                                  f"{str(part_data[tech]['nrg_use'])}energy.png")
+                    context.paste(energy_image, (299 + 71 * counter + 207, start_y + 50), mask=energy_image)
 
         process_tech(player["nano_tech"], "nano", 360)
         process_tech(player["grid_tech"], "grid", 285)
