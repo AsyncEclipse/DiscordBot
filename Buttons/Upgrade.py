@@ -59,7 +59,7 @@ class UpgradeButtons:
         game.update_player(player_helper)
         if discTileUpgrade == "mus":
             await UpgradeButtons.chooseUpgrade(game, player, interaction,
-                                               f"chooseUpgrade_{actions}_{ship}_dummy_mus_mus_5", player_helper)
+                                               f"chooseUpgrade_{actions}_{ship}_dummy_mus_5_mus", player_helper)
             return
         with open("data/parts.json", "r") as f:
             part_stats = json.load(f)
@@ -126,7 +126,7 @@ class UpgradeButtons:
 
             view.add_item(Button(label=part_stats[i]["name"], style=discord.ButtonStyle.blurple,
                                  custom_id=(f"FCID{player['color']}_chooseUpgrade_{actions}_{ship}_"
-                                            f"{oldPart}_{i}_{discTileUpgrade}_{indexOfOldPart}"),
+                                            f"{oldPart}_{i}_{indexOfOldPart}_{discTileUpgrade}"),
                                  emoji=Emoji.getEmojiByName(partName)))
         await interaction.message.edit(content=f"{interaction.user.mention}, replace "
                                        f"{part_stats[oldPart]['name']} on your {ship} with which part? "
@@ -144,8 +144,8 @@ class UpgradeButtons:
         ship = customID.split("_")[2]
         oldPart = customID.split("_")[3]
         newPart = customID.split("_")[4]
-        discTileUpgrade = customID.split("_")[5]
-        indexOfOldPart = customID.split("_")[6]
+        discTileUpgrade = customID.split("_")[6]
+        indexOfOldPart = customID.split("_")[5]
         with open("data/parts.json", "r") as f:
             part_stats = json.load(f)
         index = 0
