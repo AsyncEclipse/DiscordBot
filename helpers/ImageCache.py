@@ -85,7 +85,7 @@ class ImageCacheHelper:
             if any(substring in filename.lower().replace("fancy", "")
                    for substring in ["gcds", "gcdsadv", "anc", "ancadv", "grd", "grdadv","orb"]):
                 if "ai" in filename.lower():
-                    return (int(140), int(140))
+                    return (int(160), int(160))
                 else:
                     return (int(110 * mult), int(110 * mult))
             else:

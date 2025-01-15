@@ -507,7 +507,7 @@ class DrawHelper:
         font = ImageFont.truetype("images/resources/arial.ttf", size=100)
         stroke_color = (0, 0, 0)
         stroke_width = 2
-        text_drawable_image.text((60, 0), message, (255, 0, 0), font=font,
+        text_drawable_image.text((60, 0), message, (255, 255, 255), font=font,
                                  stroke_width=stroke_width, stroke_fill=stroke_color)
         for tech_type in tech_groups:
             sorted_techs = sorted(tech_groups[tech_type], key=lambda x: x[2])  # Sort by cost
@@ -628,7 +628,7 @@ class DrawHelper:
         font_smaller = ImageFont.truetype("images/resources/arial.ttf", size=35)
         stroke_color = (0, 0, 0)
         stroke_width = 2
-        text_drawable_image.text((0, 0), "Turn Order:", (0, 255, 0), font=font,
+        text_drawable_image.text((0, 0), "Turn Order:", (255, 255, 255), font=font,
                                  stroke_width=stroke_width, stroke_fill=stroke_color)
 
         for n, player in enumerate(playerOrder):
@@ -695,18 +695,18 @@ class DrawHelper:
         if "tile_discard_deck_300" in self.gamestate:
             amount += len(self.gamestate["tile_discard_deck_300"])
 
-        text_drawable_image.text((565, 140), str(amount), (0, 255, 0), font=font,
+        text_drawable_image.text((565, 140), str(amount), (255, 255, 255), font=font,
                                  stroke_width=stroke_width, stroke_fill=stroke_color)
-        text_drawable_image.text((0, 140), "Remaining           :", (0, 255, 0), font=font,
+        text_drawable_image.text((0, 140), "Remaining           :", (255, 255, 255), font=font,
                                  stroke_width=stroke_width, stroke_fill=stroke_color)
         if "roundNum" in self.gamestate:
             rnd = self.gamestate["roundNum"]
         else:
             rnd = 1
-        text_drawable_image.text((0, 0), "Round #" + str(rnd), (0, 255, 0), font=font,
+        text_drawable_image.text((0, 0), "Round #" + str(rnd), (255, 255, 255), font=font,
                                  stroke_width=stroke_width, stroke_fill=stroke_color)
 
-        text_drawable_image.text((0, 270), "AI Stats:", (0, 255, 0), font=font,
+        text_drawable_image.text((0, 270), "AI Stats:", (255, 255, 255), font=font,
                                  stroke_width=stroke_width, stroke_fill=stroke_color)
         x = 0
         for ship_type in ["anc", "grd", "gcds"]:
@@ -718,10 +718,10 @@ class DrawHelper:
             ship = "ai-" + ship_type + adv
             filepathShip = f"images/resources/components/basic_ships/{ship}.png"
             ship_image = self.use_image(filepathShip)
-            context.paste(ship_image, (50 + x, 350), mask=ship_image)
+            context.paste(ship_image, (25 + x, 350), mask=ship_image)
             x += 145
 
-        text_drawable_image.text((630, 0), "Parts Reference:", (0, 255, 0), font=font,
+        text_drawable_image.text((630, 0), "Parts Reference:", (255, 255, 255), font=font,
                                  stroke_width=stroke_width, stroke_fill=stroke_color)
         filepathRef = "images/resources/components/reference_sheets/upgrade_reference1.png"
         ref_image = self.use_image(filepathRef)
@@ -731,7 +731,7 @@ class DrawHelper:
         context.paste(ref_image, (970, 85), mask=ref_image)
 
         if len(self.gamestate.get("minor_species", [])) > 0:
-            text_drawable_image.text((1300, 0), "Minor Species:", (0, 255, 0), font=font,
+            text_drawable_image.text((1300, 0), "Minor Species:", (255, 255, 255), font=font,
                                      stroke_width=stroke_width, stroke_fill=stroke_color)
             minor_species = self.gamestate["minor_species"]
             count = 0
@@ -874,8 +874,8 @@ class DrawHelper:
                 context.paste(tech_image, (299 + 71 * counter, start_y), mask=tech_image)
                 if part_data.get(tech, {}).get("nrg_use", 0) > 0:
                     energy_image = self.use_image("images/resources/components/energy/" +
-                                                  f"{str(part_data[tech]['nrg_use'])}energy.png")
-                    context.paste(energy_image, (299 + 71 * counter + 207, start_y + 50), mask=energy_image)
+                                                  f"{str(part_data[tech]['nrg_use'])}energy.png").resize((18, 38))
+                    context.paste(energy_image, (299 + 71 * counter + 50, start_y + 8), mask=energy_image)
 
         process_tech(player["nano_tech"], "nano", 360)
         process_tech(player["grid_tech"], "grid", 285)
@@ -1243,13 +1243,13 @@ class DrawHelper:
                   max(context3.size[1], context4.size[1]) + 90)
         final_context = Image.new("RGBA", (width, height), (0, 0, 0, 255))
         centering = int((width - cropped_context.size[0])/2)
-        final_context.paste(context6, (0, 0))
         final_context.paste(cropped_context, (centering, 0))
-        final_context.paste(context2, (0, cropped_context.size[1]))
-        final_context.paste(context3, (0, cropped_context.size[1] + context2.size[1]))
+        final_context.paste(context6, (0, 0))
+        final_context.paste(context2, (0, cropped_context.size[1]+ max(context3.size[1],context4.size[1])))
+        final_context.paste(context3, (0, cropped_context.size[1]))
         # final_context.paste(context5, (50, context2.size[1] - 20))
         final_context.paste(context4, (context3.size[0] + 150,
-                                       cropped_context.size[1] + context2.size[1]))
+                                       cropped_context.size[1]))
         final_context.paste(context5,
                             (0, cropped_context.size[1] + context2.size[1] + max(context3.size[1],
                                                                                  context4.size[1])))
