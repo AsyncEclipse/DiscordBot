@@ -180,8 +180,7 @@ class ExploreButtons:
                 if all([game.gamestate["board"][msg[1]]["ancient"] == 0,
                         game.gamestate["board"][msg[1]]["disctile"] > 0]):
                     await DiscoveryTileButtons.exploreDiscoveryTile(game, msg[1], interaction, player)
-                view2.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray,
-                                      custom_id=f"FCID{player['color']}_startPopDrop"))
+                
         else:
             ancients = game.gamestate["board"][msg[1]]["ancient"]
             await interaction.channel.send(f"There are {ancients} ancients in this tile, "
@@ -199,8 +198,6 @@ class ExploreButtons:
         game.tile_discard(msg[1])
         await interaction.channel.send("Tile discarded")
         view = View()
-        view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray,
-                             custom_id=f"FCID{player['color']}_startPopDrop"))
         view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                              custom_id=f"FCID{player['color']}_finishAction"))
         await interaction.channel.send(f"{player['player_name']} when finished you may resolve your action "
