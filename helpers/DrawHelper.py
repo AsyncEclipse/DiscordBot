@@ -550,10 +550,10 @@ class DrawHelper:
                 # tech_image = self.use_image(tech_path)
                 # tech_image = tech_image.resize((73,73))
                 context.paste(tech_image, (ultimateX, y), mask=tech_image)
-                if part_data.get(tech, {}).get("nrg_use", 0) > 0:
-                    energy_image = self.use_image("images/resources/components/energy/" +
-                                                  f"{str(part_data[tech]['nrg_use'])}energy.png")
-                    context.paste(energy_image, (ultimateX + 207, y + 50), mask=energy_image)
+                # if part_data.get(tech, {}).get("nrg_use", 0) > 0:
+                #     energy_image = self.use_image("images/resources/components/energy/" +
+                #                                   f"{str(part_data[tech]['nrg_use'])}energy.png")
+                #     context.paste(energy_image, (ultimateX + 207, y + 50), mask=energy_image)
                 largestX = max(largestX, ultimateX + 270)
                 last_tech = techName
         context = context.crop((0, 0, largestX, 450 * 3))
@@ -872,10 +872,10 @@ class DrawHelper:
                     tech_path = f"images/resources/components/technology/rare/tech_{techName}.png"
                 tech_image = self.use_image(tech_path)
                 context.paste(tech_image, (299 + 71 * counter, start_y), mask=tech_image)
-                if part_data.get(tech, {}).get("nrg_use", 0) > 0:
-                    energy_image = self.use_image("images/resources/components/energy/" +
-                                                  f"{str(part_data[tech]['nrg_use'])}energy.png").resize((18, 38))
-                    context.paste(energy_image, (299 + 71 * counter + 50, start_y + 8), mask=energy_image)
+                # if part_data.get(tech, {}).get("nrg_use", 0) > 0:
+                #     energy_image = self.use_image("images/resources/components/energy/" +
+                #                                   f"{str(part_data[tech]['nrg_use'])}energy.png").resize((18, 38))
+                #     context.paste(energy_image, (299 + 71 * counter + 50, start_y + 8), mask=energy_image)
 
         process_tech(player["nano_tech"], "nano", 360)
         process_tech(player["grid_tech"], "grid", 285)
