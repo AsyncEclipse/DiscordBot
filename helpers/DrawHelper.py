@@ -8,6 +8,7 @@ import os
 from discord.ui import View, Button
 
 from helpers.ImageCache import ImageCacheHelper
+from helpers.ShipHelper import PlayerShip
 
 
 class DrawHelper:
@@ -720,26 +721,31 @@ class DrawHelper:
             ship_image = self.use_image(filepathShip)
             context.paste(ship_image, (25 + x, 350), mask=ship_image)
             x += 145
-
-        text_drawable_image.text((630, 0), "Parts Reference:", (255, 255, 255), font=font,
-                                 stroke_width=stroke_width, stroke_fill=stroke_color)
-        filepathRef = "images/resources/components/reference_sheets/upgrade_reference1.png"
-        ref_image = self.use_image(filepathRef)
-        context.paste(ref_image, (660, 80), mask=ref_image)
-        filepathRef = "images/resources/components/reference_sheets/upgrade_reference2.png"
-        ref_image = self.use_image(filepathRef)
-        context.paste(ref_image, (970, 85), mask=ref_image)
-
+        minorSpeciesSize = 670
+        heightSpecies = 0
         if len(self.gamestate.get("minor_species", [])) > 0:
-            text_drawable_image.text((1300, 0), "Minor Species:", (255, 255, 255), font=font,
+            heightSpecies=250
+            text_drawable_image.text((640, 0), "Minor Species:", (255, 255, 255), font=font,
                                      stroke_width=stroke_width, stroke_fill=stroke_color)
             minor_species = self.gamestate["minor_species"]
             count = 0
             for species in minor_species:
                 tile_image = Image.open("images/resources/components/minor_species/minorspecies_" +
                                         f"{species.replace(' ', '_').lower()}.png").convert("RGBA").resize((100, 100))
-                context.paste(tile_image, (1320 + 120 * count, 85), mask=tile_image)
+                context.paste(tile_image, (660 + 120 * count, 85), mask=tile_image)
                 count += 1
+        turnOrder = self.display_turn_order()
+        context.paste(turnOrder, (640, heightSpecies),mask=turnOrder)
+        text_drawable_image.text((630 +minorSpeciesSize, 0), "Parts Reference:", (255, 255, 255), font=font,
+                                 stroke_width=stroke_width, stroke_fill=stroke_color)
+        filepathRef = "images/resources/components/reference_sheets/upgrade_reference1.png"
+        ref_image = self.use_image(filepathRef)
+        context.paste(ref_image, (660+minorSpeciesSize, 80), mask=ref_image)
+        filepathRef = "images/resources/components/reference_sheets/upgrade_reference2.png"
+        ref_image = self.use_image(filepathRef)
+        context.paste(ref_image, (970+minorSpeciesSize, 85), mask=ref_image)
+
+        
 
         return context
 
@@ -817,6 +823,304 @@ class DrawHelper:
             text_drawable_image.text((x + 20 - mod, 35), str(num), color, font=font,
                                      stroke_width=stroke_width, stroke_fill=stroke_color)
         return context
+
+
+    def display_upkeep_track_reference(self, player):
+        context = Image.new("RGBA", (1690, 125), (0, 0, 0, 255))
+        draw = ImageDraw.Draw(context)  
+        influenceTrack = [0,0,1,2,3,5,7,10,13,17,21,25,30]
+        pop_path = f"images/resources/components/all_boards/popcube_{player['color']}.png"
+        inf_path = "images/resources/components/all_boards/influence_disc_" + player["color"] + ".png"
+        font = ImageFont.truetype("images/resources/arial.ttf", size=50)
+        stroke_color = (0, 0, 0)
+
+        if player['color'] == "purple" or player['color'] == "blue":
+            color = (255, 255, 255)
+        else:
+            color = (0, 0, 0)
+        stroke_width = 1
+        pop_image = self.use_image(pop_path).resize((220, 75))
+        context.paste(pop_image, (0, 35), mask=pop_image)
+        text_drawable_image = ImageDraw.Draw(context)
+        text_drawable_image.text((18, 45), "Upkeep:", color, font=font,
+                                 stroke_width=stroke_width, stroke_fill=stroke_color)
+
+
+        radius = 45
+        border_width = 5  
+        spacing = 10  
+        diameter = 2 * radius 
+        discs = player["influence_discs"]
+
+        inf_image = self.use_image(inf_path).resize((90,90))
+        for count, num in enumerate(influenceTrack):
+            x = 220+spacing + radius + count * (diameter + spacing)  
+            y = 75 
+            draw.ellipse([x-radius, y-radius, x+radius, y+radius],   
+                         outline=(255,255,255,255),   
+                         width=border_width) 
+            number = str(num)   
+            text_bbox = draw.textbbox((0,0), number, font=font)  
+            text_width = text_bbox[2] - text_bbox[0]  
+            text_height = text_bbox[3] - text_bbox[1]  
+            text_x = x - text_width // 2  
+            text_y = y - text_height // 2  
+            if 13-discs-1 < count:
+                context.paste(inf_image,(x-radius,y-radius),mask=inf_image)
+            draw.text((text_x, text_y-5), number, fill=(255,255,255,255), font=font)
+        return context
+
+
+    def draw_square_boxes(self, values):  
+        box_size = 100  
+        border_width = 10  
+        spacing = 10  
+        rows, cols = 3, 7  
+        
+        width = (box_size + spacing) * cols + spacing  
+        height = (box_size + spacing) * rows + spacing  
+        
+        image = Image.new('RGBA', (width, height), (0, 0, 0, 0))  
+        draw = ImageDraw.Draw(image)  
+
+        font = ImageFont.truetype("arial.ttf", 50)  
+        
+        for row in range(rows):  
+            for col in range(cols):  
+                x = spacing + col * (box_size + spacing)  
+                y = spacing + row * (box_size + spacing)  
+
+                draw.rectangle([x, y, x+box_size, y+box_size],   
+                            outline=(255,255,255,255),   
+                            width=border_width)  
+                value_index =  col  
+                if value_index < len(values):  
+                    number = str(values[value_index])   
+                    text_bbox = draw.textbbox((0,0), number, font=font)  
+                    text_width = text_bbox[2] - text_bbox[0]  
+                    text_height = text_bbox[3] - text_bbox[1]  
+                    text_x = x + (box_size - text_width) // 2  
+                    text_y = y + (box_size - text_height) // 2  
+                    
+                    draw.text((text_x, text_y), number, fill=(255,255,255,255), font=font)  
+        
+        return image  
+
+    def player_area_new_version(self, player):
+        faction = self.get_short_faction_name(player["name"])
+        context = Image.new("RGBA", (3500, 725), (0, 0, 0, 255))
+        referenceX = 0
+        border = 12
+        pop_path = f"images/resources/components/all_boards/popcube_{player['color']}.png"
+        pop_image = self.use_image(pop_path)
+        pop_image = pop_image.crop((32, 32, pop_image.width - 32, pop_image.height - 32))
+        pop_image = pop_image.resize((180, 180))
+        context.paste(pop_image, (referenceX, 125), mask=pop_image)
+        face_tile_path = f"images/resources/components/factions/{faction}_board.png"
+        face_tile_image = self.use_image(face_tile_path)
+        face_tile_image = face_tile_image.crop((49, 252, 154, 357))
+        face_tile_image = face_tile_image.resize((180 - 2 * border, 180 - 2 * border))
+        context.paste(face_tile_image, (referenceX + border, 125 + border), mask=face_tile_image)
+        if "username" in player:
+            font = ImageFont.truetype("images/resources/arial.ttf", size=40)
+            stroke_color = (0, 0, 0)
+            color = (255, 255, 255)
+            stroke_width = 5
+            text_drawable_image = ImageDraw.Draw(context)
+            username = player["username"]
+            if player.get("traitor"):
+                username += " (TRAITOR)"
+            text_drawable_image.text((referenceX+10, 80), username, color, font=font,
+                                        stroke_width=stroke_width, stroke_fill=stroke_color)
+            
+
+        
+
+        referenceX += 200
+
+
+
+        publicPoints = self.get_public_points(player,False)
+        pointsPath = "images/resources/components/all_boards/points.png"
+        points = self.use_image(pointsPath)
+        context.paste(points, (referenceX, 60), points)
+        font = ImageFont.truetype("images/resources/arial.ttf", size=50)
+        stroke_color = (0, 0, 0)
+        color = (0, 0, 0)
+        stroke_width = 2
+        text_drawable_image = ImageDraw.Draw(context)
+        letX = referenceX + 25
+        if publicPoints > 9:
+            letX = referenceX + 12
+        text_drawable_image.text((letX, 71), str(publicPoints), color, font=font,
+                                 stroke_width=stroke_width, stroke_fill=stroke_color)
+        colonyPath = "images/resources/components/all_boards/colony_ship.png"
+        colonyShip = self.use_image(colonyPath)
+
+        for i in range(player["colony_ships"]):
+            context.paste(colonyShip, (referenceX, 130+ 60 * i), colonyShip)
+
+
+        referenceX += 110
+
+
+        oldPA = self.player_area(player).crop((815, 160, 910, 500))
+        context.paste(oldPA, (referenceX, 50))
+
+        referenceX += 100
+
+        with open("data/techs.json", "r") as f:
+            tech_data = json.load(f)
+        resources = [
+            ("images/resources/components/resourcesymbols/money.png",
+             (255, 255, 0), "money", "money_pop_cubes"),
+            ("images/resources/components/resourcesymbols/science.png",
+             (255, 192, 203), "science", "science_pop_cubes"),
+            ("images/resources/components/resourcesymbols/material.png",
+             (101, 67, 33), "materials", "material_pop_cubes")
+        ]
+        font = ImageFont.truetype("images/resources/arial.ttf", size=80)
+        def draw_resource(context, img_path, color, player_key, amount_key, position):
+            image = self.use_image(img_path)
+            context.paste(image, position)
+            text_drawable_image = ImageDraw.Draw(context)
+            text_drawable_image.text((position[0] + 120, position[1]), f"{player[player_key]}", color, font=font,
+                                     stroke_width=stroke_width, stroke_fill=stroke_color)
+
+        y=0
+        
+        for img_path, text_color, player_key, amount_key in resources:
+            draw_resource(context, img_path, text_color, player_key, amount_key, (referenceX, y+50))
+            y += 100
+
+
+        referenceX += 250
+        
+
+        track = [0, -1, -2, -3, -4, -6, -8]
+        boxes = self.draw_square_boxes(track)
+        context.paste(boxes, (referenceX, 40),mask=boxes)
+        sizeOfTech = 110
+        def process_tech(tech_list, tech_type, start_y):
+            for counter, tech in enumerate(tech_list):
+                tech_details = tech_data.get(tech)
+                techName = tech_details["name"].lower().replace(" ", "_") if tech_details else tech
+                tech_path = f"images/resources/components/technology/{tech_type}/tech_{techName}.png"
+                if not os.path.exists(tech_path):
+                    tech_path = f"images/resources/components/technology/rare/tech_{techName}.png"
+                #tech_image = self.use_image(tech_path)
+                tech_image = Image.open(tech_path).resize((100,100))
+                context.paste(tech_image, (referenceX + 260 * counter+10, start_y+50), mask=tech_image)
+        process_tech(player["nano_tech"], "nano", sizeOfTech*2)
+        process_tech(player["grid_tech"], "grid", sizeOfTech)
+        process_tech(player["military_tech"], "military", 0)
+
+        referenceX += 900
+        if faction == "rho":
+            # Last coord is for muon source exclusively
+            interceptCoord = [(152, 39), (94, 86), (152, 97), (210, 86), (226, 39)]
+            cruiserCoord = [(360, 63), (418, 39), (476, 63), (360, 121), (418, 97), (476, 121), (492, 19)]
+            dreadCoord = [(435, 64), (493, 40), (551, 40), (609, 64), (435, 122),
+                          (493, 98), (551, 98), (609, 122), (628, 20)]
+            sbCoord = [(621, 39), (737, 39), (620, 97), (679, 66), (736, 97), (741, 0)]
+        else:
+            interceptCoord = [(74, 39), (16, 86), (74, 97), (132, 86), (148, 39)]
+            cruiserCoord = [(221, 63), (279, 39), (337, 63), (221, 121), (279, 97), (337, 121), (353, 19)]
+            dreadCoord = [(435, 64), (493, 40), (551, 40), (609, 64), (435, 122),
+                          (493, 98), (551, 98), (609, 122), (628, 20)]
+            if faction == "exile":
+                orbCoord = [(753, 68), (810, 40), (694, 97), (811, 100)]
+            sbCoord = [(697, 39), (813, 39), (697, 97), (755, 66), (814, 97), (815, 0)]
+
+        if player["name"] == "Planta":
+            interceptCoord.pop(2)
+            cruiserCoord.pop(3)
+            dreadCoord.pop(4)
+            sbCoord.pop(2)
+
+        with open("data/parts.json", "r") as f:
+            part_data = json.load(f)
+
+        
+        def process_parts(parts, coords, refX, square_size, shipType):
+            ship = PlayerShip(player, shipType)
+            total_energy = ship.total_energy
+            usedEnergy = total_energy - ship.energy
+            speed = str(ship.speed)
+            cost = str(ship.cost)
+            x, y = coords[0]  
+            if shipType == "interceptor":
+                x, y2 = coords[1]  
+            if shipType== "dreadnought" or shipType == "cruiser":
+                y -= 30
+            else:
+                y -= 7
+            stroke_color = (0, 0, 0)
+            color = (255, 255, 255)
+            stroke_width = 5
+            scaled_x = refX + int(x * square_size / 58)  
+            scaled_y = int(y * square_size / 58)
+            energy = str(usedEnergy)+"/"+str(total_energy)
+            font = ImageFont.truetype("images/resources/arial.ttf", size=40)
+            imageMat = self.use_image("images/resources/components/resourcesymbols/material.png").resize((40,40))
+            imageEng = self.use_image("images/resources/components/resourcesymbols/energy.png").resize((30,50))
+            imageSpeed = self.use_image("images/resources/components/resourcesymbols/chevron.png").resize((55,33))
+            context.paste(imageMat, (scaled_x+35,scaled_y))
+            context.paste(imageEng, (scaled_x+165,scaled_y))
+            context.paste(imageSpeed, (scaled_x+235,scaled_y+5))
+            text_drawable_image = ImageDraw.Draw(context)
+            text_drawable_image.text((scaled_x+10, scaled_y), cost, color, font=font,
+                                     stroke_width=stroke_width, stroke_fill=stroke_color)
+            text_drawable_image.text((scaled_x+110, scaled_y), energy, color, font=font,
+                                     stroke_width=stroke_width, stroke_fill=stroke_color)
+            text_drawable_image.text((scaled_x+210, scaled_y), speed, color, font=font,
+                                     stroke_width=stroke_width, stroke_fill=stroke_color)
+            for counter, part in enumerate(parts):
+                if part == "empty":
+                    x, y = coords[counter]  
+                    scaled_x = refX + int(x * square_size / 58)  
+                    scaled_y = int(y * square_size / 58)  
+                    draw = ImageDraw.Draw(context)  
+                    draw.rectangle([  
+                        scaled_x,   
+                        scaled_y+50,   
+                        scaled_x + square_size,   
+                        scaled_y + square_size+50  
+                    ], outline="white", width=5)  
+                    continue
+                part_details = part_data.get(part)  
+                partName = part_details["name"].lower().replace(" ", "_") if part_details else part  
+                part_path = f"images/resources/components/upgrades/{partName}.png"  
+                part_image = self.use_image(part_path).resize((square_size,square_size))  
+
+                if part == "mus":  
+                    part_image = part_image.resize((int(square_size * 0.69), int(square_size * 0.69)))  
+                
+                # Scale coordinates based on square size, original square was 58  
+                x, y = coords[counter]  
+                scaled_x = refX + int(x * square_size / 58)  
+                scaled_y = int(y * square_size / 58)  
+                
+                # Paste the image  
+                context.paste(part_image, (scaled_x, scaled_y+50), mask=part_image)  
+
+        process_parts(player["interceptor_parts"], interceptCoord, referenceX,100,"interceptor")
+        process_parts(player["cruiser_parts"], cruiserCoord,referenceX,100,"cruiser")
+        process_parts(player["dread_parts"], dreadCoord,referenceX,100,"dreadnought")
+        if faction == "exile":
+            process_parts(player["orb_parts"], orbCoord,referenceX,100,"orbital")
+        else:
+            process_parts(player["starbase_parts"], sbCoord,referenceX,100,"starbase")
+
+
+
+
+        context2 = self.display_cube_track_reference(player)
+        context3 = self.display_upkeep_track_reference(player)
+        context.paste(context3, (0, 500))
+        context.paste(context2, (0, 380))
+        return context
+        
 
     def player_area(self, player):
         faction = self.get_short_faction_name(player["name"])
@@ -1203,19 +1507,19 @@ class DrawHelper:
             context2 = Image.new("RGBA", (width, player_area_length), (0, 0, 0, 255))
             x, y, count = 100, 50, 0
             for player in self.gamestate["players"]:
-                player_image = self.player_area(self.gamestate["players"][player])
-                if "username" in self.gamestate["players"][player]:
-                    font = ImageFont.truetype("images/resources/arial.ttf", size=50)
-                    stroke_color = (0, 0, 0)
-                    color = (255, 165, 0)
-                    stroke_width = 2
-                    text_drawable_image = ImageDraw.Draw(context2)
-                    username = self.gamestate["players"][player]["username"]
+                player_image = self.player_area_new_version(self.gamestate["players"][player])
+                # if "username" in self.gamestate["players"][player]:
+                #     font = ImageFont.truetype("images/resources/arial.ttf", size=50)
+                #     stroke_color = (0, 0, 0)
+                #     color = (255, 165, 0)
+                #     stroke_width = 2
+                #     text_drawable_image = ImageDraw.Draw(context2)
+                #     username = self.gamestate["players"][player]["username"]
 
-                    if self.gamestate["players"][player].get("traitor"):
-                        username += " (TRAITOR)"
-                    text_drawable_image.text((x, y), username, color, font=font,
-                                             stroke_width=stroke_width, stroke_fill=stroke_color)
+                #     if self.gamestate["players"][player].get("traitor"):
+                #         username += " (TRAITOR)"
+                #     text_drawable_image.text((x, y), username, color, font=font,
+                #                              stroke_width=stroke_width, stroke_fill=stroke_color)
                 context2.paste(player_image, (x, y + 50), mask=player_image)
                 count += 1
                 if count % 2 == 0 and pCount == 4:
@@ -1233,7 +1537,7 @@ class DrawHelper:
         context3 = context3.resize((width, 500))
         context4 = self.display_remaining_tiles()
         context5 = self.display_remaining_discoveries()
-        context6 = self.display_turn_order()
+        #context6 = self.display_turn_order()
         # context5 = self.display_cube_track_reference()
         pCount = len(self.gamestate["players"])
         width = 4150 if (pCount != 2 and pCount != 4) else 2800
@@ -1244,7 +1548,7 @@ class DrawHelper:
         final_context = Image.new("RGBA", (width, height), (0, 0, 0, 255))
         centering = int((width - cropped_context.size[0])/2)
         final_context.paste(cropped_context, (centering, 0))
-        final_context.paste(context6, (0, 0))
+        #final_context.paste(context6, (0, 0))
         final_context.paste(context2, (0, cropped_context.size[1]+ max(context3.size[1],context4.size[1])))
         final_context.paste(context3, (0, cropped_context.size[1]))
         # final_context.paste(context5, (50, context2.size[1] - 20))
