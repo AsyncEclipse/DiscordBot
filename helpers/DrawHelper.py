@@ -755,7 +755,7 @@ class DrawHelper:
                 return self.gamestate["players"][i]
 
     def display_cube_track_reference(self, player):
-        context = Image.new("RGBA", (1690, 125), (0, 0, 0, 255))
+        context = Image.new("RGBA", (1690, 125), (0, 0, 0, 0))
 
         spaces = [28, 24, 21, 18, 15, 12, 10, 8, 6, 4, 3, 2, 0]
         pop_path = f"images/resources/components/all_boards/popcube_{player['color']}.png"
@@ -768,11 +768,11 @@ class DrawHelper:
         else:
             color = (0, 0, 0)
         stroke_width = 1
-        pop_image = self.use_image(pop_path).resize((220, 75))
-        context.paste(pop_image, (0, 25), mask=pop_image)
-        text_drawable_image = ImageDraw.Draw(context)
-        text_drawable_image.text((18, 35), "Income:", color, font=font,
-                                 stroke_width=stroke_width, stroke_fill=stroke_color)
+        # pop_image = self.use_image(pop_path).resize((220, 75))
+        # context.paste(pop_image, (0, 25), mask=pop_image)
+        # text_drawable_image = ImageDraw.Draw(context)
+        # text_drawable_image.text((18, 35), "Income:", color, font=font,
+        #                          stroke_width=stroke_width, stroke_fill=stroke_color)
         # Resource details: [(image_path, text_color, player_key, amount_key)]
         resources = [
             ("images/resources/components/resourcesymbols/money.png",
@@ -785,17 +785,30 @@ class DrawHelper:
              "images/resources/components/all_boards/mats_brown.png",
              "material_pop_cubes", (35, 95))
         ]
-
+        draw = ImageDraw.Draw(context)  
         def draw_resourceCube(context, pop_path, amount_key):
             population_track = player["population_track"]
-            pop_image = self.use_image(pop_path).resize((95, 95))
             amount_index = player[amount_key] - 1
             if 0 <= amount_index < len(population_track):
                 population_value = population_track[amount_index]
             else:
                 population_value = 2
             ind = spaces.index(population_value) + 1
-            context.paste(pop_image, (1390 - 90 * ind, 15))
+            x= 1315 - 88 * ind
+            y = 18
+            box_size = 80
+            border = 10
+            bordercolor = (150, 75, 0, 255)
+            if "orange" in pop_path:
+                border = 15
+                bordercolor = (255, 215, 0, 255)
+            if "pink" in pop_path:
+                border = 5
+                bordercolor = (255, 192, 203, 255)
+            #context.paste(pop_image, (x,y))
+            draw.rectangle([x, y, x+box_size, y+box_size],   
+                            outline=bordercolor,   
+                            width=border) 
 
         def draw_resource(context, img_path, amount_key, position):
             image = self.use_image(img_path).resize((30, 30))
@@ -806,59 +819,44 @@ class DrawHelper:
             else:
                 population_value = 2
             ind = spaces.index(population_value) + 1
-            context.paste(image, (position[0] + 1405 - 90 * ind, position[1]))
+            context.paste(image, (position[0] + 1330 - 88 * ind, position[1]))
 
         for img_path, color_path, amount_key, position in resources:
             draw_resourceCube(context, color_path, amount_key)
         for img_path, color_path, amount_key, position in resources:
             draw_resource(context, img_path, amount_key, position)
 
-        pop_image = self.use_image(pop_path).resize((75, 75))
-        for count, num in enumerate(spaces):
-            x = 1310 - 90 * count
-            context.paste(pop_image, (x, 25), mask=pop_image)
-            mod = 0
-            if num > 9:
-                mod = 12
-            text_drawable_image.text((x + 20 - mod, 35), str(num), color, font=font,
-                                     stroke_width=stroke_width, stroke_fill=stroke_color)
+        # pop_image = self.use_image(pop_path).resize((75, 75))
+        # for count, num in enumerate(spaces):
+        #     x = 1310 - 90 * count
+        #     context.paste(pop_image, (x, 25), mask=pop_image)
+        #     mod = 0
+        #     if num > 9:
+        #         mod = 12
+        #     text_drawable_image.text((x + 20 - mod, 35), str(num), color, font=font,
+        #                              stroke_width=stroke_width, stroke_fill=stroke_color)
         return context
 
 
     def display_upkeep_track_reference(self, player):
-        context = Image.new("RGBA", (1690, 125), (0, 0, 0, 255))
+        context = Image.new("RGBA", (1690, 125), (0, 0, 0, 0))
         draw = ImageDraw.Draw(context)  
         influenceTrack = [0,0,1,2,3,5,7,10,13,17,21,25,30]
-        pop_path = f"images/resources/components/all_boards/popcube_{player['color']}.png"
         inf_path = "images/resources/components/all_boards/influence_disc_" + player["color"] + ".png"
         font = ImageFont.truetype("images/resources/arial.ttf", size=50)
-        stroke_color = (0, 0, 0)
-
-        if player['color'] == "purple" or player['color'] == "blue":
-            color = (255, 255, 255)
-        else:
-            color = (0, 0, 0)
-        stroke_width = 1
-        pop_image = self.use_image(pop_path).resize((220, 75))
-        context.paste(pop_image, (0, 35), mask=pop_image)
-        text_drawable_image = ImageDraw.Draw(context)
-        text_drawable_image.text((18, 45), "Upkeep:", color, font=font,
-                                 stroke_width=stroke_width, stroke_fill=stroke_color)
 
 
-        radius = 45
-        border_width = 5  
-        spacing = 10  
+
+        radius = 50
+        border_width = 0  
+        spacing = 2
         diameter = 2 * radius 
         discs = player["influence_discs"]
 
-        inf_image = self.use_image(inf_path).resize((90,90))
+        inf_image = self.use_image(inf_path).resize((diameter-1,diameter-1))
         for count, num in enumerate(influenceTrack):
-            x = 220+spacing + radius + count * (diameter + spacing)  
-            y = 75 
-            draw.ellipse([x-radius, y-radius, x+radius, y+radius],   
-                         outline=(255,255,255,255),   
-                         width=border_width) 
+            x = 296+spacing + count * (diameter-14 + spacing)  
+            y = 80 
             number = str(num)   
             text_bbox = draw.textbbox((0,0), number, font=font)  
             text_width = text_bbox[2] - text_bbox[0]  
@@ -867,7 +865,7 @@ class DrawHelper:
             text_y = y - text_height // 2  
             if 13-discs-1 < count:
                 context.paste(inf_image,(x-radius,y-radius),mask=inf_image)
-            draw.text((text_x, text_y-5), number, fill=(255,255,255,255), font=font)
+                draw.text((text_x, text_y-10), number, fill=(255,255,255,255), font=font)
         return context
 
 
@@ -906,21 +904,118 @@ class DrawHelper:
         
         return image  
 
-    def player_area_new_version(self, player):
+    def player_area_version_3(self, player):
         faction = self.get_short_faction_name(player["name"])
-        context = Image.new("RGBA", (3500, 725), (0, 0, 0, 255))
-        referenceX = 0
-        border = 12
+        context = Image.new("RGBA", (3500, 800), (0, 0, 0, 255))
+        referenceX = 120
+        border = 5
         pop_path = f"images/resources/components/all_boards/popcube_{player['color']}.png"
         pop_image = self.use_image(pop_path)
         pop_image = pop_image.crop((32, 32, pop_image.width - 32, pop_image.height - 32))
-        pop_image = pop_image.resize((180, 180))
-        context.paste(pop_image, (referenceX, 125), mask=pop_image)
+        imageSize = 100
+        pop_image = pop_image.resize((imageSize, imageSize))
+        context.paste(pop_image, (referenceX, 100), mask=pop_image)
         face_tile_path = f"images/resources/components/factions/{faction}_board.png"
         face_tile_image = self.use_image(face_tile_path)
         face_tile_image = face_tile_image.crop((49, 252, 154, 357))
-        face_tile_image = face_tile_image.resize((180 - 2 * border, 180 - 2 * border))
-        context.paste(face_tile_image, (referenceX + border, 125 + border), mask=face_tile_image)
+        face_tile_image = face_tile_image.resize((imageSize - 2 * border, imageSize - 2 * border))
+        context.paste(face_tile_image, (referenceX + border, 100 + border), mask=face_tile_image)
+
+
+       
+        if "username" in player:
+            font = ImageFont.truetype("images/resources/arial.ttf", size=30)
+            stroke_color = (0, 0, 0)
+            color = (255, 255, 255)
+            stroke_width = 5
+            text_drawable_image = ImageDraw.Draw(context)
+            username = player["username"]
+            if player.get("traitor"):
+                username += " (TRAITOR)"
+            text_drawable_image.text((0, 0), username, color, font=font,
+                                        stroke_width=stroke_width, stroke_fill=stroke_color)
+        layout_path = f"images/resources/components/layouts/player_layout.png"
+        layout_image = Image.open(layout_path).resize((1827,795))
+        context.paste(layout_image, (0,0), mask=layout_image)
+
+
+        title_path = f"images/resources/components/layouts/faction_titles/name_trade_{faction}.png"
+        title_image = Image.open(title_path).resize((475,70))
+        context.paste(title_image, (0,30))
+
+        publicPoints = self.get_public_points(player,False)
+        text_drawable_image = ImageDraw.Draw(context)
+        font = ImageFont.truetype("images/resources/arial.ttf", size=50)
+        stroke_color = (0, 0, 0)
+        color = (0, 0, 0)
+        stroke_width = 2
+        letX = referenceX - 75
+        if publicPoints > 9:
+            letX = referenceX + 12
+        text_drawable_image.text((letX, 125), str(publicPoints), color, font=font,
+                                 stroke_width=stroke_width, stroke_fill=stroke_color)
+        
+        colonyPath = "images/resources/components/all_boards/colony_ship.png"
+        colonyShip = self.use_image(colonyPath)
+
+        for i in range(player["colony_ships"]):
+            context.paste(colonyShip, (referenceX+105+ 90 * i, 125), colonyShip)
+
+
+        
+        resources = [
+             ("images/resources/components/resourcesymbols/material.png",
+             (101, 67, 33), "materials", "material_pop_cubes"),
+            ("images/resources/components/resourcesymbols/money.png",
+             (255, 255, 0), "money", "money_pop_cubes"),
+            ("images/resources/components/resourcesymbols/science.png",
+             (255, 192, 203), "science", "science_pop_cubes")
+           
+        ]
+        font = ImageFont.truetype("images/resources/arial.ttf", size=70)
+        stroke_color = (255, 255, 255)
+        stroke_width = 1
+        def draw_resource(context, img_path, color, player_key, amount_key, position):
+            buffer = 0
+            if player[player_key] < 10:
+                buffer = 20
+            text_drawable_image.text((position[0] + buffer, position[1]), f"{player[player_key]}", color, font=font,
+                                     stroke_width=stroke_width, stroke_fill=stroke_color)
+
+        y=465
+        referenceX = 340
+        for img_path, text_color, player_key, amount_key in resources:
+            
+            draw_resource(context, img_path, text_color, player_key, amount_key, (referenceX, y))
+            referenceX += 90
+
+
+        sizeOfTech = 168
+        with open("data/techs.json", "r") as f:
+            tech_data = json.load(f)
+        def process_tech(tech_list, tech_type, start_y):
+            for counter, tech in enumerate(tech_list):
+                tech_details = tech_data.get(tech)
+                techName = tech_details["name"].lower().replace(" ", "_") if tech_details else tech
+                tech_path = f"images/resources/components/technology/{tech_type}/tech_{techName}.png"
+                if not os.path.exists(tech_path):
+                    tech_path = f"images/resources/components/technology/rare/tech_{techName}.png"
+                #tech_image = self.use_image(tech_path)
+                tech_image = Image.open(tech_path).resize((158,157))
+                context.paste(tech_image, (referenceX + 162 * counter+30, start_y+8), mask=tech_image)
+        process_tech(player["nano_tech"], "nano", sizeOfTech*2+15)
+        process_tech(player["grid_tech"], "grid", sizeOfTech+10)
+        process_tech(player["military_tech"], "military", 0)
+        context3 = self.display_upkeep_track_reference(player)
+        context.paste(context3, (420, 653), mask=context3)
+        context2 = self.display_cube_track_reference(player)
+        context.paste(context2, (500, 540),mask=context2)
+        return context
+
+    def player_area_version_2(self, player):
+        faction = self.get_short_faction_name(player["name"])
+        context = Image.new("RGBA", (3500, 725), (0, 0, 0, 255))
+        referenceX = 0
         if "username" in player:
             font = ImageFont.truetype("images/resources/arial.ttf", size=40)
             stroke_color = (0, 0, 0)
@@ -932,6 +1027,21 @@ class DrawHelper:
                 username += " (TRAITOR)"
             text_drawable_image.text((referenceX+10, 80), username, color, font=font,
                                         stroke_width=stroke_width, stroke_fill=stroke_color)
+        
+        border = 12
+        pop_path = f"images/resources/components/all_boards/popcube_{player['color']}.png"
+        pop_image = self.use_image(pop_path)
+        pop_image = pop_image.crop((32, 32, pop_image.width - 32, pop_image.height - 32))
+        pop_image = pop_image.resize((180, 180))
+        context.paste(pop_image, (referenceX, 125), mask=pop_image)
+        face_tile_path = f"images/resources/components/factions/{faction}_board.png"
+        face_tile_image = self.use_image(face_tile_path)
+        face_tile_image = face_tile_image.crop((49, 252, 154, 357))
+        face_tile_image = face_tile_image.resize((180 - 2 * border, 180 - 2 * border))
+        context.paste(face_tile_image, (referenceX + border, 125 + border), mask=face_tile_image)
+        
+        
+            
             
 
         
@@ -1500,14 +1610,14 @@ class DrawHelper:
 
         def create_player_area():
             pCount = len(self.gamestate["players"])
-            player_area_length = 1500 if pCount > 3 else 750
+            player_area_length = 1500 if pCount > 3 else 1000
             if pCount > 6:
                 player_area_length = 2250
             width = 4420 if (pCount != 2 and pCount != 4) else 2980
             context2 = Image.new("RGBA", (width, player_area_length), (0, 0, 0, 255))
             x, y, count = 100, 50, 0
             for player in self.gamestate["players"]:
-                player_image = self.player_area_new_version(self.gamestate["players"][player])
+                player_image = self.player_area_version_3(self.gamestate["players"][player])
                 # if "username" in self.gamestate["players"][player]:
                 #     font = ImageFont.truetype("images/resources/arial.ttf", size=50)
                 #     stroke_color = (0, 0, 0)
