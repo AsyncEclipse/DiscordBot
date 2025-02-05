@@ -117,6 +117,8 @@ class PlayerShip(Ship):
             return "dread"
         elif ship == "sb":
             return "starbase"
+        elif ship == "orbital":
+            return "orb"
         else:
             return ship_type
 
