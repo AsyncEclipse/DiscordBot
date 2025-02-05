@@ -967,18 +967,19 @@ class DrawHelper:
         font = ImageFont.truetype("images/resources/arial.ttf", size=90)
         stroke_color = (0, 0, 0)
         stroke_width = 2
+        textHeightForP = 670
         text_drawable = ImageDraw.Draw(context)
         if player.get("passed"):
-            text_drawable.text((10, 370), "Passed", fill=(255, 0, 0), font=font,
+            text_drawable.text((10, textHeightForP), "Passed", fill=(255, 0, 0), font=font,
                                stroke_width=stroke_width, stroke_fill=stroke_color)
         if player.get("eliminated"):
-            text_drawable.text((10, 370), "Eliminated", fill=(255, 0, 0), font=font,
+            text_drawable.text((10, textHeightForP), "Eliminated", fill=(255, 0, 0), font=font,
                                stroke_width=stroke_width, stroke_fill=stroke_color)
         colorActive = "nada"
         if "activePlayerColor" in self.gamestate:
             colorActive = self.gamestate.get("activePlayerColor")
         if player["color"] in colorActive:
-            text_drawable.text((10, 370), "Active", fill=(0, 255, 0), font=font,
+            text_drawable.text((10, textHeightForP), "Active", fill=(0, 255, 0), font=font,
                                stroke_width=stroke_width, stroke_fill=stroke_color)
 
         with open("data/discoverytiles.json") as f:
@@ -986,7 +987,7 @@ class DrawHelper:
         listOfAncient = player["ancient_parts"]
         if "discoveryTileBonusPointTiles" in player:
             listOfAncient = listOfAncient + player["discoveryTileBonusPointTiles"]
-        newX = 50
+        newX = 500
         for part in listOfAncient:
             discName = discTile_data[part]["name"]
             part_path = ("images/resources/components/discovery_tiles/discovery"
@@ -1006,7 +1007,7 @@ class DrawHelper:
         stroke_width = 2
         letX = referenceX - 75
         if publicPoints > 9:
-            letX = referenceX + 12
+            letX = letX -15
         text_drawable_image.text((letX, 165), str(publicPoints), color, font=font,
                                  stroke_width=stroke_width, stroke_fill=stroke_color)
         
@@ -1466,7 +1467,7 @@ class DrawHelper:
             text_drawable.text((0, 50), "Passed", fill=(255, 0, 0), font=font,
                                stroke_width=stroke_width, stroke_fill=stroke_color)
             text_image = text_image.rotate(45, expand=True)
-            context.paste(text_image, (0, 0), text_image)
+            context.paste(text_image, (0, 500), text_image)
         
         if player.get("eliminated"):
             text_image = Image.new('RGBA', (500, 500), (0, 0, 0, 0))
@@ -1474,7 +1475,7 @@ class DrawHelper:
             text_drawable.text((0, 50), "Eliminated", fill=(255, 0, 0), font=font,
                                stroke_width=stroke_width, stroke_fill=stroke_color)
             text_image = text_image.rotate(45, expand=True)
-            context.paste(text_image, (0, 0), text_image)
+            context.paste(text_image, (0, 500), text_image)
         colorActive = "nada"
         if "activePlayerColor" in self.gamestate:
             colorActive = self.gamestate.get("activePlayerColor")
@@ -1484,7 +1485,7 @@ class DrawHelper:
             text_drawable.text((0, 50), "Active", fill=(0, 255, 0), font=font,
                                stroke_width=stroke_width, stroke_fill=stroke_color)
             text_image = text_image.rotate(45, expand=True)
-            context.paste(text_image, (0, 0), text_image)
+            context.paste(text_image, (0, 500), text_image)
         with open("data/discoverytiles.json") as f:
             discTile_data = json.load(f)
 
