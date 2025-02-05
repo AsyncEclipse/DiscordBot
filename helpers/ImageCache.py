@@ -53,9 +53,9 @@ class ImageCacheHelper:
             if "ambassador" in filename.lower():
                 return (58, 58)
             elif "shrine_board" in filename.lower():
-                return (187, 171)
+                return (187*2, 171*2)
             elif "shrine" in filename.lower():
-                return (24, 24)
+                return (24*2, 24*2)
             elif "reference" in filename.lower():
                 return Image.open(os.path.join(folder, filename)).convert("RGBA").size
             else:
@@ -70,7 +70,7 @@ class ImageCacheHelper:
             elif "influence_disc" in filename.lower():
                 return (int(40 * mult), int(40 * mult))
             elif "reputation" in filename.lower():
-                return (58, 58)
+                return (110, 110)
             elif "colony_ship" in filename.lower():
                 return (100, 100)
             elif "points" in filename.lower():
@@ -113,13 +113,26 @@ class ImageCacheHelper:
         elif "discovery_tiles" in folder.lower():
             return (int(80 * mult), int(80 * mult))
         elif "upgrades" in folder.lower():
-            return (58, 58)
+            return (140, 140)
         elif "resourcesymbol" in folder.lower():
             if "alone" in filename.lower():
                 return (int(25 * mult), int(25 * mult))
             return (100, 100)
         elif "tech_" in filename.lower():
-            return (68, 68)
+            return (188,187)
+        elif "blueprint" in filename.lower():
+            if "dread" in filename.lower():
+                return (561,400)
+            else:
+                return (424,400)
+        elif "name_trade_" in filename.lower():
+            return (475,70)
+        elif "player_layout" in filename.lower():
+            return (4897,795)
+        elif "classes" in folder.lower():
+            return (90,33)
+        elif "factionimages" in folder.lower():
+            return (600,600)
         return (70, 70)
 
     def get_image(self, filename):

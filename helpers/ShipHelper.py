@@ -12,6 +12,7 @@ class Ship:
         self.missile = []
         self.hull = 0
         self.repair = 0
+        self.total_energy = 0
         self.external = 0
         self.cost = 0
         self.jumpdrive = 0
@@ -28,6 +29,7 @@ class Ship:
             self.range += part_stats["range"]
             self.speed += part_stats["speed"]
             self.energy += part_stats["nrg_src"]
+            self.total_energy += part_stats["nrg_src"]
             self.energy -= part_stats["nrg_use"]
             if part_stats["dice"]:
                 for die in part_stats["dice"]:
@@ -59,6 +61,7 @@ class PlayerShip(Ship):
         self.ship_type = self.ship_type_fixer(ship_type)
         self.speed = player[f"base_{self.ship_type}_speed"]
         self.energy = player[f"base_{self.ship_type}_nrg"]
+        self.total_energy = player[f"base_{self.ship_type}_nrg"]
         self.computer = player[f"base_{self.ship_type}_comp"]
 
         # added for Outcast factions
@@ -114,6 +117,8 @@ class PlayerShip(Ship):
             return "dread"
         elif ship == "sb":
             return "starbase"
+        elif ship == "orbital":
+            return "orb"
         else:
             return ship_type
 

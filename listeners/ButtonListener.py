@@ -33,7 +33,7 @@ class ButtonListener(commands.Cog):
     async def on_interaction(self, interaction: discord.Interaction):
         if interaction.type == discord.InteractionType.component:
             start = datetime.now()
-#            start_time = time.perf_counter()
+            start_time = time.perf_counter()
             logging.basicConfig(level=logging.INFO)
             logger = logging.getLogger(__name__)
             log_channel = discord.utils.get(interaction.guild.channels, name="bot-log")
@@ -52,11 +52,10 @@ class ButtonListener(commands.Cog):
 
                 await self.resolveButton(interaction)
 
-#                if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):
-#                    end_time = time.perf_counter()
-#                    elapsed_time = end_time - start_time
-#                    print(f"Total elapsed time for {customID} button press in main thread:
-#                          f" {elapsed_time:.2f} seconds")
+                if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):
+                    end_time = time.perf_counter()
+                    elapsed_time = end_time - start_time
+                    print(f"Total elapsed time for {customID} button press in main thread:{elapsed_time:.2f} seconds")
             except Exception as error:
                 if log_channel is not None and isinstance(log_channel, discord.TextChannel):
                     tb = traceback.format_exc()  # Get the traceback as a string
