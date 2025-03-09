@@ -716,6 +716,13 @@ class DrawHelper:
                 adv = "adv"
             if self.gamestate.get("wa_ai"):
                 adv = "wa"
+            if ship_type+"_type" in self.gamestate:
+                advanced = "adv" in self.gamestate[ship_type+"_type"]
+                worldsafar ="wa" in self.gamestate[ship_type+"_type"]
+                if advanced:
+                    adv = "adv"
+                if worldsafar:
+                    adv = "wa"
             ship = "ai-" + ship_type + adv
             filepathShip = f"images/resources/components/basic_ships/{ship}.png"
             ship_image = self.use_image(filepathShip)
@@ -1959,7 +1966,7 @@ class DrawHelper:
         return file
 
     def show_AI_stats(self):
-        ai_ships = self.display_remaining_tiles().crop((50, 350, 500, 500))
+        ai_ships = self.display_remaining_tiles().crop((40, 350, 480, 500))
         byteData = BytesIO()
         ai_ships.save(byteData, format="WEBP")
         byteData.seek(0)

@@ -9,25 +9,45 @@ from discord.ui import View, Button
 
 class DraftButtons:
     @staticmethod
-    async def startDraft(game: GamestateHelper, player_list, interaction: discord.Interaction, channel):
+    async def startDraft(game: GamestateHelper, player_list, interaction: discord.Interaction, channel, tournament:bool):
         random.shuffle(player_list)
         message = []
+        message.append("The drafting order is as follows:")
+        factionsAvailable = [("Hydran Progress", "hyd"),
+                             ("Eridani Empire", "eri"),
+                             ("Orion Hegemony", "ori"),
+                             ("Descendants of Draco", "dra"),
+                             ("Mechanema", "mec"),
+                             ("Planta", "pla"),
+                             ("Wardens of Magellan", "mag"),
+                             ("Enlightened of Lyra", "lyr"),
+                             ("Rho Indi Syndicate", "rho"),
+                             ("The Exiles", "exl")]
         game.initilizeKey("draftedFactions")
         game.initilizeKey("draftingPlayers")
         for x, player in enumerate(player_list):
             member = interaction.guild.get_member(player[0])
             message.append(f"{x + 1}. {member.mention}")
             game.addToKey("draftingPlayers", player[0])
-        message.append("For your reference, the factions currently available in the bot are the following 10,"
-                       " plus the 6 Terran equivalents. First-timers are encouraged to use the Terran factions,"
-                       " which are all the same and don't have as many quirks"
-                       " (the quirks are tame compared to TI4 asymmetry though).")
-        message.extend(["1. Hydran Progress", "2. Eridani Empire", "3. Orion Hegemony",
-                        "4. Mechanema", "5. Descendants of Draco", "6. Planta",
-                        "7. Wardens of Magellan", "8. Enlightened of Lyra",
-                        "9. Rho Indi Syndicate", "10. The Exiles"])
-
+        if not tournament:
+            message.append("For your reference, the factions currently available in the bot are the following 10,"
+                        " plus the 6 Terran equivalents. First-timers are encouraged to use the Terran factions,"
+                        " which are all the same and don't have as many quirks"
+                        " (the quirks are tame compared to TI4 asymmetry though).")
+            message.extend(["1. Hydran Progress", "2. Eridani Empire", "3. Orion Hegemony",
+                            "4. Mechanema", "5. Descendants of Draco", "6. Planta",
+                            "7. Wardens of Magellan", "8. Enlightened of Lyra",
+                            "9. Rho Indi Syndicate", "10. The Exiles"])
         await channel.send("\n".join(message))
+        game.initilizeKey("bannedFactions")
+        if tournament:
+            msg2 = "The following factions have been banned:"
+            for i in range(1, 6):
+                random_number = random.randint(0, len(factionsAvailable)-1)
+                faction, key = factionsAvailable.pop(random_number)
+                game.addToKey("bannedFactions",key)
+                msg2 += "\n"+faction
+            await channel.send(msg2)
         playerID = game.gamestate["draftingPlayers"][0]
         member = interaction.guild.get_member(playerID)
         await channel.send(f"{member.mention}, please draft a faction from those available.",
@@ -52,11 +72,14 @@ class DraftButtons:
                              ("Terran Federation (Hydran)", "ter4"),
                              ("Terran Republic (Draco)", "ter5"),
                              ("Terran Union (Planta)", "ter6")]
+        bannedFactions = game.gamestate["bannedFactions"]
         for faction, key in factionsAvailable:
             colorsAlreadyChosen = []
             for playerID, factionKey in game.gamestate["draftedFactions"]:
                 colorsAlreadyChosen.append(DraftButtons.getColor(factionKey))
             if DraftButtons.getColor(key) in colorsAlreadyChosen:
+                continue
+            if key in bannedFactions:
                 continue
             shorterName = faction
             if "(" in faction:

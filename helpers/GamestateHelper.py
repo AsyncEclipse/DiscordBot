@@ -46,6 +46,9 @@ class GamestateHelper:
         self.gamestate[key] = []
         self.update()
 
+    def changeShip(self, ship, value):
+        self.gamestate[ship+"_type"] = value
+        self.update()
     def removeFromKey(self, key, deletion):
         if deletion in self.gamestate.get(key, []):
             self.gamestate[key].remove(deletion)
