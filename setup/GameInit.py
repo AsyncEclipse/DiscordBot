@@ -42,6 +42,16 @@ class GameInit:
             self.gamestate["advanced_ai"] = 1
         if self.ai_ship_type == "wa":
             self.gamestate["wa_ai"] = 1
+        if self.ai_ship_type == "random":
+            shipTypes = ["gcds", "anc", "grd"]
+            for ship in shipTypes:
+                random_number = random.randint(1, 3)
+                if random_number == 1:
+                    self.gamestate[ship+"_type"]="normal"
+                if random_number == 2:
+                    self.gamestate[ship+"_type"]="adv"
+                if random_number == 3:
+                    self.gamestate[ship+"_type"]="wa"
         self.gamestate["turnsInPassingOrder"] = self.turn_order_variant
         if not self.rift_cannon:
             self.gamestate["tech_deck"].remove("rican")

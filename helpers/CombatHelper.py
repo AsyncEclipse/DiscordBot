@@ -255,7 +255,12 @@ class Combat:
                 continue
             if colorOrAI == owner:
                 if colorOrAI == "ai":
-                    ship = AI_Ship(unit, game.gamestate["advanced_ai"], game.gamestate["wa_ai"])
+                    advanced = game.gamestate["advanced_ai"]
+                    worldsafar = game.gamestate["wa_ai"]
+                    if unitType+"_type" in game.gamestate:
+                        advanced = "adv" in game.gamestate[unitType+"_type"]
+                        worldsafar ="wa" in game.gamestate[unitType+"_type"]
+                    ship = AI_Ship(unit, advanced, worldsafar)
                     ships.append((ship.speed, unit))
                 else:
                     player = game.get_player_from_color(colorOrAI)
@@ -293,7 +298,12 @@ class Combat:
                 continue
             if defender == owner or attacker == owner:
                 if owner == "ai":
-                    ship = AI_Ship(unit, game.gamestate["advanced_ai"], game.gamestate["wa_ai"])
+                    advanced = game.gamestate["advanced_ai"]
+                    worldsafar = game.gamestate["wa_ai"]
+                    if unitType+"_type" in game.gamestate:
+                        advanced = "adv" in game.gamestate[unitType+"_type"]
+                        worldsafar ="wa" in game.gamestate[unitType+"_type"]
+                    ship = AI_Ship(unit, advanced, worldsafar)
                     if (ship.speed, owner) not in ships:
                         ships.append((ship.speed, owner))
                     if len(ship.missile) > 0:
@@ -332,7 +342,12 @@ class Combat:
         opponentShips = Combat.getCombatantShipsBySpeed(game, opponent, playerShipsList, pos)
         for ship in opponentShips:
             if opponent == "ai":
-                shipModel = AI_Ship(ship[1], game.gamestate["advanced_ai"], game.gamestate["wa_ai"])
+                advanced = game.gamestate["advanced_ai"]
+                worldsafar = game.gamestate["wa_ai"]
+                if unitType+"_type" in game.gamestate:
+                    advanced = "adv" in game.gamestate[unitType+"_type"]
+                    worldsafar ="wa" in game.gamestate[unitType+"_type"]
+                shipModel = AI_Ship(ship[1], advanced, worldsafar)
             else:
                 player = game.get_player_from_color(opponent)
                 shipModel = PlayerShip(game.gamestate["players"][player], ship[1])
@@ -354,7 +369,12 @@ class Combat:
                 continue
             if colorOrAI == owner:
                 if colorOrAI == "ai":
-                    ship = AI_Ship(unit, game.gamestate["advanced_ai"], game.gamestate["wa_ai"])
+                    advanced = game.gamestate["advanced_ai"]
+                    worldsafar = game.gamestate["wa_ai"]
+                    if unitType+"_type" in game.gamestate:
+                        advanced = "adv" in game.gamestate[unitType+"_type"]
+                        worldsafar ="wa" in game.gamestate[unitType+"_type"]
+                    ship = AI_Ship(unit, advanced, worldsafar)
                     if len(ship.missile) > 0:
                         return True
                 else:
@@ -500,7 +520,12 @@ class Combat:
         update = False
         for ship in ships:
             if ship[0] == speed or int(ship[0]+99) == speed:
-                shipModel = AI_Ship(ship[1], game.gamestate["advanced_ai"], game.gamestate["wa_ai"])
+                advanced = game.gamestate["advanced_ai"]
+                worldsafar = game.gamestate["wa_ai"]
+                if unitType+"_type" in game.gamestate:
+                    advanced = "adv" in game.gamestate[unitType+"_type"]
+                    worldsafar ="wa" in game.gamestate[unitType+"_type"]
+                shipModel = AI_Ship(ship[1], advanced, worldsafar)
                 name = "The AI"
                 dice = shipModel.dice
                 missiles = ""
@@ -1312,7 +1337,12 @@ class Combat:
         shipType = ship.split("-")[1]
         shipOwner = ship.split("-")[0]
         if shipOwner == "ai":
-            shipModel = AI_Ship(shipType, game.gamestate["advanced_ai"], game.gamestate["wa_ai"])
+            advanced = game.gamestate["advanced_ai"]
+            worldsafar = game.gamestate["wa_ai"]
+            if unitType+"_type" in game.gamestate:
+                advanced = "adv" in game.gamestate[unitType+"_type"]
+                worldsafar ="wa" in game.gamestate[unitType+"_type"]
+            shipModel = AI_Ship(shipType, advanced, worldsafar)
         else:
             player = game.get_player_from_color(shipOwner)
             shipModel = PlayerShip(game.gamestate["players"][player], shipType)
