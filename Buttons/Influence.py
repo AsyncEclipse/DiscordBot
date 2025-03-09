@@ -75,7 +75,7 @@ class InfluenceButtons:
                     playerShips.append(player["color"])
                     if all([game.gamestate["board"][adjTile].get("owner") == 0,
                             ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, adjTile), 
-                            len(Combat.findPlayersInTile(game, adjTile)) < 2], "ai-grd" not in playerShips):
+                            len(Combat.findPlayersInTile(game, adjTile)) < 2, "ai-grd" not in playerShips]):
                         tilesToInfluence.append(adjTile)
             if tile_map[tile].get("warp", 0) == 1:
                 for tile2 in tile_map:
