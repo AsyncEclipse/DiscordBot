@@ -344,9 +344,9 @@ class Combat:
             if opponent == "ai":
                 advanced = game.gamestate["advanced_ai"]
                 worldsafar = game.gamestate["wa_ai"]
-                if unitType+"_type" in game.gamestate:
-                    advanced = "adv" in game.gamestate[unitType+"_type"]
-                    worldsafar ="wa" in game.gamestate[unitType+"_type"]
+                if ship[1]+"_type" in game.gamestate:
+                    advanced = "adv" in game.gamestate[ship[1]+"_type"]
+                    worldsafar ="wa" in game.gamestate[ship[1]+"_type"]
                 shipModel = AI_Ship(ship[1], advanced, worldsafar)
             else:
                 player = game.get_player_from_color(opponent)
@@ -522,9 +522,9 @@ class Combat:
             if ship[0] == speed or int(ship[0]+99) == speed:
                 advanced = game.gamestate["advanced_ai"]
                 worldsafar = game.gamestate["wa_ai"]
-                if unitType+"_type" in game.gamestate:
-                    advanced = "adv" in game.gamestate[unitType+"_type"]
-                    worldsafar ="wa" in game.gamestate[unitType+"_type"]
+                if ship[1]+"_type" in game.gamestate:
+                    advanced = "adv" in game.gamestate[ship[1]+"_type"]
+                    worldsafar ="wa" in game.gamestate[ship[1]+"_type"]
                 shipModel = AI_Ship(ship[1], advanced, worldsafar)
                 name = "The AI"
                 dice = shipModel.dice
@@ -1339,9 +1339,9 @@ class Combat:
         if shipOwner == "ai":
             advanced = game.gamestate["advanced_ai"]
             worldsafar = game.gamestate["wa_ai"]
-            if unitType+"_type" in game.gamestate:
-                advanced = "adv" in game.gamestate[unitType+"_type"]
-                worldsafar ="wa" in game.gamestate[unitType+"_type"]
+            if shipType+"_type" in game.gamestate:
+                advanced = "adv" in game.gamestate[shipType+"_type"]
+                worldsafar ="wa" in game.gamestate[shipType+"_type"]
             shipModel = AI_Ship(shipType, advanced, worldsafar)
         else:
             player = game.get_player_from_color(shipOwner)
