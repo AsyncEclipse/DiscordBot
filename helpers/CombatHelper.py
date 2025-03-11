@@ -342,12 +342,13 @@ class Combat:
         opponentShips = Combat.getCombatantShipsBySpeed(game, opponent, playerShipsList, pos)
         for ship in opponentShips:
             if opponent == "ai":
+                unitType = ship[1].split("-")[1]
                 advanced = game.gamestate["advanced_ai"]
                 worldsafar = game.gamestate["wa_ai"]
-                if ship[1]+"_type" in game.gamestate:
-                    advanced = "adv" in game.gamestate[ship[1]+"_type"]
-                    worldsafar ="wa" in game.gamestate[ship[1]+"_type"]
-                shipModel = AI_Ship(ship[1], advanced, worldsafar)
+                if unitType+"_type" in game.gamestate:
+                    advanced = "adv" in game.gamestate[unitType+"_type"]
+                    worldsafar ="wa" in game.gamestate[unitType+"_type"]
+                shipModel = AI_Ship(unitType, advanced, worldsafar)
             else:
                 player = game.get_player_from_color(opponent)
                 shipModel = PlayerShip(game.gamestate["players"][player], ship[1])
@@ -520,12 +521,13 @@ class Combat:
         update = False
         for ship in ships:
             if ship[0] == speed or int(ship[0]+99) == speed:
+                unitType = ship[1].split("-")[1]
                 advanced = game.gamestate["advanced_ai"]
                 worldsafar = game.gamestate["wa_ai"]
-                if ship[1]+"_type" in game.gamestate:
-                    advanced = "adv" in game.gamestate[ship[1]+"_type"]
-                    worldsafar ="wa" in game.gamestate[ship[1]+"_type"]
-                shipModel = AI_Ship(ship[1], advanced, worldsafar)
+                if unitType+"_type" in game.gamestate:
+                    advanced = "adv" in game.gamestate[unitType+"_type"]
+                    worldsafar ="wa" in game.gamestate[unitType+"_type"]
+                shipModel = AI_Ship(unitType, advanced, worldsafar)
                 name = "The AI"
                 dice = shipModel.dice
                 missiles = ""
