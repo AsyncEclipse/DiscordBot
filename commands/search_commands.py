@@ -277,7 +277,7 @@ class SearchCommands(commands.GroupCog, name="search"):
         gameSumString = ""
         gameFactionString = ""
         if tourney_only:
-            higherLim = 503
+            higherLim = 504
             lowerLim = 478
         for x in range(lowerLim, higherLim):
             gameName = f"aeb{x}"
@@ -350,11 +350,11 @@ class SearchCommands(commands.GroupCog, name="search"):
             summary += f"{faction_data[faction]['name']}: {count}\n"
         await interaction.channel.send(summary)  
         
-        await interaction.channel.send("\nPositional Faction Draft Counts:")  
-        for position, counter in enumerate(positional_drafts, 1):  
-            await interaction.channel.send(f"\nPosition {position}:")  
-            for faction, count in counter.most_common():  
-                await interaction.channel.send(f"{faction_data[faction]['name']}: {count}") 
+        # await interaction.channel.send("\nPositional Faction Draft Counts:")  
+        # for position, counter in enumerate(positional_drafts, 1):  
+        #     await interaction.channel.send(f"\nPosition {position}:")  
+        #     for faction, count in counter.most_common():  
+        #         await interaction.channel.send(f"{faction_data[faction]['name']}: {count}") 
         async def send_long_message(interaction, message):  
             chunks = [message[i:i+1990] for i in range(0, len(message), 1990)]  
             for chunk in chunks:  
