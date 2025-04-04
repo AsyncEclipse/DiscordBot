@@ -175,7 +175,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
             if game.gamestate["players"][p2]["color"] == color.value:
                 player = p2
         if player != None:
-            game.change_player(p2, new_player.id, new_player.display_name, new_player.mention)
+            game.change_player(player, new_player.id, new_player.display_name, new_player.mention)
         await interaction.response.defer(thinking=False)
         drawing = DrawHelper(game.gamestate)
         await interaction.followup.send("Successfully changed player owner to " + new_player.display_name,
