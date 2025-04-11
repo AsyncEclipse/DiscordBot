@@ -414,19 +414,45 @@ class Combat:
             #     view.add_item(Button(label="(Attacker) Roll Missiles",
             #                          style=discord.ButtonStyle.red,
             #                          custom_id=f"rollDice_{pos}_{attacker}_99_attacker"))
-            for i in range(20, -20, -1):
-                if i in defenderSpeeds:
+
+            ships = game.gamestate["board"][pos]["player_ships"][:]
+            sortedSpeeds = Combat.getBothCombatantShipsBySpeed(game, defender, attacker, ships, pos)
+            for speed, owner in sortedSpeeds:
+                if owner == defender:
                     checker = ""
                     if defender != "ai":
                         checker = "FCID" + defender + "_"
-                    view.add_item(Button(label="(Defender) Roll Initative " + str(i) + " Ships",
-                                         style=discord.ButtonStyle.green,
-                                         custom_id=f"{checker}rollDice_{pos}_{defender}_{str(i)}_defender"))
-                if i in attackerSpeeds:
+                    if speed < 90:
+                        view.add_item(Button(label="(Defender) Roll Initative " + str(speed) + " Ships",
+                                            style=discord.ButtonStyle.green,
+                                            custom_id=f"{checker}rollDice_{pos}_{defender}_{str(speed)}_defender"))
+                    else:
+                        view.add_item(Button(label="(Defender) Roll Initative " + str(speed-99) + " Missiles",
+                                            style=discord.ButtonStyle.green,
+                                            custom_id=f"{checker}rollDice_{pos}_{defender}_{str(speed)}_defender"))
+                else:
                     checker = "" if attacker == "ai" else f"FCID{attacker}_"
-                    view.add_item(Button(label="(Attacker) Roll Initative " + str(i) + " Ships",
-                                         style=discord.ButtonStyle.red,
-                                         custom_id=f"{checker}rollDice_{pos}_{attacker}_{i}_attacker"))
+                    if speed < 90:
+                        view.add_item(Button(label="(Attacker) Roll Initative " + str(speed) + " Ships",
+                                            style=discord.ButtonStyle.red,
+                                            custom_id=f"{checker}rollDice_{pos}_{attacker}_{str(speed)}_attacker"))
+                    else:
+                        view.add_item(Button(label="Attacker) Roll Initative " + str(speed-99) + " Missiles",
+                                            style=discord.ButtonStyle.red,
+                                            custom_id=f"{checker}rollDice_{pos}_{attacker}_{str(speed)}_attacker"))
+            # for i in range(20, -20, -1):
+            #     if i in defenderSpeeds:
+            #         checker = ""
+            #         if defender != "ai":
+            #             checker = "FCID" + defender + "_"
+            #         view.add_item(Button(label="(Defender) Roll Initative " + str(i) + " Ships",
+            #                              style=discord.ButtonStyle.green,
+            #                              custom_id=f"{checker}rollDice_{pos}_{defender}_{str(i)}_defender"))
+            #     if i in attackerSpeeds:
+            #         checker = "" if attacker == "ai" else f"FCID{attacker}_"
+            #         view.add_item(Button(label="(Attacker) Roll Initative " + str(i) + " Ships",
+            #                              style=discord.ButtonStyle.red,
+            #                              custom_id=f"{checker}rollDice_{pos}_{attacker}_{i}_attacker"))
         view.add_item(Button(label="Refresh Image", style=discord.ButtonStyle.blurple, custom_id=f"refreshImage_{pos}"))
         view.add_item(Button(label="Remove Units", style=discord.ButtonStyle.gray, custom_id=f"removeUnits_{pos}"))
         return view
@@ -1184,10 +1210,27 @@ class Combat:
         validTiles = []
         for tile in playerObj["owned_tiles"]:
             players = Combat.findPlayersInTile(game, tile)
-            if InfluenceButtons.areTwoTilesAdjacent(game, pos, tile, configs, wormHoleGen) and len(players) < 2:
-                if len(players) == 1 and players[0] != color:
-                    continue
-                validTiles.append(tile)
+            if InfluenceButtons.areTwoTilesAdjacent(game, pos, tile, configs, wormHoleGen):
+                if "Draco" not in player["name"]:
+                    if len(players) > 1:
+                        continue
+                    if len(players) == 1 and players[0] != color:
+                        continue
+                    validTiles.append(tile)
+                else:
+                    validTile = True
+                    for player in players:
+                        if player != color:
+                            if player == "ai":
+                                playerShips = game.gamestate["board"][tile]["player_ships"][:]
+                                if any("anc" in s for s in playerShips):
+                                    valid = True
+                                else:
+                                    validTile = False
+                            else:
+                                validTile = False
+                    if validTile:
+                        validTiles.append(tile)
         return validTiles
 
     @staticmethod
