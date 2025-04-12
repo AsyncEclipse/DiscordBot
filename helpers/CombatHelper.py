@@ -1211,7 +1211,7 @@ class Combat:
         for tile in playerObj["owned_tiles"]:
             players = Combat.findPlayersInTile(game, tile)
             if InfluenceButtons.areTwoTilesAdjacent(game, pos, tile, configs, wormHoleGen):
-                if "Draco" not in player["name"]:
+                if "Draco" not in player_helper.stats["name"]:
                     if len(players) > 1:
                         continue
                     if len(players) == 1 and players[0] != color:
