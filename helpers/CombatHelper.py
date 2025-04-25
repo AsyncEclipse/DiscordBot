@@ -96,11 +96,17 @@ class Combat:
         tiles = []
         for tile in tile_map:
             playersInTile = Combat.findPlayersInTile(game, tile)
-            if len(playersInTile) != 1:
-                continue
-            if "owner" in tile_map[tile]:
-                if tile_map[tile]["owner"] == 0 and playersInTile[0] != "ai":
-                    tiles.append((int(tile_map[tile]["sector"]), tile))
+            if len(playersInTile) == 2:
+                if "anc" in Combat.findShipTypesInTile(game, tile):
+                    if any(["Draco" in game.find_player_faction_name_from_color(playersInTile[1]),
+                            "Draco" in game.find_player_faction_name_from_color(playersInTile[0])]):
+                        tiles.append((int(tile_map[tile]["sector"]), tile))
+            else:
+                if len(playersInTile) != 1:
+                    continue
+                if "owner" in tile_map[tile]:
+                    if tile_map[tile]["owner"] == 0 and playersInTile[0] != "ai":
+                        tiles.append((int(tile_map[tile]["sector"]), tile))
         return sorted(tiles, key=lambda x: x[0], reverse=True)
 
     @staticmethod
