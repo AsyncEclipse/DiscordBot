@@ -42,7 +42,7 @@ class DraftButtons:
         game.initilizeKey("bannedFactions")
         if tournament:
             msg2 = "The following factions have been banned:"
-            for i in range(1, 6):
+            for i in range(1, 10-len(player_list)):
                 random_number = random.randint(0, len(factionsAvailable)-1)
                 faction, key = factionsAvailable.pop(random_number)
                 game.addToKey("bannedFactions",key)

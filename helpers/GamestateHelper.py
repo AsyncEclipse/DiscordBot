@@ -865,7 +865,7 @@ class GamestateHelper:
         tech_draws = self.gamestate["player_count"] + 3
         tech_draws = min(tech_draws,11)
         newTechs = []
-        while tech_draws > 0:
+        while tech_draws > 0 and len(self.gamestate["tech_deck"]) > 0:
             random.shuffle(self.gamestate["tech_deck"])
             picked_tech = self.gamestate["tech_deck"].pop(0)
             if picked_tech == "clo":

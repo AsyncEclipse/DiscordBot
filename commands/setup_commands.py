@@ -153,14 +153,14 @@ class SetupCommands(commands.GroupCog, name="setup"):
                               galactic_event_tiles: Optional[bool] = False,
                               hyperlanes: Optional[bool] = False,
                               community_parts: Optional[bool] = False,
-                              tournament: Optional[bool] = False):
+                              ban_factions: Optional[bool] = False):
         """
         :param ai_ship_type: Choose which type of AI ships to use.
         :param rift_cannon: Rift cannons are enabled by default.
         :param turn_order_variant: Pass turn order is enabled by default.
         :param galactic_event_tiles: Supernova/black-holes/Pulsars are disabled by default.
         :param hyperlanes: Hyperlanes for 4p and 5p are default off.
-        :param tournament: Used to keep track of tournament games.
+        :param ban_factions: Used to ban 10-playerCount factions from the draft.
         :param community_parts: Turns on commnity changes to improved hull and phase shield.
         :return:
         """
@@ -270,7 +270,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
                            file=drawing.show_minor_species())
         file = await asyncio.to_thread(drawing.show_AI_stats)
         await actions.send("AI stats look like this", file=file)
-        await DraftButtons.startDraft(game, player_list, interaction, actions, tournament)
+        await DraftButtons.startDraft(game, player_list, interaction, actions, ban_factions)
 
         factionThread = await actions.create_thread(name="Faction Reference", auto_archive_duration=10080)
         boardPrefix = "images/resources/components/factions/"
