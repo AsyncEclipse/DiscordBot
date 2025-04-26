@@ -100,7 +100,9 @@ class Combat:
                 if "anc" in Combat.findShipTypesInTile(game, tile):
                     if any(["Draco" in game.find_player_faction_name_from_color(playersInTile[1]),
                             "Draco" in game.find_player_faction_name_from_color(playersInTile[0])]):
-                        tiles.append((int(tile_map[tile]["sector"]), tile))
+                        if "owner" in tile_map[tile]:
+                            if tile_map[tile]["owner"] == 0:
+                                tiles.append((int(tile_map[tile]["sector"]), tile))
             else:
                 if len(playersInTile) != 1:
                     continue
@@ -212,6 +214,8 @@ class Combat:
                           f" Tile {tile3[1]} Influence")
             thread3 = await message.create_thread(name=threadName)
             playerColor = Combat.findPlayersInTile(game, tile3[1])[0]
+            if playerColor == "ai":
+                playerColor = Combat.findPlayersInTile(game, tile3[1])[1]
             winner = playerColor
             pos = tile3[1]
             player = game.getPlayerObjectFromColor(playerColor)
