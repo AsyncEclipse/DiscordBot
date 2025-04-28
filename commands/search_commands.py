@@ -310,6 +310,9 @@ class SearchCommands(commands.GroupCog, name="search"):
                     if drawing.get_public_points(game.gamestate["players"][player], True) >= highestVP:
                         secondVP = highestVP
                         highestVP = drawing.get_public_points(game.gamestate["players"][player], True)
+                    else:
+                        if drawing.get_public_points(game.gamestate["players"][player], True) >= secondVP:
+                            secondVP = drawing.get_public_points(game.gamestate["players"][player], True)
                 for player in game.gamestate["players"]:
                     username = game.gamestate["players"][player]["username"]
                     if "(" in username:

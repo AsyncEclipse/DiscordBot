@@ -129,10 +129,16 @@ class ResearchButtons:
 
     @staticmethod
     def calculate_cost(tech_details, tech_type, player):
-        prev_tech_count = (
-            len(player[f"{tech_type}_tech"]) if tech_type != "any"
-            else max(len(player["nano_tech"]), len(player["grid_tech"]), len(player["military_tech"]))
-        )
+        prev_tech_count = 0
+        if tech_type != "any":
+            prev_tech_count = len(player[f"{tech_type}_tech"]) 
+        else:
+            if len(player["nano_tech"]) < 7:
+                prev_tech_count = max(len(player["nano_tech"]),prev_tech_count)
+            if len(player["grid_tech"]) < 7:
+                prev_tech_count = max(len(player["grid_tech"]),prev_tech_count)
+            if len(player["military_tech"]) < 7:
+                prev_tech_count = max(len(player["military_tech"]),prev_tech_count)
         track = [-8, -6, -4, -3, -2, -1, 0, 0]
         discount = track[6 - prev_tech_count]
         for rep in player["reputation_track"]:
