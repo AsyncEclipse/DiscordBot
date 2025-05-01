@@ -577,7 +577,7 @@ class DrawHelper:
         return context
 
     def display_turn_order(self):
-        context = Image.new("RGBA", (900, 270), (0, 0, 0, 255))
+        context = Image.new("RGBA", (900, 290), (0, 0, 0, 255))
         if len(self.gamestate.get("activePlayerColor", [])) == 1:
             activeColor = self.gamestate["activePlayerColor"][0]
         else:
@@ -1129,7 +1129,7 @@ class DrawHelper:
                     color = (0, 0, 0)
                     stroke_width = 2
                     text_drawable_image = ImageDraw.Draw(context)
-                    text_drawable_image.text((reputationX+x*150+20, 600), str(reputation), color, font=font,
+                    text_drawable_image.text((reputationX+x*150+30, 600), str(reputation), color, font=font,
                                              stroke_width=stroke_width, stroke_fill=stroke_color)
                 else:
                     context.paste(reputation_image, (reputationX+x*150, 600), mask=reputation_image)
