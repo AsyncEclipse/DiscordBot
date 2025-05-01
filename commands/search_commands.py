@@ -324,6 +324,7 @@ class SearchCommands(commands.GroupCog, name="search"):
                             bonus = 10
                         if highestVP > secondVP + 9:
                             bonus = 20
+                        bonus = 0
                     vp_count[username] += normalVP + bonus
                     gameSumString += f"{username}: {str(drawing.get_public_points(game.gamestate['players'][player], True))}    "
                     gameFactionString += f"{game.gamestate['players'][player]['name']}: {str(drawing.get_public_points(game.gamestate['players'][player], True))}    "
