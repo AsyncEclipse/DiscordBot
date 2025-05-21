@@ -1077,6 +1077,11 @@ class GamestateHelper:
                 self.gamestate["players"][playerid][f"{tech_details['activ1']}_apt"] -= 1
         self.update()
 
+
+    def playerRemoveAncientMight(self, playerid):
+        self.gamestate["players"][playerid]["discoveryTileBonusPointTiles"] = []
+        self.update()
+
     def update(self):
         try:
             with open(f"{config.gamestate_path}/{self.game_id}.json", "w") as f:
