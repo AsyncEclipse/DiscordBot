@@ -119,7 +119,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         await interaction.channel.send(response)
 
     @app_commands.command(name="remove_tech")
-    async def remove_tech(self, interaction: discord.Interaction, tech: str, player: Optional[discord.Member] = None):
+    async def remove_tech(self, interaction: discord.Interaction, tech: str):
         """:param tech: The ID of the tech to be removed. Type help to get a list of your tech IDs"""
         game = GamestateHelper(interaction.channel)
         player = game.get_player(interaction.user.id, interaction)
@@ -136,6 +136,12 @@ class PlayerCommands(commands.GroupCog, name="player"):
         else:
             game.playerReturnTech(str(interaction.user.id), tech, player_helper.getTechType(tech))
             await interaction.response.send_message("Successfully returned " + tech_details["name"])
+
+    @app_commands.command(name="remove_ancient_might")
+    async def remove_ancient_might(self, interaction: discord.Interaction):
+        game = GamestateHelper(interaction.channel)  
+        game.playerRemoveAncientMight(str(interaction.user.id))
+        await interaction.response.send_message("Successfully removed ancient might")
 
     actionChoices = [app_commands.Choice(name="Explore", value="explore"),
                      app_commands.Choice(name="Build", value="build"),
