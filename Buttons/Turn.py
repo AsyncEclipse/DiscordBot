@@ -296,6 +296,7 @@ class TurnButtons:
                 message = (f"{nextPlayer['player_name']} use buttons to do the first turn of the round" +
                            game.displayPlayerStats(nextPlayer))
                 await interaction.channel.send(message, view=view)
+                game.updateSaveFile()
             else:
                 await interaction.channel.send("Could not find first player, someone run /player start_turn")
         else:

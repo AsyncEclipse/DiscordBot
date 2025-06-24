@@ -292,8 +292,6 @@ class ButtonListener(commands.Cog):
         elif customID.startswith("reducePopFor"):
             await DiplomaticRelationsButtons.reducePopFor(game, player_helper, interaction, customID)
         elif customID.startswith("startMove"):
-            if customID == "startMove":
-                game.updateSaveFile()
             await MoveButtons.startMove(game, player, interaction, customID, True)
         elif customID.startswith("moveFrom"):
             await MoveButtons.moveFrom(game, player, interaction, customID)
@@ -334,7 +332,6 @@ class ButtonListener(commands.Cog):
         elif customID.startswith("draftFaction"):
             await DraftButtons.draftFaction(game, interaction, customID)
         elif customID.startswith("pulsarAction"):
-            game.updateSaveFile()
             await PulsarButtons.pulsarAction(game, player, interaction, player_helper, customID)
         elif customID.startswith("blackHoleReturnStart"):
             await BlackHoleButtons.blackHoleReturnStart(game, player, customID, player_helper, interaction)
