@@ -65,6 +65,7 @@ class TurnButtons:
             await interaction.channel.send("## " + game.getPlayerEmoji(nextPlayer) + " started their turn")
             await interaction.channel.send(f"{nextPlayer['player_name']} use buttons to do your turn"
                                            + game.displayPlayerStats(nextPlayer), view=view)
+            game.updateSaveFile()
         else:
             view = View()
             role = discord.utils.get(interaction.guild.roles, name=game.game_id)
@@ -135,6 +136,7 @@ class TurnButtons:
             await interaction.channel.send("## " + game.getPlayerEmoji(nextPlayer) + " started their turn")
             await interaction.channel.send(nextPlayer["player_name"] + " use buttons to do your turn"
                                            + game.displayPlayerStats(nextPlayer), view=view)
+            game.updateSaveFile()
             sendPermaPassButton = True
             
         else:
@@ -294,6 +296,7 @@ class TurnButtons:
                 message = (f"{nextPlayer['player_name']} use buttons to do the first turn of the round" +
                            game.displayPlayerStats(nextPlayer))
                 await interaction.channel.send(message, view=view)
+                game.updateSaveFile()
             else:
                 await interaction.channel.send("Could not find first player, someone run /player start_turn")
         else:

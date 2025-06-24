@@ -175,7 +175,6 @@ class ButtonListener(commands.Cog):
         elif customID == "showReputation":
             await TurnButtons.showReputation(game, interaction, player)
         elif customID == "passForRound":
-            game.updateSaveFile()
             await TurnButtons.passForRound(player, game, interaction, player_helper)
         elif customID == "permanentlyPass":
             await TurnButtons.permanentlyPass(player, game, interaction, player_helper)
@@ -202,8 +201,6 @@ class ButtonListener(commands.Cog):
         elif customID.startswith("magColShipForSpentResource"):
             await TurnButtons.magColShipForSpentResource(game, interaction, player, customID, player_helper)
         elif customID.startswith("startExplore"):
-            if "2" not in customID:
-                game.updateSaveFile()
             await ExploreButtons.startExplore(game, player, player_helper, interaction, customID)
         elif customID.startswith("exploreTile"):
             await ExploreButtons.exploreTile(game, player, interaction, customID)
@@ -220,7 +217,6 @@ class ButtonListener(commands.Cog):
         elif customID.startswith("getFreeTech"):
             await DiscoveryTileButtons.getFreeTech(game, interaction, customID, player)
         elif customID.startswith("startResearch"):
-            game.updateSaveFile()
             await ResearchButtons.startResearch(game, player, player_helper, interaction, True)
         elif customID.startswith("getTech"):
             await ResearchButtons.getTech(game, player, player_helper, interaction, customID)
@@ -233,8 +229,6 @@ class ButtonListener(commands.Cog):
         elif customID.startswith("gain3resource"):
             await ResearchButtons.gain3resource(game, player, player_helper, interaction, customID)
         elif customID.startswith("startBuild"):
-            if "2" not in customID:
-                game.updateSaveFile()
             await BuildButtons.startBuild(game, player, interaction, customID, player_helper)
         elif customID.startswith("buildIn"):
             await BuildButtons.buildIn(game, player, interaction, customID)
@@ -249,7 +243,6 @@ class ButtonListener(commands.Cog):
         elif customID.startswith("finishSpendForBuild"):
             await BuildButtons.finishSpendForBuild(game, player, interaction, customID, player_helper)
         elif customID.startswith("startUpgrade"):
-            game.updateSaveFile()
             await UpgradeButtons.startUpgrade(game, player, interaction, True, "dummy","dum")
         elif customID.startswith("chooseDifferentShip"):
             actions = customID.split("_")[1]
@@ -267,7 +260,6 @@ class ButtonListener(commands.Cog):
         elif customID.startswith("fillPopulation"):
             await PopulationButtons.fillPopulation(game, player, interaction, customID)
         elif customID.startswith("startInfluence"):
-            game.updateSaveFile()
             await InfluenceButtons.startInfluence(game, player, interaction)
         elif customID.startswith("addInfluenceStart"):
             await InfluenceButtons.addInfluenceStart(game, player, interaction)
@@ -286,7 +278,6 @@ class ButtonListener(commands.Cog):
         elif customID.startswith("finishInfluenceAction"):
             await InfluenceButtons.finishInfluenceAction(game, player, interaction, player_helper)
         elif customID.startswith("startDiplomaticRelations"):
-            game.updateSaveFile()
             await DiplomaticRelationsButtons.startDiplomaticRelations(game, player, interaction)
         elif customID.startswith("startMinorRelations"):
             await DiplomaticRelationsButtons.startMinorRelations(game, player, interaction)
@@ -301,8 +292,6 @@ class ButtonListener(commands.Cog):
         elif customID.startswith("reducePopFor"):
             await DiplomaticRelationsButtons.reducePopFor(game, player_helper, interaction, customID)
         elif customID.startswith("startMove"):
-            if customID == "startMove":
-                game.updateSaveFile()
             await MoveButtons.startMove(game, player, interaction, customID, True)
         elif customID.startswith("moveFrom"):
             await MoveButtons.moveFrom(game, player, interaction, customID)
@@ -343,7 +332,6 @@ class ButtonListener(commands.Cog):
         elif customID.startswith("draftFaction"):
             await DraftButtons.draftFaction(game, interaction, customID)
         elif customID.startswith("pulsarAction"):
-            game.updateSaveFile()
             await PulsarButtons.pulsarAction(game, player, interaction, player_helper, customID)
         elif customID.startswith("blackHoleReturnStart"):
             await BlackHoleButtons.blackHoleReturnStart(game, player, customID, player_helper, interaction)
