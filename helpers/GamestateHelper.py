@@ -1241,7 +1241,7 @@ class GamestateHelper:
                 if isinstance(tile, int) and tile < lowest:
                     loc = x
                     lowest = tile
-            self.gamestate["players"][pID]["reputation_track"][loc] = f"{tile}-minor-{minor_species_name}"
+            self.gamestate["players"][pID]["reputation_track"][loc] = f"mixed-minor-{minor_species_name}"
             self.gamestate["reputation_tiles"].append(lowest)
         if "Discount" in minor_species_name and "Tech" not in minor_species_name:
             discountedUnit = minor_species_name.replace(" Discount", "").replace("Dreadnought", "dread").lower()
