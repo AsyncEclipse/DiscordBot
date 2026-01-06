@@ -1632,6 +1632,7 @@ class DrawHelper:
                     points += 2
                 if "per ambassador" in reputation:
                     countAmb = True
+                    points -= 1
                 if "per rep" in reputation:
                     countRep = True
         if countAmb:
