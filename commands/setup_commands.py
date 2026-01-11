@@ -153,6 +153,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
                               galactic_event_tiles: Optional[bool] = False,
                               hyperlanes: Optional[bool] = False,
                               community_parts: Optional[bool] = False,
+                              community_empires: Optional[bool] = False,
                               ban_factions: Optional[bool] = False):
         """
         :param ai_ship_type: Choose which type of AI ships to use.
@@ -162,6 +163,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         :param hyperlanes: Hyperlanes for 4p and 5p are default off.
         :param ban_factions: Used to ban 10-playerCount factions from the draft.
         :param community_parts: Turns on commnity changes to improved hull and phase shield.
+        :param community_empires: Enables community empires variant with modified factions.
         :return:
         """
         temp_player_list = [player1, player2, player3, player4, player5, player6,player7,player8,player9]
@@ -174,7 +176,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
             ai_ships = "def"
         else:
             ai_ships = ai_ship_type.value
-        new_game = GameInit(game_name, player_list, ai_ships, rift_cannon, turn_order_variant, community_parts)
+        new_game = GameInit(game_name, player_list, ai_ships, rift_cannon, turn_order_variant, community_parts, community_empires)
         new_game.create_game()
 
         async def get_or_create_category(guild: discord.Guild, category_name):
@@ -183,10 +185,10 @@ class SetupCommands(commands.GroupCog, name="setup"):
                 if category.name == category_name:
                     return category
             # If category doesn't exist, create it
-            overwrites = {
-                # Deny access to everyone else
-                interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False),
-            }
+            overwrites = {}
+            # Deny access to everyone else (if default_role exists)
+            if interaction.guild.default_role is not None:
+                overwrites[interaction.guild.default_role] = discord.PermissionOverwrite(read_messages=False)
             return await guild.create_category(category_name, overwrites=overwrites)
 
         async def get_or_create_role(guild: discord.Guild, role_name):
@@ -205,8 +207,10 @@ class SetupCommands(commands.GroupCog, name="setup"):
 
         role_name = f"aeb{config.game_number}"
         role = await get_or_create_role(interaction.guild, role_name)
-        overwrites = {interaction.guild.default_role: discord.PermissionOverwrite(read_messages=False),
-                      role: discord.PermissionOverwrite(read_messages=True, manage_messages=True)}
+        overwrites = {}
+        if interaction.guild.default_role is not None:
+            overwrites[interaction.guild.default_role] = discord.PermissionOverwrite(read_messages=False)
+        overwrites[role] = discord.PermissionOverwrite(read_messages=True, manage_messages=True)
 
         for player_id in player_list:
             member = interaction.guild.get_member(player_id[0])

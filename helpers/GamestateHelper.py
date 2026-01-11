@@ -956,6 +956,11 @@ class GamestateHelper:
         self.gamestate["players"][str(player_id)].update(faction_data[faction])
         self.gamestate["players"][str(player_id)].update({"passed": False})
         self.gamestate["players"][str(player_id)].update({"perma_passed": False})
+        
+        # Community Empires: Eridani gets 2 extra reputation track slots for minor species
+        if self.gamestate.get("community_empires", False) and faction == "eri":
+            self.gamestate["players"][str(player_id)]["reputation_track"].extend(["mixed", "mixed"])
+        
         name = self.gamestate["players"][str(player_id)]["player_name"]
         shortFaction = self.getShortFactionNameFromFull(self.gamestate["players"][str(player_id)]["name"])
         if "terran" in shortFaction:

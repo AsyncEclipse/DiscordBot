@@ -4,6 +4,8 @@ import discord
 from Buttons.Turn import TurnButtons
 from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
+from helpers.DrawHelper import DrawHelper
+from helpers.PlayerHelper import PlayerHelper
 from discord.ui import View, Button
 
 
@@ -145,6 +147,132 @@ class DraftButtons:
         return "green"
 
     @staticmethod
+    async def startEridaniMinorSpeciesDraft(game: GamestateHelper, player, interaction: discord.Interaction, temp_player_list=None):
+        """Start the minor species draft for Eridani in Community Empires mode."""
+        if "eridani_minor_species_draft" not in game.gamestate:
+            player_id = game.get_player_from_color(player["color"])
+            game.gamestate["eridani_minor_species_draft"] = {
+                "player_id": str(player_id),
+                "selected": [],
+                "remaining": 2,
+                "temp_player_list": temp_player_list
+            }
+            game.update()
+        
+        draft_state = game.gamestate["eridani_minor_species_draft"]
+        remaining = draft_state["remaining"]
+        
+        if remaining <= 0:
+            # Draft complete, start the game
+            await interaction.channel.send(f"{player['player_name']} has completed drafting their 2 minor species!")
+            # Get first player from temp_player_list if available, otherwise use first player in game
+            if draft_state.get("temp_player_list") and len(draft_state["temp_player_list"]) > 0:
+                first_player_id = draft_state["temp_player_list"][0]
+            else:
+                first_player_id = int(list(game.gamestate["players"].keys())[0])
+            first_player = game.get_player(first_player_id, interaction)
+            asyncio.create_task(game.showUpdate("Start of Game", interaction))
+            view = TurnButtons.getStartTurnButtons(game, first_player, "dummy")
+            game.initilizeKey("activePlayerColor")
+            game.addToKey("activePlayerColor", first_player["color"])
+            game.updatePingTime()
+            await interaction.channel.send(f"## {game.getPlayerEmoji(first_player)} started their turn.")
+            await interaction.channel.send(f"{first_player['player_name']} use these buttons to do your turn"
+                                           + game.displayPlayerStats(first_player), view=view)
+            return
+        
+        view = View()
+        drawing = DrawHelper(game.gamestate)
+        for minor in game.gamestate["minor_species"]:
+            if minor not in draft_state["selected"]:
+                buttonID = f"FCID{player['color']}_draftMinorSpecies_" + minor
+                view.add_item(Button(label=minor, style=discord.ButtonStyle.blurple, custom_id=buttonID))
+        
+        await interaction.channel.send(f"{player['player_name']}, choose a minor species to draft "
+                                       f"({remaining} remaining).",
+                                       view=view, file=await asyncio.to_thread(drawing.show_minor_species))
+
+    @staticmethod
+    async def draftMinorSpecies(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
+        """Handle Eridani selecting a minor species during the draft."""
+        print('drafting minor species', buttonID)
+        # ButtonID format: FCID{color}_draftMinorSpecies_{minor_species_name}
+        parts = buttonID.split("_")
+        minor_species_name = "_".join(parts[2:])  # Join all parts after the second underscore in case name has underscores
+        
+        if "eridani_minor_species_draft" not in game.gamestate:
+            await interaction.followup.send("Draft state not found. Please restart the draft.", ephemeral=True)
+            return
+        
+        draft_state = game.gamestate["eridani_minor_species_draft"]
+        
+        if minor_species_name in draft_state["selected"]:
+            await interaction.followup.send("You have already selected this minor species.", ephemeral=True)
+            return
+        
+        if minor_species_name not in game.gamestate["minor_species"]:
+            await interaction.followup.send("This minor species is not available.", ephemeral=True)
+            return
+        
+        # Add the minor species to the player's extra reputation track slots
+        pID = game.get_player_from_color(player["color"])
+        found = False
+        # Find the first available extra slot (positions 4 and 5, which are the extra slots we added)
+        for x in range(4, len(player["reputation_track"])):
+            tile = player["reputation_track"][x]
+            if isinstance(tile, str) and tile == "mixed":
+                game.gamestate["players"][str(pID)]["reputation_track"][x] = f"mixed-minor-{minor_species_name}"
+                found = True
+                break
+        
+        if not found:
+            await interaction.followup.send("No available slot found for minor species.", ephemeral=True)
+            return
+        
+        # Apply discount if applicable
+        if "Discount" in minor_species_name and "Tech" not in minor_species_name:
+            discountedUnit = minor_species_name.replace(" Discount", "").replace("Dreadnought", "dread").lower()
+            discount = 1
+            if "dread" in discountedUnit or "monolith" in discountedUnit:
+                discount = 2
+            game.gamestate["players"][str(pID)][f"cost_{discountedUnit}"] -= discount
+        
+        # Remove from available minor species
+        game.gamestate["minor_species"].remove(minor_species_name)
+        
+        # Update draft state
+        draft_state["selected"].append(minor_species_name)
+        draft_state["remaining"] -= 1
+        game.update()
+        
+        await interaction.message.delete()
+        await interaction.channel.send(f"{player['player_name']} drafted {minor_species_name}.")
+        
+        # Refresh player data after update
+        player = game.get_player(int(pID), interaction)
+        
+        # Continue draft if more selections needed
+        if draft_state["remaining"] > 0:
+            await DraftButtons.startEridaniMinorSpeciesDraft(game, player, interaction, draft_state.get("temp_player_list"))
+        else:
+            # Draft complete - use the stored temp_player_list to get first player
+            temp_player_list = draft_state.get("temp_player_list")
+            if temp_player_list and len(temp_player_list) > 0:
+                first_player_id = temp_player_list[0]
+            else:
+                first_player_id = int(list(game.gamestate["players"].keys())[0])
+            first_player = game.get_player(first_player_id, interaction)
+            await interaction.channel.send(f"{player['player_name']} has completed drafting their 2 minor species!")
+            asyncio.create_task(game.showUpdate("Start of Game", interaction))
+            view = TurnButtons.getStartTurnButtons(game, first_player, "dummy")
+            game.initilizeKey("activePlayerColor")
+            game.addToKey("activePlayerColor", first_player["color"])
+            game.updatePingTime()
+            await interaction.channel.send(f"## {game.getPlayerEmoji(first_player)} started their turn.")
+            await interaction.channel.send(f"{first_player['player_name']} use these buttons to do your turn"
+                                           + game.displayPlayerStats(first_player), view=view)
+
+    @staticmethod
     async def generalSetup(interaction: discord.Interaction, game: GamestateHelper,
                            temp_player_list, temp_faction_list):
         colors = ["blue", "red", "green", "yellow", "purple", "white", "pink", "brown", "teal"]
@@ -224,6 +352,21 @@ class DraftButtons:
             game.setup_finished()
         # game.fillInDiscTiles()
         await interaction.channel.send("Done With Setup!")
+
+        # Community Empires: Eridani drafts 2 minor species at game start
+        if game.gamestate.get("community_empires", False):
+            eridani_player_id = None
+            for player_id in game.gamestate["players"]:
+                player = game.get_player(int(player_id), interaction)
+                if player and player.get("name") == "Eridani Empire":
+                    eridani_player_id = int(player_id)
+                    break
+            
+            if eridani_player_id is not None:
+                eridani_player = game.get_player(eridani_player_id, interaction)
+                await DraftButtons.startEridaniMinorSpeciesDraft(game, eridani_player, interaction, temp_player_list)
+                # Wait for draft to complete before starting the game
+                return
 
         asyncio.create_task(game.showUpdate("Start of Game", interaction))
         view = TurnButtons.getStartTurnButtons(game, game.get_player(temp_player_list[0],interaction), "dummy")
