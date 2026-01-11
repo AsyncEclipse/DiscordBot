@@ -298,6 +298,10 @@ class ButtonListener(commands.Cog):
             await DiplomaticRelationsButtons.acceptRelationsWith(game, player, interaction, customID)
         elif customID.startswith("formMinorRelations"):
             await DiplomaticRelationsButtons.formMinorRelations(game, player, interaction, customID, player_helper)
+        elif customID.startswith("draftMinorSpecies"):
+            await DraftButtons.draftMinorSpecies(game, player, interaction, customID)
+        elif customID.startswith("stopEridaniDraft"):
+            await DraftButtons.stopEridaniDraft(game, player, interaction)
         elif customID.startswith("reducePopFor"):
             await DiplomaticRelationsButtons.reducePopFor(game, player_helper, interaction, customID)
         elif customID.startswith("startMove"):

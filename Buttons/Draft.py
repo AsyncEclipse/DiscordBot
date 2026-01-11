@@ -2,6 +2,7 @@ import asyncio
 import random
 import discord
 from Buttons.Turn import TurnButtons
+from Buttons.DiplomaticRelations import DiplomaticRelationsButtons
 from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
 from helpers.DrawHelper import DrawHelper
@@ -183,22 +184,36 @@ class DraftButtons:
         
         view = View()
         drawing = DrawHelper(game.gamestate)
+        # Calculate available money for filtering affordable options
+        money = (player["money"] + player["science"] // player["trade_value"]
+                 + player["materials"] // player["trade_value"])
+        if player["colony_ships"] > 0 and game.get_short_faction_name(player["name"]) == "magellan":
+            money += player["colony_ships"]
+        
+        # Show all available minor species (not just affordable ones)
+        # Payment will be handled when selected
         for minor in game.gamestate["minor_species"]:
             if minor not in draft_state["selected"]:
                 buttonID = f"FCID{player['color']}_draftMinorSpecies_" + minor
-                view.add_item(Button(label=minor, style=discord.ButtonStyle.blurple, custom_id=buttonID))
+                cost = DiplomaticRelationsButtons.getMinorSpeciesCost(minor)
+                label = f"{minor} ({cost})"
+                # Show all buttons - affordability will be checked when clicked
+                view.add_item(Button(label=label, style=discord.ButtonStyle.blurple, custom_id=buttonID))
+        
+        # Add "Stop Drafting" button - always available
+        view.add_item(Button(label="Stop Drafting", style=discord.ButtonStyle.red,
+                           custom_id=f"FCID{player['color']}_stopEridaniDraft"))
         
         await interaction.channel.send(f"{player['player_name']}, choose a minor species to draft "
-                                       f"({remaining} remaining).",
+                                       f"({remaining} remaining). You can also stop drafting at any time.",
                                        view=view, file=await asyncio.to_thread(drawing.show_minor_species))
 
     @staticmethod
     async def draftMinorSpecies(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
         """Handle Eridani selecting a minor species during the draft."""
-        print('drafting minor species', buttonID)
-        # ButtonID format: FCID{color}_draftMinorSpecies_{minor_species_name}
+        # ButtonID format after prefix removal: draftMinorSpecies_{minor_species_name}
         parts = buttonID.split("_")
-        minor_species_name = "_".join(parts[2:])  # Join all parts after the second underscore in case name has underscores
+        minor_species_name = "_".join(parts[1:])  # Join all parts after the first underscore in case name has underscores
         
         if "eridani_minor_species_draft" not in game.gamestate:
             await interaction.followup.send("Draft state not found. Please restart the draft.", ephemeral=True)
@@ -213,6 +228,20 @@ class DraftButtons:
         if minor_species_name not in game.gamestate["minor_species"]:
             await interaction.followup.send("This minor species is not available.", ephemeral=True)
             return
+        
+        # Calculate cost and check if player can afford it
+        cost = DiplomaticRelationsButtons.getMinorSpeciesCost(minor_species_name)
+        money = (player["money"] + player["science"] // player["trade_value"]
+                 + player["materials"] // player["trade_value"])
+        if player["colony_ships"] > 0 and game.get_short_faction_name(player["name"]) == "magellan":
+            money += player["colony_ships"]
+        
+        if cost > money:
+            await interaction.followup.send(f"You cannot afford {minor_species_name}. It costs {cost} but you only have {money} available.", ephemeral=True)
+            return
+        
+        player_helper = PlayerHelper(game.get_player_from_color(player["color"]), player)
+        paid = min(player["money"], cost)
         
         # Add the minor species to the player's extra reputation track slots
         pID = game.get_player_from_color(player["color"])
@@ -247,6 +276,45 @@ class DraftButtons:
         
         await interaction.message.delete()
         await interaction.channel.send(f"{player['player_name']} drafted {minor_species_name}.")
+        await interaction.channel.send(player_helper.adjust_money(-paid))
+        
+        # Handle partial payment if needed
+        if paid < cost:
+            view = View()
+            trade_value = player['trade_value']
+            for resource_type, button_style in [("materials", discord.ButtonStyle.gray),
+                                                ("science", discord.ButtonStyle.blurple)]:
+                if player[resource_type] >= trade_value:
+                    view.add_item(Button(label=f"Pay {trade_value} {resource_type.capitalize()}",
+                                         style=button_style,
+                                         custom_id=f"FCID{player['color']}_payAtRatio_{resource_type}"))
+            if player["colony_ships"] > 0 and game.get_short_faction_name(player["name"]) == "magellan":
+                emojiC = Emoji.getEmojiByName("colony_ship")
+                view.add_item(Button(label="Get 1 Money", style=discord.ButtonStyle.red, emoji=emojiC,
+                                     custom_id=f"FCID{player['color']}_magColShipForSpentResource_money"))
+            view.add_item(Button(label="Done Paying", style=discord.ButtonStyle.red,
+                                 custom_id=f"FCID{player['color']}_deleteMsg"))
+            await interaction.channel.send(f"Attempted to pay a cost of {str(cost)}.\n"
+                                           "Please pay the rest of the cost by trading other resources"
+                                           f" at your trade ratio ({trade_value}:1).", view=view)
+        
+        game.update_player(player_helper)
+        
+        # Handle cube selection if applicable
+        if "Cube" in minor_species_name:
+            view = View()
+            p = game.get_player(int(pID), interaction)
+            if p["material_pop_cubes"] > 0:
+                view.add_item(Button(label="Material", style=discord.ButtonStyle.gray,
+                                     custom_id=f"FCID{p['color']}_reducePopFor_material"))
+            if p["science_pop_cubes"] > 0:
+                view.add_item(Button(label="Science", style=discord.ButtonStyle.gray,
+                                     custom_id=f"FCID{p['color']}_reducePopFor_science"))
+            if p["money_pop_cubes"] > 0:
+                view.add_item(Button(label="Money", style=discord.ButtonStyle.gray,
+                                     custom_id=f"FCID{p['color']}_reducePopFor_money"))
+            await interaction.channel.send(f"{p['player_name']} choose what type of cube to put on the ambassador",
+                                           view=view)
         
         # Refresh player data after update
         player = game.get_player(int(pID), interaction)
@@ -271,6 +339,36 @@ class DraftButtons:
             await interaction.channel.send(f"## {game.getPlayerEmoji(first_player)} started their turn.")
             await interaction.channel.send(f"{first_player['player_name']} use these buttons to do your turn"
                                            + game.displayPlayerStats(first_player), view=view)
+
+    @staticmethod
+    async def stopEridaniDraft(game: GamestateHelper, player, interaction: discord.Interaction):
+        """Handle Eridani choosing to stop drafting minor species."""
+        if "eridani_minor_species_draft" not in game.gamestate:
+            await interaction.followup.send("Draft state not found.", ephemeral=True)
+            return
+        
+        draft_state = game.gamestate["eridani_minor_species_draft"]
+        selected_count = len(draft_state["selected"])
+        
+        await interaction.message.delete()
+        await interaction.channel.send(f"{player['player_name']} has stopped drafting. "
+                                       f"They selected {selected_count} minor species.")
+        
+        # Start the game
+        temp_player_list = draft_state.get("temp_player_list")
+        if temp_player_list and len(temp_player_list) > 0:
+            first_player_id = temp_player_list[0]
+        else:
+            first_player_id = int(list(game.gamestate["players"].keys())[0])
+        first_player = game.get_player(first_player_id, interaction)
+        asyncio.create_task(game.showUpdate("Start of Game", interaction))
+        view = TurnButtons.getStartTurnButtons(game, first_player, "dummy")
+        game.initilizeKey("activePlayerColor")
+        game.addToKey("activePlayerColor", first_player["color"])
+        game.updatePingTime()
+        await interaction.channel.send(f"## {game.getPlayerEmoji(first_player)} started their turn.")
+        await interaction.channel.send(f"{first_player['player_name']} use these buttons to do your turn"
+                                       + game.displayPlayerStats(first_player), view=view)
 
     @staticmethod
     async def generalSetup(interaction: discord.Interaction, game: GamestateHelper,
