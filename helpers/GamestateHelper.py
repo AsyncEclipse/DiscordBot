@@ -1018,7 +1018,19 @@ class GamestateHelper:
             tech_data = json.load(f)
 
         expanded_galaxy = count > 6
+        rift_cannon = self.gamestate.get("rift_cannon", True)
+        community_parts = self.gamestate.get("community_parts", False)
+        excluded_techs = set()
+        if not rift_cannon:
+            excluded_techs.add("rican")
+        if community_parts:
+            excluded_techs.update({"imh", "phs"})
+        else:
+            excluded_techs.update({"imhmod", "phsmod"})
+
         for tech_id, tech_info in tech_data.items():
+            if tech_id in excluded_techs:
+                continue
             if expanded_galaxy and "num_expanded_galaxy" in tech_info:
                 tile_count = tech_info["num_expanded_galaxy"]
             else:

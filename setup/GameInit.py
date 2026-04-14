@@ -54,15 +54,9 @@ class GameInit:
                     self.gamestate[ship+"_type"]="wa"
         self.gamestate["turnsInPassingOrder"] = self.turn_order_variant
         if not self.rift_cannon:
-            self.gamestate["tech_deck"].remove("rican")
             self.gamestate["discTiles"].remove("ricon")
-        if self.community_parts:
-            while "imh" in self.gamestate["tech_deck"]:
-                self.gamestate["tech_deck"].remove("imh")
-                self.gamestate["tech_deck"].append("imhmod")
-            while "phs" in self.gamestate["tech_deck"]:
-                self.gamestate["tech_deck"].remove("phs")
-                self.gamestate["tech_deck"].append("phsmod")
+        self.gamestate["rift_cannon"] = self.rift_cannon
+        self.gamestate["community_parts"] = self.community_parts
 
         with open(f"{config.gamestate_path}/{self.gamestate['game_id']}.json", "w") as f:
             json.dump(self.gamestate, f)
