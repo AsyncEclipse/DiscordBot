@@ -24,4 +24,7 @@ jobs:
           pip install pytest
 
       - name: Run tests
-        run: pytest tests/
+        run: |
+          echo '{"token": "test-token", "game_number": 46, "gamestate_path": "/tmp/eclipse_test_games"}' > config.json
+          python3 -m pytest tests/
+          
