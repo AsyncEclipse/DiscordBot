@@ -996,9 +996,9 @@ class GamestateHelper:
         self.gamestate["setup_finished"] = 1
         self.update()
 
-    def setup_techs_and_outer_rim(self, count: int, galactic_events ,hyperlane):
+    def setup_techs_and_outer_rim(self, count: int, galactic_events, hyperlane):
         self.gamestate["player_count"] = count
-        draw_count = {2: [5, 12], 3: [8, 14], 4: [14, 16], 5: [16, 18], 6: [18, 20],7:[22,22],8:[24,24],9:[24,26]}
+        draw_count = {2: [5, 12], 3: [8, 14], 4: [14, 16], 5: [16, 18], 6: [18, 20], 7: [22, 22], 8: [24, 24], 9: [24, 26]}
 
         third_sector_tiles = ["301", "302", "303", "304", "305", "306", "307", "308", "309", "310", "311", "312", "313",
                               "314", "315", "316", "317", "318", "381", "382", "398", "397", "399", "396", "394", "393"]
@@ -1017,6 +1017,27 @@ class GamestateHelper:
         with open("data/techs.json", "r") as f:
             tech_data = json.load(f)
 
+        expanded_galaxy = count > 6
+        rift_cannon = self.gamestate.get("rift_cannon", True)
+        community_parts = self.gamestate.get("community_parts", False)
+        excluded_techs = set()
+        if not rift_cannon:
+            excluded_techs.add("rican")
+        if community_parts:
+            excluded_techs.update({"imh", "phs"})
+        else:
+            excluded_techs.update({"imhmod", "phsmod"})
+
+        for tech_id, tech_info in tech_data.items():
+            if tech_id in excluded_techs:
+                continue
+            if expanded_galaxy and "num_expanded_galaxy" in tech_info:
+                tile_count = tech_info["num_expanded_galaxy"]
+            else:
+                tile_count = tech_info["num"]
+            for _ in range(tile_count):
+                self.gamestate["tech_deck"].append(tech_id)
+
         while sector_draws > 0:
             random.shuffle(third_sector_tiles)
             self.gamestate["tile_deck_300"].append(third_sector_tiles.pop(0))
@@ -1033,6 +1054,10 @@ class GamestateHelper:
                 pass
             else:
                 tech_draws -= 1
+
+        if expanded_galaxy:
+            self.gamestate["reputation_tiles"].extend([4, 4, 3, 3, 3, 2, 2, 1, 1])
+
         minorDraws = 4
         minor_species = ["Cruiser Discount", "Dreadnought Discount", "Monolith Discount", "Orbital Discount",
                          "Tech Discount", "Population Cube",

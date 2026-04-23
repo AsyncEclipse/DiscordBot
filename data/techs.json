@@ -8,7 +8,7 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 4,
+    "num": 5,
     "description": "You may upgrade your Ship Blueprints with Gauss Shield Ship Parts. This basic shield is a starting tech for the Orion species. Reduces die rolls against this ship by 1, with no effect on Direct Hits."
   },
   "fus": {
@@ -20,7 +20,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 4,
+    "num": 5,
+    "num_expanded_galaxy": 6,
     "description": "You may upgrade your Ship Blueprints with Fusion Source Ship Parts. Fusion Source generates 6 Energy for the ship."
   },
   "imh": {
@@ -33,6 +34,7 @@
     "infdisc": 0,
     "dtile": 0,
     "num": 5,
+    "num_expanded_galaxy": 6,
     "description": "You may upgrade your Ship Blueprints with Improved Hull Ship Parts. Improved Hull panels can each absorb up to 2 hits during the Combat phase."
   },
   "imhmod": {
@@ -45,6 +47,7 @@
     "infdisc": 0,
     "dtile": 0,
     "num": 5,
+    "num_expanded_galaxy": 6,
     "description": "You may upgrade your Ship Blueprints with modded Improved Hull Ship Parts. Improved Hull panels can each absorb up to 2 hits during the Combat phase but subtract 1 from your initiative."
   },
   "poc": {
@@ -56,7 +59,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 4,
+    "num": 5,
+    "num_expanded_galaxy": 6,
     "description": "You may upgrade your Ship Blueprints with Positron Computer Ship Parts. Positron Computers add +2 to all non-Direct Hit (1-5) dice values rolled by this ship during the Combat Phase. Each Positron Computer requires 1 Energy."
   },
   "ade": {
@@ -69,6 +73,7 @@
     "infdisc": 0,
     "dtile": 0,
     "num": 4,
+    "num_expanded_galaxy": 5,
     "description": "You may place Population Cubes in Advanced Money (Yellow) or Neutral (White) Population Squares with your Colony Ships. Advanced Population Squares are indicated by a small starburst in the upper left corner."
   },
   "tad": {
@@ -93,6 +98,7 @@
     "infdisc": 0,
     "dtile": 0,
     "num": 3,
+    "num_expanded_galaxy": 4,
     "description": "You may upgrade your Ship Blueprints with Antimatter Cannon Ship Parts. During the Combat Phase, Antimatter Cannons deal 4 hits to a single target if 1) the red die rolls a Direct Hit, or 2) if the red die result + total Computers - total Shields of the target ship = 6 or greater. Also see Antimass Splitter. Each Antimass Cannon requires 4 Energy."
   },
   "qug": {
@@ -105,6 +111,7 @@
     "infdisc": 2,
     "dtile": 0,
     "num": 3,
+    "num_expanded_galaxy": 4,
     "description": "You receive two additional Influence Discs, placed immediately on your Influence Track."
   },
   "neb": {
@@ -141,6 +148,7 @@
     "infdisc": 0,
     "dtile": 0,
     "num": 5,
+    "num_expanded_galaxy": 6,
     "description": "You may upgrade your Ship Blueprints with Plasma Cannon Ship Parts. During the Combat Phase, Plasma Cannons deal 2 hits to a single target if 1) the orange die rolls a Direct Hit, or 2) if the orange die result + total Computers - total Shields of the target ship = 6 or greater. Each Plasma Cannon requires 2 Energy."
   },
   "phs": {
@@ -153,6 +161,7 @@
     "infdisc": 0,
     "dtile": 0,
     "num": 5,
+    "num_expanded_galaxy": 6,
     "description": "You may upgrade your Ship Blueprints with Phase Shield Ship Parts. Reduces die rolls against this ship by 2, with no effect on Direct Hits. Each Phase Shield requires 1 Energy."
   },
   "phsmod": {
@@ -165,6 +174,7 @@
     "infdisc": 0,
     "dtile": 0,
     "num": 5,
+    "num_expanded_galaxy": 6,
     "description": "You may upgrade your Ship Blueprints with modded Phase Shield Ship Parts. Reduces die rolls against this ship by 2, with no effect on Direct Hits. Each Phase Shield requires 1 Energy but also increases initiative by 1."
   },
   "adm": {
@@ -177,6 +187,7 @@
     "infdisc": 0,
     "dtile": 0,
     "num": 4,
+    "num_expanded_galaxy": 5,
     "description": "You may place Population Cubes in Advanced Materials (Brown) or Neutral (White) Population Squares with your Colony Ships. Advanced Population Squares are indicated by a small starburst in the upper left corner."
   },
   "tas": {
@@ -189,6 +200,7 @@
     "infdisc": 0,
     "dtile": 0,
     "num": 3,
+    "num_expanded_galaxy": 4,
     "description": "You may upgrade your Ship Blueprints with Tachyon Source Ship Parts. Tachyon Source generates 9 Energy for the ship."
   },
   "glc": {
@@ -201,6 +213,7 @@
     "infdisc": 0,
     "dtile": 0,
     "num": 3,
+    "num_expanded_galaxy": 4,
     "description": "You may upgrade your Ship Blueprints with Gluon Computer Ship Parts. Gluon Computers add +3 to all non-Direct Hit (1-5) dice values rolled by this ship during the Combat Phase. Each Gluon Computer requires 2 Energy."
   },
   "plm": {
@@ -213,6 +226,7 @@
     "infdisc": 0,
     "dtile": 0,
     "num": 3,
+    "num_expanded_galaxy": 4,
     "description": "You may upgrade your Ship Blueprints with Plasma Missile Ship Parts. A Plasma Missile box rolls two dice at the beginning of Combat Phase during the Fire Missiles step. Each Plasma Missile deals 2 hits if 1) the orange die rolls a Direct Hit, or 2) if the orange die result + total Computers - total Shields of the target ship = 6 or greater. Does not fire during the Repeated Engagement Rounds. Each Plasma Missile box requires 1 Energy."
   },
   "nar": {
@@ -237,6 +251,7 @@
     "infdisc": 0,
     "dtile": 0,
     "num": 5,
+    "num_expanded_galaxy": 6,
     "description": "You may upgrade your Ship Blueprints with Fusion Drive Ship Parts. Each Fusion Drive allows ships to Move into up to 2 systems during a single Move Activation. Each Fusion Drive also adds +2 to the Ship's Initiative value during Combat; i.e., the ship also shoots faster. Each Fusion Drive requires 2 Energy."
   },
   "orb": {
@@ -249,6 +264,7 @@
     "infdisc": 0,
     "dtile": 0,
     "num": 5,
+    "num_expanded_galaxy": 6,
     "description": "You may Build Orbitals."
   },
   "adr": {
@@ -261,6 +277,7 @@
     "infdisc": 1,
     "dtile": 0,
     "num": 5,
+    "num_expanded_galaxy": 6,
     "description": "You receive 1 additional Influence Disc, placed immediately on your Influence Track."
   },
   "adl": {
@@ -272,7 +289,8 @@
     "art_pt": 0,
     "infdisc": 0,
     "dtile": 0,
-    "num": 5,
+    "num": 4,
+    "num_expanded_galaxy": 5,
     "description": "You may place Population Cubes in Advanced Science (Pink) or Neutral (White) Population Squares with your Colony Ships. Advanced Population Squares are indicated by a small starburst in the upper left corner."
   },
   "mon": {
@@ -285,6 +303,7 @@
     "infdisc": 0,
     "dtile": 0,
     "num": 3,
+    "num_expanded_galaxy": 4,
     "description": "You may Build Monoliths."
   },
   "wog": {
@@ -297,6 +316,7 @@
     "infdisc": 0,
     "dtile": 0,
     "num": 3,
+    "num_expanded_galaxy": 4,
     "description": "You may Explore, Move to, and Influence adjacent Sectors if the edges connecting the Sectors contain 1 Wormhole."
   },
   "ark": {
