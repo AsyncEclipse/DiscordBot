@@ -1762,11 +1762,12 @@ class DrawHelper:
             else:
                 rnd = 1
             output_dir = f'gamehistory/{self.gamestate["game_id"]}'
-            filename = f'{self.gamestate["game_id"]}-{rnd-1}.png'
+            filename = f'{self.gamestate["game_id"]}-{rnd-1}.webp'
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
             full_path = os.path.join(output_dir, filename)
-            final_context.save(full_path)
+            resized = final_context.resize((int(width*0.3), int(height*0.3)))
+            resized.save(full_path, quality=50, compress_level=8)
         bytes_io.seek(0)
         return discord.File(bytes_io, filename="map_image.webp")
 

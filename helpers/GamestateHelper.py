@@ -4,6 +4,7 @@ import time
 import portalocker 
 import discord
 import config
+import shutil
 from helpers.DrawHelper import DrawHelper
 from helpers.EmojiHelper import Emoji
 from helpers.PlayerHelper import PlayerHelper
@@ -98,6 +99,15 @@ class GamestateHelper:
         guild = interaction.guild
         self.gamestate["gameEnded"] = True
         self.update()
+        history_path = f'GameHistory/{self.game_id}'
+        if os.path.exists(history_path):
+            shutil.make_archive(history_path, 'zip', history_path)
+            stats_channel = discord.utils.get(guild.channels, name='ggranger-stats-paradise')
+            if stats_channel:
+                zf = discord.File(f'{history_path}.zip')
+                await stats_channel.send(file=zf)
+            os.remove(f'{history_path}.zip')
+            shutil.rmtree(f'{history_path}')
         category = interaction.channel.category
         role = discord.utils.get(guild.roles, name=self.game_id)
         for channel in guild.channels:
