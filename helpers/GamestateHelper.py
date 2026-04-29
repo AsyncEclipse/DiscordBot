@@ -189,6 +189,13 @@ class GamestateHelper:
         self.file = f
         gamestate = json.load(f)
         return gamestate
+
+    def saveEndRound(self):
+        output_dir = f'GameHistory/{self.game_id}'
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        with open(f'GameHistory/{self.game_id}/{self.game_id}-{self.gamestate["roundNum"]-1}.json', "w") as outfile:
+            json.dump(self.gamestate, outfile)
     
     def is_file_open(self,file_path):  
         try:  
