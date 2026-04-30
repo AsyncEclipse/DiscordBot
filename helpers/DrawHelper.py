@@ -1761,7 +1761,7 @@ class DrawHelper:
                 rnd = self.gamestate["roundNum"]
             else:
                 rnd = 1
-            output_dir = f'gamehistory/{self.gamestate["game_id"]}'
+            output_dir = f'GameHistory/{self.gamestate["game_id"]}'
             filename = f'{self.gamestate["game_id"]}-{rnd-1}.webp'
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
