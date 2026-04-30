@@ -8,6 +8,7 @@ launch.json
 .idea
 test.py
 ActiveGames/
+GameHistory/
 
 
 # Byte-compiled / optimized / DLL files

@@ -1652,7 +1652,7 @@ class DrawHelper:
                 points -= 2
         return points
 
-    def show_game(self):
+    def show_game(self, finalSave=False):
         def load_tile_coordinates():
             configs = Properties()
             with open("data/tileImageCoordinates.properties", "rb") as f:
@@ -1740,6 +1740,7 @@ class DrawHelper:
         width = max([context2.size[0], context3.size[0] + context4.size[0] + 150,
                      cropped_context.size[0], context5.size[0]])
         height = (cropped_context.size[1] + context2.size[1] +
+
                   max(context3.size[1], context4.size[1]) + 90)
         final_context = Image.new("RGBA", (width, height), (0, 0, 0, 255))
         centering = int((width - cropped_context.size[0])/2)
@@ -1755,6 +1756,18 @@ class DrawHelper:
                                                                                  context4.size[1])))
         bytes_io = BytesIO()
         final_context.save(bytes_io, format="WEBP")
+        if finalSave == True:
+            if "roundNum" in self.gamestate:
+                rnd = self.gamestate["roundNum"]
+            else:
+                rnd = 1
+            output_dir = f'gamehistory/{self.gamestate["game_id"]}'
+            filename = f'{self.gamestate["game_id"]}-{rnd-1}.webp'
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            full_path = os.path.join(output_dir, filename)
+            resized = final_context.resize((int(width*0.3), int(height*0.3)))
+            resized.save(full_path, quality=50, compress_level=8)
         bytes_io.seek(0)
         return discord.File(bytes_io, filename="map_image.webp")
 

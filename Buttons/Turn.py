@@ -281,6 +281,7 @@ class TurnButtons:
                     asyncio.create_task(thread.edit(archived=True))
         await game.upkeep(interaction)
         drawing = DrawHelper(game.gamestate)
+        game.saveEndRound()
         if game.gamestate["roundNum"] < 9:
             await interaction.channel.send(f"Tech Available At Start Of Round {game.gamestate['roundNum']}",
                                            file=await asyncio.to_thread(drawing.show_available_techs))
@@ -301,7 +302,8 @@ class TurnButtons:
             view.add_item(Button(label="Declare Winner", style=discord.ButtonStyle.blurple, custom_id="declareWinner"))
             await interaction.channel.send("It seems like the game should be ended, "
                                            "hit this button to reveal the winner.", view=view)
-        asyncio.create_task(game.showUpdate(f"Start of round {str(game.gamestate['roundNum'])}", interaction))
+        asyncio.create_task(game.showUpdate(f"Start of round {str(game.gamestate['roundNum'])}", interaction, finalSave=True))
+
 
     @staticmethod
     async def showReputation(game: GamestateHelper, interaction: discord.Interaction, player):

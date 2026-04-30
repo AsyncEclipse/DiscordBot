@@ -4,6 +4,7 @@ import time
 import portalocker 
 import discord
 import config
+import shutil
 from helpers.DrawHelper import DrawHelper
 from helpers.EmojiHelper import Emoji
 from helpers.PlayerHelper import PlayerHelper
@@ -98,6 +99,15 @@ class GamestateHelper:
         guild = interaction.guild
         self.gamestate["gameEnded"] = True
         self.update()
+        history_path = f'GameHistory/{self.game_id}'
+        if os.path.exists(history_path):
+            shutil.make_archive(history_path, 'zip', history_path)
+            stats_channel = discord.utils.get(guild.channels, name='ggranger-stats-paradise')
+            if stats_channel:
+                zf = discord.File(f'{history_path}.zip')
+                await stats_channel.send(file=zf)
+            os.remove(f'{history_path}.zip')
+            shutil.rmtree(f'{history_path}')
         category = interaction.channel.category
         role = discord.utils.get(guild.roles, name=self.game_id)
         for channel in guild.channels:
@@ -189,6 +199,13 @@ class GamestateHelper:
         self.file = f
         gamestate = json.load(f)
         return gamestate
+
+    def saveEndRound(self):
+        output_dir = f'GameHistory/{self.game_id}'
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        with open(f'GameHistory/{self.game_id}/{self.game_id}-{self.gamestate["roundNum"]-1}.json', "w") as outfile:
+            json.dump(self.gamestate, outfile)
     
     def is_file_open(self,file_path):  
         try:  
@@ -1392,9 +1409,12 @@ class GamestateHelper:
                 tiles.append(tile)
         return tiles
 
-    async def showGame(self,  thread, message):
+    async def showGame(self,  thread, message, finalSave = False):
         drawing = DrawHelper(self.gamestate)
-        map_result = await asyncio.to_thread(drawing.show_game)
+        if finalSave:
+            map_result = drawing.show_game(finalSave)
+        else:
+            map_result = await asyncio.to_thread(drawing.show_game)
         view = View()
         view.add_item(Button(label="Show Game", style=discord.ButtonStyle.blurple, custom_id="showGame"))
         view.add_item(Button(label="Show Reputation", style=discord.ButtonStyle.gray, custom_id="showReputation"))
@@ -1406,12 +1426,12 @@ class GamestateHelper:
         view.add_item(button)
         await thread.send(view=view)
 
-    async def showUpdate(self, message: str, interaction: discord.Interaction):
+    async def showUpdate(self, message: str, interaction: discord.Interaction, finalSave = False):
         if "-" in interaction.channel.name:
             thread_name = interaction.channel.name.split("-")[0] + "-bot-map-updates"
             thread = discord.utils.get(interaction.channel.threads, name=thread_name)
             if thread is not None:
-                asyncio.create_task(self.showGame(thread, message))
+                asyncio.create_task(self.showGame(thread, message, finalSave))
 
     def getPlayerFromHSLocation(self, location):
         if "sector" not in self.gamestate["board"].get(location, []):
