@@ -190,9 +190,22 @@ class GamestateHelper:
         await interaction.channel.send("Hit this button to cleanup the channels.", view=view)
 
     def getLocationFromID(self, id):
-        return next((tile for tile in self.gamestate["board"]
-                     if self.gamestate["board"][tile]["sector"] == str(id)),
-                    None)
+        # With nebula sectors, the parent and its 3 subsectors all share the
+        # same `sector` value. Prefer the parent (a record without a
+        # `parent_position` field) so existing call-sites get the same key
+        # they did before nebula support landed; fall back to the first
+        # subsector match.
+        sector_id = str(id)
+        first_match = None
+        for tile in self.gamestate["board"]:
+            rec = self.gamestate["board"][tile]
+            if rec.get("sector") != sector_id:
+                continue
+            if first_match is None:
+                first_match = tile
+            if "parent_position" not in rec:
+                return tile
+        return first_match
 
     def get_gamestate(self):
         f= open(f"{config.gamestate_path}/{self.game_id}.json", "r")
@@ -367,6 +380,8 @@ class GamestateHelper:
         self.update()
 
     def add_tile(self, position, orientation, sector, owner=None):
+        # Lazy import to avoid any circular import risk between helpers.
+        from helpers import NebulaHelper as NH
 
         with open("data/sectors.json") as f:
             tile_data = json.load(f)
@@ -377,22 +392,56 @@ class GamestateHelper:
                 if position not in self.gamestate["players"][self.get_player_from_color(owner)]["owned_tiles"]:
                     self.gamestate["players"][self.get_player_from_color(owner)]["owned_tiles"].append(position)
 
-            if tile["ancient"] or tile["guardian"] or tile["gcds"]:
-                adv = ""
-                anc, grd, gcds = tile["ancient"], tile["guardian"], tile["gcds"]
-                if anc:
-                    tile["player_ships"].append("ai-anc" + adv)
-                    if tile["ancient"] > 1:
+            is_nebula_tile = (NH.nebulas_enabled(self)
+                              and tile.get("type") == "nebula"
+                              and sector in NH.NEBULA_SECTOR_IDS)
+
+            if not is_nebula_tile:
+                if tile["ancient"] or tile["guardian"] or tile["gcds"]:
+                    adv = ""
+                    anc, grd, gcds = tile["ancient"], tile["guardian"], tile["gcds"]
+                    if anc:
                         tile["player_ships"].append("ai-anc" + adv)
-                if grd:
-                    tile["player_ships"].append("ai-grd" + adv)
-                if gcds:
-                    tile["player_ships"].append("ai-gcds" + adv)
+                        if tile["ancient"] > 1:
+                            tile["player_ships"].append("ai-anc" + adv)
+                    if grd:
+                        tile["player_ships"].append("ai-grd" + adv)
+                    if gcds:
+                        tile["player_ships"].append("ai-gcds" + adv)
             tile.update({"sector": sector})
             tile.update({"orientation": orientation})
         except KeyError:
             tile = {"sector": sector, "orientation": orientation}
-        self.gamestate["board"][position] = tile
+            is_nebula_tile = False
+
+        if is_nebula_tile:
+            # Build a parent anchor record (no ships, no influence space, no
+            # discovery / ancient — those live on the subsectors).
+            #
+            # The parent retains a full 6-edge wormhole array so that the
+            # symmetric `areTwoTilesAdjacent` check passes when an outside
+            # tile asks "am I adjacent to this nebula parent" before the
+            # neighbour-rewrite resolves the lookup to a subsector. The
+            # parent itself is never a movement / influence destination —
+            # `is_nebula_parent` and the empty player_ships keep it inert.
+            parent_record = dict(tile)
+            parent_record["is_nebula_parent"] = True
+            parent_record["player_ships"] = []
+            parent_record["wormholes"] = [0, 1, 2, 3, 4, 5]
+            parent_record["disctile"] = 0
+            parent_record["ancient"] = 0
+            parent_record["subsectors"] = NH.subsectors_of(position)
+            self.gamestate["board"][position] = parent_record
+
+            # Build the 3 subsector records.
+            for L in NH.SUBSECTOR_LETTERS:
+                sub = NH.make_subsector_record(parent_record, position, L,
+                                               sector, orientation)
+                if L == NH.ANCIENT_SUBSECTOR:
+                    sub["player_ships"].append("ai-anc")
+                self.gamestate["board"][f"{position}{L}"] = sub
+        else:
+            self.gamestate["board"][position] = tile
 
         configs = Properties()
         if self.gamestate.get("5playerhyperlane"):
@@ -1059,6 +1108,21 @@ class GamestateHelper:
             random.shuffle(third_sector_tiles)
             self.gamestate["tile_deck_300"].append(third_sector_tiles.pop(0))
             sector_draws -= 1
+
+        # Galactic Events: shuffle nebula tiles into the matching ring before
+        # stacks are formed. Per the rulebook (p. 4) "they do not add to the
+        # count of III tiles used", so the ring-III nebula is appended *after*
+        # the regular sector_draws have been satisfied. Ring II has no
+        # equivalent caveat in the rulebook so the ring-II nebula is added to
+        # the deck (which extends rather than replaces a draw).
+        if self.gamestate.get("enable_nebulas"):
+            from helpers import NebulaHelper as NH
+            if "295" in NH.NEBULA_SECTOR_IDS and "295" not in self.gamestate.get("tile_deck_200", []):
+                self.gamestate.setdefault("tile_deck_200", []).append("295")
+                random.shuffle(self.gamestate["tile_deck_200"])
+            if "395" in NH.NEBULA_SECTOR_IDS and "395" not in self.gamestate.get("tile_deck_300", []):
+                self.gamestate["tile_deck_300"].append("395")
+                random.shuffle(self.gamestate["tile_deck_300"])
 
         while tech_draws > 0:
             random.shuffle(self.gamestate["tech_deck"])

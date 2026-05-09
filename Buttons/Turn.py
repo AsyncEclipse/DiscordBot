@@ -240,6 +240,10 @@ class TurnButtons:
             await interaction.channel.send("It appears some tiles are still in conflict. "
                                            "Please resolve them before running upkeep")
             return
+        # End-of-Combat-Phase nebula discovery resolution. A discovery tile in
+        # a nebula subsector is claimed only if the player has a ship in that
+        # subsector at this point.
+        await Combat.claimNebulaDiscoveries(game, interaction)
         if "peopleToCheckWith" in game.gamestate and len(game.gamestate["peopleToCheckWith"]) > 0:
             msg = " Still waiting on the following players to hit the ready for upkeep button:\n"
             for color2 in game.gamestate["peopleToCheckWith"]:

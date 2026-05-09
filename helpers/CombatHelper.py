@@ -38,6 +38,64 @@ class Combat:
         return players
 
     @staticmethod
+    async def claimNebulaDiscoveries(game: GamestateHelper, interaction: discord.Interaction):
+        """Resolve nebula-subsector discovery tiles at the end of the Combat
+        Phase.
+
+        Per the Galactic Events rulebook, a discovery tile in a Nebula
+        Subsector is claimed only if the player has a ship in that subsector
+        at the end of the Combat Phase. We iterate every nebula subsector
+        record, and if exactly one player owns ships there (an AI presence
+        can block via combat resolution earlier), they claim the discovery.
+        """
+        # Lazy import to avoid a circular dep with Buttons.* at module load.
+        from helpers import NebulaHelper as NH
+        from Buttons.DiscoveryTile import DiscoveryTileButtons
+        if not NH.nebulas_enabled(game):
+            return
+        # Snapshot keys: we may mutate disctile during iteration.
+        for pos in list(game.gamestate.get("board", {}).keys()):
+            tile = game.gamestate["board"].get(pos)
+            if tile is None:
+                continue
+            if tile.get("type") != "nebula":
+                continue
+            if "parent_position" not in tile:
+                # Parent anchor — skip; discovery tiles only sit on subsectors.
+                continue
+            if tile.get("disctile", 0) <= 0:
+                continue
+            playersInTile = Combat.findPlayersInTile(game, pos)
+            # Only a single, non-AI player triggers a claim.
+            human_players = [p for p in playersInTile if p != "ai"]
+            if len(human_players) != 1:
+                continue
+            color = human_players[0]
+            player_obj = game.getPlayerObjectFromColor(color)
+            if player_obj is None:
+                continue
+            try:
+                await DiscoveryTileButtons.exploreDiscoveryTile(game, pos, interaction, player_obj)
+            except Exception as exc:
+                # Don't fail upkeep if a discovery prompt errors — log to the
+                # channel so the GM can see it. Leave disctile intact so the
+                # discovery isn't silently lost; a GM can use
+                # `/tile resolve_specific_discovery_tile` to recover.
+                import traceback
+                try:
+                    await interaction.channel.send(
+                        f"Nebula discovery resolution failed for {pos}: {exc!r}. "
+                        "Use /tile resolve_specific_discovery_tile to claim it manually."
+                    )
+                except Exception:
+                    traceback.print_exc()
+                continue
+            # exploreDiscoveryTile (via getNextDiscTile) clears disctile on
+            # success. No defensive zeroing here — that would mask future bugs
+            # by silently consuming the discovery on the failure path.
+        game.update()
+
+    @staticmethod
     def findShipTypesInTile(game: GamestateHelper, pos: str):
         tile_map = game.gamestate["board"]
         if "player_ships" not in tile_map[pos]:
