@@ -68,13 +68,24 @@ class ExploreButtons:
         else:
             with open("data/tileAdjacencies.properties", "rb") as f:
                 configs.load(f)
+        from helpers import NebulaHelper as NH
         tilesViewed = []
         playerTiles = ExploreButtons.getListOfTilesPlayerIsIn(game, player)
         for tile in playerTiles:
-            for index, adjTile in enumerate(configs.get(tile)[0].split(",")):
-                tile_orientation_index = (index + int(game.gamestate["board"][tile]["orientation"]) // 60) % 6
+            tile_record = game.gamestate["board"][tile]
+            # Nebula parents have no wormholes / no ships — they shouldn't
+            # appear here, but be defensive.
+            if NH.is_nebula_parent(tile_record):
+                continue
+            # Resolve the parent for adjacency lookups when the player's
+            # presence tile is a nebula subsector.
+            lookup_tile = NH.get_parent_position(tile) if NH.is_nebula_subsector(tile) else tile
+            if lookup_tile not in configs:
+                continue
+            for index, adjTile in enumerate(configs.get(lookup_tile)[0].split(",")):
+                tile_orientation_index = (index + int(tile_record["orientation"]) // 60) % 6
                 if all([adjTile not in tilesViewed,
-                        tile_orientation_index in game.gamestate["board"][tile]["wormholes"],
+                        tile_orientation_index in tile_record.get("wormholes", []),
                         "back" in game.gamestate.get("board", {}).get(str(adjTile), {}).get("sector", [])]):
                     if int(adjTile) > 299 and len(game.gamestate["tile_deck_300"]) == 0:
                         continue
@@ -163,9 +174,21 @@ class ExploreButtons:
         view2 = View()
         game.update_player(player_helper)
         await interaction.channel.send(f"Tile added to position {msg[1]}")
-        if game.gamestate["board"][msg[1]]["ancient"] == 0 or player["name"] == "Descendants of Draco":
+        placed_tile = game.gamestate["board"][msg[1]]
+        # Nebula sectors: subsector ancients/discoveries are resolved
+        # independently (Ancient is pre-spawned in subsector B; discoveries
+        # in A and C are claimed at end of Combat Phase). The hex itself can
+        # never carry an influence disc, so skip both prompts.
+        if placed_tile.get("type") == "nebula" and placed_tile.get("is_nebula_parent"):
+            await interaction.channel.send(
+                f"{player['player_name']} this is a Nebula sector. An Ancient occupies one "
+                "subsector and discovery tiles wait in the other two — they will be "
+                "claimed at the end of the Combat Phase by any ship still present in those subsectors. "
+                "Influence discs cannot be placed in a Nebula sector."
+            )
+        elif placed_tile["ancient"] == 0 or player["name"] == "Descendants of Draco":
             view = View()
-            if "bh" in game.gamestate["board"][msg[1]].get("type", ""):
+            if "bh" in placed_tile.get("type", ""):
                 await interaction.channel.send("This is a black hole tile, "
                                                "so its discovery tile cannot be claimed until a ship moves in, "
                                                "at which point a die will be rolled and it might teleport.")
@@ -177,12 +200,12 @@ class ExploreButtons:
                 await interaction.channel.send(f"{player['player_name']}, choose whether or not"
                                                " to place influence in the tile." + game.displayPlayerStats(player),
                                                view=view)
-                if all([game.gamestate["board"][msg[1]]["ancient"] == 0,
-                        game.gamestate["board"][msg[1]]["disctile"] > 0]):
+                if all([placed_tile["ancient"] == 0,
+                        placed_tile["disctile"] > 0]):
                     await DiscoveryTileButtons.exploreDiscoveryTile(game, msg[1], interaction, player)
-                
+
         else:
-            ancients = game.gamestate["board"][msg[1]]["ancient"]
+            ancients = placed_tile["ancient"]
             await interaction.channel.send(f"There are {ancients} ancients in this tile, "
                                            "so you will not be able to claim it until you fight and destroy them.")
 

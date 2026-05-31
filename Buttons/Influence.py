@@ -14,15 +14,35 @@ class InfluenceButtons:
 
     @staticmethod
     def areTwoTilesAdjacent(game: GamestateHelper, tile1, tile2, configs, wormholeGen: bool):
+        from helpers import NebulaHelper as NH
+        board = game.gamestate["board"]
+
+        # Two subsectors of the same nebula are always adjacent via their
+        # internal wormhole connections (A<->B<->C, all three pairs).
+        if NH.is_nebula_subsector(tile1) and NH.is_nebula_subsector(tile2):
+            if NH.get_parent_position(tile1) == NH.get_parent_position(tile2):
+                return tile1 in board and tile2 in board
+
+        def lookup_position(t):
+            # When walking the parent's adjacency table, route subsector
+            # positions back to their parent hex for lookups (the .properties
+            # files don't know about subsectors).
+            return NH.get_parent_position(t) if NH.is_nebula_subsector(t) else t
+
         def is_adjacent(tile_a, tile_b):
-            for index, adjTile in enumerate(configs.get(tile_a)[0].split(",")):
-                if tile_a in game.gamestate["board"] and tile_b in game.gamestate["board"] and adjTile == tile_b:
-                    tile_orientation_index = (index + (int(game.gamestate["board"][tile_a]["orientation"]) // 60)) % 6
-                    if tile_orientation_index in game.gamestate["board"][tile_a].get("wormholes", []):
+            lookup_a = lookup_position(tile_a)
+            lookup_b = lookup_position(tile_b)
+            if lookup_a not in configs:
+                return False
+            for index, adjTile in enumerate(configs.get(lookup_a)[0].split(",")):
+                if (tile_a in board and tile_b in board
+                        and adjTile == lookup_b):
+                    tile_orientation_index = (index + (int(board[tile_a].get("orientation", 0)) // 60)) % 6
+                    if tile_orientation_index in board[tile_a].get("wormholes", []):
                         return True
-            if tile_a in game.gamestate["board"] and tile_b in game.gamestate["board"]:
-                if game.gamestate["board"][tile_a].get("warp", 0) == 1:
-                    if game.gamestate["board"][tile_b].get("warp", 0) == 1:
+            if tile_a in board and tile_b in board:
+                if board[tile_a].get("warp", 0) == 1:
+                    if board[tile_b].get("warp", 0) == 1:
                         return True
             return False
 
@@ -58,8 +78,9 @@ class InfluenceButtons:
                 wormHoleGen = True
         tilesToInfluence = []
         playerTiles = InfluenceButtons.getListOfTilesPlayerIsInForInfluence(game, player)
+        from helpers import NebulaHelper as NH
         for tile in playerTiles:
-            for adjTile in configs.get(tile)[0].split(","):
+            for adjTile in NH.adjacent_positions_from_configs(game, tile, configs):
                 if adjTile not in tilesViewed and InfluenceButtons.areTwoTilesAdjacent(game, tile, adjTile,
                                                                                        configs, wormHoleGen):
                     tilesViewed.append(adjTile)
@@ -69,12 +90,16 @@ class InfluenceButtons:
                         continue
                     if "exploded" in game.gamestate["board"][adjTile].get("type", ""):
                         continue
+                    # Nebula sectors (parent or subsector) cannot ever hold an
+                    # influence disc per the Galactic Events rules.
+                    if game.gamestate["board"][adjTile].get("type", "") == "nebula":
+                        continue
                     if "player_ships" not in game.gamestate["board"][adjTile]:
                         continue
                     playerShips = game.gamestate["board"][adjTile]["player_ships"][:]
                     playerShips.append(player["color"])
                     if all([game.gamestate["board"][adjTile].get("owner") == 0,
-                            ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, adjTile), 
+                            ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, adjTile),
                             len(Combat.findPlayersInTile(game, adjTile)) < 2, "ai-grd" not in playerShips]):
                         tilesToInfluence.append(adjTile)
             if tile_map[tile].get("warp", 0) == 1:
@@ -87,16 +112,20 @@ class InfluenceButtons:
                             continue
                         if "exploded" in game.gamestate["board"][tile2].get("type", ""):
                             continue
+                        if game.gamestate["board"][tile2].get("type", "") == "nebula":
+                            continue
                         if "player_ships" not in game.gamestate["board"][tile2]:
                             continue
                         playerShips = game.gamestate["board"][tile2]["player_ships"][:]
                         playerShips.append(player["color"])
                         if all([game.gamestate["board"][tile2].get("owner") == 0,
-                                ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, tile2), 
+                                ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, tile2),
                                 len(Combat.findPlayersInTile(game, tile2)) < 2]):
                             tilesToInfluence.append(tile2)
             if tile not in tilesViewed:
                 tilesViewed.append(tile)
+                if game.gamestate["board"][tile].get("type", "") == "nebula":
+                    continue
                 playerShips = game.gamestate["board"][tile]["player_ships"][:]
                 playerShips.append(player["color"])
                 if all([game.gamestate["board"][tile].get("owner") == 0,

@@ -1,5 +1,6 @@
 import asyncio
 import json
+import random as _random
 import discord
 from Buttons.Upgrade import UpgradeButtons
 from helpers.GamestateHelper import GamestateHelper
@@ -8,7 +9,35 @@ from helpers.DrawHelper import DrawHelper
 from discord.ui import View, Button
 
 
+# Discovery tile IDs that cannot be placed in a Nebula Subsector.
+# Per the Galactic Events rulebook (p. 4): "the Ancient Orbital and Ancient
+# Monolith cannot be placed in Nebula Sectors; if they are revealed in a
+# Nebula Sector, draw a new Discovery Tile before choosing whether to keep
+# it for its benefit or for VP."
+_NEBULA_FORBIDDEN_DISCS = {"orb", "mon"}
+
+
 class DiscoveryTileButtons:
+    @staticmethod
+    def _maybe_reroll_for_nebula(game: GamestateHelper, tile: str, disc: str) -> str:
+        """If ``tile`` is a nebula subsector and ``disc`` is one of the
+        forbidden Ancient Orbital / Ancient Monolith tiles, shuffle it back
+        into the deck and pop a replacement. Returns the (possibly new) disc
+        id. Loops until a non-forbidden disc is drawn or the deck would
+        empty; falls back to the last drawn disc if the deck is exhausted.
+        """
+        from helpers import NebulaHelper as NH
+        if not NH.is_nebula_subsector(tile):
+            return disc
+        attempts = 0
+        deck = game.gamestate.get("discTiles") or []
+        while disc in _NEBULA_FORBIDDEN_DISCS and deck and attempts < 32:
+            deck.insert(_random.randint(0, len(deck)), disc)
+            disc = deck.pop()
+            attempts += 1
+        game.update()
+        return disc
+
     @staticmethod
     async def exploreDiscoveryTile(game: GamestateHelper, tile: str, interaction: discord.Interaction, player):
         # if "discTiles" not in game.gamestate:
@@ -17,6 +46,11 @@ class DiscoveryTileButtons:
             await interaction.followup.send("No discovery tile in tile " + tile)
             return
         disc = game.getNextDiscTile(tile)
+
+        # Nebula reroll: Ancient Orbital and Ancient Monolith cannot be placed
+        # in a Nebula Subsector. See Galactic Events rulebook p. 4.
+        disc = DiscoveryTileButtons._maybe_reroll_for_nebula(game, tile, disc)
+
         with open("data/discoverytiles.json") as f:
             discTile_data = json.load(f)
         discName = discTile_data[disc]["name"]

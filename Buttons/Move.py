@@ -99,6 +99,8 @@ class MoveButtons:
         if jumpDrivePresent == 1:
             jumpDrive = True
 
+        from helpers import NebulaHelper as NH
+
         def recursive_search(pos, distance, visited, jumpDriveAvailable):
             if distance > shipRange:
                 return
@@ -106,13 +108,18 @@ class MoveButtons:
                 return
             if "player_ships" not in tile_map[pos]:
                 return
+            # Nebula parent records are pure render anchors — ships only ever
+            # live in the subsectors. Don't treat the parent hex as a movable
+            # destination.
+            if NH.is_nebula_parent(tile_map[pos]):
+                return
             visited.add(pos)
             player_ships = tile_map[pos]["player_ships"][:]
             player_ships.append(f"{player['color']}-cruiser")  # adding phantom ship so I can reuse a method
             if not ExploreButtons.doesPlayerHaveUnpinnedShips(player, player_ships, game, pos):
                 return
 
-            for adjTile in configs.get(pos)[0].split(","):
+            for adjTile in NH.adjacent_positions_from_configs(game, pos, configs):
                 if adjTile in tile_map and InfluenceButtons.areTwoTilesAdjacent(game, pos, adjTile,
                                                                                 configs, wormHoleGen):
                     recursive_search(adjTile, distance + 1, visited, jumpDriveAvailable)

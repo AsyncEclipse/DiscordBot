@@ -194,6 +194,11 @@ class DrawHelper:
         return context
 
     def board_tile_image_file(self, position):
+        # If the caller asks for a nebula subsector tile, redirect to the
+        # parent hex (which renders all three subsectors together).
+        from helpers import NebulaHelper as NH
+        if NH.is_nebula_subsector(position):
+            position = NH.get_parent_position(position)
         final_context = self.board_tile_image(position)
         bytes_io = BytesIO()
         final_context.save(bytes_io, format="WEBP")
@@ -238,8 +243,13 @@ class DrawHelper:
         height = math.ceil(amount / result)
         context = Image.new("RGBA", (int(360 * mult * result), int(315 * mult * height)), (255, 255, 255, 0))
 
+        from helpers import NebulaHelper as NH
         for count, tile in enumerate(locations):
+            if NH.is_nebula_subsector(tile):
+                tile = NH.get_parent_position(tile)
             image = self.board_tile_image(tile)
+            if image is None:
+                continue
             x = count % result
             y = int(count / result)
             context.paste(image, (int(360 * mult * x), int(315 * mult * y)))
@@ -248,7 +258,92 @@ class DrawHelper:
         bytes_io.seek(0)
         return discord.File(bytes_io, filename="tiles.webp")
 
+    def _render_ships(self, tile_image, tile, mult, position):
+        """Render the player_ships of a tile (or subsector) onto tile_image.
+
+        Extracted so a nebula parent's hex can render its three subsectors'
+        ships using each subsector's own *_snap coords. ``position`` is used
+        only for damage_tracker lookups (which live keyed by board position).
+        """
+        if not len(tile.get("player_ships", [])) > 0:
+            return
+        counts = {}
+        countsShips = {}
+        size = int(70 * mult)
+        for ship in tile["player_ships"]:
+            if "-" not in ship:
+                continue
+            ship_type = ship.split("-")[1]
+            size = int(70 * mult)
+            if ship not in countsShips:
+                countsShips[ship] = 0
+            countsShips[ship] += int(10 * mult)
+            if ship_type in ["gcds", "gcdsadv", "anc", "ancadv", "grd", "grdadv"]:
+                ship = ship_type.replace("adv", "")
+                ship_type = "ai"
+                size = int(110 * mult)
+            if ship_type == "orb" or ship_type == "mon":
+                ship = ship_type
+                if ship_type == "orb":
+                    size = int(110 * mult)
+                    if tile.get("owner", 0) != 0:
+                        if all([self.getPlayerObjectFromColor(tile["owner"])['name'] == "The Exiles",
+                                tile.get("orbital_pop", [0])[0] == 1]):
+                            ship = "exile_orb"
+
+            filepathShip = f"images/resources/components/fancy_ships/fancy_{ship}.png"
+            if self.gamestate.get("fancy_ships") and os.path.exists(filepathShip):
+                filepathShip = f"images/resources/components/fancy_ships/fancy_{ship}.png"
+            else:
+                filepathShip = f"images/resources/components/basic_ships/{ship}.png"
+            if ship_type == "None":
+                continue
+            ship_image = self.use_image(filepathShip)
+
+            coords = tile[f"{ship_type}_snap"]
+            if ship_type not in counts:
+                counts[ship_type] = 0
+            xCordToUse = coords[0]
+            yCordToUse = coords[1]
+            if "drd" in ship_type or "cru" in ship_type:
+                xCordToUse -= 30
+                yCordToUse -= 30
+            if "sb" in ship_type:
+                yCordToUse -= 30
+
+            tile_image.paste(ship_image,
+                             (int(345 / 1024 * mult * xCordToUse + (counts[ship_type] - size / 2)),
+                              int(345 / 1024 * mult * yCordToUse + (counts[ship_type] - size / 2))),
+                             mask=ship_image)
+            counts[ship_type] += int(10 * mult)
+            if ship_type == "ai":
+                counts[ship_type] += int(20 * mult)
+        for key, value in countsShips.items():
+            damage = 0
+            ship_type = "ai"
+            if "ai-" not in key:
+                ship_type = key.split("-")[1]
+
+            coords = tile[ship_type.replace("adv", "") + "_snap"]
+            damage_tracker = self.gamestate["board"].get(position, {}).get("damage_tracker", {})
+            if key in damage_tracker:
+                damage = damage_tracker[key]
+            if damage > 0:
+                for count in range(damage):
+                    damage_image = self.use_image("images/resources/components/basic_ships/marker_damage.png")
+                    tile_image.paste(damage_image,
+                                     (int(345 / 1024 * mult * coords[0] + value - size / 2 +
+                                          10 * count * mult + 15 * mult),
+                                      int(345 / 1024 * mult * coords[1] + value - size / 2 + 35 * mult)),
+                                     mask=damage_image)
+
     def board_tile_image(self, position, additionalRot:int=0):
+        # Nebula subsectors don't render their own hex — their ships are drawn
+        # on top of the parent's hex image. Returning None here is safe because
+        # all current callers either skip None or were already adjusted.
+        from helpers import NebulaHelper as NH
+        if NH.is_nebula_subsector(position):
+            return None
         sector = self.gamestate["board"][position]["sector"]
         filepath2 = f"images/resources/hexes/{sector}.png"
         filepath = f"images/resources/hexes/numberless/{sector}.png"
@@ -342,76 +437,16 @@ class DrawHelper:
                 warppath = "images/resources/all_boards/Warp_picture.png"
                 warp_mask = self.use_image(warppath)
                 tile_image.paste(warp_mask, (int(20 * mult), int(140 * mult)), mask=warp_mask)
-            if len(tile.get("player_ships", [])) > 0:
-                counts = {}  # To track counts for each ship type
-                countsShips = {}
-                for ship in tile["player_ships"]:
-                    if "-" not in ship:
-                        continue
-                    ship_type = ship.split("-")[1]  # Extract ship type
-                    size = int(70 * mult)
-                    if ship not in countsShips:
-                        countsShips[ship] = 0
-                    countsShips[ship] += int(10 * mult)
-                    if ship_type in ["gcds", "gcdsadv", "anc", "ancadv", "grd", "grdadv"]:
-                        ship = ship_type.replace("adv", "")
-                        ship_type = "ai"
-                        size = int(110 * mult)
-                    if ship_type == "orb" or ship_type == "mon":
-                        ship = ship_type
-                        if ship_type == "orb":
-                            size = int(110 * mult)
-                            if tile["owner"] != 0:
-                                if all([self.getPlayerObjectFromColor(tile["owner"])['name'] == "The Exiles",
-                                            tile.get("orbital_pop", [0])[0] == 1]):
-                                    ship = "exile_orb"
-                                
-                    filepathShip = f"images/resources/components/fancy_ships/fancy_{ship}.png"
-                    if self.gamestate.get("fancy_ships") and os.path.exists(filepathShip):
-                        filepathShip = f"images/resources/components/fancy_ships/fancy_{ship}.png"
-                    else:
-                        filepathShip = f"images/resources/components/basic_ships/{ship}.png"
-                    if ship_type == "None":
-                        continue
-                    ship_image = self.use_image(filepathShip)
+            self._render_ships(tile_image, tile, mult, position)
 
-                    coords = tile[f"{ship_type}_snap"]
-
-                    if ship_type not in counts:
-                        counts[ship_type] = 0
-                    xCordToUse = coords[0]
-                    yCordToUse = coords[1]
-                    if "drd" in ship_type or "cru" in ship_type:
-                        xCordToUse -= 30
-                        yCordToUse -= 30
-                    if "sb" in ship_type:
-                        yCordToUse -= 30
-
-                    tile_image.paste(ship_image,
-                                     (int(345 / 1024 * mult * xCordToUse + (counts[ship_type] - size / 2)),
-                                      int(345 / 1024 * mult * yCordToUse + (counts[ship_type] - size / 2))),
-                                     mask=ship_image)
-                    counts[ship_type] += int(10 * mult)
-                    if ship_type == "ai":
-                        counts[ship_type] += int(20 * mult)
-                for key, value in countsShips.items():
-                    damage = 0
-                    ship_type = "ai"
-                    if "ai-" not in key:
-                        ship_type = key.split("-")[1]
-
-                    coords = tile[ship_type.replace("adv", "") + "_snap"]
-                    if "damage_tracker" in self.gamestate["board"][position]:
-                        if key in self.gamestate["board"][position]["damage_tracker"]:
-                            damage = self.gamestate["board"][position]["damage_tracker"][key]
-                    if damage > 0:
-                        for count in range(damage):
-                            damage_image = self.use_image("images/resources/components/basic_ships/marker_damage.png")
-                            tile_image.paste(damage_image,
-                                             (int(345 / 1024 * mult * coords[0] + value - size / 2 +
-                                                  10 * count * mult + 15 * mult),
-                                              int(345 / 1024 * mult * coords[1] + value - size / 2 + 35 * mult)),
-                                             mask=damage_image)
+            # If this is a nebula parent, also render the ships of each
+            # subsector on top of the same hex image, using the subsector's
+            # snap coordinates.
+            if NH.is_nebula_parent(tile):
+                for sub_pos in tile.get("subsectors", NH.subsectors_of(position)):
+                    sub_record = self.gamestate["board"].get(sub_pos)
+                    if sub_record is not None:
+                        self._render_ships(tile_image, sub_record, mult, sub_pos)
 
             def paste_resourcecube(tile, tile_image, resource_type, color):
                 if tile.get(f"{resource_type}_pop", 0):
@@ -1676,7 +1711,10 @@ class DrawHelper:
                 max_x = max(max_x, 1820 + hyperImage.width)
                 max_y = max(max_y, 2850 + hyperImage.height)
             for tile in tile_map:
-                tile_image = self.board_tile_image(tile).resize((345, 300))
+                rendered = self.board_tile_image(tile)
+                if rendered is None:
+                    continue
+                tile_image = rendered.resize((345, 300))
                 x, y = map(int, configs.get(tile)[0].split(","))
                 context.paste(tile_image, (x, y), mask=tile_image)
                 # Update bounding box coordinates
@@ -1786,6 +1824,8 @@ class DrawHelper:
             max_y = float('-inf')
             for tile in tile_map:
                 tile_image = self.board_tile_image(tile)
+                if tile_image is None:
+                    continue
                 x, y = map(int, configs.get(tile)[0].split(","))
                 context.paste(tile_image, (x, y), mask=tile_image)
                 # Update bounding box coordinates
