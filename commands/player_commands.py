@@ -285,6 +285,19 @@ class PlayerCommands(commands.GroupCog, name="player"):
         game.update_player(player_helper)
         await interaction.response.send_message(f"{player.mention} set traitor status to {traitor}.")
 
+    @app_commands.command(name="set_cannot_restart")
+    async def set_cannot_restart(self, interaction: discord.Interaction, cannot_restart: bool,
+                          player: Optional[discord.Member] = None):
+        if player is None:
+            player = interaction.user
+        game = GamestateHelper(interaction.channel)
+        p1 = game.get_player(player.id,interaction)
+        player_helper = PlayerHelper(player.id, p1)
+        player_helper.setCannotRestart(cannot_restart)
+        game.update_player(player_helper)
+        await interaction.response.send_message(f"{player.mention} set cannot_restart status to {cannot_restart}.")
+
+
     @app_commands.command(name="draw_reputation")
     async def draw_reputation(self, interaction: discord.Interaction, num_options: int):
         game = GamestateHelper(interaction.channel)
