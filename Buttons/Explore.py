@@ -115,6 +115,11 @@ class ExploreButtons:
         player = game.get_player(interaction.user.id,interaction)
         msg = customID.split("_")
         position = msg[1]
+        
+        # Lock turn restart because hidden layout information is being exposed
+        player["has_explored"] = True
+        game.update_player(PlayerHelper(game.getPlayersID(player), player))
+
         if len(msg) > 2:
             tileID = msg[2]
             game.tile_discard(msg[3])
