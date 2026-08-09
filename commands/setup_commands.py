@@ -153,6 +153,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
                               galactic_event_tiles: Optional[bool] = False,
                               hyperlanes: Optional[bool] = False,
                               community_parts: Optional[bool] = False,
+                              community_rep_mod: Optional[bool] = False,
                               ban_factions: Optional[bool] = False):
         """
         :param ai_ship_type: Choose which type of AI ships to use.
@@ -161,7 +162,8 @@ class SetupCommands(commands.GroupCog, name="setup"):
         :param galactic_event_tiles: Supernova/black-holes/Pulsars are disabled by default.
         :param hyperlanes: Hyperlanes for 4p and 5p are default off.
         :param ban_factions: Used to ban 10-playerCount factions from the draft.
-        :param community_parts: Turns on commnity changes to improved hull and phase shield.
+        :param community_parts: Turns on community changes to improved hull and phase shield.
+        :param community_rep_mod: Turns on the community reputation mod.
         :return:
         """
         temp_player_list = [player1, player2, player3, player4, player5, player6,player7,player8,player9]
@@ -174,7 +176,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
             ai_ships = "def"
         else:
             ai_ships = ai_ship_type.value
-        new_game = GameInit(game_name, player_list, ai_ships, rift_cannon, turn_order_variant, community_parts)
+        new_game = GameInit(game_name, player_list, ai_ships, rift_cannon, turn_order_variant, community_parts, community_rep_mod)
         new_game.create_game()
 
         async def get_or_create_category(guild: discord.Guild, category_name):
