@@ -14,10 +14,22 @@ class ReputationButtons:
         random.shuffle(randomList)
         opts = ""
         highest = 0
-        for x in range(amount_of_options):
-            opt = randomList.pop()
-            opts += " " + str(opt)
-            highest = max(opt, highest)
+        if ('community_rep_mod' in game.gamestate and game.gamestate["community_rep_mod"]):
+            if amount_of_options == 1:
+                opts = '1'
+                highest = 1
+            else:
+                modList = [x for x in randomList if x <= amount_of_options]
+                random.shuffle(modList)
+                for x in range(amount_of_options):
+                    opt = modList.pop()
+                    opts += " " + str(opt)
+                    highest = max(opt, highest)
+        else:
+            for x in range(amount_of_options):
+                opt = randomList.pop()
+                opts += " " + str(opt)
+                highest = max(opt, highest)
         if player_helper.stats["name"] == "Rho Indi Syndicate":
             player_helper.stats["money"] += (amount_of_options - 1)
             msg = (f"{player_helper.stats['player_name']}, you drew the tiles{opts} and selected {str(highest)}. You "
