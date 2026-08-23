@@ -55,7 +55,7 @@ class DiscordBot(commands.Bot):
         start_time = time.perf_counter()
         if guild is None:
             return
-        for x in range(0, 999):
+        for x in range(0, 1500):
             gameName = f"aeb{x}"
             if not os.path.exists(f"{config.gamestate_path}/{gameName}_saveFile.json"):
                 continue
