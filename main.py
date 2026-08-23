@@ -1,6 +1,5 @@
 import asyncio
 from datetime import datetime
-import os
 import discord
 import time
 from commands.game_commands import GameCommands
@@ -12,6 +11,7 @@ from commands.player_commands import PlayerCommands
 from commands.search_commands import SearchCommands
 # from helpers import ImageCache
 from helpers import ImageCache
+from helpers.GameIds import GameIds
 from helpers.GamestateHelper import GamestateHelper
 from listeners.ButtonListener import ButtonListener
 from discord.ext import commands
@@ -55,10 +55,7 @@ class DiscordBot(commands.Bot):
         start_time = time.perf_counter()
         if guild is None:
             return
-        for x in range(0, 1500):
-            gameName = f"aeb{x}"
-            if not os.path.exists(f"{config.gamestate_path}/{gameName}_saveFile.json"):
-                continue
+        for gameName in GameIds.list_active_game_ids():
             game = GamestateHelper(None, gameName)
             if len(game.gamestate.get("activePlayerColor", [])) > 0 and "lastPingTime" in game.gamestate:
                 current_time_seconds = time.time()

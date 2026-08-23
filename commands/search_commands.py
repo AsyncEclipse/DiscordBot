@@ -1,12 +1,11 @@
 import asyncio
 from collections import Counter
-import os
 import discord
 import json
 from discord.ext import commands
 from discord import app_commands
-import config
 from helpers.DrawHelper import DrawHelper
+from helpers.GameIds import GameIds
 from helpers.GamestateHelper import GamestateHelper
 
 
@@ -279,9 +278,9 @@ class SearchCommands(commands.GroupCog, name="search"):
         if tourney_only:
             higherLim = 504
             lowerLim = 478
-        for x in range(lowerLim, higherLim):
-            gameName = f"aeb{x}"
-            if not os.path.exists(f"{config.gamestate_path}/{gameName}.json"):
+        for gameName in GameIds.list_game_ids():
+            x = int(gameName[3:])
+            if x < lowerLim or x >= higherLim:
                 continue
             game = GamestateHelper(None, gameName)
             drawing = DrawHelper(game.gamestate)
