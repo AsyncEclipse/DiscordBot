@@ -36,6 +36,15 @@ class TurnButtons:
 
     @staticmethod
     async def restartTurn(player, game: GamestateHelper, interaction: discord.Interaction):
+        player_helper = PlayerHelper(game.getPlayersID(player), player)
+        # Enforce rule: No turn resets allowed after gaining tile information
+        if player_helper.cannotRestart():
+            await interaction.followup.send(
+                f"❌ {player['player_name']}, you cannot restart your turn after revealing a tile!",
+                ephemeral=True
+            )
+            return
+
         try:
             await interaction.message.delete()
             game.backUpToLastSaveFile()
@@ -55,6 +64,12 @@ class TurnButtons:
     async def endTurn(player, game: GamestateHelper, interaction: discord.Interaction):
         from helpers.CombatHelper import Combat
         nextPlayer = game.get_next_player(player)
+
+        # Clear the restart lockout flag when the turn successfully concludes
+        player_helper = PlayerHelper(game.getPlayersID(player), player)
+        player_helper.setCannotRestart(False)
+        game.update_player(player_helper)
+
         await game.updateNamesAndOutRimTiles(interaction)
         game.initilizeKey("20MinReminder")
         if nextPlayer is not None and not game.is_everyone_passed():

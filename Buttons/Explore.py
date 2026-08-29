@@ -115,6 +115,12 @@ class ExploreButtons:
         player = game.get_player(interaction.user.id,interaction)
         msg = customID.split("_")
         position = msg[1]
+
+        # Lock turn restart because of exposed hidden tile information.
+        player_helper = PlayerHelper(game.get_player_from_color(player['color']), player)
+        player_helper.setCannotRestart(True)
+        game.update_player(player_helper)
+
         if len(msg) > 2:
             tileID = msg[2]
             game.tile_discard(msg[3])

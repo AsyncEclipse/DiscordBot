@@ -111,6 +111,9 @@ class ResearchButtons:
             game.addDiscTile(game.getLocationFromID(player["home_planet"]))
             await DiscoveryTileButtons.exploreDiscoveryTile(game, game.getLocationFromID(player["home_planet"]),
                                                             interaction, player)
+            # Lock turn restart because of exposed hidden tile information.
+            player_helper.setCannotRestart(True)
+            game.update_player(player_helper)
         lenTech = len(player[f"{tech_type}_tech"])
         if lenTech == 4 and "magDiscTileUsed" in player and not player.get("magDiscTileUsed"):
             await interaction.channel.send(player["player_name"] + " due to researching your fourth tech"
@@ -119,6 +122,8 @@ class ResearchButtons:
             game.useMagDisc(str(interaction.user.id))
             await DiscoveryTileButtons.exploreDiscoveryTile(game, game.getLocationFromID(player["home_planet"]),
                                                             interaction, player)
+            player_helper.setCannotRestart(True)
+            game.update_player(player_helper)
 
     @staticmethod
     async def placeWarpPortal(interaction: discord.Interaction, game: GamestateHelper, player, customID):

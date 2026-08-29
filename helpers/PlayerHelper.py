@@ -13,6 +13,12 @@ class PlayerHelper:
         else:
             return False
 
+    def cannotRestart(self):
+        if self.stats.get("cannot_restart"):
+            return True
+        else:
+            return False
+
     def adjust_materials(self, adjustment):
         before = self.stats["materials"]
         self.stats["materials"] += adjustment
@@ -131,6 +137,9 @@ class PlayerHelper:
 
     def setTraitor(self, traitor: bool):
         self.stats["traitor"] = traitor
+
+    def setCannotRestart(self, cannot_restart: bool):
+        self.stats["cannot_restart"] = cannot_restart
     
     def setEliminated(self, eliminated: bool):
         self.stats["eliminated"] = eliminated
