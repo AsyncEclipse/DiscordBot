@@ -2,6 +2,9 @@
 config.json
 local_debug/
 gamestates/
+# local dev-only tooling
+local_run.py
+tests/test_game_init_names.py
 lib/
 scripts/
 include/
