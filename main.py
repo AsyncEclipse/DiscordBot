@@ -36,7 +36,12 @@ class DiscordBot(commands.Bot):
         await self.add_cog(GameCommands(self))
         await self.add_cog(SearchCommands(self))
         await self.add_cog(AdminCommands(self))
-        await self.tree.sync()
+        if config.guild_id:
+            guild = discord.Object(id=config.guild_id)
+            self.tree.copy_global_to(guild=guild)
+            await self.tree.sync(guild=guild)
+        else:
+            await self.tree.sync()
         start_time = time.perf_counter()
         print("Starting to load images")
         ImageCache.ImageCacheHelper("images/resources")
@@ -111,4 +116,5 @@ intents.messages = True
 intents.message_content = True
 bot = DiscordBot(command_prefix="$", intents=discord.Intents.all())
 
-bot.run(config.token)
+if __name__ == "__main__":
+    bot.run(config.token)

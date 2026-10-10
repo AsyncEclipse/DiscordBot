@@ -1,5 +1,6 @@
 import asyncio
 import random
+import config
 import discord
 from Buttons.Turn import TurnButtons
 from helpers.EmojiHelper import Emoji
@@ -27,7 +28,7 @@ class DraftButtons:
         game.initilizeKey("draftingPlayers")
         for x, player in enumerate(player_list):
             member = interaction.guild.get_member(player[0])
-            message.append(f"{x + 1}. {member.mention}")
+            message.append(f"{x + 1}. {member.mention if member else player[1]}")
             game.addToKey("draftingPlayers", player[0])
         if not tournament:
             message.append("For your reference, the factions currently available in the bot are the following 10,"
@@ -50,7 +51,8 @@ class DraftButtons:
             await channel.send(msg2)
         playerID = game.gamestate["draftingPlayers"][0]
         member = interaction.guild.get_member(playerID)
-        await channel.send(f"{member.mention}, please draft a faction from those available.",
+        await channel.send(f"{member.mention if member else game.get_player(playerID)['player_name']},"
+                           " please draft a faction from those available.",
                            view=DraftButtons.getDraftButtons(game))
 
     @staticmethod
@@ -95,7 +97,7 @@ class DraftButtons:
     @staticmethod
     async def draftFaction(game: GamestateHelper, interaction: discord.Interaction, customID: str):
         playerID = game.gamestate["draftingPlayers"][0]
-        if interaction.user.id != playerID:
+        if interaction.user.id != playerID and not (config.dev_mode and interaction.user.id == config.tester_id):
             await interaction.followup.send("These buttons are not for you", ephemeral=True)
             return
         factionKey = customID.split("_")[1]
@@ -110,7 +112,8 @@ class DraftButtons:
         if len(game.gamestate["draftingPlayers"]) > 0:
             playerID = game.gamestate["draftingPlayers"][0]
             member = interaction.guild.get_member(playerID)
-            await interaction.channel.send(f"{member.mention}, please draft a faction from those available.",
+            await interaction.channel.send(f"{member.mention if member else game.get_player(playerID)['player_name']},"
+                                           " please draft a faction from those available.",
                                            view=DraftButtons.getDraftButtons(game))
         else:
             factionsList = []

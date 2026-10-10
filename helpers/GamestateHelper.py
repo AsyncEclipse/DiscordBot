@@ -536,7 +536,9 @@ class GamestateHelper:
         for player in self.gamestate["players"]:
             if "username" not in self.gamestate["players"][player]:
                 if not self.gamestate.get("communityMode",False):
-                    self.gamestate["players"][player]["username"] = interaction.guild.get_member(int(player)).display_name
+                    member = interaction.guild.get_member(int(player))
+                    self.gamestate["players"][player]["username"] = (member.display_name if member
+                                                                     else self.gamestate["players"][player]["player_name"])
                 else:
                     self.gamestate["players"][player]["username"] = "Team "+self.gamestate["players"][player]["color"]
             tiles = self.gamestate["players"][player]["owned_tiles"][:]
@@ -1169,7 +1171,9 @@ class GamestateHelper:
 
     def get_player(self, player_id, interaction=None):
         if str(player_id) not in self.gamestate["players"]:
-            if interaction != None:
+            if interaction is not None:
+                if config.dev_mode and str(player_id) == str(config.tester_id) and self.gamestate.get("activePlayerColor"):
+                    return self.getPlayerObjectFromColor(self.gamestate["activePlayerColor"][0])
                 member = interaction.guild.get_member(player_id) 
                 roles = member.roles
                 role_names = [role.name for role in roles if role.name != "@everyone"]

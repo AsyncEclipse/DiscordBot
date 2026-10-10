@@ -1,5 +1,7 @@
 #asyncEclipse
 config.json
+local_debug/
+gamestates/
 lib/
 scripts/
 include/
