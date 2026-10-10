@@ -11,6 +11,18 @@ from helpers.ImageCache import ImageCacheHelper
 from helpers.ShipHelper import PlayerShip
 
 
+_properties_cache = {}
+
+
+def load_properties(path):
+    if path not in _properties_cache:
+        configs = Properties()
+        with open(path, "rb") as f:
+            configs.load(f)
+        _properties_cache[path] = configs
+    return _properties_cache[path]
+
+
 class DrawHelper:
     def __init__(self, gamestate):
         self.gamestate = gamestate
@@ -296,20 +308,15 @@ class DrawHelper:
             closed_mask = self.use_image(closedpath)
             open_mask = self.use_image(openpath)
             green = self.use_image(greenpath)
-            configs = Properties()
             if self.gamestate.get("5playerhyperlane"):
                 if self.gamestate.get("player_count") == 5:
-                    with open("data/tileAdjacencies_5p.properties", "rb") as f:
-                        configs.load(f)
+                    configs = load_properties("data/tileAdjacencies_5p.properties")
                 elif self.gamestate.get("player_count") == 4:
-                    with open("data/tileAdjacencies_4p.properties", "rb") as f:
-                        configs.load(f)
+                    configs = load_properties("data/tileAdjacencies_4p.properties")
                 else:
-                    with open("data/tileAdjacencies.properties", "rb") as f:
-                        configs.load(f)
+                    configs = load_properties("data/tileAdjacencies.properties")
             else:
-                with open("data/tileAdjacencies.properties", "rb") as f:
-                    configs.load(f)
+                configs = load_properties("data/tileAdjacencies.properties")
             if "wormholes" in tile and tile.get("type","")!="exploded":
                 for wormhole in tile["wormholes"]:
                     wormholeCode += str(wormhole)
@@ -1654,10 +1661,7 @@ class DrawHelper:
 
     def show_game(self, finalSave=False):
         def load_tile_coordinates():
-            configs = Properties()
-            with open("data/tileImageCoordinates.properties", "rb") as f:
-                configs.load(f)
-            return configs
+            return load_properties("data/tileImageCoordinates.properties")
 
         def paste_tiles(context, tile_map, hyperlane, player_count):
             configs = load_tile_coordinates()
@@ -1755,28 +1759,26 @@ class DrawHelper:
                             (0, cropped_context.size[1] + context2.size[1] + max(context3.size[1],
                                                                                  context4.size[1])))
         bytes_io = BytesIO()
-        final_context.save(bytes_io, format="WEBP")
-        if finalSave == True:
-            if "roundNum" in self.gamestate:
-                rnd = self.gamestate["roundNum"]
-            else:
-                rnd = 1
-            output_dir = f'GameHistory/{self.gamestate["game_id"]}'
-            filename = f'{self.gamestate["game_id"]}-{rnd-1}.webp'
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-            full_path = os.path.join(output_dir, filename)
-            resized = final_context.resize((int(width*0.3), int(height*0.3)))
-            resized.save(full_path, quality=50, compress_level=8)
+        final_context.save(bytes_io, format="WEBP", quality=80, method=1)
         bytes_io.seek(0)
-        return discord.File(bytes_io, filename="map_image.webp")
+        map_file = discord.File(bytes_io, filename="map_image.webp")
+        if finalSave:
+            return map_file, final_context
+        return map_file
+
+    def save_game_history(self, final_context):
+        rnd = self.gamestate.get("roundNum", 1)
+        output_dir = f'GameHistory/{self.gamestate["game_id"]}'
+        filename = f'{self.gamestate["game_id"]}-{rnd-1}.webp'
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        width, height = final_context.size
+        resized = final_context.resize((int(width * 0.3), int(height * 0.3)))
+        resized.save(os.path.join(output_dir, filename), quality=50, compress_level=8)
 
     async def show_map(self):
         def load_tile_coordinates():
-            configs = Properties()
-            with open("data/tileImageCoordinates.properties", "rb") as f:
-                configs.load(f)
-            return configs
+            return load_properties("data/tileImageCoordinates.properties")
 
         def paste_tiles(context, tile_map):
             configs = load_tile_coordinates()
