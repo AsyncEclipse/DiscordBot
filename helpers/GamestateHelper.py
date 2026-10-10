@@ -1412,7 +1412,7 @@ class GamestateHelper:
     async def showGame(self,  thread, message, finalSave = False):
         drawing = DrawHelper(self.gamestate)
         if finalSave:
-            map_result = drawing.show_game(finalSave)
+            map_result, composed = await asyncio.to_thread(drawing.show_game, finalSave)
         else:
             map_result = await asyncio.to_thread(drawing.show_game)
         view = View()
@@ -1425,6 +1425,8 @@ class GamestateHelper:
         view = discord.ui.View()
         view.add_item(button)
         await thread.send(view=view)
+        if finalSave:
+            asyncio.create_task(asyncio.to_thread(drawing.save_game_history, composed))
 
     async def showUpdate(self, message: str, interaction: discord.Interaction, finalSave = False):
         if "-" in interaction.channel.name:
