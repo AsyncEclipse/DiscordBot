@@ -1,4 +1,5 @@
 import asyncio
+import copy
 import json
 import discord
 from helpers.EmojiHelper import Emoji
@@ -27,7 +28,7 @@ class UpgradeButtons:
                                  custom_id=f"FCID{player['color']}_upgradeShip_{actions}_{ship}_{discTileUpgrade}"))
         await interaction.followup.send(file=await asyncio.to_thread(drawing.show_player_ship_area, image),
                                         ephemeral=True)
-        if discTileUpgrade != "dummy":
+        if discTileUpgrade not in ("dummy", "free"):
             view.add_item(Button(label="Save For Future Upgrade Action", style=discord.ButtonStyle.red,
                                  custom_id=f"FCID{player['color']}_deleteMsg"))
         if button:
@@ -75,12 +76,11 @@ class UpgradeButtons:
         view.add_item(Button(label="Choose Different Ship", style=discord.ButtonStyle.gray,
                                  custom_id=(f"FCID{player['color']}_chooseDifferentShip_"
                                             f"{actions}_{discTileUpgrade}")))
-        if discTileUpgrade != "dummy":
+        if discTileUpgrade not in ("dummy", "free"):
             view.add_item(Button(label="Save For Future Upgrade Action", style=discord.ButtonStyle.red,
                                  custom_id=f"FCID{player['color']}_deleteMsg"))
-        await interaction.message.edit(content=(f"{interaction.user.mention}, "
-                                                f"pick which part of your {ship} to replace or remove."),
-                                       view=view)
+        await UpgradeButtons.showMenu(interaction, f"{interaction.user.mention}, "
+                                                   f"pick which part of your {ship} to replace or remove.", view)
 
     @staticmethod
     async def selectOldPart(game: GamestateHelper, player, interaction: discord.Interaction,
@@ -91,7 +91,7 @@ class UpgradeButtons:
         oldPart = customID.split("_")[3]
         discTileUpgrade = customID.split("_")[4]
         indexOfOldPart = customID.split("_")[5]
-        if discTileUpgrade != "dummy":
+        if discTileUpgrade not in ("dummy", "free"):
             await UpgradeButtons.chooseUpgrade(game, player, interaction,
                                                customID + "_" + discTileUpgrade, player_helper)
             return
@@ -112,9 +112,9 @@ class UpgradeButtons:
                                  custom_id=(f"FCID{player['color']}_chooseUpgrade_{actions}_{ship}_"
                                             f"{oldPart}_{i}_{indexOfOldPart}_{discTileUpgrade}"),
                                  emoji=Emoji.getEmojiByName(partName)))
-        await interaction.message.edit(content=f"{interaction.user.mention}, replace "
-                                       f"{part_stats[oldPart]['name']} on your {ship} with which part? "
-                                       "Remove as a free action by selecting 'Empty'.", view=view)
+        await UpgradeButtons.showMenu(interaction, f"{interaction.user.mention}, replace "
+                                      f"{part_stats[oldPart]['name']} on your {ship} with which part? "
+                                      "Remove as a free action by selecting 'Empty'.", view)
         await interaction.followup.send("Available parts",
                                         file=await asyncio.to_thread(drawing.availablePartsFile, available_parts),
                                         ephemeral=True)
@@ -134,7 +134,8 @@ class UpgradeButtons:
         if newPart != "mus":
             index = player[f"{ship}_parts"].index(oldPart)
             index = int(indexOfOldPart)
-        isFreeRemoval = newPart == "empty"
+        # in free mode "empty" really empties the slot instead of reverting it
+        isFreeRemoval = newPart == "empty" and discTileUpgrade != "free"
         if isFreeRemoval:
             newPart = player[f"old_{ship}_parts"][index]
         newParts = list(player[f"{ship}_parts"])
@@ -142,13 +143,14 @@ class UpgradeButtons:
             newParts.append("mus")
         else:
             newParts[index] = newPart
-        # Validate before charging anything: an illegal build must not cost the player a disc.
+        # an illegal build must not cost the player a disc
         candidate = dict(player_helper.stats)
         candidate[f"{ship}_parts"] = newParts
         if not PlayerShip(candidate, ship).check_valid_ship():
             await interaction.followup.send("Your ship is not valid! Please try a different part", ephemeral=True)
             return
-        if not isFreeRemoval and newPart != oldPart:
+        undo = copy.deepcopy({k: v for k, v in player_helper.stats.items() if k != "upgradeUndo"})
+        if not isFreeRemoval and newPart != oldPart and discTileUpgrade != "free":
             actions -= 1
             if actions == player['upgrade_apt'] - 1 and discTileUpgrade == "dummy":
                 player_helper.spend_influence_on_action("upgrade")
@@ -158,6 +160,7 @@ class UpgradeButtons:
             player_helper.stats["ancient_parts"].remove(newPart)
         oldName = "Nothing" if newPart == "mus" else part_stats[oldPart]['name']
         player_helper.stats[f"{ship}_parts"] = newParts
+        player_helper.stats["upgradeUndo"] = undo
         player_helper.specifyDetailsOfAction(f"Replaced {oldName} with {part_stats[newPart]['name']}"
                                              f" on their {ship.capitalize()}.")
         game.update_player(player_helper)
@@ -171,9 +174,10 @@ class UpgradeButtons:
                                      custom_id=f"FCID{player['color']}_upgradeShip_{str(actions)}_{ship2}_dummy"))
         view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                              custom_id=f"FCID{player['color']}_finishAction"))
-        view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray,
-                             custom_id=f"FCID{player['color']}_restartTurn"))
-        await interaction.message.delete()
+        view.add_item(Button(label="Undo", style=discord.ButtonStyle.gray,
+                             custom_id=f"FCID{player['color']}_undoUpgrade_{customID.split('_')[1]}"))
+        if interaction.message is not None:
+            await interaction.message.delete()
         await interaction.channel.send(f"{player['player_name']} replaced {oldName} with {part_stats[newPart]['name']}"
                                        f" on their {ship.capitalize()} which now looks like this:",
                                        file=await asyncio.to_thread(drawing.show_player_ship,
@@ -181,3 +185,25 @@ class UpgradeButtons:
         if discTileUpgrade == "dummy":
             await interaction.channel.send(f"{player['player_name']}, choose which ship you would like to upgrade "
                                            "or finish your action.", view=view)
+
+    @staticmethod
+    async def undoUpgrade(game: GamestateHelper, player, interaction: discord.Interaction,
+                          customID: str, player_helper: PlayerHelper):
+        undo = player.get("upgradeUndo")
+        if undo is None:
+            await interaction.followup.send("There is no upgrade to undo.", ephemeral=True)
+            return
+        player_helper.stats.clear()
+        player_helper.stats.update(undo)
+        game.update_player(player_helper)
+        await interaction.message.delete()
+        await interaction.channel.send(f"{player['player_name']} undid their last part swap.")
+        await UpgradeButtons.startUpgrade(game, player, interaction, False, "dummy", customID.split("_")[1])
+
+    @staticmethod
+    async def showMenu(interaction: discord.Interaction, content: str, view: View):
+        # slash commands have no message to edit
+        if interaction.message is None:
+            await interaction.channel.send(content, view=view)
+        else:
+            await interaction.message.edit(content=content, view=view)

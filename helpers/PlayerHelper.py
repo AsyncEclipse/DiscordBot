@@ -129,7 +129,6 @@ class PlayerHelper:
             self.stats[f"old_{ship}_parts"] = self.stats[f"{ship}_parts"]
 
     def getAvailableShipParts(self):
-        """Every part code this player may legally fit, ignoring action cost."""
         with open("data/parts.json", "r") as f:
             part_stats = json.load(f)
         available = ["ioc", "elc", "nud", "hul", "nus", "empty"]

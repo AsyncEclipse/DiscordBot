@@ -324,7 +324,7 @@ class GamestateHelper:
 
     @staticmethod
     def getShipsWithParts(player):
-        """Ship types this faction actually fields, so callers never KeyError on a missing *_parts key."""
+        """Ship types this faction actually fields."""
         ships = ["interceptor", "cruiser", "dread", "starbase", "orb"]
         legal = []
         for ship in ships:

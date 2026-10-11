@@ -13,7 +13,7 @@ from Buttons.Upgrade import UpgradeButtons
 from helpers.PlayerHelper import PlayerHelper
 from helpers.GamestateHelper import GamestateHelper
 from helpers.DrawHelper import DrawHelper
-from helpers.ShipHelper import PlayerShip
+from discord.ui import View, Button
 
 
 class PlayerCommands(commands.GroupCog, name="player"):
@@ -220,7 +220,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         await interaction.response.defer(thinking=False)
         await UpgradeButtons.startUpgrade(game, player, interaction, False, "dummy","dum")
 
-    @app_commands.command(name="ship_parts", description="List your ship parts, or swap one out for free")
+    @app_commands.command(name="ship_parts", description="Show or change your ship parts for free")
     @app_commands.choices(ship=ship_choices)
     async def ship_parts(self, interaction: discord.Interaction,
                          ship: Optional[app_commands.Choice[str]] = None,
@@ -228,87 +228,77 @@ class PlayerCommands(commands.GroupCog, name="player"):
                          part: Optional[str] = None):
         """
 
-        :param ship: Which ship to look at. Leave empty to list every ship you have
-        :param slot: The numbered slot to change, as shown by the listing. 1 is the first slot
-        :param part: Three letter code of the part to fit into that slot. Give an unknown code for the full part list
+        :param ship: Which ship to change. Leave empty to pick from all your ships
+        :param slot: The slot to change, counting from 1. Leave empty to pick it from buttons
+        :param part: Three letter code of the part to fit. Give an unknown code for the full part list
         """
         game = GamestateHelper(interaction.channel)
         player = game.get_player(interaction.user.id, interaction)
         if player is None:
             await interaction.response.send_message("You are not a player in this game.")
             return
+        await interaction.response.defer(thinking=False)
         player_helper = PlayerHelper(game.get_player_from_color(player["color"]), player)
         with open("data/parts.json", "r") as f:
             part_stats = json.load(f)
-
-        async def send_list(header, lines):
-            await interaction.response.send_message(header)
-            for start in range(0, len(lines), 20):
-                await interaction.channel.send("\n".join(lines[start:start + 20]))
-
-        def slot_lines(ship_name):
-            parts = player.get(f"{ship_name}_parts", [])
-            return [f"> {number}. {part_stats[part]['name']} ({part})"
-                    for number, part in enumerate(parts, start=1)]
-
-        if part is not None and (part.lower() not in part_stats or part.lower() in ["list", "help"]):
+        if part is not None and part.lower() not in part_stats:
             catalog = [f"> {code} = {details['name']}" for code, details in part_stats.items()]
-            await send_list("Every ship part code:", catalog)
-            return
-        if slot is not None and part is None:
-            await interaction.response.send_message("Give me a part code to fit into that slot, "
-                                                    "or leave slot empty to list them.")
-            return
-        if part is not None and slot is None:
-            await interaction.response.send_message("Give me the numbered slot to change.")
+            await interaction.followup.send("Every ship part code:")
+            for start in range(0, len(catalog), 20):
+                await interaction.channel.send("\n".join(catalog[start:start + 20]))
             return
         if ship is None:
             if slot is not None or part is not None:
-                await interaction.response.send_message("Give me the ship you want to change.")
+                await interaction.followup.send("Give me the ship you want to change.")
                 return
-            lines = []
-            for ship_name in game.getShipsWithParts(player):
-                lines.append(f"**{ship_name.capitalize()}**")
-                lines.extend(slot_lines(ship_name))
-            await send_list(f"{player_helper.name} ship parts:", lines)
-            return
-        if slot is None:
-            await send_list(f"{player_helper.name} {ship.value} parts:", slot_lines(ship.value))
+            await UpgradeButtons.startUpgrade(game, player, interaction, False, "free", "1")
             return
 
         ship_name = ship.value
         if ship_name not in game.getShipsWithParts(player):
-            await interaction.response.send_message(f"Your faction has no {ship_name}.")
+            await interaction.followup.send(f"Your faction has no {ship_name}.")
             return
-        parts = player.get(f"{ship_name}_parts", [])
-        if not 1 <= slot <= len(parts):
-            await interaction.response.send_message(f"Your {ship_name} has {len(parts)} slots, "
-                                                    f"numbered 1 to {len(parts)}.")
+        parts = player[f"{ship_name}_parts"]
+        if slot is not None and not 1 <= slot <= len(parts):
+            await interaction.followup.send(f"Your {ship_name} has {len(parts)} slots, numbered 1 to {len(parts)}.")
             return
-        new_part = part.lower()
-        if new_part not in player_helper.getAvailableShipParts():
-            await interaction.response.send_message(f"You cannot fit a {part_stats[new_part]['name']}, "
-                                                    "you do not have the tech or discovery tile for it.")
+        new_part = part.lower() if part is not None else None
+        if new_part is not None and new_part not in player_helper.getAvailableShipParts():
+            await interaction.followup.send(f"You cannot fit a {part_stats[new_part]['name']}, "
+                                            "you do not have the tech or discovery tile for it.")
             return
         if new_part == "mus":
-            await interaction.response.send_message("A Muon Source is fitted by a discovery tile, "
-                                                    "it cannot be swapped into an existing slot.")
+            await interaction.followup.send("A Muon Source is fitted by a discovery tile, "
+                                            "it cannot be swapped into an existing slot.")
             return
-        new_parts = list(parts)
-        new_parts[slot - 1] = new_part
-        candidate = dict(player_helper.stats)
-        candidate[f"{ship_name}_parts"] = new_parts
-        if not PlayerShip(candidate, ship_name).check_valid_ship():
-            await interaction.response.send_message(f"A {ship_name} with a {part_stats[new_part]['name']} in that "
-                                                    "slot is not a legal ship.")
-            return
-        old_part = parts[slot - 1]
-        player_helper.stats[f"{ship_name}_parts"] = new_parts
+
+        drawing = DrawHelper(game.gamestate)
+        image = await asyncio.to_thread(drawing.player_area, player)
+        await interaction.followup.send(file=await asyncio.to_thread(drawing.show_player_ship,
+                                                                     image, ship_name, player["name"]))
+        player_helper.setOldShipParts(ship_name)
         game.update_player(player_helper)
-        await interaction.response.send_message(f"{player_helper.name} changed their "
-                                                f"{ship_name} slot {slot}.")
-        await interaction.channel.send(f"> Replaced {part_stats[old_part]['name']} with "
-                                       f"{part_stats[new_part]['name']} on their {ship_name.capitalize()}.")
+        if new_part is None and slot is None:
+            await UpgradeButtons.upgradeShip(game, player, interaction, f"upgradeShip_1_{ship_name}_free",
+                                             player_helper)
+        elif new_part is None:
+            old_part = parts[slot - 1]
+            await UpgradeButtons.selectOldPart(game, player, interaction,
+                                               f"selectOldPart_1_{ship_name}_{old_part}_free_{slot - 1}",
+                                               player_helper)
+        elif slot is not None:
+            await UpgradeButtons.chooseUpgrade(game, player, interaction,
+                                               f"chooseUpgrade_1_{ship_name}_{parts[slot - 1]}_{new_part}_"
+                                               f"{slot - 1}_free", player_helper)
+        else:
+            view = View()
+            for index, old_part in enumerate(parts):
+                view.add_item(Button(label=f"{index + 1}. {part_stats[old_part]['name']}",
+                                     style=discord.ButtonStyle.red,
+                                     custom_id=(f"FCID{player['color']}_chooseUpgrade_1_{ship_name}_"
+                                                f"{old_part}_{new_part}_{index}_free")))
+            await interaction.channel.send(f"{interaction.user.mention}, which part of your {ship_name} should "
+                                           f"the {part_stats[new_part]['name']} replace?", view=view)
 
     @app_commands.command(name="move")
     async def move(self, interaction: discord.Interaction):

@@ -28,3 +28,19 @@ def test_available_parts_unlock_from_techs_and_ancient_tiles():
     owned = PlayerHelper("1", _stats("hyd", grid_tech=["tad"], ancient_parts=["hyg"])).getAvailableShipParts()
     assert {"tad", "hyg"} <= owned
     assert baseline <= owned, "a tech must never cost you the parts you already had"
+
+
+def test_undo_upgrade_restores_the_snapshot(monkeypatch):
+    import asyncio
+    from unittest.mock import AsyncMock, MagicMock
+    from Buttons.Upgrade import UpgradeButtons
+
+    before = _stats("hyd", influence_discs=5)
+    stats = dict(before, influence_discs=4, interceptor_parts=["empty"], upgradeUndo=dict(before))
+    game = MagicMock()
+    restart = AsyncMock()
+    monkeypatch.setattr(UpgradeButtons, "startUpgrade", restart)
+    asyncio.run(UpgradeButtons.undoUpgrade(game, stats, AsyncMock(), "undoUpgrade_2", PlayerHelper("1", stats)))
+
+    assert stats == before, "undo must restore every stat, including the spent influence"
+    assert restart.await_args.args[-1] == "2", "undo must give the actions back"
