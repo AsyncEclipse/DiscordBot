@@ -302,7 +302,7 @@ class TurnButtons:
             view.add_item(Button(label="Declare Winner", style=discord.ButtonStyle.blurple, custom_id="declareWinner"))
             await interaction.channel.send("It seems like the game should be ended, "
                                            "hit this button to reveal the winner.", view=view)
-        asyncio.create_task(game.showUpdate(f"Start of round {str(game.gamestate['roundNum'])}", interaction, finalSave=True))
+        asyncio.create_task(game.showUpdate(f"Start of round {str(game.gamestate['roundNum'])}", interaction))
 
 
     @staticmethod
