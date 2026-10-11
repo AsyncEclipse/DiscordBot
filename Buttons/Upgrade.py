@@ -101,7 +101,7 @@ class UpgradeButtons:
         with open("data/parts.json", "r") as f:
             part_stats = json.load(f)
 
-        view.add_item(Button(label="Go back 1 Step", style=discord.ButtonStyle.red,
+        view.add_item(Button(label="Undo", style=discord.ButtonStyle.red,
                              custom_id=f"FCID{player['color']}_upgradeShip_{actions}_{ship}_{discTileUpgrade}"))
         for i in available_parts:
             part_details = part_stats.get(i)
