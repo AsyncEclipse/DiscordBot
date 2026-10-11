@@ -1,5 +1,6 @@
 import asyncio
 from datetime import datetime
+import config
 import discord
 from discord.ext import commands
 from Buttons.BlackHole import BlackHoleButtons
@@ -117,6 +118,11 @@ class ButtonListener(commands.Cog):
                         break
                 if player != None:
                     break
+        if config.dev_mode and userID == config.tester_id and customID.startswith("FCID"):
+            devColor = customID.split("_")[0].replace("FCID", "")
+            if devColor != "dummy" and game.getPlayerObjectFromColor(devColor) is not None:
+                player = game.getPlayerObjectFromColor(devColor)
+                userID = game.get_player_from_color(devColor)
         if player is not None:
             player_helper = PlayerHelper(userID, player)
         else:

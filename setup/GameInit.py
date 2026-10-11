@@ -1,4 +1,5 @@
 import json
+import os
 import config
 from config import update_game_number
 import random
@@ -26,7 +27,7 @@ class GameInit:
         self.gamestate["game_name"] = self.game_name
 
         for i in self.player_list:
-            self.gamestate["players"].update({i[0]: {"player_name": f"<@{str(i[0])}>"}})
+            self.gamestate["players"].update({i[0]: {"player_name": str(i[1])}})
 
         # Load discovery tiles
         listOfDisc = []
@@ -60,6 +61,7 @@ class GameInit:
         self.gamestate["community_parts"] = self.community_parts
         self.gamestate["community_rep_mod"] = self.community_rep_mod
 
+        os.makedirs(config.gamestate_path, exist_ok=True)
         with open(f"{config.gamestate_path}/{self.gamestate['game_id']}.json", "w") as f:
             json.dump(self.gamestate, f)
 
