@@ -1413,12 +1413,9 @@ class GamestateHelper:
                 tiles.append(tile)
         return tiles
 
-    async def showGame(self,  thread, message, finalSave = False):
+    async def showGame(self,  thread, message):
         drawing = DrawHelper(self.gamestate)
-        if finalSave:
-            map_result, composed = await asyncio.to_thread(drawing.show_game, finalSave)
-        else:
-            map_result = await asyncio.to_thread(drawing.show_game)
+        map_result = await asyncio.to_thread(drawing.show_game)
         view = View()
         view.add_item(Button(label="Show Game", style=discord.ButtonStyle.blurple, custom_id="showGame"))
         view.add_item(Button(label="Show Reputation", style=discord.ButtonStyle.gray, custom_id="showReputation"))
@@ -1429,15 +1426,13 @@ class GamestateHelper:
         view = discord.ui.View()
         view.add_item(button)
         await thread.send(view=view)
-        if finalSave:
-            asyncio.create_task(asyncio.to_thread(drawing.save_game_history, composed))
 
-    async def showUpdate(self, message: str, interaction: discord.Interaction, finalSave = False):
+    async def showUpdate(self, message: str, interaction: discord.Interaction):
         if "-" in interaction.channel.name:
             thread_name = interaction.channel.name.split("-")[0] + "-bot-map-updates"
             thread = discord.utils.get(interaction.channel.threads, name=thread_name)
             if thread is not None:
-                asyncio.create_task(self.showGame(thread, message, finalSave))
+                asyncio.create_task(self.showGame(thread, message))
 
     def getPlayerFromHSLocation(self, location):
         if "sector" not in self.gamestate["board"].get(location, []):

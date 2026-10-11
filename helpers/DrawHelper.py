@@ -1659,7 +1659,7 @@ class DrawHelper:
                 points -= 2
         return points
 
-    def show_game(self, finalSave=False):
+    def show_game(self):
         def load_tile_coordinates():
             return load_properties("data/tileImageCoordinates.properties")
 
@@ -1761,20 +1761,7 @@ class DrawHelper:
         bytes_io = BytesIO()
         final_context.save(bytes_io, format="WEBP", quality=80, method=1)
         bytes_io.seek(0)
-        map_file = discord.File(bytes_io, filename="map_image.webp")
-        if finalSave:
-            return map_file, final_context
-        return map_file
-
-    def save_game_history(self, final_context):
-        rnd = self.gamestate.get("roundNum", 1)
-        output_dir = f'GameHistory/{self.gamestate["game_id"]}'
-        filename = f'{self.gamestate["game_id"]}-{rnd-1}.webp'
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-        width, height = final_context.size
-        resized = final_context.resize((int(width * 0.3), int(height * 0.3)))
-        resized.save(os.path.join(output_dir, filename), quality=50, compress_level=8)
+        return discord.File(bytes_io, filename="map_image.webp")
 
     async def show_map(self):
         def load_tile_coordinates():
