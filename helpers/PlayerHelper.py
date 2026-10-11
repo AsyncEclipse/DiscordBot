@@ -1,3 +1,5 @@
+import json
+
 from helpers.EmojiHelper import Emoji
 
 
@@ -125,6 +127,16 @@ class PlayerHelper:
     def setOldShipParts(self, ship):
         if f"old_{ship}_parts" not in self.stats:
             self.stats[f"old_{ship}_parts"] = self.stats[f"{ship}_parts"]
+
+    def getAvailableShipParts(self):
+        """Every part code this player may legally fit, ignoring action cost."""
+        with open("data/parts.json", "r") as f:
+            part_stats = json.load(f)
+        available = ["ioc", "elc", "nud", "hul", "nus", "empty"]
+        for part in part_stats:
+            if part in self.getTechs() or part in self.stats.get("ancient_parts", []):
+                available.append(part)
+        return set(available)
 
     def passTurn(self, passed: bool):
         self.stats["passed"] = passed

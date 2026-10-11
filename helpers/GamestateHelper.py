@@ -322,6 +322,21 @@ class GamestateHelper:
         else:
             return shipName
 
+    @staticmethod
+    def getShipsWithParts(player):
+        """Ship types this faction actually fields, so callers never KeyError on a missing *_parts key."""
+        ships = ["interceptor", "cruiser", "dread", "starbase", "orb"]
+        legal = []
+        for ship in ships:
+            if player['name'] == "Rho Indi Syndicate" and ship == "dread":
+                continue
+            if player['name'] == "The Exiles" and ship == "starbase":
+                continue
+            if player['name'] != "The Exiles" and ship == "orb":
+                continue
+            legal.append(ship)
+        return legal
+
     def getShortFactionNameFromFull(self, fullName):
         if fullName == "Descendants of Draco":
             return "draco"

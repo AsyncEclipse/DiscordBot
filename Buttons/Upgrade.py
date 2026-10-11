@@ -13,7 +13,6 @@ class UpgradeButtons:
     @staticmethod
     async def startUpgrade(game: GamestateHelper, player, interaction: discord.Interaction,
                            button: bool, discTileUpgrade: str, action:str):
-        ships = ["interceptor", "cruiser", "dread", "starbase", "orb"]
         drawing = DrawHelper(game.gamestate)
         image = await asyncio.to_thread(drawing.player_area, player)
         view = View()
@@ -22,13 +21,7 @@ class UpgradeButtons:
             actions = "1"
         if action != "dum":
             actions = action
-        for ship in ships:
-            if player['name'] == "Rho Indi Syndicate" and ship == "dread":
-                continue
-            if player['name'] == "The Exiles" and ship == "starbase":
-                continue
-            if player['name'] != "The Exiles" and ship == "orb":
-                continue
+        for ship in game.getShipsWithParts(player):
             shipEmoji = Emoji.getEmojiByName(player['color'] + game.getShipShortName(ship))
             view.add_item(Button(label=ship.capitalize(), emoji=shipEmoji, style=discord.ButtonStyle.blurple,
                                  custom_id=f"FCID{player['color']}_upgradeShip_{actions}_{ship}_{discTileUpgrade}"))
@@ -103,27 +96,18 @@ class UpgradeButtons:
                                                customID + "_" + discTileUpgrade, player_helper)
             return
 
-        available_parts = ["ioc", "elc", "nud", "hul", "nus", "empty"]
+        available_parts = player_helper.getAvailableShipParts()
         drawing = DrawHelper(game.gamestate)
         with open("data/parts.json", "r") as f:
             part_stats = json.load(f)
-        for tech in part_stats:
-            if tech in player["military_tech"]:
-                available_parts.append(tech)
-            if tech in player["grid_tech"]:
-                available_parts.append(tech)
-            if tech in player["nano_tech"]:
-                available_parts.append(tech)
-            if tech in player.get("ancient_parts", []):
-                available_parts.append(tech)
-        available_parts = set(available_parts)
-        with open("data/parts.json", "r") as f:
-            part_data = json.load(f)
 
+        view.add_item(Button(label="Go back 1 Step", style=discord.ButtonStyle.red,
+                             custom_id=f"FCID{player['color']}_upgradeShip_{actions}_{ship}_{discTileUpgrade}"))
         for i in available_parts:
-            part_details = part_data.get(i)
+            part_details = part_stats.get(i)
             partName = part_details["name"].lower().replace(" ", "_") if part_details else i
-
+            if len(view.children) >= 25:
+                break
             view.add_item(Button(label=part_stats[i]["name"], style=discord.ButtonStyle.blurple,
                                  custom_id=(f"FCID{player['color']}_chooseUpgrade_{actions}_{ship}_"
                                             f"{oldPart}_{i}_{indexOfOldPart}_{discTileUpgrade}"),
@@ -131,8 +115,6 @@ class UpgradeButtons:
         await interaction.message.edit(content=f"{interaction.user.mention}, replace "
                                        f"{part_stats[oldPart]['name']} on your {ship} with which part? "
                                        "Remove as a free action by selecting 'Empty'.", view=view)
-        view.add_item(Button(label="Go back 1 Step", style=discord.ButtonStyle.red,
-                             custom_id=f"FCID{player['color']}_upgradeShip_{actions}_{ship}_{discTileUpgrade}"))
         await interaction.followup.send("Available parts",
                                         file=await asyncio.to_thread(drawing.availablePartsFile, available_parts),
                                         ephemeral=True)
@@ -152,28 +134,30 @@ class UpgradeButtons:
         if newPart != "mus":
             index = player[f"{ship}_parts"].index(oldPart)
             index = int(indexOfOldPart)
-        if newPart != "empty":
-            if newPart != oldPart:
-                actions -= 1
-                if actions == player['upgrade_apt'] - 1 and discTileUpgrade == "dummy":
-                    player_helper.spend_influence_on_action("upgrade")
-        else:
+        isFreeRemoval = newPart == "empty"
+        if isFreeRemoval:
             newPart = player[f"old_{ship}_parts"][index]
+        newParts = list(player[f"{ship}_parts"])
+        if newPart == "mus":
+            newParts.append("mus")
+        else:
+            newParts[index] = newPart
+        # Validate before charging anything: an illegal build must not cost the player a disc.
+        candidate = dict(player_helper.stats)
+        candidate[f"{ship}_parts"] = newParts
+        if not PlayerShip(candidate, ship).check_valid_ship():
+            await interaction.followup.send("Your ship is not valid! Please try a different part", ephemeral=True)
+            return
+        if not isFreeRemoval and newPart != oldPart:
+            actions -= 1
+            if actions == player['upgrade_apt'] - 1 and discTileUpgrade == "dummy":
+                player_helper.spend_influence_on_action("upgrade")
         ancientTech = ["anm", "axc", "cod", "fls", "hyg", "ins", "iod", "iom", "iot",
                        "jud", "mus", "ricon", "shh", "som", "socha", "mos", "plt", "nod"]
         if newPart in ancientTech and newPart in player_helper.stats["ancient_parts"]:
             player_helper.stats["ancient_parts"].remove(newPart)
-        oldName = ""
-        if newPart == "mus":
-            player_helper.stats[f"{ship}_parts"].append("mus")
-            oldName = "Nothing"
-        else:
-            player_helper.stats[f"{ship}_parts"][index] = newPart
-            oldName = part_stats[oldPart]['name']
-        shipCheck = PlayerShip(player_helper.stats, ship)
-        if not shipCheck.check_valid_ship():
-            await interaction.followup.send("Your ship is not valid! Please try a different part", ephemeral=True)
-            return
+        oldName = "Nothing" if newPart == "mus" else part_stats[oldPart]['name']
+        player_helper.stats[f"{ship}_parts"] = newParts
         player_helper.specifyDetailsOfAction(f"Replaced {oldName} with {part_stats[newPart]['name']}"
                                              f" on their {ship.capitalize()}.")
         game.update_player(player_helper)
@@ -181,19 +165,14 @@ class UpgradeButtons:
         image = await asyncio.to_thread(drawing.player_area, player_helper.stats)
         view = View()
         if actions > 0 and not player.get("passed"):
-            ships = ["interceptor", "cruiser", "dread", "starbase", "orb"]
-            for ship2 in ships:
-                if player['name'] == "Rho Indi Syndicate" and ship2 == "dread":
-                    continue
-                if player['name'] == "The Exiles" and ship2 == "starbase":
-                    continue
-                if player['name'] != "The Exiles" and ship2 == "orb":
-                    continue
+            for ship2 in game.getShipsWithParts(player):
                 shipEmoji = Emoji.getEmojiByName(player['color'] + game.getShipShortName(ship2))
                 view.add_item(Button(label=ship2.capitalize(), emoji=shipEmoji, style=discord.ButtonStyle.blurple,
                                      custom_id=f"FCID{player['color']}_upgradeShip_{str(actions)}_{ship2}_dummy"))
         view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                              custom_id=f"FCID{player['color']}_finishAction"))
+        view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray,
+                             custom_id=f"FCID{player['color']}_restartTurn"))
         await interaction.message.delete()
         await interaction.channel.send(f"{player['player_name']} replaced {oldName} with {part_stats[newPart]['name']}"
                                        f" on their {ship.capitalize()} which now looks like this:",
