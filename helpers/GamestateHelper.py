@@ -475,6 +475,8 @@ class GamestateHelper:
         for position in self.gamestate["board"]:
             self.gamestate["board"][position].pop("damage_tracker", None)
             self.gamestate["board"][position].pop("unitsToRetreat", None)
+            self.gamestate["board"][position].pop("pendingRiftDice", None)
+            self.gamestate["board"][position].pop("pendingRiftBackfire", None)
             for player in self.gamestate["players"]:
                 color = self.gamestate["players"][player]["color"]
                 key = "ships_destroyed_by_" + color
