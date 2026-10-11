@@ -219,7 +219,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         await interaction.response.defer(thinking=False)
         await UpgradeButtons.startUpgrade(game, player, interaction, False, "dummy","dum")
 
-    @app_commands.command(name="ship_parts")
+    @app_commands.command(name="ship_parts", description="List your ship parts, or swap one out for free")
     @app_commands.choices(ship=ship_choices)
     async def ship_parts(self, interaction: discord.Interaction,
                          ship: Optional[app_commands.Choice[str]] = None,
