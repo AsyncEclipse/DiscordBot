@@ -1185,10 +1185,12 @@ class GamestateHelper:
             json.dump(saveFile, f)
 
     def get_player(self, player_id, interaction=None):
+        # checked before seat lookup so a seated tester still plays as the active player
+        if (interaction is not None and config.dev_mode and str(player_id) == str(config.tester_id)
+                and self.gamestate.get("activePlayerColor")):
+            return self.getPlayerObjectFromColor(self.gamestate["activePlayerColor"][0])
         if str(player_id) not in self.gamestate["players"]:
             if interaction is not None:
-                if config.dev_mode and str(player_id) == str(config.tester_id) and self.gamestate.get("activePlayerColor"):
-                    return self.getPlayerObjectFromColor(self.gamestate["activePlayerColor"][0])
                 member = interaction.guild.get_member(player_id) 
                 roles = member.roles
                 role_names = [role.name for role in roles if role.name != "@everyone"]

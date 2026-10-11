@@ -132,7 +132,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         """:param tech: The ID of the tech to be removed. Type help to get a list of your tech IDs"""
         game = GamestateHelper(interaction.channel)
         player = game.get_player(interaction.user.id, interaction)
-        player_helper = PlayerHelper(interaction.user.id, player)
+        player_helper = PlayerHelper(game.get_player_from_color(player["color"]), player)
         with open("data/techs.json", "r") as f:
             tech_data = json.load(f)
         tech_details = tech_data.get(tech)
@@ -143,13 +143,14 @@ class PlayerCommands(commands.GroupCog, name="player"):
             await interaction.response.send_message(msg)
             return
         else:
-            game.playerReturnTech(str(interaction.user.id), tech, player_helper.getTechType(tech))
+            game.playerReturnTech(player_helper.player_id, tech, player_helper.getTechType(tech))
             await interaction.response.send_message("Successfully returned " + tech_details["name"])
 
     @app_commands.command(name="remove_ancient_might")
     async def remove_ancient_might(self, interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)  
-        game.playerRemoveAncientMight(str(interaction.user.id))
+        player = game.get_player(interaction.user.id, interaction)
+        game.playerRemoveAncientMight(game.get_player_from_color(player["color"]))
         await interaction.response.send_message("Successfully removed ancient might")
 
     actionChoices = [app_commands.Choice(name="Explore", value="explore"),
@@ -177,7 +178,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
     async def research(self, interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)
         player = game.get_player(interaction.user.id,interaction)
-        player_helper = PlayerHelper(interaction.user.id, player)
+        player_helper = PlayerHelper(game.get_player_from_color(player["color"]), player)
         await interaction.response.defer(thinking=False)
         await ResearchButtons.startResearch(game, player, player_helper, interaction, False)
 
@@ -236,7 +237,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         if player is None:
             await interaction.response.send_message("You are not a player in this game.")
             return
-        player_helper = PlayerHelper(interaction.user.id, player)
+        player_helper = PlayerHelper(game.get_player_from_color(player["color"]), player)
         with open("data/parts.json", "r") as f:
             part_stats = json.load(f)
 
@@ -388,7 +389,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
     async def draw_reputation(self, interaction: discord.Interaction, num_options: int):
         game = GamestateHelper(interaction.channel)
         player = game.get_player(interaction.user.id,interaction)
-        player_helper = PlayerHelper(interaction.user.id, player)
+        player_helper = PlayerHelper(game.get_player_from_color(player["color"]), player)
         await interaction.response.defer(thinking=True, ephemeral=True)
         await ReputationButtons.resolveGainingReputation(game, num_options, interaction, player_helper, False)
         await interaction.channel.send(f"{interaction.user.name} drew {num_options} reputation tiles.")
