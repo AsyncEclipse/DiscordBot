@@ -256,7 +256,7 @@ class Combat:
             unitType = unit.split("-")[1]
             owner = unit.split('-')[0]
 
-            if all([Combat.exile_orbital_exists(game, pos), "orb" in unit]):
+            if Combat.exile_orbital_exists(game, pos) and "orb" in unit:
                 owner = game.gamestate["board"][pos]["owner"]
             elif "orb" in unit or "mon" in unit:
                 continue
@@ -297,7 +297,7 @@ class Combat:
         for unit in playerShipsList:
             unitType = unit.split("-")[1]
             owner = unit.split('-')[0]
-            if all([Combat.exile_orbital_exists(game, pos), "orb" in unit]):
+            if Combat.exile_orbital_exists(game, pos) and "orb" in unit:
                 owner = game.gamestate["board"][pos]["owner"]
             elif "orb" in unit or "mon" in unit:
                 continue
