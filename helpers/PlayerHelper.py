@@ -124,6 +124,10 @@ class PlayerHelper:
         result = max(0, self.stats["disc_tiles_for_points"] + modification)
         self.stats["disc_tiles_for_points"] = result
 
+    def renameOldExileParts(self, ship):
+        # old saves hold "iot_exile", whose underscore breaks custom_id parsing
+        self.stats[f"{ship}_parts"] = ["iotexile" if p == "iot_exile" else p for p in self.stats[f"{ship}_parts"]]
+
     def setOldShipParts(self, ship):
         if f"old_{ship}_parts" not in self.stats:
             self.stats[f"old_{ship}_parts"] = self.stats[f"{ship}_parts"]

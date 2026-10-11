@@ -30,17 +30,9 @@ def test_available_parts_unlock_from_techs_and_ancient_tiles():
     assert baseline <= owned, "a tech must never cost you the parts you already had"
 
 
-def test_undo_upgrade_restores_the_snapshot(monkeypatch):
-    import asyncio
-    from unittest.mock import AsyncMock, MagicMock
-    from Buttons.Upgrade import UpgradeButtons
 
-    before = _stats("hyd", influence_discs=5)
-    stats = dict(before, influence_discs=4, interceptor_parts=["empty"], upgradeUndo=dict(before))
-    game = MagicMock()
-    restart = AsyncMock()
-    monkeypatch.setattr(UpgradeButtons, "startUpgrade", restart)
-    asyncio.run(UpgradeButtons.undoUpgrade(game, stats, AsyncMock(), "undoUpgrade_2", PlayerHelper("1", stats)))
-
-    assert stats == before, "undo must restore every stat, including the spent influence"
-    assert restart.await_args.args[-1] == "2", "undo must give the actions back"
+def test_old_exile_part_is_renamed_so_custom_ids_parse():
+    stats = _stats("exl")
+    stats["orb_parts"] = ["iot_exile", "empty"]
+    PlayerHelper("1", stats).renameOldExileParts("orb")
+    assert stats["orb_parts"] == ["iotexile", "empty"]

@@ -49,6 +49,7 @@ class UpgradeButtons:
         actions = customID.split("_")[1]
         ship = customID.split("_")[2]
         discTileUpgrade = customID.split("_")[3]
+        player_helper.renameOldExileParts(ship)
         player_helper.setOldShipParts(ship)
         game.update_player(player_helper)
         if discTileUpgrade == "mus":
@@ -69,10 +70,7 @@ class UpgradeButtons:
             view.add_item(Button(label=lab, style=discord.ButtonStyle.red,
                                  emoji=Emoji.getEmojiByName(partName),
                                  custom_id=(f"FCID{player['color']}_selectOldPart_"
-                                            f"{actions}_{ship}_{i.replace('_','')}_{discTileUpgrade}_{str(index)}")))
-            if i == "iot_exile":
-                player_helper.stats[f"{ship}_parts"] = ["iotexile" if s == "iot_exile" else s for s in player_helper.stats[f"{ship}_parts"]]  
-                game.update_player(player_helper)
+                                            f"{actions}_{ship}_{i}_{discTileUpgrade}_{str(index)}")))
         view.add_item(Button(label="Choose Different Ship", style=discord.ButtonStyle.gray,
                                  custom_id=(f"FCID{player['color']}_chooseDifferentShip_"
                                             f"{actions}_{discTileUpgrade}")))

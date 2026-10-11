@@ -258,6 +258,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         if ship_name not in game.getShipsWithParts(player):
             await interaction.followup.send(f"Your faction has no {ship_name}.")
             return
+        player_helper.renameOldExileParts(ship_name)
         parts = player[f"{ship_name}_parts"]
         if slot is not None and not 1 <= slot <= len(parts):
             await interaction.followup.send(f"Your {ship_name} has {len(parts)} slots, numbered 1 to {len(parts)}.")
