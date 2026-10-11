@@ -301,6 +301,18 @@ class PlayerCommands(commands.GroupCog, name="player"):
             await interaction.channel.send(f"{interaction.user.mention}, which part of your {ship_name} should "
                                            f"the {part_stats[new_part]['name']} replace?", view=view)
 
+    @ship_parts.autocomplete("part")
+    async def ship_parts_part_autocomplete(self, interaction: discord.Interaction, current: str):
+        game = GamestateHelper(interaction.channel)
+        player = game.get_player(interaction.user.id, interaction)
+        if player is None:
+            return []
+        with open("data/parts.json", "r") as f:
+            part_stats = json.load(f)
+        names = {code: part_stats[code]["name"] for code in PlayerHelper("", player).getAvailableShipParts()}
+        return [app_commands.Choice(name=name, value=code) for code, name in sorted(names.items(), key=lambda x: x[1])
+                if current.lower() in name.lower() or current.lower() in code][:25]
+
     @app_commands.command(name="move")
     async def move(self, interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)
