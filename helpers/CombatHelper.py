@@ -30,9 +30,8 @@ class Combat:
             color = ship.split("-")[0]
             if ("orb" in ship and not Combat.exile_orbital_exists(game, pos)) or "mon" in ship:
                 continue
-            else:
-                if "orb" in ship:
-                    color = game.gamestate["board"][pos]["owner"]
+            if "orb" in ship:
+                color = game.gamestate["board"][pos]["owner"]
             if color not in players:
                 players.append(color)
         return players
@@ -257,10 +256,8 @@ class Combat:
             unitType = unit.split("-")[1]
             owner = unit.split('-')[0]
 
-            if all([game.find_player_faction_name_from_color(owner) == "The Exiles",
-                    "orb" in unit,
-                    game.gamestate["board"][pos].get("orbital_pop", [0])[0] == 1]):
-                pass
+            if Combat.exile_orbital_exists(game, pos) and "orb" in unit:
+                owner = game.gamestate["board"][pos]["owner"]
             elif "orb" in unit or "mon" in unit:
                 continue
             if colorOrAI == owner:
@@ -300,10 +297,8 @@ class Combat:
         for unit in playerShipsList:
             unitType = unit.split("-")[1]
             owner = unit.split('-')[0]
-            if all([game.find_player_faction_name_from_color(owner) == "The Exiles",
-                    "orb" in unit,
-                    game.gamestate["board"][pos].get("orbital_pop", [0])[0] == 1]):
-                pass
+            if Combat.exile_orbital_exists(game, pos) and "orb" in unit:
+                owner = game.gamestate["board"][pos]["owner"]
             elif "orb" in unit or "mon" in unit:
                 continue
             if defender == owner or attacker == owner:
