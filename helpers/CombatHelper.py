@@ -966,6 +966,9 @@ class Combat:
         speed = game.gamestate["board"][pos]["currentSpeed"]
         tile_map = game.gamestate["board"]
         ships = player_helper.adjust_colony_ships(1)
+        if ships is False:
+            await interaction.channel.send(f"{interaction.user.mention}, you have no colony ships left to reroll with.")
+            return
         player_ships = tile_map[pos]["player_ships"][:]
         name = interaction.user.mention
         game.update_player(player_helper)

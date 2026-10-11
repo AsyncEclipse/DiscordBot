@@ -680,6 +680,9 @@ class GamestateHelper:
         
         excludedColors = []
         colors_seen["ai"] = 0
+        owner = self.gamestate["board"][pos].get("owner")
+        if isinstance(owner, str):
+            colors_seen[owner] = 1  # the controlling player always battles last, whenever they entered
 
         for item in arr:
             color = item.split('-')[0]
