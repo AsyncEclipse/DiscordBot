@@ -49,6 +49,8 @@ class UpgradeButtons:
         actions = customID.split("_")[1]
         ship = customID.split("_")[2]
         discTileUpgrade = customID.split("_")[3]
+        # set by the part menu's Undo, so the parts image is not sent twice
+        partsShown = "_partsShown" if customID.endswith("_partsShown") else ""
         player_helper.renameOldExileParts(ship)
         player_helper.setOldShipParts(ship)
         game.update_player(player_helper)
@@ -70,7 +72,7 @@ class UpgradeButtons:
             view.add_item(Button(label=lab, style=discord.ButtonStyle.red,
                                  emoji=Emoji.getEmojiByName(partName),
                                  custom_id=(f"FCID{player['color']}_selectOldPart_"
-                                            f"{actions}_{ship}_{i}_{discTileUpgrade}_{str(index)}")))
+                                            f"{actions}_{ship}_{i}_{discTileUpgrade}_{str(index)}{partsShown}")))
         view.add_item(Button(label="Choose Different Ship", style=discord.ButtonStyle.gray,
                                  custom_id=(f"FCID{player['color']}_chooseDifferentShip_"
                                             f"{actions}_{discTileUpgrade}")))
@@ -100,7 +102,7 @@ class UpgradeButtons:
             part_stats = json.load(f)
 
         view.add_item(Button(label="Undo", style=discord.ButtonStyle.red,
-                             custom_id=f"FCID{player['color']}_upgradeShip_{actions}_{ship}_{discTileUpgrade}"))
+                             custom_id=f"FCID{player['color']}_upgradeShip_{actions}_{ship}_{discTileUpgrade}_partsShown"))
         for i in available_parts:
             part_details = part_stats.get(i)
             partName = part_details["name"].lower().replace(" ", "_") if part_details else i
@@ -113,6 +115,8 @@ class UpgradeButtons:
         await UpgradeButtons.showMenu(interaction, f"{interaction.user.mention}, replace "
                                       f"{part_stats[oldPart]['name']} on your {ship} with which part? "
                                       "Remove as a free action by selecting 'Empty'.", view)
+        if customID.endswith("_partsShown"):
+            return
         await interaction.followup.send("Available parts",
                                         file=await asyncio.to_thread(drawing.availablePartsFile, available_parts),
                                         ephemeral=True)
