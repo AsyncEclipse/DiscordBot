@@ -2,24 +2,16 @@
 import pytest
 
 from Buttons.Explore import ExploreButtons
-from tests.fakes import player_stats
+from tests.fakes import board_tile, players
 
 POS = "101"
-
-
-def _players(*colors):
-    return {str(i): player_stats("hyd", color=color) for i, color in enumerate(colors, 1)}
-
-
-def _board(ships, owner=0):
-    return {POS: {"owner": owner, "sector": 101, "player_ships": list(ships)}}
 
 
 def _alliance_game(make_game, colors=("blue", "red", "green"), player_count=4, ships=(), owner=0):
     return make_game({
         "player_count": player_count,
-        "players": _players(*colors),
-        "board": _board(ships, owner),
+        "players": players(*colors),
+        "board": board_tile(ships, owner),
     })
 
 
@@ -117,42 +109,33 @@ class TestAlliancePinning:
         ships = game.gamestate["board"][POS]["player_ships"]
         return ExploreButtons.doesPlayerHaveUnpinnedShips(player, ships, game, POS)
 
-    def test_allied_ships_count_together_instead_of_pinning_each_other(self, make_game):
-        # Two ships each, both sides equal strength: only an alliance breaks the tie.
+    @pytest.mark.parametrize(("setup", "color", "unpinned"), [
+        # 2 friendly against 2 enemy is not enough to move...
+        ("no_alliance", "blue", False),
+        # ...until an alliance lets the 2+2 count together, for both members.
+        ("alliance", "blue", True),
+        ("alliance", "red", True),
+        # A betrayal splits them again.
+        ("betrayed", "blue", False),
+    ], ids=["solo", "allied_blue", "allied_red", "betrayed"])
+    def test_allied_ships_count_together_instead_of_pinning_each_other(self, make_game, setup, color, unpinned):
         ships = ["blue-int", "blue-int", "red-int", "red-int"]
         game = _alliance_game(make_game, ships=ships)
-        game.formAlliance("nova", ["blue", "red"])
+        if setup != "no_alliance":
+            game.formAlliance("nova", ["blue", "red"])
+        if setup == "betrayed":
+            game.betrayAlliance("nova", "red")
 
-        assert self._unpinned(game, "blue")
-        assert self._unpinned(game, "red")
+        assert self._unpinned(game, color) is unpinned
 
-    def test_without_the_alliance_the_same_ships_pin(self, make_game):
-        ships = ["blue-int", "blue-int", "red-int", "red-int"]
-        game = _alliance_game(make_game, ships=ships)
-
-        # 2 friendly against 2 enemy is not enough to move.
-        assert not self._unpinned(game, "blue")
-
-    def test_an_alliance_still_pins_against_a_larger_opponent(self, make_game):
-        ships = ["blue-int", "red-int", "green-int", "green-int", "green-int"]
-        game = _alliance_game(make_game, ships=ships)
-        game.formAlliance("nova", ["blue", "red"])
-
+    @pytest.mark.parametrize("ships", [
         # 2 allied against 3 enemies.
-        assert not self._unpinned(game, "blue")
-
-    def test_a_betrayer_pins_their_former_ally_again(self, make_game):
-        ships = ["blue-int", "blue-int", "red-int", "red-int"]
-        game = _alliance_game(make_game, ships=ships)
-        game.formAlliance("nova", ["blue", "red"])
-        game.betrayAlliance("nova", "red")
-
-        assert not self._unpinned(game, "blue")
-
-    def test_gcds_still_pins_an_alliance(self, make_game):
-        ships = ["blue-int", "red-int", "ai-gcds"]
-        game = _alliance_game(make_game, ships=ships)
-        game.formAlliance("nova", ["blue", "red"])
-
+        ["blue-int", "red-int", "green-int", "green-int", "green-int"],
         # A GCDS is hostile to everyone, allies included.
+        ["blue-int", "red-int", "ai-gcds"],
+    ])
+    def test_an_alliance_still_pins_against_a_larger_or_hostile_opponent(self, make_game, ships):
+        game = _alliance_game(make_game, ships=ships)
+        game.formAlliance("nova", ["blue", "red"])
+
         assert not self._unpinned(game, "blue")

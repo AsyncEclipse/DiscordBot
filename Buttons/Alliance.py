@@ -31,27 +31,14 @@ class AllianceButtons:
     @staticmethod
     def getPlayersToFoundWith(game: GamestateHelper, player):
         """Players who could found a brand new Alliance with this one."""
-        if game.isInAlliance(player) or not game.getUnfoundedAllianceTiles():
-            return []
-        founders = []
-        for other in game.gamestate["players"].values():
-            if AllianceButtons.canFoundAlliance(game, player["color"], other["color"]):
-                founders.append(other)
-        return founders
+        return [other for other in game.gamestate["players"].values()
+                if AllianceButtons.canFoundAlliance(game, player["color"], other["color"])]
 
     @staticmethod
     def getJoinableAlliances(game: GamestateHelper, player):
         """Tile types of existing Alliances this player could become a member of."""
-        if game.isInAlliance(player):
-            return []
-        joinable = []
-        for tile in game.getJoinableAllianceTiles(player):
-            members = game.getAllianceMembers(tile)
-            if not members:
-                continue  # unfounded: that is a founding, not a joining
-            if any(AllianceButtons.areRelated(game, player["color"], color) for color in members):
-                joinable.append(tile)
-        return joinable
+        return [tile for tile in game.getJoinableAllianceTiles(player)
+                if AllianceButtons.canJoinAlliance(game, player["color"], tile)]
 
     @staticmethod
     def getBetrayableAlliances(player):
@@ -156,8 +143,7 @@ class AllianceButtons:
         otherColor = buttonID.split("_")[1]
         other = game.getPlayerObjectFromColor(otherColor)
         tile = None
-        if (other is not None
-                and AllianceButtons.isPlayersTurn(game, [player["color"], otherColor])
+        if (AllianceButtons.isPlayersTurn(game, [player["color"], otherColor])
                 and AllianceButtons.canFoundAlliance(game, player["color"], otherColor)):
             tile = game.drawAllianceTile([player["color"], otherColor])
         if tile is None:
@@ -191,6 +177,7 @@ class AllianceButtons:
                 or game.isInAlliance(player) or tile not in game.getJoinableAllianceTiles(player)):
             return False
         members = game.getAllianceMembers(tile)
+        # An unfounded tile is a founding, not a joining.
         return bool(members and any(AllianceButtons.areRelated(game, color, member) for member in members))
 
     @staticmethod
@@ -217,8 +204,7 @@ class AllianceButtons:
             await interaction.channel.send(f"{joinerName} still needs the agreement of the other"
                                            " Alliance members.", view=view)
         else:
-            if (set(agreed) != set(members)
-                    or len(members) >= game.getMaxAllianceSize()):
+            if set(agreed) != set(members):
                 await interaction.channel.send("That player is no longer able to join this alliance.")
                 await interaction.message.delete()
                 return

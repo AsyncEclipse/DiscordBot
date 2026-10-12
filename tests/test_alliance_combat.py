@@ -1,27 +1,52 @@
 """Combat pairs SIDES, not colours: allies fight together and never each other."""
+import asyncio
+
+import pytest
+
 from helpers.CombatHelper import Combat
-from tests.fakes import FakeInteraction, player_stats
+from tests.fakes import FakeInteraction, board_tile, offered_ids, offered_labels, players, player_stats
 
 POS = "101"
 
 
-def _players(*colors):
-    return {str(i): player_stats("hyd", color=color) for i, color in enumerate(colors, 1)}
-
-
 def _game(make_game, colors, ships, attacker=None, defender=None, owner=0, entry=None):
-    board = {POS: {"owner": owner, "sector": 101, "disctile": 0, "player_ships": list(ships)}}
+    board = board_tile(ships, owner)
     if attacker is not None:
         board[POS]["attacker"] = attacker
     if defender is not None:
         board[POS]["defender"] = defender
     if entry is not None:
         board[POS]["entryOrder"] = list(entry)
-    return make_game({"player_count": len(colors), "players": _players(*colors), "board": board})
+    return make_game({"player_count": len(colors), "players": players(*colors), "board": board})
 
 
 def _sides(game):
     return Combat.findSidesInTile(game, POS)
+
+
+def _reputation_colors(interaction):
+    """Colours asked to draw reputation, in the order the prompts were sent."""
+    return [button_id.split("_")[0][4:] for button_id in offered_ids(interaction)
+            if "drawReputation" in button_id]
+
+
+async def _pair(game):
+    """Run the pairing step, which records the combatants and attacker/defender."""
+    Combat.getCombatButtons(game, POS)
+
+
+async def _noop(*_args, **_kwargs):
+    return None
+
+
+def _record_declared_winners(monkeypatch):
+    declared = []
+
+    async def declare_winner(_game, _interaction, pos):
+        declared.append(pos)
+
+    monkeypatch.setattr(Combat, "declareAWinner", staticmethod(declare_winner))
+    return declared
 
 
 class TestSidesInTile:
@@ -44,13 +69,9 @@ class TestSidesInTile:
         unowned.formAlliance("nova", ["blue", "red"])
         assert Combat.findUnownedTilesToTakeOver(unowned) == [(101, POS)]
 
-    def test_allies_become_one_side(self, make_game):
-        game = _game(make_game, ("blue", "red", "green"), ["blue-cru", "red-cru", "green-cru"])
-        game.formAlliance("nova", ["blue", "red"])
-        assert _sides(game) == [["blue", "red"], ["green"]]
-
-    def test_an_ally_is_merged_even_when_not_adjacent_in_the_ship_list(self, make_game):
-        game = _game(make_game, ("blue", "red", "green"), ["blue-cru", "green-cru", "red-cru"])
+    @pytest.mark.parametrize("ship_order", [("blue", "red", "green"), ("blue", "green", "red")])
+    def test_an_alliance_is_one_side_wherever_its_members_sit_in_the_ship_list(self, make_game, ship_order):
+        game = _game(make_game, ship_order, [f"{color}-cru" for color in ship_order])
         game.formAlliance("nova", ["blue", "red"])
         assert _sides(game) == [["blue", "red"], ["green"]]
 
@@ -79,30 +100,20 @@ class TestTheQueue:
     def _pairing(self, game):
         return Combat.findSidesInTile(game, POS)[-2:]
 
-    def test_the_owner_side_waits_so_the_two_attackers_fight_first(self, make_game):
-        game = _game(make_game, ("blue", "red", "green", "yellow"),
-                     ["blue-cru", "red-cru", "green-cru", "yellow-cru"], owner="blue")
+    @pytest.mark.parametrize(("colors", "ships", "expected"), [
+        # With two other sides present the owner side waits; they fight first.
+        (("blue", "red", "green", "yellow"),
+         ["blue-cru", "red-cru", "green-cru", "yellow-cru"], [["green"], ["yellow"]]),
+        # Only one other side is left, so the owner side is drawn in against it.
+        (("blue", "red", "green"),
+         ["blue-cru", "red-cru", "green-cru"], [["blue", "red"], ["green"]]),
+    ], ids=["two_attackers_fight_first", "owner_side_drawn_in"])
+    def test_the_owner_side_is_drawn_in_only_when_it_is_needed(self, make_game, colors, ships, expected):
+        game = _game(make_game, colors, ships, owner="blue")
         game.formAlliance("nova", ["blue", "red"])
         game.fixshipsOrder(POS)
 
-        assert self._pairing(game) == [["green"], ["yellow"]]
-
-    def test_after_one_attacker_dies_the_owner_side_is_drawn_in(self, make_game):
-        game = _game(make_game, ("blue", "red", "green", "yellow"),
-                     ["blue-cru", "red-cru", "green-cru"], owner="blue")
-        game.formAlliance("nova", ["blue", "red"])
-        game.fixshipsOrder(POS)
-
-        # yellow is gone, so only two sides remain and both fight.
-        assert self._pairing(game) == [["blue", "red"], ["green"]]
-
-    def test_an_alliance_facing_a_single_enemy_fights_at_once(self, make_game):
-        game = _game(make_game, ("blue", "red", "green"),
-                     ["blue-cru", "red-cru", "green-cru"], owner="blue")
-        game.formAlliance("nova", ["blue", "red"])
-        game.fixshipsOrder(POS)
-
-        assert self._pairing(game) == [["blue", "red"], ["green"]]
+        assert self._pairing(game) == expected
 
 
 class TestSideTargeting:
@@ -163,31 +174,35 @@ class TestDracoAndAncients:
     """FAQ: the ally fights the Ancients; the Descendants of Draco do not."""
 
     def _game_with_draco(self, make_game, ships, attacker=None, defender=None):
-        players = _players("blue", "red")
-        players["1"]["name"] = "Descendants of Draco"
-        board = {POS: {"owner": "red", "sector": 101, "disctile": 0, "player_ships": list(ships)}}
+        game_players = players("blue", "red")
+        game_players["1"]["name"] = "Descendants of Draco"
+        board = board_tile(ships, owner="red")
         if attacker is not None:
             board[POS]["attacker"] = attacker
         if defender is not None:
             board[POS]["defender"] = defender
-        return make_game({"player_count": 2, "players": players, "board": board,
+        return make_game({"player_count": 2, "players": game_players, "board": board,
                           "advanced_ai": False, "wa_ai": False})
 
-    def test_draco_is_left_out_when_ancients_are_present(self, make_game):
-        game = self._game_with_draco(make_game, ["blue-cru", "red-cru", "ai-anc"])
+    @pytest.mark.parametrize(("ships", "sitting_out", "sides"), [
+        (["blue-cru", "red-cru", "ai-anc"], ["blue"], [["red"], ["ai"]]),
+        (["blue-cru", "red-cru"], [], [["blue", "red"]]),
+    ], ids=["ancients_present", "no_ancients"])
+    def test_draco_sits_out_only_while_the_ancients_are_present(self, make_game, ships, sitting_out, sides):
+        game = self._game_with_draco(make_game, ships)
         game.formAlliance("nova", ["blue", "red"])
 
-        assert Combat.sitsOutAgainstAncients(game, "blue", POS)
-        assert not Combat.sitsOutAgainstAncients(game, "red", POS)
-        # Only the ally faces the Ancients.
-        assert Combat.findSidesInTile(game, POS) == [["red"], ["ai"]]
+        assert [color for color in ("blue", "red")
+                if Combat.sitsOutAgainstAncients(game, color, POS)] == sitting_out
+        assert Combat.findSidesInTile(game, POS) == sides
 
-    def test_draco_fights_normally_when_no_ancients_are_present(self, make_game):
-        game = self._game_with_draco(make_game, ["blue-cru", "red-cru"])
-        game.formAlliance("nova", ["blue", "red"])
+    def test_draco_alone_against_the_ancients_is_recognised(self, make_game):
+        game = self._game_with_draco(make_game, ["blue-cru", "ai-anc"])
 
-        assert not Combat.sitsOutAgainstAncients(game, "blue", POS)
-        assert Combat.findSidesInTile(game, POS) == [["blue", "red"]]
+        assert Combat.isDracoAgainstAncients(game, POS)
+
+        game.add_units(["red-cru"], POS)
+        assert not Combat.isDracoAgainstAncients(game, POS)
 
     def test_draco_cannot_be_hit_while_sitting_out(self, make_game):
         game = self._game_with_draco(make_game, ["blue-cru", "red-cru", "ai-anc"],
@@ -201,28 +216,18 @@ class TestDracoAndAncients:
     def test_draco_does_not_draw_reputation_after_ally_defeats_ancients(self, make_game, run):
         game = self._game_with_draco(make_game, ["blue-cru", "red-cru", "ai-anc"])
         game.formAlliance("nova", ["blue", "red"])
-        async def setup_pairing():
-            Combat.getCombatButtons(game, POS)
-
-        run(setup_pairing())
+        run(_pair(game))
         game.remove_units(["ai-anc"], POS)
         interaction = FakeInteraction()
 
         run(Combat.declareAWinner(game, interaction, POS))
 
-        prompt_colors = [child.custom_id.split("_")[0][4:]
-                         for _content, kwargs in interaction.channel.sent
-                         for child in getattr(kwargs.get("view"), "children", [])
-                         if "drawReputation" in child.custom_id]
-        assert prompt_colors == ["red"]
+        assert _reputation_colors(interaction) == ["red"]
 
     def test_repaired_pairing_adds_new_actual_combatants(self, make_game, run):
         game = self._game_with_draco(make_game, ["blue-cru", "red-cru", "ai-anc"])
         game.formAlliance("nova", ["blue", "red"])
-        async def setup_pairing():
-            Combat.getCombatButtons(game, POS)
-
-        run(setup_pairing())
+        run(_pair(game))
         game.remove_units(["ai-anc"], POS)
 
         game.setAttackerAndDefender(["blue", "red"], ["green"], POS)
@@ -271,9 +276,7 @@ class TestAllianceWinsTheSector:
 
         run(Combat.declareAWinner(game, inter, POS))
 
-        ids = [child.custom_id for _content, kwargs in inter.channel.sent
-               for child in getattr(kwargs.get("view"), "children", [])]
-        disc = [i for i in ids if "addInfluenceFinish" in i]
+        disc = [button_id for button_id in offered_ids(inter) if "addInfluenceFinish" in button_id]
         # red entered before blue, so red is offered the disc first.
         assert disc == [f"FCIDred_addInfluenceFinish_{POS}", f"FCIDblue_addInfluenceFinish_{POS}"]
 
@@ -284,8 +287,7 @@ class TestAllianceWinsTheSector:
 
         run(Combat.declareAWinner(game, inter, POS))
 
-        labels = [child.label for _content, kwargs in inter.channel.sent
-                  for child in getattr(kwargs.get("view"), "children", [])]
+        labels = offered_labels(inter)
         assert "Place Influence" in labels
         assert not any(label.startswith("Place Influence (") for label in labels)
 
@@ -386,28 +388,14 @@ class TestAllianceCombatEnd:
         game = _game(make_game, ("blue", "red", "green"),
                      ["blue-cru", "red-cru"], attacker=["green"], defender=["blue", "red"])
         game.formAlliance("nova", ["blue", "red"])
-        declared = []
+        declared = _record_declared_winners(monkeypatch)
 
-        async def declare_winner(_game, _interaction, pos):
-            declared.append(pos)
-
-        async def noop(*_args, **_kwargs):
-            return None
-
-        monkeypatch.setattr(Combat, "declareAWinner", staticmethod(declare_winner))
-        class DrawingStub:
-            @staticmethod
-            def board_tile_image_file(_pos):
-                return None
-
-        monkeypatch.setattr("helpers.CombatHelper.DrawHelper", lambda _state: DrawingStub())
-        monkeypatch.setattr(Combat, "getCombatButtons", staticmethod(lambda *_args: None))
-        monkeypatch.setattr(Combat, "startCombat", staticmethod(noop))
         run(Combat.checkCombatEnd(game, FakeInteraction(), POS, 3))
 
         assert declared == [POS]
 
-    def test_manual_unit_removal_ends_combat_when_only_allies_remain(self, make_game, run, monkeypatch):
+    @pytest.mark.parametrize("removed", ["green-cru", "blue-cru"])
+    def test_manual_unit_removal_defers_to_the_combat_end_check(self, make_game, run, monkeypatch, removed):
         game = _game(make_game, ("blue", "red", "green"),
                      ["blue-cru", "red-cru", "green-cru"])
         game.formAlliance("nova", ["blue", "red"])
@@ -423,7 +411,7 @@ class TestAllianceCombatEnd:
         monkeypatch.setattr(Combat, "getRemovalButtons", staticmethod(lambda *_args: None))
         interaction = FakeInteraction()
         interaction.message.edit = edit
-        run(Combat.removeThisUnit(game, f"removeThisUnit_{POS}_green-cru",
+        run(Combat.removeThisUnit(game, f"removeThisUnit_{POS}_{removed}",
                                   game.getPlayerObjectFromColor("blue"), interaction))
 
         assert checked == [(POS, 3)]
@@ -436,25 +424,8 @@ class TestAllianceCombatEnd:
         game.gamestate["board"]["102"] = {
             "owner": "green", "sector": 102, "disctile": 0, "player_ships": []
         }
-        declared = []
-
-        async def declare_winner(_game, _interaction, pos):
-            declared.append(pos)
-
-        async def noop(*_args, **_kwargs):
-            return None
-
-        monkeypatch.setattr(Combat, "declareAWinner", staticmethod(declare_winner))
+        declared = _record_declared_winners(monkeypatch)
         interaction = FakeInteraction()
-        monkeypatch.setattr(Combat, "promptNextSpeed", staticmethod(noop))
-        monkeypatch.setattr(Combat, "getCombatButtons", staticmethod(lambda *_args: None))
-        monkeypatch.setattr(Combat, "startCombat", staticmethod(noop))
-        class DrawingStub:
-            @staticmethod
-            def board_tile_image_file(_pos):
-                return None
-
-        monkeypatch.setattr("helpers.CombatHelper.DrawHelper", lambda _state: DrawingStub())
         run(Combat.finishRetreatingUnits(game, f"finishRetreatingUnits_{POS}_green_2_102",
                                          interaction, game.getPlayerObjectFromColor("green")))
 
@@ -473,11 +444,7 @@ class TestAllianceCombatEnd:
 
         run(Combat.declareAWinner(game, interaction, POS))
 
-        prompt_colors = [child.custom_id.split("_")[0][4:]
-                         for _content, kwargs in interaction.channel.sent
-                         for child in getattr(kwargs.get("view"), "children", [])
-                         if "drawReputation" in child.custom_id]
-        assert prompt_colors == ["red", "green", "blue"]
+        assert _reputation_colors(interaction) == ["red", "green", "blue"]
 
     def test_allied_sector_owner_is_not_offered_as_an_enemy_to_bombard(self, make_game, run):
         game = _game(make_game, ("blue", "red", "green"), ["blue-cru", "red-cru"],
@@ -488,10 +455,8 @@ class TestAllianceCombatEnd:
 
         run(Combat.declareAWinner(game, interaction, POS))
 
-        button_ids = [child.custom_id for _content, kwargs in interaction.channel.sent
-                      for child in getattr(kwargs.get("view"), "children", [])]
         assert not any("rollDice" in button_id or "removeInfluenceFinish" in button_id
-                       for button_id in button_ids)
+                       for button_id in offered_ids(interaction))
 
 
 class TestStalemateResolution:
@@ -507,15 +472,19 @@ class TestStalemateResolution:
         game.gamestate["board"][POS]["currentSpeed"] = 1
         return game
 
-    def test_unarmed_battle_after_missiles_offers_attacker_stalemate_action(self, make_game, run):
+    @pytest.mark.parametrize("source", ["combat_buttons", "prompt_next_speed"])
+    def test_an_unarmed_battle_offers_the_attacker_the_stalemate_action(self, make_game, run, source):
         game = self._unarmed_alliance_battle(make_game)
+        interaction = FakeInteraction()
 
-        async def button_ids():
-            return [button.custom_id for button in Combat.getCombatButtons(game, POS).children]
+        async def offered():
+            if source == "combat_buttons":
+                return [button.custom_id for button in Combat.getCombatButtons(game, POS).children]
+            await Combat.promptNextSpeed(game, POS, interaction.channel, False)
+            await asyncio.sleep(0)  # let the task sending the prompt finish
+            return offered_ids(interaction)
 
-        ids = run(button_ids())
-
-        assert "FCIDgreen_resolveStalemate_101_green" in ids
+        assert "FCIDgreen_resolveStalemate_101_green" in run(offered())
 
     def test_stalemate_is_blocked_during_missile_speed_and_pending_resolution(self, make_game):
         game = self._unarmed_alliance_battle(make_game)
@@ -532,24 +501,11 @@ class TestStalemateResolution:
             for key in pending:
                 game.gamestate["board"][POS].pop(key)
 
-    def test_normal_combat_prompt_offers_stalemate_after_missile_speed(self, make_game, run):
-        game = self._unarmed_alliance_battle(make_game)
-        interaction = FakeInteraction()
-
-        run(Combat.promptNextSpeed(game, POS, interaction.channel, False))
-
-        ids = [child.custom_id for _content, kwargs in interaction.channel.sent
-               for child in getattr(kwargs.get("view"), "children", [])]
-        assert "FCIDgreen_resolveStalemate_101_green" in ids
-
     def test_stalemate_destroys_attackers_and_credits_largest_ships_round_robin(
             self, make_game, run, monkeypatch):
         game = self._unarmed_alliance_battle(make_game)
         interaction = FakeInteraction()
-        async def no_end(*_args, **_kwargs):
-            return None
-
-        monkeypatch.setattr(Combat, "checkCombatEnd", staticmethod(no_end))
+        monkeypatch.setattr(Combat, "checkCombatEnd", staticmethod(_noop))
 
         run(Combat.resolveStalemate(game, f"resolveStalemate_{POS}_green", interaction))
 
@@ -581,10 +537,7 @@ class TestStalemateResolution:
     def test_stalemate_leaves_noncombat_orbitals_and_monuments_alone(self, make_game, run, monkeypatch):
         game = self._unarmed_alliance_battle(make_game)
         game.gamestate["board"][POS]["player_ships"].extend(["green-mon", "green-orb"])
-        async def no_end(*_args, **_kwargs):
-            return None
-
-        monkeypatch.setattr(Combat, "checkCombatEnd", staticmethod(no_end))
+        monkeypatch.setattr(Combat, "checkCombatEnd", staticmethod(_noop))
 
         run(Combat.resolveStalemate(game, f"resolveStalemate_{POS}_green", FakeInteraction()))
 

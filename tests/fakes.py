@@ -66,13 +66,32 @@ def player_stats(faction, **overrides):
     return stats
 
 
+def players(*colors):
+    """A gamestate players dict with one Hydran Progress per colour."""
+    return {str(i): player_stats("hyd", color=color) for i, color in enumerate(colors, 1)}
+
+
+def board_tile(ships=(), owner=0, sector=101, **extra):
+    """A board dict holding one sector, keyed the way the gamestate keys it."""
+    tile = {"owner": owner, "sector": sector, "disctile": 0, "player_ships": list(ships)}
+    tile.update(extra)
+    return {str(sector): tile}
+
+
+def offered_buttons(interaction):
+    """Every button offered across the messages the fake channel received."""
+    return [child for _content, kwargs in interaction.channel.sent
+            for child in getattr(kwargs.get("view"), "children", [])]
+
+
 def offered_labels(interaction):
     """Button labels offered across every message the fake channel received."""
-    labels = []
-    for _content, kwargs in interaction.channel.sent:
-        for child in getattr(kwargs.get("view"), "children", []):
-            labels.append(getattr(child, "label", None))
-    return labels
+    return [getattr(button, "label", None) for button in offered_buttons(interaction)]
+
+
+def offered_ids(interaction):
+    """Button custom_ids offered across every message the fake channel received."""
+    return [getattr(button, "custom_id", None) for button in offered_buttons(interaction)]
 
 
 def sent_text(interaction):

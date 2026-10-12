@@ -56,6 +56,13 @@ class Combat:
         return player is not None and "Draco" in player["name"]
 
     @staticmethod
+    def isDracoAgainstAncients(game: GamestateHelper, pos: str):
+        """FAQ: with nobody but Ancients left in the sector, Draco does not fight."""
+        players = Combat.findPlayersInTile(game, pos)
+        return (len(players) == 2 and "anc" in Combat.findShipTypesInTile(game, pos)
+                and any("Draco" in game.find_player_faction_name_from_color(color) for color in players))
+
+    @staticmethod
     def findSidesInTile(game: GamestateHelper, pos: str):
         """The colours in a sector grouped into sides: an Alliance fights as one
         side, so its members never end up opposing each other. Order matches
@@ -98,15 +105,11 @@ class Combat:
         tile_map = game.gamestate["board"]
         tiles = []
         for tile in tile_map:
-            players = Combat.findPlayersInTile(game, tile)
             if len(Combat.findSidesInTile(game, tile)) > 1:
                 game.fixshipsOrder(tile)
                 # Don't start combat between draco and ancients
-                if len(players) == 2 and "anc" in Combat.findShipTypesInTile(game, tile):
-                    playerInTile = players
-                    if any(["Draco" in game.find_player_faction_name_from_color(playerInTile[1]),
-                            "Draco" in game.find_player_faction_name_from_color(playerInTile[0])]):
-                        continue
+                if Combat.isDracoAgainstAncients(game, tile):
+                    continue
                 tiles.append((int(tile_map[tile]["sector"]), tile))
         sorted_tiles = sorted(tiles, key=lambda x: x[0], reverse=True)
         return sorted_tiles
@@ -132,14 +135,7 @@ class Combat:
         tile_map = game.gamestate["board"]
         tiles = []
         for tile in tile_map:
-            playersInTile = Combat.findPlayersInTile(game, tile)
-            is_draco_against_ancients = (
-                len(playersInTile) == 2
-                and "anc" in Combat.findShipTypesInTile(game, tile)
-                and any("Draco" in game.find_player_faction_name_from_color(color)
-                        for color in playersInTile)
-            )
-            if is_draco_against_ancients:
+            if Combat.isDracoAgainstAncients(game, tile):
                 if tile_map[tile].get("owner") == 0:
                     tiles.append((int(tile_map[tile]["sector"]), tile))
             else:
@@ -637,9 +633,7 @@ class Combat:
         await interaction.channel.send(message)
         view = Combat.getRemovalButtons(game, pos, player)
         await interaction.message.edit(view=view)
-        if (len(Combat.findPlayersInTile(game, pos)) != oldLength
-                and len(Combat.findSidesInTile(game, pos)) < 2):
-            await Combat.checkCombatEnd(game, interaction, pos, oldLength)
+        await Combat.checkCombatEnd(game, interaction, pos, oldLength)
 
     @staticmethod
     def getRiftBackfireAllocation(game: GamestateHelper, colorOrAI, player_ships, pos, totalDamage):
@@ -1590,10 +1584,7 @@ class Combat:
     @staticmethod
     async def checkCombatEnd(game: GamestateHelper, interaction: discord.Interaction, pos: str, oldLength: int):
         players = Combat.findPlayersInTile(game, pos)
-        dracoNAnc = (len(players) == 2
-                     and "anc" in Combat.findShipTypesInTile(game, pos)
-                     and "Draco" in game.find_player_faction_name_from_color(players[1]))
-        if len(Combat.findSidesInTile(game, pos)) < 2 or dracoNAnc:
+        if len(Combat.findSidesInTile(game, pos)) < 2 or Combat.isDracoAgainstAncients(game, pos):
             await Combat.declareAWinner(game, interaction, pos)
             return True
         elif oldLength != len(players):

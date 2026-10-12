@@ -6,26 +6,20 @@ import pytest
 from Buttons.Alliance import AllianceButtons
 from Buttons.Turn import TurnButtons
 from helpers.PlayerHelper import PlayerHelper
-from tests.fakes import FakeInteraction, player_stats
+from tests.fakes import FakeInteraction, board_tile, players
 
 
 def _game_state():
-    players = {
-        "1": player_stats("hyd", color="blue", owned_tiles=["101"],
-                           reputation_track=["amb-hydran-red"]),
-        "2": player_stats("hyd", color="red",
-                           reputation_track=["amb-hydran-blue"]),
-        "3": player_stats("hyd", color="green", reputation_track=["mixed"]),
-        "4": player_stats("hyd", color="yellow", reputation_track=["mixed"]),
-    }
+    game_players = players("blue", "red", "green", "yellow")
+    game_players["1"].update(owned_tiles=["101"], reputation_track=["amb-hydran-red"])
+    game_players["2"]["reputation_track"] = ["amb-hydran-blue"]
+    game_players["3"]["reputation_track"] = ["mixed"]
+    game_players["4"]["reputation_track"] = ["mixed"]
     return {
         "player_count": 4,
-        "players": players,
-        "board": {
-            "101": {"owner": "blue", "sector": 101, "player_ships": []},
-            "102": {"owner": "green", "sector": 102,
-                    "player_ships": ["blue-int", "green-int"]},
-        },
+        "players": game_players,
+        "board": {**board_tile(owner="blue"),
+                  **board_tile(["blue-int", "green-int"], owner="green", sector=102)},
     }
 
 
@@ -34,83 +28,63 @@ def _leave_nova(game):
     game.betrayAlliance("nova", "blue")
 
 
+def _traitor_check(game, color):
+    player = game.getPlayerObjectFromColor(color)
+    helper = PlayerHelper(game.get_player_from_color(color), player)
+    return TurnButtons.checkTraitor(game, player, FakeInteraction(), helper)
+
+
+def _one_related(state):
+    state["players"]["2"]["owned_tiles"] = ["101"]
+    state["board"]["101"].update(owner="red", player_ships=["blue-int"])
+
+
+def _two_related(state):
+    state["players"]["1"]["reputation_track"] = ["amb-hydran-red", "amb-hydran-green"]
+    state["players"]["2"]["owned_tiles"] = ["101"]
+    state["players"]["3"]["owned_tiles"] = ["102"]
+    state["board"]["101"].update(owner="red", player_ships=["blue-int"])
+    state["board"]["102"]["player_ships"] = ["blue-int"]
+
+
 class TestAllianceBetrayal:
-    def test_former_ally_control_makes_leaver_traitor_without_leaver_ships(
-        self, make_game, run
-    ):
+    @pytest.mark.parametrize(("ships_101", "traitor"), [
+        (["red-int"], True),
+        ([], False),
+    ], ids=["former_ally_present", "no_former_ally"])
+    def test_a_former_allys_presence_decides_whether_the_leaver_is_traitor(
+            self, make_game, run, ships_101, traitor):
         state = _game_state()
-        state["board"]["101"]["player_ships"] = ["red-int"]
+        state["board"]["101"]["player_ships"] = ships_101
         game = make_game(state)
         _leave_nova(game)
-        blue = game.getPlayerObjectFromColor("blue")
-        player_helper = PlayerHelper(game.get_player_from_color("blue"), blue)
 
-        run(TurnButtons.checkTraitor(game, blue, FakeInteraction(), player_helper))
+        run(_traitor_check(game, "blue"))
 
-        assert blue["traitor"] is True
+        assert bool(game.getPlayerObjectFromColor("blue").get("traitor")) is traitor
 
-    def test_no_former_ally_presence_in_a_sector_does_not_make_leaver_traitor(
-        self, make_game, run
-    ):
-        game = make_game(_game_state())
-        _leave_nova(game)
-        blue = game.getPlayerObjectFromColor("blue")
-        player_helper = PlayerHelper(game.get_player_from_color("blue"), blue)
-
-        run(TurnButtons.checkTraitor(game, blue, FakeInteraction(), player_helper))
-
-        assert blue.get("traitor") is not True
-
-    def test_ordinary_diplomatic_aggression_still_breaks_relations_and_marks_traitor(
-        self, make_game, run, monkeypatch
-    ):
+    @pytest.mark.parametrize(("mutate", "expected"), [
+        (_one_related, [("blue", "red")]),
+        (_two_related, [("blue", "red"), ("blue", "green")]),
+    ])
+    def test_ordinary_aggression_breaks_relations_with_each_related_player(
+            self, make_game, run, monkeypatch, mutate, expected):
         state = _game_state()
-        state["board"]["101"]["player_ships"] = ["blue-int"]
-        state["board"]["101"]["owner"] = "red"
-        state["players"]["2"]["owned_tiles"] = ["101"]
+        mutate(state)
         game = make_game(state)
-        blue = game.getPlayerObjectFromColor("blue")
         calls = []
 
-        async def break_relations(game_arg, player, other, interaction):
+        async def break_relations(_game, player, other, _interaction):
             calls.append((player["color"], other["color"]))
 
         monkeypatch.setattr(
             "Buttons.Turn.DiplomaticRelationsButtons.breakRelationsWith", break_relations
         )
-        player_helper = PlayerHelper(game.get_player_from_color("blue"), blue)
 
-        run(TurnButtons.checkTraitor(game, blue, FakeInteraction(), player_helper))
+        run(_traitor_check(game, "blue"))
 
-        assert calls == [("blue", "red")]
-        assert blue["traitor"] is True
-
-    def test_ordinary_aggression_checks_each_related_player(self, make_game, run, monkeypatch):
-        state = _game_state()
-        state["players"]["1"]["reputation_track"] = [
-            "amb-hydran-red", "amb-hydran-green"
-        ]
-        state["players"]["2"]["owned_tiles"] = ["101"]
-        state["players"]["3"]["owned_tiles"] = ["102"]
-        state["board"]["101"]["owner"] = "red"
-        state["board"]["101"]["player_ships"] = ["blue-int"]
-        state["board"]["102"]["player_ships"] = ["blue-int"]
-        game = make_game(state)
-        blue = game.getPlayerObjectFromColor("blue")
-        calls = []
-
-        async def break_relations(game_arg, player, other, interaction):
-            calls.append((player["color"], other["color"]))
-
-        monkeypatch.setattr(
-            "Buttons.Turn.DiplomaticRelationsButtons.breakRelationsWith", break_relations
-        )
-        player_helper = PlayerHelper(game.get_player_from_color("blue"), blue)
-
-        run(TurnButtons.checkTraitor(game, blue, FakeInteraction(), player_helper))
-
-        assert calls == [("blue", "red"), ("blue", "green")]
-        assert blue["traitor"] is True
+        assert calls == expected
+        assert game.getPlayerObjectFromColor("blue")["traitor"] is True
 
     def test_a_different_allys_ships_do_not_count_as_former_ally_aggression(
         self, make_game, run
@@ -126,12 +100,10 @@ class TestAllianceBetrayal:
         game = make_game(state)
         _leave_nova(game)
         game.formAlliance("flare", ["blue", "green"])
-        blue = game.getPlayerObjectFromColor("blue")
-        player_helper = PlayerHelper(game.get_player_from_color("blue"), blue)
 
-        run(TurnButtons.checkTraitor(game, blue, FakeInteraction(), player_helper))
+        run(_traitor_check(game, "blue"))
 
-        assert blue.get("traitor") is not True
+        assert game.getPlayerObjectFromColor("blue").get("traitor") is not True
 
     def test_former_ally_without_direct_diplomatic_relations_still_triggers_faq(
         self, make_game, run
@@ -143,11 +115,10 @@ class TestAllianceBetrayal:
         game.formAlliance("nova", ["blue", "red", "green"])
         game.betrayAlliance("nova", "blue")
         blue = game.getPlayerObjectFromColor("blue")
-        player_helper = PlayerHelper(game.get_player_from_color("blue"), blue)
 
         assert not any("green" in tile for tile in blue["reputation_track"])
 
-        run(TurnButtons.checkTraitor(game, blue, FakeInteraction(), player_helper))
+        run(_traitor_check(game, "blue"))
 
         assert blue["traitor"] is True
 

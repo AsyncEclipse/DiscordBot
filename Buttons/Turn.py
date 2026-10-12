@@ -13,6 +13,11 @@ from discord.ui import View, Button
 import asyncio
 
 
+def _has_ship(color, sector_ships):
+    """A ship that counts for the Act of Aggression; orbitals and monuments do not."""
+    return any(color in ship and "orb" not in ship and "mon" not in ship for ship in sector_ships)
+
+
 class TurnButtons:
 
     @staticmethod
@@ -473,17 +478,11 @@ class TurnButtons:
         ]
         for destination in game.gamestate["board"]:
             sector_ships = game.gamestate["board"][destination].get("player_ships", [])
-            player_present = any(
-                player["color"] in ship and "orb" not in ship and "mon" not in ship
-                for ship in sector_ships
-            )
+            player_present = _has_ship(player["color"], sector_ships)
             player_controls = destination in player["owned_tiles"]
 
             for former_ally in former_allies:
-                former_ally_present = any(
-                    former_ally["color"] in ship and "orb" not in ship and "mon" not in ship
-                    for ship in sector_ships
-                )
+                former_ally_present = _has_ship(former_ally["color"], sector_ships)
                 former_ally_controls = destination in former_ally["owned_tiles"]
                 if ((player_present and (former_ally_present or former_ally_controls))
                         or (player_controls and former_ally_present)):
@@ -504,10 +503,7 @@ class TurnButtons:
                 if game.areAllied(player["color"], color):
                     continue
                 p2 = game.getPlayerObjectFromColor(color)
-                if destination not in p2["owned_tiles"] and not any(
-                    color in ship and "orb" not in ship and "mon" not in ship
-                    for ship in sector_ships
-                ):
+                if destination not in p2["owned_tiles"] and not _has_ship(color, sector_ships):
                     continue
                 await DiplomaticRelationsButtons.breakRelationsWith(game, player, p2, interaction)
                 game.makeEveryoneNotTraitor()
