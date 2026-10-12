@@ -139,27 +139,51 @@ class GamestateHelper:
         self.gamestate["lastPingTime"] = time.time()
         self.update()
 
+    def getScoringUnits(self):
+        """Players grouped the way they score: an Alliance is a single unit.
+        Each unit is (colors, score, resources), with an Alliance's VP and
+        resources averaged across its members and rounded down, as the rules
+        require. Best unit first."""
+        drawing = DrawHelper(self.gamestate)
+        units = []
+        seen = set()
+        for playerID in self.gamestate["players"]:
+            playerObj = self.get_player(playerID)
+            if playerObj["color"] in seen:
+                continue
+            colors = [playerObj["color"]] + self.getAlliedColors(playerObj)
+            seen.update(colors)
+            score = 0
+            resources = 0
+            for color in colors:
+                member = self.getPlayerObjectFromColor(color)
+                score += drawing.get_public_points(member, False)
+                resources += member["science"] + member["money"] + member["materials"]
+            units.append((colors, score // len(colors), resources // len(colors)))
+        units.sort(key=lambda unit: (unit[1], unit[2]), reverse=True)
+        return units
+
+    def getUnitScore(self, player, showPrivateRegardless=False):
+        """The score this player actually wins with. An Alliance shares one score."""
+        drawing = DrawHelper(self.gamestate)
+        colors = [player["color"]] + self.getAlliedColors(player)
+        total = sum(drawing.get_public_points(self.getPlayerObjectFromColor(color), showPrivateRegardless)
+                    for color in colors)
+        return total // len(colors)
+
+    def getWinningColors(self):
+        """The colours that win together: the members of the best scoring unit."""
+        units = self.getScoringUnits()
+        return units[0][0] if units else []
+
     def getWinner(self):
-        winner = ""
-        winnerFaction = ""
-        highestScore = 0
-        resources = 0
-        for player in self.gamestate["players"]:
-            playerObj = self.get_player(player)
-            drawing = DrawHelper(self.gamestate)
-            points = drawing.get_public_points(playerObj, False)
-            totalResources = playerObj["science"] + playerObj["money"] + playerObj["materials"]
-            if points > highestScore:
-                highestScore = points
-                winner = playerObj["player_name"]
-                winnerFaction = playerObj["name"]
-                resources = totalResources
-            if points == highestScore:
-                if totalResources > resources:
-                    winner = playerObj["player_name"]
-                    winnerFaction = playerObj["name"]
-                    resources = totalResources
-        return (winner, highestScore, winnerFaction)
+        units = self.getScoringUnits()
+        if not units:
+            return ("", 0, "")
+        colors, score, _resources = units[0]
+        names = [self.getPlayerObjectFromColor(color)["player_name"] for color in colors]
+        factions = [self.getPlayerObjectFromColor(color)["name"] for color in colors]
+        return (" and ".join(names), score, " and ".join(factions))
 
     def setAdvancedAI(self, status: bool):
         self.gamestate["advanced_ai"] = status
