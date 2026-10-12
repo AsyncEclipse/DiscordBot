@@ -634,7 +634,28 @@ class GamestateHelper:
                 self.gamestate["board"][position]["player_ships"].insert(0, i)
             else:
                 self.gamestate["board"][position]["player_ships"].append(i)
+        self.noteUnitEntry(color, position)
         self.update()
+
+    def getEntryOrder(self, position):
+        """Colours in the order they entered this sector, earliest first. The
+        rules use this to break ties between allies for dice assignment,
+        reputation draws and influence placement."""
+        return self.gamestate["board"].get(position, {}).get("entryOrder", [])
+
+    def noteUnitEntry(self, color, position):
+        tile = self.gamestate["board"][position]
+        entryOrder = tile.setdefault("entryOrder", [])
+        if color not in entryOrder:
+            entryOrder.append(color)
+
+    def pruneEntryOrder(self, position):
+        """Drop colours with no ships left; they are no longer in the sector."""
+        tile = self.gamestate["board"].get(position)
+        if tile is None or "entryOrder" not in tile:
+            return
+        present = [ship.split("-")[0] for ship in tile.get("player_ships", [])]
+        tile["entryOrder"] = [color for color in tile["entryOrder"] if color in present]
 
     def displayPlayerStats(self, player):
         money = player["money"]
@@ -743,9 +764,11 @@ class GamestateHelper:
         self.update()
 
     def setAttackerAndDefender(self, attacker, defender, pos):
-        if isinstance(self.gamestate["board"][pos]["owner"], str) and attacker == self.gamestate["board"][pos]["owner"]:
-            attacker = defender
-            defender = self.gamestate["board"][pos]["owner"]
+        """Each side is a list of colours: one player, or a whole Alliance.
+        The sector owner's side always defends."""
+        owner = self.gamestate["board"][pos]["owner"]
+        if isinstance(owner, str) and owner in attacker:
+            attacker, defender = defender, attacker
         self.gamestate["board"][pos]["attacker"] = attacker
         self.gamestate["board"][pos]["defender"] = defender
         self.update()
@@ -893,6 +916,7 @@ class GamestateHelper:
             else:
                 if i + "adv" in self.gamestate["board"][position]["player_ships"]:
                     self.gamestate["board"][position]["player_ships"].remove(i + "adv")
+        self.pruneEntryOrder(position)
         self.update()
 
     async def upkeep(self, interaction: discord.Interaction):
