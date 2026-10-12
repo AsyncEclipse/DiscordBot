@@ -445,15 +445,6 @@ class Combat:
         return False
 
     @staticmethod
-    def getCombatantSpeeds(game: GamestateHelper, colorOrAI: str, playerShipsList, pos):
-        ships = Combat.getCombatantShipsBySpeed(game, colorOrAI, playerShipsList, pos)
-        speeds = []
-        for ship in ships:
-            if ship[0] not in speeds:
-                speeds.append(ship[0])
-        return speeds
-
-    @staticmethod
     def getCombatButtons(game: GamestateHelper, pos: str):
         view = View()
         sides = Combat.findSidesInTile(game, pos)[-2:]
