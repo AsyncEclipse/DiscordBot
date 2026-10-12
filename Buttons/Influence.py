@@ -300,6 +300,7 @@ class InfluenceButtons:
             game.gamestate["board"][tile]["player_ships"] = [e
                                                             for e in game.gamestate["board"][tile]["player_ships"]
                                                             if (player_color not in e or "mon" in e or "orb" in e)]
+            game.pruneEntryOrder(tile)
         try:
             if player_name in game.gamestate["pass_order"]:
                 game.gamestate["pass_order"].remove(player_name)
