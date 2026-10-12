@@ -23,9 +23,18 @@ def load_properties(path):
     return _properties_cache[path]
 
 
+_resized_cache = {}
+
+
 class DrawHelper:
     def __init__(self, gamestate):
         self.gamestate = gamestate
+
+    def use_resized_image(self, filename, size):
+        key = (filename, size)
+        if key not in _resized_cache:
+            _resized_cache[key] = self.use_image(filename).resize(size)
+        return _resized_cache[key].copy()
 
     def use_image(self, filename):
         image_cache = ImageCacheHelper("images/resources")  # Get the singleton instance
@@ -424,7 +433,7 @@ class DrawHelper:
                 if tile.get(f"{resource_type}_pop", 0):
                     if f"{resource_type}_shrine" in tile:
                         shrine_path = "images/resources/components/factions/shrine.png"
-                        shrine_image = self.use_image(shrine_path).resize((60, 60))
+                        shrine_image = self.use_resized_image(shrine_path, (60, 60))
                         coords = tile[f"{resource_type}1_snap"]
                         if coords is None or coords == []:
                             coords = tile[f"{resource_type}adv1_snap"]
@@ -578,7 +587,7 @@ class DrawHelper:
             discName = discTile_data[tile]["name"]
             part_path = ("images/resources/components/discovery_tiles/discovery"
                          f"_{discName.replace(' ', '_').lower()}.png")
-            part_image = self.use_image(part_path).resize((80, 80))
+            part_image = self.use_resized_image(part_path, (80, 80))
             context.paste(part_image, (85 * count, 0), mask=part_image)
             count += 1
         return context
@@ -692,7 +701,7 @@ class DrawHelper:
         context = Image.new("RGBA", (1900, 500), (0, 0, 0, 255))
 
         filepath = "images/resources/hexes/sector3backblank.png"
-        tile_image = self.use_image(filepath).resize((172, 150))
+        tile_image = self.use_resized_image(filepath, (172, 150))
         context.paste(tile_image, (370, 115), mask=tile_image)
         text_drawable_image = ImageDraw.Draw(context)
         font = ImageFont.truetype("images/resources/arial.ttf", size=70)
@@ -825,7 +834,7 @@ class DrawHelper:
                             width=border) 
 
         def draw_resource(context, img_path, amount_key, position):
-            image = self.use_image(img_path).resize((30, 30))
+            image = self.use_resized_image(img_path, (30, 30))
             population_track = player["population_track"]
             amount_index = player[amount_key] - 1
             if 0 <= amount_index < len(population_track):
@@ -867,7 +876,7 @@ class DrawHelper:
         diameter = 2 * radius 
         discs = player["influence_discs"]
 
-        inf_image = self.use_image(inf_path).resize((diameter-1,diameter-1))
+        inf_image = self.use_resized_image(inf_path, (diameter-1,diameter-1))
         for count, num in enumerate(influenceTrack):
             x = 296+spacing + count * (diameter-14 + spacing)  
             y = 80 
@@ -1006,7 +1015,7 @@ class DrawHelper:
             discName = discTile_data[part]["name"]
             part_path = ("images/resources/components/discovery_tiles/discovery"
                          f"_{discName.replace(' ', '_').lower()}.png")
-            part_image = self.use_image(part_path).resize((80, 80))
+            part_image = self.use_resized_image(part_path, (80, 80))
             context.paste(part_image, (newX, 700), mask=part_image)
             newX += 85
         title_path = f"images/resources/components/layouts/faction_titles/name_trade_{faction}.png"
@@ -1082,7 +1091,7 @@ class DrawHelper:
         context.paste(context2, (2438, 500),mask=context2)
 
         inf_path = "images/resources/components/all_boards/influence_disc_" + player["color"] + ".png"
-        inf_image = self.use_image(inf_path).resize((120, 120))
+        inf_image = self.use_resized_image(inf_path, (120, 120))
         text_drawable_image = ImageDraw.Draw(context)
         
         stroke_color = (0, 0, 0)
@@ -1118,8 +1127,8 @@ class DrawHelper:
         amb_empty_path = "images/resources/components/layouts/ambassador_only_empty.png"
         mixed_empty_path = "images/resources/components/layouts/mixed_empty.png"
         reputation_image = self.use_image(reputation_path)
-        amb_empty_image = self.use_image(amb_empty_path).resize((120,120))
-        mixed_empty_image = self.use_image(mixed_empty_path).resize((120,120))
+        amb_empty_image = self.use_resized_image(amb_empty_path, (120,120))
+        mixed_empty_image = self.use_resized_image(mixed_empty_path, (120,120))
         reputationX = 3850
         for x, reputation in enumerate(player["reputation_track"]):
             if isinstance(reputation, int) or "mixed" in reputation:
@@ -1129,7 +1138,7 @@ class DrawHelper:
             if isinstance(reputation, int):
                 if "gameEnded" in self.gamestate:
                     pointsPath = "images/resources/components/all_boards/points.png"
-                    points = self.use_image(pointsPath).resize(((120,120)))
+                    points = self.use_resized_image(pointsPath, (120,120))
                     context.paste(points, (reputationX+x*150, 600), mask=points)
                     font = ImageFont.truetype("images/resources/arial.ttf", size=90)
                     stroke_color = (0, 0, 0)
@@ -1147,16 +1156,16 @@ class DrawHelper:
                 if faction == "minor":
                     amb_tile_path = ("images/resources/components/minor_species/minorspecies_"
                                      f"{color.replace(' ', '_').lower()}.png")
-                    amb_tile_image = self.use_image(amb_tile_path).resize((110,110))
+                    amb_tile_image = self.use_resized_image(amb_tile_path, (110,110))
                 else:
                     amb_tile_path = f"images/resources/components/factions/{faction}_ambassador.png"
-                    amb_tile_image = self.use_image(amb_tile_path).resize((110,110))
+                    amb_tile_image = self.use_resized_image(amb_tile_path, (110,110))
                 context.paste(amb_tile_image, (reputationX+x*150, 600), mask=amb_tile_image)
                 if faction != "minor" or "cube" in color:
                     if "cube" in color:
                         color = player["color"]
                     pop_path = f"images/resources/components/all_boards/popcube_{color}.png"
-                    pop_image = self.use_image(pop_path).resize((42,42))
+                    pop_image = self.use_resized_image(pop_path, (42,42))
                     context.paste(pop_image, (reputationX+x*150+30, 600+60), mask=pop_image)
 
 
@@ -1229,7 +1238,7 @@ class DrawHelper:
                     filepath = f"images/resources/components/fancy_ships/fancy_{player['color']}-{ship}.png"
                 else:
                     filepath = f"images/resources/components/basic_ships/{player['color']}-{ship}.png"
-                ship_image = self.use_image(filepath).resize((120, 120))
+                ship_image = self.use_resized_image(filepath, (120, 120))
                 if ship == "drd":
                     ship_image = ship_image.rotate(270,expand=True)
                 for shipCounter in range(player["ship_stock"][counter]):
@@ -1266,7 +1275,7 @@ class DrawHelper:
                 part_details = part_data.get(part)  
                 partName = part_details["name"].lower().replace(" ", "_") if part_details else part  
                 part_path = f"images/resources/components/upgrades/{partName}.png"  
-                part_image = self.use_image(part_path).resize((square_size,square_size+8))  
+                part_image = self.use_resized_image(part_path, (square_size,square_size+8))  
                 if part == "mus":  
                     part_image = part_image.resize((int(square_size * 0.69), int(square_size * 0.69)))  
                 
@@ -1327,7 +1336,7 @@ class DrawHelper:
         board_image = self.use_image(filepath)
         context.paste(board_image, (0, 0))
         inf_path = "images/resources/components/all_boards/influence_disc_" + player["color"] + ".png"
-        inf_image = self.use_image(inf_path).resize((40, 40))
+        inf_image = self.use_resized_image(inf_path, (40, 40))
         with open("data/parts.json", "r") as f:
             part_data = json.load(f)
 
@@ -1439,7 +1448,7 @@ class DrawHelper:
             if isinstance(reputation, int):
                 if "gameEnded" in self.gamestate:
                     pointsPath = "images/resources/components/all_boards/points.png"
-                    points = self.use_image(pointsPath).resize(((58, 58)))
+                    points = self.use_resized_image(pointsPath, (58, 58))
                     context.paste(points, (825, 172 + x * scaler - mod), mask=points)
                     font = ImageFont.truetype("images/resources/arial.ttf", size=50)
                     stroke_color = (0, 0, 0)
@@ -1466,7 +1475,7 @@ class DrawHelper:
                     if "cube" in color:
                         color = player["color"]
                     pop_path = f"images/resources/components/all_boards/popcube_{color}.png"
-                    pop_image = self.use_image(pop_path).resize((35, 35))
+                    pop_image = self.use_resized_image(pop_path, (35, 35))
                     context.paste(pop_image, (825 + 20, 172 + x * scaler + 25 - mod), mask=pop_image)
 
         x = 925
@@ -1531,7 +1540,7 @@ class DrawHelper:
             discName = discTile_data[part]["name"]
             part_path = ("images/resources/components/discovery_tiles/discovery"
                          f"_{discName.replace(' ', '_').lower()}.png")
-            part_image = self.use_image(part_path).resize((80, 80))
+            part_image = self.use_resized_image(part_path, (80, 80))
             context.paste(part_image, (newX, newY), mask=part_image)
             newY += 85
         for img_path, text_color, player_key, amount_key in resources:
@@ -1567,7 +1576,7 @@ class DrawHelper:
                 filepath = f"images/resources/components/fancy_ships/fancy_{player['color']}-{ship}.png"
             else:
                 filepath = f"images/resources/components/basic_ships/{player['color']}-{ship}.png"
-            ship_image = self.use_image(filepath).resize((80, 80))
+            ship_image = self.use_resized_image(filepath, (80, 80))
             for shipCounter in range(player["ship_stock"][counter]):
                 context.paste(ship_image, (x + 10 * ultimateC + 70 * counter, y), ship_image)
                 ultimateC += 1
@@ -1659,7 +1668,7 @@ class DrawHelper:
                 points -= 2
         return points
 
-    def show_game(self, finalSave=False):
+    def show_game(self):
         def load_tile_coordinates():
             return load_properties("data/tileImageCoordinates.properties")
 
@@ -1670,10 +1679,10 @@ class DrawHelper:
             max_x = float('-inf')
             max_y = float('-inf')
             if hyperlane:
-                hyperImage = self.use_image("images/resources/hexes/5playerhyperlane.png").resize((1125, 900))
+                hyperImage = self.use_resized_image("images/resources/hexes/5playerhyperlane.png", (1125, 900))
                 context.paste(hyperImage, (1820, 2850), mask=hyperImage)
                 if player_count == 4:
-                    hyperImageRot = self.use_image("images/resources/hexes/5playerhyperlane.png").resize((1125, 900)).rotate(180)
+                    hyperImageRot = self.use_resized_image("images/resources/hexes/5playerhyperlane.png", (1125, 900)).rotate(180)
                     context.paste(hyperImageRot, (1560,1650), mask=hyperImageRot)
                 min_x = min(min_x, 1560)
                 min_y = min(min_y, 1650)
@@ -1761,20 +1770,7 @@ class DrawHelper:
         bytes_io = BytesIO()
         final_context.save(bytes_io, format="WEBP", quality=80, method=1)
         bytes_io.seek(0)
-        map_file = discord.File(bytes_io, filename="map_image.webp")
-        if finalSave:
-            return map_file, final_context
-        return map_file
-
-    def save_game_history(self, final_context):
-        rnd = self.gamestate.get("roundNum", 1)
-        output_dir = f'GameHistory/{self.gamestate["game_id"]}'
-        filename = f'{self.gamestate["game_id"]}-{rnd-1}.webp'
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-        width, height = final_context.size
-        resized = final_context.resize((int(width * 0.3), int(height * 0.3)))
-        resized.save(os.path.join(output_dir, filename), quality=50, compress_level=8)
+        return discord.File(bytes_io, filename="map_image.webp")
 
     async def show_map(self):
         def load_tile_coordinates():
