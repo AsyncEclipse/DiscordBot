@@ -1423,9 +1423,17 @@ class Combat:
                     message = f"{playerName}, you may explore the discovery tile."
                     asyncio.create_task(interaction.channel.send(message, view=view))
                 view2 = View()
-                view2.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple,
-                                      custom_id=f"FCID{winner}_addInfluenceFinish_{pos}"))
+                for color in [c for c in survivors if c != "ai"]:
+                    label = "Place Influence"
+                    if len(survivors) > 1:
+                        label = f"Place Influence ({game.getPlayerObjectFromColor(color)['name']})"
+                    view2.add_item(Button(label=label, style=discord.ButtonStyle.blurple,
+                                          custom_id=f"FCID{color}_addInfluenceFinish_{pos}"))
                 message = f"{playerName}, you may place your influence on the tile."
+                if len(survivors) > 1:
+                    message = (f"{playerName}, your Alliance may place an influence disc here. "
+                               "The buttons are in order of entry to the sector, so the first of you to "
+                               "want the disc should take it.")
                 asyncio.create_task(interaction.channel.send(message, view=view2))
                 view3 = View()
                 view3.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray,
