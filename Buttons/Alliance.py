@@ -35,9 +35,7 @@ class AllianceButtons:
             return []
         founders = []
         for other in game.gamestate["players"].values():
-            if other["color"] == player["color"] or game.isInAlliance(other):
-                continue
-            if AllianceButtons.areRelated(game, player["color"], other["color"]):
+            if AllianceButtons.canFoundAlliance(game, player["color"], other["color"]):
                 founders.append(other)
         return founders
 
@@ -61,12 +59,33 @@ class AllianceButtons:
         return [tile for tile, betrayed in player.get("alliances", {}).items() if not betrayed]
 
     @staticmethod
-    def canUseAlliances(game: GamestateHelper, player):
-        if not game.gamestate.get("alliances"):
+    def canUseAlliances(game: GamestateHelper, player=None):
+        return bool(game.gamestate.get("alliances") and game.gamestate.get("player_count", 0) >= 4
+                    and not game.gamestate.get("gameEnded"))
+
+    @staticmethod
+    def canFoundAlliance(game: GamestateHelper, colorA, colorB):
+        if not AllianceButtons.canUseAlliances(game) or colorA == colorB:
             return False
-        if game.gamestate.get("player_count", 0) < 4:
-            return False
-        return not game.isLastRound()
+        playerA = game.getPlayerObjectFromColor(colorA)
+        playerB = game.getPlayerObjectFromColor(colorB)
+        return bool(playerA and playerB and not game.isInAlliance(playerA) and not game.isInAlliance(playerB)
+                    and AllianceButtons.areRelated(game, colorA, colorB)
+                    and any(all(tile not in player.get("alliances", {}) for player in (playerA, playerB))
+                            for tile in game.getUnfoundedAllianceTiles()))
+
+    @staticmethod
+    def isPlayersTurn(game: GamestateHelper, colors):
+        active_colors = game.gamestate.get("activePlayerColor", [])
+        return bool(active_colors and active_colors[0] in colors)
+
+    @staticmethod
+    def canLeaveAlliance(game: GamestateHelper, player, tile):
+        return bool(AllianceButtons.canUseAlliances(game, player)
+                    and not game.isLastRound()
+                    and not player.get("allianceLeaveClosed", True)
+                    and player.get("alliances", {}).get(tile) is False
+                    and AllianceButtons.isPlayersTurn(game, [player["color"]]))
 
     @staticmethod
     def addAllianceButtons(view, game: GamestateHelper, player):
@@ -74,15 +93,23 @@ class AllianceButtons:
         can hold at most one faceup tile, so this adds at most two buttons."""
         if not AllianceButtons.canUseAlliances(game, player):
             return
-        if AllianceButtons.getPlayersToFoundWith(game, player) or AllianceButtons.getJoinableAlliances(game, player):
+        if (AllianceButtons.isPlayersTurn(game, [player["color"]])
+                and (AllianceButtons.getPlayersToFoundWith(game, player)
+                     or AllianceButtons.getJoinableAlliances(game, player))):
             view.add_item(Button(label="Form Alliance", style=discord.ButtonStyle.blurple,
                                  custom_id=f"FCID{player['color']}_startAlliance"))
         for tile in AllianceButtons.getBetrayableAlliances(player):
-            view.add_item(Button(label=f"Leave {tile.capitalize()} Alliance", style=discord.ButtonStyle.red,
-                                 custom_id=f"FCID{player['color']}_leaveAlliance_{tile}"))
+            if AllianceButtons.canLeaveAlliance(game, player, tile):
+                view.add_item(Button(label=f"Leave {tile.capitalize()} Alliance", style=discord.ButtonStyle.red,
+                                     custom_id=f"FCID{player['color']}_leaveAlliance_{tile}"))
 
     @staticmethod
     async def startAlliance(game: GamestateHelper, player, interaction: discord.Interaction):
+        if (not AllianceButtons.canUseAlliances(game, player)
+                or not AllianceButtons.isPlayersTurn(game, [player["color"]])):
+            await interaction.channel.send("You cannot form an alliance right now.")
+            await interaction.message.delete()
+            return
         view = View()
         for other in AllianceButtons.getPlayersToFoundWith(game, player):
             view.add_item(Button(label=other["name"], style=discord.ButtonStyle.blurple,
@@ -101,6 +128,11 @@ class AllianceButtons:
     @staticmethod
     async def offerAllianceTo(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
         otherColor = buttonID.split("_")[1]
+        if (not AllianceButtons.isPlayersTurn(game, [player["color"], otherColor])
+                or not AllianceButtons.canFoundAlliance(game, player["color"], otherColor)):
+            await interaction.channel.send("Those players can no longer found an alliance.")
+            await interaction.message.delete()
+            return
         other = game.getPlayerObjectFromColor(otherColor)
         view = View()
         view.add_item(Button(label="Accept", style=discord.ButtonStyle.green,
@@ -123,9 +155,13 @@ class AllianceButtons:
     async def acceptAllianceWith(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
         otherColor = buttonID.split("_")[1]
         other = game.getPlayerObjectFromColor(otherColor)
-        tile = game.drawAllianceTile([player["color"], otherColor])
+        tile = None
+        if (other is not None
+                and AllianceButtons.isPlayersTurn(game, [player["color"], otherColor])
+                and AllianceButtons.canFoundAlliance(game, player["color"], otherColor)):
+            tile = game.drawAllianceTile([player["color"], otherColor])
         if tile is None:
-            await interaction.channel.send("There is no alliance tile left to found.")
+            await interaction.channel.send("Those players can no longer found an alliance.")
         else:
             await interaction.channel.send(f"{player['player_name']} and {other['player_name']} have founded"
                                            f" the {tile.capitalize()} Alliance.")
@@ -134,6 +170,11 @@ class AllianceButtons:
     @staticmethod
     async def offerJoinAlliance(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
         tile = buttonID.split("_")[1]
+        if (not AllianceButtons.isPlayersTurn(game, [player["color"]])
+                or not AllianceButtons.canJoinAlliance(game, player["color"], tile)):
+            await interaction.channel.send("That player is no longer able to join this alliance.")
+            await interaction.message.delete()
+            return
         view = View()
         for member in game.getAllianceMembers(tile):
             memberName = game.getPlayerObjectFromColor(member)["name"]
@@ -146,16 +187,21 @@ class AllianceButtons:
     @staticmethod
     def canJoinAlliance(game: GamestateHelper, color, tile):
         player = game.getPlayerObjectFromColor(color)
-        if player is None or game.isInAlliance(player):
+        if (player is None or not AllianceButtons.canUseAlliances(game, player)
+                or game.isInAlliance(player) or tile not in game.getJoinableAllianceTiles(player)):
             return False
-        return tile not in player.get("alliances", {})
+        members = game.getAllianceMembers(tile)
+        return bool(members and any(AllianceButtons.areRelated(game, color, member) for member in members))
 
     @staticmethod
     async def agreeJoinAlliance(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
         _prefix, tile, joiner, approved = buttonID.split("_")[:4]
         agreed = [] if approved == "none" else approved.split("+")
         agreed.append(player["color"])
-        if not AllianceButtons.canJoinAlliance(game, joiner, tile):
+        members = game.getAllianceMembers(tile)
+        if (not AllianceButtons.canJoinAlliance(game, joiner, tile)
+                or not AllianceButtons.isPlayersTurn(game, [joiner, *members])
+                or player["color"] not in members):
             await interaction.channel.send("That player is no longer able to join this alliance.")
             await interaction.message.delete()
             return
@@ -171,7 +217,17 @@ class AllianceButtons:
             await interaction.channel.send(f"{joinerName} still needs the agreement of the other"
                                            " Alliance members.", view=view)
         else:
-            game.formAlliance(tile, [joiner])
+            if (set(agreed) != set(members)
+                    or len(members) >= game.getMaxAllianceSize()):
+                await interaction.channel.send("That player is no longer able to join this alliance.")
+                await interaction.message.delete()
+                return
+            try:
+                game.formAlliance(tile, [joiner])
+            except ValueError as error:
+                await interaction.channel.send(f"That player is no longer able to join this alliance: {error}")
+                await interaction.message.delete()
+                return
             playerName = game.getPlayerObjectFromColor(joiner)["player_name"]
             await interaction.channel.send(f"{playerName} has joined the {tile.capitalize()} Alliance.")
         await interaction.message.delete()
@@ -179,6 +235,10 @@ class AllianceButtons:
     @staticmethod
     async def leaveAlliance(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
         tile = buttonID.split("_")[1]
+        if not AllianceButtons.canLeaveAlliance(game, player, tile):
+            await interaction.channel.send("You can no longer leave this alliance.")
+            await interaction.message.delete()
+            return
         game.betrayAlliance(tile, player["color"])
         await interaction.channel.send(f"{player['player_name']} has left the {tile.capitalize()} Alliance and"
                                        " flipped their tile to its Betrayer side. They may never rejoin it.")

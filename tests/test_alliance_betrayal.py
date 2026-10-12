@@ -1,0 +1,211 @@
+"""Leaving an Alliance only makes the leaver a Traitor after aggression."""
+
+from discord.ui import View
+import pytest
+
+from Buttons.Alliance import AllianceButtons
+from Buttons.Turn import TurnButtons
+from helpers.PlayerHelper import PlayerHelper
+from tests.fakes import FakeInteraction, player_stats
+
+
+def _game_state():
+    players = {
+        "1": player_stats("hyd", color="blue", owned_tiles=["101"],
+                           reputation_track=["amb-hydran-red"]),
+        "2": player_stats("hyd", color="red",
+                           reputation_track=["amb-hydran-blue"]),
+        "3": player_stats("hyd", color="green", reputation_track=["mixed"]),
+        "4": player_stats("hyd", color="yellow", reputation_track=["mixed"]),
+    }
+    return {
+        "player_count": 4,
+        "players": players,
+        "board": {
+            "101": {"owner": "blue", "sector": 101, "player_ships": []},
+            "102": {"owner": "green", "sector": 102,
+                    "player_ships": ["blue-int", "green-int"]},
+        },
+    }
+
+
+def _leave_nova(game):
+    game.formAlliance("nova", ["blue", "red"])
+    game.betrayAlliance("nova", "blue")
+
+
+class TestAllianceBetrayal:
+    def test_former_ally_control_makes_leaver_traitor_without_leaver_ships(
+        self, make_game, run
+    ):
+        state = _game_state()
+        state["board"]["101"]["player_ships"] = ["red-int"]
+        game = make_game(state)
+        _leave_nova(game)
+        blue = game.getPlayerObjectFromColor("blue")
+        player_helper = PlayerHelper(game.get_player_from_color("blue"), blue)
+
+        run(TurnButtons.checkTraitor(game, blue, FakeInteraction(), player_helper))
+
+        assert blue["traitor"] is True
+
+    def test_no_former_ally_presence_in_a_sector_does_not_make_leaver_traitor(
+        self, make_game, run
+    ):
+        game = make_game(_game_state())
+        _leave_nova(game)
+        blue = game.getPlayerObjectFromColor("blue")
+        player_helper = PlayerHelper(game.get_player_from_color("blue"), blue)
+
+        run(TurnButtons.checkTraitor(game, blue, FakeInteraction(), player_helper))
+
+        assert blue.get("traitor") is not True
+
+    def test_ordinary_diplomatic_aggression_still_breaks_relations_and_marks_traitor(
+        self, make_game, run, monkeypatch
+    ):
+        state = _game_state()
+        state["board"]["101"]["player_ships"] = ["blue-int"]
+        state["board"]["101"]["owner"] = "red"
+        state["players"]["2"]["owned_tiles"] = ["101"]
+        game = make_game(state)
+        blue = game.getPlayerObjectFromColor("blue")
+        calls = []
+
+        async def break_relations(game_arg, player, other, interaction):
+            calls.append((player["color"], other["color"]))
+
+        monkeypatch.setattr(
+            "Buttons.Turn.DiplomaticRelationsButtons.breakRelationsWith", break_relations
+        )
+        player_helper = PlayerHelper(game.get_player_from_color("blue"), blue)
+
+        run(TurnButtons.checkTraitor(game, blue, FakeInteraction(), player_helper))
+
+        assert calls == [("blue", "red")]
+        assert blue["traitor"] is True
+
+    def test_ordinary_aggression_checks_each_related_player(self, make_game, run, monkeypatch):
+        state = _game_state()
+        state["players"]["1"]["reputation_track"] = [
+            "amb-hydran-red", "amb-hydran-green"
+        ]
+        state["players"]["2"]["owned_tiles"] = ["101"]
+        state["players"]["3"]["owned_tiles"] = ["102"]
+        state["board"]["101"]["owner"] = "red"
+        state["board"]["101"]["player_ships"] = ["blue-int"]
+        state["board"]["102"]["player_ships"] = ["blue-int"]
+        game = make_game(state)
+        blue = game.getPlayerObjectFromColor("blue")
+        calls = []
+
+        async def break_relations(game_arg, player, other, interaction):
+            calls.append((player["color"], other["color"]))
+
+        monkeypatch.setattr(
+            "Buttons.Turn.DiplomaticRelationsButtons.breakRelationsWith", break_relations
+        )
+        player_helper = PlayerHelper(game.get_player_from_color("blue"), blue)
+
+        run(TurnButtons.checkTraitor(game, blue, FakeInteraction(), player_helper))
+
+        assert calls == [("blue", "red"), ("blue", "green")]
+        assert blue["traitor"] is True
+
+    def test_a_different_allys_ships_do_not_count_as_former_ally_aggression(
+        self, make_game, run
+    ):
+        state = _game_state()
+        state["board"]["101"] = {
+            "owner": 0,
+            "sector": 101,
+            "player_ships": ["blue-int", "green-int"],
+        }
+        state["players"]["1"]["owned_tiles"] = []
+        state["players"]["2"]["owned_tiles"] = []
+        game = make_game(state)
+        _leave_nova(game)
+        game.formAlliance("flare", ["blue", "green"])
+        blue = game.getPlayerObjectFromColor("blue")
+        player_helper = PlayerHelper(game.get_player_from_color("blue"), blue)
+
+        run(TurnButtons.checkTraitor(game, blue, FakeInteraction(), player_helper))
+
+        assert blue.get("traitor") is not True
+
+    def test_former_ally_without_direct_diplomatic_relations_still_triggers_faq(
+        self, make_game, run
+    ):
+        state = _game_state()
+        state["player_count"] = 6
+        state["board"]["101"]["player_ships"] = ["green-int"]
+        game = make_game(state)
+        game.formAlliance("nova", ["blue", "red", "green"])
+        game.betrayAlliance("nova", "blue")
+        blue = game.getPlayerObjectFromColor("blue")
+        player_helper = PlayerHelper(game.get_player_from_color("blue"), blue)
+
+        assert not any("green" in tile for tile in blue["reputation_track"])
+
+        run(TurnButtons.checkTraitor(game, blue, FakeInteraction(), player_helper))
+
+        assert blue["traitor"] is True
+
+    def test_new_turn_opens_leave_window_and_action_closes_it(self, make_game, run):
+        game = make_game(_game_state())
+        game.setAlliances(True)
+        game.formAlliance("nova", ["blue", "red"])
+        blue = game.getPlayerObjectFromColor("blue")
+
+        TurnButtons.startNewTurn(blue, game)
+        assert game.gamestate["activePlayerColor"] == ["blue"]
+
+        async def check_views():
+            view = View()
+            AllianceButtons.addAllianceButtons(view, game, blue)
+            assert any("Leave" in button.label for button in view.children)
+
+            PlayerHelper(game.get_player_from_color("blue"), blue).spend_influence_on_action("explore")
+            view = View()
+            AllianceButtons.addAllianceButtons(view, game, blue)
+
+            assert not any("Leave" in button.label for button in view.children)
+
+        run(check_views())
+
+    @pytest.mark.parametrize(
+        ("saved_closed", "current_closed", "can_leave"),
+        [(False, True, True), (True, False, False)],
+    )
+    def test_restart_preserves_saved_leave_window(
+        self, make_game, run, monkeypatch, saved_closed, current_closed, can_leave
+    ):
+        game = make_game(_game_state())
+        game.setAlliances(True)
+        game.formAlliance("nova", ["blue", "red"])
+        blue = game.getPlayerObjectFromColor("blue")
+        blue["allianceLeaveClosed"] = saved_closed
+        game.gamestate["activePlayerColor"] = ["blue"]
+        game.update()
+        game.updateSaveFile()
+        blue["allianceLeaveClosed"] = current_closed
+        game.update()
+
+        monkeypatch.setattr("Buttons.Turn.GamestateHelper", lambda channel: game)
+        monkeypatch.setattr(game, "release_lock", lambda: None)
+        monkeypatch.setattr(
+            game, "get_player", lambda player_id, interaction: game.getPlayerObjectFromColor("blue")
+        )
+        rendered = {}
+
+        def capture_restored_leave_window(game_arg, player, last_player_color):
+            rendered["can_leave"] = AllianceButtons.canLeaveAlliance(game_arg, player, "nova")
+            return "view"
+
+        monkeypatch.setattr(
+            TurnButtons, "getStartTurnButtons", staticmethod(capture_restored_leave_window)
+        )
+
+        run(TurnButtons.restartTurn(blue, game, FakeInteraction()))
+
+        assert rendered["can_leave"] is can_leave

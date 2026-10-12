@@ -29,6 +29,7 @@ class PulsarButtons:
         from Buttons.Upgrade import UpgradeButtons
         tile = customID.split("_")[1]
         action = customID.split("_")[2]
+        player_helper.stats["allianceLeaveClosed"] = True
         player_helper.stats["lastAction"] = action
         player_helper.stats["detailsOflastAction"] = ""
         if "activatedPulsars" not in player_helper.stats:

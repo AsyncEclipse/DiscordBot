@@ -206,8 +206,7 @@ class GamestateHelper:
         self.update()
 
     def isLastRound(self):
-        """The bot plays rounds 1..LAST_ROUND; upkeep past it declares the winner.
-        Alliances may not be founded or left once this is true."""
+        """The bot plays rounds 1..LAST_ROUND; upkeep past it declares the winner."""
         return self.gamestate.get("roundNum", 1) >= LAST_ROUND
 
     async def declareWinner(self, interaction: discord.Interaction):
@@ -514,6 +513,7 @@ class GamestateHelper:
             self.gamestate["board"][position].pop("unitsToRetreat", None)
             self.gamestate["board"][position].pop("pendingRiftDice", None)
             self.gamestate["board"][position].pop("pendingRiftBackfire", None)
+            self.gamestate["board"][position].pop("combatEntryOrder", None)
             for player in self.gamestate["players"]:
                 color = self.gamestate["players"][player]["color"]
                 key = "ships_destroyed_by_" + color
@@ -643,6 +643,14 @@ class GamestateHelper:
         reputation draws and influence placement."""
         return self.gamestate["board"].get(position, {}).get("entryOrder", [])
 
+    def getCombatEntryOrder(self, position):
+        """Entry order captured when combat began, including players later removed."""
+        tile = self.gamestate["board"].get(position, {})
+        if "combatEntryOrder" in tile:
+            return tile["combatEntryOrder"]
+        # shortcut: old saves lack eliminated players' entry order; set combatEntryOrder for an ongoing battle.
+        return self.getEntryOrder(position)
+
     def noteUnitEntry(self, color, position):
         tile = self.gamestate["board"][position]
         entryOrder = tile.setdefault("entryOrder", [])
@@ -695,7 +703,14 @@ class GamestateHelper:
         return msg
 
     def setCombatants(self, players, pos):
-        self.gamestate["board"][pos]["combatants"] = players
+        tile = self.gamestate["board"][pos]
+        tile["combatants"] = players
+        if "combatEntryOrder" not in tile:
+            entry_order = list(self.getEntryOrder(pos))
+            for player in players:
+                if player not in entry_order:
+                    entry_order.append(player)
+            tile["combatEntryOrder"] = entry_order
         self.update()
 
     def setCurrentSpeed(self, speed, pos):
@@ -771,6 +786,12 @@ class GamestateHelper:
             attacker, defender = defender, attacker
         self.gamestate["board"][pos]["attacker"] = attacker
         self.gamestate["board"][pos]["defender"] = defender
+        combatants = self.gamestate["board"][pos].setdefault("combatants", [])
+        for side in (attacker, defender):
+            colors = [side] if isinstance(side, str) else side
+            for color in colors:
+                if color not in combatants:
+                    combatants.append(color)
         self.update()
 
     def setUnresolvedHits(self, amount, pos):
@@ -1471,10 +1492,30 @@ class GamestateHelper:
         return joinable
 
     def formAlliance(self, tile: str, colors):
-        """Place a matching faceup tile next to each named player's board."""
+        """Place a matching faceup tile next to each eligible player's board."""
+        if tile not in ALLIANCE_TILES:
+            raise ValueError(f"Unknown alliance tile: {tile}")
+        if not colors or len(colors) != len(set(colors)):
+            raise ValueError("An alliance needs unique player colors")
+
+        players = {player["color"]: player for player in self.gamestate["players"].values()}
+        members = set(self.getAllianceMembers(tile))
         for color in colors:
-            playerID = self.get_player_from_color(color)
-            self.gamestate["players"][playerID].setdefault("alliances", {})[tile] = False
+            player = players.get(color)
+            if player is None:
+                raise ValueError(f"Unknown alliance member: {color}")
+            held_tiles = player.get("alliances", {})
+            if tile in held_tiles and held_tiles[tile] is True:
+                raise ValueError("A betrayer cannot rejoin the same alliance")
+            if any(betrayed is False and existing_tile != tile
+                   for existing_tile, betrayed in held_tiles.items()):
+                raise ValueError("A player cannot belong to more than one alliance")
+
+        if len(members.union(colors)) > self.getMaxAllianceSize():
+            raise ValueError("The alliance has reached its maximum size")
+
+        for color in colors:
+            players[color].setdefault("alliances", {})[tile] = False
         self.update()
 
     def betrayAlliance(self, tile: str, color):
@@ -1486,7 +1527,11 @@ class GamestateHelper:
 
     def drawAllianceTile(self, colors):
         """Found a new alliance on a randomly drawn unfounded tile type."""
-        unfounded = self.getUnfoundedAllianceTiles()
+        players = {player["color"]: player for player in self.gamestate["players"].values()}
+        if not colors or len(colors) != len(set(colors)) or any(color not in players for color in colors):
+            raise ValueError("Every alliance member must be a unique player in this game")
+        unfounded = [tile for tile in self.getUnfoundedAllianceTiles()
+                     if all(tile not in players[color].get("alliances", {}) for color in colors)]
         if not unfounded:
             return None
         tile = random.choice(unfounded)

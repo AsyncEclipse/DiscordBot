@@ -83,6 +83,28 @@ class TestAllianceState:
 
         assert game.drawAllianceTile(["blue", "red"]) is None
 
+    def test_refounding_a_dissolved_tile_preserves_the_betrayer_record(self, make_game):
+        game = _alliance_game(make_game)
+        game.formAlliance("nova", ["blue", "red"])
+        game.betrayAlliance("nova", "blue")
+        game.betrayAlliance("nova", "red")
+
+        game.formAlliance("nova", ["green"])
+
+        blue = game.getPlayerObjectFromColor("blue")
+        green = game.getPlayerObjectFromColor("green")
+        assert blue["alliances"]["nova"] is True
+        assert green["alliances"]["nova"] is False
+
+    def test_forming_cannot_add_a_member_past_the_player_count_limit(self, make_game):
+        game = _alliance_game(make_game, player_count=4)
+        game.formAlliance("nova", ["blue", "red"])
+
+        with pytest.raises(ValueError, match="maximum size"):
+            game.formAlliance("nova", ["green"])
+
+        assert game.getAllianceMembers("nova") == ["blue", "red"]
+
     @pytest.mark.parametrize("player_count,expected", [(2, 2), (4, 2), (5, 2), (6, 3), (9, 3)])
     def test_max_size_follows_the_player_count(self, make_game, player_count, expected):
         game = _alliance_game(make_game, player_count=player_count)

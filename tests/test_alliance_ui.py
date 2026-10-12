@@ -1,4 +1,6 @@
 """Founding, joining and leaving an Alliance, and the Act of Aggression rule."""
+import pytest
+
 from Buttons.Alliance import AllianceButtons
 from tests.fakes import FakeInteraction, player_stats
 
@@ -16,11 +18,15 @@ def _related(*colors):
 
 
 def _game(make_game, colors=("blue", "red", "green"), player_count=4, roundNum=3, owner=0, ships=()):
+    players = _related(*colors)
+    for player in players.values():
+        player["allianceLeaveClosed"] = False
     return make_game({
         "alliances": True,
         "player_count": player_count,
         "roundNum": roundNum,
-        "players": _related(*colors),
+        "activePlayerColor": [colors[0]],
+        "players": players,
         "board": {POS: {"owner": owner, "sector": 101, "player_ships": list(ships), "disctile": 0}},
     })
 
@@ -68,11 +74,155 @@ class TestEligibility:
             game = _game(make_game, player_count=player_count)
             assert AllianceButtons.canUseAlliances(game, _color(game, "blue")) is expected
 
-    def test_alliances_are_closed_in_the_last_round(self, make_game):
+    def test_alliances_can_be_formed_in_the_last_round(self, make_game, run):
         game = _game(make_game, roundNum=7)
         assert AllianceButtons.canUseAlliances(game, _color(game, "blue"))
         game.gamestate["roundNum"] = 8
-        assert not AllianceButtons.canUseAlliances(game, _color(game, "blue"))
+        game.update()
+
+        async def collect():
+            import discord
+            view = discord.ui.View()
+            AllianceButtons.addAllianceButtons(view, game, _color(game, "blue"))
+            return [button.custom_id for button in view.children]
+
+        ids = run(collect())
+        assert any(custom_id.endswith("_startAlliance") for custom_id in ids)
+
+    def test_leaving_is_closed_in_the_last_round(self, make_game, run):
+        game = _game(make_game, roundNum=8)
+        game.formAlliance("nova", ["blue", "red"])
+
+        inter = FakeInteraction()
+        run(AllianceButtons.leaveAlliance(game, _color(game, "blue"), inter, "leaveAlliance_nova"))
+
+        assert game.isInAlliance(_color(game, "blue"))
+
+    def test_leave_button_is_not_offered_after_the_player_acts(self, make_game, run):
+        game = _game(make_game)
+        game.formAlliance("nova", ["blue", "red"])
+        game.gamestate["activePlayerColor"] = ["blue"]
+        _color(game, "blue")["allianceLeaveClosed"] = True
+        game.update()
+
+        async def collect():
+            import discord
+            view = discord.ui.View()
+            AllianceButtons.addAllianceButtons(view, game, _color(game, "blue"))
+            return [button.custom_id for button in view.children]
+
+        ids = run(collect())
+        assert not any(custom_id.endswith("_leaveAlliance_nova") for custom_id in ids)
+
+    def test_stale_leave_is_rejected_after_action(self, make_game, run):
+        game = _game(make_game)
+        game.formAlliance("nova", ["blue", "red"])
+        blue = _color(game, "blue")
+        from helpers.PlayerHelper import PlayerHelper
+        PlayerHelper(game.get_player_from_color("blue"), blue).spend_influence_on_action("build")
+        game.update()
+
+        inter = FakeInteraction()
+        run(AllianceButtons.leaveAlliance(game, blue, inter, "leaveAlliance_nova"))
+
+        assert game.isInAlliance(blue)
+
+    def test_adjusting_an_action_counter_does_not_close_leave_window(self, make_game, run):
+        game = _game(make_game)
+        game.formAlliance("nova", ["blue", "red"])
+        blue = _color(game, "blue")
+        from helpers.PlayerHelper import PlayerHelper
+        PlayerHelper(game.get_player_from_color("blue"), blue).adjust_influence_on_action("build", 0)
+        game.update()
+
+        inter = FakeInteraction()
+        run(AllianceButtons.leaveAlliance(game, blue, inter, "leaveAlliance_nova"))
+
+        assert not game.isInAlliance(blue)
+
+
+class TestStaleButtons:
+    @pytest.mark.parametrize("invalidated", ["variant", "player_count", "relations", "turn", "game_ended"])
+    def test_stale_founding_accept_rechecks_eligibility(self, make_game, run, invalidated):
+        game = _game(make_game, colors=("blue", "red", "green"), player_count=6)
+        if invalidated == "variant":
+            game.gamestate["alliances"] = False
+        elif invalidated == "player_count":
+            game.gamestate["player_count"] = 3
+        elif invalidated == "relations":
+            for player in game.gamestate["players"].values():
+                player["reputation_track"] = ["mixed"] * 4
+        elif invalidated == "turn":
+            game.gamestate["activePlayerColor"] = ["green"]
+        elif invalidated == "game_ended":
+            game.gamestate["gameEnded"] = True
+        game.update()
+
+        inter = FakeInteraction()
+        run(AllianceButtons.acceptAllianceWith(game, _color(game, "blue"), inter,
+                                               "acceptAllianceWith_red"))
+
+        assert not game.isInAlliance(_color(game, "blue"))
+        assert not game.getAllianceMembers("nova")
+
+    def test_stale_founding_accept_rechecks_membership(self, make_game, run):
+        game = _game(make_game, colors=("blue", "red", "green"), player_count=6)
+        game.formAlliance("flare", ["red", "green"])
+
+        inter = FakeInteraction()
+        run(AllianceButtons.acceptAllianceWith(game, _color(game, "blue"), inter,
+                                               "acceptAllianceWith_red"))
+
+        assert not game.isInAlliance(_color(game, "blue"))
+        assert game.getAllianceMembers("flare") == ["red", "green"]
+
+    @pytest.mark.parametrize("invalidated", ["capacity", "relations"])
+    def test_stale_join_agreement_rechecks_capacity_and_relations(self, make_game, run, invalidated):
+        player_count = 6 if invalidated == "capacity" else 4
+        game = _game(make_game, colors=("blue", "red", "green", "yellow"), player_count=player_count)
+        game.formAlliance("nova", ["blue", "red"])
+        if invalidated == "capacity":
+            # The stale request finalizes after another player fills the alliance.
+            game.formAlliance("nova", ["yellow"])
+        else:
+            for player in game.gamestate["players"].values():
+                player["reputation_track"] = ["mixed"] * 4
+
+        inter = FakeInteraction()
+        run(AllianceButtons.agreeJoinAlliance(game, _color(game, "blue"), inter,
+                                              "agreeJoinAlliance_nova_green_none"))
+        run(AllianceButtons.agreeJoinAlliance(game, _color(game, "red"), inter,
+                                              "agreeJoinAlliance_nova_green_blue"))
+        if invalidated == "capacity":
+            run(AllianceButtons.agreeJoinAlliance(game, _color(game, "yellow"), inter,
+                                                  "agreeJoinAlliance_nova_green_blue+red"))
+
+        assert "green" not in game.getAllianceMembers("nova")
+
+    def test_stale_join_agreement_rechecks_turn(self, make_game, run):
+        game = _game(make_game, colors=("blue", "red", "green", "yellow"), player_count=6)
+        game.formAlliance("nova", ["blue", "red"])
+        game.gamestate["activePlayerColor"] = ["yellow"]
+        game.update()
+
+        inter = FakeInteraction()
+        run(AllianceButtons.agreeJoinAlliance(game, _color(game, "blue"), inter,
+                                              "agreeJoinAlliance_nova_green_none"))
+        run(AllianceButtons.agreeJoinAlliance(game, _color(game, "red"), inter,
+                                              "agreeJoinAlliance_nova_green_blue"))
+
+        assert "green" not in game.getAllianceMembers("nova")
+
+    def test_stale_leave_rechecks_turn(self, make_game, run):
+        game = _game(make_game)
+        game.formAlliance("nova", ["blue", "red"])
+        game.gamestate["activePlayerColor"] = ["red"]
+        game.update()
+
+        inter = FakeInteraction()
+        run(AllianceButtons.leaveAlliance(game, _color(game, "blue"), inter, "leaveAlliance_nova"))
+
+        assert game.isInAlliance(_color(game, "blue"))
 
 
 class TestJoining:
@@ -159,6 +309,8 @@ class TestButtonDispatch:
         from Buttons.Alliance import AllianceButtons
         game = _game(make_game, colors=("blue", "red", "green"), player_count=6)
         game.formAlliance("nova", ["blue", "red"])
+        game.gamestate["activePlayerColor"] = ["green"]
+        game.update()
         inter = FakeInteraction()
 
         run(AllianceButtons.offerJoinAlliance(game, _color(game, "green"), inter,
@@ -167,9 +319,10 @@ class TestButtonDispatch:
                     for child in getattr(kwargs.get("view"), "children", [])]
         self._assert_dispatched(join_ids)
 
+        offer_game = _game(make_game, colors=("blue", "red", "green"), player_count=6)
         inter = FakeInteraction()
-        run(AllianceButtons.offerAllianceTo(game, _color(game, "green"), inter,
-                                            "offerAllianceTo_blue"))
+        run(AllianceButtons.offerAllianceTo(offer_game, _color(offer_game, "blue"), inter,
+                                            "offerAllianceTo_red"))
         offer_ids = [child.custom_id for _content, kwargs in inter.channel.sent
                      for child in getattr(kwargs.get("view"), "children", [])]
         self._assert_dispatched(offer_ids)

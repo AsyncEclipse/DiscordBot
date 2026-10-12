@@ -346,6 +346,8 @@ class ButtonListener(commands.Cog):
             await Combat.assignHitTo(game, customID, interaction, True)
         elif customID.startswith("drawReputation"):
             await Combat.drawReputation(game, customID, interaction, player_helper)
+        elif customID.startswith("resolveStalemate"):
+            await Combat.resolveStalemate(game, customID, interaction)
         elif customID.startswith("dontDrawReputation"):
             await Combat.dontDrawReputation(game, customID, interaction, player_helper)
         elif customID.startswith("removeThisUnit"):

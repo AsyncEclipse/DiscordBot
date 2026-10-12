@@ -29,6 +29,21 @@ class TestSidesInTile:
         game = _game(make_game, ("blue", "red", "green"), ["blue-cru", "red-cru", "green-cru"])
         assert _sides(game) == [["blue"], ["red"], ["green"]]
 
+    def test_allies_alone_are_not_flagged_as_a_conflict(self, make_game):
+        game = _game(make_game, ("blue", "red"), ["blue-cru", "red-cru"])
+        game.formAlliance("nova", ["blue", "red"])
+
+        assert Combat.findTilesInConflict(game) == []
+
+    def test_an_alliance_is_one_side_for_contention_and_unowned_takeover(self, make_game):
+        game = _game(make_game, ("blue", "red", "green"), ["blue-cru", "red-cru"], owner="green")
+        game.formAlliance("nova", ["blue", "red"])
+
+        assert Combat.findTilesInContention(game) == [(101, POS)]
+        unowned = _game(make_game, ("blue", "red", "green"), ["blue-cru", "red-cru"])
+        unowned.formAlliance("nova", ["blue", "red"])
+        assert Combat.findUnownedTilesToTakeOver(unowned) == [(101, POS)]
+
     def test_allies_become_one_side(self, make_game):
         game = _game(make_game, ("blue", "red", "green"), ["blue-cru", "red-cru", "green-cru"])
         game.formAlliance("nova", ["blue", "red"])
@@ -155,7 +170,8 @@ class TestDracoAndAncients:
             board[POS]["attacker"] = attacker
         if defender is not None:
             board[POS]["defender"] = defender
-        return make_game({"player_count": 2, "players": players, "board": board})
+        return make_game({"player_count": 2, "players": players, "board": board,
+                          "advanced_ai": False, "wa_ai": False})
 
     def test_draco_is_left_out_when_ancients_are_present(self, make_game):
         game = self._game_with_draco(make_game, ["blue-cru", "red-cru", "ai-anc"])
@@ -181,6 +197,37 @@ class TestDracoAndAncients:
         # The Ancients may only shoot at the ally, never at Draco.
         assert Combat.getOpponentUnitsThatCanBeHit(game, "ai", ["blue-cru", "red-cru"], 6, 0, POS, 4) \
             == ["red-cru"]
+
+    def test_draco_does_not_draw_reputation_after_ally_defeats_ancients(self, make_game, run):
+        game = self._game_with_draco(make_game, ["blue-cru", "red-cru", "ai-anc"])
+        game.formAlliance("nova", ["blue", "red"])
+        async def setup_pairing():
+            Combat.getCombatButtons(game, POS)
+
+        run(setup_pairing())
+        game.remove_units(["ai-anc"], POS)
+        interaction = FakeInteraction()
+
+        run(Combat.declareAWinner(game, interaction, POS))
+
+        prompt_colors = [child.custom_id.split("_")[0][4:]
+                         for _content, kwargs in interaction.channel.sent
+                         for child in getattr(kwargs.get("view"), "children", [])
+                         if "drawReputation" in child.custom_id]
+        assert prompt_colors == ["red"]
+
+    def test_repaired_pairing_adds_new_actual_combatants(self, make_game, run):
+        game = self._game_with_draco(make_game, ["blue-cru", "red-cru", "ai-anc"])
+        game.formAlliance("nova", ["blue", "red"])
+        async def setup_pairing():
+            Combat.getCombatButtons(game, POS)
+
+        run(setup_pairing())
+        game.remove_units(["ai-anc"], POS)
+
+        game.setAttackerAndDefender(["blue", "red"], ["green"], POS)
+
+        assert set(game.gamestate["board"][POS]["combatants"]) == {"red", "ai", "blue", "green"}
 
 
 class TestTwoPlayerRegression:
@@ -268,3 +315,299 @@ class TestEntryOrder:
         game.add_units(["blue-cru"], POS)
 
         assert game.getEntryOrder(POS) == ["red", "blue"]
+
+
+class TestAllianceCombatEnd:
+    def test_removing_one_ally_keeps_the_current_combat_pairing(self, make_game, run, monkeypatch):
+        game = _game(make_game, ("blue", "red", "green"),
+                     ["blue-cru", "red-cru", "green-cru"],
+                     attacker=["green"], defender=["blue", "red"])
+        game.formAlliance("nova", ["blue", "red"])
+        game.remove_units(["blue-cru"], POS)
+        prompted = []
+
+        async def prompt(*args):
+            prompted.append(args[1])
+
+        async def unexpected_restart(*_args, **_kwargs):
+            raise AssertionError("combat pairing restarted while both sides remain")
+
+        monkeypatch.setattr(Combat, "promptNextSpeed", staticmethod(prompt))
+        monkeypatch.setattr(Combat, "startCombat", staticmethod(unexpected_restart))
+        run(Combat.checkCombatEnd(game, FakeInteraction(), POS, 3))
+
+        assert prompted == [POS]
+
+    def test_retreat_destination_with_allied_ships_is_valid(self, make_game, monkeypatch):
+        game = _game(make_game, ("blue", "red", "green"), ["blue-cru", "red-cru"])
+        game.formAlliance("nova", ["blue", "red"])
+        game.gamestate["board"]["102"] = {
+            "owner": "red", "sector": 102, "disctile": 0,
+            "player_ships": ["blue-cru", "red-cru"],
+        }
+        game.gamestate["players"]["1"]["owned_tiles"] = ["102"]
+        monkeypatch.setattr("helpers.CombatHelper.InfluenceButtons.areTwoTilesAdjacent",
+                            lambda *_args: True)
+
+        assert Combat.getRetreatTiles(game, POS, "blue") == ["102"]
+        game.gamestate["players"]["1"]["name"] = "Descendants of Draco"
+        assert Combat.getRetreatTiles(game, POS, "blue") == ["102"]
+
+    def test_partial_retreat_continues_current_combat(self, make_game, run, monkeypatch):
+        game = _game(make_game, ("blue", "red", "green"),
+                     ["blue-cru", "blue-int", "red-cru", "green-cru"],
+                     attacker=["green"], defender=["blue", "red"])
+        game.formAlliance("nova", ["blue", "red"])
+        game.gamestate["board"]["102"] = {
+            "owner": "blue", "sector": 102, "disctile": 0, "player_ships": []
+        }
+
+        class Ship:
+            def __init__(self, _player, ship_type):
+                self.speed = {"cru": 2, "int": 3}[ship_type]
+
+        monkeypatch.setattr("helpers.CombatHelper.PlayerShip", Ship)
+        prompted = []
+
+        async def prompt(_game, pos, _channel, _continue):
+            prompted.append(pos)
+
+        monkeypatch.setattr(Combat, "promptNextSpeed", staticmethod(prompt))
+        interaction = FakeInteraction()
+        run(Combat.finishRetreatingUnits(
+            game, f"finishRetreatingUnits_{POS}_blue_2_102", interaction,
+            game.getPlayerObjectFromColor("blue")))
+
+        assert game.gamestate["board"][POS]["player_ships"] == [
+            "blue-int", "red-cru", "green-cru"]
+        assert prompted == [POS]
+
+    def test_combat_ends_when_only_allies_remain_after_enemy_is_destroyed(self, make_game, run, monkeypatch):
+        game = _game(make_game, ("blue", "red", "green"),
+                     ["blue-cru", "red-cru"], attacker=["green"], defender=["blue", "red"])
+        game.formAlliance("nova", ["blue", "red"])
+        declared = []
+
+        async def declare_winner(_game, _interaction, pos):
+            declared.append(pos)
+
+        async def noop(*_args, **_kwargs):
+            return None
+
+        monkeypatch.setattr(Combat, "declareAWinner", staticmethod(declare_winner))
+        class DrawingStub:
+            @staticmethod
+            def board_tile_image_file(_pos):
+                return None
+
+        monkeypatch.setattr("helpers.CombatHelper.DrawHelper", lambda _state: DrawingStub())
+        monkeypatch.setattr(Combat, "getCombatButtons", staticmethod(lambda *_args: None))
+        monkeypatch.setattr(Combat, "startCombat", staticmethod(noop))
+        run(Combat.checkCombatEnd(game, FakeInteraction(), POS, 3))
+
+        assert declared == [POS]
+
+    def test_manual_unit_removal_ends_combat_when_only_allies_remain(self, make_game, run, monkeypatch):
+        game = _game(make_game, ("blue", "red", "green"),
+                     ["blue-cru", "red-cru", "green-cru"])
+        game.formAlliance("nova", ["blue", "red"])
+        checked = []
+
+        async def check_end(_game, _interaction, pos, old_length):
+            checked.append((pos, old_length))
+
+        async def edit(*_args, **_kwargs):
+            return None
+
+        monkeypatch.setattr(Combat, "checkCombatEnd", staticmethod(check_end))
+        monkeypatch.setattr(Combat, "getRemovalButtons", staticmethod(lambda *_args: None))
+        interaction = FakeInteraction()
+        interaction.message.edit = edit
+        run(Combat.removeThisUnit(game, f"removeThisUnit_{POS}_green-cru",
+                                  game.getPlayerObjectFromColor("blue"), interaction))
+
+        assert checked == [(POS, 3)]
+
+    def test_retreat_ends_combat_when_only_allies_remain(self, make_game, run, monkeypatch):
+        game = _game(make_game, ("blue", "red", "green"),
+                     ["blue-cru", "red-cru", "green-cru"],
+                     attacker=["green"], defender=["blue", "red"])
+        game.formAlliance("nova", ["blue", "red"])
+        game.gamestate["board"]["102"] = {
+            "owner": "green", "sector": 102, "disctile": 0, "player_ships": []
+        }
+        declared = []
+
+        async def declare_winner(_game, _interaction, pos):
+            declared.append(pos)
+
+        async def noop(*_args, **_kwargs):
+            return None
+
+        monkeypatch.setattr(Combat, "declareAWinner", staticmethod(declare_winner))
+        interaction = FakeInteraction()
+        monkeypatch.setattr(Combat, "promptNextSpeed", staticmethod(noop))
+        monkeypatch.setattr(Combat, "getCombatButtons", staticmethod(lambda *_args: None))
+        monkeypatch.setattr(Combat, "startCombat", staticmethod(noop))
+        class DrawingStub:
+            @staticmethod
+            def board_tile_image_file(_pos):
+                return None
+
+        monkeypatch.setattr("helpers.CombatHelper.DrawHelper", lambda _state: DrawingStub())
+        run(Combat.finishRetreatingUnits(game, f"finishRetreatingUnits_{POS}_green_2_102",
+                                         interaction, game.getPlayerObjectFromColor("green")))
+
+        assert game.gamestate["board"][POS]["player_ships"] == ["blue-cru", "red-cru"]
+        assert declared == [POS]
+
+    def test_reputation_prompts_follow_recorded_entry_order_including_eliminated_ally(
+            self, make_game, run):
+        game = _game(make_game, ("blue", "red", "green"), ["blue-cru", "red-cru"],
+                     attacker=["green"], defender=["blue", "red"], owner="blue",
+                     entry=["red", "green", "blue"])
+        game.formAlliance("nova", ["blue", "red"])
+        game.setCombatants(["blue", "red", "green"], POS)
+        game.remove_units(["red-cru"], POS)
+        interaction = FakeInteraction()
+
+        run(Combat.declareAWinner(game, interaction, POS))
+
+        prompt_colors = [child.custom_id.split("_")[0][4:]
+                         for _content, kwargs in interaction.channel.sent
+                         for child in getattr(kwargs.get("view"), "children", [])
+                         if "drawReputation" in child.custom_id]
+        assert prompt_colors == ["red", "green", "blue"]
+
+    def test_allied_sector_owner_is_not_offered_as_an_enemy_to_bombard(self, make_game, run):
+        game = _game(make_game, ("blue", "red", "green"), ["blue-cru", "red-cru"],
+                     attacker=["green"], defender=["blue", "red"], owner="red")
+        game.formAlliance("nova", ["blue", "red"])
+        game.gamestate["board"][POS]["combatants"] = ["blue", "red", "green"]
+        interaction = FakeInteraction()
+
+        run(Combat.declareAWinner(game, interaction, POS))
+
+        button_ids = [child.custom_id for _content, kwargs in interaction.channel.sent
+                      for child in getattr(kwargs.get("view"), "children", [])]
+        assert not any("rollDice" in button_id or "removeInfluenceFinish" in button_id
+                       for button_id in button_ids)
+
+
+class TestStalemateResolution:
+    def _unarmed_alliance_battle(self, make_game):
+        game = _game(make_game, ("blue", "red", "green"),
+                     ["blue-int", "red-int", "green-int", "green-cru", "green-drd"],
+                     attacker=["green"], defender=["blue", "red"],
+                     entry=["red", "green", "blue"])
+        game.formAlliance("nova", ["blue", "red"])
+        for player in game.gamestate["players"].values():
+            for ship_type in ("interceptor", "cruiser", "dread"):
+                player[f"{ship_type}_parts"] = ["empty"]
+        game.gamestate["board"][POS]["currentSpeed"] = 1
+        return game
+
+    def test_unarmed_battle_after_missiles_offers_attacker_stalemate_action(self, make_game, run):
+        game = self._unarmed_alliance_battle(make_game)
+
+        async def button_ids():
+            return [button.custom_id for button in Combat.getCombatButtons(game, POS).children]
+
+        ids = run(button_ids())
+
+        assert "FCIDgreen_resolveStalemate_101_green" in ids
+
+    def test_stalemate_is_blocked_during_missile_speed_and_pending_resolution(self, make_game):
+        game = self._unarmed_alliance_battle(make_game)
+        for speed in (98, 99, 101):
+            game.gamestate["board"][POS]["currentSpeed"] = speed
+            assert not Combat.canResolveStalemate(game, POS)
+
+        game.gamestate["board"][POS]["currentSpeed"] = 1
+        for pending in ({"unresolvedHits": 1},
+                        {"pendingRiftDice": {"0": "cru"}},
+                        {"pendingRiftBackfire": {"cru": 1}}):
+            game.gamestate["board"][POS].update(pending)
+            assert not Combat.canResolveStalemate(game, POS)
+            for key in pending:
+                game.gamestate["board"][POS].pop(key)
+
+    def test_normal_combat_prompt_offers_stalemate_after_missile_speed(self, make_game, run):
+        game = self._unarmed_alliance_battle(make_game)
+        interaction = FakeInteraction()
+
+        run(Combat.promptNextSpeed(game, POS, interaction.channel, False))
+
+        ids = [child.custom_id for _content, kwargs in interaction.channel.sent
+               for child in getattr(kwargs.get("view"), "children", [])]
+        assert "FCIDgreen_resolveStalemate_101_green" in ids
+
+    def test_stalemate_destroys_attackers_and_credits_largest_ships_round_robin(
+            self, make_game, run, monkeypatch):
+        game = self._unarmed_alliance_battle(make_game)
+        interaction = FakeInteraction()
+        async def no_end(*_args, **_kwargs):
+            return None
+
+        monkeypatch.setattr(Combat, "checkCombatEnd", staticmethod(no_end))
+
+        run(Combat.resolveStalemate(game, f"resolveStalemate_{POS}_green", interaction))
+
+        assert game.gamestate["board"][POS]["player_ships"] == ["blue-int", "red-int"]
+        assert game.gamestate["board"][POS]["ships_destroyed_by_red"] == ["drd", "int"]
+        assert game.gamestate["board"][POS]["ships_destroyed_by_blue"] == ["cru"]
+
+    def test_stale_stalemate_action_cannot_destroy_a_different_attacker(self, make_game, run):
+        game = self._unarmed_alliance_battle(make_game)
+        game.gamestate["board"][POS]["attacker"] = ["blue"]
+
+        run(Combat.resolveStalemate(game, f"resolveStalemate_{POS}_green", FakeInteraction()))
+
+        assert game.gamestate["board"][POS]["player_ships"] == [
+            "blue-int", "red-int", "green-int", "green-cru", "green-drd"
+        ]
+
+    def test_stalemate_action_refuses_ships_that_still_have_nonmissile_weapons(self, make_game, run):
+        game = _game(make_game, ("blue", "red", "green"),
+                     ["blue-int", "red-int", "green-cru"],
+                     attacker=["green"], defender=["blue", "red"])
+        game.formAlliance("nova", ["blue", "red"])
+        game.gamestate["board"][POS]["currentSpeed"] = 1
+
+        run(Combat.resolveStalemate(game, f"resolveStalemate_{POS}_green", FakeInteraction()))
+
+        assert game.gamestate["board"][POS]["player_ships"] == ["blue-int", "red-int", "green-cru"]
+
+    def test_stalemate_leaves_noncombat_orbitals_and_monuments_alone(self, make_game, run, monkeypatch):
+        game = self._unarmed_alliance_battle(make_game)
+        game.gamestate["board"][POS]["player_ships"].extend(["green-mon", "green-orb"])
+        async def no_end(*_args, **_kwargs):
+            return None
+
+        monkeypatch.setattr(Combat, "checkCombatEnd", staticmethod(no_end))
+
+        run(Combat.resolveStalemate(game, f"resolveStalemate_{POS}_green", FakeInteraction()))
+
+        assert "green-mon" in game.gamestate["board"][POS]["player_ships"]
+        assert "green-orb" in game.gamestate["board"][POS]["player_ships"]
+
+    def test_armed_exile_orbital_prevents_stalemate_resolution(self, make_game):
+        game = _game(make_game, ("blue", "red", "green"),
+                     ["blue-int", "red-int", "green-cru", "green-orb"],
+                     attacker=["green"], defender=["blue", "red"], owner="green")
+        game.formAlliance("nova", ["blue", "red"])
+        game.gamestate["players"]["3"] = player_stats("exl", color="green")
+        game.gamestate["board"][POS]["orbital_pop"] = [1]
+        for player in game.gamestate["players"].values():
+            for ship_type in ("interceptor", "cruiser", "dread"):
+                player[f"{ship_type}_parts"] = ["empty"]
+        game.gamestate["players"]["3"]["orb_parts"] = ["anc"]
+        game.gamestate["board"][POS]["currentSpeed"] = 1
+
+        assert not Combat.canResolveStalemate(game, POS)
+
+    def test_stalemate_action_is_dispatched(self):
+        with open("listeners/ButtonListener.py") as listener_file:
+            listener = listener_file.read()
+
+        assert 'customID.startswith("resolveStalemate")' in listener

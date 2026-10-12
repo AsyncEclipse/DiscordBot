@@ -320,9 +320,8 @@ class PlayerCommands(commands.GroupCog, name="player"):
         # view = Turn(interaction, player.id)
         game = GamestateHelper(interaction.channel)
         p1 = game.get_player(player.id,interaction)
+        TurnButtons.startNewTurn(p1, game)
         view = TurnButtons.getStartTurnButtons(game, p1, "dummy")
-        game.initilizeKey("activePlayerColor")
-        game.addToKey("activePlayerColor", p1["color"])
         game.updatePingTime()
         await interaction.response.send_message(f"## {game.getPlayerEmoji(p1)} started their turn.")
         await interaction.channel.send((f"{p1['player_name']} use these buttons to do your turn. "

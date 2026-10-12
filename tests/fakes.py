@@ -4,7 +4,6 @@ Discord is never available in tests, so interaction, channel, guild and message
 objects are stubbed here. Anything that is a plain helper rather than a pytest
 fixture belongs in this module; fixtures live in conftest.py.
 """
-import asyncio
 import copy
 import json
 
@@ -78,11 +77,3 @@ def offered_labels(interaction):
 
 def sent_text(interaction):
     return "\n".join(str(content) for content, _kwargs in interaction.channel.sent)
-
-
-async def drain(coro):
-    """Await a coroutine and let its create_task side effects run."""
-    result = await coro
-    for _ in range(10):
-        await asyncio.sleep(0)
-    return result
