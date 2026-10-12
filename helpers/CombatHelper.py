@@ -382,10 +382,15 @@ class Combat:
             opponents = list(defender)
         elif colorOrAI in defender:
             opponents = list(attacker)
-        elif colorOrAI == players[len(players) - 1]:
-            opponents = [players[len(players) - 2]]
+        elif not attacker and not defender:
+            # No sides recorded yet, as in an older save: fall back to position.
+            if colorOrAI == players[len(players) - 1]:
+                opponents = [players[len(players) - 2]]
+            else:
+                opponents = [players[len(players) - 1]]
         else:
-            opponents = [players[len(players) - 1]]
+            # This player is not in the pairing that is currently fighting.
+            return hittableShips
         # The rules break ties between allies by sector entry: the player who
         # arrived last is the first target. Every other rule is unchanged.
         opponents = [color for color in opponents if not Combat.sitsOutAgainstAncients(game, color, pos)]

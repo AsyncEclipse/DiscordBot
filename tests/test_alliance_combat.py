@@ -112,6 +112,21 @@ class TestSideTargeting:
         assert Combat.getOpponentUnitsThatCanBeHit(game, "green", ["blue-cru", "red-cru"], 6, 0, POS, 4) \
             == ["red-cru", "blue-cru"]
 
+    def test_a_player_waiting_out_the_pairing_is_offered_no_targets(self, make_game):
+        game = _game(make_game, ("blue", "red", "green", "yellow"),
+                     ["blue-cru", "red-cru", "green-cru", "yellow-cru"],
+                     attacker=["yellow"], defender=["green"], owner="blue")
+        game.formAlliance("nova", ["blue", "red"])
+
+        # The alliance is waiting for its turn, so it has nothing to shoot at.
+        assert Combat.getOpponentUnitsThatCanBeHit(game, "blue", ["green-cru", "yellow-cru"], 6, 0, POS, 4) == []
+
+    def test_without_recorded_sides_the_positional_fallback_still_applies(self, make_game):
+        game = _game(make_game, ("blue", "green"), ["blue-cru", "green-cru"], owner="blue")
+
+        # No attacker/defender at all: the last colour in the tile is the target.
+        assert Combat.getOpponentUnitsThatCanBeHit(game, "blue", ["green-cru"], 6, 0, POS, 4) == ["green-cru"]
+
     def test_the_owner_side_defends_whichever_way_round_it_is_passed(self, make_game):
         game = _game(make_game, ("blue", "red", "green"), ["blue-cru", "red-cru", "green-cru"], owner="red")
         game.setAttackerAndDefender(["blue", "red"], ["green"], POS)
