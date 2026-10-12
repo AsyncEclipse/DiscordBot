@@ -1,6 +1,6 @@
 """Combat pairs SIDES, not colours: allies fight together and never each other."""
 from helpers.CombatHelper import Combat
-from tests.fakes import player_stats
+from tests.fakes import FakeInteraction, player_stats
 
 POS = "101"
 
@@ -211,6 +211,36 @@ class TestTwoPlayerRegression:
         # Defender wins initiative ties, as it always has.
         assert Combat.getBothCombatantShipsBySpeed(game, ["red"], ["blue"], ships, POS) \
             == [(2, "red"), (2, "blue")]
+
+
+class TestAllianceWinsTheSector:
+    def test_the_winning_side_is_offered_the_disc_earliest_entry_first(self, make_game, run):
+        game = _game(make_game, ("blue", "red", "green"),
+                     ["blue-cru", "red-cru"],
+                     attacker=["green"], defender=["blue", "red"], owner=0,
+                     entry=["green", "red", "blue"])
+        game.formAlliance("nova", ["blue", "red"])
+        inter = FakeInteraction()
+
+        run(Combat.declareAWinner(game, inter, POS))
+
+        ids = [child.custom_id for _content, kwargs in inter.channel.sent
+               for child in getattr(kwargs.get("view"), "children", [])]
+        disc = [i for i in ids if "addInfluenceFinish" in i]
+        # red entered before blue, so red is offered the disc first.
+        assert disc == [f"FCIDred_addInfluenceFinish_{POS}", f"FCIDblue_addInfluenceFinish_{POS}"]
+
+    def test_a_solo_winner_still_gets_one_plain_button(self, make_game, run):
+        game = _game(make_game, ("blue", "green"), ["blue-cru"],
+                     attacker=["green"], defender=["blue"], owner=0, entry=["green", "blue"])
+        inter = FakeInteraction()
+
+        run(Combat.declareAWinner(game, inter, POS))
+
+        labels = [child.label for _content, kwargs in inter.channel.sent
+                  for child in getattr(kwargs.get("view"), "children", [])]
+        assert "Place Influence" in labels
+        assert not any(label.startswith("Place Influence (") for label in labels)
 
 
 class TestEntryOrder:
