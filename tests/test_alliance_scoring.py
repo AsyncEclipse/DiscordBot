@@ -131,3 +131,18 @@ class TestSharedScore:
         game.gamestate["players"][game.get_player_from_color("red")]["science"] = 9
 
         assert game.getWinningColors() == ["red"]
+
+    def test_every_allies_tourney_division_lands_on_100(self, make_game):
+        """search_commands divides each player's shared score by the winning shared
+        score, so no member of a winning alliance can register above 100%."""
+        game = _game(make_game, {"blue": 1, "red": 6, "green": 3})
+        game.formAlliance("nova", ["blue", "red"])
+
+        winners = game.getWinningColors()
+        winningScore = max(game.getUnitScore(game.getPlayerObjectFromColor(color), True)
+                           for color in winners)
+
+        assert sorted(winners) == ["blue", "red"]
+        for color in winners:
+            player = game.getPlayerObjectFromColor(color)
+            assert int(100 * game.getUnitScore(player, True) / winningScore) == 100
