@@ -15,6 +15,7 @@ from discord.ui import View, Button
 
 
 ALLIANCE_TILES = ["nova", "flare", "vortex"]
+LAST_ROUND = 8
 
 
 class GamestateHelper:
@@ -179,6 +180,11 @@ class GamestateHelper:
     def setAlliances(self, status: bool):
         self.gamestate["alliances"] = status
         self.update()
+
+    def isLastRound(self):
+        """The bot plays rounds 1..LAST_ROUND; upkeep past it declares the winner.
+        Alliances may not be founded or left once this is true."""
+        return self.gamestate.get("roundNum", 1) >= LAST_ROUND
 
     async def declareWinner(self, interaction: discord.Interaction):
         self.gamestate["gameEnded"] = True
@@ -1379,6 +1385,15 @@ class GamestateHelper:
             return False
         shared = set(playerA.get("alliances", {})).intersection(playerB.get("alliances", {}))
         return any(not playerA["alliances"][tile] and not playerB["alliances"][tile] for tile in shared)
+
+    def isFormerAlly(self, colorA, colorB):
+        """True when colorA betrayed a tile colorB still holds faceup."""
+        playerA = self.getPlayerObjectFromColor(colorA)
+        playerB = self.getPlayerObjectFromColor(colorB)
+        if playerA is None or playerB is None:
+            return False
+        shared = set(playerA.get("alliances", {})).intersection(playerB.get("alliances", {}))
+        return any(playerA["alliances"][tile] and not playerB["alliances"][tile] for tile in shared)
 
     def getAlliedColors(self, player):
         """Colours of everyone currently allied with this player."""

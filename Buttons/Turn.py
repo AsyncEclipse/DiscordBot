@@ -1,5 +1,6 @@
 import discord
 from Buttons.BlackHole import BlackHoleButtons
+from Buttons.Alliance import AllianceButtons
 from Buttons.DiplomaticRelations import DiplomaticRelationsButtons
 from Buttons.Explore import ExploreButtons
 from Buttons.Population import PopulationButtons
@@ -413,6 +414,7 @@ class TurnButtons:
         if not player_helper.isTraitor() and len(game.gamestate.get("minor_species", [])) > 0:
             view.add_item(Button(label="Minor Species Relations", style=discord.ButtonStyle.green,
                                  custom_id=f"FCID{p1['color']}_startMinorRelations"))
+        AllianceButtons.addAllianceButtons(view, game, player)
         if game.getNumberOfSaveFiles() > 0:
             view.add_item(Button(label="Undo Last Turn", style=discord.ButtonStyle.red,
                                  custom_id=f"FCID{lastPlayerColor}_undoLastTurn"))
@@ -471,6 +473,9 @@ class TurnButtons:
                 for tile in repTrack:
                     if isinstance(tile, str) and "-" in tile and "minor" not in tile:
                         color = tile.split("-")[2]
+                        if game.areAllied(player["color"], color):
+                            # An Ally's ships or control are never an Act of Aggression.
+                            continue
                         p2 = game.getPlayerObjectFromColor(color)
                         broken = False
                         if destination in p2["owned_tiles"]:
@@ -481,6 +486,16 @@ class TurnButtons:
                             if color in ship:
                                 broken = True
                         if broken:
+                            if game.isFormerAlly(player["color"], color):
+                                # Leaving an Alliance does not break relations, but being in a
+                                # sector with a former Ally's ships or control makes you the Traitor.
+                                game.makeEveryoneNotTraitor()
+                                player_helper.setTraitor(True)
+                                game.update_player(player_helper)
+                                await interaction.channel.send(
+                                    f"{player['player_name']}, you left {p2['player_name']}'s Alliance and are in a "
+                                    "sector with their ships or control, so you now are the Traitor.")
+                                return
                             await DiplomaticRelationsButtons.breakRelationsWith(game, player, p2, interaction)
                             game.makeEveryoneNotTraitor()
                             player_helper.setTraitor(True)
@@ -520,6 +535,7 @@ class TurnButtons:
                     len(game.gamestate["minor_species"]) > 0]):
                 view.add_item(Button(label="Minor Species Relations", style=discord.ButtonStyle.green,
                                      custom_id=f"FCID{player['color']}_startMinorRelations"))
+        AllianceButtons.addAllianceButtons(view, game, player)
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray,
                              custom_id=f"FCID{player['color']}_restartTurn"))
         await interaction.channel.send(f"Colony ships available: {player['colony_ships']}\n"

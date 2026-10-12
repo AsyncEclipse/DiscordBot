@@ -5,6 +5,7 @@ import discord
 from discord.ext import commands
 from Buttons.BlackHole import BlackHoleButtons
 from Buttons.Build import BuildButtons
+from Buttons.Alliance import AllianceButtons
 from Buttons.DiplomaticRelations import DiplomaticRelationsButtons
 from Buttons.DiscoveryTile import DiscoveryTileButtons
 from Buttons.Draft import DraftButtons
@@ -306,6 +307,21 @@ class ButtonListener(commands.Cog):
             await DiplomaticRelationsButtons.formMinorRelations(game, player, interaction, customID, player_helper)
         elif customID.startswith("reducePopFor"):
             await DiplomaticRelationsButtons.reducePopFor(game, player_helper, interaction, customID)
+        elif customID.startswith("startAlliance"):
+            game.updateSaveFile()
+            await AllianceButtons.startAlliance(game, player, interaction)
+        elif customID.startswith("offerAllianceTo"):
+            await AllianceButtons.offerAllianceTo(game, player, interaction, customID)
+        elif customID.startswith("declineAllianceWith"):
+            await AllianceButtons.declineAllianceWith(game, player, interaction, customID)
+        elif customID.startswith("acceptAllianceWith"):
+            await AllianceButtons.acceptAllianceWith(game, player, interaction, customID)
+        elif customID.startswith("offerJoinAlliance"):
+            await AllianceButtons.offerJoinAlliance(game, player, interaction, customID)
+        elif customID.startswith("agreeJoinAlliance"):
+            await AllianceButtons.agreeJoinAlliance(game, player, interaction, customID)
+        elif customID.startswith("leaveAlliance"):
+            await AllianceButtons.leaveAlliance(game, player, interaction, customID)
         elif customID.startswith("startMove"):
             if customID == "startMove":
                 game.updateSaveFile()
