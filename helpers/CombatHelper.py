@@ -337,10 +337,6 @@ class Combat:
     def getBothCombatantShipsBySpeed(game: GamestateHelper, defender, attacker, playerShipsList, pos):
         """defender and attacker are sides: lists of colours."""
         ships = []
-        # if Combat.doesCombatantHaveMissiles(game, defender, playerShipsList):
-        #     ships.append((99, defender))
-        # if Combat.doesCombatantHaveMissiles(game, attacker, playerShipsList):
-        #     ships.append((99, attacker))
         for unit in playerShipsList:
             unitType = unit.split("-")[1]
             owner = unit.split('-')[0]
@@ -371,6 +367,30 @@ class Combat:
                             ships.append((ship.speed+99, owner))
         sorted_ships = sorted(ships, key=lambda x: (x[0], x[1] in defender), reverse=True)
         return sorted_ships
+
+    @staticmethod
+    def allianceInCombat(game: GamestateHelper, pos: str):
+        """True when either pairing is an Alliance. Its members field the same
+        ship types, so buttons without an owner would be ambiguous."""
+        tile = game.gamestate["board"][pos]
+        return len(Combat.sideOf(tile.get("attacker"))) > 1 or len(Combat.sideOf(tile.get("defender"))) > 1
+
+    @staticmethod
+    def getCombatantTag(game: GamestateHelper, pos: str, colorOrAI: str):
+        """Faction name and icon to add to one combatant's buttons, or empty
+        strings when no Alliance is in the fight and the plain label suffices."""
+        if colorOrAI == "ai" or not Combat.allianceInCombat(game, pos):
+            return "", None
+        player = game.getPlayerObjectFromColor(colorOrAI)
+        return f" ({player['name']})", game.getPlayerEmoji(player)
+
+    @staticmethod
+    def getTargetButton(game: GamestateHelper, pos: str, ship: str):
+        """Label and icon for a target button. An Alliance's members field the
+        same ship types, so the ship type alone does not say whose ship it is."""
+        owner, shipType = ship.split("-", 1)
+        suffix, emoji = Combat.getCombatantTag(game, pos, owner)
+        return f"Hit {Combat.translateShipAbrToName(shipType)}{suffix}", emoji
 
     @staticmethod
     def getOpponentUnitsThatCanBeHit(game: GamestateHelper, colorOrAI: str, playerShipsList,
@@ -428,30 +448,6 @@ class Combat:
                         ship_type = temp[1]
                     hittableShips.append(opponent + "-" + ship_type.replace("adv", ""))
         return hittableShips
-
-    @staticmethod
-    def doesCombatantHaveMissiles(game: GamestateHelper, colorOrAI: str, playerShipsList):
-        for unit in playerShipsList:
-            unitType = unit.split("-")[1]
-            owner = unit.split('-')[0]
-            if unitType == "orb" or unitType == "mon":
-                continue
-            if colorOrAI == owner:
-                if colorOrAI == "ai":
-                    advanced = game.gamestate["advanced_ai"]
-                    worldsafar = game.gamestate["wa_ai"]
-                    if unitType+"_type" in game.gamestate:
-                        advanced = "adv" in game.gamestate[unitType+"_type"]
-                        worldsafar ="wa" in game.gamestate[unitType+"_type"]
-                    ship = AI_Ship(unit, advanced, worldsafar)
-                    if len(ship.missile) > 0:
-                        return True
-                else:
-                    player = game.get_player_from_color(colorOrAI)
-                    ship = PlayerShip(game.gamestate["players"][player], unitType)
-                    if len(ship.missile) > 0:
-                        return True
-        return False
 
     @staticmethod
     def canResolveStalemate(game: GamestateHelper, pos: str):
@@ -555,45 +551,38 @@ class Combat:
         if len(sides) > 1:
             attacker = Combat.sideOf(game.gamestate["board"][pos]["attacker"])
             defender = Combat.sideOf(game.gamestate["board"][pos]["defender"])
-            # if Combat.doesCombatantHaveMissiles(game, defender, player_ships):
-            #     view.add_item(Button(label="(Defender) Roll Missiles",
-            #                          style=discord.ButtonStyle.green,
-            #                          custom_id=f"rollDice_{pos}_{defender}_99_defender"))
-            # if Combat.doesCombatantHaveMissiles(game, attacker, player_ships):
-            #     view.add_item(Button(label="(Attacker) Roll Missiles",
-            #                          style=discord.ButtonStyle.red,
-            #                          custom_id=f"rollDice_{pos}_{attacker}_99_attacker"))
-
             ships = game.gamestate["board"][pos]["player_ships"][:]
             sortedSpeeds = Combat.getBothCombatantShipsBySpeed(game, defender, attacker, ships, pos)
             for speed, owner in sortedSpeeds:
                 # Each ship rolls for its own colour, even when its side is an Alliance.
                 checker = "" if owner == "ai" else f"FCID{owner}_"
+                suffix, emoji = Combat.getCombatantTag(game, pos, owner)
                 if owner in defender:
                     if speed < 90:
-                        view.add_item(Button(label="(Defender) Roll Initative " + str(speed) + " Ships",
-                                            style=discord.ButtonStyle.green,
+                        view.add_item(Button(label=f"(Defender) Roll Initative {speed} Ships{suffix}",
+                                            style=discord.ButtonStyle.green, emoji=emoji,
                                             custom_id=f"{checker}rollDice_{pos}_{owner}_{str(speed)}_defender"))
                     else:
-                        view.add_item(Button(label="(Defender) Roll Initative " + str(speed-99) + " Missiles",
-                                            style=discord.ButtonStyle.green,
+                        view.add_item(Button(label=f"(Defender) Roll Initative {speed-99} Missiles{suffix}",
+                                            style=discord.ButtonStyle.green, emoji=emoji,
                                             custom_id=f"{checker}rollDice_{pos}_{owner}_{str(speed)}_defender"))
                 else:
                     if speed < 90:
-                        view.add_item(Button(label="(Attacker) Roll Initative " + str(speed) + " Ships",
-                                            style=discord.ButtonStyle.red,
+                        view.add_item(Button(label=f"(Attacker) Roll Initative {speed} Ships{suffix}",
+                                            style=discord.ButtonStyle.red, emoji=emoji,
                                             custom_id=f"{checker}rollDice_{pos}_{owner}_{str(speed)}_attacker"))
                     else:
-                        view.add_item(Button(label="Attacker) Roll Initative " + str(speed-99) + " Missiles",
-                                            style=discord.ButtonStyle.red,
+                        view.add_item(Button(label=f"(Attacker) Roll Initative {speed-99} Missiles{suffix}",
+                                            style=discord.ButtonStyle.red, emoji=emoji,
                                             custom_id=f"{checker}rollDice_{pos}_{owner}_{str(speed)}_attacker"))
         view.add_item(Button(label="Refresh Image", style=discord.ButtonStyle.blurple, custom_id=f"refreshImage_{pos}"))
         view.add_item(Button(label="Remove Units", style=discord.ButtonStyle.gray, custom_id=f"removeUnits_{pos}"))
         if Combat.canResolveStalemate(game, pos) and attacker:
             for color in attacker:
                 checker = "" if color == "ai" else f"FCID{color}_"
-                view.add_item(Button(label="Resolve Stalemate (Destroy Attacking Ships)",
-                                     style=discord.ButtonStyle.red,
+                suffix, emoji = Combat.getCombatantTag(game, pos, color)
+                view.add_item(Button(label=f"Resolve Stalemate (Destroy Attacking Ships){suffix}",
+                                     style=discord.ButtonStyle.red, emoji=emoji,
                                      custom_id=f"{checker}resolveStalemate_{pos}_{color}"))
         return view
 
@@ -835,12 +824,10 @@ class Combat:
                             "The bot has calculated that you can hit these ships.")
                     view = View()
                     for ship in hittableShips:
-                        targetType = ship.split("-")[1]
-                        # shipOwner = ship.split("-")[0]
-                        label = "Hit " + Combat.translateShipAbrToName(targetType)
+                        label, emoji = Combat.getTargetButton(game, pos, ship)
                         buttonID = (f"FCID{colorOrAI}_assignHitTo_{pos}_{colorOrAI}"
                                     f"_{ship}_{dieNum}_{dieDam}_{counter}")
-                        view.add_item(Button(label=label, style=discord.ButtonStyle.red,
+                        view.add_item(Button(label=label, emoji=emoji, style=discord.ButtonStyle.red,
                                                 custom_id=buttonID))
                     await interaction.channel.send(msg, view=view)
                     hitsToAssign = 1
@@ -1042,12 +1029,10 @@ class Combat:
                                            "The bot has calculated that you can hit these ships.")
                                     view = View()
                                     for ship in hittableShips:
-                                        shipType = ship.split("-")[1]
-                                        # shipOwner = ship.split("-")[0]
-                                        label = "Hit " + Combat.translateShipAbrToName(shipType)
+                                        label, emoji = Combat.getTargetButton(game, pos, ship)
                                         buttonID = (f"FCID{colorOrAI}_assignHitTo_{pos}_{colorOrAI}"
                                                     f"_{ship}_{dieNum}_{dieDam}_{counter}")
-                                        view.add_item(Button(label=label, style=discord.ButtonStyle.red,
+                                        view.add_item(Button(label=label, emoji=emoji, style=discord.ButtonStyle.red,
                                                              custom_id=buttonID))
                                     await interaction.channel.send(msg, view=view)
                                     hitsToAssign = 1
@@ -1194,10 +1179,9 @@ class Combat:
                                "The bot has calculated that you can hit these ships.")
                         view = View()
                         for ship in hittableShips:
-                            targetType = ship.split("-")[1]
-                            label = "Hit " + Combat.translateShipAbrToName(targetType)
+                            label, emoji = Combat.getTargetButton(game, pos, ship)
                             buttonID = f"FCID{colorOrAI}_assignHitTo_{pos}_{colorOrAI}_{ship}_{dieNum}_{dieDam}"
-                            view.add_item(Button(label=label, style=discord.ButtonStyle.red, custom_id=buttonID))
+                            view.add_item(Button(label=label, emoji=emoji, style=discord.ButtonStyle.red, custom_id=buttonID))
                         asyncio.create_task(interaction.channel.send(msg, view=view))
                         hitsToAssign = 1
                         if "unresolvedHits" in game.gamestate["board"][pos]:
@@ -1345,8 +1329,9 @@ class Combat:
             for color in attacker:
                 if color == "ai":
                     continue
-                view.add_item(Button(label="Resolve Stalemate (Destroy Attacking Ships)",
-                                     style=discord.ButtonStyle.red,
+                suffix, emoji = Combat.getCombatantTag(game, pos, color)
+                view.add_item(Button(label=f"Resolve Stalemate (Destroy Attacking Ships){suffix}",
+                                     style=discord.ButtonStyle.red, emoji=emoji,
                                      custom_id=f"FCID{color}_resolveStalemate_{pos}_{color}"))
             msg += " Neither side has weapons remaining; the attacker may resolve a stalemate."
         asyncio.create_task(channel.send(msg, view=view))
@@ -1614,6 +1599,7 @@ class Combat:
         dieDam = buttonID.split("_")[5]
         shipType = ship.split("-")[1]
         shipOwner = ship.split("-")[0]
+        suffix, _emoji = Combat.getCombatantTag(game, pos, shipOwner)
         if shipOwner == "ai":
             advanced = game.gamestate["advanced_ai"]
             worldsafar = game.gamestate["wa_ai"]
@@ -1627,9 +1613,9 @@ class Combat:
         damage = game.add_damage(ship, pos, int(dieDam))
         if colorOrAI != "ai":
             msg = (f"{interaction.user.mention} dealt {dieDam} damage to a"
-                   f" {Combat.translateShipAbrToName(shipType)} with a die that rolled a {str(dieNum)}. ")
+                   f" {Combat.translateShipAbrToName(shipType)}{suffix} with a die that rolled a {str(dieNum)}. ")
         else:
-            msg = (f"The AI dealt {dieDam} damage to a {Combat.translateShipAbrToName(shipType)}"
+            msg = (f"The AI dealt {dieDam} damage to a {Combat.translateShipAbrToName(shipType)}{suffix}"
                    f" with a die that rolled a {str(dieNum)}. ")
         msg += f"The damaged ship has {shipModel.hull - damage + 1}/{shipModel.hull + 1} hp left. "
         oldLength = len(Combat.findPlayersInTile(game, pos))
@@ -1647,10 +1633,11 @@ class Combat:
                 game.destroy_ship(ship, pos, dummyKiller)
             if colorOrAI != "ai":
                 msg += (f"{interaction.user.name} destroyed the"
-                        f" {Combat.translateShipAbrToName(shipType)} due to the damage exceeding the ships hull.")
+                        f" {Combat.translateShipAbrToName(shipType)}{suffix}"
+                        " due to the damage exceeding the ships hull.")
             else:
-                msg += (f"The AI destroyed the {Combat.translateShipAbrToName(shipType)}"
-                        f" due to the damage exceeding the ships hull.")
+                msg += (f"The AI destroyed the {Combat.translateShipAbrToName(shipType)}{suffix}"
+                        " due to the damage exceeding the ships hull.")
             await interaction.channel.send(msg)
             if not deferEnd:
                 await Combat.checkCombatEnd(game, interaction, pos, oldLength)

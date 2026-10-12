@@ -138,6 +138,44 @@ class TestSideTargeting:
         assert Combat.getOpponentUnitsThatCanBeHit(game, "green", ["blue-cru", "red-cru"], 6, 0, POS, 4) \
             == ["red-cru", "blue-cru"]
 
+    def test_buttons_name_the_owner_once_an_alliance_is_in_the_fight(self, make_game, run):
+        game = _game(make_game, ("blue", "red", "green"),
+                     ["blue-cru", "red-cru", "green-cru"],
+                     attacker=["green"], defender=["blue", "red"], owner="blue",
+                     entry=["green", "blue", "red"])
+        game.formAlliance("nova", ["blue", "red"])
+        game.gamestate["players"]["2"]["name"] = "Planta"
+        game.gamestate["players"]["3"]["name"] = "Mechanema"
+
+        # Two allied enemies field the same ship type, so each target button must say whose it is.
+        targets = [Combat.getTargetButton(game, POS, ship)
+                   for ship in Combat.getOpponentUnitsThatCanBeHit(
+                       game, "green", ["blue-cru", "red-cru"], 6, 0, POS, 4)]
+
+        assert [label for label, _icon in targets] == ["Hit cruiser (Planta)", "Hit cruiser (Hydran Progress)"]
+        assert "plantatoken" in targets[0][1] and "hydrantoken" in targets[1][1]
+
+        # Both defenders roll their own initiative, so their buttons must name them too.
+        async def roll_buttons():
+            return [(button.label, button.emoji) for button in Combat.getCombatButtons(game, POS).children
+                    if "Roll Initative" in button.label]
+
+        rolls = run(roll_buttons())
+
+        assert [label for label, _icon in rolls] == ["(Defender) Roll Initative 2 Ships (Hydran Progress)",
+                                                    "(Defender) Roll Initative 2 Ships (Planta)",
+                                                    "(Attacker) Roll Initative 2 Ships (Mechanema)"]
+        assert rolls[2][1].name == "mechanematoken"
+
+        # The Ancients have no faction token, so their ships stay plainly named.
+        assert Combat.getTargetButton(game, POS, "ai-anc") == ("Hit Ancient", None)
+
+        # The damage log says whose ship was hit, too.
+        interaction = FakeInteraction()
+        run(Combat.assignHitTo(game, f"assignHitTo_{POS}_green_blue-cru_6_1", interaction, False))
+
+        assert "dealt 1 damage to a cruiser (Hydran Progress) with a die" in interaction.channel.sent[0][0]
+
     def test_a_player_waiting_out_the_pairing_is_offered_no_targets(self, make_game):
         game = _game(make_game, ("blue", "red", "green", "yellow"),
                      ["blue-cru", "red-cru", "green-cru", "yellow-cru"],
@@ -263,6 +301,23 @@ class TestTwoPlayerRegression:
         # Defender wins initiative ties, as it always has.
         assert Combat.getBothCombatantShipsBySpeed(game, ["red"], ["blue"], ships, POS) \
             == [(2, "red"), (2, "blue")]
+
+    def test_buttons_stay_plain_without_an_alliance(self, make_game, run):
+        game = _game(make_game, ("blue", "red"), ["blue-cru", "red-cru"],
+                     attacker=["blue"], defender=["red"], owner="red")
+
+        async def roll_buttons():
+            return [(button.label, button.emoji) for button in Combat.getCombatButtons(game, POS).children]
+
+        assert Combat.getTargetButton(game, POS, "red-cru") == ("Hit cruiser", None)
+        assert run(roll_buttons()) \
+            == [("(Defender) Roll Initative 2 Ships", None), ("(Attacker) Roll Initative 2 Ships", None),
+                ("Refresh Image", None), ("Remove Units", None)]
+
+        interaction = FakeInteraction()
+        run(Combat.assignHitTo(game, f"assignHitTo_{POS}_blue_red-cru_6_1", interaction, False))
+
+        assert "dealt 1 damage to a cruiser with a die" in interaction.channel.sent[0][0]
 
 
 class TestAllianceWinsTheSector:
@@ -485,6 +540,25 @@ class TestStalemateResolution:
             return offered_ids(interaction)
 
         assert "FCIDgreen_resolveStalemate_101_green" in run(offered())
+
+    def test_an_attacking_alliance_gets_one_named_stalemate_button_each(self, make_game, run):
+        game = _game(make_game, ("blue", "red", "green"),
+                     ["blue-int", "red-int", "green-int"],
+                     attacker=["blue", "red"], defender=["green"], owner="green")
+        game.formAlliance("nova", ["blue", "red"])
+        for player in game.gamestate["players"].values():
+            for ship_type in ("interceptor", "cruiser", "dread"):
+                player[f"{ship_type}_parts"] = ["empty"]
+        game.gamestate["board"][POS]["currentSpeed"] = 1
+        game.gamestate["players"]["2"]["name"] = "Planta"
+
+        async def stalemate_buttons():
+            return [(button.label, button.emoji.name if button.emoji else None)
+                    for button in Combat.getCombatButtons(game, POS).children if "Stalemate" in button.label]
+
+        assert run(stalemate_buttons()) \
+            == [("Resolve Stalemate (Destroy Attacking Ships) (Hydran Progress)", "hydrantoken"),
+                ("Resolve Stalemate (Destroy Attacking Ships) (Planta)", "plantatoken")]
 
     def test_stalemate_is_blocked_during_missile_speed_and_pending_resolution(self, make_game):
         game = self._unarmed_alliance_battle(make_game)
