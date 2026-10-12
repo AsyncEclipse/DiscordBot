@@ -14,6 +14,9 @@ import random
 from discord.ui import View, Button
 
 
+ALLIANCE_TILES = ["nova", "flare", "vortex"]
+
+
 class GamestateHelper:
     def __init__(self, game_id: discord.TextChannel = None, nameID: str = None, overRideLock:bool=False):
         if game_id is not None:
@@ -171,6 +174,10 @@ class GamestateHelper:
 
     def setFancyShips(self, status: bool):
         self.gamestate["fancy_ships"] = status
+        self.update()
+
+    def setAlliances(self, status: bool):
+        self.gamestate["alliances"] = status
         self.update()
 
     async def declareWinner(self, interaction: discord.Interaction):
@@ -1356,6 +1363,72 @@ class GamestateHelper:
                 self.gamestate["players"][pID]["reputation_track"][x] = tile.split("-")[0]
                 break
         self.update()
+
+    def getAllianceMembers(self, tile: str):
+        """Colours of the players still in this alliance; betrayers have left."""
+        return [p["color"] for p in self.gamestate["players"].values()
+                if p.get("alliances", {}).get(tile) is False]
+
+    def areAllied(self, colorA, colorB):
+        """Two players are allied when they share a tile that neither has betrayed."""
+        if colorA == colorB:
+            return False
+        playerA = self.getPlayerObjectFromColor(colorA)
+        playerB = self.getPlayerObjectFromColor(colorB)
+        if playerA is None or playerB is None:
+            return False
+        shared = set(playerA.get("alliances", {})).intersection(playerB.get("alliances", {}))
+        return any(not playerA["alliances"][tile] and not playerB["alliances"][tile] for tile in shared)
+
+    def getAlliedColors(self, player):
+        """Colours of everyone currently allied with this player."""
+        return [p["color"] for p in self.gamestate["players"].values()
+                if self.areAllied(player["color"], p["color"])]
+
+    def isInAlliance(self, player):
+        """True while the player still holds at least one faceup tile."""
+        return any(betrayed is False for betrayed in player.get("alliances", {}).values())
+
+    def getMaxAllianceSize(self):
+        return 2 if self.gamestate["player_count"] < 6 else 3
+
+    def getUnfoundedAllianceTiles(self):
+        """Tile types nobody has founded an alliance on yet."""
+        return [tile for tile in ALLIANCE_TILES if not self.getAllianceMembers(tile)]
+
+    def getJoinableAllianceTiles(self, player):
+        """Types this player could still take a tile of: not already held (faceup or
+        betrayed, which bars rejoining) and not already at the player-count limit."""
+        joinable = []
+        for tile in ALLIANCE_TILES:
+            if tile in player.get("alliances", {}):
+                continue
+            if len(self.getAllianceMembers(tile)) < self.getMaxAllianceSize():
+                joinable.append(tile)
+        return joinable
+
+    def formAlliance(self, tile: str, colors):
+        """Place a matching faceup tile next to each named player's board."""
+        for color in colors:
+            playerID = self.get_player_from_color(color)
+            self.gamestate["players"][playerID].setdefault("alliances", {})[tile] = False
+        self.update()
+
+    def betrayAlliance(self, tile: str, color):
+        """Flip this player's tile to its Betrayer side. The tile stays, so the
+        player can never rejoin this alliance but may join a different one."""
+        playerID = self.get_player_from_color(color)
+        self.gamestate["players"][playerID].setdefault("alliances", {})[tile] = True
+        self.update()
+
+    def drawAllianceTile(self, colors):
+        """Found a new alliance on a randomly drawn unfounded tile type."""
+        unfounded = self.getUnfoundedAllianceTiles()
+        if not unfounded:
+            return None
+        tile = random.choice(unfounded)
+        self.formAlliance(tile, colors)
+        return tile
 
     def addDiscTile(self, tile: str):
         self.gamestate["board"][tile]["disctile"] = 1

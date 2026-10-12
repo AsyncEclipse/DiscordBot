@@ -30,6 +30,9 @@ class ExploreButtons:
             if "mon" not in ship:
                 if player["color"] in ship and "orb" not in ship:
                     playerShipsCount += 1
+                elif "orb" not in ship and game.areAllied(player["color"], ship.split("-")[0]):
+                    # Allied ships never pin each other; they count together against opponents.
+                    playerShipsCount += 1
                 else:
                     if "gcds" in ship:
                         opponentShips += 99

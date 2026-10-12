@@ -36,6 +36,12 @@ class GameCommands(commands.GroupCog, name="game"):
         game.setFancyShips(status)
         await interaction.response.send_message("Set fancy ships status to " + str(status))
 
+    @app_commands.command(name="set_alliances")
+    async def set_alliances(self, interaction: discord.Interaction, status: bool):
+        game = GamestateHelper(interaction.channel)
+        game.setAlliances(status)
+        await interaction.response.send_message("Set alliances status to " + str(status))
+
     @app_commands.command(name="set_turns_in_passing_order")
     async def set_turns_in_passing_order(self, interaction: discord.Interaction, status: bool):
         game = GamestateHelper(interaction.channel)
