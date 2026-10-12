@@ -117,6 +117,64 @@ class TestJoining:
         assert game.getAllianceMembers("nova") == ["blue", "red"]
 
 
+class TestButtonDispatch:
+    """A custom id nobody handles is a dead end, so every button the alliance
+    UI builds has to appear in the listener's dispatch chain."""
+
+    def _verbs(self):
+        import re
+        listener = open("listeners/ButtonListener.py").read()
+        return re.findall(r'customID\.startswith\("([^"]+)"\)', listener)
+
+    def _assert_dispatched(self, custom_ids):
+        verbs = self._verbs()
+        assert custom_ids
+        for custom_id in custom_ids:
+            stripped = custom_id.split("_", 1)[1]
+            assert any(stripped.startswith(verb) for verb in verbs), \
+                f"{custom_id} has no handler"
+
+    def test_the_turn_buttons_are_dispatched(self, make_game, run):
+        import discord
+        from Buttons.Alliance import AllianceButtons
+        game = _game(make_game, colors=("blue", "red", "green"), player_count=6)
+        player = _color(game, "blue")
+
+        async def collect():
+            """Founding, allied, and betrayed all offer different buttons."""
+            ids = []
+            for stage in ("fresh", "allied", "betrayed"):
+                if stage == "allied":
+                    game.formAlliance("nova", ["blue", "red"])
+                if stage == "betrayed":
+                    game.betrayAlliance("nova", "blue")
+                view = discord.ui.View()
+                AllianceButtons.addAllianceButtons(view, game, player)
+                ids.extend(child.custom_id for child in view.children)
+            return ids
+
+        self._assert_dispatched(run(collect()))
+
+    def test_the_offer_and_join_buttons_are_dispatched(self, make_game, run):
+        from Buttons.Alliance import AllianceButtons
+        game = _game(make_game, colors=("blue", "red", "green"), player_count=6)
+        game.formAlliance("nova", ["blue", "red"])
+        inter = FakeInteraction()
+
+        run(AllianceButtons.offerJoinAlliance(game, _color(game, "green"), inter,
+                                              "offerJoinAlliance_nova"))
+        join_ids = [child.custom_id for _content, kwargs in inter.channel.sent
+                    for child in getattr(kwargs.get("view"), "children", [])]
+        self._assert_dispatched(join_ids)
+
+        inter = FakeInteraction()
+        run(AllianceButtons.offerAllianceTo(game, _color(game, "green"), inter,
+                                            "offerAllianceTo_blue"))
+        offer_ids = [child.custom_id for _content, kwargs in inter.channel.sent
+                     for child in getattr(kwargs.get("view"), "children", [])]
+        self._assert_dispatched(offer_ids)
+
+
 class TestActOfAggression:
     def test_an_allies_presence_is_not_aggression(self, make_game, run):
         game = _game(make_game, ships=["blue-int", "red-int"], owner="red")
