@@ -27,6 +27,10 @@ import traceback
 from helpers.PlayerHelper import PlayerHelper
 
 
+# Same button pressed again within this many seconds of the last press is treated as an accidental double click.
+DOUBLE_PRESS_WINDOW = 3
+
+
 class ButtonListener(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -129,7 +133,10 @@ class ButtonListener(commands.Cog):
             player_helper = PlayerHelper(userID, player)
         else:
             player_helper = None
-        if game.gamestate.get("lastButton") == customID:
+        # Click times come from Discord, so time spent waiting on the game lock doesn't count.
+        pressed_at = interaction.created_at.timestamp()
+        if (game.gamestate.get("lastButton") == customID
+                and pressed_at - game.gamestate.get("lastButtonTime", 0) < DOUBLE_PRESS_WINDOW):
             if not any(substring in customID for substring in ["showGame", "AtRatio", "gain5",
                                                                "showReputation", "rollDice", "magColShip",
                                                                "rerollDie", "readyForUpkeep","draftFaction"]):
@@ -163,7 +170,7 @@ class ButtonListener(commands.Cog):
         if player is None:
             return
         # The guard above compares this against the raw custom id, FCID prefix included.
-        game.saveLastButtonPressed(interaction.data["custom_id"])
+        game.saveLastButtonPressed(interaction.data["custom_id"], pressed_at)
         if customID.startswith("tradeAtRatio"):
             await TurnButtons.tradeAtRatio(game, player, player_helper, interaction, customID)
         elif customID == "showReputation":

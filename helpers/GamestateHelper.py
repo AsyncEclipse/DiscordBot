@@ -56,8 +56,9 @@ class GamestateHelper:
             self.gamestate[key].append(addition)
             self.update()
 
-    def saveLastButtonPressed(self, buttonID: str):
+    def saveLastButtonPressed(self, buttonID: str, pressed_at: float = 0):
         self.gamestate["lastButton"] = buttonID
+        self.gamestate["lastButtonTime"] = pressed_at
         self.update()
 
     def changeColor(self, colorOld, colorNew):
