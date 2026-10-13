@@ -12,6 +12,7 @@ from commands.player_commands import PlayerCommands
 from commands.search_commands import SearchCommands
 # from helpers import ImageCache
 from helpers import ImageCache
+from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
 from listeners.ButtonListener import ButtonListener
 from discord.ext import commands
@@ -42,6 +43,9 @@ class DiscordBot(commands.Bot):
             await self.tree.sync(guild=guild)
         else:
             await self.tree.sync()
+        app_emojis = await self.fetch_application_emojis()
+        Emoji.load(app_emojis)
+        print(f"Loaded {len(app_emojis)} application emojis")
         start_time = time.perf_counter()
         print("Starting to load images")
         ImageCache.ImageCacheHelper("images/resources")

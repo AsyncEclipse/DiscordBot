@@ -13,6 +13,7 @@ from Buttons.Upgrade import UpgradeButtons
 from helpers.PlayerHelper import PlayerHelper
 from helpers.GamestateHelper import GamestateHelper
 from helpers.DrawHelper import DrawHelper
+from discord.ui import View, Button
 
 
 class PlayerCommands(commands.GroupCog, name="player"):
@@ -29,6 +30,14 @@ class PlayerCommands(commands.GroupCog, name="player"):
         app_commands.Choice(name="Pink", value="pink"),
         app_commands.Choice(name="Teal", value="teal"),
         app_commands.Choice(name="Brown", value="brown")
+    ]
+
+    ship_choices = [
+        app_commands.Choice(name="Interceptor", value="interceptor"),
+        app_commands.Choice(name="Cruiser", value="cruiser"),
+        app_commands.Choice(name="Dreadnought", value="dread"),
+        app_commands.Choice(name="Starbase", value="starbase"),
+        app_commands.Choice(name="Orbital", value="orb")
     ]
 
     @app_commands.command(name="stats", description="Anything to do with player stats")
@@ -123,7 +132,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
         """:param tech: The ID of the tech to be removed. Type help to get a list of your tech IDs"""
         game = GamestateHelper(interaction.channel)
         player = game.get_player(interaction.user.id, interaction)
-        player_helper = PlayerHelper(interaction.user.id, player)
+        player_helper = PlayerHelper(game.get_player_from_color(player["color"]), player)
         with open("data/techs.json", "r") as f:
             tech_data = json.load(f)
         tech_details = tech_data.get(tech)
@@ -134,13 +143,14 @@ class PlayerCommands(commands.GroupCog, name="player"):
             await interaction.response.send_message(msg)
             return
         else:
-            game.playerReturnTech(str(interaction.user.id), tech, player_helper.getTechType(tech))
+            game.playerReturnTech(player_helper.player_id, tech, player_helper.getTechType(tech))
             await interaction.response.send_message("Successfully returned " + tech_details["name"])
 
     @app_commands.command(name="remove_ancient_might")
     async def remove_ancient_might(self, interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)  
-        game.playerRemoveAncientMight(str(interaction.user.id))
+        player = game.get_player(interaction.user.id, interaction)
+        game.playerRemoveAncientMight(game.get_player_from_color(player["color"]))
         await interaction.response.send_message("Successfully removed ancient might")
 
     actionChoices = [app_commands.Choice(name="Explore", value="explore"),
@@ -168,7 +178,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
     async def research(self, interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)
         player = game.get_player(interaction.user.id,interaction)
-        player_helper = PlayerHelper(interaction.user.id, player)
+        player_helper = PlayerHelper(game.get_player_from_color(player["color"]), player)
         await interaction.response.defer(thinking=False)
         await ResearchButtons.startResearch(game, player, player_helper, interaction, False)
 
@@ -209,6 +219,99 @@ class PlayerCommands(commands.GroupCog, name="player"):
         player = game.get_player(interaction.user.id,interaction)
         await interaction.response.defer(thinking=False)
         await UpgradeButtons.startUpgrade(game, player, interaction, False, "dummy","dum")
+
+    @app_commands.command(name="ship_parts", description="Show or change your ship parts for free")
+    @app_commands.choices(ship=ship_choices)
+    async def ship_parts(self, interaction: discord.Interaction,
+                         ship: Optional[app_commands.Choice[str]] = None,
+                         slot: Optional[int] = None,
+                         part: Optional[str] = None):
+        """
+
+        :param ship: Which ship to change. Leave empty to pick from all your ships
+        :param slot: The slot to change, counting from 1. Leave empty to pick it from buttons
+        :param part: Three letter code of the part to fit. Give an unknown code for the full part list
+        """
+        game = GamestateHelper(interaction.channel)
+        player = game.get_player(interaction.user.id, interaction)
+        if player is None:
+            await interaction.response.send_message("You are not a player in this game.")
+            return
+        await interaction.response.defer(thinking=False)
+        player_helper = PlayerHelper(game.get_player_from_color(player["color"]), player)
+        with open("data/parts.json", "r") as f:
+            part_stats = json.load(f)
+        if part is not None and part.lower() not in part_stats:
+            catalog = [f"> {code} = {details['name']}" for code, details in part_stats.items()]
+            await interaction.followup.send("Every ship part code:")
+            for start in range(0, len(catalog), 20):
+                await interaction.channel.send("\n".join(catalog[start:start + 20]))
+            return
+        if ship is None:
+            if slot is not None or part is not None:
+                await interaction.followup.send("Give me the ship you want to change.")
+                return
+            await UpgradeButtons.startUpgrade(game, player, interaction, False, "free", "1")
+            return
+
+        ship_name = ship.value
+        if ship_name not in game.getShipsWithParts(player):
+            await interaction.followup.send(f"Your faction has no {ship_name}.")
+            return
+        player_helper.renameOldExileParts(ship_name)
+        parts = player[f"{ship_name}_parts"]
+        if slot is not None and not 1 <= slot <= len(parts):
+            await interaction.followup.send(f"Your {ship_name} has {len(parts)} slots, numbered 1 to {len(parts)}.")
+            return
+        new_part = part.lower() if part is not None else None
+        if new_part is not None and new_part not in player_helper.getAvailableShipParts():
+            await interaction.followup.send(f"You cannot fit a {part_stats[new_part]['name']}, "
+                                            "you do not have the tech or discovery tile for it.")
+            return
+        if new_part == "mus":
+            await interaction.followup.send("A Muon Source is fitted by a discovery tile, "
+                                            "it cannot be swapped into an existing slot.")
+            return
+
+        drawing = DrawHelper(game.gamestate)
+        image = await asyncio.to_thread(drawing.player_area, player)
+        await interaction.followup.send(file=await asyncio.to_thread(drawing.show_player_ship,
+                                                                     image, ship_name, player["name"]))
+        player_helper.setOldShipParts(ship_name)
+        game.update_player(player_helper)
+        if new_part is None and slot is None:
+            await UpgradeButtons.upgradeShip(game, player, interaction, f"upgradeShip_1_{ship_name}_free",
+                                             player_helper)
+        elif new_part is None:
+            old_part = parts[slot - 1]
+            await UpgradeButtons.selectOldPart(game, player, interaction,
+                                               f"selectOldPart_1_{ship_name}_{old_part}_free_{slot - 1}",
+                                               player_helper)
+        elif slot is not None:
+            await UpgradeButtons.chooseUpgrade(game, player, interaction,
+                                               f"chooseUpgrade_1_{ship_name}_{parts[slot - 1]}_{new_part}_"
+                                               f"{slot - 1}_free", player_helper)
+        else:
+            view = View()
+            for index, old_part in enumerate(parts):
+                view.add_item(Button(label=f"{index + 1}. {part_stats[old_part]['name']}",
+                                     style=discord.ButtonStyle.red,
+                                     custom_id=(f"FCID{player['color']}_chooseUpgrade_1_{ship_name}_"
+                                                f"{old_part}_{new_part}_{index}_free")))
+            await interaction.channel.send(f"{interaction.user.mention}, which part of your {ship_name} should "
+                                           f"the {part_stats[new_part]['name']} replace?", view=view)
+
+    @ship_parts.autocomplete("part")
+    async def ship_parts_part_autocomplete(self, interaction: discord.Interaction, current: str):
+        game = GamestateHelper(interaction.channel)
+        player = game.get_player(interaction.user.id, interaction)
+        if player is None:
+            return []
+        with open("data/parts.json", "r") as f:
+            part_stats = json.load(f)
+        names = {code: part_stats[code]["name"] for code in PlayerHelper("", player).getAvailableShipParts()}
+        return [app_commands.Choice(name=name, value=code) for code, name in sorted(names.items(), key=lambda x: x[1])
+                if current.lower() in name.lower() or current.lower() in code][:25]
 
     @app_commands.command(name="move")
     async def move(self, interaction: discord.Interaction):
@@ -289,7 +392,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
     async def draw_reputation(self, interaction: discord.Interaction, num_options: int):
         game = GamestateHelper(interaction.channel)
         player = game.get_player(interaction.user.id,interaction)
-        player_helper = PlayerHelper(interaction.user.id, player)
+        player_helper = PlayerHelper(game.get_player_from_color(player["color"]), player)
         await interaction.response.defer(thinking=True, ephemeral=True)
         await ReputationButtons.resolveGainingReputation(game, num_options, interaction, player_helper, False)
         await interaction.channel.send(f"{interaction.user.name} drew {num_options} reputation tiles.")
