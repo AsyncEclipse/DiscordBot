@@ -97,7 +97,7 @@ class DraftButtons:
     @staticmethod
     async def draftFaction(game: GamestateHelper, interaction: discord.Interaction, customID: str):
         playerID = game.gamestate["draftingPlayers"][0]
-        if interaction.user.id != playerID and not (config.dev_mode and interaction.user.id == config.tester_id):
+        if interaction.user.id != playerID and not (config.dev_mode and config.is_tester(interaction.user.id)):
             await interaction.followup.send("These buttons are not for you", ephemeral=True)
             return
         factionKey = customID.split("_")[1]
