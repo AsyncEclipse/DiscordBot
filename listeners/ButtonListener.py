@@ -269,6 +269,8 @@ class ButtonListener(commands.Cog):
             await UpgradeButtons.selectOldPart(game, player, interaction, customID, player_helper)
         elif customID.startswith("chooseUpgrade"):
             await UpgradeButtons.chooseUpgrade(game, player, interaction, customID, player_helper)
+        elif customID.startswith("undoUpgrade"):
+            await UpgradeButtons.undoUpgrade(game, player, interaction, customID, player_helper)
         elif customID.startswith("startPopDrop"):
             await PopulationButtons.startPopDrop(game, player, interaction)
         elif customID.startswith("fillPopulation"):

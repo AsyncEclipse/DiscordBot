@@ -1,3 +1,5 @@
+import json
+
 from helpers.EmojiHelper import Emoji
 
 
@@ -123,9 +125,22 @@ class PlayerHelper:
         result = max(0, self.stats["disc_tiles_for_points"] + modification)
         self.stats["disc_tiles_for_points"] = result
 
+    def renameOldExileParts(self, ship):
+        # old saves hold "iot_exile", whose underscore breaks custom_id parsing
+        self.stats[f"{ship}_parts"] = ["iotexile" if p == "iot_exile" else p for p in self.stats[f"{ship}_parts"]]
+
     def setOldShipParts(self, ship):
         if f"old_{ship}_parts" not in self.stats:
             self.stats[f"old_{ship}_parts"] = self.stats[f"{ship}_parts"]
+
+    def getAvailableShipParts(self):
+        with open("data/parts.json", "r") as f:
+            part_stats = json.load(f)
+        available = ["ioc", "elc", "nud", "hul", "nus", "empty"]
+        for part in part_stats:
+            if part in self.getTechs() or part in self.stats.get("ancient_parts", []):
+                available.append(part)
+        return set(available)
 
     def passTurn(self, passed: bool):
         self.stats["passed"] = passed

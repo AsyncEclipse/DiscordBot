@@ -29,8 +29,7 @@ class ResearchButtons:
                                              player, tech_details, tech_type, tech):
         cost = ResearchButtons.calculate_cost(tech_details, tech_type, player)
         game.playerResearchTech(game.get_player_from_color(player["color"]), tech, tech_type)
-        player = game.get_player(interaction.user.id,interaction)
-        player_helper = PlayerHelper(interaction.user.id, player)
+        player_helper = PlayerHelper(game.get_player_from_color(player["color"]), player)
         with open("data/techs.json", "r") as f:
             tech_data = json.load(f)
         tech_details = tech_data.get(tech)
@@ -116,7 +115,7 @@ class ResearchButtons:
             await interaction.channel.send(player["player_name"] + " due to researching your fourth tech"
                                            " for the first time this game as Magellan, you get a discovery tile")
             game.addDiscTile(game.getLocationFromID(player["home_planet"]))
-            game.useMagDisc(str(interaction.user.id))
+            game.useMagDisc(game.get_player_from_color(player["color"]))
             await DiscoveryTileButtons.exploreDiscoveryTile(game, game.getLocationFromID(player["home_planet"]),
                                                             interaction, player)
 
@@ -162,13 +161,11 @@ class ResearchButtons:
     @staticmethod
     async def startResearch(game: GamestateHelper, player, player_helper: PlayerHelper,
                             interaction: discord.Interaction, buttonCommand: bool):
-        player = game.get_player(interaction.user.id,interaction)
         await interaction.channel.send(f"{player['player_name']} is using their turn to research")
-        player_helper = PlayerHelper(interaction.user.id, player)
+        player_helper = PlayerHelper(game.get_player_from_color(player["color"]), player)
         if buttonCommand:
             player_helper.spend_influence_on_action("research")
             game.update_player(player_helper)
-        player = game.get_player(interaction.user.id,interaction)
         drawing = DrawHelper(game.gamestate)
         view = View()
         view2 = View()
@@ -270,7 +267,6 @@ class ResearchButtons:
         tech = buttonID.split("_")[1]
         tech_type = buttonID.split("_")[2]
         view = View()
-        player = game.get_player(interaction.user.id,interaction)
         with open("data/techs.json", "r") as f:
             tech_data = json.load(f)
         tech_details = tech_data.get(tech)
