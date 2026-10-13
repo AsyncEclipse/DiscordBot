@@ -14,13 +14,7 @@ volley's backfire may be assigned to any of the owner's rift-armed ships, so a
 cruiser's two backfires can still destroy an interceptor.
 """
 from helpers.CombatHelper import Combat
-from tests.fakes import (
-    FakeInteraction,
-    offered_labels,
-    player_stats,
-)
-
-POS = "101"
+from tests.fakes import FakeInteraction, POS, offered_labels, player_stats
 
 
 def _player(color, pid, int_parts, cru_parts, name="Hydran Progress"):

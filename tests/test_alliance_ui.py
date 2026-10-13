@@ -6,10 +6,7 @@ import pytest
 
 from Buttons.Alliance import AllianceButtons
 from Buttons.Turn import TurnButtons
-from helpers.PlayerHelper import PlayerHelper
-from tests.fakes import FakeInteraction, board_tile, offered_ids, players
-
-POS = "101"
+from tests.fakes import FakeInteraction, POS, board_tile, offered_ids, player_helper, players
 
 
 def _related(*colors):
@@ -43,8 +40,7 @@ async def _alliance_button_ids(game, player):
 
 async def _check_traitor(game, player):
     interaction = FakeInteraction()
-    helper = PlayerHelper(game.get_player_from_color(player["color"]), player)
-    await TurnButtons.checkTraitor(game, player, interaction, helper)
+    await TurnButtons.checkTraitor(game, player, interaction, player_helper(game, player["color"]))
 
 
 def _last_round(game, _player):
@@ -56,11 +52,11 @@ def _not_blues_turn(game, _player):
 
 
 def _spends_influence(game, player):
-    PlayerHelper(game.get_player_from_color(player["color"]), player).spend_influence_on_action("build")
+    player_helper(game, player["color"]).spend_influence_on_action("build")
 
 
 def _adjusts_counter_only(game, player):
-    PlayerHelper(game.get_player_from_color(player["color"]), player).adjust_influence_on_action("build", 0)
+    player_helper(game, player["color"]).adjust_influence_on_action("build", 0)
 
 
 class TestEligibility:

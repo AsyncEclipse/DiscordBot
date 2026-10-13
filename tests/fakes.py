@@ -7,7 +7,10 @@ fixture belongs in this module; fixtures live in conftest.py.
 import copy
 import json
 
+from helpers.PlayerHelper import PlayerHelper
+
 FACTIONS = json.load(open("data/factions.json"))
+POS = "101"  # the sector board_tile() builds by default
 
 
 class FakeMessage:
@@ -103,11 +106,16 @@ def players(*colors):
     return {str(i): player_stats("hyd", color=color) for i, color in enumerate(colors, 1)}
 
 
-def board_tile(ships=(), owner=0, sector=101, **extra):
+def board_tile(ships=(), owner=0, sector=int(POS), **extra):
     """A board dict holding one sector, keyed the way the gamestate keys it."""
     tile = {"owner": owner, "sector": sector, "disctile": 0, "player_ships": list(ships)}
     tile.update(extra)
     return {str(sector): tile}
+
+
+def player_helper(game, color):
+    """A PlayerHelper for the player with this colour."""
+    return PlayerHelper(game.get_player_from_color(color), game.getPlayerObjectFromColor(color))
 
 
 def offered_buttons(interaction):

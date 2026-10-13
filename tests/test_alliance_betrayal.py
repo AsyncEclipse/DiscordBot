@@ -5,8 +5,7 @@ import pytest
 
 from Buttons.Alliance import AllianceButtons
 from Buttons.Turn import TurnButtons
-from helpers.PlayerHelper import PlayerHelper
-from tests.fakes import FakeInteraction, board_tile, players
+from tests.fakes import FakeInteraction, board_tile, player_helper, players
 
 
 def _game_state():
@@ -30,8 +29,7 @@ def _leave_nova(game):
 
 def _traitor_check(game, color):
     player = game.getPlayerObjectFromColor(color)
-    helper = PlayerHelper(game.get_player_from_color(color), player)
-    return TurnButtons.checkTraitor(game, player, FakeInteraction(), helper)
+    return TurnButtons.checkTraitor(game, player, FakeInteraction(), player_helper(game, color))
 
 
 def _one_related(state):
@@ -136,7 +134,7 @@ class TestAllianceBetrayal:
             AllianceButtons.addAllianceButtons(view, game, blue)
             assert any("Leave" in button.label for button in view.children)
 
-            PlayerHelper(game.get_player_from_color("blue"), blue).spend_influence_on_action("explore")
+            player_helper(game, "blue").spend_influence_on_action("explore")
             view = View()
             AllianceButtons.addAllianceButtons(view, game, blue)
 

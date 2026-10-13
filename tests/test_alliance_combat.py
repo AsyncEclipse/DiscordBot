@@ -4,9 +4,7 @@ import asyncio
 import pytest
 
 from helpers.CombatHelper import Combat
-from tests.fakes import FakeInteraction, board_tile, offered_ids, offered_labels, players, player_stats
-
-POS = "101"
+from tests.fakes import FakeInteraction, POS, board_tile, offered_ids, offered_labels, player_stats, players
 
 
 def _game(make_game, colors, ships, attacker=None, defender=None, owner=0, entry=None):

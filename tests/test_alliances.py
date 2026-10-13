@@ -2,9 +2,7 @@
 import pytest
 
 from Buttons.Explore import ExploreButtons
-from tests.fakes import board_tile, players
-
-POS = "101"
+from tests.fakes import POS, board_tile, players
 
 
 def _alliance_game(make_game, colors=("blue", "red", "green"), player_count=4, ships=(), owner=0):
