@@ -14,10 +14,14 @@ class FakeMessage:
     async def delete(self):
         pass
 
+    async def edit(self, **kwargs):
+        pass
+
 
 class FakeChannel:
     def __init__(self, name="aeb1-actions"):
         self.name = name
+        self.threads = []
         self.sent = []
 
     async def send(self, content=None, **kwargs):
@@ -32,21 +36,49 @@ class FakeUser:
     display_name = "tester"
 
 
+class FakeRole:
+    def __init__(self, name):
+        self.name = name
+        self.mention = f"<@&{name}>"
+
+
 class FakeGuild:
     emojis = []
     channels = []
-    roles = []
+
+    def __init__(self, role_names=()):
+        self.roles = [FakeRole(n) for n in role_names]
 
     def get_member(self, _id):
         return None
 
 
+class FakeResponder:
+    """Stands in for interaction.response / interaction.followup; records sends."""
+
+    def __init__(self):
+        self.sent = []
+
+    async def defer(self, **kwargs):
+        pass
+
+    async def send(self, content=None, **kwargs):
+        self.sent.append((content, kwargs))
+
+    send_message = send
+
+
 class FakeInteraction:
-    def __init__(self, channel=None):
+    def __init__(self, channel=None, custom_id=None, user_id=None, role_names=()):
         self.channel = channel or FakeChannel()
         self.user = FakeUser()
-        self.guild = FakeGuild()
+        if user_id is not None:
+            self.user.id = user_id
+        self.guild = FakeGuild(role_names)
         self.message = FakeMessage()
+        self.data = {"custom_id": custom_id}
+        self.response = FakeResponder()
+        self.followup = FakeResponder()
 
 
 def player_stats(faction, **overrides):
@@ -94,5 +126,15 @@ def offered_ids(interaction):
     return [getattr(button, "custom_id", None) for button in offered_buttons(interaction)]
 
 
-def sent_text(interaction):
-    return "\n".join(str(content) for content, _kwargs in interaction.channel.sent)
+def buttons(channel):
+    """custom_id -> label for every button in the most recent message that has any."""
+    for _content, kwargs in reversed(channel.sent):
+        children = getattr(kwargs.get("view"), "children", [])
+        if children:
+            return {c.custom_id: c.label for c in children}
+    return {}
+
+
+def reload(game):
+    """Re-read a game from disk: what the next button press will see."""
+    return type(game)(None, game.game_id)
