@@ -1,8 +1,4 @@
-class Emoji:
-
-    @staticmethod
-    def getEmojiByName(name: str):
-        emojiList = ["<:morph_shield:1301315782407356527>",
+EMOJI_MARKUP_LIST = ["<:morph_shield:1301315782407356527>",
                      "<:tachyon_drive:1301315477812940905>",
                      "<:tachyon_source:1301314865058680972>",
                      "<:fusion_source:1301315774060822578>",
@@ -147,7 +143,24 @@ class Emoji:
                      "<:yellowint:1301319881047674934>",
                      "<:greenint:1301320116813697064>",
                      "<:whiteint:1301319925679390871>"]
-        for emoj in emojiList:
+
+
+class Emoji:
+
+    # name -> "<:name:id>" for this bot's application emojis, when loaded.
+    _app = {}
+
+    @staticmethod
+    def load(application_emojis):
+        Emoji._app = {emoji.name: str(emoji) for emoji in application_emojis}
+
+    @staticmethod
+    def getEmojiByName(name: str):
+        if name in Emoji._app:
+            return Emoji._app[name]
+        if "orb" in name and "_" not in name and "orb" in Emoji._app:
+            return Emoji._app["orb"]
+        for emoj in EMOJI_MARKUP_LIST:
             if f":{name}:" in emoj:
                 return emoj
             if "orb" in name and "_" not in name and ":orb:" in emoj:
