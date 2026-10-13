@@ -39,7 +39,6 @@ class TurnButtons:
         try:
             await interaction.message.delete()
             game.backUpToLastSaveFile()
-            game.release_lock()
             game = GamestateHelper(interaction.channel)
             player = game.get_player(interaction.user.id,interaction)
             view = TurnButtons.getStartTurnButtons(game, player, "dummy")
