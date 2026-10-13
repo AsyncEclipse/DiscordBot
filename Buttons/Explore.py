@@ -114,6 +114,11 @@ class ExploreButtons:
         view = View()
         msg = customID.split("_")
         position = msg[1]
+        if position not in ExploreButtons.getTilesToExplore(game, player):
+            await interaction.channel.send(f"{player['player_name']}, you cannot explore"
+                                           f" position {position} right now.")
+            await interaction.message.delete()
+            return
         if len(msg) > 2:
             tileID = msg[2]
             game.tile_discard(msg[3])
