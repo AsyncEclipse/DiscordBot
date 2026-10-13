@@ -114,7 +114,8 @@ class ExploreButtons:
         view = View()
         msg = customID.split("_")
         position = msg[1]
-        if position not in ExploreButtons.getTilesToExplore(game, player):
+        # only on the first press: a Draco option press comes after the draw, which may have emptied the 300 deck
+        if len(msg) == 2 and position not in ExploreButtons.getTilesToExplore(game, player):
             await interaction.channel.send(f"{player['player_name']}, you cannot explore"
                                            f" position {position} right now.")
             await interaction.message.delete()
