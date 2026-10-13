@@ -450,10 +450,8 @@ class TurnButtons:
     async def undoLastTurn(player, game: GamestateHelper, interaction: discord.Interaction):
         view = View()
         await interaction.message.delete()
-        view.add_item(Button(label="Undo Last Turn", style=discord.ButtonStyle.red,
-                             custom_id=f"FCID{player['color']}_restartTurn"))
-        view.add_item(Button(label="Delete This Message", style=discord.ButtonStyle.gray,
-                             custom_id=f"FCID{player['color']}_deleteMsg"))
+        view.add_item(Button(label="Undo Last Turn", style=discord.ButtonStyle.red, custom_id="restartTurn"))
+        view.add_item(Button(label="Delete This Message", style=discord.ButtonStyle.gray, custom_id="deleteMsg"))
         await interaction.channel.send("Please confirm you want to undo the last turn. "
                                        "The person who took the last turn should be the one pressing this button",
                                        view=view)
