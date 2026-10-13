@@ -37,11 +37,12 @@ class TurnButtons:
     @staticmethod
     async def restartTurn(player, game: GamestateHelper, interaction: discord.Interaction):
         try:
+            color = player["color"]
             await interaction.message.delete()
             game.backUpToLastSaveFile()
             game.release_lock()
             game = GamestateHelper(interaction.channel)
-            player = game.get_player(interaction.user.id,interaction)
+            player = game.getPlayerObjectFromColor(color)
             view = TurnButtons.getStartTurnButtons(game, player, "dummy")
             game.saveLastButtonPressed("restart")
             await interaction.channel.send(player['player_name'] + " has chosen to back up to last start of turn.")

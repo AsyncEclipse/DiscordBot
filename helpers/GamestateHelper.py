@@ -1191,7 +1191,7 @@ class GamestateHelper:
 
     def get_player(self, player_id, interaction=None):
         # checked before seat lookup so a seated tester still plays as the active player
-        if (interaction is not None and config.dev_mode and str(player_id) == str(config.tester_id)
+        if (interaction is not None and config.dev_mode and config.is_tester(player_id)
                 and self.gamestate.get("activePlayerColor")):
             return self.getPlayerObjectFromColor(self.gamestate["activePlayerColor"][0])
         if str(player_id) not in self.gamestate["players"]:

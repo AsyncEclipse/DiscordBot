@@ -180,7 +180,7 @@ class DrawHelper:
                                      custom_id=f"FCID{player['color']}_placeTile_{position}_{tileID}_{rotation}"))
                 count += 1
         byteData = BytesIO()
-        if count < 5:
+        if 1 < count < 5:
             context = context.crop((0, 0, int(345 * 3 * (count - 1) * mult), int(300 * 3 * mult)))
         context.save(byteData, format="WEBP")
         byteData.seek(0)
