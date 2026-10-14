@@ -107,7 +107,7 @@ class TestSharedScore:
         game = _game(make_game, {"blue": 1, "red": 2, "green": 2})
         game.formAlliance("nova", ["blue", "red"])
 
-        assert sorted(game.getWinningColors()) == ["blue", "red"]
+        assert sorted(game.getScoringUnits()[0][0]) == ["blue", "red"]
         winner, score, _faction = game.getWinner()
         assert score == 3
         assert "blue" in winner and "red" in winner
@@ -118,19 +118,19 @@ class TestSharedScore:
         game.formAlliance("nova", ["blue", "red"])
         game.betrayAlliance("nova", "blue")
 
-        assert game.getWinningColors() == ["red"]
+        assert game.getScoringUnits()[0][0] == ["red"]
         assert game.getUnitScore(game.getPlayerObjectFromColor("blue")) < 3
 
     def test_without_alliances_every_player_scores_alone(self, make_game):
         game = _game(make_game, {"blue": 2, "red": 5})
-        assert game.getWinningColors() == ["red"]
+        assert game.getScoringUnits()[0][0] == ["red"]
         assert game.getWinner()[1] == 5
 
     def test_a_tie_is_broken_by_the_shared_resource_total(self, make_game):
         game = _game(make_game, {"blue": 3, "red": 3})
         game.gamestate["players"][game.get_player_from_color("red")]["science"] = 9
 
-        assert game.getWinningColors() == ["red"]
+        assert game.getScoringUnits()[0][0] == ["red"]
 
     def test_every_allies_tourney_division_lands_on_100(self, make_game):
         """search_commands divides each player's shared score by the winning shared
@@ -138,9 +138,7 @@ class TestSharedScore:
         game = _game(make_game, {"blue": 1, "red": 6, "green": 3})
         game.formAlliance("nova", ["blue", "red"])
 
-        winners = game.getWinningColors()
-        winningScore = max(game.getUnitScore(game.getPlayerObjectFromColor(color), True)
-                           for color in winners)
+        winners, winningScore, _resources = game.getScoringUnits()[0]
 
         assert sorted(winners) == ["blue", "red"]
         for color in winners:

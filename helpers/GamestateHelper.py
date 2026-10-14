@@ -158,11 +158,6 @@ class GamestateHelper:
                     for color in colors)
         return total // len(colors)
 
-    def getWinningColors(self):
-        """The colours that win together: the members of the best scoring unit."""
-        units = self.getScoringUnits()
-        return units[0][0] if units else []
-
     def getWinner(self):
         units = self.getScoringUnits()
         if not units:
