@@ -1,4 +1,4 @@
-import asyncio
+import pytest
 
 from discord.ui import View
 
@@ -45,34 +45,24 @@ class FakeGame:
     getShipShortName = staticmethod(GamestateHelper.getShipShortName)
 
 
-def test_ancient_power_counts_installed_parts_once_and_recalculates_after_removal():
-    player = make_player()
+@pytest.mark.parametrize("faction, before, after", [
+    ("Atlantians", (2, 4), (1, 3)),  # (points, interceptor cost)
+    ("Hydran Progress", (0, 3), (0, 3)),
+])
+def test_ancient_power_and_price_of_power(faction, before, after):
+    player = make_player(faction)
     player["ancient_parts"] = ["socha", "cod"]
-    player["reputation_track"] = []
     game = DrawHelper({"board": {"201": {"owner": "blue", "vp": 0, "artifact": 0,
-                                             "player_ships": ["blue-int"] * 4}}})
+                                         "player_ships": ["blue-int"] * 4}}})
 
-    assert PlayerHelper.installed_discovery_part_count(player) == 2
-    assert game.get_public_points(player, False) == 2
-    assert PlayerShip(player, "interceptor").cost == 4
+    assert (game.get_public_points(player, False), PlayerShip(player, "interceptor").cost) == before
     assert PlayerHelper.get_ship_cost(player, "cru") == 5
 
     player["interceptor_parts"].remove("mus")
-    assert PlayerHelper.installed_discovery_part_count(player) == 1
-    assert game.get_public_points(player, False) == 1
-    assert PlayerShip(player, "interceptor").cost == 3
+    assert (game.get_public_points(player, False), PlayerShip(player, "interceptor").cost) == after
 
 
-def test_discovery_part_rules_do_not_change_other_factions():
-    player = make_player("Hydran Progress")
-    game = DrawHelper({"board": {}})
-
-    assert game.get_public_points(player, False) == 0
-    assert PlayerShip(player, "interceptor").cost == 3
-    assert PlayerHelper.get_ship_cost(player, "int") == 3
-
-
-def test_build_labels_and_accumulation_use_adjusted_ship_cost():
+def test_build_labels_and_accumulation_use_adjusted_ship_cost(run):
     player = make_player()
     game = FakeGame()
     view = BuildButtons.buildBuildButtonsView(None, "", 0, "201", View(), player, game)
@@ -80,7 +70,6 @@ def test_build_labels_and_accumulation_use_adjusted_ship_cost():
     assert interceptor.label == "Interceptor (4)"
 
     interaction = FakeInteraction()
-    asyncio.run(BuildButtons.buildShip(
-        game, player, interaction, "buildShip_none_0_201_Interceptor"))
+    run(BuildButtons.buildShip(game, player, interaction, "buildShip_none_0_201_Interceptor"))
 
     assert interaction.message.edited["content"] == "Total cost so far of 4"

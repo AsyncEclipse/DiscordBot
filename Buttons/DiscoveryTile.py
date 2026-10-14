@@ -47,9 +47,12 @@ class DiscoveryTileButtons:
         if player.get("name") == "Atlantians":
             # identical draws collapse to one choice
             choices = list(dict.fromkeys(DiscoveryTileButtons.drawAtlantiansDiscoveryChoices(game)))
+            if not choices:
+                await interaction.channel.send("No eligible discovery tiles remain in the deck.")
+                return
+            game.gamestate["board"][tile]["disctile"] = 0
+            game.update()
             if len(choices) > 1:
-                game.gamestate["board"][tile]["disctile"] = 0
-                game.update()
                 view = View()
                 with open("data/discoverytiles.json") as f:
                     discTile_data = json.load(f)
@@ -63,11 +66,6 @@ class DiscoveryTileButtons:
                     f"{player['player_name']} drew two discovery tiles. Choose one to resolve;"
                     " the other is discarded.\n" + "\n".join(descriptions), view=view)
                 return
-            if not choices:
-                await interaction.channel.send("No eligible discovery tiles remain in the deck.")
-                return
-            game.gamestate["board"][tile]["disctile"] = 0
-            game.update()
             disc = choices[0]
         else:
             disc = game.getNextDiscTile(tile)
