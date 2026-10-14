@@ -105,31 +105,14 @@ class TestEligibility:
         ids = run(_alliance_button_ids(game, game.getPlayerObjectFromColor("blue")))
         assert any(custom_id.endswith("_startAlliance") for custom_id in ids)
 
-    @pytest.mark.parametrize(("change", "left"), [
+    @pytest.mark.parametrize(("change", "window_open"), [
         (_last_round, False),
         (_not_blues_turn, False),
         (_spends_influence, False),
         (_adjusts_counter_only, True),
     ])
     def test_the_leave_window_closes_with_the_turn_and_the_first_action(
-            self, make_game, run, change, left):
-        game = _game(make_game)
-        game.formAlliance("nova", ["blue", "red"])
-        blue = game.getPlayerObjectFromColor("blue")
-        change(game, blue)
-        game.update()
-
-        run(AllianceButtons.leaveAlliance(game, blue, FakeInteraction(), "leaveAlliance_nova"))
-
-        assert (not game.isInAlliance(blue)) is left
-
-    @pytest.mark.parametrize(("change", "offered"), [
-        (_last_round, False),
-        (_not_blues_turn, False),
-        (_spends_influence, False),
-        (_adjusts_counter_only, True),
-    ])
-    def test_the_leave_button_is_offered_only_inside_the_window(self, make_game, run, change, offered):
+            self, make_game, run, change, window_open):
         game = _game(make_game)
         game.formAlliance("nova", ["blue", "red"])
         blue = game.getPlayerObjectFromColor("blue")
@@ -137,8 +120,11 @@ class TestEligibility:
         game.update()
 
         ids = run(_alliance_button_ids(game, blue))
+        assert any(custom_id.endswith("_leaveAlliance_nova") for custom_id in ids) is window_open
 
-        assert any(custom_id.endswith("_leaveAlliance_nova") for custom_id in ids) is offered
+        run(AllianceButtons.leaveAlliance(game, blue, FakeInteraction(), "leaveAlliance_nova"))
+
+        assert (not game.isInAlliance(blue)) is window_open
 
 
 class TestStaleButtons:

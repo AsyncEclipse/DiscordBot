@@ -74,9 +74,12 @@ class InfluenceButtons:
                         continue
                     playerShips = game.gamestate["board"][adjTile]["player_ships"][:]
                     playerShips.append(player["color"])
+                    # Allies are not opponents, so their ships don't make the sector contested.
+                    colorsInTile = [c for c in Combat.findPlayersInTile(game, adjTile)
+                                    if not game.areAllied(player["color"], c)]
                     if all([game.gamestate["board"][adjTile].get("owner") == 0,
-                            ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, adjTile), 
-                            len(Combat.findPlayersInTile(game, adjTile)) < 2, "ai-grd" not in playerShips]):
+                            ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, adjTile),
+                            len(colorsInTile) < 2, "ai-grd" not in playerShips]):
                         tilesToInfluence.append(adjTile)
             if tile_map[tile].get("warp", 0) == 1:
                 for tile2 in tile_map:
@@ -92,9 +95,11 @@ class InfluenceButtons:
                             continue
                         playerShips = game.gamestate["board"][tile2]["player_ships"][:]
                         playerShips.append(player["color"])
+                        colorsInTile = [c for c in Combat.findPlayersInTile(game, tile2)
+                                        if not game.areAllied(player["color"], c)]
                         if all([game.gamestate["board"][tile2].get("owner") == 0,
-                                ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, tile2), 
-                                len(Combat.findPlayersInTile(game, tile2)) < 2]):
+                                ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, tile2),
+                                len(colorsInTile) < 2]):
                             tilesToInfluence.append(tile2)
             if tile not in tilesViewed:
                 tilesViewed.append(tile)

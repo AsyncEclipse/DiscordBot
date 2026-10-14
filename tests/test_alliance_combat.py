@@ -723,3 +723,41 @@ class TestStalemateResolution:
             listener = listener_file.read()
 
         assert 'customID.startswith("resolveStalemate")' in listener
+
+
+class TestAllianceDiceAssignment:
+    """FAQ: non-player (Ancient/Guardian/GCDS) dice hit the Alliance collectively,
+    with ties between similar targets going to whoever entered last."""
+
+    def _ai_game(self, make_game):
+        game = _game(make_game, ("green", "red"), ["ai-anc", "green-int", "red-int"],
+                     attacker="ai", defender=["green", "red"], entry=["green", "red"])
+        game.gamestate["advanced_ai"] = False
+        game.gamestate["wa_ai"] = False
+        return game
+
+    def test_never_targets_an_allied_ship(self, make_game):
+        game = self._ai_game(make_game)
+        ships = game.gamestate["board"][POS]["player_ships"]
+
+        hittable = Combat.getOpponentUnitsThatCanBeHit(game, "ai", ships, 6, 1, POS, 2)
+
+        assert hittable and all(ship.startswith("green-") or ship.startswith("red-") for ship in hittable)
+        # and specifically: a player's own dice never see their Ally as hittable, only the real opponent.
+        own_dice_targets = Combat.getOpponentUnitsThatCanBeHit(game, "green", ships, 6, 0, POS, 3)
+        assert own_dice_targets and all(ship.startswith("ai-") for ship in own_dice_targets)
+
+    def test_ties_between_similar_targets_go_to_the_last_entered_ally(self, make_game, run, no_random, monkeypatch):
+        game = self._ai_game(make_game)
+        no_random([6, 6])
+        hit = []
+
+        async def spy(_game, buttonID, _interaction, _flag):
+            hit.append(buttonID.split("_")[3])
+
+        monkeypatch.setattr(Combat, "assignHitTo", spy)
+        monkeypatch.setattr(Combat, "promptNextSpeed", _noop)
+
+        run(Combat.rollDice(game, f"rollDice_{POS}_ai_2_deleteMsg", FakeInteraction()))
+
+        assert hit and all(ship == "red-int" for ship in hit)

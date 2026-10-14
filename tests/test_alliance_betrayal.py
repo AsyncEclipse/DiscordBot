@@ -5,6 +5,7 @@ import pytest
 
 from Buttons.Alliance import AllianceButtons
 from Buttons.Turn import TurnButtons
+from helpers.CombatHelper import Combat
 from tests.fakes import FakeInteraction, board_tile, player_helper, players
 
 
@@ -141,6 +142,33 @@ class TestAllianceBetrayal:
             assert not any("Leave" in button.label for button in view.children)
 
         run(check_views())
+
+    def test_passing_the_turn_also_checks_the_traitor_rule(self, make_game, run, monkeypatch):
+        """FAQ: aggression against a former Ally counts at the end of your Action OR Turn."""
+        state = _game_state()
+        state["board"]["101"]["player_ships"] = ["red-int"]
+        game = make_game(state)
+        _leave_nova(game)
+        blue = game.getPlayerObjectFromColor("blue")
+
+        checked = []
+
+        async def spy(_game, player, _interaction, _player_helper):
+            checked.append(player["color"])
+
+        monkeypatch.setattr(TurnButtons, "checkTraitor", spy)
+        monkeypatch.setattr(game, "get_next_player", lambda _player: None)
+        monkeypatch.setattr(Combat, "findTilesInConflict", staticmethod(lambda _g: []))
+        monkeypatch.setattr(Combat, "findUnownedTilesToTakeOver", staticmethod(lambda _g: []))
+        monkeypatch.setattr(Combat, "findTilesInContention", staticmethod(lambda _g: []))
+        async def noop(*_a, **_k):
+            return None
+        monkeypatch.setattr(game, "updateNamesAndOutRimTiles", noop)
+
+        inter = FakeInteraction(role_names=[game.game_id])
+        run(TurnButtons.passForRound(blue, game, inter, player_helper(game, "blue")))
+
+        assert checked == ["blue"]
 
     @pytest.mark.parametrize(
         ("saved_closed", "current_closed", "can_leave"),

@@ -109,6 +109,10 @@ class TurnButtons:
                            player_helper: PlayerHelper):
         from helpers.CombatHelper import Combat
         player_helper.stats["allianceLeaveClosed"] = True
+        game.update_player(player_helper)
+        # Alliance FAQ: Act of Aggression against a former Ally counts at the end of
+        # your Action or Turn, so Passing must check it too, not just finishAction.
+        await TurnButtons.checkTraitor(game, player, interaction, player_helper)
         if player.get("passed"):
             await interaction.channel.send(f"{player['player_name']} passed on their reaction window.")
         else:

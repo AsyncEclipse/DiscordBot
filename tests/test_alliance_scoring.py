@@ -1,4 +1,6 @@
 """Alliance scoring: tile VP, and the score allies win or lose with together."""
+import pytest
+
 from helpers.DrawHelper import DrawHelper
 from tests.fakes import player_stats
 
@@ -34,39 +36,36 @@ def _game(make_game, spec, **extra):
     return make_game(state)
 
 
+def _just_formed(game, _blue):
+    game.formAlliance("nova", ["blue"])
+
+
+def _betrayed(game, _blue):
+    game.formAlliance("nova", ["blue"])
+    game.betrayAlliance("nova", "blue")
+
+
+def _betrayed_then_rejoined(game, _blue):
+    game.formAlliance("nova", ["blue"])
+    game.betrayAlliance("nova", "blue")
+    game.formAlliance("flare", ["blue"])
+
+
 class TestAllianceTilePoints:
-    def test_a_faceup_tile_is_worth_two(self, make_game):
+    @pytest.mark.parametrize(("do", "expected_delta"), [
+        (_just_formed, 2),
+        (_betrayed, -3),
+        (_betrayed_then_rejoined, -3 + 2),
+    ], ids=["faceup_tile", "betrayer_tile", "betrayer_with_second_tile"])
+    def test_tile_points(self, make_game, do, expected_delta):
         game = _game(make_game, {"blue": 3})
         blue = game.getPlayerObjectFromColor("blue")
         before = DrawHelper(game.gamestate).get_public_points(blue, False)
 
-        game.formAlliance("nova", ["blue"])
+        do(game, blue)
         after = DrawHelper(game.gamestate).get_public_points(blue, False)
 
-        assert after == before + 2
-
-    def test_a_betrayer_tile_costs_three(self, make_game):
-        game = _game(make_game, {"blue": 3})
-        blue = game.getPlayerObjectFromColor("blue")
-        before = DrawHelper(game.gamestate).get_public_points(blue, False)
-
-        game.formAlliance("nova", ["blue"])
-        game.betrayAlliance("nova", "blue")
-        after = DrawHelper(game.gamestate).get_public_points(blue, False)
-
-        assert after == before - 3
-
-    def test_a_betrayer_holding_a_second_tile_scores_both(self, make_game):
-        game = _game(make_game, {"blue": 3})
-        blue = game.getPlayerObjectFromColor("blue")
-        before = DrawHelper(game.gamestate).get_public_points(blue, False)
-
-        game.formAlliance("nova", ["blue"])
-        game.betrayAlliance("nova", "blue")
-        game.formAlliance("flare", ["blue"])
-        after = DrawHelper(game.gamestate).get_public_points(blue, False)
-
-        assert after == before - 3 + 2
+        assert after == before + expected_delta
 
     def test_rho_indi_gets_no_exemption_from_the_betrayer_penalty(self, make_game):
         game = _game(make_game, {"blue": 3})

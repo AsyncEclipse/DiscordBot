@@ -2,6 +2,7 @@
 import pytest
 
 from Buttons.Explore import ExploreButtons
+from Buttons.Influence import InfluenceButtons
 from tests.fakes import POS, board_tile, players
 
 
@@ -143,3 +144,18 @@ class TestAlliancePinning:
         game.formAlliance("nova", ["blue", "red"])
 
         assert not self._unpinned(game, "blue")
+
+
+class TestAllianceInfluence:
+    def test_an_allys_ships_do_not_block_influence_into_a_shared_sector(self, make_game, monkeypatch):
+        """Allies are not opponents, so a sector holding only you and your Ally
+        is still a legal Influence target through a Wormhole Connection."""
+        game = _alliance_game(make_game, colors=("blue", "red"), owner="blue")
+        game.gamestate["board"]["102"] = {
+            "owner": 0, "sector": 102, "disctile": 0, "player_ships": ["blue-int", "red-int"],
+        }
+        game.formAlliance("nova", ["blue", "red"])
+        monkeypatch.setattr(InfluenceButtons, "areTwoTilesAdjacent", staticmethod(lambda *_a: True))
+        blue = game.getPlayerObjectFromColor("blue")
+
+        assert "102" in InfluenceButtons.getTilesToInfluence(game, blue)
