@@ -28,7 +28,8 @@ class UpgradeButtons:
                                  custom_id=f"FCID{player['color']}_upgradeShip_{actions}_{ship}_{discTileUpgrade}"))
         await interaction.followup.send(file=await asyncio.to_thread(drawing.show_player_ship_area, image),
                                         ephemeral=True)
-        if discTileUpgrade not in ("dummy", "free"):
+        # only a discovery tile part can be saved for a later Upgrade action
+        if discTileUpgrade in DISCOVERY_PART_IDS:
             view.add_item(Button(label="Save For Future Upgrade Action", style=discord.ButtonStyle.red,
                                  custom_id=f"FCID{player['color']}_deleteMsg"))
         if button:
@@ -76,7 +77,7 @@ class UpgradeButtons:
         view.add_item(Button(label="Choose Different Ship", style=discord.ButtonStyle.gray,
                                  custom_id=(f"FCID{player['color']}_chooseDifferentShip_"
                                             f"{actions}_{discTileUpgrade}")))
-        if discTileUpgrade not in ("dummy", "free"):
+        if discTileUpgrade in DISCOVERY_PART_IDS:
             view.add_item(Button(label="Save For Future Upgrade Action", style=discord.ButtonStyle.red,
                                  custom_id=f"FCID{player['color']}_deleteMsg"))
         await UpgradeButtons.showMenu(interaction, f"{interaction.user.mention}, "

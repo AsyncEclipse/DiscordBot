@@ -100,9 +100,9 @@ def start_game(games_dir, run):
     from setup.GameInit import GameInit
     from tests.fakes import FakeChannel, FakeInteraction
 
-    def _start(player_count=2):
+    def _start(player_count=2, factions=None):
         random.seed(0)  # GameInit shuffles decks and tiles; keep runs reproducible
-        factions = ["hyd", "eri", "ori", "dra", "mec", "pla"]
+        factions = factions or ["hyd", "eri", "ori", "dra", "mec", "pla"]
         colors = ["blue", "red", "green", "yellow", "purple", "white"]
         homes = ["201", "203", "205", "207", "209", "211"]  # turn order reads these positions
         players = [[i + 1, f"<@{i + 1}>"] for i in range(player_count)]
