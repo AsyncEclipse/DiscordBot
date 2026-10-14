@@ -18,12 +18,17 @@ from Buttons.Shrine import ShrineButtons
 from Buttons.Turn import TurnButtons
 from Buttons.Upgrade import UpgradeButtons
 from helpers.CombatHelper import Combat
+from helpers.GameLock import game_lock
 from helpers.GamestateHelper import GamestateHelper
 import time
 import logging
 import traceback
 
 from helpers.PlayerHelper import PlayerHelper
+
+
+# Same button pressed again within this many seconds of the last press is treated as an accidental double click.
+DOUBLE_PRESS_WINDOW = 3
 
 
 class ButtonListener(commands.Cog):
@@ -51,7 +56,10 @@ class ButtonListener(commands.Cog):
                                                     " please wait 5-10 seconds for the map to generate",
                                                     ephemeral=True)
 
-                await self.resolveButton(interaction)
+                # A second press waits its turn instead of racing this one's
+                # read-modify-write of the save file.
+                async with game_lock(interaction.channel.name.split("-")[0]):
+                    await self.resolveButton(interaction)
 
                 if button_log_channel is not None and isinstance(button_log_channel, discord.TextChannel):
                     end_time = time.perf_counter()
@@ -86,8 +94,6 @@ class ButtonListener(commands.Cog):
                                     newline = tb.rfind("\n", 0, 1980)
                                     await log_channel.send("```python\n" + tb[:newline] + "\n```")
                                     tb = tb[newline + 1:]
-                        # game = GamestateHelper(interaction.channel, interaction.channel.name,True)
-                        # game.setLockedStatus(False)
                     except discord.Forbidden:
                         logger.warning("Cannot send messages to the log channel `#bot-log`. Check permissions.")
                     except discord.HTTPException as e:
@@ -127,7 +133,10 @@ class ButtonListener(commands.Cog):
             player_helper = PlayerHelper(userID, player)
         else:
             player_helper = None
-        if game.gamestate.get("lastButton") == customID:
+        # Click times come from Discord, so time spent waiting on the game lock doesn't count.
+        pressed_at = interaction.created_at.timestamp()
+        if (game.gamestate.get("lastButton") == customID
+                and pressed_at - game.gamestate.get("lastButtonTime", 0) < DOUBLE_PRESS_WINDOW):
             if not any(substring in customID for substring in ["showGame", "AtRatio", "gain5",
                                                                "showReputation", "rollDice", "magColShip",
                                                                "rerollDie", "readyForUpkeep","draftFaction"]):
@@ -138,15 +147,6 @@ class ButtonListener(commands.Cog):
                                                 ephemeral=True)
                 return
 
-        # if game.gamestate.get("gameLocked") == "yes":
-        #     await asyncio.sleep(0.5)
-        #     game = GamestateHelper(interaction.channel)
-        #     if game.gamestate.get("gameLocked") == "yes":
-        #         await interaction.followup.send((f"{interaction.user.mention}, the game was processing"
-        #                                         " another request when you hit this button. Try again now"),
-        #                                         ephemeral=True)
-        #         return
-        
         # If we want to prevent others from touching someone else's buttons,
         # we can attach FCID{color}_ to the start of the button ID as a check.
         # We then remove this check so it doesnt interfere with the rest of the resolution.
@@ -169,13 +169,8 @@ class ButtonListener(commands.Cog):
             return
         if player is None:
             return
-        game.file = game.setLockedStatus(True)
-        if game.file == None: 
-            await interaction.followup.send((f"{interaction.user.mention}, the game was processing"
-                                                " another request when you hit this button. Try again now"),
-                                                ephemeral=True)
-            return
-        game.saveLastButtonPressed(customID)
+        # The guard above compares this against the raw custom id, FCID prefix included.
+        game.saveLastButtonPressed(interaction.data["custom_id"], pressed_at)
         if customID.startswith("tradeAtRatio"):
             await TurnButtons.tradeAtRatio(game, player, player_helper, interaction, customID)
         elif customID == "showReputation":
@@ -359,6 +354,5 @@ class ButtonListener(commands.Cog):
             await BlackHoleButtons.blackHoleFinish(game, player, customID, player_helper, interaction)
         end_time = time.perf_counter()
         elapsed_time = end_time - start_time
-        game.setLockedStatus(False)
         if elapsed_time > 5:
             print(f"Total elapsed time for {customID} button press in side thread: {elapsed_time:.2f} seconds")

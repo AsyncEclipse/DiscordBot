@@ -40,7 +40,6 @@ class TurnButtons:
             color = player["color"]
             await interaction.message.delete()
             game.backUpToLastSaveFile()
-            game.release_lock()
             game = GamestateHelper(interaction.channel)
             player = game.getPlayerObjectFromColor(color)
             view = TurnButtons.getStartTurnButtons(game, player, "dummy")
@@ -237,6 +236,10 @@ class TurnButtons:
     @staticmethod
     async def runUpkeep(game: GamestateHelper, interaction: discord.Interaction):
         from helpers.CombatHelper import Combat
+        # Upkeep clears every pass, so this stops a stale or queued second press from running another round.
+        if not game.is_everyone_passed():
+            await interaction.channel.send("Not everyone has passed, so upkeep has already run or can't run yet.")
+            return
         if len(Combat.findTilesInConflict(game)) > 0:
             await interaction.channel.send("It appears some tiles are still in conflict. "
                                            "Please resolve them before running upkeep")
@@ -300,7 +303,7 @@ class TurnButtons:
                 await interaction.channel.send("Could not find first player, someone run /player start_turn")
         else:
             view = View()
-            view.add_item(Button(label="Declare Winner", style=discord.ButtonStyle.blurple, custom_id="declareWinner"))
+            view.add_item(Button(label="Declare Winner", style=discord.ButtonStyle.blurple, custom_id="FCIDdummy_declareWinner"))
             await interaction.channel.send("It seems like the game should be ended, "
                                            "hit this button to reveal the winner.", view=view)
         asyncio.create_task(game.showUpdate(f"Start of round {str(game.gamestate['roundNum'])}", interaction))

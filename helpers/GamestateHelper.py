@@ -1,7 +1,6 @@
 import asyncio
 import json
 import time
-import portalocker 
 import discord
 import config
 import shutil
@@ -15,17 +14,14 @@ from discord.ui import View, Button
 
 
 class GamestateHelper:
-    def __init__(self, game_id: discord.TextChannel = None, nameID: str = None, overRideLock:bool=False):
+    def __init__(self, game_id: discord.TextChannel = None, nameID: str = None):
         if game_id is not None:
             nameID = game_id.name
-        self.file = None
         if "-" in nameID:
             game_id = nameID.split("-")[0]
         else:
             game_id = nameID
         self.game_id = game_id
-        if overRideLock:
-            self.release_lock()
         self.gamestate = self.get_gamestate()
 
     def getPlayersID(self, player):
@@ -60,19 +56,10 @@ class GamestateHelper:
             self.gamestate[key].append(addition)
             self.update()
 
-    def saveLastButtonPressed(self, buttonID: str):
+    def saveLastButtonPressed(self, buttonID: str, pressed_at: float = 0):
         self.gamestate["lastButton"] = buttonID
+        self.gamestate["lastButtonTime"] = pressed_at
         self.update()
-
-    def setLockedStatus(self, statusOfLock: bool):
-        if statusOfLock:
-            #self.gamestate["gameLocked"] = "yes"
-            return self.acquire_lock()
-        else:
-            self.release_lock()
-            return None
-            #self.gamestate["gameLocked"] = "no"
-        #self.update()
 
     def changeColor(self, colorOld, colorNew):
         def replace_string_in_dict(original_dict, old_string, new_string):
@@ -186,7 +173,7 @@ class GamestateHelper:
         await interaction.channel.send(f"{role.mention} {winner} is the winner with {highestScore} points",
                                        file=stats)
         view = View()
-        view.add_item(Button(label="End Game", style=discord.ButtonStyle.blurple, custom_id="endGame"))
+        view.add_item(Button(label="End Game", style=discord.ButtonStyle.blurple, custom_id="FCIDdummy_endGame"))
         await interaction.channel.send("Hit this button to cleanup the channels.", view=view)
 
     def getLocationFromID(self, id):
@@ -195,10 +182,8 @@ class GamestateHelper:
                     None)
 
     def get_gamestate(self):
-        f= open(f"{config.gamestate_path}/{self.game_id}.json", "r")
-        self.file = f
-        gamestate = json.load(f)
-        return gamestate
+        with open(f"{config.gamestate_path}/{self.game_id}.json", "r") as f:
+            return json.load(f)
 
     def saveEndRound(self):
         output_dir = f'GameHistory/{self.game_id}'
@@ -206,32 +191,6 @@ class GamestateHelper:
             os.makedirs(output_dir)
         with open(f'GameHistory/{self.game_id}/{self.game_id}-{self.gamestate["roundNum"]-1}.json', "w") as outfile:
             json.dump(self.gamestate, outfile)
-    
-    def is_file_open(self,file_path):  
-        try:  
-            os.rename(file_path, file_path)  
-            return False  
-        except OSError:  
-            return True  
-    
-    def acquire_lock(self):  
-        file_handle = self.file
-        if self.file == None or not self.is_file_open(f"{config.gamestate_path}/{self.game_id}.json"):
-            file_handle = open(f"{config.gamestate_path}/{self.game_id}.json", "r+")  
-            self.file = file_handle
-        try:  
-            portalocker.lock(file_handle, portalocker.LOCK_EX | portalocker.LOCK_NB)  
-        except portalocker.LockException:  
-            file_handle.close()  
-            return None 
-        return file_handle  
-
-    def release_lock(self):  
-        file_handle = self.file 
-        if file_handle == None or not self.is_file_open(f"{config.gamestate_path}/{self.game_id}.json"):
-            file_handle = open(f"{config.gamestate_path}/{self.game_id}.json", "r")
-        portalocker.unlock(file_handle)
-        file_handle.close()  
 
     def get_saveFile(self):
         if not os.path.exists(f"{config.gamestate_path}/{self.game_id}_saveFile.json"):
@@ -1151,10 +1110,8 @@ class GamestateHelper:
             with open(f"{config.gamestate_path}/{self.game_id}.json", "w") as f:
                 json.dump(self.gamestate, f)
         except (OSError, IOError, json.JSONDecodeError, PermissionError):
-            self.release_lock()
             with open(f"{config.gamestate_path}/{self.game_id}.json", "w") as f:
                 json.dump(self.gamestate, f)
-            self.acquire_lock()
 
     def getNumberOfSaveFiles(self):
         saveFile = self.get_saveFile()
