@@ -595,6 +595,11 @@ class DrawHelper:
             count += 1
         return context
 
+    def faction_portrait(self, faction):
+        if faction == "atlantians":
+            return self.use_image(f"images/resources/components/layouts/factionImages/{faction}_image.png")
+        return self.use_image(f"images/resources/components/factions/{faction}_board.png").crop((49, 252, 154, 357))
+
     def display_turn_order(self):
         context = Image.new("RGBA", (900, 290), (0, 0, 0, 255))
         if len(self.gamestate.get("activePlayerColor", [])) == 1:
@@ -659,13 +664,7 @@ class DrawHelper:
             pop_image = pop_image.crop((32, 32, pop_image.width - 32, pop_image.height - 32))
             pop_image = pop_image.resize((90, 90))
             context.paste(pop_image, (95*n, 85), mask=pop_image)
-            face_tile_path = f"images/resources/components/factions/{faction}_board.png"
-            if faction == "atlantians":
-                face_tile_path = f"images/resources/components/layouts/factionImages/{faction}_image.png"
-            face_tile_image = self.use_image(face_tile_path)
-            if faction != "atlantians":
-                face_tile_image = face_tile_image.crop((49, 252, 154, 357))
-            face_tile_image = face_tile_image.resize((90 - 2 * border, 90 - 2 * border))
+            face_tile_image = self.faction_portrait(faction).resize((90 - 2 * border, 90 - 2 * border))
             context.paste(face_tile_image, (95 * n + border, 85 + border), mask=face_tile_image)
             if player["passed"]:
                 draw = ImageDraw.Draw(context)
@@ -694,21 +693,14 @@ class DrawHelper:
             pop_image = pop_image.crop((32, 32, pop_image.width - 32, pop_image.height - 32))
             pop_image = pop_image.resize((60, 60))
             context.paste(pop_image, (130 + 65 * n, 200), mask=pop_image)
-            face_tile_path = f"images/resources/components/factions/{faction}_board.png"
-            if faction == "atlantians":
-                face_tile_path = f"images/resources/components/layouts/factionImages/{faction}_image.png"
-            face_tile_image = self.use_image(face_tile_path)
-            if faction != "atlantians":
-                face_tile_image = face_tile_image.crop((49, 252, 154, 357))
-            face_tile_image = face_tile_image.convert("L").convert("RGBA")
+            face_tile_image = self.faction_portrait(faction).convert("L").convert("RGBA")
             face_tile_image = face_tile_image.resize((60 - 2 * border, 60 - 2 * border))
             context.paste(face_tile_image, (130 + 65 * n + border, 200 + border), mask=face_tile_image)
 
         return context
 
     def display_remaining_tiles(self):
-        height = 540 if self.gamestate.get("minor_species") else 500
-        context = Image.new("RGBA", (1900, height), (0, 0, 0, 255))
+        context = Image.new("RGBA", (1900, 500), (0, 0, 0, 255))
 
         filepath = "images/resources/hexes/sector3backblank.png"
         tile_image = self.use_resized_image(filepath, (172, 150))
@@ -1011,7 +1003,7 @@ class DrawHelper:
         colorActive = "nada"
         if "activePlayerColor" in self.gamestate:
             colorActive = self.gamestate.get("activePlayerColor")
-        if player["color"] in colorActive and not player.get("passed") and not player.get("eliminated"):
+        if player["color"] in colorActive:
             text_drawable.text((10, textHeightForP), "Active", fill=(0, 255, 0), font=font,
                                stroke_width=stroke_width, stroke_fill=stroke_color)
 
@@ -1515,7 +1507,7 @@ class DrawHelper:
         colorActive = "nada"
         if "activePlayerColor" in self.gamestate:
             colorActive = self.gamestate.get("activePlayerColor")
-        if player["color"] == colorActive and not player.get("passed") and not player.get("eliminated"):
+        if player["color"] == colorActive:
             text_image = Image.new('RGBA', (500, 500), (0, 0, 0, 0))
             text_drawable = ImageDraw.Draw(text_image)
             text_drawable.text((0, 50), "Active", fill=(0, 255, 0), font=font,

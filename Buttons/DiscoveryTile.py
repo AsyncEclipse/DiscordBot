@@ -34,9 +34,8 @@ class DiscoveryTileButtons:
         view = View()
         view.add_item(Button(label="Use it for its ability", style=discord.ButtonStyle.green,
                              custom_id=f"FCID{player['color']}_usedDiscForAbility_{disc}_{tile}"))
-        view.add_item(Button(label="Get 2 Points", style=discord.ButtonStyle.red,
-                             custom_id=f"FCID{player['color']}_keepDiscForPoints"))
-        await interaction.channel.send(msg, view=view, file=file)
+        view.add_item(Button(label="Get 2 Points", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_keepDiscForPoints"))
+        asyncio.create_task(interaction.channel.send(msg, view=view, file=file))
 
     @staticmethod
     async def exploreDiscoveryTile(game: GamestateHelper, tile: str, interaction: discord.Interaction, player):
@@ -46,12 +45,9 @@ class DiscoveryTileButtons:
             await interaction.followup.send("No discovery tile in tile " + tile)
             return
         if player.get("name") == "Atlantians":
+            # identical draws collapse to one choice
             choices = list(dict.fromkeys(DiscoveryTileButtons.drawAtlantiansDiscoveryChoices(game)))
             if len(choices) > 1:
-                choice_id = game.gamestate.get("discoveryChoiceId", 0) + 1
-                game.gamestate["discoveryChoiceId"] = choice_id
-                pending = game.gamestate.setdefault("pendingDiscoveryChoices", {})
-                pending[str(choice_id)] = {"choices": choices, "tile": tile, "color": player["color"]}
                 game.gamestate["board"][tile]["disctile"] = 0
                 game.update()
                 view = View()
@@ -61,7 +57,7 @@ class DiscoveryTileButtons:
                 for choice in choices:
                     choice_data = discTile_data[choice]
                     view.add_item(Button(label=choice_data["name"], style=discord.ButtonStyle.green,
-                                         custom_id=f"FCID{player['color']}_selectDiscTile_{choice_id}_{choice}_{tile}"))
+                                         custom_id=f"FCID{player['color']}_selectDiscTile_{choice}_{tile}"))
                     descriptions.append(f"**{choice_data['name']}**: {choice_data['description']}")
                 await interaction.channel.send(
                     f"{player['player_name']} drew two discovery tiles. Choose one to resolve;"
@@ -79,16 +75,7 @@ class DiscoveryTileButtons:
 
     @staticmethod
     async def selectDiscTile(game: GamestateHelper, interaction: discord.Interaction, buttonID: str, player):
-        parts = buttonID.split("_")
-        choice_id, disc, tile = parts[1:4]
-        pending_choices = game.gamestate.get("pendingDiscoveryChoices", {})
-        pending = pending_choices.get(choice_id)
-        if (pending is None or pending["color"] != player["color"] or disc not in pending["choices"]
-                or tile != pending["tile"]):
-            await interaction.followup.send("That discovery tile choice is no longer available.", ephemeral=True)
-            return
-        del pending_choices[choice_id]
-        game.update()
+        disc, tile = buttonID.split("_")[1:3]
         await interaction.message.edit(view=None)
         await DiscoveryTileButtons.sendDiscoveryTileOptions(game, tile, interaction, player, disc)
 

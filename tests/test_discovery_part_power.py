@@ -7,6 +7,7 @@ from helpers.DrawHelper import DrawHelper
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 from helpers.ShipHelper import PlayerShip
+from tests.fakes import FakeInteraction
 
 
 def make_player(name="Atlantians"):
@@ -42,16 +43,6 @@ class FakeGame:
         self.gamestate = {"board": {"201": {"player_ships": []}}}
 
     getShipShortName = staticmethod(GamestateHelper.getShipShortName)
-
-
-class FakeMessage:
-    async def edit(self, **kwargs):
-        self.edited = kwargs
-
-
-class FakeInteraction:
-    def __init__(self):
-        self.message = FakeMessage()
 
 
 def test_ancient_power_counts_installed_parts_once_and_recalculates_after_removal():

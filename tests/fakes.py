@@ -17,7 +17,7 @@ class FakeMessage:
         pass
 
     async def edit(self, **kwargs):
-        pass
+        self.edited = kwargs
 
 
 class FakeChannel:
