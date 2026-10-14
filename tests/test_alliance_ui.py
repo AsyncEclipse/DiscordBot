@@ -306,14 +306,21 @@ class TestActOfAggression:
         run(_check_traitor(game, blue))
         assert not blue.get("traitor")
 
-    def test_a_former_ally_becomes_the_traitor_without_breaking_relations(self, make_game, run):
+    def test_aggression_against_a_former_ally_breaks_relations_once(self, make_game, run):
         game = _game(make_game, ships=["blue-int", "red-int"], owner="red")
         game.formAlliance("nova", ["blue", "red"])
         game.betrayAlliance("nova", "blue")
         blue = game.getPlayerObjectFromColor("blue")
-        relationsBefore = list(blue["reputation_track"])
+        green = game.getPlayerObjectFromColor("green")
 
         run(_check_traitor(game, blue))
 
         assert blue.get("traitor")
-        assert blue["reputation_track"] == relationsBefore
+        assert not any("red" in str(tile) for tile in blue["reputation_track"])
+
+        # Someone else takes the card later; staying next to red must not take it back.
+        game.makeEveryoneNotTraitor()
+        green["traitor"] = True
+        run(_check_traitor(game, blue))
+
+        assert green["traitor"] and not blue.get("traitor")

@@ -67,6 +67,12 @@ class TestSidesInTile:
         unowned.formAlliance("nova", ["blue", "red"])
         assert Combat.findUnownedTilesToTakeOver(unowned) == [(101, POS)]
 
+    def test_an_ally_is_not_offered_to_bomb_its_allys_sector(self, make_game):
+        game = _game(make_game, ("blue", "red"), ["blue-cru"], owner="red")
+        game.formAlliance("nova", ["blue", "red"])
+
+        assert Combat.findTilesInContention(game) == []
+
     @pytest.mark.parametrize("ship_order", [("blue", "red", "green"), ("blue", "green", "red")])
     def test_an_alliance_is_one_side_wherever_its_members_sit_in_the_ship_list(self, make_game, ship_order):
         game = _game(make_game, ship_order, [f"{color}-cru" for color in ship_order])
@@ -427,6 +433,40 @@ class TestAllianceCombatEnd:
         monkeypatch.setattr(Combat, "promptNextSpeed", staticmethod(prompt))
         monkeypatch.setattr(Combat, "startCombat", staticmethod(unexpected_restart))
         run(Combat.checkCombatEnd(game, FakeInteraction(), POS, 3))
+
+        assert prompted == [POS]
+
+    def test_destroying_an_ally_waits_for_the_remaining_hits(self, make_game, run, monkeypatch):
+        game = _game(make_game, ("blue", "red", "green"),
+                     ["blue-cru", "red-int", "green-cru"],
+                     attacker=["green"], defender=["blue", "red"])
+        game.formAlliance("nova", ["blue", "red"])
+        game.setUnresolvedHits(2, POS)
+        prompted = []
+
+        async def prompt(*args):
+            prompted.append(args[1])
+
+        monkeypatch.setattr(Combat, "promptNextSpeed", staticmethod(prompt))
+        run(Combat.assignHitTo(game, f"assignHitTo_{POS}_green_red-int_6_5", FakeInteraction(), True))
+        assert prompted == []
+
+        run(Combat.assignHitTo(game, f"assignHitTo_{POS}_green_blue-cru_6_1", FakeInteraction(), True))
+        assert prompted == [POS]
+
+    def test_a_last_hit_that_destroys_an_ally_prompts_once(self, make_game, run, monkeypatch):
+        game = _game(make_game, ("blue", "red", "green"),
+                     ["blue-cru", "red-int", "green-cru"],
+                     attacker=["green"], defender=["blue", "red"])
+        game.formAlliance("nova", ["blue", "red"])
+        game.setUnresolvedHits(1, POS)
+        prompted = []
+
+        async def prompt(*args):
+            prompted.append(args[1])
+
+        monkeypatch.setattr(Combat, "promptNextSpeed", staticmethod(prompt))
+        run(Combat.assignHitTo(game, f"assignHitTo_{POS}_green_red-int_6_5", FakeInteraction(), True))
 
         assert prompted == [POS]
 

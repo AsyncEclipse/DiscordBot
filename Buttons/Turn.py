@@ -71,7 +71,6 @@ class TurnButtons:
             await interaction.channel.send(f"{nextPlayer['player_name']} use buttons to do your turn"
                                            + game.displayPlayerStats(nextPlayer), view=view)
         else:
-            game.initilizeKey("activePlayerColor")
             view = View()
             role = discord.utils.get(interaction.guild.roles, name=game.game_id)
             msg = f"{role.mention}, all players have passed, you may use this button to start the next round"
@@ -144,7 +143,6 @@ class TurnButtons:
             sendPermaPassButton = True
             
         else:
-            game.initilizeKey("activePlayerColor")
             view = View()
             role = discord.utils.get(interaction.guild.roles, name=game.game_id)
             msg = f"{role.mention}, all players have passed, you may use this button to start the next round"
@@ -476,49 +474,39 @@ class TurnButtons:
 
     @staticmethod
     async def checkTraitor(game: GamestateHelper, player, interaction: discord.Interaction, player_helper: PlayerHelper):
-        former_allies = [
-            other for other in game.gamestate["players"].values()
-            if game.isFormerAlly(player["color"], other["color"])
-        ]
+        related = [tile.split("-")[2] for tile in player["reputation_track"]
+                   if isinstance(tile, str) and "-" in tile and "minor" not in tile]
+        # Alliance FAQ: aggression against a former Ally makes you the Traitor even without
+        # Relations, but only once per former Ally, so it cannot later take the card back.
+        former_allies = [p["color"] for p in game.gamestate["players"].values()
+                         if game.isFormerAlly(player["color"], p["color"])
+                         and p["color"] not in player.get("aggressedFormerAllies", [])]
         for destination in game.gamestate["board"]:
             sector_ships = game.gamestate["board"][destination].get("player_ships", [])
             player_present = _has_ship(player["color"], sector_ships)
             player_controls = destination in player["owned_tiles"]
-
-            for former_ally in former_allies:
-                former_ally_present = _has_ship(former_ally["color"], sector_ships)
-                former_ally_controls = destination in former_ally["owned_tiles"]
-                if ((player_present and (former_ally_present or former_ally_controls))
-                        or (player_controls and former_ally_present)):
-                    game.makeEveryoneNotTraitor()
-                    player_helper.setTraitor(True)
-                    game.update_player(player_helper)
-                    await interaction.channel.send(
-                        f"{player['player_name']}, you left {former_ally['player_name']}'s Alliance and are in a "
-                        "sector with their ships or control, so you now are the Traitor.")
-                    return
-
-            if not player_present:
+            if not player_present and not player_controls:
                 continue
-            for tile in player["reputation_track"][:]:
-                if not (isinstance(tile, str) and "-" in tile and "minor" not in tile):
-                    continue
-                color = tile.split("-")[2]
+            for color in list(dict.fromkeys(related + former_allies)):
                 if game.areAllied(player["color"], color):
                     continue
                 p2 = game.getPlayerObjectFromColor(color)
-                if destination not in p2["owned_tiles"] and not _has_ship(color, sector_ships):
+                other_present = _has_ship(color, sector_ships)
+                former_ally = color in former_allies
+                aggression = player_present and (destination in p2["owned_tiles"] or other_present)
+                if not (aggression or (former_ally and player_controls and other_present)):
                     continue
-                await DiplomaticRelationsButtons.breakRelationsWith(game, player, p2, interaction)
+                if color in related:
+                    await DiplomaticRelationsButtons.breakRelationsWith(game, player, p2, interaction)
+                    related.remove(color)
+                if former_ally:
+                    player_helper.stats.setdefault("aggressedFormerAllies", []).append(color)
+                    former_allies.remove(color)
                 game.makeEveryoneNotTraitor()
                 player_helper.setTraitor(True)
                 game.update_player(player_helper)
-                await interaction.channel.send(f"{player['player_name']}, you broke relations with {color}"
-                                               " and now are the Traitor.")
-                            
-
-
-
+                await interaction.channel.send(f"{player['player_name']}, your Act of Aggression against "
+                                               f"{p2['player_name']} makes you the Traitor.")
 
     @staticmethod
     async def finishAction(player, game: GamestateHelper, interaction: discord.Interaction,

@@ -126,6 +126,12 @@ class TestAlliancePinning:
 
         assert self._unpinned(game, color) is unpinned
 
+    def test_an_allys_ships_alone_are_not_yours(self, make_game):
+        game = _alliance_game(make_game, ships=["red-int", "red-int"])
+        game.formAlliance("nova", ["blue", "red"])
+
+        assert self._unpinned(game, "blue") is False
+
     @pytest.mark.parametrize("ships", [
         # 2 allied against 3 enemies.
         ["blue-int", "red-int", "green-int", "green-int", "green-int"],

@@ -128,6 +128,7 @@ class Combat:
             side = sides[0]
             if (tile_map[tile]["owner"] != 0
                     and tile_map[tile]["owner"] not in side
+                    and not any(game.areAllied(tile_map[tile]["owner"], color) for color in side)
                     and "ai" not in side):
                 tiles.append((int(tile_map[tile]["sector"]), tile))
         sorted_tiles = sorted(tiles, key=lambda x: x[0], reverse=True)
@@ -1336,7 +1337,9 @@ class Combat:
                 view.add_item(Button(label=f"Resolve Stalemate (Destroy Attacking Ships){suffix}",
                                      style=discord.ButtonStyle.red, emoji=emoji,
                                      custom_id=f"FCID{color}_resolveStalemate_{pos}_{color}"))
-            msg += " Neither side has weapons remaining; the attacker may resolve a stalemate."
+            msg += " Neither side has weapons remaining; the attacker must retreat or resolve the stalemate."
+            if not any(Combat.getRetreatTiles(game, pos, color) for color in attacker if color != "ai"):
+                msg += " There is no sector to retreat to."
         asyncio.create_task(channel.send(msg, view=view))
 
     @staticmethod
@@ -1585,9 +1588,11 @@ class Combat:
                                                              view=Combat.getCombatButtons(game, pos), file=image))
                 await Combat.startCombat(game, interaction.channel, pos)
                 return True
-            else:
+            if not (tile.get("unresolvedHits", 0) > 0 or tile.get("pendingRiftDice")
+                    or any(tile.get("pendingRiftBackfire", {}).values())):
+                # Otherwise the last pending hit prompts the next initiative step.
                 await Combat.promptNextSpeed(game, pos, interaction.channel, True)
-                return True
+            return True
         return False
 
     @staticmethod
@@ -1620,6 +1625,10 @@ class Combat:
                    f" with a die that rolled a {str(dieNum)}. ")
         msg += f"The damaged ship has {shipModel.hull - damage + 1}/{shipModel.hull + 1} hp left. "
         oldLength = len(Combat.findPlayersInTile(game, pos))
+        if button:
+            # Count this hit before checkCombatEnd looks for hits still pending.
+            hitsToAssign = max(game.gamestate["board"][pos].get("unresolvedHits", 0) - 1, 0)
+            game.setUnresolvedHits(hitsToAssign, pos)
         if shipModel.hull < damage:
             if colorOrAI not in ship:
                 game.destroy_ship(ship, pos, colorOrAI)
@@ -1646,10 +1655,6 @@ class Combat:
             await interaction.channel.send(msg)
         if button:
             await interaction.message.delete()
-            hitsToAssign = 0
-            if "unresolvedHits" in game.gamestate["board"][pos]:
-                hitsToAssign = max(game.gamestate["board"][pos]["unresolvedHits"] - 1, 0)
-            game.setUnresolvedHits(hitsToAssign, pos)
             if hitsToAssign == 0 and oldLength == len(Combat.findPlayersInTile(game, pos)):
                 await Combat.promptNextSpeed(game, pos, interaction.channel, True)
 

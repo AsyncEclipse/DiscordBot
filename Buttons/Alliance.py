@@ -64,6 +64,8 @@ class AllianceButtons:
     @staticmethod
     def isPlayersTurn(game: GamestateHelper, colors):
         active_colors = game.gamestate.get("activePlayerColor", [])
+        # shortcut: after everyone passes the last player stays active, so an old Form Alliance
+        # button still works until the next round starts; add an end-of-round flag if that matters.
         return bool(active_colors and active_colors[0] in colors)
 
     @staticmethod
