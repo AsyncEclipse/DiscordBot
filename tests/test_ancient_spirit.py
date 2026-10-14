@@ -3,6 +3,7 @@ import pytest
 from Buttons.DiscoveryTile import DiscoveryTileButtons
 from Buttons.Research import ResearchButtons
 from helpers.DrawHelper import DrawHelper
+from helpers.PlayerHelper import PlayerHelper
 from tests.fakes import FakeInteraction, buttons
 
 
@@ -37,7 +38,8 @@ def test_ancient_labs_research_uses_ancient_spirit_choice(make_game, run, monkey
     interaction = FakeInteraction()
 
     run(ResearchButtons.handle_specific_tech_selection(
-        interaction, game, player, {"base_cost": 13, "min_cost": 9, "name": "Ancient Labs",
+        interaction, game, player, PlayerHelper("1", player),
+        {"base_cost": 13, "min_cost": 9, "name": "Ancient Labs",
                                     "track": "any", "art_pt": 0, "infdisc": 0, "activ1": 0, "dtile": 1},
         "grid", "anl"))
 
