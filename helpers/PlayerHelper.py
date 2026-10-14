@@ -19,6 +19,16 @@ class PlayerHelper:
     def is_reputation_only_slot(player, index):
         return player["name"] == "Atlantians" and index < 2
 
+    @staticmethod
+    def has_reputation_slot_for_relation(player):
+        """A relation takes the first free ambassador slot, or replaces the lowest reputation tile."""
+        for index, tile in enumerate(player["reputation_track"]):
+            if isinstance(tile, str) and tile in ("amb", "mixed"):
+                return True
+            if isinstance(tile, int) and not PlayerHelper.is_reputation_only_slot(player, index):
+                return True
+        return False
+
     def isTraitor(self):
         if self.stats.get("traitor"):
             return True

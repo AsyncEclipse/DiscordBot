@@ -1215,6 +1215,9 @@ class GamestateHelper:
             return full_name.lower().replace(" ", "_")
 
     def formRelationsBetween(self, player1, player2):
+        if not all(PlayerHelper.has_reputation_slot_for_relation(player)
+                   for player in (player1, player2)):
+            return False
         pID = self.get_player_from_color(player1['color'])
         pID2 = self.get_player_from_color(player2['color'])
         found = False
@@ -1233,7 +1236,6 @@ class GamestateHelper:
                 if isinstance(tile, int) and tile < lowest:
                     loc = x
                     lowest = tile
-            assert loc is not None, "No reputation slot available for diplomacy"
             track = f"mixed-{self.get_short_faction_name(player2['name'])}-{player2['color']}"
             self.gamestate["players"][pID]["reputation_track"][loc] = track
             self.gamestate["reputation_tiles"].append(lowest)
@@ -1254,14 +1256,16 @@ class GamestateHelper:
                 if isinstance(tile, int) and tile < lowest:
                     loc = x
                     lowest = tile
-            assert loc is not None, "No reputation slot available for diplomacy"
             track = f"mixed-{self.get_short_faction_name(player1['name'])}-{player1['color']}"
             self.gamestate["players"][pID2]["reputation_track"][loc] = track
             self.gamestate["reputation_tiles"].append(lowest)
 
         self.update()
+        return True
 
     def formMinorSpeciesRelations(self, player, minor_species_name: str):
+        if not PlayerHelper.has_reputation_slot_for_relation(player):
+            return False
         pID = self.get_player_from_color(player['color'])
         found = False
         for x, tile in enumerate(player["reputation_track"]):
@@ -1278,7 +1282,6 @@ class GamestateHelper:
                 if isinstance(tile, int) and tile < lowest:
                     loc = x
                     lowest = tile
-            assert loc is not None, "No reputation slot available for minor species"
             self.gamestate["players"][pID]["reputation_track"][loc] = f"mixed-minor-{minor_species_name}"
             self.gamestate["reputation_tiles"].append(lowest)
         if "Discount" in minor_species_name and "Tech" not in minor_species_name:
@@ -1290,6 +1293,7 @@ class GamestateHelper:
         self.gamestate["minor_species"].remove(minor_species_name)
 
         self.update()
+        return True
 
     def returnReputation(self, val: int, player):
         loc = 0

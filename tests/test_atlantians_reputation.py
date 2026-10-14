@@ -31,3 +31,19 @@ def test_returning_reputation_preserves_slot_type(monkeypatch):
     game.returnReputation(3, player)
     assert player["reputation_track"] == ["rep", 2, 4, "mixed"]
     assert game.gamestate["reputation_tiles"] == [1, 3]
+
+
+def test_a_full_track_refuses_relations(monkeypatch):
+    taken = ["rep", "rep", "mixed-terran_federation-red", "mixed-minor-The Sentinels"]
+    player = {"name": "Atlantians", "color": "blue", "reputation_track": deepcopy(taken)}
+    other = {"name": "Terran Federation", "color": "red", "reputation_track": ["amb", "mixed"]}
+    game = object.__new__(GamestateHelper)
+    game.gamestate = {"players": {"1": player, "2": other}, "reputation_tiles": [],
+                      "minor_species": ["The Sentinels"]}
+    monkeypatch.setattr(game, "update", lambda: None)
+
+    assert game.formRelationsBetween(player, other) is False
+    assert game.formMinorSpeciesRelations(player, "The Sentinels") is False
+    assert player["reputation_track"] == taken
+    assert other["reputation_track"] == ["amb", "mixed"]
+    assert game.gamestate["minor_species"] == ["The Sentinels"]
