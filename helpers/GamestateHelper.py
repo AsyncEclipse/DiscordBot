@@ -173,7 +173,7 @@ class GamestateHelper:
         await interaction.channel.send(f"{role.mention} {winner} is the winner with {highestScore} points",
                                        file=stats)
         view = View()
-        view.add_item(Button(label="End Game", style=discord.ButtonStyle.blurple, custom_id="endGame"))
+        view.add_item(Button(label="End Game", style=discord.ButtonStyle.blurple, custom_id="FCIDdummy_endGame"))
         await interaction.channel.send("Hit this button to cleanup the channels.", view=view)
 
     def getLocationFromID(self, id):
