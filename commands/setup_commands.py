@@ -41,7 +41,8 @@ class SetupCommands(commands.GroupCog, name="setup"):
                       app_commands.Choice(name="Terran Directorate (Eridani)", value="ter3"),
                       app_commands.Choice(name="Terran Federation (Hydran)", value="ter4"),
                       app_commands.Choice(name="Terran Republic (Draco)", value="ter5"),
-                      app_commands.Choice(name="Terran Union (Planta)", value="ter6"),]
+                      app_commands.Choice(name="Terran Union (Planta)", value="ter6"),
+                      app_commands.Choice(name="Atlantians (Unknown)", value="atl")]
     
     @app_commands.choices(ai_ship_type=ai_choices2)
     @app_commands.choices(ai_ship=ai_ship_choices)

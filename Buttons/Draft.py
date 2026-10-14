@@ -58,22 +58,27 @@ class DraftButtons:
     @staticmethod
     def getDraftButtons(game: GamestateHelper):
         view = View()
-        factionsAvailable = [("Hydran Progress", "hyd"),
-                             ("Eridani Empire", "eri"),
-                             ("Orion Hegemony", "ori"),
-                             ("Descendants of Draco", "dra"),
-                             ("Mechanema", "mec"),
-                             ("Planta", "pla"),
-                             ("Wardens of Magellan", "mag"),
-                             ("Enlightened of Lyra", "lyr"),
-                             ("Rho Indi Syndicate", "rho"),
-                             ("The Exiles", "exl"),
-                             ("Terran Alliance (Orion)", "ter1"),
-                             ("Terran Conglomerate (Mech)", "ter2"),
-                             ("Terran Directorate (Eridani)", "ter3"),
-                             ("Terran Federation (Hydran)", "ter4"),
-                             ("Terran Republic (Draco)", "ter5"),
-                             ("Terran Union (Planta)", "ter6")]
+        base_factions = [("Hydran Progress", "hyd"),
+                         ("Eridani Empire", "eri"),
+                         ("Orion Hegemony", "ori"),
+                         ("Descendants of Draco", "dra"),
+                         ("Mechanema", "mec"),
+                         ("Planta", "pla"),
+                         ("Wardens of Magellan", "mag"),
+                         ("Enlightened of Lyra", "lyr"),
+                         ("Rho Indi Syndicate", "rho"),
+                         ("The Exiles", "exl")]
+        terran_factions = [("Terran Alliance (Orion)", "ter1"),
+                           ("Terran Conglomerate (Mech)", "ter2"),
+                           ("Terran Directorate (Eridani)", "ter3"),
+                           ("Terran Federation (Hydran)", "ter4"),
+                           ("Terran Republic (Draco)", "ter5"),
+                           ("Terran Union (Planta)", "ter6")]
+        community_factions = [("Atlantians (Unknown)", "atl")]
+        if game.gamestate.get("communityMode", False):
+            factionsAvailable = base_factions + terran_factions + community_factions
+        else:
+            factionsAvailable = base_factions + terran_factions
         bannedFactions = game.gamestate["bannedFactions"]
         for faction, key in factionsAvailable:
             colorsAlreadyChosen = []
@@ -93,7 +98,6 @@ class DraftButtons:
             view.add_item(Button(label=f"{faction}", emoji=emoji, style=discord.ButtonStyle.gray,
                                  custom_id=f"draftFaction_{key}_{faction}"))
         return view
-
     @staticmethod
     async def draftFaction(game: GamestateHelper, interaction: discord.Interaction, customID: str):
         playerID = game.gamestate["draftingPlayers"][0]
@@ -145,6 +149,8 @@ class DraftButtons:
             return "brown"
         if faction == "exl":
             return "teal"
+        if faction == "atl":
+            return "cyan"
         return "green"
 
     @staticmethod
