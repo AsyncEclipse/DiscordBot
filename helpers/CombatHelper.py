@@ -860,10 +860,16 @@ class Combat:
     async def rollDice(game: GamestateHelper, buttonID: str, interaction: discord.Interaction):
         pos = buttonID.split("_")[1]
         colorOrAI = buttonID.split("_")[2]
+        speed = int(buttonID.split("_")[3])
+        tile = game.gamestate["board"][pos]
+        pairing = Combat.sideOf(tile.get("attacker")) + Combat.sideOf(tile.get("defender"))
+        # Initiative 1000 is population bombing, which has no pairing.
+        if speed != 1000 and pairing and colorOrAI not in pairing:
+            await interaction.channel.send("The combat pairing changed. Press Refresh Image and roll again.")
+            return
         if colorOrAI == "ai":
             await Combat.rollDiceAI(game, buttonID, interaction)
             return
-        speed = int(buttonID.split("_")[3])
         oldLength = len(Combat.findPlayersInTile(game, pos))
         tile_map = game.gamestate["board"]
         player_ships = tile_map[pos]["player_ships"][:]

@@ -470,6 +470,16 @@ class TestAllianceCombatEnd:
 
         assert prompted == [POS]
 
+    def test_a_roll_from_outside_the_pairing_asks_for_a_refresh(self, make_game, run):
+        game = _game(make_game, ("blue", "red", "green"),
+                     ["blue-cru", "red-cru", "green-cru"], attacker=["green"], defender=["blue"])
+        interaction = FakeInteraction()
+
+        run(Combat.rollDice(game, f"rollDice_{POS}_red_2_deleteMsg", interaction))
+
+        assert any("Refresh Image" in content for content, _kwargs in interaction.channel.sent)
+        assert game.gamestate["board"][POS].get("currentRoller") is None
+
     def test_retreat_destination_with_allied_ships_is_valid(self, make_game, monkeypatch):
         game = _game(make_game, ("blue", "red", "green"), ["blue-cru", "red-cru"])
         game.formAlliance("nova", ["blue", "red"])
