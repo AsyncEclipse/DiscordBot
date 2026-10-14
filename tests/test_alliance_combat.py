@@ -248,6 +248,18 @@ class TestDracoAndAncients:
 
         assert Combat.isDracoAgainstAncients(game, POS)
 
+    def test_draco_left_with_the_ancients_may_only_place_influence(self, make_game, run):
+        game = self._game_with_draco(make_game, ["blue-cru", "ai-anc"], owner=0)
+        game.gamestate["board"][POS]["disctile"] = 1
+        interaction = FakeInteraction()
+
+        run(Combat.declareAWinner(game, interaction, POS))
+
+        ids = offered_ids(interaction)
+        assert f"FCIDblue_addInfluenceFinish_{POS}" in ids
+        assert not any("exploreDiscoveryTile" in button_id for button_id in ids)
+        assert not any("Alliance" in content for content, _kwargs in interaction.channel.sent)
+
     def test_draco_defends_his_sector_last_among_players(self, make_game):
         game = self._game_with_draco(make_game, ["blue-cru", "red-cru", "green-cru", "ai-anc"],
                                      owner="blue", colors=("blue", "red", "green"))

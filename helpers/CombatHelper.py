@@ -1485,12 +1485,12 @@ class Combat:
                                                       countDraw, playerColor])
                     countDraw += 1
                 asyncio.create_task(interaction.channel.send(msg, view=view))
-        survivors = Combat.findPlayersInTile(game, pos)
+        survivors = [color for color in Combat.findPlayersInTile(game, pos) if color != "ai"]
         # An Alliance wins as a side. Its members decide who drops the disc in
         # order of entry to the sector, so offer it to the earliest first.
         entryOrder = game.getCombatEntryOrder(pos)
         survivors.sort(key=lambda color: entryOrder.index(color) if color in entryOrder else len(entryOrder))
-        winner = next((color for color in survivors if color != "ai"), None)
+        winner = next(iter(survivors), None)
         owner = game.gamestate["board"][pos]["owner"]
 
         winner_owns_or_allies = (winner is not None and owner != 0 and owner != "ai"
@@ -1499,14 +1499,15 @@ class Combat:
             player = game.getPlayerObjectFromColor(winner)
             playerName = player["player_name"]
             if owner == 0:
-                if game.gamestate["board"][pos]["disctile"] != 0:
+                # Draco may share a sector with Ancients, but they still guard its Discovery Tile.
+                if game.gamestate["board"][pos]["disctile"] != 0 and not Combat.isDracoAgainstAncients(game, pos):
                     view = View()
                     view.add_item(Button(label="Explore Discovery Tile", style=discord.ButtonStyle.green,
                                          custom_id=f"FCID{winner}_exploreDiscoveryTile_{pos}_deleteMsg"))
                     message = f"{playerName}, you may explore the discovery tile."
                     asyncio.create_task(interaction.channel.send(message, view=view))
                 view2 = View()
-                for color in [c for c in survivors if c != "ai"]:
+                for color in survivors:
                     label = "Place Influence"
                     if len(survivors) > 1:
                         label = f"Place Influence ({game.getPlayerObjectFromColor(color)['name']})"
