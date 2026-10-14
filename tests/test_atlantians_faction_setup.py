@@ -2,6 +2,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
+import pytest
+
 from Buttons.Draft import DraftButtons
 from commands.setup_commands import SetupCommands
 from helpers.DrawHelper import DrawHelper
@@ -10,8 +12,9 @@ from tests.fakes import FakeChannel, FakeInteraction, FakeRole
 
 
 class FakeGame:
-    def __init__(self, community_mode):
+    def __init__(self, community_factions, community_mode):
         self.gamestate = {
+            "community_factions": community_factions,
             "communityMode": community_mode,
             "bannedFactions": [],
             "draftedFactions": [],
@@ -20,9 +23,10 @@ class FakeGame:
     getShortFactionNameFromFull = GamestateHelper.getShortFactionNameFromFull
 
 
-def test_atlantians_only_appear_in_community_draft():
-    standard_buttons = DraftButtons.getDraftButtons(FakeGame(False))
-    community_buttons = DraftButtons.getDraftButtons(FakeGame(True))
+@pytest.mark.parametrize("community_mode", [False, True])
+def test_atlantians_only_appear_in_community_draft(community_mode):
+    standard_buttons = DraftButtons.getDraftButtons(FakeGame(False, community_mode))
+    community_buttons = DraftButtons.getDraftButtons(FakeGame(True, community_mode))
 
     assert len(standard_buttons.children) == 16
     assert [button.label for button in community_buttons.children].count("Atlantians") == 1
@@ -36,7 +40,9 @@ def test_atlantians_faction_lookup_uses_renderer_key():
     assert game.get_short_faction_name("Atlantians") == "atlantians"
 
 
-def test_game_creation_sends_atlantians_board_and_reference(games_dir, run, monkeypatch):
+@pytest.mark.parametrize("community_factions", [False, True])
+def test_game_creation_sends_atlantians_board_and_reference(
+        games_dir, run, monkeypatch, community_factions):
     interaction = FakeInteraction()
     interaction.guild.categories = [SimpleNamespace(name="Games #1-10")]
     interaction.guild.default_role = FakeRole("@everyone")
@@ -59,7 +65,12 @@ def test_game_creation_sends_atlantians_board_and_reference(games_dir, run, monk
     monkeypatch.setattr(DrawHelper, "get_file", get_reference_file)
     run(SetupCommands.create_new_game.callback(
         SetupCommands(None), interaction, "test", SimpleNamespace(id=1), 2,
-        player2=SimpleNamespace(id=2)))
+        player2=SimpleNamespace(id=2), community_factions=community_factions))
+
+    game = GamestateHelper(None, "aeb1")
+    assert game.gamestate["community_factions"] is community_factions
+    assert not game.gamestate.get("communityMode", False)
+    assert game.gamestate["community_rep_mod"] is False
 
     atlantians_messages = [(content, kwargs["file"]) for content, kwargs in reference.sent
                           if "file" in kwargs and "atlantians" in kwargs["file"]]

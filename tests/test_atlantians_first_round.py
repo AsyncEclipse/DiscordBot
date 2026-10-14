@@ -33,10 +33,9 @@ def test_atlantians_and_terran_explore_then_pass(games_dir, run, press, monkeypa
                         lambda self, filename, size: self.use_image(filename).resize(size))
     monkeypatch.setattr(DrawHelper, "show_disc_tile", lambda self, name: None)
     GameInit("Atlantians first round", [[1, "<@1>"], [2, "<@2>"]],
-             "def", True, True, False, False).create_game()
+             "def", True, True, False, False, community_factions=True).create_game()
     game = GamestateHelper(None, "aeb1")
     game.setup_techs_and_outer_rim(2, False, False)
-    game.gamestate["communityMode"] = True
     game.gamestate["discTiles"] = ["mog", "sci", "mat", "cru"]
     game.gamestate["tile_deck_100"] = ["102", "103"]
     game.update()

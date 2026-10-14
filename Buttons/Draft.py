@@ -75,7 +75,7 @@ class DraftButtons:
                              ("Terran Federation (Hydran)", "ter4"),
                              ("Terran Republic (Draco)", "ter5"),
                              ("Terran Union (Planta)", "ter6")]
-        if game.gamestate.get("communityMode", False):
+        if game.gamestate.get("community_factions", False):
             factionsAvailable.append(("Atlantians", "atl"))
         bannedFactions = game.gamestate["bannedFactions"]
         for faction, key in factionsAvailable:
