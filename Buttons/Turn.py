@@ -289,6 +289,8 @@ class TurnButtons:
             for thread in interaction.channel.threads:
                 if "Round" in thread.name:
                     asyncio.create_task(thread.edit(archived=True))
+        # The Combat Phase ends here: hand out any Discovery Tiles still claimable.
+        await Combat.settleDiscoveryTiles(game, interaction.channel)
         await game.upkeep(interaction)
         drawing = DrawHelper(game.gamestate)
         game.saveEndRound()

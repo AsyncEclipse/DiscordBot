@@ -1,5 +1,6 @@
 import asyncio
 import discord
+from Buttons.DiscoveryTile import DiscoveryTileButtons
 from Buttons.Explore import ExploreButtons
 from Buttons.Population import PopulationButtons
 from Buttons.Turn import TurnButtons
@@ -171,6 +172,7 @@ class InfluenceButtons:
 
     @staticmethod
     async def addInfluenceFinish(game: GamestateHelper, p1, interaction: discord.Interaction, buttonID: str):
+        from helpers.CombatHelper import Combat
         tileLoc = buttonID.split("_")[1]
         if p1["influence_discs"] < 1:
             await interaction.channel.send(f"{p1['player_name']} does not have any more influence disks.")
@@ -181,6 +183,9 @@ class InfluenceButtons:
             return
         game.add_control(p1["color"], tileLoc)
         await interaction.channel.send(f"{p1['player_name']} acquired control of {tileLoc}.")
+        if Combat.discoveryTileClaimable(game, tileLoc):
+            # FAQ: the first player to place an Influence Disc takes the tile at once.
+            await DiscoveryTileButtons.exploreDiscoveryTile(game, tileLoc, interaction, p1)
         await interaction.message.delete()
 
     @staticmethod
