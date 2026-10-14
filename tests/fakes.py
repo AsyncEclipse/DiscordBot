@@ -6,6 +6,7 @@ fixture belongs in this module; fixtures live in conftest.py.
 """
 import copy
 import json
+from datetime import datetime, timezone
 
 from helpers.PlayerHelper import PlayerHelper
 
@@ -80,6 +81,7 @@ class FakeInteraction:
         self.guild = FakeGuild(role_names)
         self.message = FakeMessage()
         self.data = {"custom_id": custom_id}
+        self.created_at = datetime.now(timezone.utc)
         self.response = FakeResponder()
         self.followup = FakeResponder()
 

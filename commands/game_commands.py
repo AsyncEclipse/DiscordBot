@@ -135,13 +135,6 @@ class GameCommands(commands.GroupCog, name="game"):
         game.initilizeKey("5playerhyperlane")
 
 
-    @app_commands.command(name="unlock_hold")
-    async def unlock_hold(self, interaction: discord.Interaction):
-        await interaction.response.send_message("The hold on actions has been released")
-        game = GamestateHelper(interaction.channel, interaction.channel.name, True)
-        game.setLockedStatus(False)
-    
-
     @app_commands.command(name="test_all_the_tiles")
     @app_commands.choices(color=color_choices)
     async def test_all_the_tiles(self, interaction: discord.Interaction, color: app_commands.Choice[str]):
@@ -177,7 +170,6 @@ class GameCommands(commands.GroupCog, name="game"):
                                                     "They may run /player start_turn to get their buttons. "
                                                     + str(game.getNumberOfSaveFiles()) + " save files remain.")
             game.saveLastButtonPressed("restart")
-            game.setLockedStatus(False)
         else:
             await interaction.response.send_message("Ran out of save files, could not back up")
 

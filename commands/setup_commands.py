@@ -174,7 +174,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         for i in temp_player_list:
             if i is not None:
                 player_list.append([i.id, f"<@{i.id}>"])
-        if config.dev_mode and interaction.user.id == config.tester_id:
+        if config.dev_mode and config.is_tester(interaction.user.id):
             # Dev: fill empty slots with synthetic players that mention the tester.
             for n in range(len(player_list), min(max(player_count, 2), 9)):
                 player_list.append([90000 + n, f"<@{interaction.user.id}>"])
@@ -429,7 +429,6 @@ class SetupCommands(commands.GroupCog, name="setup"):
 
         message = "\n".join(["Discovery Reference"])
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "Discovery_Reference.png"))
-        game.release_lock()
         await factionThread.send(role.mention + " pinging you here, which contains all the faction sheets")
         await interaction.followup.send("\n".join(["New game created! Here are the channels:",
                                                    tabletalk.jump_url, actions.jump_url]))
