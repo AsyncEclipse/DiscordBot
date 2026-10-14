@@ -3,6 +3,7 @@ import random
 import config
 import discord
 from Buttons.Turn import TurnButtons
+from Buttons.DiscoveryTile import DiscoveryTileButtons
 from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
 from discord.ui import View, Button
@@ -58,27 +59,24 @@ class DraftButtons:
     @staticmethod
     def getDraftButtons(game: GamestateHelper):
         view = View()
-        base_factions = [("Hydran Progress", "hyd"),
-                         ("Eridani Empire", "eri"),
-                         ("Orion Hegemony", "ori"),
-                         ("Descendants of Draco", "dra"),
-                         ("Mechanema", "mec"),
-                         ("Planta", "pla"),
-                         ("Wardens of Magellan", "mag"),
-                         ("Enlightened of Lyra", "lyr"),
-                         ("Rho Indi Syndicate", "rho"),
-                         ("The Exiles", "exl")]
-        terran_factions = [("Terran Alliance (Orion)", "ter1"),
-                           ("Terran Conglomerate (Mech)", "ter2"),
-                           ("Terran Directorate (Eridani)", "ter3"),
-                           ("Terran Federation (Hydran)", "ter4"),
-                           ("Terran Republic (Draco)", "ter5"),
-                           ("Terran Union (Planta)", "ter6")]
-        community_factions = [("Atlantians (Unknown)", "atl")]
+        factionsAvailable = [("Hydran Progress", "hyd"),
+                             ("Eridani Empire", "eri"),
+                             ("Orion Hegemony", "ori"),
+                             ("Descendants of Draco", "dra"),
+                             ("Mechanema", "mec"),
+                             ("Planta", "pla"),
+                             ("Wardens of Magellan", "mag"),
+                             ("Enlightened of Lyra", "lyr"),
+                             ("Rho Indi Syndicate", "rho"),
+                             ("The Exiles", "exl"),
+                             ("Terran Alliance (Orion)", "ter1"),
+                             ("Terran Conglomerate (Mech)", "ter2"),
+                             ("Terran Directorate (Eridani)", "ter3"),
+                             ("Terran Federation (Hydran)", "ter4"),
+                             ("Terran Republic (Draco)", "ter5"),
+                             ("Terran Union (Planta)", "ter6")]
         if game.gamestate.get("communityMode", False):
-            factionsAvailable = base_factions + terran_factions + community_factions
-        else:
-            factionsAvailable = base_factions + terran_factions
+            factionsAvailable.append(("Atlantians", "atl"))
         bannedFactions = game.gamestate["bannedFactions"]
         for faction, key in factionsAvailable:
             colorsAlreadyChosen = []
@@ -98,6 +96,7 @@ class DraftButtons:
             view.add_item(Button(label=f"{faction}", emoji=emoji, style=discord.ButtonStyle.gray,
                                  custom_id=f"draftFaction_{key}_{faction}"))
         return view
+
     @staticmethod
     async def draftFaction(game: GamestateHelper, interaction: discord.Interaction, customID: str):
         playerID = game.gamestate["draftingPlayers"][0]
@@ -156,6 +155,7 @@ class DraftButtons:
     @staticmethod
     async def generalSetup(interaction: discord.Interaction, game: GamestateHelper,
                            temp_player_list, temp_faction_list):
+        is_initial_setup = game.gamestate["setup_finished"] != 1
         colors = ["blue", "red", "green", "yellow", "purple", "white", "pink", "brown", "teal"]
         count = 0
         listPlayerHomes = []
@@ -233,6 +233,14 @@ class DraftButtons:
             game.setup_finished()
         # game.fillInDiscTiles()
         await interaction.channel.send("Done With Setup!")
+
+        if is_initial_setup:
+            for player_id in temp_player_list:
+                player = game.get_player(player_id, interaction)
+                if player is not None and "anl" in player.get("nano_tech", []):
+                    home = game.getLocationFromID(player["home_planet"])
+                    game.addDiscTile(home)
+                    await DiscoveryTileButtons.exploreDiscoveryTile(game, home, interaction, player)
 
         asyncio.create_task(game.showUpdate("Start of Game", interaction))
         view = TurnButtons.getStartTurnButtons(game, game.get_player(temp_player_list[0],interaction), "dummy")

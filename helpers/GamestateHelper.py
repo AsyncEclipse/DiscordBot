@@ -317,6 +317,8 @@ class GamestateHelper:
             return "rho"
         elif fullName == "The Exiles":
             return "exile"
+        elif fullName == "Atlantians":
+            return "atlantians"
         elif "Terran" in fullName:
             return fullName.lower().replace(" ", "_")
 
@@ -1207,6 +1209,8 @@ class GamestateHelper:
             return "rho"
         elif full_name == "The Exiles":
             return "exile"
+        elif full_name == "Atlantians":
+            return "atlantians"
         elif "Terran" in full_name:
             return full_name.lower().replace(" ", "_")
 
@@ -1222,11 +1226,14 @@ class GamestateHelper:
                 break
         if not found:
             lowest = 10
-            loc = 0
+            loc = None
             for x, tile in enumerate(player1["reputation_track"]):
+                if PlayerHelper.is_reputation_only_slot(player1, x):
+                    continue
                 if isinstance(tile, int) and tile < lowest:
                     loc = x
                     lowest = tile
+            assert loc is not None, "No reputation slot available for diplomacy"
             track = f"mixed-{self.get_short_faction_name(player2['name'])}-{player2['color']}"
             self.gamestate["players"][pID]["reputation_track"][loc] = track
             self.gamestate["reputation_tiles"].append(lowest)
@@ -1240,11 +1247,14 @@ class GamestateHelper:
                 break
         if not found:
             lowest = 10
-            loc = 0
+            loc = None
             for x, tile in enumerate(player2["reputation_track"]):
+                if PlayerHelper.is_reputation_only_slot(player2, x):
+                    continue
                 if isinstance(tile, int) and tile < lowest:
                     loc = x
                     lowest = tile
+            assert loc is not None, "No reputation slot available for diplomacy"
             track = f"mixed-{self.get_short_faction_name(player1['name'])}-{player1['color']}"
             self.gamestate["players"][pID2]["reputation_track"][loc] = track
             self.gamestate["reputation_tiles"].append(lowest)
@@ -1261,11 +1271,14 @@ class GamestateHelper:
                 break
         if not found:
             lowest = 10
-            loc = 0
+            loc = None
             for x, tile in enumerate(player["reputation_track"]):
+                if PlayerHelper.is_reputation_only_slot(player, x):
+                    continue
                 if isinstance(tile, int) and tile < lowest:
                     loc = x
                     lowest = tile
+            assert loc is not None, "No reputation slot available for minor species"
             self.gamestate["players"][pID]["reputation_track"][loc] = f"mixed-minor-{minor_species_name}"
             self.gamestate["reputation_tiles"].append(lowest)
         if "Discount" in minor_species_name and "Tech" not in minor_species_name:
@@ -1285,7 +1298,8 @@ class GamestateHelper:
             if isinstance(tile, int) and tile == val:
                 loc = x
                 lowest = tile
-                self.gamestate["players"][pID]["reputation_track"][loc] = "mixed"
+                self.gamestate["players"][pID]["reputation_track"][loc] = (
+                    "rep" if PlayerHelper.is_reputation_only_slot(player, loc) else "mixed")
                 self.gamestate["reputation_tiles"].append(lowest)
                 self.update()
                 return

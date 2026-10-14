@@ -42,7 +42,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
                       app_commands.Choice(name="Terran Federation (Hydran)", value="ter4"),
                       app_commands.Choice(name="Terran Republic (Draco)", value="ter5"),
                       app_commands.Choice(name="Terran Union (Planta)", value="ter6"),
-                      app_commands.Choice(name="Atlantians (Unknown)", value="atl")]
+                      app_commands.Choice(name="Atlantians", value="atl")]
     
     @app_commands.choices(ai_ship_type=ai_choices2)
     @app_commands.choices(ai_ship=ai_ship_choices)
@@ -411,6 +411,19 @@ class SetupCommands(commands.GroupCog, name="setup"):
 
         message = "\n".join(["# Terrans"])
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "terran_conglomerate_board.png"))
+
+        message = "\n".join(["# Atlantians",
+                             "- Start with Ancient Labs in the Nano Tech track.",
+                             "- **Ancient Spirit:** Draw two discovery tiles and choose one to resolve. "
+                             "Replace any +6 Materials or Ancient Cruiser tile with another draw.",
+                             "- **Ancient Instinct:** After a Research action, you may perform Upgrade 1 "
+                             "using a technology researched during that action.",
+                             "- **Ancient Power:** Gain 1 VP for each discovery tile installed on a Ship Blueprint.",
+                             "- **Price of Power:** Each ship costs 1 additional Materials for each discovery tile "
+                             "beyond the first installed on its Ship Blueprint."])
+        await factionThread.send(message, file=drawing.get_file(boardPrefix + "atlantians_board.png"))
+        await factionThread.send("Atlantians faction reference",
+                                 file=drawing.get_file(boardPrefix + "atlantians_info.png"))
 
         message = "\n".join(["Rift Reference"])
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "Rift_Reference.png"))

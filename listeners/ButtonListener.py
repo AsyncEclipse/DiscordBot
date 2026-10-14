@@ -181,8 +181,10 @@ class ButtonListener(commands.Cog):
         elif customID == "permanentlyPass":
             await TurnButtons.permanentlyPass(player, game, interaction, player_helper)
         elif customID == "endTurn":
+            ResearchButtons.clearAncientInstinctOpportunity(game, player)
             await TurnButtons.endTurn(player, game, interaction)
         elif customID == "restartTurn":
+            ResearchButtons.clearAncientInstinctOpportunity(game, player)
             await TurnButtons.restartTurn(player, game, interaction)
         elif customID == "undoLastTurn":
             await TurnButtons.undoLastTurn(player, game, interaction)
@@ -197,6 +199,7 @@ class ButtonListener(commands.Cog):
             if rnd != round2:
                 await interaction.message.delete()
         elif customID.startswith("finishAction"):
+            ResearchButtons.clearAncientInstinctOpportunity(game, player)
             await TurnButtons.finishAction(player, game, interaction, player_helper)
         elif customID.startswith("magColShipForResource"):
             await TurnButtons.magColShipForResource(game, interaction, player, customID, player_helper)
@@ -216,6 +219,8 @@ class ButtonListener(commands.Cog):
             await DiscoveryTileButtons.keepDiscForPoints(game, player_helper, interaction)
         elif customID.startswith("exploreDiscoveryTile"):
             await DiscoveryTileButtons.exploreDiscoveryTile(game, customID.split("_")[1], interaction, player)
+        elif customID.startswith("selectDiscTile"):
+            await DiscoveryTileButtons.selectDiscTile(game, interaction, customID, player)
         elif customID.startswith("usedDiscForAbility"):
             await DiscoveryTileButtons.usedDiscForAbility(game, player_helper, interaction, customID, player)
         elif customID.startswith("getFreeTech"):
@@ -225,6 +230,8 @@ class ButtonListener(commands.Cog):
             await ResearchButtons.startResearch(game, player, player_helper, interaction, True)
         elif customID.startswith("getTech"):
             await ResearchButtons.getTech(game, player, player_helper, interaction, customID)
+        elif customID.startswith("ancientInstinctUpgrade"):
+            await UpgradeButtons.startAncientInstinctUpgrade(game, player, interaction, customID.split("_")[1])
         elif customID.startswith("placeWarpPortal"):
             await ResearchButtons.placeWarpPortal(interaction, game, player, customID)
         elif customID.startswith("payAtRatio"):
@@ -253,10 +260,14 @@ class ButtonListener(commands.Cog):
             game.updateSaveFile()
             await UpgradeButtons.startUpgrade(game, player, interaction, True, "dummy","dum")
         elif customID.startswith("chooseDifferentShip"):
-            actions = customID.split("_")[1]
-            discTile = customID.split("_")[2]
+            parts = customID.split("_")
+            actions = parts[1]
+            discTile = parts[2]
             await interaction.message.delete()
-            await UpgradeButtons.startUpgrade(game, player, interaction, False, discTile,actions)
+            if len(parts) > 4 and parts[3] == "ai":
+                await UpgradeButtons.startAncientInstinctUpgrade(game, player, interaction, parts[4])
+            else:
+                await UpgradeButtons.startUpgrade(game, player, interaction, False, discTile, actions)
         elif customID.startswith("upgradeShip"):
             await UpgradeButtons.upgradeShip(game, player, interaction, customID, player_helper)
         elif customID.startswith("selectOldPart"):

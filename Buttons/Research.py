@@ -118,6 +118,34 @@ class ResearchButtons:
             game.useMagDisc(game.get_player_from_color(player["color"]))
             await DiscoveryTileButtons.exploreDiscoveryTile(game, game.getLocationFromID(player["home_planet"]),
                                                             interaction, player)
+        await ResearchButtons.offerAncientInstinctUpgrade(game, player, player_helper, interaction, tech, tech_details)
+
+    @staticmethod
+    async def offerAncientInstinctUpgrade(game: GamestateHelper, player, player_helper: PlayerHelper,
+                                          interaction: discord.Interaction, tech: str, tech_details):
+        if (player["name"] != "Atlantians" or not player.get("ancientInstinctResearchAction")
+                or player.get("ancientInstinctUsed")):
+            return
+        with open("data/parts.json", "r") as f:
+            part_data = json.load(f)
+        if tech not in part_data:
+            return
+        available_techs = player_helper.stats.setdefault("ancientInstinctAvailableTechs", [])
+        if tech not in available_techs:
+            available_techs.append(tech)
+        game.update_player(player_helper)
+        view = View()
+        view.add_item(Button(label="Perform Upgrade 1", style=discord.ButtonStyle.blurple,
+                             custom_id=f"FCID{player['color']}_ancientInstinctUpgrade_{tech}"))
+        await interaction.channel.send(f"{player['player_name']}, Ancient Instinct lets you perform one "
+                                       f"upgrade using {tech_details['name']}.", view=view)
+
+    @staticmethod
+    def clearAncientInstinctOpportunity(game: GamestateHelper, player):
+        if player["name"] == "Atlantians":
+            player["ancientInstinctAvailableTechs"] = []
+            player["ancientInstinctResearchAction"] = False
+            game.update_player(PlayerHelper(game.get_player_from_color(player["color"]), player))
 
     @staticmethod
     async def placeWarpPortal(interaction: discord.Interaction, game: GamestateHelper, player, customID):
@@ -163,8 +191,13 @@ class ResearchButtons:
                             interaction: discord.Interaction, buttonCommand: bool):
         await interaction.channel.send(f"{player['player_name']} is using their turn to research")
         player_helper = PlayerHelper(game.get_player_from_color(player["color"]), player)
+        if player["name"] == "Atlantians":
+            player_helper.stats["ancientInstinctResearchAction"] = True
+            player_helper.stats["ancientInstinctAvailableTechs"] = []
+            player_helper.stats["ancientInstinctUsed"] = False
         if buttonCommand:
             player_helper.spend_influence_on_action("research")
+        if buttonCommand or player["name"] == "Atlantians":
             game.update_player(player_helper)
         drawing = DrawHelper(game.gamestate)
         view = View()
