@@ -26,10 +26,9 @@ class ResearchButtons:
 
     @staticmethod
     async def handle_specific_tech_selection(interaction: discord.Interaction, game: GamestateHelper,
-                                             player, tech_details, tech_type, tech):
+                                             player, player_helper: PlayerHelper, tech_details, tech_type, tech):
         cost = ResearchButtons.calculate_cost(tech_details, tech_type, player)
         game.playerResearchTech(game.get_player_from_color(player["color"]), tech, tech_type)
-        player_helper = PlayerHelper(game.get_player_from_color(player["color"]), player)
         with open("data/techs.json", "r") as f:
             tech_data = json.load(f)
         tech_details = tech_data.get(tech)
@@ -176,7 +175,6 @@ class ResearchButtons:
     async def startResearch(game: GamestateHelper, player, player_helper: PlayerHelper,
                             interaction: discord.Interaction, buttonCommand: bool):
         await interaction.channel.send(f"{player['player_name']} is using their turn to research")
-        player_helper = PlayerHelper(game.get_player_from_color(player["color"]), player)
         if buttonCommand:
             player_helper.spend_influence_on_action("research")
             game.update_player(player_helper)
@@ -289,7 +287,7 @@ class ResearchButtons:
             await interaction.channel.send(f"{interaction.user.mention}, select the row of tech you would like to place"
                                            " this wild tech in. The discounted cost is in parentheses.", view=view)
         else:
-            await ResearchButtons.handle_specific_tech_selection(interaction, game, player,
+            await ResearchButtons.handle_specific_tech_selection(interaction, game, player, player_helper,
                                                                  tech_details, tech_type, tech)
 
     @staticmethod
