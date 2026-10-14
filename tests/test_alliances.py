@@ -39,6 +39,28 @@ class TestAllianceState:
         assert game.getAllianceMembers("nova") == ["red"]
         assert game.gamestate["players"][game.get_player_from_color("blue")]["alliances"] == {"nova": True}
 
+    def test_a_lone_remaining_member_can_still_leave_and_then_join_elsewhere(self, make_game):
+        """When one Ally leaves, the other keeps their faceup tile but is not
+        stuck: they may also flip to Betrayer later, and only then join a
+        different Alliance."""
+        game = _alliance_game(make_game)
+        game.formAlliance("nova", ["blue", "red"])
+        game.betrayAlliance("nova", "blue")
+        red = game.getPlayerObjectFromColor("red")
+
+        assert game.getAllianceMembers("nova") == ["red"]
+        assert game.isInAlliance(red)
+        with pytest.raises(ValueError, match="more than one alliance"):
+            game.formAlliance("flare", ["red", "green"])
+
+        game.betrayAlliance("nova", "red")
+        red = game.getPlayerObjectFromColor("red")
+
+        assert not game.isInAlliance(red)
+        assert game.getAllianceMembers("nova") == []
+        game.formAlliance("flare", ["red", "green"])
+        assert game.areAllied("red", "green")
+
     def test_a_betrayer_cannot_rejoin_but_may_join_a_different_alliance(self, make_game):
         game = _alliance_game(make_game)
         game.formAlliance("nova", ["blue", "red"])
@@ -159,3 +181,17 @@ class TestAllianceInfluence:
         blue = game.getPlayerObjectFromColor("blue")
 
         assert "102" in InfluenceButtons.getTilesToInfluence(game, blue)
+
+    def test_an_opponent_alongside_an_ally_still_blocks_influence(self, make_game, monkeypatch):
+        """An Ally's presence does not make a Sector safe to Influence if a
+        third, non-Allied player also has Ships there."""
+        game = _alliance_game(make_game, owner="blue")
+        game.gamestate["board"]["102"] = {
+            "owner": 0, "sector": 102, "disctile": 0,
+            "player_ships": ["red-int", "green-int"],
+        }
+        game.formAlliance("nova", ["blue", "red"])
+        monkeypatch.setattr(InfluenceButtons, "areTwoTilesAdjacent", staticmethod(lambda *_a: True))
+        blue = game.getPlayerObjectFromColor("blue")
+
+        assert "102" not in InfluenceButtons.getTilesToInfluence(game, blue)
