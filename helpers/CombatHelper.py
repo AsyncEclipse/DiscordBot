@@ -47,11 +47,6 @@ class Combat:
         return list(value)
 
     @staticmethod
-    def isDraco(game: GamestateHelper, color):
-        player = game.getPlayerObjectFromColor(color) if color != "ai" else None
-        return player is not None and "Draco" in player["name"]
-
-    @staticmethod
     def currentPairing(game: GamestateHelper, pos: str):
         """The two sides that fight next. Draco may not battle the Ancients:
         when his Alliance faces them, his Ally fights and he sits it out (FAQ)."""
@@ -59,7 +54,8 @@ class Combat:
         if len(sides) == 2 and "anc" in Combat.findShipTypesInTile(game, pos):
             for ancients, other in ((0, 1), (1, 0)):
                 if "ai" in sides[ancients]:
-                    allies = [color for color in sides[other] if not Combat.isDraco(game, color)]
+                    allies = [color for color in sides[other]
+                              if "Draco" not in game.find_player_faction_name_from_color(color)]
                     if allies:
                         sides[other] = allies
         return sides
