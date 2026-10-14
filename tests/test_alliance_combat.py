@@ -207,30 +207,55 @@ class TestSideTargeting:
 
 
 class TestDracoAndAncients:
-    """FAQ: the ally fights the Ancients; the Descendants of Draco do not."""
+    """Draco (blue) may not battle the Ancients but fights players as usual.
+    Alliance FAQ: an Ally fights the Ancients and Draco sits that battle out."""
 
-    def _game_with_draco(self, make_game, ships, attacker=None, defender=None):
-        game_players = players("blue", "red")
+    def _game_with_draco(self, make_game, ships, attacker=None, defender=None, owner="red",
+                         colors=("blue", "red")):
+        game_players = players(*colors)
         game_players["1"]["name"] = "Descendants of Draco"
-        board = board_tile(ships, owner="red")
+        board = board_tile(ships, owner=owner)
         if attacker is not None:
             board[POS]["attacker"] = attacker
         if defender is not None:
             board[POS]["defender"] = defender
-        return make_game({"player_count": 2, "players": game_players, "board": board,
+        game = make_game({"player_count": len(colors), "players": game_players, "board": board,
                           "advanced_ai": False, "wa_ai": False})
+        game.fixshipsOrder(POS)
+        return game
 
-    @pytest.mark.parametrize(("ships", "sitting_out", "sides"), [
-        (["blue-cru", "red-cru", "ai-anc"], ["blue"], [["red"], ["ai"]]),
-        (["blue-cru", "red-cru"], [], [["blue", "red"]]),
+    @pytest.mark.parametrize(("ships", "pairing"), [
+        (["blue-cru", "red-cru", "ai-anc"], [["ai"], ["red"]]),
+        (["blue-cru", "red-cru"], [["red", "blue"]]),
     ], ids=["ancients_present", "no_ancients"])
-    def test_draco_sits_out_only_while_the_ancients_are_present(self, make_game, ships, sitting_out, sides):
+    def test_an_allied_draco_sits_out_only_against_the_ancients(self, make_game, ships, pairing):
         game = self._game_with_draco(make_game, ships)
         game.formAlliance("nova", ["blue", "red"])
 
-        assert [color for color in ("blue", "red")
-                if Combat.sitsOutAgainstAncients(game, color, POS)] == sitting_out
-        assert Combat.findSidesInTile(game, POS) == sides
+        assert Combat.currentPairing(game, POS) == pairing
+
+    def test_draco_fights_a_player_before_the_ancients(self, make_game):
+        game = self._game_with_draco(make_game, ["blue-cru", "red-cru", "ai-anc"], owner=0)
+
+        assert Combat.currentPairing(game, POS) == [["blue"], ["red"]]
+
+        game.remove_units(["blue-cru"], POS)
+        assert Combat.currentPairing(game, POS) == [["ai"], ["red"]]
+
+    def test_draco_winning_against_a_player_ends_combat(self, make_game):
+        game = self._game_with_draco(make_game, ["blue-cru", "red-cru", "ai-anc"], owner=0)
+        game.remove_units(["red-cru"], POS)
+
+        assert Combat.isDracoAgainstAncients(game, POS)
+
+    def test_draco_defends_his_sector_last_among_players(self, make_game):
+        game = self._game_with_draco(make_game, ["blue-cru", "red-cru", "green-cru", "ai-anc"],
+                                     owner="blue", colors=("blue", "red", "green"))
+
+        assert Combat.currentPairing(game, POS) == [["red"], ["green"]]
+
+        game.remove_units(["red-cru"], POS)
+        assert Combat.currentPairing(game, POS) == [["blue"], ["green"]]
 
     def test_draco_alone_against_the_ancients_is_recognised(self, make_game):
         game = self._game_with_draco(make_game, ["blue-cru", "ai-anc"])
@@ -240,10 +265,10 @@ class TestDracoAndAncients:
         game.add_units(["red-cru"], POS)
         assert not Combat.isDracoAgainstAncients(game, POS)
 
-    def test_draco_cannot_be_hit_while_sitting_out(self, make_game):
-        game = self._game_with_draco(make_game, ["blue-cru", "red-cru", "ai-anc"],
-                                     attacker=["ai"], defender=["blue", "red"])
+    def test_draco_cannot_be_hit_while_sitting_out(self, make_game, run):
+        game = self._game_with_draco(make_game, ["blue-cru", "red-cru", "ai-anc"])
         game.formAlliance("nova", ["blue", "red"])
+        run(_pair(game))
 
         # The Ancients may only shoot at the ally, never at Draco.
         assert Combat.getOpponentUnitsThatCanBeHit(game, "ai", ["blue-cru", "red-cru"], 6, 0, POS, 4) \

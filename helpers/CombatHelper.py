@@ -47,13 +47,22 @@ class Combat:
         return list(value)
 
     @staticmethod
-    def sitsOutAgainstAncients(game: GamestateHelper, color, pos):
-        """FAQ: with Ancients in the sector an ally fights them, but the
-        Descendants of Draco do not participate at all."""
-        if "anc" not in Combat.findShipTypesInTile(game, pos):
-            return False
-        player = game.getPlayerObjectFromColor(color)
+    def isDraco(game: GamestateHelper, color):
+        player = game.getPlayerObjectFromColor(color) if color != "ai" else None
         return player is not None and "Draco" in player["name"]
+
+    @staticmethod
+    def currentPairing(game: GamestateHelper, pos: str):
+        """The two sides that fight next. Draco may not battle the Ancients:
+        when his Alliance faces them, his Ally fights and he sits it out (FAQ)."""
+        sides = Combat.findSidesInTile(game, pos)[-2:]
+        if len(sides) == 2 and "anc" in Combat.findShipTypesInTile(game, pos):
+            for ancients, other in ((0, 1), (1, 0)):
+                if "ai" in sides[ancients]:
+                    allies = [color for color in sides[other] if not Combat.isDraco(game, color)]
+                    if allies:
+                        sides[other] = allies
+        return sides
 
     @staticmethod
     def isDracoAgainstAncients(game: GamestateHelper, pos: str):
@@ -69,8 +78,6 @@ class Combat:
         findPlayersInTile, so the last side is the most recent arrival."""
         sides = []
         for color in Combat.findPlayersInTile(game, pos):
-            if Combat.sitsOutAgainstAncients(game, color, pos):
-                continue
             for side in sides:
                 if any(game.areAllied(color, member) for member in side):
                     side.append(color)
@@ -147,7 +154,7 @@ class Combat:
     @staticmethod
     async def startCombat(game: GamestateHelper, channel, pos):
         drawing = DrawHelper(game.gamestate)
-        sides = Combat.findSidesInTile(game, pos)[-2:]
+        sides = Combat.currentPairing(game, pos)
         game.setAttackerAndDefender(sides[1], sides[0], pos)
         game.setCurrentRoller(None, pos)
         game.setCurrentRoller(None, pos)
@@ -179,7 +186,8 @@ class Combat:
 
         for tile in tiles:
 
-            participating_colors = [color for side in Combat.findSidesInTile(game, tile[1]) for color in side]
+            # Later pairings add their own colours, so only those who fight draw Reputation.
+            participating_colors = [color for side in Combat.currentPairing(game, tile[1]) for color in side]
             game.setCombatants(participating_colors, tile[1])
             message_to_send = f"Combat will occur in system {tile[0]}, position {tile[1]}."
             message = await channel.send(message_to_send)
@@ -422,7 +430,6 @@ class Combat:
             return hittableShips
         # The rules break ties between allies by sector entry: the player who
         # arrived last is the first target. Every other rule is unchanged.
-        opponents = [color for color in opponents if not Combat.sitsOutAgainstAncients(game, color, pos)]
         entryOrder = game.getEntryOrder(pos)
         opponents.sort(key=lambda color: entryOrder.index(color) if color in entryOrder else -1, reverse=True)
 
@@ -495,7 +502,7 @@ class Combat:
             return
         _, pos, attacker_color = parts
         tile = game.gamestate["board"][pos]
-        sides = Combat.findSidesInTile(game, pos)[-2:]
+        sides = Combat.currentPairing(game, pos)
         if len(sides) != 2:
             await interaction.channel.send("This battle no longer has two opposing sides. Refresh the combat view.")
             return
@@ -544,7 +551,7 @@ class Combat:
     @staticmethod
     def getCombatButtons(game: GamestateHelper, pos: str):
         view = View()
-        sides = Combat.findSidesInTile(game, pos)[-2:]
+        sides = Combat.currentPairing(game, pos)
         if len(sides) < 2:
             return view
         game.setAttackerAndDefender(sides[1], sides[0], pos)
@@ -1461,8 +1468,6 @@ class Combat:
         for playerColor in players:
             if playerColor == "ai":
                 continue
-            if Combat.sitsOutAgainstAncients(game, playerColor, pos):
-                continue
             player = game.getPlayerObjectFromColor(playerColor)
             count = str(game.getReputationTilesToDraw(pos, playerColor))
             view = View()
@@ -1484,8 +1489,7 @@ class Combat:
                                                       countDraw, playerColor])
                     countDraw += 1
                 asyncio.create_task(interaction.channel.send(msg, view=view))
-        survivors = [color for color in Combat.findPlayersInTile(game, pos)
-                     if not Combat.sitsOutAgainstAncients(game, color, pos)]
+        survivors = Combat.findPlayersInTile(game, pos)
         # An Alliance wins as a side. Its members decide who drops the disc in
         # order of entry to the sector, so offer it to the earliest first.
         entryOrder = game.getCombatEntryOrder(pos)
