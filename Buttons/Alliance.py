@@ -145,8 +145,7 @@ class AllianceButtons:
         otherColor = buttonID.split("_")[1]
         other = game.getPlayerObjectFromColor(otherColor)
         tile = None
-        if (AllianceButtons.isPlayersTurn(game, [player["color"], otherColor])
-                and AllianceButtons.canFoundAlliance(game, player["color"], otherColor)):
+        if AllianceButtons.canFoundAlliance(game, player["color"], otherColor):
             tile = game.drawAllianceTile([player["color"], otherColor])
         if tile is None:
             await interaction.channel.send("Those players can no longer found an alliance.")
@@ -189,7 +188,6 @@ class AllianceButtons:
         agreed.append(player["color"])
         members = game.getAllianceMembers(tile)
         if (not AllianceButtons.canJoinAlliance(game, joiner, tile)
-                or not AllianceButtons.isPlayersTurn(game, [joiner, *members])
                 or player["color"] not in members):
             await interaction.channel.send("That player is no longer able to join this alliance.")
             await interaction.message.delete()

@@ -128,7 +128,23 @@ class TestEligibility:
 
 
 class TestStaleButtons:
-    @pytest.mark.parametrize("invalidated", ["variant", "player_count", "relations", "turn", "game_ended"])
+    @pytest.mark.parametrize("response", ["accept", "decline"])
+    def test_founding_offer_can_be_answered_after_the_turn_moves_on(self, make_game, run, response):
+        game = _game(make_game)
+        blue = game.getPlayerObjectFromColor("blue")
+        red = game.getPlayerObjectFromColor("red")
+        inter = FakeInteraction()
+        run(AllianceButtons.offerAllianceTo(game, blue, inter, "offerAllianceTo_red"))
+
+        TurnButtons.startNewTurn(game.getPlayerObjectFromColor("green"), game)
+        handler = (AllianceButtons.acceptAllianceWith if response == "accept"
+                   else AllianceButtons.declineAllianceWith)
+        run(handler(game, red, inter, f"{response}AllianceWith_blue"))
+
+        assert game.areAllied("blue", "red") is (response == "accept")
+        assert ("have founded" if response == "accept" else "declined") in inter.channel.sent[-1][0]
+
+    @pytest.mark.parametrize("invalidated", ["variant", "player_count", "relations", "game_ended"])
     def test_stale_founding_accept_rechecks_eligibility(self, make_game, run, invalidated):
         game = _game(make_game, colors=("blue", "red", "green"), player_count=6)
         if invalidated == "variant":
@@ -138,8 +154,6 @@ class TestStaleButtons:
         elif invalidated == "relations":
             for player in game.gamestate["players"].values():
                 player["reputation_track"] = ["mixed"] * 4
-        elif invalidated == "turn":
-            game.gamestate["activePlayerColor"] = ["green"]
         elif invalidated == "game_ended":
             game.gamestate["gameEnded"] = True
         game.update()
@@ -163,7 +177,7 @@ class TestStaleButtons:
         assert game.getAllianceMembers("flare") == ["red", "green"]
 
     @pytest.mark.parametrize(("invalidated", "player_count"), [
-        ("capacity", 6), ("relations", 4), ("turn", 6),
+        ("capacity", 6), ("relations", 4),
     ])
     def test_stale_join_agreement_rechecks_eligibility(self, make_game, run, invalidated, player_count):
         game = _game(make_game, colors=("blue", "red", "green", "yellow"), player_count=player_count)
@@ -174,8 +188,6 @@ class TestStaleButtons:
         elif invalidated == "relations":
             for player in game.gamestate["players"].values():
                 player["reputation_track"] = ["mixed"] * 4
-        else:
-            game.gamestate["activePlayerColor"] = ["yellow"]
         game.update()
 
         inter = FakeInteraction()
@@ -192,11 +204,15 @@ class TestStaleButtons:
 
 class TestJoining:
     def test_a_third_player_may_join_once_every_member_agrees(self, make_game, run):
-        game = _game(make_game, colors=("blue", "red", "green"), player_count=6)
+        game = _game(make_game, colors=("blue", "red", "green", "yellow"), player_count=6)
         game.formAlliance("nova", ["blue", "red"])
         green = game.getPlayerObjectFromColor("green")
 
         assert "nova" in AllianceButtons.getJoinableAlliances(game, green)
+
+        TurnButtons.startNewTurn(green, game)
+        run(AllianceButtons.offerJoinAlliance(game, green, FakeInteraction(), "offerJoinAlliance_nova"))
+        TurnButtons.startNewTurn(game.getPlayerObjectFromColor("yellow"), game)
 
         run(AllianceButtons.agreeJoinAlliance(game, game.getPlayerObjectFromColor("blue"),
                                               FakeInteraction(), "agreeJoinAlliance_nova_green_none"))
