@@ -7,7 +7,7 @@ more VP per such sector, and only one colony ship refreshed per Influence action
 import pytest
 
 from helpers.DrawHelper import DrawHelper
-from tests.fakes import buttons, player_stats, reload
+from tests.fakes import FakeMessage, buttons, player_stats, reload
 
 # A ring 1 sector with an artifact key (data/sectors.json), free in a two player start.
 ARTIFACT_SECTOR = "107"
@@ -55,6 +55,20 @@ def test_taking_control_of_an_artifact_sector_offers_the_cube(start_game, press)
     state = reload(game)
     assert state.gamestate["board"]["205"]["disc_pop"] == [1]
     assert state.get_player(1)["science_pop_cubes"] == 11
+
+
+def test_a_second_answer_on_the_cube_prompt_does_not_place_a_second_cube(start_game, press):
+    game, channel = start_game(factions=["ra", "eri"])
+    game.add_tile("205", 0, ARTIFACT_SECTOR)
+    press(channel, 1, "FCIDblue_addInfluenceFinish_205")
+
+    message = FakeMessage()
+    press(channel, 1, "FCIDblue_ancientsCube_money_205", message)
+    press(channel, 1, "FCIDblue_ancientsCube_science_205", message)
+
+    player = reload(game).get_player(1)
+    assert player["money_pop_cubes"] == 10
+    assert player["science_pop_cubes"] == 12
 
 
 def test_a_plain_sector_is_not_offered_the_cube(start_game, press):
