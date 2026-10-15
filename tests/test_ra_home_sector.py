@@ -35,7 +35,12 @@ def test_ra_home_sector_tile_art():
         tile.load()
 
 
-def test_ra_home_sector_renders(make_game):
+def test_ra_home_sector_renders(make_game, monkeypatch):
+    # Stub the art like the round-1 tests do: this covers the tile's data going through the
+    # drawing code, and keeps the suite off the one-time image cache load real art costs.
+    monkeypatch.setattr(DrawHelper, "use_image", lambda self, filename: Image.new("RGBA", (1024, 890)))
+    monkeypatch.setattr(DrawHelper, "use_resized_image",
+                        lambda self, filename, size: self.use_image(filename).resize(size))
     tile = dict(ra_home_sector())
     tile.update({"sector": "255", "orientation": 0, "owner": "blue"})
     tile["player_ships"] = ["blue-int", "blue-cru"]

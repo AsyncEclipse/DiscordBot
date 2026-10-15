@@ -9,6 +9,15 @@ import pytest
 from helpers.DrawHelper import DrawHelper
 from tests.fakes import FakeMessage, buttons, player_stats, reload
 
+
+@pytest.fixture(autouse=True)
+def _no_tile_render(monkeypatch):
+    """These tests cover cube bookkeeping, not rendering. The flows attach tile images, and
+    rendering real art costs a one-time image-cache load the whole suite would pay for."""
+    monkeypatch.setattr(DrawHelper, "board_tile_image_file", lambda self, position: None)
+    monkeypatch.setattr(DrawHelper, "mergeLocationsFile", lambda self, positions: None)
+
+
 # A ring 1 sector with an artifact key (data/sectors.json), free in a two player start.
 ARTIFACT_SECTOR = "107"
 
