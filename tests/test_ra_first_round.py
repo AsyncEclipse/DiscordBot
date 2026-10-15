@@ -21,13 +21,12 @@ def find_button(channel, prefix):
 
 
 def test_remnants_of_ra_and_atlantians_explore_then_pass(games_dir, run, press, monkeypatch):
+    """Engine only: the round's flows render art internally, so it is stubbed out (the stub
+    checks the file exists). The real render is the local_debug check script."""
     random.seed(0)
-    loaded_images = []
 
-    # Keep the real orientation choices while omitting thumbnail rendering in tests.
     def load_thumbnail(self, filename):
         assert Path(filename).is_file(), filename
-        loaded_images.append(filename)
         return Image.new("RGBA", (1024, 890))
 
     monkeypatch.setattr(DrawHelper, "use_image", load_thumbnail)
@@ -95,16 +94,6 @@ def test_remnants_of_ra_and_atlantians_explore_then_pass(games_dir, run, press, 
         assert player["explore_action_counters"] == 1
         assert len(player["owned_tiles"]) == 2
         assert player["passed"]
-        assert DrawHelper(final_game.gamestate).player_area(player).size == (5000, 800)
-    DrawHelper(final_game.gamestate).display_turn_order()
-    assert loaded_images.count("images/resources/components/layouts/factionImages/ra_image.png") == 3
-    assert "images/resources/components/layouts/faction_titles/name_trade_ra.png" in loaded_images
-    for ship in ["interceptor", "cruiser", "dreadnought", "starbase"]:
-        assert f"images/resources/components/layouts/blueprints/classes/ra_{ship}_class.png" in loaded_images
-    assert loaded_images.count("images/resources/components/layouts/factionImages/atlantians_image.png") == 3
-    assert "images/resources/components/layouts/faction_titles/name_trade_atlantians.png" in loaded_images
-    for ship in ["interceptor", "cruiser", "dreadnought", "starbase"]:
-        assert f"images/resources/components/layouts/blueprints/classes/atlantians_{ship}_class.png" in loaded_images
     # 3/3/2 from the card, plus the 2 money an Explore grants.
     assert final_game.get_player(1)["materials"] == 3
     assert final_game.get_player(1)["science"] == 3
