@@ -1,36 +1,31 @@
+"""The aeb ids that exist on disk, so no caller walks a hardcoded id range.
+
+A game is in progress while its aebN_saveFile.json exists: endGame deletes that file
+and leaves aebN.json behind, so reminders read save files and stats read every game.
+"""
 import os
-import re
+
 import config
 
 
-class GameIds:
-    _SAVE_FILE_RE = re.compile(r"^aeb(\d+)_saveFile\.json$")
-    _GAME_JSON_RE = re.compile(r"^aeb(\d+)\.json$")
+def list_game_ids() -> list[str]:
+    """Sorted ids of every game ever started, finished ones included."""
+    return _list_ids(".json")
 
-    @staticmethod
-    def list_game_ids(gamestate_path: str | None = None) -> list[str]:
-        """Return sorted IDs for every aebN.json on disk, including finished games."""
-        return GameIds._list_matching(GameIds._GAME_JSON_RE, gamestate_path)
 
-    @staticmethod
-    def list_active_game_ids(gamestate_path: str | None = None) -> list[str]:
-        """Return sorted IDs for games that still have aebN_saveFile.json.
+def list_active_game_ids() -> list[str]:
+    """Sorted ids of the games still in progress, i.e. those with a save file."""
+    return _list_ids("_saveFile.json")
 
-        endGame deletes that save file, so this is the in-progress set the reminder loop wants.
-        """
-        return GameIds._list_matching(GameIds._SAVE_FILE_RE, gamestate_path)
 
-    @staticmethod
-    def _list_matching(pattern: re.Pattern, gamestate_path: str | None) -> list[str]:
-        if gamestate_path is None:
-            gamestate_path = config.gamestate_path
-        if not os.path.isdir(gamestate_path):
-            return []
-        found = []
-        for filename in os.listdir(gamestate_path):
-            match = pattern.match(filename)
-            if match:
-                number = int(match.group(1))
-                found.append((number, f"aeb{number}"))
-        found.sort(key=lambda item: item[0])
-        return [game_id for _, game_id in found]
+def _list_ids(suffix: str) -> list[str]:
+    if not os.path.isdir(config.gamestate_path):
+        return []
+    numbers = []
+    for filename in os.listdir(config.gamestate_path):
+        if not filename.startswith("aeb") or not filename.endswith(suffix):
+            continue
+        number = filename[3:-len(suffix)]
+        if number.isdigit():
+            numbers.append(int(number))
+    return [f"aeb{number}" for number in sorted(numbers)]

@@ -12,7 +12,7 @@ from commands.search_commands import SearchCommands
 # from helpers import ImageCache
 from helpers import ImageCache
 from helpers.EmojiHelper import Emoji
-from helpers.GameIds import GameIds
+from helpers.GameIds import list_active_game_ids
 from helpers.GamestateHelper import GamestateHelper
 from listeners.ButtonListener import ButtonListener
 from discord.ext import commands
@@ -64,7 +64,7 @@ class DiscordBot(commands.Bot):
         start_time = time.perf_counter()
         if guild is None:
             return
-        for gameName in GameIds.list_active_game_ids():
+        for gameName in list_active_game_ids():
             game = GamestateHelper(None, gameName)
             if len(game.gamestate.get("activePlayerColor", [])) > 0 and "lastPingTime" in game.gamestate:
                 current_time_seconds = time.time()

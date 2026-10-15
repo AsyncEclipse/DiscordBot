@@ -5,7 +5,7 @@ import json
 from discord.ext import commands
 from discord import app_commands
 from helpers.DrawHelper import DrawHelper
-from helpers.GameIds import GameIds
+from helpers.GameIds import list_game_ids
 from helpers.GamestateHelper import GamestateHelper
 
 
@@ -278,7 +278,7 @@ class SearchCommands(commands.GroupCog, name="search"):
         if tourney_only:
             higherLim = 504
             lowerLim = 478
-        for gameName in GameIds.list_game_ids():
+        for gameName in list_game_ids():
             x = int(gameName[3:])
             if x < lowerLim or x >= higherLim:
                 continue
