@@ -75,14 +75,18 @@ class DraftButtons:
                              ("Terran Federation (Hydran)", "ter4"),
                              ("Terran Republic (Draco)", "ter5"),
                              ("Terran Union (Planta)", "ter6")]
+        communityFactions = [("Atlantians", "atl")]
+        communityFactionKeys = {key for faction, key in communityFactions}
         if game.gamestate.get("community_factions", False):
-            factionsAvailable.append(("Atlantians", "atl"))
+            factionsAvailable.extend(communityFactions)
         bannedFactions = game.gamestate["bannedFactions"]
+        draftedFactionKeys = {key for playerID, key in game.gamestate["draftedFactions"]}
+        colorsAlreadyChosen = {DraftButtons.getColor(key) for key in draftedFactionKeys
+                               if key not in communityFactionKeys}
         for faction, key in factionsAvailable:
-            colorsAlreadyChosen = []
-            for playerID, factionKey in game.gamestate["draftedFactions"]:
-                colorsAlreadyChosen.append(DraftButtons.getColor(factionKey))
-            if DraftButtons.getColor(key) in colorsAlreadyChosen:
+            if key in draftedFactionKeys:
+                continue
+            if key not in communityFactionKeys and DraftButtons.getColor(key) in colorsAlreadyChosen:
                 continue
             if key in bannedFactions:
                 continue
