@@ -22,6 +22,29 @@ def test_ancient_spirit_skips_material_and_cruiser_tiles(make_game, run, deck, o
     assert game.gamestate["discTiles"] == []
 
 
+def test_ancient_spirit_choice_shows_both_tile_images(make_game, run, monkeypatch):
+    game = make_game({"discTiles": ["som", "jud"], "board": {"201": {"disctile": 1}}})
+    player = {"name": "Atlantians", "player_name": "Blue", "color": "blue"}
+    interaction = FakeInteraction()
+    rendered_names = []
+    render_tile = DrawHelper.show_disc_tile
+
+    def record_tile(drawing, name):
+        rendered_names.append(name)
+        return render_tile(drawing, name)
+
+    monkeypatch.setattr(DrawHelper, "show_disc_tile", record_tile)
+
+    run(DiscoveryTileButtons.exploreDiscoveryTile(game, "201", interaction, player))
+
+    content, options = interaction.channel.sent[-1]
+    assert rendered_names == ["Jump Drive", "Soliton Missile"]
+    assert [button.label for button in options["view"].children] == rendered_names
+    assert len(options["files"]) == 2
+    assert all(file.fp.getbuffer().nbytes > 0 for file in options["files"])
+    assert "following the normal rules" not in content
+
+
 def test_ancient_labs_research_uses_ancient_spirit_choice(make_game, run, monkeypatch):
     player = {
         "name": "Atlantians", "player_name": "Blue", "color": "blue", "home_planet": "home",

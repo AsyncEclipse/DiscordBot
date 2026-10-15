@@ -56,15 +56,16 @@ class DiscoveryTileButtons:
                 view = View()
                 with open("data/discoverytiles.json") as f:
                     discTile_data = json.load(f)
-                descriptions = []
+                drawing = DrawHelper(game.gamestate)
+                files = []
                 for choice in choices:
                     choice_data = discTile_data[choice]
                     view.add_item(Button(label=choice_data["name"], style=discord.ButtonStyle.green,
                                          custom_id=f"FCID{player['color']}_selectDiscTile_{choice}_{tile}"))
-                    descriptions.append(f"**{choice_data['name']}**: {choice_data['description']}")
+                    files.append(await asyncio.to_thread(drawing.show_disc_tile, choice_data["name"]))
                 await interaction.channel.send(
                     f"{player['player_name']} drew two discovery tiles. Choose one to resolve;"
-                    " the other is discarded.\n" + "\n".join(descriptions), view=view)
+                    " the other is discarded.", view=view, files=files)
                 return
             disc = choices[0]
         else:
