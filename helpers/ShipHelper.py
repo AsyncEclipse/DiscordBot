@@ -1,4 +1,5 @@
 import json
+from helpers.PlayerHelper import PlayerHelper
 
 
 class Ship:
@@ -76,10 +77,8 @@ class PlayerShip(Ship):
 
         self.ship_parts = player[f"{self.ship_type}_parts"]
         self.build_ship_stats(self.ship_parts)
-        if "orb" in self.ship_type:
-            self.cost = 5
-        else:
-            self.cost = player[f"cost_{self.ship_type}"]
+        base_cost = 5 if "orb" in self.ship_type else None
+        self.cost = PlayerHelper.get_ship_cost(player, self.ship_type, base_cost)
 
     def getRange(self):
         return self.range

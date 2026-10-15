@@ -3,6 +3,7 @@ import random
 import config
 import discord
 from Buttons.Turn import TurnButtons
+from Buttons.DiscoveryTile import DiscoveryTileButtons
 from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
 from discord.ui import View, Button
@@ -74,12 +75,18 @@ class DraftButtons:
                              ("Terran Federation (Hydran)", "ter4"),
                              ("Terran Republic (Draco)", "ter5"),
                              ("Terran Union (Planta)", "ter6")]
+        communityFactions = [("Atlantians", "atl")]
+        communityFactionKeys = {key for faction, key in communityFactions}
+        if game.gamestate.get("community_factions", False):
+            factionsAvailable.extend(communityFactions)
         bannedFactions = game.gamestate["bannedFactions"]
+        draftedFactionKeys = {key for playerID, key in game.gamestate["draftedFactions"]}
+        colorsAlreadyChosen = {DraftButtons.getColor(key) for key in draftedFactionKeys
+                               if key not in communityFactionKeys}
         for faction, key in factionsAvailable:
-            colorsAlreadyChosen = []
-            for playerID, factionKey in game.gamestate["draftedFactions"]:
-                colorsAlreadyChosen.append(DraftButtons.getColor(factionKey))
-            if DraftButtons.getColor(key) in colorsAlreadyChosen:
+            if key in draftedFactionKeys:
+                continue
+            if key not in communityFactionKeys and DraftButtons.getColor(key) in colorsAlreadyChosen:
                 continue
             if key in bannedFactions:
                 continue
@@ -145,11 +152,14 @@ class DraftButtons:
             return "brown"
         if faction == "exl":
             return "teal"
+        if faction == "atl":
+            return "blue"
         return "green"
 
     @staticmethod
     async def generalSetup(interaction: discord.Interaction, game: GamestateHelper,
                            temp_player_list, temp_faction_list):
+        is_initial_setup = game.gamestate["setup_finished"] != 1
         colors = ["blue", "red", "green", "yellow", "purple", "white", "pink", "brown", "teal"]
         count = 0
         listPlayerHomes = []
@@ -227,6 +237,14 @@ class DraftButtons:
             game.setup_finished()
         # game.fillInDiscTiles()
         await interaction.channel.send("Done With Setup!")
+
+        if is_initial_setup:
+            for player_id in temp_player_list:
+                player = game.get_player(player_id, interaction)
+                if player is not None and "anl" in player.get("nano_tech", []):
+                    home = game.getLocationFromID(player["home_planet"])
+                    game.addDiscTile(home)
+                    await DiscoveryTileButtons.exploreDiscoveryTile(game, home, interaction, player)
 
         asyncio.create_task(game.showUpdate("Start of Game", interaction))
         view = TurnButtons.getStartTurnButtons(game, game.get_player(temp_player_list[0],interaction), "dummy")

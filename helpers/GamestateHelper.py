@@ -56,9 +56,10 @@ class GamestateHelper:
             self.gamestate[key].append(addition)
             self.update()
 
-    def saveLastButtonPressed(self, buttonID: str, pressed_at: float = 0):
+    def saveLastButtonPressed(self, buttonID: str, pressed_at: float = 0, message_id=None):
         self.gamestate["lastButton"] = buttonID
         self.gamestate["lastButtonTime"] = pressed_at
+        self.gamestate["lastButtonMessage"] = message_id
         self.update()
 
     def changeColor(self, colorOld, colorNew):
@@ -317,6 +318,8 @@ class GamestateHelper:
             return "rho"
         elif fullName == "The Exiles":
             return "exile"
+        elif fullName == "Atlantians":
+            return "atlantians"
         elif "Terran" in fullName:
             return fullName.lower().replace(" ", "_")
 
@@ -1207,10 +1210,15 @@ class GamestateHelper:
             return "rho"
         elif full_name == "The Exiles":
             return "exile"
+        elif full_name == "Atlantians":
+            return "atlantians"
         elif "Terran" in full_name:
             return full_name.lower().replace(" ", "_")
 
     def formRelationsBetween(self, player1, player2):
+        if not all(PlayerHelper.has_reputation_slot_for_relation(player)
+                   for player in (player1, player2)):
+            return False
         pID = self.get_player_from_color(player1['color'])
         pID2 = self.get_player_from_color(player2['color'])
         found = False
@@ -1222,8 +1230,10 @@ class GamestateHelper:
                 break
         if not found:
             lowest = 10
-            loc = 0
+            loc = None
             for x, tile in enumerate(player1["reputation_track"]):
+                if PlayerHelper.is_reputation_only_slot(player1, x):
+                    continue
                 if isinstance(tile, int) and tile < lowest:
                     loc = x
                     lowest = tile
@@ -1240,8 +1250,10 @@ class GamestateHelper:
                 break
         if not found:
             lowest = 10
-            loc = 0
+            loc = None
             for x, tile in enumerate(player2["reputation_track"]):
+                if PlayerHelper.is_reputation_only_slot(player2, x):
+                    continue
                 if isinstance(tile, int) and tile < lowest:
                     loc = x
                     lowest = tile
@@ -1250,8 +1262,11 @@ class GamestateHelper:
             self.gamestate["reputation_tiles"].append(lowest)
 
         self.update()
+        return True
 
     def formMinorSpeciesRelations(self, player, minor_species_name: str):
+        if not PlayerHelper.has_reputation_slot_for_relation(player):
+            return False
         pID = self.get_player_from_color(player['color'])
         found = False
         for x, tile in enumerate(player["reputation_track"]):
@@ -1261,8 +1276,10 @@ class GamestateHelper:
                 break
         if not found:
             lowest = 10
-            loc = 0
+            loc = None
             for x, tile in enumerate(player["reputation_track"]):
+                if PlayerHelper.is_reputation_only_slot(player, x):
+                    continue
                 if isinstance(tile, int) and tile < lowest:
                     loc = x
                     lowest = tile
@@ -1277,6 +1294,7 @@ class GamestateHelper:
         self.gamestate["minor_species"].remove(minor_species_name)
 
         self.update()
+        return True
 
     def returnReputation(self, val: int, player):
         loc = 0
@@ -1285,7 +1303,8 @@ class GamestateHelper:
             if isinstance(tile, int) and tile == val:
                 loc = x
                 lowest = tile
-                self.gamestate["players"][pID]["reputation_track"][loc] = "mixed"
+                self.gamestate["players"][pID]["reputation_track"][loc] = (
+                    "rep" if PlayerHelper.is_reputation_only_slot(player, loc) else "mixed")
                 self.gamestate["reputation_tiles"].append(lowest)
                 self.update()
                 return
