@@ -8,7 +8,7 @@ from helpers.DrawHelper import DrawHelper
 
 def ra_home_sector():
     with open("data/sectors.json", "r") as f:
-        return json.load(f)["267"]
+        return json.load(f)["255"]
 
 
 def test_ra_home_sector_data():
@@ -28,7 +28,7 @@ def test_ra_home_sector_data():
 
 
 def test_ra_home_sector_tile_art():
-    path = "images/resources/hexes/267.png"
+    path = "images/resources/hexes/255.png"
     assert Path(path).is_file(), path
     with Image.open(path) as tile:
         assert tile.size == (1024, 890)
@@ -37,7 +37,7 @@ def test_ra_home_sector_tile_art():
 
 def test_ra_home_sector_renders(make_game):
     tile = dict(ra_home_sector())
-    tile.update({"sector": "267", "orientation": 0, "owner": "blue"})
+    tile.update({"sector": "255", "orientation": 0, "owner": "blue"})
     tile["player_ships"] = ["blue-int", "blue-cru"]
     game = make_game({
         "board": {"201": tile},

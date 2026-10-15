@@ -8,7 +8,7 @@ def test_ra_faction_stats_match_printed_board():
     assert ra["name"] == "Remnants of Ra"
     assert (ra["materials"], ra["science"], ra["money"]) == (3, 3, 2)
     assert (ra["colony_ships"], ra["base_colony_ships"]) == (3, 3)
-    assert ra["home_planet"] == "267"
+    assert ra["home_planet"] == "255"
     assert ra["military_tech"] == ["plc"]
     assert ra["trade_value"] == 4
     assert [ra[key] for key in ("explore_apt", "research_apt", "upgrade_apt",

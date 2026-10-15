@@ -33,6 +33,31 @@ def test_ra_faction_color_is_supported_setup_color():
     assert DraftButtons.getColor("ra") in supported_colors
 
 
+@pytest.mark.parametrize("drafted, available", [
+    (["hyd"], {"ra", "atl"}),
+    (["ter4"], {"ra", "atl"}),
+    (["atl"], {"ra", "hyd", "ter4"}),
+    (["ra"], {"atl", "hyd", "ter4"}),
+    (["ra", "hyd"], {"atl"}),
+    (["atl", "hyd"], {"ra"}),
+])
+def test_remnants_do_not_share_colour_blocks(drafted, available):
+    game = FakeGame(True, False)
+    game.gamestate["draftedFactions"] = list(enumerate(drafted))
+
+    buttons = DraftButtons.getDraftButtons(game)
+    available_keys = {button.custom_id.split("_")[1] for button in buttons.children}
+
+    assert available_keys & {"ra", "atl", "hyd", "ter4"} == available
+
+
+def test_remnants_still_respect_explicit_bans():
+    game = FakeGame(True, False)
+    game.gamestate["bannedFactions"] = ["ra"]
+
+    assert "Remnants of Ra" not in [button.label for button in DraftButtons.getDraftButtons(game).children]
+
+
 def test_ra_faction_choice_exists():
     choices = [(choice.name, choice.value) for choice in SetupCommands.factionChoices]
     assert ("Remnants of Ra", "ra") in choices

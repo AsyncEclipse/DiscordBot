@@ -23,6 +23,7 @@ def find_button(channel, prefix):
 def test_remnants_of_ra_and_terran_explore_then_pass(games_dir, run, press, monkeypatch):
     random.seed(0)
     loaded_images = []
+
     # Keep the real orientation choices while omitting thumbnail rendering in tests.
     def load_thumbnail(self, filename):
         assert Path(filename).is_file(), filename
@@ -32,7 +33,6 @@ def test_remnants_of_ra_and_terran_explore_then_pass(games_dir, run, press, monk
     monkeypatch.setattr(DrawHelper, "use_image", load_thumbnail)
     monkeypatch.setattr(DrawHelper, "use_resized_image",
                         lambda self, filename, size: self.use_image(filename).resize(size))
-    monkeypatch.setattr(DrawHelper, "show_disc_tile", lambda self, name: None)
     GameInit("Remnants of Ra first round", [[1, "<@1>"], [2, "<@2>"]],
              "def", True, True, False, False, community_factions=True).create_game()
     game = GamestateHelper(None, "aeb1")
@@ -50,7 +50,7 @@ def test_remnants_of_ra_and_terran_explore_then_pass(games_dir, run, press, monk
     assert state["players"]["1"]["reputation_track"] == ["mixed", "mixed", "mixed", "mixed"]
     assert state["players"]["1"]["money"] == 2
     assert state["players"]["2"]["name"] == "Terran Federation"
-    assert state["board"]["201"]["sector"] == "267"
+    assert state["board"]["201"]["sector"] == "255"
     assert state["activePlayerColor"] == ["blue"]
 
     # Power of the Ancients includes the home sector: the setup offers the disc cube.
@@ -98,4 +98,3 @@ def test_remnants_of_ra_and_terran_explore_then_pass(games_dir, run, press, monk
     assert final_game.get_player(1)["materials"] == 3
     assert final_game.get_player(1)["science"] == 3
     assert final_game.get_player(1)["money"] == 4
-
