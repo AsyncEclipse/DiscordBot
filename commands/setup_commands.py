@@ -425,8 +425,6 @@ class SetupCommands(commands.GroupCog, name="setup"):
                              "- **Price of Power:** Each ship costs 1 additional Materials for each discovery tile "
                              "beyond the first installed on its Ship Blueprint."])
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "atlantians_board.png"))
-        await factionThread.send("Atlantians faction reference",
-                                 file=drawing.get_file(boardPrefix + "atlantians_info.png"))
 
         message = "\n".join(["Rift Reference"])
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "Rift_Reference.png"))
