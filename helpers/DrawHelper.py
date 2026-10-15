@@ -1169,7 +1169,7 @@ class DrawHelper:
                     context.paste(pop_image, (reputationX+x*150+30, 600+60), mask=pop_image)
 
         # Alliance tiles sit to the right of the reputation track.
-        allianceX = 4480
+        allianceX = 4600
         for allianceTile, betrayed in player.get("alliances", {}).items():
             side = "betrayed" if betrayed else "ally"
             alliance_path = (f"images/resources/components/alliances/"
