@@ -20,7 +20,7 @@ def find_button(channel, prefix):
     )
 
 
-def test_remnants_of_ra_and_terran_explore_then_pass(games_dir, run, press, monkeypatch):
+def test_remnants_of_ra_and_atlantians_explore_then_pass(games_dir, run, press, monkeypatch):
     random.seed(0)
     loaded_images = []
 
@@ -42,15 +42,17 @@ def test_remnants_of_ra_and_terran_explore_then_pass(games_dir, run, press, monk
     game.update()
     channel = FakeChannel("aeb1-actions")
     interaction = FakeInteraction(channel, role_names=["aeb1"])
-    run(DraftButtons.generalSetup(interaction, game, [1, 2], ["ra", "ter4"]))
+    run(DraftButtons.generalSetup(interaction, game, [1, 2], ["ra", "atl"]))
 
     state = reload(game).gamestate
     assert state["players"]["1"]["name"] == "Remnants of Ra"
     assert state["players"]["1"]["military_tech"] == ["plc"]
     assert state["players"]["1"]["reputation_track"] == ["mixed", "mixed", "mixed", "mixed"]
     assert state["players"]["1"]["money"] == 2
-    assert state["players"]["2"]["name"] == "Terran Federation"
+    assert state["players"]["2"]["name"] == "Atlantians"
+    assert state["players"]["2"]["nano_tech"] == ["anl"]
     assert state["board"]["201"]["sector"] == "255"
+    assert state["board"]["207"]["sector"] == "266"
     assert state["activePlayerColor"] == ["blue"]
 
     # Power of the Ancients includes the home sector: the setup offers the disc cube.
@@ -58,6 +60,11 @@ def test_remnants_of_ra_and_terran_explore_then_pass(games_dir, run, press, monk
     state = reload(game).gamestate
     assert state["board"]["201"]["disc_pop"] == [1]
     assert state["players"]["1"]["science_pop_cubes"] == 11
+
+    # The other community setup hook, Atlantians' discovery choice, runs in the same game.
+    press(channel, 2, find_button(channel, "FCIDred_selectDiscTile_"))
+    press(channel, 2, find_button(channel, "FCIDred_keepDiscForPoints"))
+    assert reload(game).get_player(2)["disc_tiles_for_points"] == 1
 
     explored_positions = []
     for player_id, color in [(1, "blue"), (2, "red")]:
@@ -94,7 +101,15 @@ def test_remnants_of_ra_and_terran_explore_then_pass(games_dir, run, press, monk
     assert "images/resources/components/layouts/faction_titles/name_trade_ra.png" in loaded_images
     for ship in ["interceptor", "cruiser", "dreadnought", "starbase"]:
         assert f"images/resources/components/layouts/blueprints/classes/ra_{ship}_class.png" in loaded_images
+    assert loaded_images.count("images/resources/components/layouts/factionImages/atlantians_image.png") == 3
+    assert "images/resources/components/layouts/faction_titles/name_trade_atlantians.png" in loaded_images
+    for ship in ["interceptor", "cruiser", "dreadnought", "starbase"]:
+        assert f"images/resources/components/layouts/blueprints/classes/atlantians_{ship}_class.png" in loaded_images
     # 3/3/2 from the card, plus the 2 money an Explore grants.
     assert final_game.get_player(1)["materials"] == 3
     assert final_game.get_player(1)["science"] == 3
     assert final_game.get_player(1)["money"] == 4
+    # Atlantians start 3/3/3, kept their setup discovery tile for 2 points, and did not pass first.
+    assert final_game.get_player(2)["materials"] == 3
+    assert final_game.get_player(2)["science"] == 3
+    assert final_game.get_player(2)["money"] == 3
