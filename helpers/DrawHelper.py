@@ -1772,21 +1772,23 @@ class DrawHelper:
         width = 4150 if (pCount != 2 and pCount != 4) else 2800
         width = max([context2.size[0], context3.size[0] + context4.size[0] + 150,
                      cropped_context.size[0], context5.size[0]])
-        height = (cropped_context.size[1] + context2.size[1] +
-
+        # The map's bottom edge must not crowd the round/turn order strip below it.
+        mapGap = 60
+        height = (cropped_context.size[1] + context2.size[1] + mapGap +
                   max(context3.size[1], context4.size[1]) + 90)
         final_context = Image.new("RGBA", (width, height), (0, 0, 0, 255))
         centering = int((width - cropped_context.size[0])/2)
         final_context.paste(cropped_context, (centering, 0))
         #final_context.paste(context6, (0, 0))
-        final_context.paste(context2, (0, cropped_context.size[1]+ max(context3.size[1],context4.size[1])))
-        final_context.paste(context3, (0, cropped_context.size[1]))
+        final_context.paste(context2, (0, cropped_context.size[1] + mapGap +
+                                       max(context3.size[1],context4.size[1])))
+        final_context.paste(context3, (0, cropped_context.size[1] + mapGap))
         # final_context.paste(context5, (50, context2.size[1] - 20))
         final_context.paste(context4, (context3.size[0] + 150,
-                                       cropped_context.size[1]))
+                                       cropped_context.size[1] + mapGap))
         final_context.paste(context5,
-                            (0, cropped_context.size[1] + context2.size[1] + max(context3.size[1],
-                                                                                 context4.size[1])))
+                            (0, cropped_context.size[1] + mapGap + context2.size[1] + max(
+                                context3.size[1], context4.size[1])))
         bytes_io = BytesIO()
         final_context.save(bytes_io, format="WEBP", quality=80, method=1)
         bytes_io.seek(0)
