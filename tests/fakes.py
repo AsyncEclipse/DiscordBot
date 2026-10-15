@@ -13,6 +13,12 @@ FACTIONS = json.load(open("data/factions.json"))
 
 
 class FakeMessage:
+    _next_id = 1
+
+    def __init__(self):
+        self.id = FakeMessage._next_id
+        FakeMessage._next_id += 1
+
     async def delete(self):
         pass
 
@@ -71,13 +77,13 @@ class FakeResponder:
 
 
 class FakeInteraction:
-    def __init__(self, channel=None, custom_id=None, user_id=None, role_names=()):
+    def __init__(self, channel=None, custom_id=None, user_id=None, role_names=(), message=None):
         self.channel = channel or FakeChannel()
         self.user = FakeUser()
         if user_id is not None:
             self.user.id = user_id
         self.guild = FakeGuild(role_names)
-        self.message = FakeMessage()
+        self.message = message or FakeMessage()
         self.data = {"custom_id": custom_id}
         self.created_at = datetime.now(timezone.utc)
         self.response = FakeResponder()

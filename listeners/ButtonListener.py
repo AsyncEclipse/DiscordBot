@@ -30,6 +30,14 @@ from helpers.PlayerHelper import PlayerHelper
 # Same button pressed again within this many seconds of the last press is treated as an accidental double click.
 DOUBLE_PRESS_WINDOW = 3
 
+# Buttons that answer a prompt: once one is pressed the rest of that message is stale. Prompts that stay
+# open for several presses (population, build spending, upgrade menus, combat, turn menu) are absent.
+ANSWER_BUTTONS = ("selectDiscTile", "exploreDiscoveryTile", "keepDiscForPoints", "usedDiscForAbility",
+                  "exploreTile", "discardTile", "placeTile",
+                  "getTech", "getFreeTech", "placeWarpPortal",
+                  "offerRelationsTo", "acceptRelationsWith", "declineRelationsWith", "formMinorRelations",
+                  "reducePopFor", "addCubeToTrack", "drawReputation", "dontDrawReputation")
+
 
 class ButtonListener(commands.Cog):
     def __init__(self, bot):
@@ -147,6 +155,15 @@ class ButtonListener(commands.Cog):
                                                 ephemeral=True)
                 return
 
+        # A prompt answers once: a queued second click must not resolve too.
+        # shortcut: only the most recent press is kept, upgrade if a duplicate answer still slips through.
+        if (any(button in game.gamestate.get("lastButton", "") for button in ANSWER_BUTTONS)
+                and game.gamestate.get("lastButtonMessage") == interaction.message.id
+                and pressed_at - game.gamestate.get("lastButtonTime", 0) < DOUBLE_PRESS_WINDOW):
+            await interaction.followup.send(f"{interaction.user.mention}, that prompt was already answered.",
+                                            ephemeral=True)
+            return
+
         # If we want to prevent others from touching someone else's buttons,
         # we can attach FCID{color}_ to the start of the button ID as a check.
         # We then remove this check so it doesnt interfere with the rest of the resolution.
@@ -170,7 +187,7 @@ class ButtonListener(commands.Cog):
         if player is None:
             return
         # The guard above compares this against the raw custom id, FCID prefix included.
-        game.saveLastButtonPressed(interaction.data["custom_id"], pressed_at)
+        game.saveLastButtonPressed(interaction.data["custom_id"], pressed_at, interaction.message.id)
         if customID.startswith("tradeAtRatio"):
             await TurnButtons.tradeAtRatio(game, player, player_helper, interaction, customID)
         elif customID == "showReputation":
