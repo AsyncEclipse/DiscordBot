@@ -134,7 +134,9 @@ class ButtonListener(commands.Cog):
             # get_player can hand back another player's stats (dev-mode testers, or a
             # community-mode role match), so bind the helper to the seat those stats
             # live in; update_player writes stats back under this id.
-            player_helper = PlayerHelper(game.get_player_from_color(player["color"]), player)
+            player_id = next(seat_id for seat_id, stats in game.gamestate["players"].items()
+                             if stats is player)
+            player_helper = PlayerHelper(player_id, player)
         else:
             player_helper = None
         # Click times come from Discord, so time spent waiting on the game lock doesn't count.
