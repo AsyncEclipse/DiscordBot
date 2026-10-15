@@ -1534,11 +1534,17 @@ class GamestateHelper:
 
     def update_player(self, *args):
         for ar in args:
-            if ar.player_id in self.gamestate["players"]:
-                self.gamestate["players"][ar.player_id] = ar.stats
-            else:
-                playerID = self.get_player_from_color(ar.stats["color"])
-                self.gamestate["players"][playerID] = ar.stats
+            playerID = ar.player_id
+            if playerID not in self.gamestate["players"]:
+                playerID = self.get_player_from_color(ar.stats.get("color"))
+            seat = self.gamestate["players"].get(playerID)
+            if seat is None or seat.get("color") != ar.stats.get("color"):
+                # A dev-mode tester drives the active player's buttons, so the stats
+                # being saved need not belong to the seat holding this id. Never copy
+                # one faction's stats into another faction's seat.
+                print(f"update_player: ignoring {ar.stats.get('color')} stats for seat {ar.player_id}")
+                continue
+            self.gamestate["players"][playerID] = ar.stats
         self.update()
 
     def change_player(self, player_id, new_player_id, new_username, new_player_name):

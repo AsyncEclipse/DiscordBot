@@ -367,7 +367,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
             permanent = passed
         game = GamestateHelper(interaction.channel)
         p1 = game.get_player(player.id,interaction)
-        player_helper = PlayerHelper(player.id, p1)
+        player_helper = PlayerHelper(game.get_player_from_color(p1["color"]), p1)
         player_helper.permanentlyPassTurn(permanent)
         player_helper.passTurn(passed)
         if passed:
@@ -382,7 +382,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
             player = interaction.user
         game = GamestateHelper(interaction.channel)
         p1 = game.get_player(player.id,interaction)
-        player_helper = PlayerHelper(player.id, p1)
+        player_helper = PlayerHelper(game.get_player_from_color(p1["color"]), p1)
         game.makeEveryoneNotTraitor()
         player_helper.setTraitor(traitor)
         game.update_player(player_helper)
