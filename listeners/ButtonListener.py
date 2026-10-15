@@ -36,7 +36,8 @@ ANSWER_BUTTONS = ("selectDiscTile", "exploreDiscoveryTile", "keepDiscForPoints",
                   "exploreTile", "discardTile", "placeTile",
                   "getTech", "getFreeTech", "placeWarpPortal",
                   "offerRelationsTo", "acceptRelationsWith", "declineRelationsWith", "formMinorRelations",
-                  "reducePopFor", "addCubeToTrack", "drawReputation", "dontDrawReputation")
+                  "reducePopFor", "addCubeToTrack", "drawReputation", "dontDrawReputation",
+                  "ancientsCube")
 
 
 class ButtonListener(commands.Cog):
@@ -291,6 +292,8 @@ class ButtonListener(commands.Cog):
             await PopulationButtons.startPopDrop(game, player, interaction)
         elif customID.startswith("fillPopulation"):
             await PopulationButtons.fillPopulation(game, player, interaction, customID)
+        elif customID.startswith("ancientsCube"):
+            await PopulationButtons.placeAncientsCube(game, player, interaction, customID)
         elif customID.startswith("startInfluence"):
             game.updateSaveFile()
             await InfluenceButtons.startInfluence(game, player, interaction)

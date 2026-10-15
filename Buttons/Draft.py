@@ -4,6 +4,7 @@ import config
 import discord
 from Buttons.Turn import TurnButtons
 from Buttons.DiscoveryTile import DiscoveryTileButtons
+from Buttons.Population import PopulationButtons
 from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
 from discord.ui import View, Button
@@ -77,6 +78,7 @@ class DraftButtons:
                              ("Terran Union (Planta)", "ter6")]
         if game.gamestate.get("community_factions", False):
             factionsAvailable.append(("Atlantians", "atl"))
+            factionsAvailable.append(("Remnants of Ra", "ra"))
         bannedFactions = game.gamestate["bannedFactions"]
         for faction, key in factionsAvailable:
             colorsAlreadyChosen = []
@@ -149,6 +151,8 @@ class DraftButtons:
         if faction == "exl":
             return "teal"
         if faction == "atl":
+            return "blue"
+        if faction == "ra":
             return "blue"
         return "green"
 
@@ -241,6 +245,9 @@ class DraftButtons:
                     home = game.getLocationFromID(player["home_planet"])
                     game.addDiscTile(home)
                     await DiscoveryTileButtons.exploreDiscoveryTile(game, home, interaction, player)
+                if player is not None and player.get("name") == "Remnants of Ra":
+                    await PopulationButtons.offerAncientsCube(game, player, interaction,
+                                                              game.getLocationFromID(player["home_planet"]))
 
         asyncio.create_task(game.showUpdate("Start of Game", interaction))
         view = TurnButtons.getStartTurnButtons(game, game.get_player(temp_player_list[0],interaction), "dummy")

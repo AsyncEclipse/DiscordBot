@@ -25,7 +25,7 @@ def test_atlantians_only_appear_in_community_draft(community_mode):
 
     assert len(standard_buttons.children) == 16
     assert [button.label for button in community_buttons.children].count("Atlantians") == 1
-    assert len(community_buttons.children) == 17
+    assert len(community_buttons.children) == 18
 
 
 def test_atlantians_reference_images_exist():

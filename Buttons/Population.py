@@ -43,7 +43,7 @@ class PopulationButtons:
         fullPlanets = []
         tileState = game.gamestate["board"][tile]
         planetTypes = ["money", "science", "material", "neutral",
-                       "moneyadv", "scienceadv", "materialadv", "neutraladv", "orbital"]
+                       "moneyadv", "scienceadv", "materialadv", "neutraladv", "orbital", "disc"]
         for planetT in planetTypes:
             if f"{planetT}_pop" in tileState:
                 for i, val in enumerate(tileState[f"{planetT}_pop"]):
@@ -136,3 +136,35 @@ class PopulationButtons:
                                                      f"You now have an income of {str(income)} {resourceType}. {ships}"
                                                      f" colony ship{'s' if ships == 1 else 's'} left unexhausted.",
                                                      file=await asyncio.to_thread(drawing.board_tile_image_file, tile)))
+
+    @staticmethod
+    async def offerAncientsCube(game: GamestateHelper, player, interaction: discord.Interaction, tile: str):
+        """Remnants of Ra: Power of the Ancients puts a cube on the influence disc of an artifact sector."""
+        tileState = game.gamestate["board"][tile]
+        if player.get("name") != "Remnants of Ra" or not tileState.get("artifact"):
+            return
+        if tileState.get("disc_pop", [0])[0]:
+            return
+        view = View()
+        for pop in ["money", "science", "material"]:
+            if player[f"{pop}_pop_cubes"] > 0:
+                view.add_item(Button(label=pop.capitalize(), style=discord.ButtonStyle.blurple,
+                                     custom_id=f"FCID{player['color']}_ancientsCube_{pop}_{tile}"))
+        if len(view.children) == 0:
+            return
+        await interaction.channel.send(f"{player['player_name']}, your Power of the Ancients places an additional"
+                                       f" population cube on your influence disc in tile {tile}."
+                                       " Choose which type of cube.", view=view)
+
+    @staticmethod
+    async def placeAncientsCube(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
+        pop, tile = buttonID.split("_")[1:3]
+        if not game.add_disc_pop(pop, tile, game.get_player_from_color(player["color"])):
+            await interaction.followup.send("Could not place the cube: the disc already holds one or"
+                                            f" your {pop} track is empty.", ephemeral=True)
+            return
+        await interaction.message.edit(view=None)
+        await interaction.channel.send(f"{player['player_name']} placed a {pop} population cube"
+                                       " on the influence disc.",
+                                       file=await asyncio.to_thread(
+                                           DrawHelper(game.gamestate).board_tile_image_file, tile))

@@ -42,7 +42,8 @@ class SetupCommands(commands.GroupCog, name="setup"):
                       app_commands.Choice(name="Terran Federation (Hydran)", value="ter4"),
                       app_commands.Choice(name="Terran Republic (Draco)", value="ter5"),
                       app_commands.Choice(name="Terran Union (Planta)", value="ter6"),
-                      app_commands.Choice(name="Atlantians", value="atl")]
+                      app_commands.Choice(name="Atlantians", value="atl"),
+                      app_commands.Choice(name="Remnants of Ra", value="ra")]
     
     @app_commands.choices(ai_ship_type=ai_choices2)
     @app_commands.choices(ai_ship=ai_ship_choices)
@@ -427,6 +428,18 @@ class SetupCommands(commands.GroupCog, name="setup"):
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "atlantians_board.png"))
         await factionThread.send("Atlantians faction reference",
                                  file=drawing.get_file(boardPrefix + "atlantians_info.png"))
+
+        message = "\n".join(["# Remnants of Ra",
+                             "- Start with Plasma Cannon in the Military Tech track.",
+                             "- **Power of the Ancients:** An additional population cube of any type in a sector"
+                             " with an artifact key (placed on top of the influence disk)."
+                             " This includes your home sector.",
+                             "- **Secrets of the Ancients:** Gain 1 additional VP for each sector you control"
+                             " with an artifact key.",
+                             "- You flip only 1 colony ship per Influence action."])
+        await factionThread.send(message, file=drawing.get_file(boardPrefix + "ra_board.png"))
+        await factionThread.send("Remnants of Ra faction reference",
+                                 file=drawing.get_file(boardPrefix + "ra_info.png"))
 
         message = "\n".join(["Rift Reference"])
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "Rift_Reference.png"))

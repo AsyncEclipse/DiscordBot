@@ -18,6 +18,7 @@ class FakeMessage:
     def __init__(self):
         self.id = FakeMessage._next_id
         FakeMessage._next_id += 1
+        self.components = []
 
     async def delete(self):
         pass

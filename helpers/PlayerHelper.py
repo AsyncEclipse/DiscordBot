@@ -254,10 +254,10 @@ class PlayerHelper:
                 self.adjust_influence(count)
         if "graveYard" in self.stats:
             for cube in self.stats["graveYard"]:
-                if "neutral" not in cube and "orbital" not in cube:
+                if "neutral" not in cube and "orbital" not in cube and "disc" not in cube:
                     self.stats[cube + "_cubes"] = self.stats[cube + "_cubes"] + 1
                 else:
-                    if "neutral" not in cube:
+                    if "neutral" not in cube and "disc" not in cube:
                         orbitalCubes += 1
                     else:
                         neutralCubes += 1
