@@ -1327,9 +1327,11 @@ class Combat:
 
     @staticmethod
     async def offerTechnoMagic(game: GamestateHelper, channel, pos: str):
-        """Techno-Magic: at the start of a combat, one temporary Upgrade 1 per ship blueprint."""
-        for color in Combat.findPlayersInTile(game, pos):
-            if color == "ai":
+        """Techno-Magic: at the start of a combat, one temporary Upgrade 1 per ship blueprint.
+        The attacker chooses first, the defender last."""
+        tile = game.gamestate["board"][pos]
+        for color in [tile.get("attacker"), tile.get("defender")]:
+            if not color or color == "ai":
                 continue
             player = game.getPlayerObjectFromColor(color)
             if player["name"] != "Techno-Mages":
@@ -1347,25 +1349,41 @@ class Combat:
     async def technoMagicUpgrade(game: GamestateHelper, customID: str, player, interaction: discord.Interaction,
                                  player_helper: PlayerHelper):
         pos, ship = customID.split("_")[1:3]
-        remembered = game.gamestate["board"][pos].setdefault("tmParts", {}).setdefault(player["color"], {})
-        if ship in remembered:
+        color = player["color"]
+        # the first install anywhere holds the pre-combat blueprint, so overlapping combats
+        # each remove only their own temporary part
+        base = next((tile["tmParts"][color][ship]["base"]
+                     for tile in game.gamestate["board"].values()
+                     if tile.get("tmParts", {}).get(color, {}).get(ship, {}).get("base")), None)
+        record = game.gamestate["board"][pos].setdefault("tmParts", {}).setdefault(color, {}).setdefault(ship, {})
+        if record.get("install"):
             await interaction.followup.send("You have already upgraded that blueprint this combat.", ephemeral=True)
             return
-        remembered[ship] = list(player[f"{ship}_parts"])
+        record["base"] = base if base is not None else list(player[f"{ship}_parts"])
         game.update()
-        await UpgradeButtons.upgradeShip(game, player, interaction, f"upgradeShip_1_{ship}_tm", player_helper)
+        await UpgradeButtons.upgradeShip(game, player, interaction, f"upgradeShip_1_{ship}_tm{pos}", player_helper)
 
     @staticmethod
     async def revertTechnoMagic(game: GamestateHelper, interaction: discord.Interaction, pos: str):
         """The temporary parts installed at the start of this combat come off again."""
-        for color, remembered in game.gamestate["board"][pos].pop("tmParts", {}).items():
+        for color, ships in game.gamestate["board"][pos].pop("tmParts", {}).items():
             player = game.getPlayerObjectFromColor(color)
             player_helper = PlayerHelper(color, player)
-            for ship, parts in remembered.items():
-                player[f"{ship}_parts"] = parts
-            game.update_player(player_helper)
-            await interaction.channel.send(f"Techno-Magic wears off: the temporary ship parts are removed"
-                                           f" from {player['player_name']}'s blueprints.")
+            restore = {}
+            for ship, record in ships.items():
+                pending = any(tile.get("tmParts", {}).get(color, {}).get(ship, {}).get("install")
+                              for key, tile in game.gamestate["board"].items() if key != pos)
+                if not pending:
+                    restore[ship] = record["base"]
+            if restore:
+                for ship, parts in restore.items():
+                    player[f"{ship}_parts"] = parts
+                game.update_player(player_helper)
+                await interaction.channel.send(f"Techno-Magic wears off: the temporary ship parts are removed"
+                                               f" from {player['player_name']}'s blueprints.")
+            else:
+                # every install belongs to a combat that is still pending; the pop itself must persist
+                game.update()
 
     @staticmethod
     async def declareAWinner(game: GamestateHelper, interaction: discord.Interaction, pos: str):

@@ -10,7 +10,7 @@ from PIL import Image
 from Buttons.Build import BuildButtons
 from helpers.CombatHelper import Combat
 from helpers.DrawHelper import DrawHelper
-from tests.fakes import FakeInteraction, buttons, player_stats, reload
+from tests.fakes import FakeInteraction, buttons, reload
 
 
 @pytest.fixture(autouse=True)
@@ -131,6 +131,8 @@ def test_one_colony_ship_is_not_enough(start_game, press):
 def test_techno_magic_offers_one_upgrade_per_ship_blueprint(start_game, run):
     game, channel = start_game(factions=["tm", "eri"])
     game.gamestate["board"]["201"]["player_ships"] = ["blue-int", "blue-cru", "red-int"]
+    game.gamestate["board"]["201"]["attacker"] = "red"
+    game.gamestate["board"]["201"]["defender"] = "blue"
     game.update()
 
     run(Combat.offerTechnoMagic(game, channel, "201"))
@@ -157,28 +159,32 @@ def test_techno_magic_installs_a_part_without_spending_a_disc(start_game, press)
 
     inter = press(channel, 1, "FCIDblue_technoMagic_201_interceptor")
     part_menu = {c.custom_id: c.label for c in inter.message.edited["view"].children}
-    inter = press(channel, 1, next(cid for cid in part_menu if cid.endswith("_tm_3")))
+    inter = press(channel, 1, next(cid for cid in part_menu if cid.endswith("_tm201_3")))
     choices = {c.custom_id for c in inter.message.edited["view"].children
                if c.custom_id.startswith("FCIDblue_chooseUpgrade_")}
     # no 'empty' (ship parts may not be removed) and no discovery part (no Ancient ship parts)
     assert {cid.split("_")[5] for cid in choices} == {"ioc", "elc", "nud", "hul", "nus"}
 
-    press(channel, 1, next(cid for cid in choices if cid.endswith("_hul_3_tm")))
+    press(channel, 1, next(cid for cid in choices if cid.endswith("_hul_3_tm201")))
 
     state = reload(game)
     assert state.get_player(1)["interceptor_parts"] == ["ioc", "nus", "nud", "hul"]
     assert state.get_player(1)["influence_discs"] == discs
-    assert state.gamestate["board"]["201"]["tmParts"]["blue"]["interceptor"] == ["ioc", "nus", "nud", "empty"]
+    record = state.gamestate["board"]["201"]["tmParts"]["blue"]["interceptor"]
+    assert record["base"] == ["ioc", "nus", "nud", "empty"]
+    # the record survives the save-file round trip, so tuples come back as lists
+    assert record["install"] == [3, "empty", "hul"]
 
 
 def test_a_blueprint_is_only_upgraded_once_per_combat(start_game, press):
     game, channel = start_game(factions=["tm", "eri"])
+    inter = press(channel, 1, "FCIDblue_technoMagic_201_interceptor")
+    part_menu = {c.custom_id: c.label for c in inter.message.edited["view"].children}
+    inter = press(channel, 1, next(cid for cid in part_menu if cid.endswith("_tm201_3")))
+    choices = {c.custom_id for c in inter.message.edited["view"].children
+               if c.custom_id.startswith("FCIDblue_chooseUpgrade_")}
+    press(channel, 1, next(cid for cid in choices if cid.endswith("_hul_3_tm201")))
 
-    press(channel, 1, "FCIDblue_technoMagic_201_interceptor")
-    # step past the listener's accidental-double-press window to reach the faction's own guard
-    game = reload(game)
-    game.gamestate["lastButtonTime"] -= 10
-    game.update()
     inter = press(channel, 1, "FCIDblue_technoMagic_201_interceptor")
 
     assert any("already upgraded" in str(item) for item in inter.followup.sent)
@@ -188,10 +194,10 @@ def test_techno_magic_parts_come_off_when_the_combat_ends(start_game, press, run
     game, channel = start_game(factions=["tm", "eri"])
     inter = press(channel, 1, "FCIDblue_technoMagic_201_interceptor")
     part_menu = {c.custom_id: c.label for c in inter.message.edited["view"].children}
-    inter = press(channel, 1, next(cid for cid in part_menu if cid.endswith("_tm_3")))
+    inter = press(channel, 1, next(cid for cid in part_menu if cid.endswith("_tm201_3")))
     choices = {c.custom_id for c in inter.message.edited["view"].children
                if c.custom_id.startswith("FCIDblue_chooseUpgrade_")}
-    press(channel, 1, next(cid for cid in choices if cid.endswith("_hul_3_tm")))
+    press(channel, 1, next(cid for cid in choices if cid.endswith("_hul_3_tm201")))
     assert reload(game).get_player(1)["interceptor_parts"] == ["ioc", "nus", "nud", "hul"]
 
     # the presses run on their own gamestate instances; declareAWinner sees the saved one
@@ -208,10 +214,72 @@ def test_techno_magic_keeps_the_blueprint_across_a_restart_of_the_same_combat(st
     game, channel = start_game(factions=["tm", "eri"])
     inter = press(channel, 1, "FCIDblue_technoMagic_201_interceptor")
     part_menu = {c.custom_id: c.label for c in inter.message.edited["view"].children}
-    inter = press(channel, 1, next(cid for cid in part_menu if cid.endswith("_tm_3")))
+    inter = press(channel, 1, next(cid for cid in part_menu if cid.endswith("_tm201_3")))
     choices = {c.custom_id for c in inter.message.edited["view"].children
                if c.custom_id.startswith("FCIDblue_chooseUpgrade_")}
-    press(channel, 1, next(cid for cid in choices if cid.endswith("_hul_3_tm")))
+    press(channel, 1, next(cid for cid in choices if cid.endswith("_hul_3_tm201")))
 
     # the tile still holds the record, so a re-offered combat cannot double the upgrade
-    assert reload(game).gamestate["board"]["201"]["tmParts"]["blue"]["interceptor"] == ["ioc", "nus", "nud", "empty"]
+    record = reload(game).gamestate["board"]["201"]["tmParts"]["blue"]["interceptor"]
+    assert record["base"] == ["ioc", "nus", "nud", "empty"]
+    assert record["install"] == [3, "empty", "hul"]
+
+
+def test_two_pending_combats_do_not_strip_each_others_parts(start_game, press, run):
+    """A blueprint upgraded for two simultaneous fights keeps the other fight's part
+    until that fight resolves too, and ends back at the pre-combat blueprint."""
+    game, channel = start_game(factions=["tm", "eri"])
+    game.add_tile("205", 0, "104")
+    for pos in ("201", "205"):
+        game.gamestate["board"][pos]["player_ships"] = ["blue-int", "red-int"]
+    game.update()
+
+    for pos, part in (("201", "hul"), ("205", "elc")):
+        inter = press(channel, 1, f"FCIDblue_technoMagic_{pos}_interceptor")
+        part_menu = {c.custom_id: c.label for c in inter.message.edited["view"].children}
+        inter = press(channel, 1, next(cid for cid in part_menu if cid.endswith(f"_tm{pos}_3")))
+        choices = {c.custom_id for c in inter.message.edited["view"].children
+                   if c.custom_id.startswith("FCIDblue_chooseUpgrade_")}
+        press(channel, 1, next(cid for cid in choices if cid.endswith(f"_{part}_3_tm{pos}")))
+
+    assert reload(game).get_player(1)["interceptor_parts"] == ["ioc", "nus", "nud", "elc"]
+    # each revert runs on the gamestate as it is on disk at that moment
+    game = reload(game)
+    run(Combat.revertTechnoMagic(game, FakeInteraction(channel), "201"))
+    # 205's temporary part must survive 201's combat ending
+    assert reload(game).get_player(1)["interceptor_parts"] == ["ioc", "nus", "nud", "elc"]
+    game = reload(game)
+    run(Combat.revertTechnoMagic(game, FakeInteraction(channel), "205"))
+    assert reload(game).get_player(1)["interceptor_parts"] == ["ioc", "nus", "nud", "empty"]
+    assert "tmParts" not in reload(game).gamestate["board"]["201"]
+
+
+def test_the_attacker_is_offered_the_upgrade_first(start_game, run):
+    """Where timing matters, the defender chooses last."""
+    game, channel = start_game(factions=["tm", "tm"])
+    game.gamestate["board"]["201"]["player_ships"] = ["blue-int", "red-int"]
+    game.gamestate["board"]["201"]["attacker"] = "red"
+    game.gamestate["board"]["201"]["defender"] = "blue"
+    game.update()
+
+    run(Combat.offerTechnoMagic(game, channel, "201"))
+
+    offers = [kwargs.get("view") for content, kwargs in channel.sent
+              if any("technoMagic" in getattr(b, "custom_id", "")
+                     for b in getattr(kwargs.get("view"), "children", []))]
+    assert all(b.custom_id.startswith("FCIDred_") for b in offers[0].children)
+    assert all(b.custom_id.startswith("FCIDblue_") for b in offers[1].children)
+
+
+def test_grey_advanced_squares_still_need_their_tech(start_game, press):
+    # Technology finds a Way covers the coloured Advanced squares; a grey one still needs a tech
+    game, channel = start_game(factions=["tm", "eri"])
+    place_advanced_square(game)
+    game.gamestate["board"]["205"]["neutraladv_pop"] = [0]
+    game.update()
+
+    press(channel, 1, "FCIDblue_startPopDrop")
+
+    menu = [cid for cid in buttons(channel) if cid.startswith("FCIDblue_fillPopulation_205_")]
+    assert "FCIDblue_fillPopulation_205_scienceadv_0" in menu
+    assert not [cid for cid in menu if "neutraladv" in cid]
