@@ -143,9 +143,12 @@ class ButtonListener(commands.Cog):
         pressed_at = interaction.created_at.timestamp()
         if (game.gamestate.get("lastButton") == customID
                 and pressed_at - game.gamestate.get("lastButtonTime", 0) < DOUBLE_PRESS_WINDOW):
+            # buildShip reuses the same id when you add a second ship of the same type,
+            # so it cannot be guarded by id alone.
             if not any(substring in customID for substring in ["showGame", "AtRatio", "gain5",
                                                                "showReputation", "rollDice", "magColShip",
-                                                               "rerollDie", "readyForUpkeep","draftFaction"]):
+                                                               "rerollDie", "readyForUpkeep", "draftFaction",
+                                                               "buildShip"]):
                 await interaction.followup.send(f"{interaction.user.mention}, this button ({customID}) was pressed"
                                                 " most recently, and we are attempting to prevent an accidental"
                                                 " double press. Try hitting show reputation first and then hitting this"
