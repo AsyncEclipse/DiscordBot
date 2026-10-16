@@ -2,19 +2,7 @@ import pytest
 
 from Buttons.Draft import DraftButtons
 from commands.setup_commands import SetupCommands
-from helpers.GamestateHelper import GamestateHelper
-
-
-class FakeGame:
-    def __init__(self, community_factions, community_mode):
-        self.gamestate = {
-            "community_factions": community_factions,
-            "communityMode": community_mode,
-            "bannedFactions": [],
-            "draftedFactions": [],
-        }
-
-    getShortFactionNameFromFull = GamestateHelper.getShortFactionNameFromFull
+from tests.fakes import FakeGame
 
 
 @pytest.mark.parametrize("community_mode", [False, True])

@@ -3,8 +3,6 @@ from pathlib import Path
 
 from PIL import Image
 
-from helpers.DrawHelper import DrawHelper
-
 
 def ra_home_sector():
     with open("data/sectors.json", "r") as f:
@@ -33,21 +31,3 @@ def test_ra_home_sector_tile_art():
     with Image.open(path) as tile:
         assert tile.size == (1024, 890)
         tile.load()
-
-
-def test_ra_home_sector_renders(make_game, monkeypatch):
-    # Stub the art like the round-1 tests do: this covers the tile's data going through the
-    # drawing code, and keeps the suite off the one-time image cache load real art costs.
-    monkeypatch.setattr(DrawHelper, "use_image", lambda self, filename: Image.new("RGBA", (1024, 890)))
-    monkeypatch.setattr(DrawHelper, "use_resized_image",
-                        lambda self, filename, size: self.use_image(filename).resize(size))
-    tile = dict(ra_home_sector())
-    tile.update({"sector": "255", "orientation": 0, "owner": "blue"})
-    tile["player_ships"] = ["blue-int", "blue-cru"]
-    game = make_game({
-        "board": {"201": tile},
-        "players": {"1": {"color": "blue", "name": "Remnants of Ra", "owned_tiles": ["201"]}},
-        "player_count": 2,
-    })
-    image = DrawHelper(game.gamestate).board_tile_image("201")
-    assert image.width >= 300

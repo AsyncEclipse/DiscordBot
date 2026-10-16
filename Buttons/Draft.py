@@ -249,7 +249,7 @@ class DraftButtons:
                     home = game.getLocationFromID(player["home_planet"])
                     game.addDiscTile(home)
                     await DiscoveryTileButtons.exploreDiscoveryTile(game, home, interaction, player)
-                if player is not None and player.get("name") == "Remnants of Ra":
+                if player is not None:
                     await PopulationButtons.offerAncientsCube(game, player, interaction,
                                                               game.getLocationFromID(player["home_planet"]))
 

@@ -22,7 +22,7 @@ def find_button(channel, prefix):
 
 def test_remnants_of_ra_and_atlantians_explore_then_pass(games_dir, run, press, monkeypatch):
     """Engine only: the round's flows render art internally, so it is stubbed out (the stub
-    checks the file exists). The real render is the local_debug check script."""
+    checks the file exists)."""
     random.seed(0)
 
     def load_thumbnail(self, filename):
