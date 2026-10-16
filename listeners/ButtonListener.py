@@ -248,6 +248,10 @@ class ButtonListener(commands.Cog):
         elif customID.startswith("ancientInstinctUpgrade"):
             await interaction.message.delete()
             await UpgradeButtons.startUpgrade(game, player, interaction, False, customID.split("_")[1], "dum")
+        elif customID.startswith("setupTech"):
+            # deleting the offer makes the pre-game purchase one technology
+            await interaction.message.delete()
+            await ResearchButtons.startResearch(game, player, player_helper, interaction, False)
         elif customID.startswith("placeWarpPortal"):
             await ResearchButtons.placeWarpPortal(interaction, game, player, customID)
         elif customID.startswith("payAtRatio"):
@@ -288,6 +292,8 @@ class ButtonListener(commands.Cog):
             await UpgradeButtons.chooseUpgrade(game, player, interaction, customID, player_helper)
         elif customID.startswith("undoUpgrade"):
             await UpgradeButtons.undoUpgrade(game, player, interaction, customID, player_helper)
+        elif customID.startswith("technoMagic"):
+            await Combat.technoMagicUpgrade(game, customID, player, interaction, player_helper)
         elif customID.startswith("startPopDrop"):
             await PopulationButtons.startPopDrop(game, player, interaction)
         elif customID.startswith("fillPopulation"):

@@ -43,7 +43,8 @@ class SetupCommands(commands.GroupCog, name="setup"):
                       app_commands.Choice(name="Terran Republic (Draco)", value="ter5"),
                       app_commands.Choice(name="Terran Union (Planta)", value="ter6"),
                       app_commands.Choice(name="Atlantians", value="atl"),
-                      app_commands.Choice(name="Remnants of Ra", value="ra")]
+                      app_commands.Choice(name="Remnants of Ra", value="ra"),
+                      app_commands.Choice(name="Techno-Mages", value="tm")]
     
     @app_commands.choices(ai_ship_type=ai_choices2)
     @app_commands.choices(ai_ship=ai_ship_choices)
@@ -436,6 +437,20 @@ class SetupCommands(commands.GroupCog, name="setup"):
                              " with an artifact key.",
                              "- You flip only 1 colony ship per Influence action."])
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "ra_board.png"))
+
+        message = "\n".join(["# Techno-Mages",
+                             "- Start with no technologies. You may spend part of your initial science to buy"
+                             " 1 technology before the game begins if you wish.",
+                             "- **Technology finds a Way:** Use 2 Colony Ships to place a resource cube of the"
+                             " correct type on an Advanced planet you could not normally populate.",
+                             "- **Techno-Magic:** At the start of each combat, you may temporarily Upgrade 1 on"
+                             " each ship blueprint. Place the new part upside down so that you remember to"
+                             " remove it after the battle. You may not remove ship parts and you cannot place"
+                             " Ancient ship parts. Normal power restrictions apply. Where timing matters"
+                             " (e.g. vs Spiral), the Defender chooses last.",
+                             "- **Limited Manufacturing:** You only get 1 Activation with a Build Action, and you"
+                             " may only flip 1 Colony Ship with an Influence action."])
+        await factionThread.send(message, file=drawing.get_file(boardPrefix + "tm_board.png"))
 
         message = "\n".join(["Rift Reference"])
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "Rift_Reference.png"))

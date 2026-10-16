@@ -322,6 +322,8 @@ class GamestateHelper:
             return "atlantians"
         elif fullName == "Remnants of Ra":
             return "ra"
+        elif fullName == "Techno-Mages":
+            return "tm"
         elif "Terran" in fullName:
             return fullName.lower().replace(" ", "_")
 
@@ -696,9 +698,10 @@ class GamestateHelper:
         self.gamestate["board"][pos]["unresolvedHits"] = amount
         self.update()
 
-    def add_pop_specific(self, originalType: str, popType: str, number: int, position: str, playerID):
-        if self.gamestate["players"][playerID]["colony_ships"] > 0:
-            self.gamestate["players"][playerID]["colony_ships"] -= 1
+    def add_pop_specific(self, originalType: str, popType: str, number: int, position: str, playerID,
+                         colony_ships: int = 1):
+        if self.gamestate["players"][playerID]["colony_ships"] >= colony_ships:
+            self.gamestate["players"][playerID]["colony_ships"] -= colony_ships
         else:
             return False
         if f"{originalType}_pop" in self.gamestate["board"][position]:
@@ -1227,6 +1230,8 @@ class GamestateHelper:
             return "atlantians"
         elif full_name == "Remnants of Ra":
             return "ra"
+        elif full_name == "Techno-Mages":
+            return "tm"
         elif "Terran" in full_name:
             return full_name.lower().replace(" ", "_")
 

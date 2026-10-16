@@ -27,7 +27,9 @@ class PopulationButtons:
                 if tileState.get("orbital_pop", 0) == 0 or tileState["orbital_pop"] == [0]:
                     emptyPlanets.append(f"{tile}_orbital_0")
         allPlayerTechs = player["military_tech"] + player["grid_tech"] + player["nano_tech"]
-        if "met" not in allPlayerTechs:
+        # Technology finds a Way: two colony ships reach an Advanced planet the techs do not unlock
+        finds_a_way = player.get("name") == "Techno-Mages" and player["colony_ships"] >= 2
+        if "met" not in allPlayerTechs and not finds_a_way:
             if "adl" not in allPlayerTechs:
                 emptyPlanets = [s for s in emptyPlanets if "scienceadv" not in s]
             if "adm" not in allPlayerTechs:
@@ -119,8 +121,17 @@ class PopulationButtons:
                     typeOfPop = optionsForPop[0]
             else:
                 typeOfPop = buttonID.split("_")[4]
+        allPlayerTechs = player["military_tech"] + player["grid_tech"] + player["nano_tech"]
+        # Technology finds a Way: an Advanced planet the techs do not unlock costs a second colony ship,
+        # and the cube must match that square's resource
+        tech_gap = (player.get("name") == "Techno-Mages" and "adv" in originalPop
+                    and "neutral" not in originalPop and "met" not in allPlayerTechs
+                    and not any(tech in allPlayerTechs for tech in
+                                {"scienceadv": ["adl"], "materialadv": ["adm"],
+                                 "moneyadv": ["ade"]}[originalPop]))
         if not game.add_pop_specific(originalPop, typeOfPop, int(num), tile,
-                                     game.get_player_from_color(player["color"])):
+                                     game.get_player_from_color(player["color"]),
+                                     2 if tech_gap else 1):
             await interaction.channel.send(f"Did not have enough colony ships so failed"
                                            f" to add {typeOfPop} pop to tile {tile}")
             return

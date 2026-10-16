@@ -5,6 +5,7 @@ import discord
 from Buttons.Turn import TurnButtons
 from Buttons.DiscoveryTile import DiscoveryTileButtons
 from Buttons.Population import PopulationButtons
+from Buttons.Research import ResearchButtons
 from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
 from discord.ui import View, Button
@@ -77,7 +78,8 @@ class DraftButtons:
                              ("Terran Republic (Draco)", "ter5"),
                              ("Terran Union (Planta)", "ter6")]
         communityFactions = [("Atlantians", "atl"),
-                             ("Remnants of Ra", "ra")]
+                             ("Remnants of Ra", "ra"),
+                             ("Techno-Mages", "tm")]
         communityFactionKeys = {key for faction, key in communityFactions}
         if game.gamestate.get("community_factions", False):
             factionsAvailable.extend(communityFactions)
@@ -158,6 +160,8 @@ class DraftButtons:
             return "blue"
         if faction == "ra":
             return "blue"
+        if faction == "tm":
+            return "purple"
         return "green"
 
     @staticmethod
@@ -252,6 +256,7 @@ class DraftButtons:
                 if player is not None:
                     await PopulationButtons.offerAncientsCube(game, player, interaction,
                                                               game.getLocationFromID(player["home_planet"]))
+                    await ResearchButtons.offerSetupTech(game, player, interaction)
 
         asyncio.create_task(game.showUpdate("Start of Game", interaction))
         view = TurnButtons.getStartTurnButtons(game, game.get_player(temp_player_list[0],interaction), "dummy")

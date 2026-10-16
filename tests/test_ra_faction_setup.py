@@ -13,7 +13,7 @@ def test_ra_only_appears_in_community_draft(community_mode):
     assert len(standard_buttons.children) == 16
     assert [button.label for button in standard_buttons.children].count("Remnants of Ra") == 0
     assert [button.label for button in community_buttons.children].count("Remnants of Ra") == 1
-    assert len(community_buttons.children) == 18
+    assert len(community_buttons.children) == 19
 
 
 def test_ra_faction_color_is_supported_setup_color():

@@ -1,0 +1,217 @@
+"""Techno-Mages species rules: Limited Manufacturing, Technology finds a Way, Techno-Magic.
+
+All three were read off the faction's printed card: one Build activation and one colony ship
+per Influence action, two colony ships reaching an Advanced planet the techs do not unlock,
+and one temporary Upgrade 1 per ship blueprint at the start of each combat.
+"""
+import pytest
+from PIL import Image
+
+from Buttons.Build import BuildButtons
+from helpers.CombatHelper import Combat
+from helpers.DrawHelper import DrawHelper
+from tests.fakes import FakeInteraction, buttons, player_stats, reload
+
+
+@pytest.fixture(autouse=True)
+def _no_tile_render(monkeypatch):
+    """These tests cover bookkeeping, not rendering. The flows attach tile and player images,
+    and rendering real art costs a one-time image-cache load the whole suite would pay for."""
+    monkeypatch.setattr(DrawHelper, "board_tile_image_file", lambda self, position: None)
+    monkeypatch.setattr(DrawHelper, "mergeLocationsFile", lambda self, positions: None)
+    monkeypatch.setattr(DrawHelper, "use_image", lambda self, filename: Image.new("RGBA", (1024, 890)))
+    monkeypatch.setattr(DrawHelper, "use_resized_image",
+                        lambda self, filename, size: self.use_image(filename).resize(size))
+
+
+# A ring 1 sector with an advanced science square (data/sectors.json), free in a two player start.
+ADVANCED_SECTOR = "104"
+
+
+def place_advanced_square(game):
+    game.add_tile("205", 0, ADVANCED_SECTOR)
+    game.gamestate["board"]["205"]["owner"] = "blue"
+    game.get_player(1)["owned_tiles"].append("205")
+    game.update()
+
+
+# --- Limited Manufacturing ---------------------------------------------------
+
+@pytest.mark.parametrize("faction, refused", [("tm", True), ("eri", False)])
+def test_only_one_unit_per_build_action(start_game, run, faction, refused):
+    game, channel = start_game(factions=[faction, "hyd"])
+    inter = FakeInteraction(channel)
+    run(BuildButtons.buildShip(game, game.get_player(1), inter, "buildShip_int_3_201_Cruiser"))
+
+    refused_message = "cannot build any more units" in inter.message.edited["content"]
+    assert refused_message == refused
+
+
+def test_the_build_menu_offers_one_activation(start_game, press):
+    game, channel = start_game(factions=["tm", "eri"])
+
+    press(channel, 1, "FCIDblue_startBuild")
+    press(channel, 1, "FCIDblue_buildIn_201")
+
+    assert any("up to 1 units" in content for content, _ in channel.sent)
+
+
+# --- Limited Manufacturing: the Influence action ------------------------------
+
+@pytest.mark.parametrize("faction, refreshed", [("tm", 2), ("hyd", 3)])
+def test_influence_refreshes_one_colony_ship_only_for_techno_mages(start_game, press, faction, refreshed):
+    game, channel = start_game(factions=[faction, "eri"])
+    game.get_player(1)["colony_ships"] = 1
+    game.update()
+
+    press(channel, 1, "FCIDblue_startInfluence")
+    expected_label = "Refresh 1 Colony Ship" if faction == "tm" else "Refresh 2 Colony Ships"
+    assert expected_label in buttons(channel).values()
+    press(channel, 1, "FCIDblue_refreshPopShips")
+
+    assert reload(game).get_player(1)["colony_ships"] == refreshed
+
+
+# --- Technology finds a Way ---------------------------------------------------
+
+def test_two_colony_ships_reach_an_advanced_planet_the_techs_do_not_unlock(start_game, press):
+    game, channel = start_game(factions=["tm", "eri"])
+    place_advanced_square(game)
+    ships = game.get_player(1)["colony_ships"]
+
+    press(channel, 1, "FCIDblue_startPopDrop")
+    assert "FCIDblue_fillPopulation_205_scienceadv_0" in buttons(channel)
+    press(channel, 1, "FCIDblue_fillPopulation_205_scienceadv_0")
+
+    state = reload(game)
+    assert state.gamestate["board"]["205"]["scienceadv_pop"] == [1]
+    # The cube is of the correct type: it comes off the science track.
+    assert state.get_player(1)["science_pop_cubes"] == 11
+    # Two colony ships went into it.
+    assert state.get_player(1)["colony_ships"] == ships - 2
+
+
+def test_the_advanced_planet_costs_one_ship_once_the_tech_is_researched(start_game, press):
+    game, channel = start_game(factions=["tm", "eri"])
+    place_advanced_square(game)
+    game.get_player(1)["nano_tech"].append("adl")
+    game.update()
+
+    press(channel, 1, "FCIDblue_startPopDrop")
+    press(channel, 1, "FCIDblue_fillPopulation_205_scienceadv_0")
+
+    state = reload(game)
+    assert state.gamestate["board"]["205"]["scienceadv_pop"] == [1]
+    assert state.get_player(1)["colony_ships"] == 2
+
+
+def test_other_factions_do_not_reach_the_advanced_planet(start_game, press):
+    # Remnants of Ra start with no technologies, so nothing unlocks the square for them.
+    game, channel = start_game(factions=["ra", "eri"])
+    place_advanced_square(game)
+
+    press(channel, 1, "FCIDblue_startPopDrop")
+
+    assert not [cid for cid in buttons(channel) if "scienceadv" in cid]
+
+
+def test_one_colony_ship_is_not_enough(start_game, press):
+    game, channel = start_game(factions=["tm", "eri"])
+    place_advanced_square(game)
+    game.get_player(1)["colony_ships"] = 1
+    game.update()
+
+    press(channel, 1, "FCIDblue_startPopDrop")
+
+    assert not [cid for cid in buttons(channel) if "scienceadv" in cid]
+
+
+# --- Techno-Magic -------------------------------------------------------------
+
+def test_techno_magic_offers_one_upgrade_per_ship_blueprint(start_game, run):
+    game, channel = start_game(factions=["tm", "eri"])
+    game.gamestate["board"]["201"]["player_ships"] = ["blue-int", "blue-cru", "red-int"]
+    game.update()
+
+    run(Combat.offerTechnoMagic(game, channel, "201"))
+
+    menu = buttons(channel)
+    for ship in ("interceptor", "cruiser", "dread", "starbase"):
+        assert f"FCIDblue_technoMagic_201_{ship}" in menu
+    assert not [cid for cid in menu if cid.startswith("FCIDred_")]
+
+
+def test_techno_magic_is_not_offered_to_other_factions(start_game, run):
+    game, channel = start_game(factions=["hyd", "eri"])
+    game.gamestate["board"]["201"]["player_ships"] = ["blue-int", "red-int"]
+    game.update()
+
+    run(Combat.offerTechnoMagic(game, channel, "201"))
+
+    assert not [cid for cid in buttons(channel) if "technoMagic" in cid]
+
+
+def test_techno_magic_installs_a_part_without_spending_a_disc(start_game, press):
+    game, channel = start_game(factions=["tm", "eri"])
+    discs = game.get_player(1)["influence_discs"]
+
+    inter = press(channel, 1, "FCIDblue_technoMagic_201_interceptor")
+    part_menu = {c.custom_id: c.label for c in inter.message.edited["view"].children}
+    inter = press(channel, 1, next(cid for cid in part_menu if cid.endswith("_tm_3")))
+    choices = {c.custom_id for c in inter.message.edited["view"].children
+               if c.custom_id.startswith("FCIDblue_chooseUpgrade_")}
+    # no 'empty' (ship parts may not be removed) and no discovery part (no Ancient ship parts)
+    assert {cid.split("_")[5] for cid in choices} == {"ioc", "elc", "nud", "hul", "nus"}
+
+    press(channel, 1, next(cid for cid in choices if cid.endswith("_hul_3_tm")))
+
+    state = reload(game)
+    assert state.get_player(1)["interceptor_parts"] == ["ioc", "nus", "nud", "hul"]
+    assert state.get_player(1)["influence_discs"] == discs
+    assert state.gamestate["board"]["201"]["tmParts"]["blue"]["interceptor"] == ["ioc", "nus", "nud", "empty"]
+
+
+def test_a_blueprint_is_only_upgraded_once_per_combat(start_game, press):
+    game, channel = start_game(factions=["tm", "eri"])
+
+    press(channel, 1, "FCIDblue_technoMagic_201_interceptor")
+    # step past the listener's accidental-double-press window to reach the faction's own guard
+    game = reload(game)
+    game.gamestate["lastButtonTime"] -= 10
+    game.update()
+    inter = press(channel, 1, "FCIDblue_technoMagic_201_interceptor")
+
+    assert any("already upgraded" in str(item) for item in inter.followup.sent)
+
+
+def test_techno_magic_parts_come_off_when_the_combat_ends(start_game, press, run):
+    game, channel = start_game(factions=["tm", "eri"])
+    inter = press(channel, 1, "FCIDblue_technoMagic_201_interceptor")
+    part_menu = {c.custom_id: c.label for c in inter.message.edited["view"].children}
+    inter = press(channel, 1, next(cid for cid in part_menu if cid.endswith("_tm_3")))
+    choices = {c.custom_id for c in inter.message.edited["view"].children
+               if c.custom_id.startswith("FCIDblue_chooseUpgrade_")}
+    press(channel, 1, next(cid for cid in choices if cid.endswith("_hul_3_tm")))
+    assert reload(game).get_player(1)["interceptor_parts"] == ["ioc", "nus", "nud", "hul"]
+
+    # the presses run on their own gamestate instances; declareAWinner sees the saved one
+    game = reload(game)
+    run(Combat.revertTechnoMagic(game, FakeInteraction(channel), "201"))
+
+    state = reload(game)
+    assert state.get_player(1)["interceptor_parts"] == ["ioc", "nus", "nud", "empty"]
+    assert "tmParts" not in state.gamestate["board"]["201"]
+
+
+def test_techno_magic_keeps_the_blueprint_across_a_restart_of_the_same_combat(start_game, press):
+    """startCombat runs again after every destroyed ship; the offer must not repeat."""
+    game, channel = start_game(factions=["tm", "eri"])
+    inter = press(channel, 1, "FCIDblue_technoMagic_201_interceptor")
+    part_menu = {c.custom_id: c.label for c in inter.message.edited["view"].children}
+    inter = press(channel, 1, next(cid for cid in part_menu if cid.endswith("_tm_3")))
+    choices = {c.custom_id for c in inter.message.edited["view"].children
+               if c.custom_id.startswith("FCIDblue_chooseUpgrade_")}
+    press(channel, 1, next(cid for cid in choices if cid.endswith("_hul_3_tm")))
+
+    # the tile still holds the record, so a re-offered combat cannot double the upgrade
+    assert reload(game).gamestate["board"]["201"]["tmParts"]["blue"]["interceptor"] == ["ioc", "nus", "nud", "empty"]

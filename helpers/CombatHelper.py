@@ -6,6 +6,7 @@ from discord.ui import View, Button
 from Buttons.Influence import InfluenceButtons
 from Buttons.Population import PopulationButtons
 from Buttons.Reputation import ReputationButtons
+from Buttons.Upgrade import UpgradeButtons
 from helpers.DrawHelper import DrawHelper
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
@@ -155,6 +156,7 @@ class Combat:
                               view=Combat.getCombatButtons(game, tile[1]),
                               file=await asyncio.to_thread(drawing.board_tile_image_file, tile[1])))
             await Combat.startCombat(game, thread, tile[1])
+            await Combat.offerTechnoMagic(game, thread, tile[1])
             game.addToKey("tilesToResolve", tile[0])
             for combatatant in Combat.findPlayersInTile(game, tile[1]):
                 if combatatant not in game.gamestate["peopleToCheckWith"] and combatatant != "ai":
@@ -1324,6 +1326,48 @@ class Combat:
         await Combat.promptNextSpeed(game, pos, interaction.channel, False)
 
     @staticmethod
+    async def offerTechnoMagic(game: GamestateHelper, channel, pos: str):
+        """Techno-Magic: at the start of a combat, one temporary Upgrade 1 per ship blueprint."""
+        for color in Combat.findPlayersInTile(game, pos):
+            if color == "ai":
+                continue
+            player = game.getPlayerObjectFromColor(color)
+            if player["name"] != "Techno-Mages":
+                continue
+            view = View()
+            for ship in game.getShipsWithParts(player):
+                view.add_item(Button(label=ship.capitalize(), style=discord.ButtonStyle.blurple,
+                                     custom_id=f"FCID{color}_technoMagic_{pos}_{ship}"))
+            if len(view.children):
+                await channel.send(f"{player['player_name']}, Techno-Magic lets you temporarily Upgrade 1 on each"
+                                   " ship blueprint for this combat. The new parts are removed when the battle"
+                                   " ends. You may not remove ship parts or place Ancient ship parts.", view=view)
+
+    @staticmethod
+    async def technoMagicUpgrade(game: GamestateHelper, customID: str, player, interaction: discord.Interaction,
+                                 player_helper: PlayerHelper):
+        pos, ship = customID.split("_")[1:3]
+        remembered = game.gamestate["board"][pos].setdefault("tmParts", {}).setdefault(player["color"], {})
+        if ship in remembered:
+            await interaction.followup.send("You have already upgraded that blueprint this combat.", ephemeral=True)
+            return
+        remembered[ship] = list(player[f"{ship}_parts"])
+        game.update()
+        await UpgradeButtons.upgradeShip(game, player, interaction, f"upgradeShip_1_{ship}_tm", player_helper)
+
+    @staticmethod
+    async def revertTechnoMagic(game: GamestateHelper, interaction: discord.Interaction, pos: str):
+        """The temporary parts installed at the start of this combat come off again."""
+        for color, remembered in game.gamestate["board"][pos].pop("tmParts", {}).items():
+            player = game.getPlayerObjectFromColor(color)
+            player_helper = PlayerHelper(color, player)
+            for ship, parts in remembered.items():
+                player[f"{ship}_parts"] = parts
+            game.update_player(player_helper)
+            await interaction.channel.send(f"Techno-Magic wears off: the temporary ship parts are removed"
+                                           f" from {player['player_name']}'s blueprints.")
+
+    @staticmethod
     async def declareAWinner(game: GamestateHelper, interaction: discord.Interaction, pos: str):
         game.updateSaveFile()
 
@@ -1345,6 +1389,7 @@ class Combat:
             players = Combat.findPlayersInTile(game, pos)
         countDraw = 1
         game.removeFromKey("tilesToResolve", int(game.gamestate["board"][pos]["sector"]))
+        await Combat.revertTechnoMagic(game, interaction, pos)
         for playerColor in players:
             if playerColor == "ai":
                 continue

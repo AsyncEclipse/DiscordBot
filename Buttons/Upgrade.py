@@ -92,12 +92,16 @@ class UpgradeButtons:
         oldPart = customID.split("_")[3]
         discTileUpgrade = customID.split("_")[4]
         indexOfOldPart = customID.split("_")[5]
-        if discTileUpgrade not in ("dummy", "free"):
+        if discTileUpgrade not in ("dummy", "free", "tm"):
             await UpgradeButtons.chooseUpgrade(game, player, interaction,
                                                customID + "_" + discTileUpgrade, player_helper)
             return
 
         available_parts = player_helper.getAvailableShipParts()
+        if discTileUpgrade == "tm":
+            # Techno-Magic: no removing ship parts, and no Ancient ship parts
+            available_parts = {part for part in available_parts
+                               if part != "empty" and part not in DISCOVERY_PART_IDS}
         drawing = DrawHelper(game.gamestate)
         with open("data/parts.json", "r") as f:
             part_stats = json.load(f)
@@ -113,9 +117,10 @@ class UpgradeButtons:
                                  custom_id=(f"FCID{player['color']}_chooseUpgrade_{actions}_{ship}_"
                                             f"{oldPart}_{i}_{indexOfOldPart}_{discTileUpgrade}"),
                                  emoji=Emoji.getEmojiByName(partName)))
+        removal_note = "" if discTileUpgrade == "tm" else " Remove as a free action by selecting 'Empty'."
         await UpgradeButtons.showMenu(interaction, f"{interaction.user.mention}, replace "
-                                      f"{part_stats[oldPart]['name']} on your {ship} with which part? "
-                                      "Remove as a free action by selecting 'Empty'.", view)
+                                      f"{part_stats[oldPart]['name']} on your {ship} with which part?"
+                                      f"{removal_note}", view)
         if customID.endswith("_partsShown"):
             return
         await interaction.followup.send("Available parts",

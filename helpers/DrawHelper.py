@@ -88,6 +88,8 @@ class DrawHelper:
             return "atlantians"
         elif full_name == "Remnants of Ra":
             return "ra"
+        elif full_name == "Techno-Mages":
+            return "tm"
         elif "Terran" in full_name:
             return full_name.lower().replace(" ", "_")
 
@@ -603,7 +605,7 @@ class DrawHelper:
         return context
 
     def faction_portrait(self, faction):
-        if faction == "atlantians" or faction == "ra":
+        if faction == "atlantians" or faction == "ra" or faction == "tm":
             return self.use_image(f"images/resources/components/layouts/factionImages/{faction}_image.png")
         return self.use_image(f"images/resources/components/factions/{faction}_board.png").crop((49, 252, 154, 357))
 

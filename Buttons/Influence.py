@@ -139,7 +139,7 @@ class InfluenceButtons:
         if len(InfluenceButtons.getTilesToInfluence(game, p1)) > 0:
             view.add_item(Button(label="Add  Influence", style=discord.ButtonStyle.green,
                                  custom_id=f"FCID{p1['color']}_addInfluenceStart"))
-        if "Magellan" in p1["name"] or p1["name"] == "Remnants of Ra":
+        if "Magellan" in p1["name"] or p1["name"] in ("Remnants of Ra", "Techno-Mages"):
             view.add_item(Button(label="Refresh 1 Colony Ship", style=discord.ButtonStyle.blurple,
                                  custom_id=f"FCID{p1['color']}_refreshPopShips"))
         else:
@@ -186,7 +186,7 @@ class InfluenceButtons:
 
     @staticmethod
     async def refreshPopShips(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
-        if "Magellan" in player["name"] or player["name"] == "Remnants of Ra":
+        if "Magellan" in player["name"] or player["name"] in ("Remnants of Ra", "Techno-Mages"):
             numShips = game.refresh_one_colony_ship(game.get_player_from_color(player["color"]))
         else:
             numShips = game.refresh_two_colony_ships(game.get_player_from_color(player["color"]))
