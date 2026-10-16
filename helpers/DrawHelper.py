@@ -744,7 +744,9 @@ class DrawHelper:
         return context
 
     def display_remaining_tiles(self):
-        context = Image.new("RGBA", (1900, 500), (0, 0, 0, 255))
+        # Tall enough for the turn order (290px) pasted under the minor species block at y 250;
+        # at 500 it clipped its "Next Round" row, which the player areas below then covered.
+        context = Image.new("RGBA", (1900, 560), (0, 0, 0, 255))
 
         filepath = "images/resources/hexes/sector3backblank.png"
         tile_image = self.use_resized_image(filepath, (172, 150))
