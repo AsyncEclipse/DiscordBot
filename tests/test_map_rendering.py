@@ -26,3 +26,18 @@ def test_show_game_leaves_a_gap_between_the_map_and_the_round_order(start_game, 
     map_bottom = max(row for row in range(strip_top) if has_content(row, 900, width))
 
     assert strip_top - map_bottom >= 30
+
+
+def test_the_info_strip_has_room_for_the_turn_order(start_game, monkeypatch):
+    # The turn order is pasted under the minor species block inside the strip; the strip has to
+    # be tall enough or its "Next Round" row is clipped by the canvas and the player areas below.
+    monkeypatch.setattr(DrawHelper, "use_image",
+                        lambda self, filename: Image.new("RGBA", (1024, 890), (255, 255, 255, 255)))
+    game, _channel = start_game()
+    game.gamestate["minor_species"] = ["Point Per Ambassador"]
+    drawing = DrawHelper(game.gamestate)
+
+    strip = drawing.display_remaining_tiles()
+    turn_order = drawing.display_turn_order()
+
+    assert strip.height >= 250 + turn_order.height
