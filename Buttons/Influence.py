@@ -179,6 +179,9 @@ class InfluenceButtons:
             await interaction.channel.send(f"Someone else controls {tileLoc}. "
                                            "Remove their control via valid means first.")
             return
+        if game.gamestate["board"][tileLoc].get("type", "") == "nebula":
+            await interaction.channel.send("Nebula Sectors may never contain Influence Discs.")
+            return
         game.add_control(p1["color"], tileLoc)
         await interaction.channel.send(f"{p1['player_name']} acquired control of {tileLoc}.")
         await interaction.message.delete()

@@ -17,6 +17,11 @@ class DiscoveryTileButtons:
             await interaction.followup.send("No discovery tile in tile " + tile)
             return
         disc = game.getNextDiscTile(tile)
+        if game.gamestate["board"][tile].get("type", "") == "nebula" and disc in ("orb", "mon"):
+            # Ancient Orbital and Monolith cannot be placed in Nebula Sectors: bury them and redraw
+            while disc in ("orb", "mon") and any(d not in ("orb", "mon") for d in game.gamestate["discTiles"]):
+                game.gamestate["discTiles"].insert(0, disc)
+                disc = game.gamestate["discTiles"].pop()
         with open("data/discoverytiles.json") as f:
             discTile_data = json.load(f)
         discName = discTile_data[disc]["name"]

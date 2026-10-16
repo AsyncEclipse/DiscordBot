@@ -187,9 +187,15 @@ class ExploreButtons:
                     await DiscoveryTileButtons.exploreDiscoveryTile(game, msg[1], interaction, player)
                 
         else:
-            ancients = game.gamestate["board"][msg[1]]["ancient"]
-            await interaction.channel.send(f"There are {ancients} ancients in this tile, "
-                                           "so you will not be able to claim it until you fight and destroy them.")
+            if game.gamestate["board"][msg[1]].get("type", "") == "nebula":
+                await interaction.channel.send("This is a Nebula Sector: it has no Influence Space, so no Influence"
+                                               " Discs may ever be placed here. Discovery Tiles here can only be"
+                                               " claimed by having a Ship in the sector at the end of the"
+                                               " Combat Phase.")
+            else:
+                ancients = game.gamestate["board"][msg[1]]["ancient"]
+                await interaction.channel.send(f"There are {ancients} ancients in this tile, "
+                                               "so you will not be able to claim it until you fight and destroy them.")
 
         view2.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                               custom_id=f"FCID{player['color']}_finishAction"))

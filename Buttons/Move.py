@@ -242,6 +242,10 @@ class MoveButtons:
                                                                                               bhtype, "damage"))
             if game.gamestate["board"][destination]["disctile"] > 0:
                 await DiscoveryTileButtons.exploreDiscoveryTile(game, destination, interaction, player)
+        elif all([game.gamestate["board"][destination].get("type", "") == "nebula",
+                  game.gamestate["board"][destination]["disctile"] > 0]):
+            # Nebula discovery tiles are claimed by ship presence, not by influence
+            await DiscoveryTileButtons.exploreDiscoveryTile(game, destination, interaction, player)
 
         if moveCount == 1:
             player_helper.spend_influence_on_action("move")
