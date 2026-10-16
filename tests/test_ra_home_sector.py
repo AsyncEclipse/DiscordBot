@@ -30,4 +30,7 @@ def test_ra_home_sector_tile_art():
     assert Path(path).is_file(), path
     with Image.open(path) as tile:
         assert tile.size == (1024, 890)
+        # Corners cut like every other sector tile, or the tile paints its background
+        # over the sectors around it wherever the two are composited.
+        assert tile.convert("RGBA").getpixel((0, 0))[3] == 0
         tile.load()
