@@ -15,6 +15,9 @@ class InfluenceButtons:
     @staticmethod
     def areTwoTilesAdjacent(game: GamestateHelper, tile1, tile2, configs, wormholeGen: bool):
         def is_adjacent(tile_a, tile_b):
+            if tile_a not in configs or tile_b not in configs:
+                # nebula subsectors carry pre-validated stored adjacency
+                return tile_a in game.gamestate["board"] and tile_b in game.gamestate["board"]
             for index, adjTile in enumerate(configs.get(tile_a)[0].split(",")):
                 if tile_a in game.gamestate["board"] and tile_b in game.gamestate["board"] and adjTile == tile_b:
                     tile_orientation_index = (index + (int(game.gamestate["board"][tile_a]["orientation"]) // 60)) % 6
@@ -59,7 +62,8 @@ class InfluenceButtons:
         tilesToInfluence = []
         playerTiles = InfluenceButtons.getListOfTilesPlayerIsInForInfluence(game, player)
         for tile in playerTiles:
-            for adjTile in configs.get(tile)[0].split(","):
+            stored = tile_map[tile].get("adjacent")
+            for adjTile in (stored if stored is not None else configs.get(tile)[0].split(",")):
                 if adjTile not in tilesViewed and InfluenceButtons.areTwoTilesAdjacent(game, tile, adjTile,
                                                                                        configs, wormHoleGen):
                     tilesViewed.append(adjTile)
@@ -68,6 +72,8 @@ class InfluenceButtons:
                     if "bh" in game.gamestate["board"][adjTile].get("type", ""):
                         continue
                     if "exploded" in game.gamestate["board"][adjTile].get("type", ""):
+                        continue
+                    if "nebula" in game.gamestate["board"][adjTile].get("type", ""):
                         continue
                     if "player_ships" not in game.gamestate["board"][adjTile]:
                         continue

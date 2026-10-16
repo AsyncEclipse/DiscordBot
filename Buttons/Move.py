@@ -112,9 +112,21 @@ class MoveButtons:
             if not ExploreButtons.doesPlayerHaveUnpinnedShips(player, player_ships, game, pos):
                 return
 
-            for adjTile in configs.get(pos)[0].split(","):
+            tile_entry = tile_map[pos]
+            internal = tile_entry.get("nebula_internal", [])
+            candidates = tile_entry.get("adjacent")
+            dirs = tile_entry.get("adjacent_dirs")
+            if candidates is None:
+                candidates = configs.get(pos)[0].split(",")
+            for index, adjTile in enumerate(candidates):
+                if adjTile in internal:
+                    # crossing an internal Nebula wormhole costs two move activations
+                    recursive_search(adjTile, distance + 2, visited, jumpDriveAvailable)
+                    continue
                 if adjTile in tile_map and InfluenceButtons.areTwoTilesAdjacent(game, pos, adjTile,
                                                                                 configs, wormHoleGen):
+                    if "nebula_internal" in tile_map[adjTile]:
+                        adjTile = game.nebula_subsector_for_edge(adjTile, dirs[index] if dirs else index, configs)
                     recursive_search(adjTile, distance + 1, visited, jumpDriveAvailable)
                 elif jumpDriveAvailable and "wormholes" in tile_map.get(adjTile, []):
                     recursive_search(adjTile, distance + 1, visited, False)

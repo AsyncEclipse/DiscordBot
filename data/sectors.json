@@ -3847,7 +3847,7 @@
     "owner": 0,
     "name": "NGC 5189",
     "ring": 2,
-    "disctile": 2,
+    "disctile": 0,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
@@ -3873,15 +3873,30 @@
     "neutraladv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [],
-    "cru_snap": [],
-    "drd_snap": [],
-    "sb_snap": [],
+    "int_snap": [
+      390,
+      130
+    ],
+    "cru_snap": [
+      640,
+      650
+    ],
+    "drd_snap": [
+      440,
+      740
+    ],
+    "sb_snap": [
+      240,
+      560
+    ],
     "mon_snap": [
       513,
       450
     ],
-    "orb_snap": [],
+    "orb_snap": [
+      330,
+      280
+    ],
     "ai_snap": [
       630,
       444
@@ -3900,6 +3915,22 @@
     "guardian": 0,
     "gcds": 0,
     "warp": 0,
+    "subsectors": {
+        "b": {
+            "wormholes": [
+                0,
+                5
+            ],
+            "disctile": 1
+        },
+        "c": {
+            "wormholes": [
+                3,
+                4
+            ],
+            "disctile": 1
+        }
+    },
     "type": "nebula"
   },
   "301": {
@@ -5647,7 +5678,7 @@
     "owner": 0,
     "name": "NGC 1952",
     "ring": 3,
-    "disctile": 2,
+    "disctile": 0,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
@@ -5673,15 +5704,30 @@
     "neutraladv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [],
-    "cru_snap": [],
-    "drd_snap": [],
-    "sb_snap": [],
+    "int_snap": [
+      390,
+      130
+    ],
+    "cru_snap": [
+      640,
+      650
+    ],
+    "drd_snap": [
+      440,
+      740
+    ],
+    "sb_snap": [
+      240,
+      560
+    ],
     "mon_snap": [
       513,
       450
     ],
-    "orb_snap": [],
+    "orb_snap": [
+      330,
+      280
+    ],
     "ai_snap": [
       628,
       446
@@ -5700,6 +5746,22 @@
     "guardian": 0,
     "gcds": 0,
     "warp": 0,
+    "subsectors": {
+        "b": {
+            "wormholes": [
+                0,
+                5
+            ],
+            "disctile": 1
+        },
+        "c": {
+            "wormholes": [
+                3,
+                4
+            ],
+            "disctile": 1
+        }
+    },
     "type": "nebula"
   },
   "396": {
