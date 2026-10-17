@@ -47,23 +47,11 @@ def test_nebula_placement_expands_into_subsectors(make_game):
     # ring-2 adjacency of position 207 is [104, 206, 309, 310, 311, 208]:
     # the ancient wedge owns edges 1,2; the discovery wedges 0,5 and 3,4
     assert board["207"]["adjacent"] == ["206", "309", "207b", "207c"]
-    assert board["207b"]["adjacent"] == ["104", "208", "207c", "207"]
-    assert board["207c"]["adjacent"] == ["310", "311", "207b", "207"]
+    assert board["207b"]["adjacent"] == ["104", "208", "207", "207c"]
+    assert board["207c"]["adjacent"] == ["310", "311", "207", "207b"]
 
 
-def test_nebula_edge_resolution_rotates_with_orientation(make_game):
-    game = make_game(_bare_gamestate())
-    game.add_tile("207", 120, "295")
-    board = game.gamestate["board"]
-    assert board["207"]["adjacent"][:2] == ["208", "104"]
-    assert board["207b"]["adjacent"][:2] == ["311", "310"]
-    assert board["207c"]["adjacent"][:2] == ["206", "309"]
-    assert game.nebula_subsector_for_edge("207", 0, None) == "207c"
-    assert game.nebula_subsector_for_edge("207", 1, None) == "207b"
-    assert game.nebula_subsector_for_edge("207", 3, None) == "207"
-
-
-def test_nebula_internal_move_needs_two_activations(make_game, monkeypatch):
+def test_nebula_internal_move_costs_one_activation(make_game, monkeypatch):
     monkeypatch.setattr(PlayerHelper, "getTechs", lambda self: [])
     game = make_game(_bare_gamestate())
     game.add_tile("207", 0, "295")
@@ -73,25 +61,42 @@ def test_nebula_internal_move_needs_two_activations(make_game, monkeypatch):
     game.gamestate["board"]["207b"]["player_ships"] = ["blue-int"]
     game.update()
     player = {"color": "blue", "name": "Blue", "player_name": "Blue"}
-    tiles1 = MoveButtons.getTilesInRange(game, player, "207b", 1, 0)
-    assert tiles1 == {"207b", "104", "208"}
-    tiles2 = MoveButtons.getTilesInRange(game, player, "207b", 2, 0)
-    assert {"207c", "207"} <= tiles2
+    tiles = MoveButtons.getTilesInRange(game, player, "207b", 1, 0)
+    assert {"207c", "207"} <= tiles
+    assert "206" not in tiles  # 206 borders the Ancient Subsector, not 207b
 
 
-def test_move_into_nebula_lands_in_edge_owning_subsector(make_game, monkeypatch):
+def _neighbour_game(make_game, monkeypatch, rot):
     monkeypatch.setattr(PlayerHelper, "getTechs", lambda self: [])
     game = make_game(_bare_gamestate())
     game.add_tile("207", 0, "295")
-    game.add_tile("104", 0, "101")
-    # tile 101 spawns an Ancient that would pin the ship; the test only needs the map topology
-    game.gamestate["board"]["104"]["player_ships"] = []
+    # sector 201 has wormholes [1, 3, 5]: at 0/120/240 its edge facing 207 is a wall
+    game.add_tile("208", rot, "201")
     game.gamestate["players"] = {"1": {"color": "blue", "name": "Blue", "player_name": "Blue"}}
     game.update()
-    # 104 sits south of 207, so the shared edge belongs to the SW discovery wedge
-    tiles = MoveButtons.getTilesInRange(game, {"color": "blue", "name": "Blue", "player_name": "Blue"}, "104", 1, 0)
-    assert "207c" in tiles
-    assert "207" not in tiles and "207b" not in tiles
+    return game, {"color": "blue", "name": "Blue", "player_name": "Blue"}
+
+
+def test_move_into_nebula_lands_in_edge_owning_subsector(make_game, monkeypatch):
+    game, player = _neighbour_game(make_game, monkeypatch, 60)
+    game.gamestate["board"]["208"]["player_ships"] = ["blue-int"]
+    game.update()
+    # 208 is on 207's NW edge, which belongs to Subsector b
+    assert MoveButtons.getTilesInRange(game, player, "208", 1, 0) & {"207", "207b", "207c"} == {"207b"}
+    game.gamestate["board"]["207b"]["player_ships"] = ["blue-int"]
+    game.update()
+    assert "208" in MoveButtons.getTilesInRange(game, player, "207b", 1, 0)
+
+
+def test_nebula_walls_need_jump_drive(make_game, monkeypatch):
+    game, player = _neighbour_game(make_game, monkeypatch, 0)
+    game.gamestate["board"]["208"]["player_ships"] = ["blue-int"]
+    game.gamestate["board"]["207b"]["player_ships"] = ["blue-int"]
+    game.update()
+    assert "208" not in MoveButtons.getTilesInRange(game, player, "207b", 1, 0)
+    assert "208" in MoveButtons.getTilesInRange(game, player, "207b", 1, 1)
+    assert "207b" not in MoveButtons.getTilesInRange(game, player, "208", 1, 0)
+    assert MoveButtons.getTilesInRange(game, player, "208", 1, 1) & {"207", "207b", "207c"} == {"207b"}
 
 
 def test_influence_refused_in_nebula(make_game, run):

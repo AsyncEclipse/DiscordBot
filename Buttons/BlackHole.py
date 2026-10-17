@@ -71,11 +71,15 @@ class BlackHoleButtons:
                             if adjTile not in game.gamestate["board"] or "back" in game.gamestate["board"][adjTile]["sector"]:
                                 target = tile
                                 if "nebula_internal" in game.gamestate["board"][tile]:
-                                    target = game.nebula_subsector_for_edge(tile, index, configs)
+                                    target = game.nebula_subsector_for_edge(tile, index)
+                                    # each Nebula Subsector with an open border is its own option
+                                    if any(item.custom_id.endswith(f"_{target}_{damage}") for item in view.children):
+                                        continue
                                 view.add_item(Button(label=f"Add ship to Tile {target}", style=discord.ButtonStyle.gray,
                                                      custom_id=f"FCID{player['color']}_blackHoleFinish"
                                                      f"_{ship}_{target}_{damage}"))
-                                break
+                                if "nebula_internal" not in game.gamestate["board"][tile]:
+                                    break
         else:
             for tile in game.gamestate["board"]:
                 if "nebula_parent" in game.gamestate["board"][tile]:

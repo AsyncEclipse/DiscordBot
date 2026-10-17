@@ -15,9 +15,14 @@ class InfluenceButtons:
     @staticmethod
     def areTwoTilesAdjacent(game: GamestateHelper, tile1, tile2, configs, wormholeGen: bool):
         def is_adjacent(tile_a, tile_b):
-            if tile_a not in configs or tile_b not in configs:
-                # nebula subsectors carry pre-validated stored adjacency
-                return tile_a in game.gamestate["board"] and tile_b in game.gamestate["board"]
+            board = game.gamestate["board"]
+            if "adjacent" in board.get(tile_a, {}):
+                # Nebula Subsector: every edge is a wormhole
+                return tile_b in board[tile_a]["adjacent"]
+            if "adjacent" in board.get(tile_b, {}):
+                if tile_a not in board[tile_b]["adjacent"]:
+                    return False
+                tile_b = board[tile_b].get("nebula_parent", tile_b)
             for index, adjTile in enumerate(configs.get(tile_a)[0].split(",")):
                 if tile_a in game.gamestate["board"] and tile_b in game.gamestate["board"] and adjTile == tile_b:
                     tile_orientation_index = (index + (int(game.gamestate["board"][tile_a]["orientation"]) // 60)) % 6

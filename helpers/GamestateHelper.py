@@ -1,4 +1,5 @@
 import asyncio
+import copy
 import json
 import time
 import discord
@@ -13,10 +14,9 @@ import random
 from discord.ui import View, Button
 
 # Nebula Sectors (295/395) are one hex split into three Subsectors. Edges are
-# indexed 0=N, 1=NE, 2=SE, 3=S, 4=SW, 5=NW in base orientation; the parent
-# board position holds the ancient wedge, subsectors b/c the discovery wedges.
+# indexed 0=N, 1=NE, 2=SE, 3=S, 4=SW, 5=NW; the parent board position holds
+# the Ancient subsector, subsectors b/c the discovery ones.
 NEBULA_WEDGES = {"": (1, 2), "b": (0, 5), "c": (3, 4)}
-NEBULA_WEDGE_NAMES = {"": "e", "b": "nw", "c": "sw"}
 
 
 class GamestateHelper:
@@ -397,36 +397,21 @@ class GamestateHelper:
                 if adjTile not in self.gamestate["board"] and len(self.gamestate["tile_deck_300"]) + discard > 0 and adjTile in configs:
                     self.add_tile(adjTile, 0, "sector3back")
         if position is not None and tile.get("type") == "nebula":
-            rot = int(orientation) // 60
             neighbors = configs.get(position)[0].split(",")
-            suffixes = list(tile.get("subsectors", {}))
-            for suffix, wedge in tile.get("subsectors", {}).items():
-                sub = {k: (v[:] if isinstance(v, list) else v) for k, v in tile.items()}
-                sub["disctile"] = wedge.get("disctile", 0)
-                sub["ancient"] = sub["guardian"] = sub["gcds"] = 0
-                sub["player_ships"] = []
-                sub["nebula_parent"] = position
-                sub["nebula_wedge"] = NEBULA_WEDGE_NAMES[suffix]
-                internal = [position + s for s in suffixes if s != suffix] + [position]
-                external_dirs = [(w - rot) % 6 for w in NEBULA_WEDGES[suffix]]
-                sub["adjacent"] = [neighbors[d] for d in external_dirs] + internal
-                sub["adjacent_dirs"] = external_dirs + [None] * len(internal)
-                sub["nebula_internal"] = internal
+            suffixes = [""] + list(tile["subsectors"])
+            for suffix in suffixes:
+                sub = tile if suffix == "" else {**copy.deepcopy(tile), **tile["subsectors"][suffix],
+                                                 "ancient": 0, "player_ships": [], "nebula_parent": position}
+                # every Nebula edge is a wormhole, and siblings connect through internal wormholes
+                sub["adjacent"] = ([neighbors[d] for d in NEBULA_WEDGES[suffix]]
+                                   + [position + s for s in suffixes if s != suffix])
+                sub["nebula_internal"] = [position + s for s in suffixes if s != suffix]
                 self.gamestate["board"][position + suffix] = sub
-            tile["nebula_wedge"] = "e"
-            tile["adjacent"] = [neighbors[(w - rot) % 6] for w in NEBULA_WEDGES[""]] + [position + s for s in suffixes]
-            tile["adjacent_dirs"] = [(w - rot) % 6 for w in NEBULA_WEDGES[""]] + [None] * len(suffixes)
-            tile["nebula_internal"] = [position + s for s in suffixes]
         self.update()
 
-    def nebula_subsector_for_edge(self, parent, edge, configs):
-        # edge: index of parent in the source tile's adjacency list (absolute map direction)
-        rot = int(self.gamestate["board"][parent]["orientation"]) // 60
-        base = (edge - rot) % 6
-        for suffix, wedge in NEBULA_WEDGES.items():
-            if base in wedge:
-                return parent + suffix
-        return parent
+    def nebula_subsector_for_edge(self, parent, edge):
+        # edge: direction from the Nebula hex to its neighbour (Nebulas are always placed unrotated)
+        return parent + next(s for s, wedge in NEBULA_WEDGES.items() if edge in wedge)
 
     def add_control(self, color, position):
         self.gamestate["board"][position]["owner"] = color

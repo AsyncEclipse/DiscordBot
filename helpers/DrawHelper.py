@@ -23,26 +23,6 @@ def load_properties(path):
     return _properties_cache[path]
 
 
-def clamp_to_wedge(coords, wedge):
-    # Pull a hex-space point into its Nebula subsector wedge (hex center (512, 443), y axis down).
-    cx, cy = 512, 443
-    lo, hi = {"e": (-60, 60), "nw": (60, 180), "sw": (180, 300)}[wedge]
-    dx, dy = coords[0] - cx, coords[1] - cy
-    if dx == 0 and dy == 0:
-        return [coords[0], coords[1]]
-    ang = math.degrees(math.atan2(-dy, dx)) % 360
-    rel = (ang - lo) % 360
-    span = (hi - lo) % 360
-    r = math.hypot(dx, dy)
-    if rel > span:
-        rel = span if rel - span <= 360 - rel else 0
-        # keep clamped ships off the dividing lines between subsectors
-        rel = span - 25 if rel == span else 25
-        r *= 0.85
-    ang = (lo + rel) % 360
-    return [int(cx + r * math.cos(math.radians(ang))), int(cy - r * math.sin(math.radians(ang)))]
-
-
 _resized_cache = {}
 
 
@@ -173,7 +153,7 @@ class DrawHelper:
             for string in wormholeStringsViewed:
                 if contains_all_chars(string, wormholeString):
                     alreadyFound = True
-            if alreadyFound and tile.get("type") != "nebula":
+            if alreadyFound:
                 continue
             wormholeStringsViewed.append(wormholeString)
             rotationWorks = False
@@ -414,8 +394,6 @@ class DrawHelper:
                     ship_image = self.use_image(filepathShip)
 
                     coords = ship_tile[f"{ship_type}_snap"]
-                    if "nebula_wedge" in ship_tile:
-                        coords = clamp_to_wedge(coords, ship_tile["nebula_wedge"])
 
                     if ship_type not in counts:
                         counts[ship_type] = 0
@@ -441,8 +419,6 @@ class DrawHelper:
                         ship_type = key.split("-")[1]
 
                     coords = ship_tile[ship_type.replace("adv", "") + "_snap"]
-                    if "nebula_wedge" in ship_tile:
-                        coords = clamp_to_wedge(coords, ship_tile["nebula_wedge"])
                     if "damage_tracker" in self.gamestate["board"][ship_pos]:
                         if key in self.gamestate["board"][ship_pos]["damage_tracker"]:
                             damage = self.gamestate["board"][ship_pos]["damage_tracker"][key]
@@ -458,13 +434,11 @@ class DrawHelper:
             paste_ships(tile, position)
             if "nebula_internal" in tile:
                 for sib in tile["nebula_internal"]:
-                    sib_tile = self.gamestate["board"].get(sib)
-                    if sib_tile is None:
-                        continue
+                    sib_tile = self.gamestate["board"][sib]
                     if sib_tile.get("disctile", 0) > 0:
                         discTile = self.use_image("images/resources/components/discovery_tiles/discovery_2ptback.png")
                         discTile = discTile.rotate(315, expand=True)
-                        diamond = {"nw": (390, 210), "sw": (390, 660)}[sib_tile["nebula_wedge"]]
+                        diamond = sib_tile["disc_snap"]
                         tile_image.paste(discTile, (int(diamond[0] - discTile.width / 2),
                                                     int(diamond[1] - discTile.height / 2)), mask=discTile)
                     if len(sib_tile.get("player_ships", [])) > 0:
