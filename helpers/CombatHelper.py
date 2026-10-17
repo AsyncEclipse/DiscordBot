@@ -105,7 +105,7 @@ class Combat:
             else:
                 if len(playersInTile) != 1:
                     continue
-                if "owner" in tile_map[tile]:
+                if "owner" in tile_map[tile] and tile_map[tile].get("type") != "nebula":
                     if tile_map[tile]["owner"] == 0 and playersInTile[0] != "ai":
                         tiles.append((int(tile_map[tile]["sector"]), tile))
         return sorted(tiles, key=lambda x: x[0], reverse=True)
@@ -1343,7 +1343,10 @@ class Combat:
             players = game.gamestate["board"][pos]["combatants"]
         else:
             players = Combat.findPlayersInTile(game, pos)
-        countDraw = 1
+        system = int(game.gamestate["board"][pos]["sector"])
+        # Nebula Subsectors share a sector number, so number draws after any already queued for it
+        countDraw = 1 + sum(q[0] == system for q in game.gamestate.get("queuedDraws", [])
+                            + game.gamestate.get("queuedQuestions", []))
         game.removeFromKey("tilesToResolve", int(game.gamestate["board"][pos]["sector"]))
         for playerColor in players:
             if playerColor == "ai":
@@ -1373,7 +1376,9 @@ class Combat:
         winner = survivors[0] if survivors else None
         owner = game.gamestate["board"][pos]["owner"]
 
-        if winner is not None and winner != "ai" and owner != winner:
+        # Nebula Sectors take no influence; their Discovery Tiles are offered at upkeep
+        nebula = game.gamestate["board"][pos].get("type") == "nebula"
+        if winner is not None and winner != "ai" and owner != winner and not nebula:
             player = game.getPlayerObjectFromColor(winner)
             playerName = player["player_name"]
             if owner == 0:

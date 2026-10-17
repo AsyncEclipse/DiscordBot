@@ -13,11 +13,19 @@ FACTIONS = json.load(open("data/factions.json"))
 
 
 class FakeMessage:
+    def __init__(self, channel=None):
+        self.channel = channel
+
     async def delete(self):
         pass
 
     async def edit(self, **kwargs):
         pass
+
+    async def create_thread(self, name):
+        thread = FakeChannel(name)
+        self.channel.threads.append(thread)
+        return thread
 
 
 class FakeChannel:
@@ -28,7 +36,10 @@ class FakeChannel:
 
     async def send(self, content=None, **kwargs):
         self.sent.append((content, kwargs))
-        return FakeMessage()
+        return FakeMessage(self)
+
+    async def edit(self, **kwargs):
+        pass
 
 
 class FakeUser:

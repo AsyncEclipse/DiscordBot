@@ -251,6 +251,18 @@ class TurnButtons:
                 msg += p2["player_name"]+"\n"
             await interaction.channel.send(msg)
             return
+        for pos, tile in game.gamestate["board"].items():
+            # end of the Combat Phase: a lone ship owner claims a Nebula Discovery Tile
+            if tile.get("type") != "nebula" or tile.get("disctile", 0) == 0:
+                continue
+            survivors = Combat.findPlayersInTile(game, pos)
+            if len(survivors) == 1:
+                view = View()
+                view.add_item(Button(label="Explore Discovery Tile", style=discord.ButtonStyle.green,
+                                     custom_id=f"FCID{survivors[0]}_exploreDiscoveryTile_{pos}_deleteMsg"))
+                player_name = game.getPlayerObjectFromColor(survivors[0])["player_name"]
+                await interaction.channel.send(f"{player_name}, you may explore the discovery tile in {pos}.",
+                                               view=view)
         for player in game.gamestate["players"]:
             if game.gamestate["players"][player].get("eliminated"):
                 continue
