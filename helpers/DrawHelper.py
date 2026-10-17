@@ -431,7 +431,8 @@ class DrawHelper:
                                               int(345 / 1024 * mult * coords[1] + value - size / 2 + 35 * mult)),
                                              mask=damage_image)
 
-            paste_ships(tile, position)
+            if len(tile.get("player_ships", [])) > 0:
+                paste_ships(tile, position)
             if "nebula_internal" in tile:
                 for sib in tile["nebula_internal"]:
                     sib_tile = self.gamestate["board"][sib]

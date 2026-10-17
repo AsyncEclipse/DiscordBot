@@ -113,3 +113,4 @@ def test_influence_refused_in_nebula(make_game, run):
     assert game.gamestate["board"]["207b"]["owner"] == 0
     assert any("Nebula Sectors may never contain Influence Discs." in content
                for content, _ in inter.channel.sent)
+
