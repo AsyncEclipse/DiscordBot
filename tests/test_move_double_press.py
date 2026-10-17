@@ -1,12 +1,10 @@
-"""Recreates the reported bug: pressing a move button a second time duplicates an interceptor.
+"""A move button pressed a second time must not re-run the move.
 
-The double-press guard (listeners/ButtonListener.py) only refuses the *identical*
-custom id within a 3 second window. When the second click lands after that window
-(the bot often takes longer than 3s per action), MoveButtons.moveTo runs again:
-remove_units silently no-ops because the ship already left the origin, while
-add_units appends the ship to the destination a second time and drains a ship
-from stock. These tests pin the current buggy behaviour; flip the assertions
-once the second press is refused.
+The double-press guard (listeners/ButtonListener.py) only refuses the identical
+custom id within 3 seconds, so it cannot catch a stale destination button —
+a different one, or the same one after the window. MoveButtons.moveTo therefore
+checks the ship is still at the origin before touching the board: remove_units
+would silently no-op while add_units appends the ship again.
 """
 import pytest
 
@@ -29,35 +27,41 @@ def no_move_drawing(monkeypatch):
 
 
 def game_ready_for_the_reported_presses(start_game):
-    """A lone interceptor at home, a blue cruiser already one tile away.
+    """A lone interceptor at home, blue cruisers parked on both destinations.
 
-    301 adjoins home 201 across matching wormhole edges, so the interceptor can
-    reach it. Destinations are only offered for tiles that hold an unpinned
-    ship of the moving player, and with the interceptor being the only blue-int
-    on the board a re-executed move cannot be mistaken for moving another
-    ship — the duplicate is unambiguous.
+    301 and 302 adjoin home 201 across matching wormhole edges, so the
+    interceptor can reach both. Destinations are only offered for tiles that
+    hold an unpinned ship of the moving player, and with the interceptor being
+    the only blue-int on the board a re-executed move cannot be mistaken for
+    moving another ship.
     """
     game, channel = start_game()
     game.add_tile("301", 0, "202")
+    game.add_tile("302", 60, "202")
     game.gamestate["board"]["301"]["player_ships"] = ["blue-cru"]
+    game.gamestate["board"]["302"]["player_ships"] = ["blue-cru"]
     game.update()
     return game, channel
 
 
 def move_the_interceptor(press, channel):
-    """Walk the flow: move button, origin tile, ship; return the destination button id."""
+    """Walk the flow: move button, origin tile, ship; return the offered destination ids."""
     press(channel, P1, "FCIDblue_startMove")
     origin = [k for k in buttons(channel) if k.startswith("FCIDblue_moveFrom_201_")][0]
     press(channel, P1, origin)
     ship = [k for k in buttons(channel) if "moveThisShip" in k and "interceptor" in k][0]
     press(channel, P1, ship)
-    return [k for k in buttons(channel) if k.startswith("FCIDblue_moveTo") and "_301_" in k][0]
+    return [k for k in buttons(channel) if k.startswith("FCIDblue_moveTo")]
 
 
-def test_double_pressing_a_move_button_after_the_guard_window_duplicates_the_interceptor(
+def refused_for_moving(inter):
+    return any("already moved" in content for content, _kwargs in inter.followup.sent)
+
+
+def test_double_pressing_a_move_button_after_the_guard_window_is_refused(
         start_game, press, no_move_drawing):
     game, channel = game_ready_for_the_reported_presses(start_game)
-    destination = move_the_interceptor(press, channel)
+    destination = [k for k in move_the_interceptor(press, channel) if "_301_" in k][0]
     press(channel, P1, destination)  # the interceptor moves from 201 to 301
     stock = reload(game).gamestate["players"]["1"]["ship_stock"][0]
 
@@ -66,17 +70,30 @@ def test_double_pressing_a_move_button_after_the_guard_window_duplicates_the_int
     game = reload(game)
     game.gamestate["lastButtonTime"] -= 10
     game.update()
-    press(channel, P1, destination)
+    inter = press(channel, P1, destination)
 
+    assert refused_for_moving(inter)
     state = reload(game).gamestate
-    assert state["board"]["301"]["player_ships"].count("blue-int") == 2  # BUG: duplicated
-    assert state["board"]["201"]["player_ships"].count("blue-int") == 0  # remove_units no-opped
-    assert state["players"]["1"]["ship_stock"][0] == stock - 1  # the phantom came out of stock
+    assert state["board"]["301"]["player_ships"].count("blue-int") == 1
+    assert state["board"]["201"]["player_ships"].count("blue-int") == 0
+    assert state["players"]["1"]["ship_stock"][0] == stock
+
+
+def test_pressing_a_different_destination_button_after_the_move_is_refused(
+        start_game, press, no_move_drawing):
+    game, channel = game_ready_for_the_reported_presses(start_game)
+    destinations = move_the_interceptor(press, channel)
+    press(channel, P1, [k for k in destinations if "_301_" in k][0])  # the interceptor moves to 301
+
+    inter = press(channel, P1, [k for k in destinations if "_302_" in k][0])
+
+    assert refused_for_moving(inter)
+    assert reload(game).gamestate["board"]["302"]["player_ships"].count("blue-int") == 0
 
 
 def test_a_rapid_double_press_of_the_same_move_button_is_refused(start_game, press, no_move_drawing):
     game, channel = game_ready_for_the_reported_presses(start_game)
-    destination = move_the_interceptor(press, channel)
+    destination = [k for k in move_the_interceptor(press, channel) if "_301_" in k][0]
     press(channel, P1, destination)
 
     inter = press(channel, P1, destination)  # second click within the 3 second window
