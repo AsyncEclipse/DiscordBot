@@ -23,6 +23,9 @@ class MoveButtons:
         tiles = []
         for tile in tile_map:
             if "player_ships" in tile_map[tile]:
+                if not any(f"{player['color']}-{ship}" in tile_map[tile]["player_ships"]
+                           for ship in ("int", "cru", "drd")):
+                    continue
                 if ExploreButtons.doesPlayerHaveUnpinnedShips(player, tile_map[tile]["player_ships"], game, tile):
                     tiles.append(tile)
         return tiles
