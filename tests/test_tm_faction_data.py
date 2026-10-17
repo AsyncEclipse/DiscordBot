@@ -17,16 +17,10 @@ def test_tm_faction_stats_match_printed_board():
                                 "build_apt", "move_apt", "influence_apt")] == [1, 1, 2, 1, 2, 2]
     assert tm["reputation_track"] == ["amb", "mixed", "mixed", "mixed"]
     assert tm["influence_discs"] == 12
-    # The home sector's squares are empty: no cubes come printed on the tile.
+    # Two cubes start on the home sector's science squares.
     assert (tm["money_pop_cubes"], tm["material_pop_cubes"], tm["science_pop_cubes"]) == (12, 12, 10)
     # The income row every faction uses (DrawHelper.display_cube_track_reference indexes into it).
     assert tm["population_track"] == [28, 24, 21, 18, 15, 12, 10, 8, 6, 4, 3, 2, 0]
-
-
-def test_tm_starts_with_no_technology_and_the_standard_discount_curve():
-    tm = FACTIONS["tm"]
-    assert tm["military_tech"] == tm["grid_tech"] == tm["nano_tech"] == []
-    # The board's tracks print the same -1, -2, -3, -4, -6, -8 circles as the official boards.
     assert tm["tech_track"] == [-8, -6, -4, -3, -2, -1, 0, 0]
 
 

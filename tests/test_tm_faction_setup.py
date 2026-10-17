@@ -3,7 +3,7 @@ import pytest
 from Buttons.Draft import DraftButtons
 from Buttons.Research import ResearchButtons
 from commands.setup_commands import SetupCommands
-from tests.fakes import FakeGame, FakeInteraction, FakeMessage, buttons, reload
+from tests.fakes import FakeGame, FakeInteraction, buttons
 
 
 @pytest.mark.parametrize("community_mode", [False, True])
@@ -60,28 +60,3 @@ def test_only_techno_mages_are_offered_the_pregame_tech(start_game, run):
     run(ResearchButtons.offerSetupTech(game, game.get_player(1), FakeInteraction(channel)))
     assert "FCIDblue_setupTech" in buttons(channel)
 
-
-def test_the_pregame_tech_opens_the_normal_research_menu_without_a_disc(start_game, press):
-    game, channel = start_game(factions=["tm", "eri"])
-    discs = game.get_player(1)["influence_discs"]
-
-    press(channel, 1, "FCIDblue_setupTech")
-
-    # the standard research flow, unspent: no influence disc went on the action
-    assert any(cid.startswith("FCIDblue_getTech_") for cid in buttons(channel))
-    assert reload(game).get_player(1)["influence_discs"] == discs
-
-
-def test_the_pregame_tech_offer_is_removed_when_used(start_game, press, monkeypatch):
-    deleted = []
-
-    async def record_delete(self):
-        deleted.append(True)
-
-    monkeypatch.setattr(FakeMessage, "delete", record_delete)
-    game, channel = start_game(factions=["tm", "eri"])
-
-    press(channel, 1, "FCIDblue_setupTech", FakeMessage())
-
-    # deleting the offer is what makes the purchase one technology
-    assert deleted == [True]

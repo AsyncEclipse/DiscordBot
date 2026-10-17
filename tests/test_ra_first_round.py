@@ -53,6 +53,9 @@ def test_remnants_of_ra_atlantians_and_techno_mages_explore_then_pass(games_dir,
     assert state["players"]["2"]["nano_tech"] == ["anl"]
     assert state["board"]["201"]["sector"] == "255"
     assert state["players"]["3"]["name"] == "Techno-Mages"
+    assert state["players"]["3"]["reputation_track"] == ["amb", "mixed", "mixed", "mixed"]
+    assert state["players"]["3"]["build_apt"] == 1
+    assert state["players"]["3"]["science_pop_cubes"] == 10
     assert state["board"]["205"]["sector"] == "266"
     assert state["board"]["209"]["sector"] == "244"
     assert state["activePlayerColor"] == ["blue"]

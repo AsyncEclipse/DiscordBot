@@ -35,6 +35,17 @@ def place_advanced_square(game):
     game.update()
 
 
+def install_part(press, channel, pos="201", part="hul"):
+    """Techno-Magic on the interceptor's empty slot; returns the part choices offered."""
+    inter = press(channel, 1, f"FCIDblue_technoMagic_{pos}_interceptor")
+    slot = next(c.custom_id for c in inter.message.edited["view"].children if c.custom_id.endswith(f"_tm{pos}_3"))
+    inter = press(channel, 1, slot)
+    choices = {c.custom_id for c in inter.message.edited["view"].children
+               if c.custom_id.startswith("FCIDblue_chooseUpgrade_")}
+    press(channel, 1, next(cid for cid in choices if cid.endswith(f"_{part}_3_tm{pos}")))
+    return choices
+
+
 # --- Limited Manufacturing ---------------------------------------------------
 
 @pytest.mark.parametrize("faction, refused", [("tm", True), ("eri", False)])
@@ -157,15 +168,10 @@ def test_techno_magic_installs_a_part_without_spending_a_disc(start_game, press)
     game, channel = start_game(factions=["tm", "eri"])
     discs = game.get_player(1)["influence_discs"]
 
-    inter = press(channel, 1, "FCIDblue_technoMagic_201_interceptor")
-    part_menu = {c.custom_id: c.label for c in inter.message.edited["view"].children}
-    inter = press(channel, 1, next(cid for cid in part_menu if cid.endswith("_tm201_3")))
-    choices = {c.custom_id for c in inter.message.edited["view"].children
-               if c.custom_id.startswith("FCIDblue_chooseUpgrade_")}
+    choices = install_part(press, channel)
+
     # no 'empty' (ship parts may not be removed) and no discovery part (no Ancient ship parts)
     assert {cid.split("_")[5] for cid in choices} == {"ioc", "elc", "nud", "hul", "nus"}
-
-    press(channel, 1, next(cid for cid in choices if cid.endswith("_hul_3_tm201")))
 
     state = reload(game)
     assert state.get_player(1)["interceptor_parts"] == ["ioc", "nus", "nud", "hul"]
@@ -174,30 +180,14 @@ def test_techno_magic_installs_a_part_without_spending_a_disc(start_game, press)
     assert record["base"] == ["ioc", "nus", "nud", "empty"]
     # the record survives the save-file round trip, so tuples come back as lists
     assert record["install"] == [3, "empty", "hul"]
-
-
-def test_a_blueprint_is_only_upgraded_once_per_combat(start_game, press):
-    game, channel = start_game(factions=["tm", "eri"])
+    # once per blueprint per combat
     inter = press(channel, 1, "FCIDblue_technoMagic_201_interceptor")
-    part_menu = {c.custom_id: c.label for c in inter.message.edited["view"].children}
-    inter = press(channel, 1, next(cid for cid in part_menu if cid.endswith("_tm201_3")))
-    choices = {c.custom_id for c in inter.message.edited["view"].children
-               if c.custom_id.startswith("FCIDblue_chooseUpgrade_")}
-    press(channel, 1, next(cid for cid in choices if cid.endswith("_hul_3_tm201")))
-
-    inter = press(channel, 1, "FCIDblue_technoMagic_201_interceptor")
-
     assert any("already upgraded" in str(item) for item in inter.followup.sent)
 
 
 def test_techno_magic_parts_come_off_when_the_combat_ends(start_game, press, run):
     game, channel = start_game(factions=["tm", "eri"])
-    inter = press(channel, 1, "FCIDblue_technoMagic_201_interceptor")
-    part_menu = {c.custom_id: c.label for c in inter.message.edited["view"].children}
-    inter = press(channel, 1, next(cid for cid in part_menu if cid.endswith("_tm201_3")))
-    choices = {c.custom_id for c in inter.message.edited["view"].children
-               if c.custom_id.startswith("FCIDblue_chooseUpgrade_")}
-    press(channel, 1, next(cid for cid in choices if cid.endswith("_hul_3_tm201")))
+    install_part(press, channel)
     assert reload(game).get_player(1)["interceptor_parts"] == ["ioc", "nus", "nud", "hul"]
 
     # the presses run on their own gamestate instances; declareAWinner sees the saved one
@@ -215,12 +205,7 @@ def test_a_new_pairing_on_the_tile_is_a_new_techno_magic_combat(start_game, pres
     game, channel = start_game(factions=["tm", "eri"])
     game.gamestate["board"]["201"]["player_ships"] = ["blue-int", "red-int"]
     game.update()
-    inter = press(channel, 1, "FCIDblue_technoMagic_201_interceptor")
-    part_menu = {c.custom_id: c.label for c in inter.message.edited["view"].children}
-    inter = press(channel, 1, next(cid for cid in part_menu if cid.endswith("_tm201_3")))
-    choices = {c.custom_id for c in inter.message.edited["view"].children
-               if c.custom_id.startswith("FCIDblue_chooseUpgrade_")}
-    press(channel, 1, next(cid for cid in choices if cid.endswith("_hul_3_tm201")))
+    install_part(press, channel)
 
     game = reload(game)
     run(Combat.startCombat(game, channel, "201"))
@@ -233,12 +218,7 @@ def test_a_new_pairing_on_the_tile_is_a_new_techno_magic_combat(start_game, pres
 
 def test_undo_frees_the_blueprint_for_another_techno_magic_part(start_game, press):
     game, channel = start_game(factions=["tm", "eri"])
-    inter = press(channel, 1, "FCIDblue_technoMagic_201_interceptor")
-    part_menu = {c.custom_id: c.label for c in inter.message.edited["view"].children}
-    inter = press(channel, 1, next(cid for cid in part_menu if cid.endswith("_tm201_3")))
-    choices = {c.custom_id for c in inter.message.edited["view"].children
-               if c.custom_id.startswith("FCIDblue_chooseUpgrade_")}
-    press(channel, 1, next(cid for cid in choices if cid.endswith("_hul_3_tm201")))
+    install_part(press, channel)
 
     press(channel, 1, "FCIDblue_undoUpgrade_1_tm201_interceptor")
 
@@ -267,12 +247,7 @@ def test_two_pending_combats_do_not_strip_each_others_parts(start_game, press, r
     game.update()
 
     for pos, part in (("201", "hul"), ("205", "elc")):
-        inter = press(channel, 1, f"FCIDblue_technoMagic_{pos}_interceptor")
-        part_menu = {c.custom_id: c.label for c in inter.message.edited["view"].children}
-        inter = press(channel, 1, next(cid for cid in part_menu if cid.endswith(f"_tm{pos}_3")))
-        choices = {c.custom_id for c in inter.message.edited["view"].children
-                   if c.custom_id.startswith("FCIDblue_chooseUpgrade_")}
-        press(channel, 1, next(cid for cid in choices if cid.endswith(f"_{part}_3_tm{pos}")))
+        install_part(press, channel, pos, part)
 
     assert reload(game).get_player(1)["interceptor_parts"] == ["ioc", "nus", "nud", "elc"]
     # each revert runs on the gamestate as it is on disk at that moment
