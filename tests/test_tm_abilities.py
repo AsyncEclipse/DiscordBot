@@ -303,15 +303,21 @@ def test_the_attacker_is_offered_the_upgrade_first(start_game, run):
     assert all(b.custom_id.startswith("FCIDblue_") for b in offers[1].children)
 
 
-def test_grey_advanced_squares_still_need_their_tech(start_game, press):
-    # Technology finds a Way covers the coloured Advanced squares; a grey one still needs a tech
+def test_grey_advanced_squares_take_any_cube_for_two_ships(start_game, press):
+    # Technology finds a Way reaches a grey Advanced square too; any cube type fits it
     game, channel = start_game(factions=["tm", "eri"])
     place_advanced_square(game)
     game.gamestate["board"]["205"]["neutraladv_pop"] = [0]
     game.update()
+    ships = game.get_player(1)["colony_ships"]
 
     press(channel, 1, "FCIDblue_startPopDrop")
+    assert "FCIDblue_fillPopulation_205_neutraladv_0" in buttons(channel)
+    press(channel, 1, "FCIDblue_fillPopulation_205_neutraladv_0")
+    assert {"FCIDblue_fillPopulation_205_neutraladv_0_money", "FCIDblue_fillPopulation_205_neutraladv_0_science",
+            "FCIDblue_fillPopulation_205_neutraladv_0_material"} <= set(buttons(channel))
+    press(channel, 1, "FCIDblue_fillPopulation_205_neutraladv_0_money")
 
-    menu = [cid for cid in buttons(channel) if cid.startswith("FCIDblue_fillPopulation_205_")]
-    assert "FCIDblue_fillPopulation_205_scienceadv_0" in menu
-    assert not [cid for cid in menu if "neutraladv" in cid]
+    state = reload(game)
+    assert state.gamestate["board"]["205"]["neutraladv_pop"] == [1]
+    assert state.get_player(1)["colony_ships"] == ships - 2

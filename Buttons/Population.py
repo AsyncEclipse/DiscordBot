@@ -27,9 +27,7 @@ class PopulationButtons:
                 if tileState.get("orbital_pop", 0) == 0 or tileState["orbital_pop"] == [0]:
                     emptyPlanets.append(f"{tile}_orbital_0")
         allPlayerTechs = player["military_tech"] + player["grid_tech"] + player["nano_tech"]
-        # Technology finds a Way: two colony ships reach a coloured Advanced planet the techs
-        # do not unlock. Grey advanced squares still need their tech, and the cube must match
-        # the square's resource, which the coloured type-choice flow already enforces.
+        # Technology finds a Way: two colony ships reach an Advanced planet the techs do not unlock
         finds_a_way = player.get("name") == "Techno-Mages" and player["colony_ships"] >= 2
         if "met" not in allPlayerTechs:
             if "adl" not in allPlayerTechs and not finds_a_way:
@@ -38,9 +36,20 @@ class PopulationButtons:
                 emptyPlanets = [s for s in emptyPlanets if "materialadv" not in s]
             if "ade" not in allPlayerTechs and not finds_a_way:
                 emptyPlanets = [s for s in emptyPlanets if "moneyadv" not in s]
-            if "adl" not in allPlayerTechs and "adm" not in allPlayerTechs and "ade" not in allPlayerTechs:
+            if ("adl" not in allPlayerTechs and "adm" not in allPlayerTechs and "ade" not in allPlayerTechs
+                    and not finds_a_way):
                 emptyPlanets = [s for s in emptyPlanets if "neutraladv" not in s]
         return emptyPlanets
+
+    @staticmethod
+    def finds_a_way_gap(player, square):
+        """Technology finds a Way: this Advanced square is one the techs do not unlock, so it costs a
+        second colony ship (a coloured square still takes only its own resource)."""
+        techs = player["military_tech"] + player["grid_tech"] + player["nano_tech"]
+        unlocking = {"scienceadv": ["adl"], "materialadv": ["adm"], "moneyadv": ["ade"],
+                     "neutraladv": ["adl", "adm", "ade"]}.get(square)
+        return (player.get("name") == "Techno-Mages" and unlocking is not None and "met" not in techs
+                and not any(tech in techs for tech in unlocking))
 
     @staticmethod
     def findFullPopulation(game: GamestateHelper, tile: str):
@@ -96,7 +105,8 @@ class PopulationButtons:
                 optionsForPop = ["money", "science", "material"]
                 if "orbital" in typeOfPop:
                     optionsForPop = ["money", "science"]
-                if "adv" in typeOfPop:
+                # a grey Advanced square reached by Technology finds a Way takes any cube type
+                if "adv" in typeOfPop and not PopulationButtons.finds_a_way_gap(player, originalPop):
                     if "met" not in allPlayerTechs:
                         if "adl" not in allPlayerTechs:
                             optionsForPop.remove("science")
@@ -123,14 +133,7 @@ class PopulationButtons:
                     typeOfPop = optionsForPop[0]
             else:
                 typeOfPop = buttonID.split("_")[4]
-        allPlayerTechs = player["military_tech"] + player["grid_tech"] + player["nano_tech"]
-        # Technology finds a Way: an Advanced planet the techs do not unlock costs a second colony ship,
-        # and the cube must match that square's resource
-        tech_gap = (player.get("name") == "Techno-Mages" and "adv" in originalPop
-                    and "neutral" not in originalPop and "met" not in allPlayerTechs
-                    and not any(tech in allPlayerTechs for tech in
-                                {"scienceadv": ["adl"], "materialadv": ["adm"],
-                                 "moneyadv": ["ade"]}[originalPop]))
+        tech_gap = PopulationButtons.finds_a_way_gap(player, originalPop)
         if not game.add_pop_specific(originalPop, typeOfPop, int(num), tile,
                                      game.get_player_from_color(player["color"]),
                                      2 if tech_gap else 1):
