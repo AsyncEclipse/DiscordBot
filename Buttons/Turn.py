@@ -1,5 +1,6 @@
 import discord
 from Buttons.BlackHole import BlackHoleButtons
+from Buttons.Alliance import AllianceButtons
 from Buttons.DiplomaticRelations import DiplomaticRelationsButtons
 from Buttons.Explore import ExploreButtons
 from Buttons.Population import PopulationButtons
@@ -10,6 +11,11 @@ from helpers.PlayerHelper import PlayerHelper
 from helpers.DrawHelper import DrawHelper
 from discord.ui import View, Button
 import asyncio
+
+
+def _has_ship(color, sector_ships):
+    """A ship that counts for the Act of Aggression; orbitals and monuments do not."""
+    return any(color in ship and "orb" not in ship and "mon" not in ship for ship in sector_ships)
 
 
 class TurnButtons:
@@ -58,9 +64,8 @@ class TurnButtons:
         await game.updateNamesAndOutRimTiles(interaction)
         game.initilizeKey("20MinReminder")
         if nextPlayer is not None and not game.is_everyone_passed():
+            TurnButtons.startNewTurn(nextPlayer, game)
             view = TurnButtons.getStartTurnButtons(game, nextPlayer, player["color"])
-            game.initilizeKey("activePlayerColor")
-            game.addToKey("activePlayerColor", nextPlayer["color"])
             game.updatePingTime()
             await interaction.channel.send("## " + game.getPlayerEmoji(nextPlayer) + " started their turn")
             await interaction.channel.send(f"{nextPlayer['player_name']} use buttons to do your turn"
@@ -103,6 +108,11 @@ class TurnButtons:
     async def passForRound(player, game: GamestateHelper, interaction: discord.Interaction,
                            player_helper: PlayerHelper):
         from helpers.CombatHelper import Combat
+        player_helper.stats["allianceLeaveClosed"] = True
+        game.update_player(player_helper)
+        # Alliance FAQ: Act of Aggression against a former Ally counts at the end of
+        # your Action or Turn, so Passing must check it too, not just finishAction.
+        await TurnButtons.checkTraitor(game, player, interaction, player_helper)
         if player.get("passed"):
             await interaction.channel.send(f"{player['player_name']} passed on their reaction window.")
         else:
@@ -128,9 +138,8 @@ class TurnButtons:
         game.addToPassOrder(player["player_name"])
         sendPermaPassButton = False
         if nextPlayer is not None and not game.is_everyone_passed():
+            TurnButtons.startNewTurn(nextPlayer, game)
             view = TurnButtons.getStartTurnButtons(game, nextPlayer, player["color"])
-            game.initilizeKey("activePlayerColor")
-            game.addToKey("activePlayerColor", nextPlayer["color"])
             game.updatePingTime()
             await interaction.channel.send("## " + game.getPlayerEmoji(nextPlayer) + " started their turn")
             await interaction.channel.send(nextPlayer["player_name"] + " use buttons to do your turn"
@@ -174,6 +183,7 @@ class TurnButtons:
     @staticmethod
     async def permanentlyPass(player, game: GamestateHelper, interaction:
                               discord.Interaction, player_helper: PlayerHelper):
+        player_helper.stats["allianceLeaveClosed"] = True
         player_helper.permanentlyPassTurn(True)
         game.update_player(player_helper)
         await interaction.followup.send("You passed on reactions as long as noone attacks you", ephemeral=True)
@@ -283,6 +293,8 @@ class TurnButtons:
             for thread in interaction.channel.threads:
                 if "Round" in thread.name:
                     asyncio.create_task(thread.edit(archived=True))
+        # The Combat Phase ends here: hand out any Discovery Tiles still claimable.
+        await Combat.settleDiscoveryTiles(game, interaction.channel)
         await game.upkeep(interaction)
         drawing = DrawHelper(game.gamestate)
         game.saveEndRound()
@@ -291,9 +303,8 @@ class TurnButtons:
                                            file=await asyncio.to_thread(drawing.show_available_techs))
             nextPlayer = TurnButtons.getFirstPlayer(game)
             if nextPlayer is not None:
+                TurnButtons.startNewTurn(nextPlayer, game)
                 view = TurnButtons.getStartTurnButtons(game, nextPlayer, "dummy")
-                game.initilizeKey("activePlayerColor")
-                game.addToKey("activePlayerColor", nextPlayer["color"])
                 game.updatePingTime()
                 await interaction.channel.send("## " + game.getPlayerEmoji(nextPlayer) + " started their turn")
                 message = (f"{nextPlayer['player_name']} use buttons to do the first turn of the round" +
@@ -346,6 +357,13 @@ class TurnButtons:
         view.add_item(button)
         view.add_item(Button(label="Show Reputation", style=discord.ButtonStyle.gray, custom_id="showReputation"))
         await TurnButtons.send_files(interaction, [map], view, ephemeralStatus)
+
+    @staticmethod
+    def startNewTurn(player, game: GamestateHelper):
+        """Open Alliance leaving until the player takes an action or passes."""
+        player["allianceLeaveClosed"] = False
+        game.gamestate["activePlayerColor"] = [player["color"]]
+        game.update()
 
     @staticmethod
     def getStartTurnButtons(game: GamestateHelper, p1, lastPlayerColor):
@@ -417,6 +435,7 @@ class TurnButtons:
         if not player_helper.isTraitor() and len(game.gamestate.get("minor_species", [])) > 0:
             view.add_item(Button(label="Minor Species Relations", style=discord.ButtonStyle.green,
                                  custom_id=f"FCID{p1['color']}_startMinorRelations"))
+        AllianceButtons.addAllianceButtons(view, game, player)
         if game.getNumberOfSaveFiles() > 0:
             view.add_item(Button(label="Undo Last Turn", style=discord.ButtonStyle.red,
                                  custom_id=f"FCID{lastPlayerColor}_undoLastTurn"))
@@ -461,44 +480,45 @@ class TurnButtons:
 
     @staticmethod
     async def checkTraitor(game: GamestateHelper, player, interaction: discord.Interaction, player_helper: PlayerHelper):
+        related = [tile.split("-")[2] for tile in player["reputation_track"]
+                   if isinstance(tile, str) and "-" in tile and "minor" not in tile]
+        # Alliance FAQ: aggression against a former Ally makes you the Traitor even without
+        # Relations, but only once per former Ally, so it cannot later take the card back.
+        former_allies = [p["color"] for p in game.gamestate["players"].values()
+                         if game.isFormerAlly(player["color"], p["color"])
+                         and p["color"] not in player.get("aggressedFormerAllies", [])]
         for destination in game.gamestate["board"]:
-            playerPresent = False
-            if "player_ships" not in game.gamestate["board"][destination]:
+            sector_ships = game.gamestate["board"][destination].get("player_ships", [])
+            player_present = _has_ship(player["color"], sector_ships)
+            player_controls = destination in player["owned_tiles"]
+            if not player_present and not player_controls:
                 continue
-            for ship in game.gamestate["board"][destination]["player_ships"]:
-                if "orb" in ship or "mon" in ship:
+            for color in list(dict.fromkeys(related + former_allies)):
+                if game.areAllied(player["color"], color):
                     continue
-                if player['color'] in ship:
-                    playerPresent = True
-            if playerPresent:
-                repTrack = player["reputation_track"][:]
-                for tile in repTrack:
-                    if isinstance(tile, str) and "-" in tile and "minor" not in tile:
-                        color = tile.split("-")[2]
-                        p2 = game.getPlayerObjectFromColor(color)
-                        broken = False
-                        if destination in p2["owned_tiles"]:
-                            broken = True
-                        for ship in game.gamestate["board"][destination]["player_ships"]:
-                            if "orb" in ship or "mon" in ship:
-                                continue
-                            if color in ship:
-                                broken = True
-                        if broken:
-                            await DiplomaticRelationsButtons.breakRelationsWith(game, player, p2, interaction)
-                            game.makeEveryoneNotTraitor()
-                            player_helper.setTraitor(True)
-                            game.update_player(player_helper)
-                            await interaction.channel.send(f"{player['player_name']}, you broke relations with {color}"
-                                                        " and now are the Traitor.")
-                            
-
-
-
+                p2 = game.getPlayerObjectFromColor(color)
+                other_present = _has_ship(color, sector_ships)
+                former_ally = color in former_allies
+                aggression = player_present and (destination in p2["owned_tiles"] or other_present)
+                if not (aggression or (former_ally and player_controls and other_present)):
+                    continue
+                if color in related:
+                    await DiplomaticRelationsButtons.breakRelationsWith(game, player, p2, interaction)
+                    related.remove(color)
+                if former_ally:
+                    player_helper.stats.setdefault("aggressedFormerAllies", []).append(color)
+                    former_allies.remove(color)
+                game.makeEveryoneNotTraitor()
+                player_helper.setTraitor(True)
+                game.update_player(player_helper)
+                await interaction.channel.send(f"{player['player_name']}, your Act of Aggression against "
+                                               f"{p2['player_name']} makes you the Traitor.")
 
     @staticmethod
     async def finishAction(player, game: GamestateHelper, interaction: discord.Interaction,
                            player_helper: PlayerHelper):
+        player_helper.stats["allianceLeaveClosed"] = True
+        game.update_player(player_helper)
         await TurnButtons.checkTraitor(game, player, interaction, player_helper)
         view = View()
         view.add_item(Button(label="End Turn", style=discord.ButtonStyle.red,
@@ -524,6 +544,7 @@ class TurnButtons:
                     len(game.gamestate["minor_species"]) > 0]):
                 view.add_item(Button(label="Minor Species Relations", style=discord.ButtonStyle.green,
                                      custom_id=f"FCID{player['color']}_startMinorRelations"))
+        AllianceButtons.addAllianceButtons(view, game, player)
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray,
                              custom_id=f"FCID{player['color']}_restartTurn"))
         await interaction.channel.send(f"Colony ships available: {player['colony_ships']}\n"

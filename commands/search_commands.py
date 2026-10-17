@@ -305,20 +305,25 @@ class SearchCommands(commands.GroupCog, name="search"):
                     gameFactionString += "(5p Hyperlane)   "
                 highestVP = 1
                 secondVP = 1
+                # Without an Alliance this is the player's own score, as before.
+                scores = {player: game.getUnitScore(game.gamestate["players"][player], True)
+                          for player in game.gamestate["players"]}
                 for player in game.gamestate["players"]:
-                    if drawing.get_public_points(game.gamestate["players"][player], True) >= highestVP:
+                    if scores[player] >= highestVP:
                         secondVP = highestVP
-                        highestVP = drawing.get_public_points(game.gamestate["players"][player], True)
+                        highestVP = scores[player]
                     else:
-                        if drawing.get_public_points(game.gamestate["players"][player], True) >= secondVP:
-                            secondVP = drawing.get_public_points(game.gamestate["players"][player], True)
+                        if scores[player] >= secondVP:
+                            secondVP = scores[player]
                 for player in game.gamestate["players"]:
-                    username = game.gamestate["players"][player]["username"]
+                    playerObj = game.gamestate["players"][player]
+                    username = playerObj["username"]
                     if "(" in username:
                         username = username.split("(")[0].replace(" ","")
                     bonus = 0
-                    normalVP = round(float(100.0*drawing.get_public_points(game.gamestate["players"][player], True)/highestVP),2)
-                    if drawing.get_public_points(game.gamestate["players"][player], True) == highestVP:
+                    playerScore = scores[player]
+                    normalVP = round(float(100.0*playerScore/highestVP), 2)
+                    if playerScore == highestVP:
                         if highestVP > secondVP + 4:
                             bonus = 10
                         if highestVP > secondVP + 9:
@@ -332,16 +337,22 @@ class SearchCommands(commands.GroupCog, name="search"):
                     else:
                         finished_tourney_games[username] += 0
                 if game.gamestate["roundNum"] == 9:
-                    winner, highestScore, faction = game.getWinner()
-                    if "Terran" in faction:
-                        faction = "Terran"
-                    faction_victory_count[faction] += 1
+                    # Allies win together, so every member's faction gets the win. The
+                    # winning score is getWinner's: public points, shared by an Alliance.
+                    winningColors, winningScore, _resources = game.getScoringUnits()[0]
+                    for color in winningColors:
+                        winnerFaction = game.getPlayerObjectFromColor(color)["name"]
+                        if "Terran" in winnerFaction:
+                            winnerFaction = "Terran"
+                        faction_victory_count[winnerFaction] += 1
+                    winningScore = max(1, winningScore)
                     for player in game.gamestate["players"]:
-                        factionVP = drawing.get_public_points(game.gamestate["players"][player], True)
-                        faction = game.gamestate["players"][player]["name"]
+                        playerObj = game.gamestate["players"][player]
+                        factionVP = scores[player]
+                        faction = playerObj["name"]
                         if "Terran" in faction:
                             faction = "Terran"
-                        faction_performance[faction] += int(100*factionVP/highestScore)
+                        faction_performance[faction] += int(100*factionVP/winningScore)
                         max_faction_performance[faction] +=100
                 gameSumString += "\n"
                 gameFactionString += "\n"

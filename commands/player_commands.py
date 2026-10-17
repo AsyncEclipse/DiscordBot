@@ -367,7 +367,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
             permanent = passed
         game = GamestateHelper(interaction.channel)
         p1 = game.get_player(player.id,interaction)
-        player_helper = PlayerHelper(player.id, p1)
+        player_helper = PlayerHelper(game.get_player_from_color(p1["color"]), p1)
         player_helper.permanentlyPassTurn(permanent)
         player_helper.passTurn(passed)
         if passed:
@@ -382,7 +382,7 @@ class PlayerCommands(commands.GroupCog, name="player"):
             player = interaction.user
         game = GamestateHelper(interaction.channel)
         p1 = game.get_player(player.id,interaction)
-        player_helper = PlayerHelper(player.id, p1)
+        player_helper = PlayerHelper(game.get_player_from_color(p1["color"]), p1)
         game.makeEveryoneNotTraitor()
         player_helper.setTraitor(traitor)
         game.update_player(player_helper)
@@ -423,9 +423,8 @@ class PlayerCommands(commands.GroupCog, name="player"):
         # view = Turn(interaction, player.id)
         game = GamestateHelper(interaction.channel)
         p1 = game.get_player(player.id,interaction)
+        TurnButtons.startNewTurn(p1, game)
         view = TurnButtons.getStartTurnButtons(game, p1, "dummy")
-        game.initilizeKey("activePlayerColor")
-        game.addToKey("activePlayerColor", p1["color"])
         game.updatePingTime()
         await interaction.response.send_message(f"## {game.getPlayerEmoji(p1)} started their turn.")
         await interaction.channel.send((f"{p1['player_name']} use these buttons to do your turn. "
