@@ -7,6 +7,7 @@ from Buttons.Influence import InfluenceButtons
 from Buttons.Population import PopulationButtons
 from Buttons.Reputation import ReputationButtons
 from helpers.DrawHelper import DrawHelper
+from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 from helpers.ShipHelper import AI_Ship, PlayerShip
@@ -721,8 +722,8 @@ class Combat:
                         random_number = random.randint(1, 6)
                         num = str(random_number).replace("1", "Miss").replace("6", ":boom:")
                         emojiName = f"dice_{Combat.translateColorToName(die)}_{random_number}"
-                        guild_emojis = interaction.guild.emojis
-                        matching_emojis = [emoji for emoji in guild_emojis if emoji.name == emojiName]
+                        matching_emojis = ([Emoji._app[emojiName]] if emojiName in Emoji._app
+                                           else [e for e in interaction.guild.emojis if e.name == emojiName])
                         msg += str(num) + " "
                         if len(matching_emojis) > 0:
                             msg2 += str(matching_emojis[0]) + " "
@@ -910,8 +911,8 @@ class Combat:
                         random_number = random.randint(1, 6)
                         num = str(random_number).replace("1", "Miss").replace("6", ":boom:")
                         emojiName = f"dice_{Combat.translateColorToName(die)}_{random_number}"
-                        guild_emojis = interaction.guild.emojis
-                        matching_emojis = [emoji for emoji in guild_emojis if emoji.name == emojiName]
+                        matching_emojis = ([Emoji._app[emojiName]] if emojiName in Emoji._app
+                                           else [e for e in interaction.guild.emojis if e.name == emojiName])
                         msg += str(num) + " "
                         if len(matching_emojis) > 0:
                             msg2 += str(matching_emojis[0]) + " "
@@ -991,8 +992,8 @@ class Combat:
                                                             custom_id=riftButtonID))
                                     emojiStr = str(dieNum)
                                     emojiName = f"dice_{Combat.translateColorToName('pink')}_{dieNum}"
-                                    guild_emojis = interaction.guild.emojis
-                                    matching_emojis = [emoji for emoji in guild_emojis if emoji.name == emojiName]
+                                    matching_emojis = ([Emoji._app[emojiName]] if emojiName in Emoji._app
+                                                       else [e for e in interaction.guild.emojis if e.name == emojiName])
                                     msg += str(num) + " "
                                     if len(matching_emojis) > 0:
                                         emojiStr = str(matching_emojis[0]) 
@@ -1096,8 +1097,8 @@ class Combat:
             random_number = random.randint(1, 6)
             num = str(random_number).replace("1", "Miss").replace("6", ":boom:")
             emojiName = f"dice_{Combat.translateColorToName(die)}_{random_number}"
-            guild_emojis = interaction.guild.emojis
-            matching_emojis = [emoji for emoji in guild_emojis if emoji.name == emojiName]
+            matching_emojis = ([Emoji._app[emojiName]] if emojiName in Emoji._app
+                               else [e for e in interaction.guild.emojis if e.name == emojiName])
             msg += str(num) + " "
             if len(matching_emojis) > 0:
                 msg2 += str(matching_emojis[0]) + " "
@@ -1157,8 +1158,8 @@ class Combat:
                                                 custom_id=riftButtonID))
                         emojiStr = str(dieNum)
                         emojiName = f"dice_{Combat.translateColorToName('pink')}_{dieNum}"
-                        guild_emojis = interaction.guild.emojis
-                        matching_emojis = [emoji for emoji in guild_emojis if emoji.name == emojiName]
+                        matching_emojis = ([Emoji._app[emojiName]] if emojiName in Emoji._app
+                                           else [e for e in interaction.guild.emojis if e.name == emojiName])
                         msg += str(num) + " "
                         if len(matching_emojis) > 0:
                             emojiStr = str(matching_emojis[0]) 
