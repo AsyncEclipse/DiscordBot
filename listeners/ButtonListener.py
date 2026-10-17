@@ -159,6 +159,16 @@ class ButtonListener(commands.Cog):
                     return
                 customID = customID.replace(check + "_", "")
 
+        # Presses queue on the game lock, so a press behind the one that used up (deleted) this
+        # message would replay a stale choice. Ephemeral messages can't be fetched; skip them.
+        if not interaction.message.flags.ephemeral:
+            try:
+                await interaction.channel.fetch_message(interaction.message.id)
+            except discord.NotFound:
+                await interaction.followup.send(f"{interaction.user.mention}, these buttons were already used.",
+                                                ephemeral=True)
+                return
+
         if "deleteMsg" in customID:
             await interaction.message.delete()
         if customID == "showGame":
