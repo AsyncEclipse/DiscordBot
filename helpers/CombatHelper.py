@@ -113,6 +113,8 @@ class Combat:
 
     @staticmethod
     async def startCombat(game: GamestateHelper, channel, pos):
+        # a new pairing on the tile is a new combat: last pairing's Techno-Magic parts come off first
+        await Combat.revertTechnoMagic(game, channel, pos)
         drawing = DrawHelper(game.gamestate)
         players = Combat.findPlayersInTile(game, pos)[-2:]
         game.setAttackerAndDefender(players[1], players[0], pos)
@@ -127,6 +129,7 @@ class Combat:
             else:
                 file = await asyncio.to_thread(drawing.show_AI_stats)
                 await channel.send("AI stats look like this", file=file)
+        await Combat.offerTechnoMagic(game, channel, pos)
         await Combat.promptNextSpeed(game, pos, channel, False)
 
     @staticmethod
@@ -156,7 +159,6 @@ class Combat:
                               view=Combat.getCombatButtons(game, tile[1]),
                               file=await asyncio.to_thread(drawing.board_tile_image_file, tile[1])))
             await Combat.startCombat(game, thread, tile[1])
-            await Combat.offerTechnoMagic(game, thread, tile[1])
             game.addToKey("tilesToResolve", tile[0])
             for combatatant in Combat.findPlayersInTile(game, tile[1]):
                 if combatatant not in game.gamestate["peopleToCheckWith"] and combatatant != "ai":
@@ -1364,7 +1366,7 @@ class Combat:
         await UpgradeButtons.upgradeShip(game, player, interaction, f"upgradeShip_1_{ship}_tm{pos}", player_helper)
 
     @staticmethod
-    async def revertTechnoMagic(game: GamestateHelper, interaction: discord.Interaction, pos: str):
+    async def revertTechnoMagic(game: GamestateHelper, channel, pos: str):
         """The temporary parts installed at the start of this combat come off again."""
         for color, ships in game.gamestate["board"][pos].pop("tmParts", {}).items():
             player = game.getPlayerObjectFromColor(color)
@@ -1379,7 +1381,7 @@ class Combat:
                 for ship, parts in restore.items():
                     player[f"{ship}_parts"] = parts
                 game.update_player(player_helper)
-                await interaction.channel.send(f"Techno-Magic wears off: the temporary ship parts are removed"
+                await channel.send(f"Techno-Magic wears off: the temporary ship parts are removed"
                                                f" from {player['player_name']}'s blueprints.")
             else:
                 # every install belongs to a combat that is still pending; the pop itself must persist
@@ -1407,7 +1409,7 @@ class Combat:
             players = Combat.findPlayersInTile(game, pos)
         countDraw = 1
         game.removeFromKey("tilesToResolve", int(game.gamestate["board"][pos]["sector"]))
-        await Combat.revertTechnoMagic(game, interaction, pos)
+        await Combat.revertTechnoMagic(game, interaction.channel, pos)
         for playerColor in players:
             if playerColor == "ai":
                 continue

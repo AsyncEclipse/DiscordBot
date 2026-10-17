@@ -251,7 +251,7 @@ class ButtonListener(commands.Cog):
         elif customID.startswith("setupTech"):
             # deleting the offer makes the pre-game purchase one technology
             await interaction.message.delete()
-            await ResearchButtons.startResearch(game, player, player_helper, interaction, False)
+            await ResearchButtons.startResearch(game, player, player_helper, interaction, False, setup=True)
         elif customID.startswith("placeWarpPortal"):
             await ResearchButtons.placeWarpPortal(interaction, game, player, customID)
         elif customID.startswith("payAtRatio"):

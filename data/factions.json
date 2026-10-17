@@ -2493,7 +2493,7 @@
                 "influence_action_counters": 0,
                 "money_pop_cubes": 12,
                 "material_pop_cubes": 12,
-                "science_pop_cubes": 12,
+                "science_pop_cubes": 10,
                 "population_track": [
                         28,
                         24,

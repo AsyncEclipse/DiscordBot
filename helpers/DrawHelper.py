@@ -1123,7 +1123,8 @@ class DrawHelper:
             text_drawable_image.text((50 + int(116 * x), 607), f"{action_activation}", color, font=font,
                                              stroke_width=stroke_width, stroke_fill=stroke_color)
         font = ImageFont.truetype("images/resources/arial.ttf", size=35)
-        if "magellan" in faction:
+        # the colony ships one Influence action may flip (Buttons/Influence.py)
+        if "magellan" in faction or faction in ("ra", "tm"):
             text_drawable_image.text((618, 417), f"1", color, font=font,
                                              stroke_width=stroke_width, stroke_fill=stroke_color)
         else:

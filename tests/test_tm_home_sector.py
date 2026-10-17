@@ -17,7 +17,7 @@ def test_tm_home_sector_data():
     assert sector["artifact"] == 1
     assert sector["wormholes"] == [0, 1, 3, 4]
     # The tile prints two science squares, both empty: no cubes come printed on the tile.
-    assert sector["science_pop"] == [0, 0]
+    assert sector["science_pop"] == [1, 1]
     assert sector["money_pop"] == [] and sector["material_pop"] == []
     assert sector["scienceadv_pop"] == [] and sector["materialadv_pop"] == []
     for key, coords in sector.items():

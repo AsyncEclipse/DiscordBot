@@ -18,7 +18,7 @@ def test_tm_faction_stats_match_printed_board():
     assert tm["reputation_track"] == ["amb", "mixed", "mixed", "mixed"]
     assert tm["influence_discs"] == 12
     # The home sector's squares are empty: no cubes come printed on the tile.
-    assert (tm["money_pop_cubes"], tm["material_pop_cubes"], tm["science_pop_cubes"]) == (12, 12, 12)
+    assert (tm["money_pop_cubes"], tm["material_pop_cubes"], tm["science_pop_cubes"]) == (12, 12, 10)
     # The income row every faction uses (DrawHelper.display_cube_track_reference indexes into it).
     assert tm["population_track"] == [28, 24, 21, 18, 15, 12, 10, 8, 6, 4, 3, 2, 0]
 

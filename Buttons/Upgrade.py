@@ -194,6 +194,12 @@ class UpgradeButtons:
         if discTileUpgrade == "dummy":
             await interaction.channel.send(f"{player['player_name']}, choose which ship you would like to upgrade "
                                            "or finish your action.", view=view)
+        elif discTileUpgrade.startswith("tm"):
+            view = View()
+            view.add_item(Button(label="Undo", style=discord.ButtonStyle.gray,
+                                 custom_id=f"FCID{player['color']}_undoUpgrade_1_{discTileUpgrade}_{ship}"))
+            await interaction.channel.send(f"{player['player_name']}, you may undo this Techno-Magic part.",
+                                           view=view)
 
     @staticmethod
     async def undoUpgrade(game: GamestateHelper, player, interaction: discord.Interaction,
@@ -204,11 +210,21 @@ class UpgradeButtons:
             return
         player_helper.stats.clear()
         player_helper.stats.update(undo)
+        parts = customID.split("_")
+        # Undo buttons posted before the upgrade mode joined the id carry only the action count
+        mode = parts[2] if len(parts) > 2 else "dummy"
+        if mode.startswith("tm"):
+            # the blueprint is free for another Techno-Magic part this combat
+            game.gamestate["board"][mode[2:]]["tmParts"][player["color"]][parts[3]].pop("install", None)
+            game.update_player(player_helper)
+            await interaction.message.delete()
+            await UpgradeButtons.upgradeShip(game, player, interaction, f"upgradeShip_1_{parts[3]}_{mode}",
+                                             player_helper)
+            return
         game.update_player(player_helper)
         await interaction.message.delete()
         await interaction.channel.send(f"{player['player_name']} undid their last part swap.")
-        await UpgradeButtons.startUpgrade(game, player, interaction, False, customID.split("_")[2],
-                                          customID.split("_")[1])
+        await UpgradeButtons.startUpgrade(game, player, interaction, False, mode, parts[1])
 
     @staticmethod
     async def showMenu(interaction: discord.Interaction, content: str, view: View):

@@ -48,11 +48,11 @@ def test_techno_mages_and_atlantians_explore_then_pass(games_dir, run, press, mo
     assert state["players"]["1"]["name"] == "Techno-Mages"
     assert state["players"]["1"]["military_tech"] == []
     assert state["players"]["1"]["reputation_track"] == ["amb", "mixed", "mixed", "mixed"]
-    # 2/6/3 from the board's storage strip, one Build activation, empty home squares.
+    # 2/6/3 from the board's storage strip, one Build activation, both home science squares populated.
     assert (state["players"]["1"]["materials"], state["players"]["1"]["science"],
             state["players"]["1"]["money"]) == (2, 6, 3)
     assert state["players"]["1"]["build_apt"] == 1
-    assert state["players"]["1"]["science_pop_cubes"] == 12
+    assert state["players"]["1"]["science_pop_cubes"] == 10
     assert state["board"]["201"]["sector"] == "244"
     assert state["board"]["207"]["sector"] == "266"
     assert state["activePlayerColor"] == ["purple"]
@@ -101,7 +101,7 @@ def test_techno_mages_and_atlantians_explore_then_pass(games_dir, run, press, mo
         assert player["explore_action_counters"] == 1
         assert len(player["owned_tiles"]) == 2
         assert player["passed"]
-    # 2/4/3 after the pre-game tech, plus the 2 money an Explore grants.
+    # 2/4/3 after the pre-game tech, plus the 2 money for passing first.
     assert final_game.get_player(1)["materials"] == 2
     assert final_game.get_player(1)["science"] == 4
     assert final_game.get_player(1)["money"] == 5

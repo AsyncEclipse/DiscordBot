@@ -86,7 +86,7 @@ def test_two_colony_ships_reach_an_advanced_planet_the_techs_do_not_unlock(start
     state = reload(game)
     assert state.gamestate["board"]["205"]["scienceadv_pop"] == [1]
     # The cube is of the correct type: it comes off the science track.
-    assert state.get_player(1)["science_pop_cubes"] == 11
+    assert state.get_player(1)["science_pop_cubes"] == 9
     # Two colony ships went into it.
     assert state.get_player(1)["colony_ships"] == ships - 2
 
@@ -202,15 +202,36 @@ def test_techno_magic_parts_come_off_when_the_combat_ends(start_game, press, run
 
     # the presses run on their own gamestate instances; declareAWinner sees the saved one
     game = reload(game)
-    run(Combat.revertTechnoMagic(game, FakeInteraction(channel), "201"))
+    run(Combat.revertTechnoMagic(game, channel, "201"))
 
     state = reload(game)
     assert state.get_player(1)["interceptor_parts"] == ["ioc", "nus", "nud", "empty"]
     assert "tmParts" not in state.gamestate["board"]["201"]
 
 
-def test_techno_magic_keeps_the_blueprint_across_a_restart_of_the_same_combat(start_game, press):
-    """startCombat runs again after every destroyed ship; the offer must not repeat."""
+def test_a_new_pairing_on_the_tile_is_a_new_techno_magic_combat(start_game, press, run):
+    """startCombat reruns when a player leaves a multi-player tile: last pairing's part comes off
+    and the upgrade is offered again."""
+    game, channel = start_game(factions=["tm", "eri"])
+    game.gamestate["board"]["201"]["player_ships"] = ["blue-int", "red-int"]
+    game.update()
+    inter = press(channel, 1, "FCIDblue_technoMagic_201_interceptor")
+    part_menu = {c.custom_id: c.label for c in inter.message.edited["view"].children}
+    inter = press(channel, 1, next(cid for cid in part_menu if cid.endswith("_tm201_3")))
+    choices = {c.custom_id for c in inter.message.edited["view"].children
+               if c.custom_id.startswith("FCIDblue_chooseUpgrade_")}
+    press(channel, 1, next(cid for cid in choices if cid.endswith("_hul_3_tm201")))
+
+    game = reload(game)
+    run(Combat.startCombat(game, channel, "201"))
+
+    state = reload(game)
+    assert state.get_player(1)["interceptor_parts"] == ["ioc", "nus", "nud", "empty"]
+    assert any(button.custom_id == "FCIDblue_technoMagic_201_interceptor"
+               for content, kwargs in channel.sent for button in getattr(kwargs.get("view"), "children", []))
+
+
+def test_undo_frees_the_blueprint_for_another_techno_magic_part(start_game, press):
     game, channel = start_game(factions=["tm", "eri"])
     inter = press(channel, 1, "FCIDblue_technoMagic_201_interceptor")
     part_menu = {c.custom_id: c.label for c in inter.message.edited["view"].children}
@@ -219,10 +240,21 @@ def test_techno_magic_keeps_the_blueprint_across_a_restart_of_the_same_combat(st
                if c.custom_id.startswith("FCIDblue_chooseUpgrade_")}
     press(channel, 1, next(cid for cid in choices if cid.endswith("_hul_3_tm201")))
 
-    # the tile still holds the record, so a re-offered combat cannot double the upgrade
-    record = reload(game).gamestate["board"]["201"]["tmParts"]["blue"]["interceptor"]
-    assert record["base"] == ["ioc", "nus", "nud", "empty"]
-    assert record["install"] == [3, "empty", "hul"]
+    press(channel, 1, "FCIDblue_undoUpgrade_1_tm201_interceptor")
+
+    state = reload(game)
+    assert state.get_player(1)["interceptor_parts"] == ["ioc", "nus", "nud", "empty"]
+    assert "install" not in state.gamestate["board"]["201"]["tmParts"]["blue"]["interceptor"]
+
+
+def test_undo_buttons_posted_before_the_mode_was_added_still_work(start_game, press):
+    game, channel = start_game(factions=["eri", "hyd"])
+    game.get_player(1)["upgradeUndo"] = dict(game.get_player(1))
+    game.update()
+
+    press(channel, 1, "FCIDblue_undoUpgrade_2")
+
+    assert any("undid their last part swap" in content for content, _ in channel.sent)
 
 
 def test_two_pending_combats_do_not_strip_each_others_parts(start_game, press, run):
@@ -245,11 +277,11 @@ def test_two_pending_combats_do_not_strip_each_others_parts(start_game, press, r
     assert reload(game).get_player(1)["interceptor_parts"] == ["ioc", "nus", "nud", "elc"]
     # each revert runs on the gamestate as it is on disk at that moment
     game = reload(game)
-    run(Combat.revertTechnoMagic(game, FakeInteraction(channel), "201"))
+    run(Combat.revertTechnoMagic(game, channel, "201"))
     # 205's temporary part must survive 201's combat ending
     assert reload(game).get_player(1)["interceptor_parts"] == ["ioc", "nus", "nud", "elc"]
     game = reload(game)
-    run(Combat.revertTechnoMagic(game, FakeInteraction(channel), "205"))
+    run(Combat.revertTechnoMagic(game, channel, "205"))
     assert reload(game).get_player(1)["interceptor_parts"] == ["ioc", "nus", "nud", "empty"]
     assert "tmParts" not in reload(game).gamestate["board"]["201"]
 

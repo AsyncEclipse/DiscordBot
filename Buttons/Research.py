@@ -184,8 +184,9 @@ class ResearchButtons:
 
     @staticmethod
     async def startResearch(game: GamestateHelper, player, player_helper: PlayerHelper,
-                            interaction: discord.Interaction, buttonCommand: bool):
-        await interaction.channel.send(f"{player['player_name']} is using their turn to research")
+                            interaction: discord.Interaction, buttonCommand: bool, setup: bool = False):
+        if not setup:
+            await interaction.channel.send(f"{player['player_name']} is using their turn to research")
         if buttonCommand:
             player_helper.spend_influence_on_action("research")
             game.update_player(player_helper)
@@ -217,7 +218,8 @@ class ResearchButtons:
         for tech in researchedTech:
             displayedTechs.append(tech)
         buttonCount = 1
-        avalScience = ResearchButtons.getPlayerTotalAvailableScience(player, game)
+        # the pre-game purchase spends initial science only, no trading
+        avalScience = player["science"] if setup else ResearchButtons.getPlayerTotalAvailableScience(player, game)
         for tech_type in tech_groups:
             sorted_techs = sorted(tech_groups[tech_type], key=lambda x: x[2])  # Sort by cost
             for tech, tech_name, cost in sorted_techs:
