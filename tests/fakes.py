@@ -6,21 +6,27 @@ fixture belongs in this module; fixtures live in conftest.py.
 """
 import asyncio
 import copy
+import itertools
 import json
 from datetime import datetime, timezone
+from types import SimpleNamespace
+
+import discord
 
 FACTIONS = json.load(open("data/factions.json"))
 
 
 class FakeMessage:
-    _next_id = 1
+    _ids = itertools.count(1)
 
-    def __init__(self):
-        self.id = FakeMessage._next_id
-        FakeMessage._next_id += 1
+    def __init__(self, channel=None):
+        self.id = next(self._ids)
+        self.flags = SimpleNamespace(ephemeral=False)
+        self.channel = channel
 
     async def delete(self):
-        pass
+        if self.channel is not None:
+            self.channel.deleted.add(self.id)
 
     async def edit(self, **kwargs):
         self.edited = kwargs
@@ -31,10 +37,25 @@ class FakeChannel:
         self.name = name
         self.threads = []
         self.sent = []
+        self.messages = []  # parallel to sent: the message each send created
+        self.deleted = set()
 
     async def send(self, content=None, **kwargs):
         self.sent.append((content, kwargs))
-        return FakeMessage()
+        self.messages.append(FakeMessage(self))
+        return self.messages[-1]
+
+    async def fetch_message(self, message_id):
+        if message_id in self.deleted:
+            raise discord.NotFound(SimpleNamespace(status=404, reason="Not Found"), "Unknown Message")
+        return FakeMessage(self)
+
+    def message_with(self, custom_id):
+        """The latest message carrying this button, as Discord hands it to the press."""
+        for (_content, kwargs), message in zip(reversed(self.sent), reversed(self.messages)):
+            if any(getattr(c, "custom_id", None) == custom_id for c in getattr(kwargs.get("view"), "children", [])):
+                return message
+        return None
 
 
 class FakeUser:

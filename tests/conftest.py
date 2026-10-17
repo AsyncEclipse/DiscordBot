@@ -84,7 +84,7 @@ def press(run):
     def _press(channel, user_id, custom_id, message=None):
         game_id = channel.name.split("-")[0]  # the guild role that pings players is named after the game
         inter = FakeInteraction(channel, custom_id=custom_id, user_id=user_id, role_names=[game_id],
-                                message=message)
+                                message=message or channel.message_with(custom_id))
         run(ButtonListener(None).resolveButton(inter))
         return inter
 
