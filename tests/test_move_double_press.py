@@ -2,9 +2,9 @@
 
 The double-press guard (listeners/ButtonListener.py) only refuses the identical
 custom id within 3 seconds, so it cannot catch a stale destination button —
-a different one, or the same one after the window. MoveButtons.moveTo therefore
-checks the ship is still at the origin before touching the board: remove_units
-would silently no-op while add_units appends the ship again.
+a different one, or the same one after the window. The listener therefore
+refuses any press on a message an earlier press already used up (deleted):
+re-running moveTo would no-op remove_units and still append the ship again.
 """
 import pytest
 
@@ -55,7 +55,7 @@ def move_the_interceptor(press, channel):
 
 
 def refused_for_moving(inter):
-    return any("already moved" in content for content, _kwargs in inter.followup.sent)
+    return any("already used" in content for content, _kwargs in inter.followup.sent)
 
 
 def test_double_pressing_a_move_button_after_the_guard_window_is_refused(

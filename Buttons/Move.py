@@ -175,13 +175,6 @@ class MoveButtons:
         moveCount = int(buttonID.split("_")[4])
         player_color = player["color"]
         shipName = f"{player_color}-{game.getShipShortName(shipType)}"
-        origin_ships = game.gamestate["board"][originT]["player_ships"]
-        # A stale move button lands here after the ship already left: remove_units would
-        # no-op on the empty origin while add_units still appends the ship again.
-        if shipName not in origin_ships and shipName + "adv" not in origin_ships:
-            await interaction.followup.send(
-                f"{player['player_name']}, that ship has already moved from {originT}.", ephemeral=True)
-            return
         tile_ships = game.gamestate["board"][destination]["player_ships"]
         game.remove_units([shipName], originT)
         game.add_units([shipName], destination)
