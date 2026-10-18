@@ -4,7 +4,6 @@ Discord is never available in tests, so interaction, channel, guild and message
 objects are stubbed here. Anything that is a plain helper rather than a pytest
 fixture belongs in this module; fixtures live in conftest.py.
 """
-import asyncio
 import copy
 import itertools
 import json
@@ -15,7 +14,10 @@ import discord
 
 from helpers.GamestateHelper import GamestateHelper
 
+from helpers.PlayerHelper import PlayerHelper
+
 FACTIONS = json.load(open("data/factions.json"))
+POS = "101"  # the sector board_tile() builds by default
 
 
 class FakeMessage:
@@ -145,13 +147,37 @@ def player_stats(faction, **overrides):
     return stats
 
 
+def players(*colors):
+    """A gamestate players dict with one Hydran Progress per colour."""
+    return {str(i): player_stats("hyd", color=color) for i, color in enumerate(colors, 1)}
+
+
+def board_tile(ships=(), owner=0, sector=int(POS), **extra):
+    """A board dict holding one sector, keyed the way the gamestate keys it."""
+    tile = {"owner": owner, "sector": sector, "disctile": 0, "player_ships": list(ships)}
+    tile.update(extra)
+    return {str(sector): tile}
+
+
+def player_helper(game, color):
+    """A PlayerHelper for the player with this colour."""
+    return PlayerHelper(game.get_player_from_color(color), game.getPlayerObjectFromColor(color))
+
+
+def offered_buttons(interaction):
+    """Every button offered across the messages the fake channel received."""
+    return [child for _content, kwargs in interaction.channel.sent
+            for child in getattr(kwargs.get("view"), "children", [])]
+
+
 def offered_labels(interaction):
     """Button labels offered across every message the fake channel received."""
-    labels = []
-    for _content, kwargs in interaction.channel.sent:
-        for child in getattr(kwargs.get("view"), "children", []):
-            labels.append(getattr(child, "label", None))
-    return labels
+    return [getattr(button, "label", None) for button in offered_buttons(interaction)]
+
+
+def offered_ids(interaction):
+    """Button custom_ids offered across every message the fake channel received."""
+    return [getattr(button, "custom_id", None) for button in offered_buttons(interaction)]
 
 
 def buttons(channel):
@@ -166,11 +192,3 @@ def buttons(channel):
 def reload(game):
     """Re-read a game from disk: what the next button press will see."""
     return type(game)(None, game.game_id)
-
-
-async def drain(coro):
-    """Await a coroutine and let its create_task side effects run."""
-    result = await coro
-    for _ in range(10):
-        await asyncio.sleep(0)
-    return result

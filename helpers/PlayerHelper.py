@@ -110,6 +110,7 @@ class PlayerHelper:
 
     def spend_influence_on_action(self, action: str):
         self.adjust_influence(-1)
+        self.stats["allianceLeaveClosed"] = True
         self.stats["lastAction"] = action
         self.stats["detailsOflastAction"] = ""
         counters = f"{action}_action_counters"

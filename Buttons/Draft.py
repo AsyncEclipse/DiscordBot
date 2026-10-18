@@ -259,11 +259,10 @@ class DraftButtons:
                     await ResearchButtons.offerSetupTech(game, player, interaction)
 
         asyncio.create_task(game.showUpdate("Start of Game", interaction))
-        view = TurnButtons.getStartTurnButtons(game, game.get_player(temp_player_list[0],interaction), "dummy")
-        game.initilizeKey("activePlayerColor")
-        game.addToKey("activePlayerColor", game.get_player(temp_player_list[0],interaction)["color"])
-        game.updatePingTime()
         player = game.get_player(temp_player_list[0],interaction)
+        TurnButtons.startNewTurn(player, game)
+        view = TurnButtons.getStartTurnButtons(game, player, "dummy")
+        game.updatePingTime()
         await interaction.channel.send(f"## {game.getPlayerEmoji(player)} started their turn.")
         await interaction.channel.send(f"{player['player_name']} use these buttons to do your turn"
                                        + game.displayPlayerStats(player), view=view)

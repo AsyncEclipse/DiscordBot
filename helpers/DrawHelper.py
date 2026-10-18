@@ -1184,6 +1184,15 @@ class DrawHelper:
                     pop_image = self.use_resized_image(pop_path, (42,42))
                     context.paste(pop_image, (reputationX+x*150+30, 600+60), mask=pop_image)
 
+        # Alliance tiles sit to the right of the reputation track.
+        allianceX = 4600
+        for allianceTile, betrayed in player.get("alliances", {}).items():
+            side = "betrayed" if betrayed else "ally"
+            alliance_path = (f"images/resources/components/alliances/"
+                             f"alliances_{allianceTile}_{side}.png")
+            alliance_image = self.use_resized_image(alliance_path, (120, 120))
+            context.paste(alliance_image, (allianceX, 600), mask=alliance_image)
+            allianceX += 130
 
         faction = self.get_short_faction_name(player["name"])
         ships = ["int", "cru", "drd", "sb","orb"]
@@ -1681,6 +1690,10 @@ class DrawHelper:
 
         if "rep" in player.get("discoveryTileBonusPointTiles", []):
             points += reputationPoints // 3
+        for betrayed in player.get("alliances", {}).values():
+            # A faceup Alliance Tile is worth 2 VP, a Betrayer tile costs 3. Rho Indi
+            # gets no exemption here, unlike the Traitor Card.
+            points += -3 if betrayed else 2
         if player.get("traitor"):
             if player["name"] == "Rho Indi Syndicate":
                 pass

@@ -13,6 +13,10 @@ import random
 from discord.ui import View, Button
 
 
+ALLIANCE_TILES = ["nova", "flare", "vortex"]
+LAST_ROUND = 8
+
+
 class GamestateHelper:
     def __init__(self, game_id: discord.TextChannel = None, nameID: str = None):
         if game_id is not None:
@@ -123,27 +127,46 @@ class GamestateHelper:
         self.gamestate["lastPingTime"] = time.time()
         self.update()
 
+    def getScoringUnits(self):
+        """Players grouped the way they score: an Alliance is a single unit.
+        Each unit is (colors, score, resources), with an Alliance's VP and
+        resources averaged across its members and rounded down, as the rules
+        require. Best unit first."""
+        drawing = DrawHelper(self.gamestate)
+        units = []
+        seen = set()
+        for playerID in self.gamestate["players"]:
+            playerObj = self.get_player(playerID)
+            if playerObj["color"] in seen:
+                continue
+            colors = [playerObj["color"]] + self.getAlliedColors(playerObj)
+            seen.update(colors)
+            score = 0
+            resources = 0
+            for color in colors:
+                member = self.getPlayerObjectFromColor(color)
+                score += drawing.get_public_points(member, False)
+                resources += member["science"] + member["money"] + member["materials"]
+            units.append((colors, score // len(colors), resources // len(colors)))
+        units.sort(key=lambda unit: (unit[1], unit[2]), reverse=True)
+        return units
+
+    def getUnitScore(self, player, showPrivateRegardless=False):
+        """The score this player actually wins with. An Alliance shares one score."""
+        drawing = DrawHelper(self.gamestate)
+        colors = [player["color"]] + self.getAlliedColors(player)
+        total = sum(drawing.get_public_points(self.getPlayerObjectFromColor(color), showPrivateRegardless)
+                    for color in colors)
+        return total // len(colors)
+
     def getWinner(self):
-        winner = ""
-        winnerFaction = ""
-        highestScore = 0
-        resources = 0
-        for player in self.gamestate["players"]:
-            playerObj = self.get_player(player)
-            drawing = DrawHelper(self.gamestate)
-            points = drawing.get_public_points(playerObj, False)
-            totalResources = playerObj["science"] + playerObj["money"] + playerObj["materials"]
-            if points > highestScore:
-                highestScore = points
-                winner = playerObj["player_name"]
-                winnerFaction = playerObj["name"]
-                resources = totalResources
-            if points == highestScore:
-                if totalResources > resources:
-                    winner = playerObj["player_name"]
-                    winnerFaction = playerObj["name"]
-                    resources = totalResources
-        return (winner, highestScore, winnerFaction)
+        units = self.getScoringUnits()
+        if not units:
+            return ("", 0, "")
+        colors, score, _resources = units[0]
+        names = [self.getPlayerObjectFromColor(color)["player_name"] for color in colors]
+        factions = [self.getPlayerObjectFromColor(color)["name"] for color in colors]
+        return (" and ".join(names), score, " and ".join(factions))
 
     def setAdvancedAI(self, status: bool):
         self.gamestate["advanced_ai"] = status
@@ -160,6 +183,14 @@ class GamestateHelper:
     def setFancyShips(self, status: bool):
         self.gamestate["fancy_ships"] = status
         self.update()
+
+    def setAlliances(self, status: bool):
+        self.gamestate["alliances"] = status
+        self.update()
+
+    def isLastRound(self):
+        """The bot plays rounds 1..LAST_ROUND; upkeep past it declares the winner."""
+        return self.gamestate.get("roundNum", 1) >= LAST_ROUND
 
     async def declareWinner(self, interaction: discord.Interaction):
         self.gamestate["gameEnded"] = True
@@ -458,6 +489,7 @@ class GamestateHelper:
             self.gamestate["board"][position].pop("unitsToRetreat", None)
             self.gamestate["board"][position].pop("pendingRiftDice", None)
             self.gamestate["board"][position].pop("pendingRiftBackfire", None)
+            self.gamestate["board"][position].pop("combatEntryOrder", None)
             for player in self.gamestate["players"]:
                 color = self.gamestate["players"][player]["color"]
                 key = "ships_destroyed_by_" + color
@@ -578,7 +610,36 @@ class GamestateHelper:
                 self.gamestate["board"][position]["player_ships"].insert(0, i)
             else:
                 self.gamestate["board"][position]["player_ships"].append(i)
+        self.noteUnitEntry(color, position)
         self.update()
+
+    def getEntryOrder(self, position):
+        """Colours in the order they entered this sector, earliest first. The
+        rules use this to break ties between allies for dice assignment,
+        reputation draws and influence placement."""
+        return self.gamestate["board"].get(position, {}).get("entryOrder", [])
+
+    def getCombatEntryOrder(self, position):
+        """Entry order captured when combat began, including players later removed."""
+        tile = self.gamestate["board"].get(position, {})
+        if "combatEntryOrder" in tile:
+            return tile["combatEntryOrder"]
+        # shortcut: old saves lack eliminated players' entry order; set combatEntryOrder for an ongoing battle.
+        return self.getEntryOrder(position)
+
+    def noteUnitEntry(self, color, position):
+        tile = self.gamestate["board"][position]
+        entryOrder = tile.setdefault("entryOrder", [])
+        if color not in entryOrder:
+            entryOrder.append(color)
+
+    def pruneEntryOrder(self, position):
+        """Drop colours with no ships left; they are no longer in the sector."""
+        tile = self.gamestate["board"].get(position)
+        if tile is None or "entryOrder" not in tile:
+            return
+        present = [ship.split("-")[0] for ship in tile.get("player_ships", [])]
+        tile["entryOrder"] = [color for color in tile["entryOrder"] if color in present]
 
     def displayPlayerStats(self, player):
         money = player["money"]
@@ -618,7 +679,14 @@ class GamestateHelper:
         return msg
 
     def setCombatants(self, players, pos):
-        self.gamestate["board"][pos]["combatants"] = players
+        tile = self.gamestate["board"][pos]
+        tile["combatants"] = players
+        if "combatEntryOrder" not in tile:
+            entry_order = list(self.getEntryOrder(pos))
+            for player in players:
+                if player not in entry_order:
+                    entry_order.append(player)
+            tile["combatEntryOrder"] = entry_order
         self.update()
 
     def setCurrentSpeed(self, speed, pos):
@@ -687,11 +755,19 @@ class GamestateHelper:
         self.update()
 
     def setAttackerAndDefender(self, attacker, defender, pos):
-        if isinstance(self.gamestate["board"][pos]["owner"], str) and attacker == self.gamestate["board"][pos]["owner"]:
-            attacker = defender
-            defender = self.gamestate["board"][pos]["owner"]
+        """Each side is a list of colours: one player, or a whole Alliance.
+        The sector owner's side always defends."""
+        owner = self.gamestate["board"][pos]["owner"]
+        if isinstance(owner, str) and owner in attacker:
+            attacker, defender = defender, attacker
         self.gamestate["board"][pos]["attacker"] = attacker
         self.gamestate["board"][pos]["defender"] = defender
+        combatants = self.gamestate["board"][pos].setdefault("combatants", [])
+        for side in (attacker, defender):
+            colors = [side] if isinstance(side, str) else side
+            for color in colors:
+                if color not in combatants:
+                    combatants.append(color)
         self.update()
 
     def setUnresolvedHits(self, amount, pos):
@@ -849,6 +925,7 @@ class GamestateHelper:
             else:
                 if i + "adv" in self.gamestate["board"][position]["player_ships"]:
                     self.gamestate["board"][position]["player_ships"].remove(i + "adv")
+        self.pruneEntryOrder(position)
         self.update()
 
     async def upkeep(self, interaction: discord.Interaction):
@@ -1370,6 +1447,105 @@ class GamestateHelper:
                 break
         self.update()
 
+    def getAllianceMembers(self, tile: str):
+        """Colours of the players still in this alliance; betrayers have left."""
+        return [p["color"] for p in self.gamestate["players"].values()
+                if p.get("alliances", {}).get(tile) is False]
+
+    def areAllied(self, colorA, colorB):
+        """Two players are allied when they share a tile that neither has betrayed."""
+        if colorA == colorB:
+            return False
+        playerA = self.getPlayerObjectFromColor(colorA)
+        playerB = self.getPlayerObjectFromColor(colorB)
+        if playerA is None or playerB is None:
+            return False
+        shared = set(playerA.get("alliances", {})).intersection(playerB.get("alliances", {}))
+        return any(not playerA["alliances"][tile] and not playerB["alliances"][tile] for tile in shared)
+
+    def isFormerAlly(self, colorA, colorB):
+        """True when colorA betrayed a tile colorB still holds faceup."""
+        playerA = self.getPlayerObjectFromColor(colorA)
+        playerB = self.getPlayerObjectFromColor(colorB)
+        if playerA is None or playerB is None:
+            return False
+        shared = set(playerA.get("alliances", {})).intersection(playerB.get("alliances", {}))
+        return any(playerA["alliances"][tile] and not playerB["alliances"][tile] for tile in shared)
+
+    def getAlliedColors(self, player):
+        """Colours of everyone currently allied with this player."""
+        return [p["color"] for p in self.gamestate["players"].values()
+                if self.areAllied(player["color"], p["color"])]
+
+    def isInAlliance(self, player):
+        """True while the player still holds at least one faceup tile."""
+        return any(betrayed is False for betrayed in player.get("alliances", {}).values())
+
+    def getMaxAllianceSize(self):
+        return 2 if self.gamestate["player_count"] < 6 else 3
+
+    def getUnfoundedAllianceTiles(self):
+        """Tile types nobody has founded an alliance on yet."""
+        return [tile for tile in ALLIANCE_TILES if not self.getAllianceMembers(tile)]
+
+    def getJoinableAllianceTiles(self, player):
+        """Types this player could still take a tile of: not already held (faceup or
+        betrayed, which bars rejoining) and not already at the player-count limit."""
+        joinable = []
+        for tile in ALLIANCE_TILES:
+            if tile in player.get("alliances", {}):
+                continue
+            if len(self.getAllianceMembers(tile)) < self.getMaxAllianceSize():
+                joinable.append(tile)
+        return joinable
+
+    def formAlliance(self, tile: str, colors):
+        """Place a matching faceup tile next to each eligible player's board."""
+        if tile not in ALLIANCE_TILES:
+            raise ValueError(f"Unknown alliance tile: {tile}")
+        if not colors or len(colors) != len(set(colors)):
+            raise ValueError("An alliance needs unique player colors")
+
+        players = {player["color"]: player for player in self.gamestate["players"].values()}
+        members = set(self.getAllianceMembers(tile))
+        for color in colors:
+            player = players.get(color)
+            if player is None:
+                raise ValueError(f"Unknown alliance member: {color}")
+            held_tiles = player.get("alliances", {})
+            if tile in held_tiles and held_tiles[tile] is True:
+                raise ValueError("A betrayer cannot rejoin the same alliance")
+            if any(betrayed is False and existing_tile != tile
+                   for existing_tile, betrayed in held_tiles.items()):
+                raise ValueError("A player cannot belong to more than one alliance")
+
+        if len(members.union(colors)) > self.getMaxAllianceSize():
+            raise ValueError("The alliance has reached its maximum size")
+
+        for color in colors:
+            players[color].setdefault("alliances", {})[tile] = False
+        self.update()
+
+    def betrayAlliance(self, tile: str, color):
+        """Flip this player's tile to its Betrayer side. The tile stays, so the
+        player can never rejoin this alliance but may join a different one."""
+        playerID = self.get_player_from_color(color)
+        self.gamestate["players"][playerID].setdefault("alliances", {})[tile] = True
+        self.update()
+
+    def drawAllianceTile(self, colors):
+        """Found a new alliance on a randomly drawn unfounded tile type."""
+        players = {player["color"]: player for player in self.gamestate["players"].values()}
+        if not colors or len(colors) != len(set(colors)) or any(color not in players for color in colors):
+            raise ValueError("Every alliance member must be a unique player in this game")
+        unfounded = [tile for tile in self.getUnfoundedAllianceTiles()
+                     if all(tile not in players[color].get("alliances", {}) for color in colors)]
+        if not unfounded:
+            return None
+        tile = random.choice(unfounded)
+        self.formAlliance(tile, colors)
+        return tile
+
     def addDiscTile(self, tile: str):
         self.gamestate["board"][tile]["disctile"] = 1
         self.update()
@@ -1397,11 +1573,17 @@ class GamestateHelper:
 
     def update_player(self, *args):
         for ar in args:
-            if ar.player_id in self.gamestate["players"]:
-                self.gamestate["players"][ar.player_id] = ar.stats
-            else:
-                playerID = self.get_player_from_color(ar.stats["color"])
-                self.gamestate["players"][playerID] = ar.stats
+            playerID = ar.player_id
+            if playerID not in self.gamestate["players"]:
+                playerID = self.get_player_from_color(ar.stats.get("color"))
+            seat = self.gamestate["players"].get(playerID)
+            if seat is None or seat.get("color") != ar.stats.get("color"):
+                # A dev-mode tester drives the active player's buttons, so the stats
+                # being saved need not belong to the seat holding this id. Never copy
+                # one faction's stats into another faction's seat.
+                print(f"update_player: ignoring {ar.stats.get('color')} stats for seat {ar.player_id}")
+                continue
+            self.gamestate["players"][playerID] = ar.stats
         self.update()
 
     def change_player(self, player_id, new_player_id, new_username, new_player_name):
