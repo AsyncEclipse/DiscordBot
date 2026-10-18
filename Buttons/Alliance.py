@@ -223,9 +223,7 @@ class AllianceButtons:
         tile = buttonID.split("_")[1]
         if not AllianceButtons.canLeaveAlliance(game, player, tile):
             await interaction.channel.send("You can no longer leave this alliance.")
-            await interaction.message.delete()
             return
         game.betrayAlliance(tile, player["color"])
         await interaction.channel.send(f"{player['player_name']} has left the {tile.capitalize()} Alliance and"
                                        " flipped their tile to its Betrayer side. They may never rejoin it.")
-        await interaction.message.delete()

@@ -1,5 +1,6 @@
 """Founding, joining and leaving an Alliance, and the Act of Aggression rule."""
 import re
+from unittest.mock import AsyncMock
 
 import discord
 import pytest
@@ -128,6 +129,32 @@ class TestEligibility:
 
 
 class TestStaleButtons:
+    @pytest.mark.parametrize("has_left", [False, True])
+    def test_leaving_preserves_the_turn_menu(self, start_game, run, has_left):
+        game, channel = start_game(4)
+        game.setAlliances(True)
+        game.formAlliance("nova", ["blue", "red"])
+        blue = game.getPlayerObjectFromColor("blue")
+        TurnButtons.startNewTurn(blue, game)
+
+        async def leave_from_turn_menu():
+            view = TurnButtons.getStartTurnButtons(game, blue, "yellow")
+            message = await channel.send("Choose an action", view=view)
+            message.delete = AsyncMock()
+            if has_left:
+                game.betrayAlliance("nova", "blue")
+            interaction = FakeInteraction(channel)
+            interaction.message = message
+
+            await AllianceButtons.leaveAlliance(game, blue, interaction, "leaveAlliance_nova")
+
+            message.delete.assert_not_awaited()
+            assert any(button.custom_id == "FCIDblue_startResearch" for button in view.children)
+            assert not game.isInAlliance(blue)
+            assert game.gamestate["activePlayerColor"] == ["blue"]
+
+        run(leave_from_turn_menu())
+
     @pytest.mark.parametrize("response", ["accept", "decline"])
     def test_founding_offer_can_be_answered_after_the_turn_moves_on(self, make_game, run, response):
         game = _game(make_game)
