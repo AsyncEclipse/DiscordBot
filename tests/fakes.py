@@ -29,7 +29,7 @@ class FakeMessage:
             self.channel.deleted.add(self.id)
 
     async def edit(self, **kwargs):
-        pass
+        self.edited = kwargs
 
 
 class FakeChannel:
@@ -98,13 +98,13 @@ class FakeResponder:
 
 
 class FakeInteraction:
-    def __init__(self, channel=None, custom_id=None, user_id=None, role_names=()):
+    def __init__(self, channel=None, custom_id=None, user_id=None, role_names=(), message=None):
         self.channel = channel or FakeChannel()
         self.user = FakeUser()
         if user_id is not None:
             self.user.id = user_id
         self.guild = FakeGuild(role_names)
-        self.message = FakeMessage()
+        self.message = message or FakeMessage()
         self.data = {"custom_id": custom_id}
         self.created_at = datetime.now(timezone.utc)
         self.response = FakeResponder()

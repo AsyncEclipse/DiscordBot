@@ -4,7 +4,7 @@ import json
 import discord
 from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
-from helpers.PlayerHelper import PlayerHelper
+from helpers.PlayerHelper import DISCOVERY_PART_IDS, PlayerHelper
 from helpers.DrawHelper import DrawHelper
 from discord.ui import View, Button
 from helpers.ShipHelper import PlayerShip
@@ -28,7 +28,8 @@ class UpgradeButtons:
                                  custom_id=f"FCID{player['color']}_upgradeShip_{actions}_{ship}_{discTileUpgrade}"))
         await interaction.followup.send(file=await asyncio.to_thread(drawing.show_player_ship_area, image),
                                         ephemeral=True)
-        if discTileUpgrade not in ("dummy", "free"):
+        # only a discovery tile part can be saved for a later Upgrade action
+        if discTileUpgrade in DISCOVERY_PART_IDS:
             view.add_item(Button(label="Save For Future Upgrade Action", style=discord.ButtonStyle.red,
                                  custom_id=f"FCID{player['color']}_deleteMsg"))
         if button:
@@ -76,7 +77,7 @@ class UpgradeButtons:
         view.add_item(Button(label="Choose Different Ship", style=discord.ButtonStyle.gray,
                                  custom_id=(f"FCID{player['color']}_chooseDifferentShip_"
                                             f"{actions}_{discTileUpgrade}")))
-        if discTileUpgrade not in ("dummy", "free"):
+        if discTileUpgrade in DISCOVERY_PART_IDS:
             view.add_item(Button(label="Save For Future Upgrade Action", style=discord.ButtonStyle.red,
                                  custom_id=f"FCID{player['color']}_deleteMsg"))
         await UpgradeButtons.showMenu(interaction, f"{interaction.user.mention}, "
@@ -156,9 +157,7 @@ class UpgradeButtons:
             actions -= 1
             if actions == player['upgrade_apt'] - 1 and discTileUpgrade == "dummy":
                 player_helper.spend_influence_on_action("upgrade")
-        ancientTech = ["anm", "axc", "cod", "fls", "hyg", "ins", "iod", "iom", "iot",
-                       "jud", "mus", "ricon", "shh", "som", "socha", "mos", "plt", "nod"]
-        if newPart in ancientTech and newPart in player_helper.stats["ancient_parts"]:
+        if newPart in DISCOVERY_PART_IDS and newPart in player_helper.stats["ancient_parts"]:
             player_helper.stats["ancient_parts"].remove(newPart)
         oldName = "Nothing" if newPart == "mus" else part_stats[oldPart]['name']
         player_helper.stats[f"{ship}_parts"] = newParts

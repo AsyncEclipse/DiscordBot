@@ -81,10 +81,10 @@ def press(run):
     from listeners.ButtonListener import ButtonListener
     from tests.fakes import FakeInteraction
 
-    def _press(channel, user_id, custom_id):
+    def _press(channel, user_id, custom_id, message=None):
         game_id = channel.name.split("-")[0]  # the guild role that pings players is named after the game
-        inter = FakeInteraction(channel, custom_id=custom_id, user_id=user_id, role_names=[game_id])
-        inter.message = channel.message_with(custom_id) or inter.message
+        inter = FakeInteraction(channel, custom_id=custom_id, user_id=user_id, role_names=[game_id],
+                                message=message or channel.message_with(custom_id))
         run(ButtonListener(None).resolveButton(inter))
         return inter
 
@@ -101,9 +101,9 @@ def start_game(games_dir, run):
     from setup.GameInit import GameInit
     from tests.fakes import FakeChannel, FakeInteraction
 
-    def _start(player_count=2):
+    def _start(player_count=2, factions=None):
         random.seed(0)  # GameInit shuffles decks and tiles; keep runs reproducible
-        factions = ["hyd", "eri", "ori", "dra", "mec", "pla"]
+        factions = factions or ["hyd", "eri", "ori", "dra", "mec", "pla"]
         colors = ["blue", "red", "green", "yellow", "purple", "white"]
         homes = ["201", "203", "205", "207", "209", "211"]  # turn order reads these positions
         players = [[i + 1, f"<@{i + 1}>"] for i in range(player_count)]
