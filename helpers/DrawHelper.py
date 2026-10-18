@@ -1,7 +1,7 @@
 import math
 import discord
 from io import BytesIO
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 from jproperties import Properties
 import json
 import os
@@ -474,6 +474,14 @@ class DrawHelper:
                                 coords = tile["orb_snap"]
                             elif resource_type == "disc":
                                 coords = disc_center
+                                alpha = pop_image.getchannel("A")
+                                outlined_cube = Image.new("RGBA", pop_image.size, (235, 235, 235))
+                                outlined_cube.putalpha(alpha.filter(ImageFilter.MaxFilter(9)))
+                                dark_outline = Image.new("RGBA", pop_image.size, (20, 20, 20))
+                                dark_outline.putalpha(alpha.filter(ImageFilter.MaxFilter(5)))
+                                outlined_cube.alpha_composite(dark_outline)
+                                outlined_cube.alpha_composite(pop_image)
+                                pop_image = outlined_cube
                             else:
                                 coords = tile[f"{resource_type}{x + 1}_snap"]
                             tile_image.paste(pop_image, (int(345 / 1024 * mult * coords[0] - int(18 * mult)),
