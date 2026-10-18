@@ -320,6 +320,10 @@ class GamestateHelper:
             return "exile"
         elif fullName == "Atlantians":
             return "atlantians"
+        elif fullName == "Remnants of Ra":
+            return "ra"
+        elif fullName == "Techno-Mages":
+            return "tm"
         elif "Terran" in fullName:
             return fullName.lower().replace(" ", "_")
 
@@ -694,9 +698,10 @@ class GamestateHelper:
         self.gamestate["board"][pos]["unresolvedHits"] = amount
         self.update()
 
-    def add_pop_specific(self, originalType: str, popType: str, number: int, position: str, playerID):
-        if self.gamestate["players"][playerID]["colony_ships"] > 0:
-            self.gamestate["players"][playerID]["colony_ships"] -= 1
+    def add_pop_specific(self, originalType: str, popType: str, number: int, position: str, playerID,
+                         colony_ships: int = 1):
+        if self.gamestate["players"][playerID]["colony_ships"] >= colony_ships:
+            self.gamestate["players"][playerID]["colony_ships"] -= colony_ships
         else:
             return False
         if f"{originalType}_pop" in self.gamestate["board"][position]:
@@ -705,6 +710,17 @@ class GamestateHelper:
             self.gamestate["board"][position][f"{originalType}_pop"] = [1]
         if popType.replace("adv", "") + "_pop_cubes" in self.gamestate["players"][playerID]:
             self.gamestate["players"][playerID][popType.replace("adv", "") + "_pop_cubes"] -= 1
+        self.update()
+        return True
+
+    def add_disc_pop(self, popType: str, position: str, playerID):
+        """Power of the Ancients: one population cube on the influence disc, taken from its track."""
+        if self.gamestate["board"][position].get("disc_pop", [0])[0] > 0:
+            return False
+        if self.gamestate["players"][playerID][f"{popType}_pop_cubes"] < 1:
+            return False
+        self.gamestate["board"][position]["disc_pop"] = [1]
+        self.gamestate["players"][playerID][f"{popType}_pop_cubes"] -= 1
         self.update()
         return True
     
@@ -793,11 +809,11 @@ class GamestateHelper:
                 found = True
             if found:
                 if not graveYard:
-                    if "neutral" not in i and "orbital" not in i:
+                    if "neutral" not in i and "orbital" not in i and "disc" not in i:
                         if  self.gamestate["players"][playerID][i.replace("adv", "") + "_cubes"] < 13:
                             self.gamestate["players"][playerID][i.replace("adv", "") + "_cubes"] += 1
                     else:
-                        if "neutral" not in i:
+                        if "neutral" not in i and "disc" not in i:
                             orbitalPop += 1
                         else:
                             neutralPop += 1
@@ -1212,6 +1228,10 @@ class GamestateHelper:
             return "exile"
         elif full_name == "Atlantians":
             return "atlantians"
+        elif full_name == "Remnants of Ra":
+            return "ra"
+        elif full_name == "Techno-Mages":
+            return "tm"
         elif "Terran" in full_name:
             return full_name.lower().replace(" ", "_")
 

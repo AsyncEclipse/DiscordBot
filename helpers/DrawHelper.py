@@ -86,6 +86,10 @@ class DrawHelper:
             return "exile"
         elif full_name == "Atlantians":
             return "atlantians"
+        elif full_name == "Remnants of Ra":
+            return "ra"
+        elif full_name == "Techno-Mages":
+            return "tm"
         elif "Terran" in full_name:
             return full_name.lower().replace(" ", "_")
 
@@ -432,7 +436,7 @@ class DrawHelper:
                                               int(345 / 1024 * mult * coords[1] + value - size / 2 + 35 * mult)),
                                              mask=damage_image)
 
-            def paste_resourcecube(tile, tile_image, resource_type, color):
+            def paste_resourcecube(tile, tile_image, resource_type, color, disc_center):
                 if tile.get(f"{resource_type}_pop", 0):
                     if f"{resource_type}_shrine" in tile:
                         shrine_path = "images/resources/components/factions/shrine.png"
@@ -452,6 +456,8 @@ class DrawHelper:
                             pop_image = self.use_image(pop_path)
                             if resource_type == "orbital":
                                 coords = tile["orb_snap"]
+                            elif resource_type == "disc":
+                                coords = disc_center
                             else:
                                 coords = tile[f"{resource_type}{x + 1}_snap"]
                             tile_image.paste(pop_image, (int(345 / 1024 * mult * coords[0] - int(18 * mult)),
@@ -471,17 +477,20 @@ class DrawHelper:
                 inf_image = self.use_image(inf_path)
                 if "currentAction" in tile:
                     if tile["currentAction"] == "move":
-                        tile_image.paste(inf_image, (int(202 * mult), int(30 * mult)), mask=inf_image)
+                        disc_position = (202, 30)
                     elif tile["currentAction"] == "build":
-                        tile_image.paste(inf_image, (int(202 * mult), int(180 * mult)), mask=inf_image)
+                        disc_position = (202, 180)
                     else:
-                        tile_image.paste(inf_image, (int(82 * mult), int(148 * mult)), mask=inf_image)
-
+                        disc_position = (82, 148)
                 else:
-                    tile_image.paste(inf_image, (int(153 * mult), int(130 * mult)), mask=inf_image)
-                for resource in ["neutral", "neutraladv", "money", "moneyadv",
-                                 "science", "scienceadv", "material", "materialadv", "orbital"]:
-                    paste_resourcecube(tile, tile_image, resource, color)
+                    disc_position = (153, 130)
+                tile_image.paste(inf_image, (int(disc_position[0] * mult), int(disc_position[1] * mult)),
+                                 mask=inf_image)
+                disc_center = (disc_position[0] * mult + inf_image.width / 2,
+                               disc_position[1] * mult + inf_image.height / 2)
+                for resource in ["neutral", "neutraladv", "money", "moneyadv", "science", "scienceadv",
+                                 "material", "materialadv", "orbital", "disc"]:
+                    paste_resourcecube(tile, tile_image, resource, color, disc_center)
             return tile_image
 
     def areTwoTilesAdjacent(self, tile1, tile2, configs):
@@ -596,7 +605,7 @@ class DrawHelper:
         return context
 
     def faction_portrait(self, faction):
-        if faction == "atlantians":
+        if faction == "atlantians" or faction == "ra" or faction == "tm":
             return self.use_image(f"images/resources/components/layouts/factionImages/{faction}_image.png")
         return self.use_image(f"images/resources/components/factions/{faction}_board.png").crop((49, 252, 154, 357))
 
@@ -700,7 +709,8 @@ class DrawHelper:
         return context
 
     def display_remaining_tiles(self):
-        context = Image.new("RGBA", (1900, 500), (0, 0, 0, 255))
+        # Tall enough for the turn order (290px) pasted under the minor species block at y 250.
+        context = Image.new("RGBA", (1900, 560), (0, 0, 0, 255))
 
         filepath = "images/resources/hexes/sector3backblank.png"
         tile_image = self.use_resized_image(filepath, (172, 150))
@@ -1113,7 +1123,8 @@ class DrawHelper:
             text_drawable_image.text((50 + int(116 * x), 607), f"{action_activation}", color, font=font,
                                              stroke_width=stroke_width, stroke_fill=stroke_color)
         font = ImageFont.truetype("images/resources/arial.ttf", size=35)
-        if "magellan" in faction:
+        # the colony ships one Influence action may flip (Buttons/Influence.py)
+        if "magellan" in faction or faction in ("ra", "tm"):
             text_drawable_image.text((618, 417), f"1", color, font=font,
                                              stroke_width=stroke_width, stroke_fill=stroke_color)
         else:
@@ -1621,6 +1632,8 @@ class DrawHelper:
                             points += 3
                 if player["name"] == "Planta":
                     points += 1
+                if player["name"] == "Remnants of Ra" and tile_map[tile]["artifact"] == 1:
+                    points += 1
             if player["name"] == "Descendants of Draco" and "player_ships" in tile_map[tile]:
                 for ship in tile_map[tile]["player_ships"]:
                     if "anc" in ship:
@@ -1759,21 +1772,23 @@ class DrawHelper:
         width = 4150 if (pCount != 2 and pCount != 4) else 2800
         width = max([context2.size[0], context3.size[0] + context4.size[0] + 150,
                      cropped_context.size[0], context5.size[0]])
-        height = (cropped_context.size[1] + context2.size[1] +
-
+        # The map's bottom edge must not crowd the round/turn order strip below it.
+        mapGap = 60
+        height = (cropped_context.size[1] + context2.size[1] + mapGap +
                   max(context3.size[1], context4.size[1]) + 90)
         final_context = Image.new("RGBA", (width, height), (0, 0, 0, 255))
         centering = int((width - cropped_context.size[0])/2)
         final_context.paste(cropped_context, (centering, 0))
         #final_context.paste(context6, (0, 0))
-        final_context.paste(context2, (0, cropped_context.size[1]+ max(context3.size[1],context4.size[1])))
-        final_context.paste(context3, (0, cropped_context.size[1]))
+        final_context.paste(context2, (0, cropped_context.size[1] + mapGap +
+                                       max(context3.size[1],context4.size[1])))
+        final_context.paste(context3, (0, cropped_context.size[1] + mapGap))
         # final_context.paste(context5, (50, context2.size[1] - 20))
         final_context.paste(context4, (context3.size[0] + 150,
-                                       cropped_context.size[1]))
+                                       cropped_context.size[1] + mapGap))
         final_context.paste(context5,
-                            (0, cropped_context.size[1] + context2.size[1] + max(context3.size[1],
-                                                                                 context4.size[1])))
+                            (0, cropped_context.size[1] + mapGap + context2.size[1] + max(
+                                context3.size[1], context4.size[1])))
         bytes_io = BytesIO()
         final_context.save(bytes_io, format="WEBP", quality=80, method=1)
         bytes_io.seek(0)

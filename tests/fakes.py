@@ -13,6 +13,8 @@ from types import SimpleNamespace
 
 import discord
 
+from helpers.GamestateHelper import GamestateHelper
+
 FACTIONS = json.load(open("data/factions.json"))
 
 
@@ -23,6 +25,7 @@ class FakeMessage:
         self.id = next(self._ids)
         self.flags = SimpleNamespace(ephemeral=False)
         self.channel = channel
+        self.components = []
 
     async def delete(self):
         if self.channel is not None:
@@ -109,6 +112,20 @@ class FakeInteraction:
         self.created_at = datetime.now(timezone.utc)
         self.response = FakeResponder()
         self.followup = FakeResponder()
+
+
+class FakeGame:
+    """Stand-in for the draft/setup code paths: only the gamestate keys they read."""
+
+    def __init__(self, community_factions, community_mode):
+        self.gamestate = {
+            "community_factions": community_factions,
+            "communityMode": community_mode,
+            "bannedFactions": [],
+            "draftedFactions": [],
+        }
+
+    getShortFactionNameFromFull = GamestateHelper.getShortFactionNameFromFull
 
 
 def player_stats(faction, **overrides):

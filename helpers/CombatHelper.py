@@ -6,6 +6,7 @@ from discord.ui import View, Button
 from Buttons.Influence import InfluenceButtons
 from Buttons.Population import PopulationButtons
 from Buttons.Reputation import ReputationButtons
+from Buttons.Upgrade import UpgradeButtons
 from helpers.DrawHelper import DrawHelper
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
@@ -112,6 +113,8 @@ class Combat:
 
     @staticmethod
     async def startCombat(game: GamestateHelper, channel, pos):
+        # a new pairing on the tile is a new combat: last pairing's Techno-Magic parts come off first
+        await Combat.revertTechnoMagic(game, channel, pos)
         drawing = DrawHelper(game.gamestate)
         players = Combat.findPlayersInTile(game, pos)[-2:]
         game.setAttackerAndDefender(players[1], players[0], pos)
@@ -126,6 +129,7 @@ class Combat:
             else:
                 file = await asyncio.to_thread(drawing.show_AI_stats)
                 await channel.send("AI stats look like this", file=file)
+        await Combat.offerTechnoMagic(game, channel, pos)
         await Combat.promptNextSpeed(game, pos, channel, False)
 
     @staticmethod
@@ -1324,6 +1328,66 @@ class Combat:
         await Combat.promptNextSpeed(game, pos, interaction.channel, False)
 
     @staticmethod
+    async def offerTechnoMagic(game: GamestateHelper, channel, pos: str):
+        """Techno-Magic: at the start of a combat, one temporary Upgrade 1 per ship blueprint.
+        The attacker chooses first, the defender last."""
+        tile = game.gamestate["board"][pos]
+        for color in [tile.get("attacker"), tile.get("defender")]:
+            if not color or color == "ai":
+                continue
+            player = game.getPlayerObjectFromColor(color)
+            if player["name"] != "Techno-Mages":
+                continue
+            view = View()
+            for ship in game.getShipsWithParts(player):
+                view.add_item(Button(label=ship.capitalize(), style=discord.ButtonStyle.blurple,
+                                     custom_id=f"FCID{color}_technoMagic_{pos}_{ship}"))
+            if len(view.children):
+                await channel.send(f"{player['player_name']}, Techno-Magic lets you temporarily Upgrade 1 on each"
+                                   " ship blueprint for this combat. The new parts are removed when the battle"
+                                   " ends. You may not remove ship parts or place Ancient ship parts.", view=view)
+
+    @staticmethod
+    async def technoMagicUpgrade(game: GamestateHelper, customID: str, player, interaction: discord.Interaction,
+                                 player_helper: PlayerHelper):
+        pos, ship = customID.split("_")[1:3]
+        color = player["color"]
+        # the first install anywhere holds the pre-combat blueprint, so overlapping combats
+        # each remove only their own temporary part
+        base = next((tile["tmParts"][color][ship]["base"]
+                     for tile in game.gamestate["board"].values()
+                     if tile.get("tmParts", {}).get(color, {}).get(ship, {}).get("base")), None)
+        record = game.gamestate["board"][pos].setdefault("tmParts", {}).setdefault(color, {}).setdefault(ship, {})
+        if record.get("install"):
+            await interaction.followup.send("You have already upgraded that blueprint this combat.", ephemeral=True)
+            return
+        record["base"] = base if base is not None else list(player[f"{ship}_parts"])
+        game.update()
+        await UpgradeButtons.upgradeShip(game, player, interaction, f"upgradeShip_1_{ship}_tm{pos}", player_helper)
+
+    @staticmethod
+    async def revertTechnoMagic(game: GamestateHelper, channel, pos: str):
+        """The temporary parts installed at the start of this combat come off again."""
+        for color, ships in game.gamestate["board"][pos].pop("tmParts", {}).items():
+            player = game.getPlayerObjectFromColor(color)
+            player_helper = PlayerHelper(color, player)
+            restore = {}
+            for ship, record in ships.items():
+                pending = any(tile.get("tmParts", {}).get(color, {}).get(ship, {}).get("install")
+                              for key, tile in game.gamestate["board"].items() if key != pos)
+                if not pending:
+                    restore[ship] = record["base"]
+            if restore:
+                for ship, parts in restore.items():
+                    player[f"{ship}_parts"] = parts
+                game.update_player(player_helper)
+                await channel.send(f"Techno-Magic wears off: the temporary ship parts are removed"
+                                               f" from {player['player_name']}'s blueprints.")
+            else:
+                # every install belongs to a combat that is still pending; the pop itself must persist
+                game.update()
+
+    @staticmethod
     async def declareAWinner(game: GamestateHelper, interaction: discord.Interaction, pos: str):
         game.updateSaveFile()
 
@@ -1345,6 +1409,7 @@ class Combat:
             players = Combat.findPlayersInTile(game, pos)
         countDraw = 1
         game.removeFromKey("tilesToResolve", int(game.gamestate["board"][pos]["sector"]))
+        await Combat.revertTechnoMagic(game, interaction.channel, pos)
         for playerColor in players:
             if playerColor == "ai":
                 continue
