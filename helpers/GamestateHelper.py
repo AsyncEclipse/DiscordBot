@@ -1,4 +1,5 @@
 import asyncio
+import copy
 import json
 import time
 import discord
@@ -11,6 +12,11 @@ import os
 from jproperties import Properties
 import random
 from discord.ui import View, Button
+
+# Nebula Sectors (295/395) are one hex split into three Subsectors. Edges are
+# indexed 0=N, 1=NE, 2=SE, 3=S, 4=SW, 5=NW; the parent board position holds
+# the Ancient subsector, subsectors b/c the discovery ones.
+NEBULA_WEDGES = {"": (1, 2), "b": (0, 5), "c": (3, 4)}
 
 
 ALLIANCE_TILES = ["nova", "flare", "vortex"]
@@ -428,7 +434,22 @@ class GamestateHelper:
                     discard = len(self.gamestate["tile_discard_deck_300"])
                 if adjTile not in self.gamestate["board"] and len(self.gamestate["tile_deck_300"]) + discard > 0 and adjTile in configs:
                     self.add_tile(adjTile, 0, "sector3back")
+        if position is not None and tile.get("type") == "nebula":
+            neighbors = configs.get(position)[0].split(",")
+            suffixes = [""] + list(tile["subsectors"])
+            for suffix in suffixes:
+                sub = tile if suffix == "" else {**copy.deepcopy(tile), **tile["subsectors"][suffix],
+                                                 "ancient": 0, "player_ships": [], "nebula_parent": position}
+                # every Nebula edge is a wormhole, and siblings connect through internal wormholes
+                sub["adjacent"] = ([neighbors[d] for d in NEBULA_WEDGES[suffix]]
+                                   + [position + s for s in suffixes if s != suffix])
+                sub["nebula_internal"] = [position + s for s in suffixes if s != suffix]
+                self.gamestate["board"][position + suffix] = sub
         self.update()
+
+    def nebula_subsector_for_edge(self, parent, edge):
+        # edge: direction from the Nebula hex to its neighbour (Nebulas are always placed unrotated)
+        return parent + next(s for s, wedge in NEBULA_WEDGES.items() if edge in wedge)
 
     def add_control(self, color, position):
         self.gamestate["board"][position]["owner"] = color
@@ -1095,7 +1116,8 @@ class GamestateHelper:
         draw_count = {2: [5, 12], 3: [8, 14], 4: [14, 16], 5: [16, 18], 6: [18, 20], 7: [22, 22], 8: [24, 24], 9: [24, 26]}
 
         third_sector_tiles = ["301", "302", "303", "304", "305", "306", "307", "308", "309", "310", "311", "312", "313",
-                              "314", "315", "316", "317", "318", "381", "382", "398", "397", "399", "396", "394", "393"]
+                              "314", "315", "316", "317", "318", "381", "382", "398", "397", "399", "396", "395",
+                              "394", "393"]
         if not galactic_events and count < 7:
             third_sector_tiles = ["301", "302", "303", "304", "305", "306", "307", "308", "309", "310",
                                   "311", "312", "313", "314", "315", "316", "317", "318", "381", "382"]
@@ -1105,6 +1127,8 @@ class GamestateHelper:
                 third_sector_tiles.remove("396")
             else:
                 third_sector_tiles.remove("399")
+            # Nebula Sectors (295 ring 2, 395 ring 3) ship with the galactic events tile pool
+            self.gamestate["tile_deck_200"].append("295")
         sector_draws = draw_count[self.gamestate["player_count"]][0]
         tech_draws = draw_count[self.gamestate["player_count"]][1]
 

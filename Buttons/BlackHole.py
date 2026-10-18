@@ -62,17 +62,28 @@ class BlackHoleButtons:
                 with open("data/tileAdjacencies.properties", "rb") as f:
                     configs.load(f)
             for tile in game.gamestate["board"]:
+                if "nebula_parent" in game.gamestate["board"][tile]:
+                    continue
                 if "wormholes" in game.gamestate["board"][tile]:
                     for index, adjTile in enumerate(configs.get(tile)[0].split(",")):
                         tile_orientation_index = (index + int(game.gamestate["board"][tile]["orientation"]) // 60) % 6
                         if tile_orientation_index in game.gamestate["board"][tile]["wormholes"]:
                             if adjTile not in game.gamestate["board"] or "back" in game.gamestate["board"][adjTile]["sector"]:
-                                view.add_item(Button(label=f"Add ship to Tile {tile}", style=discord.ButtonStyle.gray,
+                                target = tile
+                                if "nebula_internal" in game.gamestate["board"][tile]:
+                                    target = game.nebula_subsector_for_edge(tile, index)
+                                    # each Nebula Subsector with an open border is its own option
+                                    if any(item.custom_id.endswith(f"_{target}_{damage}") for item in view.children):
+                                        continue
+                                view.add_item(Button(label=f"Add ship to Tile {target}", style=discord.ButtonStyle.gray,
                                                      custom_id=f"FCID{player['color']}_blackHoleFinish"
-                                                     f"_{ship}_{tile}_{damage}"))
-                                break
+                                                     f"_{ship}_{target}_{damage}"))
+                                if "nebula_internal" not in game.gamestate["board"][tile]:
+                                    break
         else:
             for tile in game.gamestate["board"]:
+                if "nebula_parent" in game.gamestate["board"][tile]:
+                    continue
                 if int(tile) < 200 and int(tile) > 99 and "back" not in game.gamestate["board"][tile]["sector"]:
                     view.add_item(Button(label=f"Add ship to Tile {tile}", style=discord.ButtonStyle.gray,
                                          custom_id=f"FCID{player['color']}_blackHoleFinish_{ship}_{tile}_{damage}"))

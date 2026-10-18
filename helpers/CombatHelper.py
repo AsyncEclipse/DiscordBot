@@ -141,6 +141,8 @@ class Combat:
         tile_map = game.gamestate["board"]
         tiles = []
         for tile in tile_map:
+            if tile_map[tile].get("type") == "nebula":
+                continue
             if Combat.isDracoAgainstAncients(game, tile):
                 if tile_map[tile].get("owner") == 0:
                     tiles.append((int(tile_map[tile]["sector"]), tile))
@@ -1565,7 +1567,10 @@ class Combat:
             players = game.gamestate["board"][pos]["combatants"]
         else:
             players = Combat.findPlayersInTile(game, pos)
-        countDraw = 1
+        system = int(game.gamestate["board"][pos]["sector"])
+        # Nebula Subsectors share a sector number, so number draws after any already queued for it
+        countDraw = 1 + sum(q[0] == system for q in game.gamestate.get("queuedDraws", [])
+                            + game.gamestate.get("queuedQuestions", []))
         game.removeFromKey("tilesToResolve", int(game.gamestate["board"][pos]["sector"]))
         await Combat.revertTechnoMagic(game, interaction.channel, pos)
         entry_order = game.getCombatEntryOrder(pos)
@@ -1605,7 +1610,8 @@ class Combat:
 
         winner_owns_or_allies = (winner is not None and owner != 0 and owner != "ai"
                                  and game.areAllied(winner, owner))
-        if winner is not None and owner != winner and not winner_owns_or_allies:
+        nebula = game.gamestate["board"][pos].get("type") == "nebula"
+        if winner is not None and owner != winner and not winner_owns_or_allies and not nebula:
             player = game.getPlayerObjectFromColor(winner)
             playerName = player["player_name"]
             if owner == 0:

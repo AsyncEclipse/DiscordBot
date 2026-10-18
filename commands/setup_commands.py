@@ -164,7 +164,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         :param ai_ship_type: Choose which type of AI ships to use.
         :param rift_cannon: Rift cannons are enabled by default.
         :param turn_order_variant: Pass turn order is enabled by default.
-        :param galactic_event_tiles: Supernova/black-holes/Pulsars are disabled by default.
+        :param galactic_event_tiles: Supernova/black-holes/Pulsars/Nebula Sectors are disabled by default.
         :param hyperlanes: Hyperlanes for 4p and 5p are default off.
         :param ban_factions: Used to ban 10-playerCount factions from the draft.
         :param community_parts: Turns on community changes to improved hull and phase shield.
@@ -252,7 +252,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
             else:
                 msgBig +="## Hyperlanes have been enabled for this game"
         if galactic_event_tiles:
-            msgBig += "\n## Galactic Event Tiles have been added to this game"
+            msgBig += "\n## Galactic Event Tiles and Nebula Sectors have been added to this game"
         if rift_cannon:
             msgBig += "\n## Rift Cannons have been added to this game"
         if alliances:

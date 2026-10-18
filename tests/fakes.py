@@ -36,6 +36,11 @@ class FakeMessage:
     async def edit(self, **kwargs):
         self.edited = kwargs
 
+    async def create_thread(self, name):
+        thread = FakeChannel(name)
+        self.channel.threads.append(thread)
+        return thread
+
 
 class FakeChannel:
     def __init__(self, name="aeb1-actions"):
@@ -54,6 +59,9 @@ class FakeChannel:
         if message_id in self.deleted:
             raise discord.NotFound(SimpleNamespace(status=404, reason="Not Found"), "Unknown Message")
         return FakeMessage(self)
+
+    async def edit(self, **kwargs):
+        self.edited = kwargs
 
     def message_with(self, custom_id):
         """The latest message carrying this button, as Discord hands it to the press."""

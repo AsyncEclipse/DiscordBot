@@ -10,11 +10,17 @@ from discord.ui import View, Button
 
 class DiscoveryTileButtons:
     @staticmethod
-    def drawAtlantiansDiscoveryChoices(game: GamestateHelper):
+    def drawAtlantiansDiscoveryChoices(game: GamestateHelper, tile=None):
         """Draw two choices, removing Material Gain and Ancient Cruiser from the deck."""
         choices = []
+        is_nebula = game.gamestate["board"].get(tile, {}).get("type") == "nebula"
         while game.gamestate["discTiles"] and len(choices) < 2:
             disc = game.gamestate["discTiles"].pop()
+            if is_nebula and disc in ("orb", "mon"):
+                game.gamestate["discTiles"].insert(0, disc)
+                if not any(d not in ("orb", "mon") for d in game.gamestate["discTiles"]):
+                    break
+                continue
             if disc not in ("mat", "cru"):
                 choices.append(disc)
         game.update()
@@ -46,7 +52,7 @@ class DiscoveryTileButtons:
             return
         if player.get("name") == "Atlantians":
             # identical draws collapse to one choice
-            choices = list(dict.fromkeys(DiscoveryTileButtons.drawAtlantiansDiscoveryChoices(game)))
+            choices = list(dict.fromkeys(DiscoveryTileButtons.drawAtlantiansDiscoveryChoices(game, tile)))
             if not choices:
                 await interaction.channel.send("No eligible discovery tiles remain in the deck.")
                 return
@@ -70,6 +76,11 @@ class DiscoveryTileButtons:
             disc = choices[0]
         else:
             disc = game.getNextDiscTile(tile)
+            if game.gamestate["board"][tile].get("type") == "nebula":
+                while disc in ("orb", "mon") and any(d not in ("orb", "mon") for d in game.gamestate["discTiles"]):
+                    game.gamestate["discTiles"].insert(0, disc)
+                    disc = game.gamestate["discTiles"].pop()
+                game.update()
         await DiscoveryTileButtons.sendDiscoveryTileOptions(game, tile, interaction, player, disc)
 
     @staticmethod

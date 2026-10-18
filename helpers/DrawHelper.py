@@ -277,6 +277,8 @@ class DrawHelper:
         return discord.File(bytes_io, filename="tiles.webp")
 
     def board_tile_image(self, position, additionalRot:int=0):
+        if "nebula_parent" in self.gamestate["board"].get(position, {}):
+            return self.board_tile_image(self.gamestate["board"][position]["nebula_parent"], additionalRot)
         sector = self.gamestate["board"][position]["sector"]
         filepath2 = f"images/resources/hexes/{sector}.png"
         filepath = f"images/resources/hexes/numberless/{sector}.png"
@@ -290,7 +292,7 @@ class DrawHelper:
             tile = self.gamestate["board"][position]
             rotation = (int(tile["orientation"])+additionalRot+360)%360
 
-            if int(position) // 100 == 2 and int(position) % 2 == 1 and self.gamestate["player_count"] < 7:
+            if position.isdigit() and int(position) // 100 == 2 and int(position) % 2 == 1 and self.gamestate["player_count"] < 7:
                 hsMask2 = Image.open("images/resources/masks/hsmaskTrip.png").convert("RGBA").resize((210, 210))
                 tile_image.paste(hsMask2, (int(138 * mult), int(115 * mult)), mask=hsMask2)
             if tile.get("disctile", 0) > 0:
@@ -365,10 +367,10 @@ class DrawHelper:
                 warppath = "images/resources/all_boards/Warp_picture.png"
                 warp_mask = self.use_image(warppath)
                 tile_image.paste(warp_mask, (int(20 * mult), int(140 * mult)), mask=warp_mask)
-            if len(tile.get("player_ships", [])) > 0:
+            def paste_ships(ship_tile, ship_pos):
                 counts = {}  # To track counts for each ship type
                 countsShips = {}
-                for ship in tile["player_ships"]:
+                for ship in ship_tile["player_ships"]:
                     if "-" not in ship:
                         continue
                     ship_type = ship.split("-")[1]  # Extract ship type
@@ -384,9 +386,9 @@ class DrawHelper:
                         ship = ship_type
                         if ship_type == "orb":
                             size = int(110 * mult)
-                            if tile["owner"] != 0:
-                                if all([self.getPlayerObjectFromColor(tile["owner"])['name'] == "The Exiles",
-                                            tile.get("orbital_pop", [0])[0] == 1]):
+                            if ship_tile["owner"] != 0:
+                                if all([self.getPlayerObjectFromColor(ship_tile["owner"])['name'] == "The Exiles",
+                                            ship_tile.get("orbital_pop", [0])[0] == 1]):
                                     ship = "exile_orb"
                                 
                     filepathShip = f"images/resources/components/fancy_ships/fancy_{ship}.png"
@@ -398,7 +400,7 @@ class DrawHelper:
                         continue
                     ship_image = self.use_image(filepathShip)
 
-                    coords = tile[f"{ship_type}_snap"]
+                    coords = ship_tile[f"{ship_type}_snap"]
 
                     if ship_type not in counts:
                         counts[ship_type] = 0
@@ -423,10 +425,10 @@ class DrawHelper:
                     if "ai-" not in key:
                         ship_type = key.split("-")[1]
 
-                    coords = tile[ship_type.replace("adv", "") + "_snap"]
-                    if "damage_tracker" in self.gamestate["board"][position]:
-                        if key in self.gamestate["board"][position]["damage_tracker"]:
-                            damage = self.gamestate["board"][position]["damage_tracker"][key]
+                    coords = ship_tile[ship_type.replace("adv", "") + "_snap"]
+                    if "damage_tracker" in self.gamestate["board"][ship_pos]:
+                        if key in self.gamestate["board"][ship_pos]["damage_tracker"]:
+                            damage = self.gamestate["board"][ship_pos]["damage_tracker"][key]
                     if damage > 0:
                         for count in range(damage):
                             damage_image = self.use_image("images/resources/components/basic_ships/marker_damage.png")
@@ -435,6 +437,20 @@ class DrawHelper:
                                                   10 * count * mult + 15 * mult),
                                               int(345 / 1024 * mult * coords[1] + value - size / 2 + 35 * mult)),
                                              mask=damage_image)
+
+            if len(tile.get("player_ships", [])) > 0:
+                paste_ships(tile, position)
+            if "nebula_internal" in tile:
+                for sib in tile["nebula_internal"]:
+                    sib_tile = self.gamestate["board"][sib]
+                    if sib_tile.get("disctile", 0) > 0:
+                        discTile = self.use_image("images/resources/components/discovery_tiles/discovery_2ptback.png")
+                        discTile = discTile.rotate(315, expand=True)
+                        diamond = sib_tile["disc_snap"]
+                        tile_image.paste(discTile, (int(diamond[0] - discTile.width / 2),
+                                                    int(diamond[1] - discTile.height / 2)), mask=discTile)
+                    if len(sib_tile.get("player_ships", [])) > 0:
+                        paste_ships(sib_tile, sib)
 
             def paste_resourcecube(tile, tile_image, resource_type, color, disc_center):
                 if tile.get(f"{resource_type}_pop", 0):
@@ -1722,6 +1738,8 @@ class DrawHelper:
                 max_x = max(max_x, 1820 + hyperImage.width)
                 max_y = max(max_y, 2850 + hyperImage.height)
             for tile in tile_map:
+                if "nebula_parent" in self.gamestate["board"][tile]:
+                    continue
                 tile_image = self.board_tile_image(tile).resize((345, 300))
                 x, y = map(int, configs.get(tile)[0].split(","))
                 context.paste(tile_image, (x, y), mask=tile_image)
@@ -1818,6 +1836,8 @@ class DrawHelper:
             max_x = float('-inf')
             max_y = float('-inf')
             for tile in tile_map:
+                if "nebula_parent" in self.gamestate["board"][tile]:
+                    continue
                 tile_image = self.board_tile_image(tile)
                 x, y = map(int, configs.get(tile)[0].split(","))
                 context.paste(tile_image, (x, y), mask=tile_image)

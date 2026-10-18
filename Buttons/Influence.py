@@ -16,6 +16,14 @@ class InfluenceButtons:
     @staticmethod
     def areTwoTilesAdjacent(game: GamestateHelper, tile1, tile2, configs, wormholeGen: bool):
         def is_adjacent(tile_a, tile_b):
+            board = game.gamestate["board"]
+            if "adjacent" in board.get(tile_a, {}):
+                # Nebula Subsector: every edge is a wormhole
+                return tile_b in board[tile_a]["adjacent"]
+            if "adjacent" in board.get(tile_b, {}):
+                if tile_a not in board[tile_b]["adjacent"]:
+                    return False
+                tile_b = board[tile_b].get("nebula_parent", tile_b)
             for index, adjTile in enumerate(configs.get(tile_a)[0].split(",")):
                 if tile_a in game.gamestate["board"] and tile_b in game.gamestate["board"] and adjTile == tile_b:
                     tile_orientation_index = (index + (int(game.gamestate["board"][tile_a]["orientation"]) // 60)) % 6
@@ -60,7 +68,8 @@ class InfluenceButtons:
         tilesToInfluence = []
         playerTiles = InfluenceButtons.getListOfTilesPlayerIsInForInfluence(game, player)
         for tile in playerTiles:
-            for adjTile in configs.get(tile)[0].split(","):
+            stored = tile_map[tile].get("adjacent")
+            for adjTile in (stored if stored is not None else configs.get(tile)[0].split(",")):
                 if adjTile not in tilesViewed and InfluenceButtons.areTwoTilesAdjacent(game, tile, adjTile,
                                                                                        configs, wormHoleGen):
                     tilesViewed.append(adjTile)
@@ -69,6 +78,8 @@ class InfluenceButtons:
                     if "bh" in game.gamestate["board"][adjTile].get("type", ""):
                         continue
                     if "exploded" in game.gamestate["board"][adjTile].get("type", ""):
+                        continue
+                    if "nebula" in game.gamestate["board"][adjTile].get("type", ""):
                         continue
                     if "player_ships" not in game.gamestate["board"][adjTile]:
                         continue
@@ -185,6 +196,9 @@ class InfluenceButtons:
         if game.gamestate["board"][tileLoc]["owner"] != 0:
             await interaction.channel.send(f"Someone else controls {tileLoc}. "
                                            "Remove their control via valid means first.")
+            return
+        if game.gamestate["board"][tileLoc].get("type", "") == "nebula":
+            await interaction.channel.send("Nebula Sectors may never contain Influence Discs.")
             return
         game.add_control(p1["color"], tileLoc)
         await interaction.channel.send(f"{p1['player_name']} acquired control of {tileLoc}.")

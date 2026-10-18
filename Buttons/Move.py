@@ -115,7 +115,11 @@ class MoveButtons:
             if not ExploreButtons.doesPlayerHaveUnpinnedShips(player, player_ships, game, pos):
                 return
 
-            for adjTile in configs.get(pos)[0].split(","):
+            candidates = tile_map[pos].get("adjacent") or configs.get(pos)[0].split(",")
+            for index, adjTile in enumerate(candidates):
+                if "adjacent" not in tile_map[pos] and "nebula_internal" in tile_map.get(adjTile, {}):
+                    # entering a Nebula: land in the Subsector that owns the shared edge
+                    adjTile = game.nebula_subsector_for_edge(adjTile, (index + 3) % 6)
                 if adjTile in tile_map and InfluenceButtons.areTwoTilesAdjacent(game, pos, adjTile,
                                                                                 configs, wormHoleGen):
                     recursive_search(adjTile, distance + 1, visited, jumpDriveAvailable)
