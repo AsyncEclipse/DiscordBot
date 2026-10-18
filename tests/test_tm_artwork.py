@@ -33,3 +33,11 @@ def test_tm_artwork_key_matches_the_name_lookups():
     assert DrawHelper.get_short_faction_name(None, "Techno-Mages") == "tm"
     assert GamestateHelper.getShortFactionNameFromFull(None, "Techno-Mages") == "tm"
     assert GamestateHelper.get_short_faction_name(None, "Techno-Mages") == "tm"
+
+
+def test_tm_ambassador_has_transparent_token_corners():
+    with Image.open("images/resources/components/factions/tm_ambassador.png") as image:
+        alpha = image.getchannel("A")
+        for corner in [(0, 0), (511, 0), (0, 511), (511, 511)]:
+            assert alpha.getpixel(corner) == 0
+        assert alpha.getpixel((256, 256)) >= 250
