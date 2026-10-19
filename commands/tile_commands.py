@@ -250,6 +250,22 @@ class TileCommands(commands.GroupCog, name="tile"):
         image = drawing.board_tile_image(tile_position)
         await interaction.followup.send(file=drawing.show_single_tile(image))
 
+    @app_commands.command(name="techno_magic_menu", description="Restore Techno-Magic upgrade buttons for a combat")
+    async def techno_magic_menu(self, interaction: discord.Interaction, tile_position: str):
+        game = GamestateHelper(interaction.channel)
+        tile = game.gamestate["board"].get(tile_position)
+        if tile is None:
+            await interaction.response.send_message("There is no tile at that position.", ephemeral=True)
+            return
+        if (not tile.get("attacker") or not tile.get("defender")
+                or len(Combat.currentPairing(game, tile_position)) != 2
+                or Combat.isDracoAgainstAncients(game, tile_position)):
+            await interaction.response.send_message("There is no active combat at that position.", ephemeral=True)
+            return
+        await interaction.response.defer(thinking=False)
+        await Combat.offerTechnoMagic(game, interaction.channel, tile_position)
+        await interaction.followup.send("Restored any remaining Techno-Magic upgrades for this combat.")
+
     @app_commands.command(name="declare_a_combat_winner")
     async def declare_a_combat_winner(self, interaction: discord.Interaction, tile_position: str):
         game = GamestateHelper(interaction.channel)

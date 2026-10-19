@@ -189,13 +189,17 @@ class UpgradeButtons:
         drawing = DrawHelper(game.gamestate)
         image = await asyncio.to_thread(drawing.player_area, player_helper.stats)
         view = View()
-        if actions > 0 and not player.get("passed"):
+        if actions > 0 and (discTileUpgrade == "free" or not player.get("passed")):
             for ship2 in game.getShipsWithParts(player):
                 shipEmoji = Emoji.getEmojiByName(player['color'] + game.getShipShortName(ship2))
                 view.add_item(Button(label=ship2.capitalize(), emoji=shipEmoji, style=discord.ButtonStyle.blurple,
-                                     custom_id=f"FCID{player['color']}_upgradeShip_{str(actions)}_{ship2}_dummy"))
-        view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
-                             custom_id=f"FCID{player['color']}_finishAction"))
+                                     custom_id=f"FCID{player['color']}_upgradeShip_{str(actions)}_{ship2}_{discTileUpgrade}"))
+        if discTileUpgrade == "free":
+            view.add_item(Button(label="Done", style=discord.ButtonStyle.red,
+                                 custom_id=f"FCID{player['color']}_deleteMsg"))
+        else:
+            view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
+                                 custom_id=f"FCID{player['color']}_finishAction"))
         view.add_item(Button(label="Undo", style=discord.ButtonStyle.gray,
                              custom_id=f"FCID{player['color']}_undoUpgrade_{customID.split('_')[1]}_{discTileUpgrade}"))
         if interaction.message is not None:
@@ -204,9 +208,9 @@ class UpgradeButtons:
                                        f" on their {ship.capitalize()} which now looks like this:",
                                        file=await asyncio.to_thread(drawing.show_player_ship,
                                                                     image, ship, player_helper.stats["name"]))
-        if discTileUpgrade == "dummy":
+        if discTileUpgrade in ("dummy", "free"):
             await interaction.channel.send(f"{player['player_name']}, choose which ship you would like to upgrade "
-                                           "or finish your action.", view=view)
+                                           "or finish.", view=view)
         elif discTileUpgrade.startswith("tm"):
             view = UpgradeButtons.getTechnoMagicView(game, player, discTileUpgrade[2:])
             view.add_item(Button(label="Undo", style=discord.ButtonStyle.gray,
@@ -230,9 +234,9 @@ class UpgradeButtons:
             # the blueprint is free for another Techno-Magic part this combat
             game.gamestate["board"][mode[2:]]["tmParts"][player["color"]][parts[3]].pop("install", None)
             game.update_player(player_helper)
-            await interaction.message.delete()
-            await UpgradeButtons.upgradeShip(game, player, interaction, f"upgradeShip_1_{parts[3]}_{mode}",
-                                             player_helper)
+            view = UpgradeButtons.getTechnoMagicView(game, player, mode[2:])
+            await interaction.message.edit(content=f"{player['player_name']}, undid the Techno-Magic part."
+                                           " Choose a combat blueprint to upgrade.", view=view)
             return
         game.update_player(player_helper)
         await interaction.message.delete()
