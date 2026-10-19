@@ -1,5 +1,6 @@
 import asyncio
 import discord
+from Buttons.DiscoveryTile import DiscoveryTileButtons
 from Buttons.Explore import ExploreButtons
 from Buttons.Population import PopulationButtons
 from Buttons.Turn import TurnButtons
@@ -86,9 +87,12 @@ class InfluenceButtons:
                         continue
                     playerShips = game.gamestate["board"][adjTile]["player_ships"][:]
                     playerShips.append(player["color"])
+                    # Allies are not opponents, so their ships don't make the sector contested.
+                    colorsInTile = [c for c in Combat.findPlayersInTile(game, adjTile)
+                                    if c != player["color"] and not game.areAllied(player["color"], c)]
                     if all([game.gamestate["board"][adjTile].get("owner") == 0,
-                            ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, adjTile), 
-                            len(Combat.findPlayersInTile(game, adjTile)) < 2, "ai-grd" not in playerShips]):
+                            ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, adjTile),
+                            len(colorsInTile) == 0, "ai-grd" not in playerShips]):
                         tilesToInfluence.append(adjTile)
             if tile_map[tile].get("warp", 0) == 1:
                 for tile2 in tile_map:
@@ -104,9 +108,11 @@ class InfluenceButtons:
                             continue
                         playerShips = game.gamestate["board"][tile2]["player_ships"][:]
                         playerShips.append(player["color"])
+                        colorsInTile = [c for c in Combat.findPlayersInTile(game, tile2)
+                                        if c != player["color"] and not game.areAllied(player["color"], c)]
                         if all([game.gamestate["board"][tile2].get("owner") == 0,
-                                ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, tile2), 
-                                len(Combat.findPlayersInTile(game, tile2)) < 2]):
+                                ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, tile2),
+                                len(colorsInTile) == 0]):
                             tilesToInfluence.append(tile2)
             if tile not in tilesViewed:
                 tilesViewed.append(tile)
@@ -184,6 +190,7 @@ class InfluenceButtons:
 
     @staticmethod
     async def addInfluenceFinish(game: GamestateHelper, p1, interaction: discord.Interaction, buttonID: str):
+        from helpers.CombatHelper import Combat
         tileLoc = buttonID.split("_")[1]
         if p1["influence_discs"] < 1:
             await interaction.channel.send(f"{p1['player_name']} does not have any more influence disks.")
@@ -197,6 +204,9 @@ class InfluenceButtons:
             return
         game.add_control(p1["color"], tileLoc)
         await interaction.channel.send(f"{p1['player_name']} acquired control of {tileLoc}.")
+        if Combat.discoveryTileClaimable(game, tileLoc):
+            # FAQ: the first player to place an Influence Disc takes the tile at once.
+            await DiscoveryTileButtons.exploreDiscoveryTile(game, tileLoc, interaction, p1)
         await interaction.message.delete()
 
     @staticmethod
@@ -316,6 +326,7 @@ class InfluenceButtons:
             game.gamestate["board"][tile]["player_ships"] = [e
                                                             for e in game.gamestate["board"][tile]["player_ships"]
                                                             if (player_color not in e or "mon" in e or "orb" in e)]
+            game.pruneEntryOrder(tile)
         try:
             if player_name in game.gamestate["pass_order"]:
                 game.gamestate["pass_order"].remove(player_name)

@@ -1,5 +1,6 @@
 import asyncio
 import discord
+from Buttons.Alliance import AllianceButtons
 from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
 from helpers.DrawHelper import DrawHelper
@@ -96,6 +97,10 @@ class DiplomaticRelationsButtons:
             buttonID = f"FCID{player['color']}_offerRelationsTo_" + game.gamestate["players"][p2]["color"]
             label = f"{game.gamestate['players'][p2]['name']}"
             view.add_item(Button(label=label, style=discord.ButtonStyle.blurple, custom_id=buttonID))
+        if len(view.children) == 0:
+            await interaction.channel.send(f"{player['player_name']}, there is nobody you can form"
+                                           " diplomatic relations with right now.")
+            return
         await interaction.channel.send(f"{player['player_name']}, choose which player you would like to offer"
                                        " diplomatic relations to", view=view)
 
@@ -194,6 +199,15 @@ class DiplomaticRelationsButtons:
                                      custom_id=f"FCID{p['color']}_reducePopFor_money"))
             await interaction.channel.send(f"{p['player_name']} choose what type of cube to put on the ambassador",
                                            view=view)
+
+        # New relations can unlock founding or joining an Alliance, so offer it to
+        # whichever of the two is on turn now rather than waiting for the next menu.
+        for p in [player, p2]:
+            allianceView = View()
+            AllianceButtons.addAllianceButtons(allianceView, game, p)
+            if len(allianceView.children) > 0:
+                await interaction.channel.send(f"{p['player_name']}, you may now form an Alliance.",
+                                               view=allianceView)
 
         if "dummy" not in buttonID:
             await interaction.message.delete()

@@ -5,6 +5,7 @@ import discord
 from discord.ext import commands
 from Buttons.BlackHole import BlackHoleButtons
 from Buttons.Build import BuildButtons
+from Buttons.Alliance import AllianceButtons
 from Buttons.DiplomaticRelations import DiplomaticRelationsButtons
 from Buttons.DiscoveryTile import DiscoveryTileButtons
 from Buttons.Draft import DraftButtons
@@ -138,16 +139,24 @@ class ButtonListener(commands.Cog):
                 player = game.getPlayerObjectFromColor(devColor)
                 userID = game.get_player_from_color(devColor)
         if player is not None:
-            player_helper = PlayerHelper(userID, player)
+            # get_player can hand back another player's stats (dev-mode testers, or a
+            # community-mode role match), so bind the helper to the seat those stats
+            # live in; update_player writes stats back under this id.
+            player_id = next(seat_id for seat_id, stats in game.gamestate["players"].items()
+                             if stats is player)
+            player_helper = PlayerHelper(player_id, player)
         else:
             player_helper = None
         # Click times come from Discord, so time spent waiting on the game lock doesn't count.
         pressed_at = interaction.created_at.timestamp()
         if (game.gamestate.get("lastButton") == customID
                 and pressed_at - game.gamestate.get("lastButtonTime", 0) < DOUBLE_PRESS_WINDOW):
+            # buildShip reuses the same id when you add a second ship of the same type,
+            # so it cannot be guarded by id alone.
             if not any(substring in customID for substring in ["showGame", "AtRatio", "gain5",
                                                                "showReputation", "rollDice", "magColShip",
-                                                               "rerollDie", "readyForUpkeep","draftFaction"]):
+                                                               "rerollDie", "readyForUpkeep", "draftFaction",
+                                                               "buildShip"]):
                 await interaction.followup.send(f"{interaction.user.mention}, this button ({customID}) was pressed"
                                                 " most recently, and we are attempting to prevent an accidental"
                                                 " double press. Try hitting show reputation first and then hitting this"
@@ -335,6 +344,21 @@ class ButtonListener(commands.Cog):
             await DiplomaticRelationsButtons.formMinorRelations(game, player, interaction, customID, player_helper)
         elif customID.startswith("reducePopFor"):
             await DiplomaticRelationsButtons.reducePopFor(game, player_helper, interaction, customID)
+        elif customID.startswith("startAlliance"):
+            game.updateSaveFile()
+            await AllianceButtons.startAlliance(game, player, interaction)
+        elif customID.startswith("offerAllianceTo"):
+            await AllianceButtons.offerAllianceTo(game, player, interaction, customID)
+        elif customID.startswith("declineAllianceWith"):
+            await AllianceButtons.declineAllianceWith(game, player, interaction, customID)
+        elif customID.startswith("acceptAllianceWith"):
+            await AllianceButtons.acceptAllianceWith(game, player, interaction, customID)
+        elif customID.startswith("offerJoinAlliance"):
+            await AllianceButtons.offerJoinAlliance(game, player, interaction, customID)
+        elif customID.startswith("agreeJoinAlliance"):
+            await AllianceButtons.agreeJoinAlliance(game, player, interaction, customID)
+        elif customID.startswith("leaveAlliance"):
+            await AllianceButtons.leaveAlliance(game, player, interaction, customID)
         elif customID.startswith("startMove"):
             if customID == "startMove":
                 game.updateSaveFile()
@@ -359,6 +383,8 @@ class ButtonListener(commands.Cog):
             await Combat.assignHitTo(game, customID, interaction, True)
         elif customID.startswith("drawReputation"):
             await Combat.drawReputation(game, customID, interaction, player_helper)
+        elif customID.startswith("resolveStalemate"):
+            await Combat.resolveStalemate(game, customID, interaction)
         elif customID.startswith("dontDrawReputation"):
             await Combat.dontDrawReputation(game, customID, interaction, player_helper)
         elif customID.startswith("removeThisUnit"):

@@ -6,6 +6,7 @@ without depending on the guild the originals live in. Safe to re-run: names that
 already exist on the application are skipped.
 """
 import asyncio
+import pathlib
 import urllib.request
 
 import discord
@@ -32,6 +33,9 @@ class Uploader(discord.Client):
         try:
             existing = {emoji.name for emoji in await self.fetch_application_emojis()}
             images = await asyncio.to_thread(_download_all)
+            # Dice emojis are looked up by name, not hardcoded; upload them from the bundled dice faces.
+            for path in pathlib.Path("images/resources/components/dice_faces").glob("dice_*.png"):
+                images[path.stem] = path.read_bytes()
             uploaded = 0
             for name, image in images.items():
                 if name in existing:

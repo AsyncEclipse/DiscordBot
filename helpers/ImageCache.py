@@ -62,6 +62,8 @@ class ImageCacheHelper:
                 return (895, 500)
         elif "minor_species" in folder.lower():
             return (58, 58)
+        elif "alliances" in folder.lower():
+            return (120, 120)
         elif "energy" in folder.lower():
             return (54, 116)
         elif "all_boards" in folder.lower():
