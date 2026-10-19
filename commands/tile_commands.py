@@ -266,7 +266,10 @@ class TileCommands(commands.GroupCog, name="tile"):
         await interaction.response.defer(thinking=False)
         for color in list(tile.get("tmParts", {})):
             UpgradeButtons.resetTechnoMagic(game, game.getPlayerObjectFromColor(color), tile_position)
+        await interaction.channel.send(f"Combat controls for tile {tile_position}.",
+                                       view=Combat.getCombatButtons(game, tile_position))
         await Combat.offerTechnoMagic(game, interaction.channel, tile_position)
+        await Combat.refreshCombatPrompt(game, tile_position, interaction.channel)
         await interaction.followup.send("Reset Techno-Magic upgrades for this combat. Choose your temporary parts again.")
 
     @app_commands.command(name="declare_a_combat_winner")

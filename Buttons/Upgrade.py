@@ -27,6 +27,8 @@ class UpgradeButtons:
                                      custom_id=f"FCID{player['color']}_undoUpgrade_1_tm{pos}_{ship}"))
         view.add_item(Button(label="Restart Techno-Magic", style=discord.ButtonStyle.red,
                              custom_id=f"FCID{player['color']}_restartTechnoMagic_{pos}"))
+        view.add_item(Button(label="Show Current Combat Turn", style=discord.ButtonStyle.blurple,
+                             custom_id=f"FCID{player['color']}_refreshCombatPrompt_{pos}"))
         return view
 
     @staticmethod

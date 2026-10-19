@@ -1257,7 +1257,19 @@ class Combat:
                             break
 
     @staticmethod
-    async def promptNextSpeed(game: GamestateHelper, pos: str, channel, update: bool):
+    async def refreshCombatPrompt(game: GamestateHelper, pos: str, channel):
+        tile = game.gamestate["board"][pos]
+        if len(Combat.currentPairing(game, pos)) != 2 or Combat.isDracoAgainstAncients(game, pos):
+            await channel.send("There is no active combat at that position.")
+            return
+        if (tile.get("unresolvedHits", 0) > 0 or tile.get("pendingRiftDice")
+                or any(tile.get("pendingRiftBackfire", {}).values())):
+            await channel.send("Resolve the pending hits and Rift Cannon effects before rolling again.")
+            return
+        await Combat.promptNextSpeed(game, pos, channel, False, repeat=True)
+
+    @staticmethod
+    async def promptNextSpeed(game: GamestateHelper, pos: str, channel, update: bool, repeat: bool = False):
         currentSpeed = None
         if "currentSpeed" in game.gamestate["board"][pos]:
             currentSpeed = game.gamestate["board"][pos]["currentSpeed"]
@@ -1272,7 +1284,11 @@ class Combat:
         found = False
         nextSpeed = -20
         nextOwner = ""
+        if repeat and currentSpeed is not None and currentRoller is not None:
+            nextSpeed, nextOwner = currentSpeed, currentRoller
         for speed, owner in sortedSpeeds:
+            if nextOwner:
+                break
             if any([found, currentSpeed is None, currentRoller is None,
                     currentSpeed is not None and speed < currentSpeed]):
                 nextSpeed = speed
@@ -1325,7 +1341,7 @@ class Combat:
                     newSpeeds = 0
                     for ship in shipsSpeeds:
                         speed2 = ship[0]
-                        if speed2 < 99 and speed2 != int(speed):
+                        if speed2 < 99 and speed2 != int(nextSpeed):
                             newSpeeds += 1
                             break
                     if newSpeeds < 1:
