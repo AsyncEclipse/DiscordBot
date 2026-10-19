@@ -153,7 +153,7 @@ class DrawHelper:
             for string in wormholeStringsViewed:
                 if contains_all_chars(string, wormholeString):
                     alreadyFound = True
-            if alreadyFound:
+            if alreadyFound and tile.get("type") != "nebula":
                 continue
             wormholeStringsViewed.append(wormholeString)
             rotationWorks = False
@@ -161,7 +161,12 @@ class DrawHelper:
                 adjTileWormholeNum = (index + x) % 6
                 if rotationWorks:
                     continue
-                if adjTile in playerTiles and adjTileWormholeNum in tile["wormholes"]:
+                connected = adjTile in playerTiles
+                neighbor = self.gamestate["board"].get(adjTile, {})
+                if "nebula_internal" in neighbor:
+                    connected = any(position in self.gamestate["board"][source]["adjacent"]
+                                    for source in [adjTile] + neighbor["nebula_internal"] if source in playerTiles)
+                if connected and adjTileWormholeNum in tile["wormholes"]:
                     for index2, adjTile2 in enumerate(configs.get(adjTile)[0].split(",")):
                         tile_orientation_index2 = (index2 +
                                                    int(self.gamestate["board"][adjTile]["orientation"]) // 60) % 6
@@ -190,7 +195,11 @@ class DrawHelper:
     def base_tile_image_with_rotation_in_context(self, rotation, tileID, tile, count, configs, position, configs2):
         mult = 1
         context = Image.new("RGBA", (int(345 * 3 * mult), int(300 * 3 * mult)), (255, 255, 255, 0))
-        image = self.base_tile_image_with_rotation(tileID, rotation, tile["wormholes"]).resize((345, 300))
+        image = self.base_tile_image_with_rotation(tileID, rotation, tile["wormholes"])
+        if tile.get("type") == "nebula":
+            image = image.rotate(rotation)
+            self.label_nebula_subsectors(image, position, rotation)
+        image = image.resize((345, 300))
         context.paste(image, (int(345 * mult), int(300 * mult)), mask=image)
         coords = [(int(345 * mult), 0),
                   (int(605 * mult), int(150 * mult)),
@@ -253,6 +262,8 @@ class DrawHelper:
         return discord.File(bytes_io, filename="parts.webp")
 
     def mergeLocationsFile(self, locations):
+        locations = list(dict.fromkeys(self.gamestate["board"][pos].get("nebula_parent", pos)
+                                       for pos in locations))
         amount = len(locations)
         mult = 1024 / 345
         result = math.ceil(math.sqrt(amount))
@@ -309,8 +320,9 @@ class DrawHelper:
             stroke_width = 6
             text_color = (255, 255, 255)
             textDrawableImage = ImageDraw.Draw(tile_image)
-            textDrawableImage.text(text_position, text, text_color, font=font,
-                                   stroke_width=stroke_width, stroke_fill=stroke_color)
+            if tile.get("type") != "nebula":
+                textDrawableImage.text(text_position, text, text_color, font=font,
+                                       stroke_width=stroke_width, stroke_fill=stroke_color)
 
             wormholeCode = ""
             closedpath = "images/resources/masks/closed_wh_mask.png"
@@ -495,7 +507,23 @@ class DrawHelper:
                 for resource in ["neutral", "neutraladv", "money", "moneyadv",
                                  "science", "scienceadv", "material", "materialadv", "orbital"]:
                     paste_resourcecube(tile, tile_image, resource, color)
+            if tile.get("type") == "nebula":
+                tile_image = tile_image.rotate(rotation)
+                self.label_nebula_subsectors(tile_image, position, rotation)
             return tile_image
+
+    @staticmethod
+    def label_nebula_subsectors(image, position, rotation):
+        angle = math.radians(rotation)
+        center_x, center_y = image.width / 2, image.height / 2
+        font = ImageFont.truetype("images/resources/arial.ttf", size=int(30 * 1024 / 345))
+        draw = ImageDraw.Draw(image)
+        for suffix, (x, y) in zip("ABC", [(865, 445), (335, 139), (335, 751)]):
+            x, y = x - center_x, y - center_y
+            point = (center_x + x * math.cos(angle) + y * math.sin(angle),
+                     center_y - x * math.sin(angle) + y * math.cos(angle))
+            draw.text(point, f"{position}-{suffix}", fill="white", font=font, anchor="mm",
+                      stroke_width=6, stroke_fill="black")
 
     def areTwoTilesAdjacent(self, tile1, tile2, configs):
         def is_adjacent(tile_a, tile_b):

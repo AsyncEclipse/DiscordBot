@@ -56,8 +56,8 @@ def test_nebula_move_combat_and_discovery(start_game, press, no_random):
     game.update()
 
     # each ship enters only the Subsector owning the edge it crosses
-    assert _move(press, ch, P1, "blue", "201", "interceptor", "202b") == {"202b"}
-    assert _move(press, ch, P2, "red", "203", "interceptor", "202") == {"202"}
+    assert _move(press, ch, P1, "blue", "201", "interceptor", "202b") == {"202-B"}
+    assert _move(press, ch, P2, "red", "203", "interceptor", "202") == {"202-A"}
     _snapshot(game, "nebula_moved")
 
     press(ch, P1, "FCIDblue_passForRound")

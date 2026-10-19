@@ -75,7 +75,8 @@ class BlackHoleButtons:
                                     # each Nebula Subsector with an open border is its own option
                                     if any(item.custom_id.endswith(f"_{target}_{damage}") for item in view.children):
                                         continue
-                                view.add_item(Button(label=f"Add ship to Tile {target}", style=discord.ButtonStyle.gray,
+                                view.add_item(Button(label=f"Add ship to Tile {game.get_tile_label(target)}",
+                                                     style=discord.ButtonStyle.gray,
                                                      custom_id=f"FCID{player['color']}_blackHoleFinish"
                                                      f"_{ship}_{target}_{damage}"))
                                 if "nebula_internal" not in game.gamestate["board"][tile]:
