@@ -19,7 +19,9 @@ class InfluenceButtons:
             board = game.gamestate["board"]
             if "adjacent" in board.get(tile_a, {}):
                 # Nebula Subsector: every edge is a wormhole
-                return tile_b in board[tile_a]["adjacent"]
+                if tile_b in board[tile_a].get("nebula_internal", []):
+                    return True
+                return board.get(tile_b, {}).get("nebula_parent", tile_b) in board[tile_a]["adjacent"]
             if "adjacent" in board.get(tile_b, {}):
                 if tile_a not in board[tile_b]["adjacent"]:
                     return False
