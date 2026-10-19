@@ -23,6 +23,9 @@ class MoveButtons:
         tiles = []
         for tile in tile_map:
             if "player_ships" in tile_map[tile]:
+                if not any(f"{player['color']}-{ship}" in tile_map[tile]["player_ships"]
+                           for ship in ("int", "cru", "drd")):
+                    continue
                 if ExploreButtons.doesPlayerHaveUnpinnedShips(player, tile_map[tile]["player_ships"], game, tile):
                     tiles.append(tile)
         return tiles
@@ -185,13 +188,15 @@ class MoveButtons:
         owner = game.gamestate["board"][destination]["owner"]
         if tile_ships:
             p2_color = tile_ships[0].split("-")[0]
-        if owner != 0 and isinstance(owner, str) and owner != player["color"]:
+        if (owner != 0 and isinstance(owner, str) and owner != player_color
+                and not game.areAllied(player_color, owner)):
             p2 = game.getPlayerObjectFromColor(owner)
             player_helper2 = PlayerHelper(game.get_player_from_color(owner), p2)
             player_helper2.permanentlyPassTurn(False)
             game.update_player(player_helper2)
             await interaction.channel.send(p2["player_name"] + " your system has been invaded")
-        if ((tile_ships) and (owner == 0) and (p2_color != "ai") and (p2_color != player_color)):
+        if (tile_ships and owner == 0 and p2_color != "ai" and p2_color != player_color
+                and not game.areAllied(player_color, p2_color)):
             p2 = game.getPlayerObjectFromColor(p2_color)
             player_helper2 = PlayerHelper(game.get_player_from_color(p2_color), p2)
             player_helper2.permanentlyPassTurn(False)

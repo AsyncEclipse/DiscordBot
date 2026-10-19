@@ -700,7 +700,9 @@ class DrawHelper:
         return context
 
     def display_remaining_tiles(self):
-        context = Image.new("RGBA", (1900, 500), (0, 0, 0, 255))
+        # Tall enough for the turn order (290px) pasted under the minor species block at y 250;
+        # at 500 it clipped its "Next Round" row, which the player areas below then covered.
+        context = Image.new("RGBA", (1900, 560), (0, 0, 0, 255))
 
         filepath = "images/resources/hexes/sector3backblank.png"
         tile_image = self.use_resized_image(filepath, (172, 150))
@@ -1173,6 +1175,15 @@ class DrawHelper:
                     pop_image = self.use_resized_image(pop_path, (42,42))
                     context.paste(pop_image, (reputationX+x*150+30, 600+60), mask=pop_image)
 
+        # Alliance tiles sit to the right of the reputation track.
+        allianceX = 4600
+        for allianceTile, betrayed in player.get("alliances", {}).items():
+            side = "betrayed" if betrayed else "ally"
+            alliance_path = (f"images/resources/components/alliances/"
+                             f"alliances_{allianceTile}_{side}.png")
+            alliance_image = self.use_resized_image(alliance_path, (120, 120))
+            context.paste(alliance_image, (allianceX, 600), mask=alliance_image)
+            allianceX += 130
 
         faction = self.get_short_faction_name(player["name"])
         ships = ["int", "cru", "drd", "sb","orb"]
@@ -1668,6 +1679,10 @@ class DrawHelper:
 
         if "rep" in player.get("discoveryTileBonusPointTiles", []):
             points += reputationPoints // 3
+        for betrayed in player.get("alliances", {}).values():
+            # A faceup Alliance Tile is worth 2 VP, a Betrayer tile costs 3. Rho Indi
+            # gets no exemption here, unlike the Traitor Card.
+            points += -3 if betrayed else 2
         if player.get("traitor"):
             if player["name"] == "Rho Indi Syndicate":
                 pass
@@ -1759,21 +1774,23 @@ class DrawHelper:
         width = 4150 if (pCount != 2 and pCount != 4) else 2800
         width = max([context2.size[0], context3.size[0] + context4.size[0] + 150,
                      cropped_context.size[0], context5.size[0]])
-        height = (cropped_context.size[1] + context2.size[1] +
-
+        # The map's bottom edge must not crowd the round/turn order strip below it.
+        mapGap = 60
+        height = (cropped_context.size[1] + context2.size[1] + mapGap +
                   max(context3.size[1], context4.size[1]) + 90)
         final_context = Image.new("RGBA", (width, height), (0, 0, 0, 255))
         centering = int((width - cropped_context.size[0])/2)
         final_context.paste(cropped_context, (centering, 0))
         #final_context.paste(context6, (0, 0))
-        final_context.paste(context2, (0, cropped_context.size[1]+ max(context3.size[1],context4.size[1])))
-        final_context.paste(context3, (0, cropped_context.size[1]))
+        final_context.paste(context2, (0, cropped_context.size[1] + mapGap +
+                                       max(context3.size[1],context4.size[1])))
+        final_context.paste(context3, (0, cropped_context.size[1] + mapGap))
         # final_context.paste(context5, (50, context2.size[1] - 20))
         final_context.paste(context4, (context3.size[0] + 150,
-                                       cropped_context.size[1]))
+                                       cropped_context.size[1] + mapGap))
         final_context.paste(context5,
-                            (0, cropped_context.size[1] + context2.size[1] + max(context3.size[1],
-                                                                                 context4.size[1])))
+                            (0, cropped_context.size[1] + mapGap + context2.size[1] + max(
+                                context3.size[1], context4.size[1])))
         bytes_io = BytesIO()
         final_context.save(bytes_io, format="WEBP", quality=80, method=1)
         bytes_io.seek(0)

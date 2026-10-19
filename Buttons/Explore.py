@@ -23,6 +23,7 @@ class ExploreButtons:
     def doesPlayerHaveUnpinnedShips(player, playerShips, game, tile):
         player_helper = PlayerHelper(game.get_player_from_color(player['color']), player)
         playerShipsCount = 0
+        alliedShips = 0
         opponentShips = 0
         if len(playerShips) == 0:
             return False
@@ -30,6 +31,9 @@ class ExploreButtons:
             if "mon" not in ship:
                 if player["color"] in ship and "orb" not in ship:
                     playerShipsCount += 1
+                elif "orb" not in ship and game.areAllied(player["color"], ship.split("-")[0]):
+                    # Allied ships never pin each other; they count together against opponents.
+                    alliedShips += 1
                 else:
                     if "gcds" in ship:
                         opponentShips += 99
@@ -50,7 +54,7 @@ class ExploreButtons:
         researchedTechs = player_helper.getTechs()
         if "clo" in researchedTechs or "cld" in researchedTechs:
             playerShipsCount *= 2
-        return playerShipsCount > opponentShips
+        return playerShipsCount > 0 and playerShipsCount + alliedShips > opponentShips
 
     @staticmethod
     def getTilesToExplore(game: GamestateHelper, player):

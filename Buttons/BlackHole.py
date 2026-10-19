@@ -94,7 +94,8 @@ class BlackHoleButtons:
         owner = game.gamestate["board"][destination]["owner"]
         if damage == "damage":
             game.add_damage(ship, destination, 1)
-        if owner != 0 and isinstance(owner, str) and owner != player["color"]:
+        if (owner != 0 and isinstance(owner, str) and owner != player["color"]
+                and not game.areAllied(player["color"], owner)):
             p2 = game.getPlayerObjectFromColor(owner)
             player_helper2 = PlayerHelper(game.get_player_from_color(owner), p2)
             player_helper2.permanentlyPassTurn(False)

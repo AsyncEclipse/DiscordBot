@@ -29,9 +29,9 @@ Always `reload(game)` after a press: the press works on its own copy of the game
 
 ## Adding tests
 
-- Plain functions, one file per area (`test_<module>_<topic>.py`).
-- Shared fakes and helpers go in `fakes.py`, fixtures in `conftest.py`. Keep a helper local
-  until a second file needs it.
+- One file per area (`test_<module>_<topic>.py`). Plain functions; a class per rule group is fine when a file covers several (as in the alliance tests).
+- Shared fakes and helpers go in `fakes.py` (`players`, `board_tile`, `POS`, `player_helper`, `offered_ids`, ...),
+  fixtures in `conftest.py`. Keep a helper local until a second file needs it.
 - A fake missing a Discord method (a `KeyError` or `AttributeError` on `interaction.*`)
   is a one-line fix in `fakes.py`, not a reason to skip the test.
 - A fake only records calls; it can't catch real Discord problems (permissions,
