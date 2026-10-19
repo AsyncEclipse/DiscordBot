@@ -3,11 +3,31 @@ import json
 from helpers.EmojiHelper import Emoji
 
 
+DISCOVERY_PART_IDS = frozenset({
+    "anm", "axc", "cod", "fls", "hyg", "ins", "iod", "iom", "iot",
+    "jud", "mos", "mus", "nod", "plt", "ricon", "shh", "socha", "som",
+})
+
+
 class PlayerHelper:
     def __init__(self, player_id, player_stats):
         self.stats = player_stats
         self.player_id = str(player_id)
         self.name = self.stats["player_name"]
+
+    @staticmethod
+    def is_reputation_only_slot(player, index):
+        return player["name"] == "Atlantians" and index < 2
+
+    @staticmethod
+    def has_reputation_slot_for_relation(player):
+        """A relation takes the first free ambassador slot, or replaces the lowest reputation tile."""
+        for index, tile in enumerate(player["reputation_track"]):
+            if isinstance(tile, str) and tile in ("amb", "mixed"):
+                return True
+            if isinstance(tile, int) and not PlayerHelper.is_reputation_only_slot(player, index):
+                return True
+        return False
 
     def isTraitor(self):
         if self.stats.get("traitor"):
@@ -141,6 +161,30 @@ class PlayerHelper:
             if part in self.getTechs() or part in self.stats.get("ancient_parts", []):
                 available.append(part)
         return set(available)
+
+    @staticmethod
+    def installed_discovery_part_count(player, ship_type=None):
+        ship_types = (ship_type,) if ship_type else (
+            "interceptor", "cruiser", "dread", "starbase", "orb")
+        return sum(
+            part in DISCOVERY_PART_IDS
+            for ship in ship_types
+            for part in player.get(f"{ship}_parts", [])
+        )
+
+    @staticmethod
+    def get_ship_cost(player, ship_type, base_cost=None):
+        ship_type = {
+            "int": "interceptor", "cru": "cruiser", "drd": "dread",
+            "sb": "starbase",
+        }.get(ship_type, ship_type)
+        cost_type = {"orb": "orbital", "mon": "monolith"}.get(ship_type, ship_type)
+        if base_cost is None:
+            base_cost = player[f"cost_{cost_type}"]
+        if player.get("name") != "Atlantians":
+            return base_cost
+        discovery_parts = PlayerHelper.installed_discovery_part_count(player, ship_type)
+        return base_cost + max(0, discovery_parts - 1)
 
     def passTurn(self, passed: bool):
         self.stats["passed"] = passed

@@ -5,8 +5,12 @@ objects are stubbed here. Anything that is a plain helper rather than a pytest
 fixture belongs in this module; fixtures live in conftest.py.
 """
 import copy
+import itertools
 import json
 from datetime import datetime, timezone
+from types import SimpleNamespace
+
+import discord
 
 from helpers.PlayerHelper import PlayerHelper
 
@@ -15,11 +19,19 @@ POS = "101"  # the sector board_tile() builds by default
 
 
 class FakeMessage:
+    _ids = itertools.count(1)
+
+    def __init__(self, channel=None):
+        self.id = next(self._ids)
+        self.flags = SimpleNamespace(ephemeral=False)
+        self.channel = channel
+
     async def delete(self):
-        pass
+        if self.channel is not None:
+            self.channel.deleted.add(self.id)
 
     async def edit(self, **kwargs):
-        pass
+        self.edited = kwargs
 
 
 class FakeChannel:
@@ -27,10 +39,25 @@ class FakeChannel:
         self.name = name
         self.threads = []
         self.sent = []
+        self.messages = []  # parallel to sent: the message each send created
+        self.deleted = set()
 
     async def send(self, content=None, **kwargs):
         self.sent.append((content, kwargs))
-        return FakeMessage()
+        self.messages.append(FakeMessage(self))
+        return self.messages[-1]
+
+    async def fetch_message(self, message_id):
+        if message_id in self.deleted:
+            raise discord.NotFound(SimpleNamespace(status=404, reason="Not Found"), "Unknown Message")
+        return FakeMessage(self)
+
+    def message_with(self, custom_id):
+        """The latest message carrying this button, as Discord hands it to the press."""
+        for (_content, kwargs), message in zip(reversed(self.sent), reversed(self.messages)):
+            if any(getattr(c, "custom_id", None) == custom_id for c in getattr(kwargs.get("view"), "children", [])):
+                return message
+        return None
 
 
 class FakeUser:
@@ -73,13 +100,13 @@ class FakeResponder:
 
 
 class FakeInteraction:
-    def __init__(self, channel=None, custom_id=None, user_id=None, role_names=()):
+    def __init__(self, channel=None, custom_id=None, user_id=None, role_names=(), message=None):
         self.channel = channel or FakeChannel()
         self.user = FakeUser()
         if user_id is not None:
             self.user.id = user_id
         self.guild = FakeGuild(role_names)
-        self.message = FakeMessage()
+        self.message = message or FakeMessage()
         self.data = {"custom_id": custom_id}
         self.created_at = datetime.now(timezone.utc)
         self.response = FakeResponder()

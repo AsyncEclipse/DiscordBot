@@ -8,6 +8,7 @@ import os
 from discord.ui import View, Button
 
 from helpers.ImageCache import ImageCacheHelper
+from helpers.PlayerHelper import PlayerHelper
 from helpers.ShipHelper import PlayerShip
 
 
@@ -83,6 +84,8 @@ class DrawHelper:
             return "rho"
         elif full_name == "The Exiles":
             return "exile"
+        elif full_name == "Atlantians":
+            return "atlantians"
         elif "Terran" in full_name:
             return full_name.lower().replace(" ", "_")
 
@@ -592,6 +595,11 @@ class DrawHelper:
             count += 1
         return context
 
+    def faction_portrait(self, faction):
+        if faction == "atlantians":
+            return self.use_image(f"images/resources/components/layouts/factionImages/{faction}_image.png")
+        return self.use_image(f"images/resources/components/factions/{faction}_board.png").crop((49, 252, 154, 357))
+
     def display_turn_order(self):
         context = Image.new("RGBA", (900, 290), (0, 0, 0, 255))
         if len(self.gamestate.get("activePlayerColor", [])) == 1:
@@ -656,10 +664,7 @@ class DrawHelper:
             pop_image = pop_image.crop((32, 32, pop_image.width - 32, pop_image.height - 32))
             pop_image = pop_image.resize((90, 90))
             context.paste(pop_image, (95*n, 85), mask=pop_image)
-            face_tile_path = f"images/resources/components/factions/{faction}_board.png"
-            face_tile_image = self.use_image(face_tile_path)
-            face_tile_image = face_tile_image.crop((49, 252, 154, 357))
-            face_tile_image = face_tile_image.resize((90 - 2 * border, 90 - 2 * border))
+            face_tile_image = self.faction_portrait(faction).resize((90 - 2 * border, 90 - 2 * border))
             context.paste(face_tile_image, (95 * n + border, 85 + border), mask=face_tile_image)
             if player["passed"]:
                 draw = ImageDraw.Draw(context)
@@ -688,10 +693,7 @@ class DrawHelper:
             pop_image = pop_image.crop((32, 32, pop_image.width - 32, pop_image.height - 32))
             pop_image = pop_image.resize((60, 60))
             context.paste(pop_image, (130 + 65 * n, 200), mask=pop_image)
-            face_tile_path = f"images/resources/components/factions/{faction}_board.png"
-            face_tile_image = self.use_image(face_tile_path)
-            face_tile_image = face_tile_image.crop((49, 252, 154, 357))
-            face_tile_image = face_tile_image.convert("L").convert("RGBA")
+            face_tile_image = self.faction_portrait(faction).convert("L").convert("RGBA")
             face_tile_image = face_tile_image.resize((60 - 2 * border, 60 - 2 * border))
             context.paste(face_tile_image, (130 + 65 * n + border, 200 + border), mask=face_tile_image)
 
@@ -1129,9 +1131,12 @@ class DrawHelper:
         reputation_image = self.use_image(reputation_path)
         amb_empty_image = self.use_resized_image(amb_empty_path, (120,120))
         mixed_empty_image = self.use_resized_image(mixed_empty_path, (120,120))
+        rep_only_image = self.use_resized_image("images/resources/components/layouts/reputation_only.png", (120,120))
         reputationX = 3850
         for x, reputation in enumerate(player["reputation_track"]):
-            if isinstance(reputation, int) or "mixed" in reputation:
+            if PlayerHelper.is_reputation_only_slot(player, x):
+                context.paste(rep_only_image, (reputationX+x*150, 600), mask=rep_only_image)
+            elif isinstance(reputation, int) or "mixed" in reputation:
                 context.paste(mixed_empty_image, (reputationX+x*150, 600), mask=mixed_empty_image)
             else:
                 context.paste(amb_empty_image, (reputationX+x*150, 600), mask=amb_empty_image)
@@ -1638,6 +1643,8 @@ class DrawHelper:
                     points += len(player[tType]) - 3
         if "disc_tiles_for_points" in player:
             points += player["disc_tiles_for_points"] * 2
+        if player["name"] == "Atlantians":
+            points += PlayerHelper.installed_discovery_part_count(player)
         reputationPoints = 0
         ambass = 0
         repu = 0

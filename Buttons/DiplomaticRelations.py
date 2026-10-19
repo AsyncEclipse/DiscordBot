@@ -45,7 +45,10 @@ class DiplomaticRelationsButtons:
                                  buttonID: str, player_helper: PlayerHelper):
         await interaction.message.delete()
         minor = buttonID.split("_")[1]
-        game.formMinorSpeciesRelations(player, minor)
+        if not game.formMinorSpeciesRelations(player, minor):
+            await interaction.channel.send(f"{player['player_name']}, all your reputation slots are taken, so you"
+                                           f" cannot take the {minor} ambassador.")
+            return
         await interaction.channel.send(f"{player['player_name']} formed relations with the minor species"
                                        f" that gives the benefit of {minor}.")
         cost = DiplomaticRelationsButtons.getMinorSpeciesCost(minor)
@@ -174,10 +177,13 @@ class DiplomaticRelationsButtons:
             if "dummy" not in buttonID:
                 await interaction.message.delete()
             return
+        p2 = game.gamestate["players"][pID]
+        if not game.formRelationsBetween(player, p2):
+            await interaction.followup.send(f"{interaction.user.mention}, one of you has no room left on their"
+                                            " reputation track for this ambassador.")
+            return
         await interaction.followup.send(f"{game.gamestate['players'][pID]['player_name']} your"
                                         f" relations have been accepted by {player['player_name']}")
-        p2 = game.gamestate["players"][pID]
-        game.formRelationsBetween(player, p2)
 
         for p in [player, p2]:
             view = View()

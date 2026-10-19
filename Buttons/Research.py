@@ -117,6 +117,20 @@ class ResearchButtons:
             game.useMagDisc(game.get_player_from_color(player["color"]))
             await DiscoveryTileButtons.exploreDiscoveryTile(game, game.getLocationFromID(player["home_planet"]),
                                                             interaction, player)
+        await ResearchButtons.offerAncientInstinctUpgrade(player, interaction, tech, tech_details)
+
+    @staticmethod
+    async def offerAncientInstinctUpgrade(player, interaction: discord.Interaction, tech: str, tech_details):
+        if player["name"] != "Atlantians":
+            return
+        with open("data/parts.json", "r") as f:
+            if tech not in json.load(f):
+                return
+        view = View()
+        view.add_item(Button(label="Perform Upgrade 1", style=discord.ButtonStyle.blurple,
+                             custom_id=f"FCID{player['color']}_ancientInstinctUpgrade_{tech}"))
+        await interaction.channel.send(f"{player['player_name']}, Ancient Instinct lets you perform one "
+                                       f"upgrade using {tech_details['name']}.", view=view)
 
     @staticmethod
     async def placeWarpPortal(interaction: discord.Interaction, game: GamestateHelper, player, customID):

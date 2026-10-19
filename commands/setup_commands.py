@@ -41,7 +41,8 @@ class SetupCommands(commands.GroupCog, name="setup"):
                       app_commands.Choice(name="Terran Directorate (Eridani)", value="ter3"),
                       app_commands.Choice(name="Terran Federation (Hydran)", value="ter4"),
                       app_commands.Choice(name="Terran Republic (Draco)", value="ter5"),
-                      app_commands.Choice(name="Terran Union (Planta)", value="ter6"),]
+                      app_commands.Choice(name="Terran Union (Planta)", value="ter6"),
+                      app_commands.Choice(name="Atlantians", value="atl")]
     
     @app_commands.choices(ai_ship_type=ai_choices2)
     @app_commands.choices(ai_ship=ai_ship_choices)
@@ -155,7 +156,8 @@ class SetupCommands(commands.GroupCog, name="setup"):
                               community_parts: Optional[bool] = False,
                               community_rep_mod: Optional[bool] = False,
                               ban_factions: Optional[bool] = False,
-                              alliances: Optional[bool] = False):
+                              alliances: Optional[bool] = False,
+                              community_factions: bool = False):
         """
         :param ai_ship_type: Choose which type of AI ships to use.
         :param rift_cannon: Rift cannons are enabled by default.
@@ -166,6 +168,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         :param community_parts: Turns on community changes to improved hull and phase shield.
         :param community_rep_mod: Turns on the community reputation mod.
         :param alliances: Enables the Alliances variant; needs 4 or more players.
+        :param community_factions: Includes community factions in the draft.
         :return:
         """
         temp_player_list = [player1, player2, player3, player4, player5, player6,player7,player8,player9]
@@ -182,7 +185,8 @@ class SetupCommands(commands.GroupCog, name="setup"):
             ai_ships = "def"
         else:
             ai_ships = ai_ship_type.value
-        new_game = GameInit(game_name, player_list, ai_ships, rift_cannon, turn_order_variant, community_parts, community_rep_mod)
+        new_game = GameInit(game_name, player_list, ai_ships, rift_cannon, turn_order_variant,
+                            community_parts, community_rep_mod, community_factions=community_factions)
         new_game.create_game()
 
         async def get_or_create_category(guild: discord.Guild, category_name):
@@ -420,6 +424,17 @@ class SetupCommands(commands.GroupCog, name="setup"):
 
         message = "\n".join(["# Terrans"])
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "terran_conglomerate_board.png"))
+
+        message = "\n".join(["# Atlantians",
+                             "- Start with Ancient Labs in the Nano Tech track.",
+                             "- **Ancient Spirit:** Draw two discovery tiles and choose one to resolve. "
+                             "Replace any +6 Materials or Ancient Cruiser tile with another draw.",
+                             "- **Ancient Instinct:** After a Research action, you may perform Upgrade 1 "
+                             "using a technology researched during that action.",
+                             "- **Ancient Power:** Gain 1 VP for each discovery tile installed on a Ship Blueprint.",
+                             "- **Price of Power:** Each ship costs 1 additional Materials for each discovery tile "
+                             "beyond the first installed on its Ship Blueprint."])
+        await factionThread.send(message, file=drawing.get_file(boardPrefix + "atlantians_board.png"))
 
         message = "\n".join(["Rift Reference"])
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "Rift_Reference.png"))

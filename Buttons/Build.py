@@ -60,10 +60,7 @@ class BuildButtons:
                                                     f"{build} for {cost} materials."))
             return
         build.append(f"{player['color']}-{GamestateHelper.getShipShortName(ship)}")
-        key = f"cost_{ship.lower()}"
-        if ship.lower() == "dreadnought":
-            key = "cost_dread"
-        cost += player[key]
+        cost += PlayerHelper.get_ship_cost(player, game.getShipShortName(ship))
         view = View()
         view = BuildButtons.buildBuildButtonsView(interaction, ";".join(build), cost, loc, view, player, game)
         await interaction.message.edit(content=f"Total cost so far of {cost}", view=view)
@@ -88,24 +85,23 @@ class BuildButtons:
             if "mon" in shipInTile and "Monolith" in ships:
                 ships.remove("Monolith")
         for counter, ship in enumerate(ships):
-            key = f"cost_{ship.lower()}"
+            ship_short = game.getShipShortName(ship)
             remaining = 10
             if counter < len(player["ship_stock"]) and "Orb" not in ship and "Mon" not in ship:
                 remaining = player["ship_stock"][counter]
                 if shipsShort[counter] in build:
                     remaining -= build.count(shipsShort[counter])
-            if ship.lower() == "dreadnought":
-                key = "cost_dread"
+            ship_cost = PlayerHelper.get_ship_cost(player, ship_short)
             buttonElements = [f"FCID{player['color']}", "buildShip", build, str(cost), build_loc, ship]
             if remaining > 0:
                 if ship != "Monolith":
                     shipEmoji = Emoji.getEmojiByName(player['color'] + game.getShipShortName(ship))
                     if ship == "Orbital":
                         shipEmoji = Emoji.getEmojiByName("orb")
-                    view.add_item(Button(label=f"{ship} ({player[f'{key}']})", emoji=shipEmoji,
+                    view.add_item(Button(label=f"{ship} ({ship_cost})", emoji=shipEmoji,
                                          style=discord.ButtonStyle.blurple, custom_id="_".join(buttonElements)))
                 else:
-                    view.add_item(Button(label=f"{ship} ({player[f'{key}']})",
+                    view.add_item(Button(label=f"{ship} ({ship_cost})",
                                          style=discord.ButtonStyle.blurple, custom_id="_".join(buttonElements)))
         buttonElements = [f"FCID{player['color']}", "finishBuild", build, str(cost), build_loc]
         if build != "none":
