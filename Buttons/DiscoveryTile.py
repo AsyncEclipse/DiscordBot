@@ -10,18 +10,25 @@ from discord.ui import View, Button
 
 class DiscoveryTileButtons:
     @staticmethod
-    async def exploreDiscoveryTile(game: GamestateHelper, tile: str, interaction: discord.Interaction, player):
-        # if "discTiles" not in game.gamestate:
-        #    game.fillInDiscTiles()
-        if game.gamestate["board"][tile]["disctile"] == 0:
-            await interaction.followup.send("No discovery tile in tile " + tile)
-            return
-        disc = game.getNextDiscTile(tile)
-        if game.gamestate["board"][tile].get("type", "") == "nebula" and disc in ("orb", "mon"):
-            # Ancient Orbital and Monolith cannot be placed in Nebula Sectors: bury them and redraw
-            while disc in ("orb", "mon") and any(d not in ("orb", "mon") for d in game.gamestate["discTiles"]):
+    def drawAtlantiansDiscoveryChoices(game: GamestateHelper, tile=None):
+        """Draw two choices, removing Material Gain and Ancient Cruiser from the deck."""
+        choices = []
+        is_nebula = game.gamestate["board"].get(tile, {}).get("type") == "nebula"
+        while game.gamestate["discTiles"] and len(choices) < 2:
+            disc = game.gamestate["discTiles"].pop()
+            if is_nebula and disc in ("orb", "mon"):
                 game.gamestate["discTiles"].insert(0, disc)
-                disc = game.gamestate["discTiles"].pop()
+                if not any(d not in ("orb", "mon") for d in game.gamestate["discTiles"]):
+                    break
+                continue
+            if disc not in ("mat", "cru"):
+                choices.append(disc)
+        game.update()
+        return choices
+
+    @staticmethod
+    async def sendDiscoveryTileOptions(game: GamestateHelper, tile: str, interaction: discord.Interaction,
+                                      player, disc: str):
         with open("data/discoverytiles.json") as f:
             discTile_data = json.load(f)
         discName = discTile_data[disc]["name"]
@@ -35,6 +42,52 @@ class DiscoveryTileButtons:
                              custom_id=f"FCID{player['color']}_usedDiscForAbility_{disc}_{tile}"))
         view.add_item(Button(label="Get 2 Points", style=discord.ButtonStyle.red, custom_id=f"FCID{player['color']}_keepDiscForPoints"))
         asyncio.create_task(interaction.channel.send(msg, view=view, file=file))
+
+    @staticmethod
+    async def exploreDiscoveryTile(game: GamestateHelper, tile: str, interaction: discord.Interaction, player):
+        # if "discTiles" not in game.gamestate:
+        #    game.fillInDiscTiles()
+        if game.gamestate["board"][tile]["disctile"] == 0:
+            await interaction.followup.send("No discovery tile in tile " + tile)
+            return
+        if player.get("name") == "Atlantians":
+            # identical draws collapse to one choice
+            choices = list(dict.fromkeys(DiscoveryTileButtons.drawAtlantiansDiscoveryChoices(game, tile)))
+            if not choices:
+                await interaction.channel.send("No eligible discovery tiles remain in the deck.")
+                return
+            game.gamestate["board"][tile]["disctile"] = 0
+            game.update()
+            if len(choices) > 1:
+                view = View()
+                with open("data/discoverytiles.json") as f:
+                    discTile_data = json.load(f)
+                drawing = DrawHelper(game.gamestate)
+                files = []
+                for choice in choices:
+                    choice_data = discTile_data[choice]
+                    view.add_item(Button(label=choice_data["name"], style=discord.ButtonStyle.green,
+                                         custom_id=f"FCID{player['color']}_selectDiscTile_{choice}_{tile}"))
+                    files.append(await asyncio.to_thread(drawing.show_disc_tile, choice_data["name"]))
+                await interaction.channel.send(
+                    f"{player['player_name']} drew two discovery tiles. Choose one to resolve;"
+                    " the other is discarded.", view=view, files=files)
+                return
+            disc = choices[0]
+        else:
+            disc = game.getNextDiscTile(tile)
+            if game.gamestate["board"][tile].get("type") == "nebula":
+                while disc in ("orb", "mon") and any(d not in ("orb", "mon") for d in game.gamestate["discTiles"]):
+                    game.gamestate["discTiles"].insert(0, disc)
+                    disc = game.gamestate["discTiles"].pop()
+                game.update()
+        await DiscoveryTileButtons.sendDiscoveryTileOptions(game, tile, interaction, player, disc)
+
+    @staticmethod
+    async def selectDiscTile(game: GamestateHelper, interaction: discord.Interaction, buttonID: str, player):
+        disc, tile = buttonID.split("_")[1:3]
+        await interaction.message.edit(view=None)
+        await DiscoveryTileButtons.sendDiscoveryTileOptions(game, tile, interaction, player, disc)
 
     @staticmethod
     async def keepDiscForPoints(game: GamestateHelper, player_helper: PlayerHelper, interaction: discord.Interaction):

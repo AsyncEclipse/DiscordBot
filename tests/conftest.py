@@ -17,6 +17,12 @@ import random
 import pytest
 
 import config
+from helpers import CombatHelper
+from helpers.CombatHelper import Combat
+from helpers.GamestateHelper import GamestateHelper
+from listeners.ButtonListener import ButtonListener
+from setup.GameInit import GameInit
+from tests.fakes import FakeChannel, FakeInteraction
 
 
 @pytest.fixture
@@ -31,63 +37,60 @@ def games_dir(tmp_path, monkeypatch):
 @pytest.fixture
 def make_game(games_dir):
     """Write a gamestate dict to a temp file and return a GamestateHelper for it."""
-    from helpers.GamestateHelper import GamestateHelper
-
-    def _make(gamestate, game_id="t"):
+    def make(gamestate, game_id="t"):
         gamestate.setdefault("game_id", game_id)
         with open(games_dir / f"{game_id}.json", "w") as f:
             json.dump(gamestate, f)
         return GamestateHelper(None, game_id)
 
-    return _make
+    return make
 
 
 @pytest.fixture
 def no_random(monkeypatch):
     """Replace random.randint with a queue of canned rolls."""
-    from helpers import CombatHelper
-
-    def _use(values):
+    def use(values):
         dice = iter(values)
         monkeypatch.setattr(CombatHelper.random, "randint", lambda a, b: next(dice))
 
-    return _use
+    return use
 
 
 @pytest.fixture
 def quiet_combat(monkeypatch):
     """Keep combat resolution off Discord and off the filesystem."""
-    from helpers import CombatHelper
-    from helpers.CombatHelper import Combat
-
-    async def _noop(*args, **kwargs):
+    async def noop(*args, **kwargs):
         return None
 
-    monkeypatch.setattr(Combat, "startCombat", staticmethod(_noop))
+    monkeypatch.setattr(Combat, "startCombat", staticmethod(noop))
     monkeypatch.setattr(CombatHelper, "DrawHelper", lambda *a, **k: None)
 
 
 @pytest.fixture
 def run():
-    """Await a coroutine and flush its create_task side effects."""
-    from tests.fakes import drain
-
-    return lambda coro: asyncio.run(drain(coro))
+    """Await a coroutine and all background tasks it starts."""
+    def run_coroutine(coro):
+        async def await_tasks():
+            result = await coro
+            current_task = asyncio.current_task()
+            while tasks := asyncio.all_tasks() - {current_task}:
+                await asyncio.gather(*tasks)
+            return result
+        return asyncio.run(await_tasks())
+    return run_coroutine
 
 
 @pytest.fixture
 def press(run):
     """Click a button through ButtonListener.resolveButton, as the given user."""
-    from listeners.ButtonListener import ButtonListener
-    from tests.fakes import FakeInteraction
-
-    def _press(channel, user_id, custom_id):
+    def click(channel, user_id, custom_id, message=None):
         game_id = channel.name.split("-")[0]  # the guild role that pings players is named after the game
-        inter = FakeInteraction(channel, custom_id=custom_id, user_id=user_id, role_names=[game_id])
+        inter = FakeInteraction(channel, custom_id=custom_id, user_id=user_id, role_names=[game_id],
+                                message=message or channel.message_with(custom_id))
         run(ButtonListener(None).resolveButton(inter))
         return inter
 
-    return _press
+    return click
 
 
 @pytest.fixture
@@ -96,13 +99,9 @@ def start_game(games_dir, run):
 
     Returns (game, channel); press buttons in the channel with `press`.
     """
-    from helpers.GamestateHelper import GamestateHelper
-    from setup.GameInit import GameInit
-    from tests.fakes import FakeChannel, FakeInteraction
-
-    def _start(player_count=2):
+    def start(player_count=2, factions=None):
         random.seed(0)  # GameInit shuffles decks and tiles; keep runs reproducible
-        factions = ["hyd", "eri", "ori", "dra", "mec", "pla"]
+        factions = factions or ["hyd", "eri", "ori", "dra", "mec", "pla"]
         colors = ["blue", "red", "green", "yellow", "purple", "white"]
         homes = ["201", "203", "205", "207", "209", "211"]  # turn order reads these positions
         players = [[i + 1, f"<@{i + 1}>"] for i in range(player_count)]
@@ -119,4 +118,4 @@ def start_game(games_dir, run):
         game.addToKey("activePlayerColor", "blue")
         return game, FakeChannel("aeb1-actions")
 
-    return _start
+    return start

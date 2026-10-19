@@ -39,7 +39,7 @@ class ReputationButtons:
 
         found = False
         for x, tile in enumerate(player_helper.stats["reputation_track"]):
-            if tile == "mixed":
+            if tile in ("rep", "mixed"):
                 player_helper.stats["reputation_track"][x] = highest
                 game.gamestate["reputation_tiles"].remove(highest)
                 found = True
