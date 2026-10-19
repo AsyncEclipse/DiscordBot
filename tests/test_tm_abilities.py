@@ -317,7 +317,8 @@ def test_techno_magic_keeps_other_combat_blueprints_available(start_game, press,
 
     menu = channel.sent[-1][1]["view"]
     assert {c.custom_id for c in menu.children} == {
-        "FCIDblue_technoMagic_201_interceptor", "FCIDblue_undoUpgrade_1_tm201_cruiser"}
+        "FCIDblue_technoMagic_201_interceptor", "FCIDblue_undoUpgrade_1_tm201_cruiser",
+        "FCIDblue_restartTechnoMagic_201"}
     install_part(press, channel)
     state = reload(game)
     assert set(state.gamestate["board"]["201"]["tmParts"]["blue"]) == {"cruiser", "interceptor"}

@@ -21,7 +21,35 @@ class UpgradeButtons:
                     and not installed.get(ship, {}).get("install")):
                 view.add_item(Button(label=ship.capitalize(), style=discord.ButtonStyle.blurple,
                                      custom_id=f"FCID{player['color']}_technoMagic_{pos}_{ship}"))
+        for ship, record in installed.items():
+            if record.get("install"):
+                view.add_item(Button(label=f"Undo {ship.capitalize()}", style=discord.ButtonStyle.gray,
+                                     custom_id=f"FCID{player['color']}_undoUpgrade_1_tm{pos}_{ship}"))
+        view.add_item(Button(label="Restart Techno-Magic", style=discord.ButtonStyle.red,
+                             custom_id=f"FCID{player['color']}_restartTechnoMagic_{pos}"))
         return view
+
+    @staticmethod
+    def resetTechnoMagic(game: GamestateHelper, player, pos: str, ship=None):
+        records = game.gamestate["board"][pos].get("tmParts", {}).get(player["color"], {})
+        for blueprint, record in records.items():
+            if ship is not None and blueprint != ship:
+                continue
+            if not record.pop("install", None):
+                continue
+            parts = list(record["base"])
+            for tile in game.gamestate["board"].values():
+                install = tile.get("tmParts", {}).get(player["color"], {}).get(blueprint, {}).get("install")
+                if install:
+                    parts[install[0]] = install[2]
+            player[f"{blueprint}_parts"] = parts
+        game.update_player(PlayerHelper(game.get_player_from_color(player["color"]), player))
+
+    @staticmethod
+    async def restartTechnoMagic(game: GamestateHelper, player, interaction: discord.Interaction, pos: str):
+        UpgradeButtons.resetTechnoMagic(game, player, pos)
+        await interaction.message.edit(content=f"{player['player_name']}, choose your Techno-Magic upgrades again.",
+                                       view=UpgradeButtons.getTechnoMagicView(game, player, pos))
 
     @staticmethod
     async def startUpgrade(game: GamestateHelper, player, interaction: discord.Interaction,
@@ -86,7 +114,10 @@ class UpgradeButtons:
                                  emoji=Emoji.getEmojiByName(partName),
                                  custom_id=(f"FCID{player['color']}_selectOldPart_"
                                             f"{actions}_{ship}_{i}_{discTileUpgrade}_{str(index)}{partsShown}")))
-        if not discTileUpgrade.startswith("tm"):
+        if discTileUpgrade.startswith("tm"):
+            view.add_item(Button(label="Restart Techno-Magic", style=discord.ButtonStyle.red,
+                                 custom_id=f"FCID{player['color']}_restartTechnoMagic_{discTileUpgrade[2:]}"))
+        else:
             view.add_item(Button(label="Choose Different Ship", style=discord.ButtonStyle.gray,
                                  custom_id=(f"FCID{player['color']}_chooseDifferentShip_"
                                             f"{actions}_{discTileUpgrade}")))
@@ -130,6 +161,9 @@ class UpgradeButtons:
                                  custom_id=(f"FCID{player['color']}_chooseUpgrade_{actions}_{ship}_"
                                             f"{oldPart}_{i}_{indexOfOldPart}_{discTileUpgrade}"),
                                  emoji=Emoji.getEmojiByName(partName)))
+        if discTileUpgrade.startswith("tm"):
+            view.add_item(Button(label="Restart Techno-Magic", style=discord.ButtonStyle.red,
+                                 custom_id=f"FCID{player['color']}_restartTechnoMagic_{discTileUpgrade[2:]}"))
         removal_note = "" if discTileUpgrade.startswith("tm") else " Remove as a free action by selecting 'Empty'."
         await UpgradeButtons.showMenu(interaction, f"{interaction.user.mention}, replace "
                                       f"{part_stats[oldPart]['name']} on your {ship} with which part?"
@@ -182,7 +216,8 @@ class UpgradeButtons:
         if discTileUpgrade.startswith("tm"):
             pos = discTileUpgrade[2:]
             game.gamestate["board"][pos]["tmParts"][player["color"]][ship]["install"] = (index, oldPart, newPart)
-        player_helper.stats["upgradeUndo"] = undo
+        if not discTileUpgrade.startswith("tm"):
+            player_helper.stats["upgradeUndo"] = undo
         player_helper.specifyDetailsOfAction(f"Replaced {oldName} with {part_stats[newPart]['name']}"
                                              f" on their {ship.capitalize()}.")
         game.update_player(player_helper)
@@ -213,31 +248,27 @@ class UpgradeButtons:
                                            "or finish.", view=view)
         elif discTileUpgrade.startswith("tm"):
             view = UpgradeButtons.getTechnoMagicView(game, player, discTileUpgrade[2:])
-            view.add_item(Button(label="Undo", style=discord.ButtonStyle.gray,
-                                 custom_id=f"FCID{player['color']}_undoUpgrade_1_{discTileUpgrade}_{ship}"))
             await interaction.channel.send(f"{player['player_name']}, choose another combat blueprint to upgrade"
                                            " or undo this Techno-Magic part.", view=view)
 
     @staticmethod
     async def undoUpgrade(game: GamestateHelper, player, interaction: discord.Interaction,
                           customID: str, player_helper: PlayerHelper):
+        parts = customID.split("_")
+        # Undo buttons posted before the upgrade mode joined the id carry only the action count
+        mode = parts[2] if len(parts) > 2 else "dummy"
+        if mode.startswith("tm"):
+            UpgradeButtons.resetTechnoMagic(game, player, mode[2:], parts[3])
+            view = UpgradeButtons.getTechnoMagicView(game, player, mode[2:])
+            await interaction.message.edit(content=f"{player['player_name']}, undid the Techno-Magic part."
+                                           " Choose a combat blueprint to upgrade.", view=view)
+            return
         undo = player.get("upgradeUndo")
         if undo is None:
             await interaction.followup.send("There is no upgrade to undo.", ephemeral=True)
             return
         player_helper.stats.clear()
         player_helper.stats.update(undo)
-        parts = customID.split("_")
-        # Undo buttons posted before the upgrade mode joined the id carry only the action count
-        mode = parts[2] if len(parts) > 2 else "dummy"
-        if mode.startswith("tm"):
-            # the blueprint is free for another Techno-Magic part this combat
-            game.gamestate["board"][mode[2:]]["tmParts"][player["color"]][parts[3]].pop("install", None)
-            game.update_player(player_helper)
-            view = UpgradeButtons.getTechnoMagicView(game, player, mode[2:])
-            await interaction.message.edit(content=f"{player['player_name']}, undid the Techno-Magic part."
-                                           " Choose a combat blueprint to upgrade.", view=view)
-            return
         game.update_player(player_helper)
         await interaction.message.delete()
         await interaction.channel.send(f"{player['player_name']} undid their last part swap.")

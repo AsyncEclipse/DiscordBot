@@ -2,6 +2,7 @@ import json
 import discord
 from Buttons.DiscoveryTile import DiscoveryTileButtons
 from Buttons.Influence import InfluenceButtons
+from Buttons.Upgrade import UpgradeButtons
 from discord.ext import commands
 from discord import app_commands
 from discord.ui import View, Button
@@ -250,7 +251,7 @@ class TileCommands(commands.GroupCog, name="tile"):
         image = drawing.board_tile_image(tile_position)
         await interaction.followup.send(file=drawing.show_single_tile(image))
 
-    @app_commands.command(name="techno_magic_menu", description="Restore Techno-Magic upgrade buttons for a combat")
+    @app_commands.command(name="techno_magic_menu", description="Reset temporary Techno-Magic upgrades and choose again for a combat")
     async def techno_magic_menu(self, interaction: discord.Interaction, tile_position: str):
         game = GamestateHelper(interaction.channel)
         tile = game.gamestate["board"].get(tile_position)
@@ -263,8 +264,10 @@ class TileCommands(commands.GroupCog, name="tile"):
             await interaction.response.send_message("There is no active combat at that position.", ephemeral=True)
             return
         await interaction.response.defer(thinking=False)
+        for color in list(tile.get("tmParts", {})):
+            UpgradeButtons.resetTechnoMagic(game, game.getPlayerObjectFromColor(color), tile_position)
         await Combat.offerTechnoMagic(game, interaction.channel, tile_position)
-        await interaction.followup.send("Restored any remaining Techno-Magic upgrades for this combat.")
+        await interaction.followup.send("Reset Techno-Magic upgrades for this combat. Choose your temporary parts again.")
 
     @app_commands.command(name="declare_a_combat_winner")
     async def declare_a_combat_winner(self, interaction: discord.Interaction, tile_position: str):

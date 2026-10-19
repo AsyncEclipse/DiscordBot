@@ -311,6 +311,8 @@ class ButtonListener(commands.Cog):
             await UpgradeButtons.chooseUpgrade(game, player, interaction, customID, player_helper)
         elif customID.startswith("undoUpgrade"):
             await UpgradeButtons.undoUpgrade(game, player, interaction, customID, player_helper)
+        elif customID.startswith("restartTechnoMagic"):
+            await UpgradeButtons.restartTechnoMagic(game, player, interaction, customID.split("_")[1])
         elif customID.startswith("technoMagic"):
             await Combat.technoMagicUpgrade(game, customID, player, interaction, player_helper)
         elif customID.startswith("startPopDrop"):
