@@ -1463,10 +1463,7 @@ class Combat:
             player = game.getPlayerObjectFromColor(color)
             if player["name"] != "Techno-Mages":
                 continue
-            view = View()
-            for ship in game.getShipsWithParts(player):
-                view.add_item(Button(label=ship.capitalize(), style=discord.ButtonStyle.blurple,
-                                     custom_id=f"FCID{color}_technoMagic_{pos}_{ship}"))
+            view = UpgradeButtons.getTechnoMagicView(game, player, pos)
             if len(view.children):
                 await channel.send(f"{player['player_name']}, Techno-Magic lets you temporarily Upgrade 1 on each"
                                    " ship blueprint for this combat. The new parts are removed when the battle"

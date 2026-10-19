@@ -12,6 +12,18 @@ from helpers.ShipHelper import PlayerShip
 
 class UpgradeButtons:
     @staticmethod
+    def getTechnoMagicView(game: GamestateHelper, player, pos: str):
+        tile = game.gamestate["board"][pos]
+        installed = tile.get("tmParts", {}).get(player["color"], {})
+        view = View()
+        for ship in game.getShipsWithParts(player):
+            if (f"{player['color']}-{game.getShipShortName(ship)}" in tile.get("player_ships", [])
+                    and not installed.get(ship, {}).get("install")):
+                view.add_item(Button(label=ship.capitalize(), style=discord.ButtonStyle.blurple,
+                                     custom_id=f"FCID{player['color']}_technoMagic_{pos}_{ship}"))
+        return view
+
+    @staticmethod
     async def startUpgrade(game: GamestateHelper, player, interaction: discord.Interaction,
                            button: bool, discTileUpgrade: str, action:str):
         drawing = DrawHelper(game.gamestate)
@@ -74,7 +86,8 @@ class UpgradeButtons:
                                  emoji=Emoji.getEmojiByName(partName),
                                  custom_id=(f"FCID{player['color']}_selectOldPart_"
                                             f"{actions}_{ship}_{i}_{discTileUpgrade}_{str(index)}{partsShown}")))
-        view.add_item(Button(label="Choose Different Ship", style=discord.ButtonStyle.gray,
+        if not discTileUpgrade.startswith("tm"):
+            view.add_item(Button(label="Choose Different Ship", style=discord.ButtonStyle.gray,
                                  custom_id=(f"FCID{player['color']}_chooseDifferentShip_"
                                             f"{actions}_{discTileUpgrade}")))
         if discTileUpgrade in DISCOVERY_PART_IDS:
@@ -195,11 +208,11 @@ class UpgradeButtons:
             await interaction.channel.send(f"{player['player_name']}, choose which ship you would like to upgrade "
                                            "or finish your action.", view=view)
         elif discTileUpgrade.startswith("tm"):
-            view = View()
+            view = UpgradeButtons.getTechnoMagicView(game, player, discTileUpgrade[2:])
             view.add_item(Button(label="Undo", style=discord.ButtonStyle.gray,
                                  custom_id=f"FCID{player['color']}_undoUpgrade_1_{discTileUpgrade}_{ship}"))
-            await interaction.channel.send(f"{player['player_name']}, you may undo this Techno-Magic part.",
-                                           view=view)
+            await interaction.channel.send(f"{player['player_name']}, choose another combat blueprint to upgrade"
+                                           " or undo this Techno-Magic part.", view=view)
 
     @staticmethod
     async def undoUpgrade(game: GamestateHelper, player, interaction: discord.Interaction,

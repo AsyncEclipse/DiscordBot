@@ -149,9 +149,10 @@ def test_techno_magic_offers_one_upgrade_per_ship_blueprint(start_game, run):
     run(Combat.offerTechnoMagic(game, channel, "201"))
 
     menu = buttons(channel)
-    for ship in ("interceptor", "cruiser", "dread", "starbase"):
+    for ship in ("interceptor", "cruiser"):
         assert f"FCIDblue_technoMagic_201_{ship}" in menu
     assert not [cid for cid in menu if cid.startswith("FCIDred_")]
+    assert not [cid for cid in menu if cid.endswith(("_dread", "_starbase"))]
 
 
 def test_techno_magic_is_not_offered_to_other_factions(start_game, run):
@@ -296,3 +297,30 @@ def test_grey_advanced_squares_take_any_cube_for_two_ships(start_game, press):
     state = reload(game)
     assert state.gamestate["board"]["205"]["neutraladv_pop"] == [1]
     assert state.get_player(1)["colony_ships"] == ships - 2
+
+
+def test_techno_magic_keeps_other_combat_blueprints_available(start_game, press, run):
+    game, channel = start_game(factions=["tm", "eri"])
+    tile = game.gamestate["board"]["201"]
+    tile["player_ships"] = ["blue-int", "blue-cru", "red-drd"]
+    tile["attacker"], tile["defender"] = "red", "blue"
+    game.update()
+    run(Combat.offerTechnoMagic(game, channel, "201"))
+
+    inter = press(channel, 1, "FCIDblue_technoMagic_201_cruiser")
+    slot = next(c.custom_id for c in inter.message.edited["view"].children
+                if "_selectOldPart_" in c.custom_id and "_empty_" in c.custom_id)
+    inter = press(channel, 1, slot)
+    choice = next(c.custom_id for c in inter.message.edited["view"].children
+                  if "_chooseUpgrade_" in c.custom_id and "_hul_" in c.custom_id)
+    press(channel, 1, choice)
+
+    menu = channel.sent[-1][1]["view"]
+    assert {c.custom_id for c in menu.children} == {
+        "FCIDblue_technoMagic_201_interceptor", "FCIDblue_undoUpgrade_1_tm201_cruiser"}
+    install_part(press, channel)
+    state = reload(game)
+    assert set(state.gamestate["board"]["201"]["tmParts"]["blue"]) == {"cruiser", "interceptor"}
+    run(Combat.revertTechnoMagic(state, channel, "201"))
+    assert reload(game).get_player(1)["cruiser_parts"] == game.get_player(1)["cruiser_parts"]
+    assert reload(game).get_player(1)["interceptor_parts"] == game.get_player(1)["interceptor_parts"]
