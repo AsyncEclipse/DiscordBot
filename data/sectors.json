@@ -3847,7 +3847,7 @@
     "owner": 0,
     "name": "NGC 5189",
     "ring": 2,
-    "disctile": 2,
+    "disctile": 0,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
@@ -3873,19 +3873,19 @@
     "neutraladv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [],
-    "cru_snap": [],
-    "drd_snap": [],
-    "sb_snap": [],
+    "int_snap": [800, 200],
+    "cru_snap": [800, 690],
+    "drd_snap": [860, 300],
+    "sb_snap": [770, 690],
     "mon_snap": [
       513,
       450
     ],
-    "orb_snap": [],
-    "ai_snap": [
-      630,
-      444
+    "orb_snap": [
+      330,
+      280
     ],
+    "ai_snap": [690, 443],
     "wormholes": [
       0,
       1,
@@ -3900,6 +3900,54 @@
     "guardian": 0,
     "gcds": 0,
     "warp": 0,
+    "subsectors": {
+        "b": {
+            "disctile": 1,
+            "int_snap": [
+                600,
+                110
+            ],
+            "cru_snap": [
+                480,
+                330
+            ],
+            "drd_snap": [
+                290,
+                110
+            ],
+            "sb_snap": [
+                480,
+                330
+            ],
+            "disc_snap": [
+                385,
+                217
+            ]
+        },
+        "c": {
+            "disctile": 1,
+            "int_snap": [
+                600,
+                776
+            ],
+            "cru_snap": [
+                480,
+                556
+            ],
+            "drd_snap": [
+                290,
+                776
+            ],
+            "sb_snap": [
+                480,
+                556
+            ],
+            "disc_snap": [
+                385,
+                660
+            ]
+        }
+    },
     "type": "nebula"
   },
   "301": {
@@ -5647,7 +5695,7 @@
     "owner": 0,
     "name": "NGC 1952",
     "ring": 3,
-    "disctile": 2,
+    "disctile": 0,
     "player_ships": [],
     "money_pop": [],
     "money1_snap": [],
@@ -5673,19 +5721,19 @@
     "neutraladv_pop": [],
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
-    "int_snap": [],
-    "cru_snap": [],
-    "drd_snap": [],
-    "sb_snap": [],
+    "int_snap": [800, 200],
+    "cru_snap": [800, 690],
+    "drd_snap": [860, 300],
+    "sb_snap": [770, 690],
     "mon_snap": [
       513,
       450
     ],
-    "orb_snap": [],
-    "ai_snap": [
-      628,
-      446
+    "orb_snap": [
+      330,
+      280
     ],
+    "ai_snap": [690, 443],
     "wormholes": [
       0,
       1,
@@ -5700,6 +5748,54 @@
     "guardian": 0,
     "gcds": 0,
     "warp": 0,
+    "subsectors": {
+        "b": {
+            "disctile": 1,
+            "int_snap": [
+                600,
+                110
+            ],
+            "cru_snap": [
+                480,
+                330
+            ],
+            "drd_snap": [
+                290,
+                110
+            ],
+            "sb_snap": [
+                480,
+                330
+            ],
+            "disc_snap": [
+                385,
+                217
+            ]
+        },
+        "c": {
+            "disctile": 1,
+            "int_snap": [
+                600,
+                776
+            ],
+            "cru_snap": [
+                480,
+                556
+            ],
+            "drd_snap": [
+                290,
+                776
+            ],
+            "sb_snap": [
+                480,
+                556
+            ],
+            "disc_snap": [
+                385,
+                660
+            ]
+        }
+    },
     "type": "nebula"
   },
   "396": {

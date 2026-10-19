@@ -145,7 +145,8 @@ class Combat:
                     tiles.append((int(tile_map[tile]["sector"]), tile))
             else:
                 sides = Combat.findSidesInTile(game, tile)
-                if len(sides) == 1 and "ai" not in sides[0] and tile_map[tile].get("owner") == 0:
+                if (len(sides) == 1 and "ai" not in sides[0] and tile_map[tile].get("owner") == 0
+                        and tile_map[tile].get("type") != "nebula"):
                     tiles.append((int(tile_map[tile]["sector"]), tile))
         return sorted(tiles, key=lambda x: x[0], reverse=True)
 
@@ -1501,7 +1502,10 @@ class Combat:
             players = game.gamestate["board"][pos]["combatants"]
         else:
             players = Combat.findPlayersInTile(game, pos)
-        countDraw = 1
+        system = int(game.gamestate["board"][pos]["sector"])
+        # Nebula Subsectors share a sector number, so number draws after any already queued for it
+        countDraw = 1 + sum(q[0] == system for q in game.gamestate.get("queuedDraws", [])
+                            + game.gamestate.get("queuedQuestions", []))
         game.removeFromKey("tilesToResolve", int(game.gamestate["board"][pos]["sector"]))
         entry_order = game.getCombatEntryOrder(pos)
         players = sorted(players, key=lambda color: (entry_order.index(color) if color in entry_order
@@ -1538,9 +1542,11 @@ class Combat:
         winner = next(iter(survivors), None)
         owner = game.gamestate["board"][pos]["owner"]
 
+        # Nebula Sectors take no influence; their Discovery Tiles are offered at upkeep
+        nebula = game.gamestate["board"][pos].get("type") == "nebula"
         winner_owns_or_allies = (winner is not None and owner != 0 and owner != "ai"
                                  and game.areAllied(winner, owner))
-        if winner is not None and owner != winner and not winner_owns_or_allies:
+        if winner is not None and owner != winner and not winner_owns_or_allies and not nebula:
             player = game.getPlayerObjectFromColor(winner)
             playerName = player["player_name"]
             if owner == 0:

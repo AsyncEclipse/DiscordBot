@@ -38,7 +38,7 @@ class MoveButtons:
         view = View()
         tiles = MoveButtons.getListOfUnpinnedShipTiles(game, player)
         for tile in tiles:
-            view.add_item(Button(label=tile, style=discord.ButtonStyle.red,
+            view.add_item(Button(label=game.get_tile_label(tile), style=discord.ButtonStyle.red,
                                  custom_id=f"FCID{player['color']}_moveFrom_{tile}_{moveCount}"))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray,
                              custom_id=f"FCID{player['color']}_restartTurn"))
@@ -73,7 +73,7 @@ class MoveButtons:
                              custom_id=f"FCID{player['color']}_restartTurn"))
         await interaction.message.delete()
         await interaction.channel.send(f"{player['player_name']}, select the ship"
-                                       f" you would like to move from {originT}", view=view)
+                                       f" you would like to move from {game.get_tile_label(originT)}", view=view)
 
     @staticmethod
     def getTilesInRange(game: GamestateHelper, player, origin: str, shipRange: int, jumpDrivePresent: int):
@@ -115,7 +115,14 @@ class MoveButtons:
             if not ExploreButtons.doesPlayerHaveUnpinnedShips(player, player_ships, game, pos):
                 return
 
-            for adjTile in configs.get(pos)[0].split(","):
+            candidates = tile_map[pos].get("adjacent") or configs.get(pos)[0].split(",")
+            for adjTile in candidates:
+                if ("nebula_internal" in tile_map.get(adjTile, {})
+                        and adjTile not in tile_map[pos].get("nebula_internal", [])):
+                    # entering a Nebula: land in the Subsector that owns the shared edge
+                    parent = tile_map[pos].get("nebula_parent", pos)
+                    edge = configs.get(parent)[0].split(",").index(adjTile)
+                    adjTile = game.nebula_subsector_for_edge(adjTile, (edge + 3) % 6)
                 if adjTile in tile_map and InfluenceButtons.areTwoTilesAdjacent(game, pos, adjTile,
                                                                                 configs, wormHoleGen):
                     recursive_search(adjTile, distance + 1, visited, jumpDriveAvailable)
@@ -145,11 +152,11 @@ class MoveButtons:
         count = 0
         for destination in tiles:
             if count < 24:
-                view.add_item(Button(label=destination, style=discord.ButtonStyle.blurple,
+                view.add_item(Button(label=game.get_tile_label(destination), style=discord.ButtonStyle.blurple,
                                      custom_id=(f"FCID{player['color']}_moveTo_{originT}"
                                                 f"_{shipType}_{destination}_{moveCount}")))
             else:
-                view2.add_item(Button(label=destination, style=discord.ButtonStyle.blurple,
+                view2.add_item(Button(label=game.get_tile_label(destination), style=discord.ButtonStyle.blurple,
                                       custom_id=(f"FCID{player['color']}_moveTo_{originT}"
                                                  f"_{shipType}_{destination}_{moveCount}")))
             count += 1
@@ -158,7 +165,7 @@ class MoveButtons:
 
         await interaction.message.delete()
         await interaction.channel.send(f"{player['player_name']}, select the tile you would like to move "
-                                       f"a {shipType} from {originT} to.", view=view)
+                                       f"a {shipType} from {game.get_tile_label(originT)} to.", view=view)
         if count > 24:
             await interaction.channel.send("Additional Options", view=view2)
         drawing = DrawHelper(game.gamestate)
@@ -183,7 +190,8 @@ class MoveButtons:
         game.add_units([shipName], destination)
         game.fixshipsOrder(destination)
         drawing = DrawHelper(game.gamestate)
-        await interaction.channel.send(f"{player['player_name']} Moved a {shipType} from {originT} to {destination}.",
+        await interaction.channel.send(f"{player['player_name']} Moved a {shipType} from "
+                                       f"{game.get_tile_label(originT)} to {game.get_tile_label(destination)}.",
                                        file=await asyncio.to_thread(drawing.board_tile_image_file, destination))
         owner = game.gamestate["board"][destination]["owner"]
         if tile_ships:

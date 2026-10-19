@@ -24,6 +24,7 @@ class FakeMessage:
     def __init__(self, channel=None):
         self.id = next(self._ids)
         self.flags = SimpleNamespace(ephemeral=False)
+
         self.channel = channel
 
     async def delete(self):
@@ -32,6 +33,11 @@ class FakeMessage:
 
     async def edit(self, **kwargs):
         self.edited = kwargs
+
+    async def create_thread(self, name):
+        thread = FakeChannel(name)
+        self.channel.threads.append(thread)
+        return thread
 
 
 class FakeChannel:
@@ -47,6 +53,9 @@ class FakeChannel:
         self.messages.append(FakeMessage(self))
         return self.messages[-1]
 
+    async def edit(self, **kwargs):
+        self.edited = kwargs
+
     async def fetch_message(self, message_id):
         if message_id in self.deleted:
             raise discord.NotFound(SimpleNamespace(status=404, reason="Not Found"), "Unknown Message")
@@ -58,6 +67,7 @@ class FakeChannel:
             if any(getattr(c, "custom_id", None) == custom_id for c in getattr(kwargs.get("view"), "children", [])):
                 return message
         return None
+
 
 
 class FakeUser:
