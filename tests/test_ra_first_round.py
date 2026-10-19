@@ -58,17 +58,17 @@ def test_remnants_of_ra_atlantians_and_techno_mages_explore_then_pass(games_dir,
     assert state["players"]["3"]["science_pop_cubes"] == 10
     assert state["board"]["205"]["sector"] == "266"
     assert state["board"]["209"]["sector"] == "244"
-    assert state["activePlayerColor"] == ["blue"]
+    assert state["activePlayerColor"] == ["yellow"]
 
     # Power of the Ancients includes the home sector: the setup offers the disc cube.
-    press(channel, 1, find_button(channel, "FCIDblue_ancientsCube_science_"))
+    press(channel, 1, find_button(channel, "FCIDyellow_ancientsCube_science_"))
     state = reload(game).gamestate
     assert state["board"]["201"]["disc_pop"] == [1]
     assert state["players"]["1"]["science_pop_cubes"] == 11
 
     # The other community setup hook, Atlantians' discovery choice, runs in the same game.
-    press(channel, 2, find_button(channel, "FCIDred_selectDiscTile_"))
-    press(channel, 2, find_button(channel, "FCIDred_keepDiscForPoints"))
+    press(channel, 2, find_button(channel, "FCIDblue_selectDiscTile_"))
+    press(channel, 2, find_button(channel, "FCIDblue_keepDiscForPoints"))
     assert reload(game).get_player(2)["disc_tiles_for_points"] == 1
 
     # Techno-Mages' pre-game tech purchase, the third setup hook in the same game.
@@ -79,7 +79,7 @@ def test_remnants_of_ra_atlantians_and_techno_mages_explore_then_pass(games_dir,
     assert reload(game).get_player(3)["influence_discs"] == discs
 
     explored_positions = []
-    for player_id, color in [(1, "blue"), (2, "red"), (3, "purple")]:
+    for player_id, color in [(1, "yellow"), (2, "blue"), (3, "purple")]:
         assert reload(game).gamestate["activePlayerColor"] == [color]
         press(channel, player_id, f"FCID{color}_startExplore")
         explore = next(custom_id for custom_id in buttons(channel)
@@ -94,9 +94,9 @@ def test_remnants_of_ra_atlantians_and_techno_mages_explore_then_pass(games_dir,
         press(channel, player_id, f"FCID{color}_finishAction")
         press(channel, player_id, f"FCID{color}_endTurn")
 
-    press(channel, 1, "FCIDblue_passForRound")
-    assert reload(game).gamestate["activePlayerColor"] == ["red"]
-    press(channel, 2, "FCIDred_passForRound")
+    press(channel, 1, "FCIDyellow_passForRound")
+    assert reload(game).gamestate["activePlayerColor"] == ["blue"]
+    press(channel, 2, "FCIDblue_passForRound")
     press(channel, 3, "FCIDpurple_passForRound")
     final_game = reload(game)
     assert final_game.is_everyone_passed()

@@ -16,9 +16,8 @@ def test_ra_only_appears_in_community_draft(community_mode):
     assert len(community_buttons.children) == 19
 
 
-def test_ra_faction_color_is_supported_setup_color():
-    supported_colors = ["blue", "red", "green", "yellow", "purple", "white", "pink", "brown", "teal"]
-    assert DraftButtons.getColor("ra") in supported_colors
+def test_ra_faction_color_is_yellow():
+    assert DraftButtons.getColor("ra") == "yellow"
 
 
 @pytest.mark.parametrize("drafted, available", [
