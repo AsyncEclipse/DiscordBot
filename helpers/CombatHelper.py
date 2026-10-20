@@ -6,6 +6,7 @@ from discord.ui import View, Button
 from Buttons.Influence import InfluenceButtons
 from Buttons.Population import PopulationButtons
 from Buttons.Reputation import ReputationButtons
+from Buttons.Upgrade import UpgradeButtons
 from helpers.DrawHelper import DrawHelper
 from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
@@ -140,6 +141,8 @@ class Combat:
         tile_map = game.gamestate["board"]
         tiles = []
         for tile in tile_map:
+            if tile_map[tile].get("type") == "nebula":
+                continue
             if Combat.isDracoAgainstAncients(game, tile):
                 if tile_map[tile].get("owner") == 0:
                     tiles.append((int(tile_map[tile]["sector"]), tile))
@@ -152,10 +155,11 @@ class Combat:
 
     @staticmethod
     async def startCombat(game: GamestateHelper, channel, pos):
+        # a new pairing on the tile is a new combat: last pairing's Techno-Magic parts come off first
+        await Combat.revertTechnoMagic(game, channel, pos)
         drawing = DrawHelper(game.gamestate)
         sides = Combat.currentPairing(game, pos)
         game.setAttackerAndDefender(sides[1], sides[0], pos)
-        game.setCurrentRoller(None, pos)
         game.setCurrentRoller(None, pos)
         for side in sides:
             for player in side:
@@ -167,6 +171,7 @@ class Combat:
                 else:
                     file = await asyncio.to_thread(drawing.show_AI_stats)
                     await channel.send("AI stats look like this", file=file)
+        await Combat.offerTechnoMagic(game, channel, pos)
         await Combat.promptNextSpeed(game, pos, channel, False)
 
     @staticmethod
@@ -1253,7 +1258,19 @@ class Combat:
                             break
 
     @staticmethod
-    async def promptNextSpeed(game: GamestateHelper, pos: str, channel, update: bool):
+    async def refreshCombatPrompt(game: GamestateHelper, pos: str, channel):
+        tile = game.gamestate["board"][pos]
+        if len(Combat.currentPairing(game, pos)) != 2 or Combat.isDracoAgainstAncients(game, pos):
+            await channel.send("There is no active combat at that position.")
+            return
+        if (tile.get("unresolvedHits", 0) > 0 or tile.get("pendingRiftDice")
+                or any(tile.get("pendingRiftBackfire", {}).values())):
+            await channel.send("Resolve the pending hits and Rift Cannon effects before rolling again.")
+            return
+        await Combat.promptNextSpeed(game, pos, channel, False, repeat=True)
+
+    @staticmethod
+    async def promptNextSpeed(game: GamestateHelper, pos: str, channel, update: bool, repeat: bool = False):
         currentSpeed = None
         if "currentSpeed" in game.gamestate["board"][pos]:
             currentSpeed = game.gamestate["board"][pos]["currentSpeed"]
@@ -1268,7 +1285,11 @@ class Combat:
         found = False
         nextSpeed = -20
         nextOwner = ""
+        if repeat and currentSpeed is not None and currentRoller is not None:
+            nextSpeed, nextOwner = currentSpeed, currentRoller
         for speed, owner in sortedSpeeds:
+            if nextOwner:
+                break
             if any([found, currentSpeed is None, currentRoller is None,
                     currentSpeed is not None and speed < currentSpeed]):
                 nextSpeed = speed
@@ -1321,7 +1342,7 @@ class Combat:
                     newSpeeds = 0
                     for ship in shipsSpeeds:
                         speed2 = ship[0]
-                        if speed2 < 99 and speed2 != int(speed):
+                        if speed2 < 99 and speed2 != int(nextSpeed):
                             newSpeeds += 1
                             break
                     if newSpeeds < 1:
@@ -1448,6 +1469,64 @@ class Combat:
         await Combat.promptNextSpeed(game, pos, interaction.channel, False)
 
     @staticmethod
+    async def offerTechnoMagic(game: GamestateHelper, channel, pos: str):
+        """Techno-Magic: at the start of a combat, one temporary Upgrade 1 per ship blueprint.
+        The attacker chooses first, the defender last."""
+        tile = game.gamestate["board"][pos]
+        colors = Combat.sideOf(tile.get("attacker")) + Combat.sideOf(tile.get("defender"))
+        for color in colors:
+            if not color or color == "ai":
+                continue
+            player = game.getPlayerObjectFromColor(color)
+            if player["name"] != "Techno-Mages":
+                continue
+            view = UpgradeButtons.getTechnoMagicView(game, player, pos)
+            if len(view.children):
+                await channel.send(f"{player['player_name']}, Techno-Magic lets you temporarily Upgrade 1 on each"
+                                   " ship blueprint for this combat. The new parts are removed when the battle"
+                                   " ends. You may not remove ship parts or place Ancient ship parts.", view=view)
+
+    @staticmethod
+    async def technoMagicUpgrade(game: GamestateHelper, customID: str, player, interaction: discord.Interaction,
+                                 player_helper: PlayerHelper):
+        pos, ship = customID.split("_")[1:3]
+        color = player["color"]
+        # the first install anywhere holds the pre-combat blueprint, so overlapping combats
+        # each remove only their own temporary part
+        base = next((tile["tmParts"][color][ship]["base"]
+                     for tile in game.gamestate["board"].values()
+                     if tile.get("tmParts", {}).get(color, {}).get(ship, {}).get("base")), None)
+        record = game.gamestate["board"][pos].setdefault("tmParts", {}).setdefault(color, {}).setdefault(ship, {})
+        if record.get("install"):
+            await interaction.followup.send("You have already upgraded that blueprint this combat.", ephemeral=True)
+            return
+        record["base"] = base if base is not None else list(player[f"{ship}_parts"])
+        game.update()
+        await UpgradeButtons.upgradeShip(game, player, interaction, f"upgradeShip_1_{ship}_tm{pos}", player_helper)
+
+    @staticmethod
+    async def revertTechnoMagic(game: GamestateHelper, channel, pos: str):
+        """The temporary parts installed at the start of this combat come off again."""
+        for color, ships in game.gamestate["board"][pos].pop("tmParts", {}).items():
+            player = game.getPlayerObjectFromColor(color)
+            player_helper = PlayerHelper(color, player)
+            restore = {}
+            for ship, record in ships.items():
+                pending = any(tile.get("tmParts", {}).get(color, {}).get(ship, {}).get("install")
+                              for key, tile in game.gamestate["board"].items() if key != pos)
+                if not pending:
+                    restore[ship] = record["base"]
+            if restore:
+                for ship, parts in restore.items():
+                    player[f"{ship}_parts"] = parts
+                game.update_player(player_helper)
+                await channel.send(f"Techno-Magic wears off: the temporary ship parts are removed"
+                                   f" from {player['player_name']}'s blueprints.")
+            else:
+                # every install belongs to a combat that is still pending; the pop itself must persist
+                game.update()
+
+    @staticmethod
     def discoveryTileClaimable(game: GamestateHelper, pos: str):
         """A Discovery Tile still on the board that no Ancients guard. Ancients
         guard their tile until destroyed, even against the Descendants of Draco."""
@@ -1507,6 +1586,7 @@ class Combat:
         countDraw = 1 + sum(q[0] == system for q in game.gamestate.get("queuedDraws", [])
                             + game.gamestate.get("queuedQuestions", []))
         game.removeFromKey("tilesToResolve", int(game.gamestate["board"][pos]["sector"]))
+        await Combat.revertTechnoMagic(game, interaction.channel, pos)
         entry_order = game.getCombatEntryOrder(pos)
         players = sorted(players, key=lambda color: (entry_order.index(color) if color in entry_order
                                                       else len(entry_order), players.index(color)))

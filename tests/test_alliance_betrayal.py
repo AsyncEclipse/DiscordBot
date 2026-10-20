@@ -47,6 +47,18 @@ def _two_related(state):
 
 
 class TestAllianceBetrayal:
+    def test_former_ally_does_not_take_traitor_back_by_staying_in_leavers_sector(self, make_game, run):
+        state = _game_state()
+        state["board"]["101"]["player_ships"] = ["red-int"]
+        game = make_game(state)
+        _leave_nova(game)
+
+        run(_traitor_check(game, "blue"))
+        run(_traitor_check(game, "red"))
+
+        assert game.getPlayerObjectFromColor("blue")["traitor"] is True
+        assert not game.getPlayerObjectFromColor("red").get("traitor")
+
     @pytest.mark.parametrize(("ships_101", "traitor"), [
         (["red-int"], True),
         ([], False),

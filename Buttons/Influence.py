@@ -158,7 +158,7 @@ class InfluenceButtons:
         if len(InfluenceButtons.getTilesToInfluence(game, p1)) > 0:
             view.add_item(Button(label="Add  Influence", style=discord.ButtonStyle.green,
                                  custom_id=f"FCID{p1['color']}_addInfluenceStart"))
-        if "Magellan" in p1["name"]:
+        if "Magellan" in p1["name"] or p1["name"] in ("Remnants of Ra", "Techno-Mages"):
             view.add_item(Button(label="Refresh 1 Colony Ship", style=discord.ButtonStyle.blurple,
                                  custom_id=f"FCID{p1['color']}_refreshPopShips"))
         else:
@@ -204,6 +204,7 @@ class InfluenceButtons:
             return
         game.add_control(p1["color"], tileLoc)
         await interaction.channel.send(f"{p1['player_name']} acquired control of {tileLoc}.")
+        await PopulationButtons.offerAncientsCube(game, p1, interaction, tileLoc)
         if Combat.discoveryTileClaimable(game, tileLoc):
             # FAQ: the first player to place an Influence Disc takes the tile at once.
             await DiscoveryTileButtons.exploreDiscoveryTile(game, tileLoc, interaction, p1)
@@ -211,7 +212,7 @@ class InfluenceButtons:
 
     @staticmethod
     async def refreshPopShips(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
-        if "Magellan" in player["name"]:
+        if "Magellan" in player["name"] or player["name"] in ("Remnants of Ra", "Techno-Mages"):
             numShips = game.refresh_one_colony_ship(game.get_player_from_color(player["color"]))
         else:
             numShips = game.refresh_two_colony_ships(game.get_player_from_color(player["color"]))
@@ -323,6 +324,8 @@ class InfluenceButtons:
                     game.gamestate["board"][tile]["materialadv_pop"][0] = 0
                 if len(game.gamestate["board"][tile]["neutraladv_pop"]) > 0:
                     game.gamestate["board"][tile]["neutraladv_pop"][0] = 0
+                if len(game.gamestate["board"][tile].get("disc_pop", [])) > 0:
+                    game.gamestate["board"][tile]["disc_pop"][0] = 0
             game.gamestate["board"][tile]["player_ships"] = [e
                                                             for e in game.gamestate["board"][tile]["player_ships"]
                                                             if (player_color not in e or "mon" in e or "orb" in e)]

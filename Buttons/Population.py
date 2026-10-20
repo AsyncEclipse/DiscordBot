@@ -27,23 +27,36 @@ class PopulationButtons:
                 if tileState.get("orbital_pop", 0) == 0 or tileState["orbital_pop"] == [0]:
                     emptyPlanets.append(f"{tile}_orbital_0")
         allPlayerTechs = player["military_tech"] + player["grid_tech"] + player["nano_tech"]
+        # Technology finds a Way: two colony ships reach an Advanced planet the techs do not unlock
+        finds_a_way = player.get("name") == "Techno-Mages" and player["colony_ships"] >= 2
         if "met" not in allPlayerTechs:
-            if "adl" not in allPlayerTechs:
+            if "adl" not in allPlayerTechs and not finds_a_way:
                 emptyPlanets = [s for s in emptyPlanets if "scienceadv" not in s]
-            if "adm" not in allPlayerTechs:
+            if "adm" not in allPlayerTechs and not finds_a_way:
                 emptyPlanets = [s for s in emptyPlanets if "materialadv" not in s]
-            if "ade" not in allPlayerTechs:
+            if "ade" not in allPlayerTechs and not finds_a_way:
                 emptyPlanets = [s for s in emptyPlanets if "moneyadv" not in s]
-            if "adl" not in allPlayerTechs and "adm" not in allPlayerTechs and "ade" not in allPlayerTechs:
+            if ("adl" not in allPlayerTechs and "adm" not in allPlayerTechs and "ade" not in allPlayerTechs
+                    and not finds_a_way):
                 emptyPlanets = [s for s in emptyPlanets if "neutraladv" not in s]
         return emptyPlanets
+
+    @staticmethod
+    def finds_a_way_gap(player, square):
+        """Technology finds a Way: this Advanced square is one the techs do not unlock, so it costs a
+        second colony ship (a coloured square still takes only its own resource)."""
+        techs = player["military_tech"] + player["grid_tech"] + player["nano_tech"]
+        unlocking = {"scienceadv": ["adl"], "materialadv": ["adm"], "moneyadv": ["ade"],
+                     "neutraladv": ["adl", "adm", "ade"]}.get(square)
+        return (player.get("name") == "Techno-Mages" and unlocking is not None and "met" not in techs
+                and not any(tech in techs for tech in unlocking))
 
     @staticmethod
     def findFullPopulation(game: GamestateHelper, tile: str):
         fullPlanets = []
         tileState = game.gamestate["board"][tile]
         planetTypes = ["money", "science", "material", "neutral",
-                       "moneyadv", "scienceadv", "materialadv", "neutraladv", "orbital"]
+                       "moneyadv", "scienceadv", "materialadv", "neutraladv", "orbital", "disc"]
         for planetT in planetTypes:
             if f"{planetT}_pop" in tileState:
                 for i, val in enumerate(tileState[f"{planetT}_pop"]):
@@ -92,7 +105,8 @@ class PopulationButtons:
                 optionsForPop = ["money", "science", "material"]
                 if "orbital" in typeOfPop:
                     optionsForPop = ["money", "science"]
-                if "adv" in typeOfPop:
+                # a grey Advanced square reached by Technology finds a Way takes any cube type
+                if "adv" in typeOfPop and not PopulationButtons.finds_a_way_gap(player, originalPop):
                     if "met" not in allPlayerTechs:
                         if "adl" not in allPlayerTechs:
                             optionsForPop.remove("science")
@@ -119,8 +133,10 @@ class PopulationButtons:
                     typeOfPop = optionsForPop[0]
             else:
                 typeOfPop = buttonID.split("_")[4]
+        tech_gap = PopulationButtons.finds_a_way_gap(player, originalPop)
         if not game.add_pop_specific(originalPop, typeOfPop, int(num), tile,
-                                     game.get_player_from_color(player["color"])):
+                                     game.get_player_from_color(player["color"]),
+                                     2 if tech_gap else 1):
             await interaction.channel.send(f"Did not have enough colony ships so failed"
                                            f" to add {typeOfPop} pop to tile {tile}")
             return
@@ -136,3 +152,35 @@ class PopulationButtons:
                                                      f"You now have an income of {str(income)} {resourceType}. {ships}"
                                                      f" colony ship{'s' if ships == 1 else 's'} left unexhausted.",
                                                      file=await asyncio.to_thread(drawing.board_tile_image_file, tile)))
+
+    @staticmethod
+    async def offerAncientsCube(game: GamestateHelper, player, interaction: discord.Interaction, tile: str):
+        """Remnants of Ra: Power of the Ancients puts a cube on the influence disc of an artifact sector."""
+        tileState = game.gamestate["board"][tile]
+        if player.get("name") != "Remnants of Ra" or not tileState.get("artifact"):
+            return
+        if tileState.get("disc_pop", [0])[0]:
+            return
+        view = View()
+        for pop in ["money", "science", "material"]:
+            if player[f"{pop}_pop_cubes"] > 0:
+                view.add_item(Button(label=pop.capitalize(), style=discord.ButtonStyle.blurple,
+                                     custom_id=f"FCID{player['color']}_ancientsCube_{pop}_{tile}"))
+        if len(view.children) == 0:
+            return
+        await interaction.channel.send(f"{player['player_name']}, your Power of the Ancients places an additional"
+                                       f" population cube on your influence disc in tile {tile}."
+                                       " Spend one colony ship and choose which type of cube.", view=view)
+
+    @staticmethod
+    async def placeAncientsCube(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
+        pop, tile = buttonID.split("_")[1:3]
+        if not game.add_disc_pop(pop, tile, game.get_player_from_color(player["color"])):
+            await interaction.followup.send("Could not place the cube: you need an unused colony ship,"
+                                            f" an empty disc and a cube on your {pop} track.", ephemeral=True)
+            return
+        await interaction.message.edit(view=None)
+        await interaction.channel.send(f"{player['player_name']} placed a {pop} population cube"
+                                       " on the influence disc.",
+                                       file=await asyncio.to_thread(
+                                           DrawHelper(game.gamestate).board_tile_image_file, tile))

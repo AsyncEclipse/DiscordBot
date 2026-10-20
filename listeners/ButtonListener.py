@@ -37,7 +37,8 @@ ANSWER_BUTTONS = ("selectDiscTile", "exploreDiscoveryTile", "keepDiscForPoints",
                   "exploreTile", "discardTile", "placeTile",
                   "getTech", "getFreeTech", "placeWarpPortal",
                   "offerRelationsTo", "acceptRelationsWith", "declineRelationsWith", "formMinorRelations",
-                  "reducePopFor", "addCubeToTrack", "drawReputation", "dontDrawReputation")
+                  "reducePopFor", "addCubeToTrack", "drawReputation", "dontDrawReputation",
+                  "ancientsCube", "setupTech")
 
 
 class ButtonListener(commands.Cog):
@@ -200,6 +201,9 @@ class ButtonListener(commands.Cog):
         if customID == "showGame":
             await TurnButtons.showGame(game, interaction)
             return
+        if customID.startswith("refreshCombatPrompt"):
+            await Combat.refreshCombatPrompt(game, customID.split("_")[1], interaction.channel)
+            return
         if customID.startswith("refreshImage"):
             await Combat.refreshImage(game, customID, interaction)
             return
@@ -266,6 +270,10 @@ class ButtonListener(commands.Cog):
         elif customID.startswith("ancientInstinctUpgrade"):
             await interaction.message.delete()
             await UpgradeButtons.startUpgrade(game, player, interaction, False, customID.split("_")[1], "dum")
+        elif customID.startswith("setupTech"):
+            # deleting the offer makes the pre-game purchase one technology
+            await interaction.message.delete()
+            await ResearchButtons.startResearch(game, player, player_helper, interaction, False, setup=True)
         elif customID.startswith("placeWarpPortal"):
             await ResearchButtons.placeWarpPortal(interaction, game, player, customID)
         elif customID.startswith("payAtRatio"):
@@ -306,10 +314,16 @@ class ButtonListener(commands.Cog):
             await UpgradeButtons.chooseUpgrade(game, player, interaction, customID, player_helper)
         elif customID.startswith("undoUpgrade"):
             await UpgradeButtons.undoUpgrade(game, player, interaction, customID, player_helper)
+        elif customID.startswith("restartTechnoMagic"):
+            await UpgradeButtons.restartTechnoMagic(game, player, interaction, customID.split("_")[1])
+        elif customID.startswith("technoMagic"):
+            await Combat.technoMagicUpgrade(game, customID, player, interaction, player_helper)
         elif customID.startswith("startPopDrop"):
             await PopulationButtons.startPopDrop(game, player, interaction)
         elif customID.startswith("fillPopulation"):
             await PopulationButtons.fillPopulation(game, player, interaction, customID)
+        elif customID.startswith("ancientsCube"):
+            await PopulationButtons.placeAncientsCube(game, player, interaction, customID)
         elif customID.startswith("startInfluence"):
             game.updateSaveFile()
             await InfluenceButtons.startInfluence(game, player, interaction)

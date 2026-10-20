@@ -1,7 +1,7 @@
 import math
 import discord
 from io import BytesIO
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 from jproperties import Properties
 import json
 import os
@@ -86,6 +86,10 @@ class DrawHelper:
             return "exile"
         elif full_name == "Atlantians":
             return "atlantians"
+        elif full_name == "Remnants of Ra":
+            return "ra"
+        elif full_name == "Techno-Mages":
+            return "tm"
         elif "Terran" in full_name:
             return full_name.lower().replace(" ", "_")
 
@@ -460,7 +464,7 @@ class DrawHelper:
                     if len(sib_tile.get("player_ships", [])) > 0:
                         paste_ships(sib_tile, sib)
 
-            def paste_resourcecube(tile, tile_image, resource_type, color):
+            def paste_resourcecube(tile, tile_image, resource_type, color, disc_center):
                 if tile.get(f"{resource_type}_pop", 0):
                     if f"{resource_type}_shrine" in tile:
                         shrine_path = "images/resources/components/factions/shrine.png"
@@ -480,6 +484,16 @@ class DrawHelper:
                             pop_image = self.use_image(pop_path)
                             if resource_type == "orbital":
                                 coords = tile["orb_snap"]
+                            elif resource_type == "disc":
+                                coords = disc_center
+                                alpha = pop_image.getchannel("A")
+                                outlined_cube = Image.new("RGBA", pop_image.size, (235, 235, 235))
+                                outlined_cube.putalpha(alpha.filter(ImageFilter.MaxFilter(9)))
+                                dark_outline = Image.new("RGBA", pop_image.size, (20, 20, 20))
+                                dark_outline.putalpha(alpha.filter(ImageFilter.MaxFilter(5)))
+                                outlined_cube.alpha_composite(dark_outline)
+                                outlined_cube.alpha_composite(pop_image)
+                                pop_image = outlined_cube
                             else:
                                 coords = tile[f"{resource_type}{x + 1}_snap"]
                             tile_image.paste(pop_image, (int(345 / 1024 * mult * coords[0] - int(18 * mult)),
@@ -499,17 +513,20 @@ class DrawHelper:
                 inf_image = self.use_image(inf_path)
                 if "currentAction" in tile:
                     if tile["currentAction"] == "move":
-                        tile_image.paste(inf_image, (int(202 * mult), int(30 * mult)), mask=inf_image)
+                        disc_position = (202, 30)
                     elif tile["currentAction"] == "build":
-                        tile_image.paste(inf_image, (int(202 * mult), int(180 * mult)), mask=inf_image)
+                        disc_position = (202, 180)
                     else:
-                        tile_image.paste(inf_image, (int(82 * mult), int(148 * mult)), mask=inf_image)
-
+                        disc_position = (82, 148)
                 else:
-                    tile_image.paste(inf_image, (int(153 * mult), int(130 * mult)), mask=inf_image)
-                for resource in ["neutral", "neutraladv", "money", "moneyadv",
-                                 "science", "scienceadv", "material", "materialadv", "orbital"]:
-                    paste_resourcecube(tile, tile_image, resource, color)
+                    disc_position = (153, 130)
+                tile_image.paste(inf_image, (int(disc_position[0] * mult), int(disc_position[1] * mult)),
+                                 mask=inf_image)
+                disc_center = (disc_position[0] * mult + inf_image.width / 2,
+                               disc_position[1] * mult + inf_image.height / 2)
+                for resource in ["neutral", "neutraladv", "money", "moneyadv", "science", "scienceadv",
+                                 "material", "materialadv", "orbital", "disc"]:
+                    paste_resourcecube(tile, tile_image, resource, color, disc_center)
             if tile.get("type") == "nebula":
                 tile_image = tile_image.rotate(rotation)
                 self.label_nebula_subsectors(tile_image, position, rotation)
@@ -640,7 +657,7 @@ class DrawHelper:
         return context
 
     def faction_portrait(self, faction):
-        if faction == "atlantians":
+        if faction == "atlantians" or faction == "ra" or faction == "tm":
             return self.use_image(f"images/resources/components/layouts/factionImages/{faction}_image.png")
         return self.use_image(f"images/resources/components/factions/{faction}_board.png").crop((49, 252, 154, 357))
 
@@ -1159,7 +1176,8 @@ class DrawHelper:
             text_drawable_image.text((50 + int(116 * x), 607), f"{action_activation}", color, font=font,
                                              stroke_width=stroke_width, stroke_fill=stroke_color)
         font = ImageFont.truetype("images/resources/arial.ttf", size=35)
-        if "magellan" in faction:
+        # the colony ships one Influence action may flip (Buttons/Influence.py)
+        if "magellan" in faction or faction in ("ra", "tm"):
             text_drawable_image.text((618, 417), f"1", color, font=font,
                                              stroke_width=stroke_width, stroke_fill=stroke_color)
         else:
@@ -1675,6 +1693,8 @@ class DrawHelper:
                         if "mon" in ship:
                             points += 3
                 if player["name"] == "Planta":
+                    points += 1
+                if player["name"] == "Remnants of Ra" and tile_map[tile]["artifact"] == 1:
                     points += 1
             if player["name"] == "Descendants of Draco" and "player_ships" in tile_map[tile]:
                 for ship in tile_map[tile]["player_ships"]:
