@@ -251,7 +251,8 @@ class TileCommands(commands.GroupCog, name="tile"):
         image = drawing.board_tile_image(tile_position)
         await interaction.followup.send(file=drawing.show_single_tile(image))
 
-    @app_commands.command(name="techno_magic_menu", description="Reset temporary Techno-Magic upgrades and choose again for a combat")
+    @app_commands.command(name="techno_magic_menu",
+                          description="Reset temporary Techno-Magic upgrades and choose again for a combat")
     async def techno_magic_menu(self, interaction: discord.Interaction, tile_position: str):
         game = GamestateHelper(interaction.channel)
         tile = game.gamestate["board"].get(tile_position)
@@ -270,7 +271,8 @@ class TileCommands(commands.GroupCog, name="tile"):
                                        view=Combat.getCombatButtons(game, tile_position))
         await Combat.offerTechnoMagic(game, interaction.channel, tile_position)
         await Combat.refreshCombatPrompt(game, tile_position, interaction.channel)
-        await interaction.followup.send("Reset Techno-Magic upgrades for this combat. Choose your temporary parts again.")
+        await interaction.followup.send("Reset Techno-Magic upgrades for this combat."
+                                        " Choose your temporary parts again.")
 
     @app_commands.command(name="declare_a_combat_winner")
     async def declare_a_combat_winner(self, interaction: discord.Interaction, tile_position: str):

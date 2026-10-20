@@ -158,8 +158,8 @@ class SetupCommands(commands.GroupCog, name="setup"):
                               community_parts: Optional[bool] = False,
                               community_rep_mod: Optional[bool] = False,
                               ban_factions: Optional[bool] = False,
-                              community_factions: bool = False,
-                              alliances: Optional[bool] = False):
+                              alliances: Optional[bool] = False,
+                              community_factions: bool = False):
         """
         :param ai_ship_type: Choose which type of AI ships to use.
         :param rift_cannon: Rift cannons are enabled by default.
@@ -169,8 +169,8 @@ class SetupCommands(commands.GroupCog, name="setup"):
         :param ban_factions: Used to ban 10-playerCount factions from the draft.
         :param community_parts: Turns on community changes to improved hull and phase shield.
         :param community_rep_mod: Turns on the community reputation mod.
-        :param community_factions: Includes community factions in the draft.
         :param alliances: Enables the Alliances variant; needs 4 or more players.
+        :param community_factions: Includes community factions in the draft.
         :return:
         """
         temp_player_list = [player1, player2, player3, player4, player5, player6,player7,player8,player9]

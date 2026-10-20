@@ -1,4 +1,6 @@
-"""Remnants of Ra, Atlantians and Techno-Mages through setup and a full first round, on the real engine and save files."""
+"""Remnants of Ra, Atlantians and Techno-Mages through setup and a full first round,
+on the real engine and save files.
+"""
 import random
 from pathlib import Path
 

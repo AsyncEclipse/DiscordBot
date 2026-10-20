@@ -59,4 +59,3 @@ def test_only_techno_mages_are_offered_the_pregame_tech(start_game, run):
     game, channel = start_game(factions=["tm", "eri"])
     run(ResearchButtons.offerSetupTech(game, game.get_player(1), FakeInteraction(channel)))
     assert "FCIDblue_setupTech" in buttons(channel)
-

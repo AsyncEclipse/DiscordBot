@@ -26,6 +26,7 @@ class FakeMessage:
     def __init__(self, channel=None):
         self.id = next(self._ids)
         self.flags = SimpleNamespace(ephemeral=False)
+
         self.channel = channel
         self.components = []
 
@@ -69,6 +70,7 @@ class FakeChannel:
             if any(getattr(c, "custom_id", None) == custom_id for c in getattr(kwargs.get("view"), "children", [])):
                 return message
         return None
+
 
 
 class FakeUser:

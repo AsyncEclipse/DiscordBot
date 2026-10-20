@@ -18,7 +18,8 @@ def test_community_alliance_fights_in_nebula(start_game, run, press, monkeypatch
     game.update()
 
     run(Combat.startCombat(game, channel, "202b"))
-    assert "FCIDblue_technoMagic_202b_interceptor" in [button.custom_id for button in offered_buttons(FakeInteraction(channel))]
+    assert "FCIDblue_technoMagic_202b_interceptor" in [
+        button.custom_id for button in offered_buttons(FakeInteraction(channel))]
     assert Combat.findSidesInTile(game, "202b") == [["blue", "red"], ["yellow"]]
 
     inter = press(channel, 1, "FCIDblue_technoMagic_202b_interceptor")

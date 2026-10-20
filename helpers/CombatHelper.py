@@ -148,7 +148,8 @@ class Combat:
                     tiles.append((int(tile_map[tile]["sector"]), tile))
             else:
                 sides = Combat.findSidesInTile(game, tile)
-                if len(sides) == 1 and "ai" not in sides[0] and tile_map[tile].get("owner") == 0:
+                if (len(sides) == 1 and "ai" not in sides[0] and tile_map[tile].get("owner") == 0
+                        and tile_map[tile].get("type") != "nebula"):
                     tiles.append((int(tile_map[tile]["sector"]), tile))
         return sorted(tiles, key=lambda x: x[0], reverse=True)
 
@@ -1520,7 +1521,7 @@ class Combat:
                     player[f"{ship}_parts"] = parts
                 game.update_player(player_helper)
                 await channel.send(f"Techno-Magic wears off: the temporary ship parts are removed"
-                                               f" from {player['player_name']}'s blueprints.")
+                                   f" from {player['player_name']}'s blueprints.")
             else:
                 # every install belongs to a combat that is still pending; the pop itself must persist
                 game.update()
@@ -1621,9 +1622,10 @@ class Combat:
         winner = next(iter(survivors), None)
         owner = game.gamestate["board"][pos]["owner"]
 
+        # Nebula Sectors take no influence; their Discovery Tiles are offered at upkeep
+        nebula = game.gamestate["board"][pos].get("type") == "nebula"
         winner_owns_or_allies = (winner is not None and owner != 0 and owner != "ai"
                                  and game.areAllied(winner, owner))
-        nebula = game.gamestate["board"][pos].get("type") == "nebula"
         if winner is not None and owner != winner and not winner_owns_or_allies and not nebula:
             player = game.getPlayerObjectFromColor(winner)
             playerName = player["player_name"]

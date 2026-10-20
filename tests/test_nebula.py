@@ -4,6 +4,7 @@ from discord.ui import View
 from PIL import Image, ImageChops
 
 from Buttons.BlackHole import BlackHoleButtons
+from Buttons.DiscoveryTile import DiscoveryTileButtons
 from Buttons.Move import MoveButtons
 from helpers.DrawHelper import DrawHelper
 from helpers.PlayerHelper import PlayerHelper
@@ -259,3 +260,20 @@ def test_render_rotates_ships_and_discoveries_with_the_subsectors(make_game, mon
         assert ImageChops.difference(rendered, baseline.rotate(rotation)).convert("RGB").getbbox() is None
         assert labels[-1] == ("207", rotation)
 
+
+
+def test_atlantians_nebula_choices_bury_unplaceable_discoveries(make_game):
+    game = make_game({
+        "board": {"202b": {"type": "nebula", "disctile": 1}},
+        "discTiles": ["sci", "mon", "mat", "cru", "orb", "rep"],
+    })
+
+    assert DiscoveryTileButtons.drawAtlantiansDiscoveryChoices(game, "202b") == ["rep", "sci"]
+    assert game.gamestate["discTiles"] == ["mon", "orb"]
+
+
+def test_atlantians_nebula_choices_stop_when_only_unplaceable_tiles_remain(make_game):
+    game = make_game({"board": {"202b": {"type": "nebula"}}, "discTiles": ["orb", "mon"]})
+
+    assert DiscoveryTileButtons.drawAtlantiansDiscoveryChoices(game, "202b") == []
+    assert sorted(game.gamestate["discTiles"]) == ["mon", "orb"]

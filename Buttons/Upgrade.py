@@ -230,7 +230,8 @@ class UpgradeButtons:
             for ship2 in game.getShipsWithParts(player):
                 shipEmoji = Emoji.getEmojiByName(player['color'] + game.getShipShortName(ship2))
                 view.add_item(Button(label=ship2.capitalize(), emoji=shipEmoji, style=discord.ButtonStyle.blurple,
-                                     custom_id=f"FCID{player['color']}_upgradeShip_{str(actions)}_{ship2}_{discTileUpgrade}"))
+                                     custom_id=(f"FCID{player['color']}_upgradeShip_"
+                                                f"{actions}_{ship2}_{discTileUpgrade}")))
         if discTileUpgrade == "free":
             view.add_item(Button(label="Done", style=discord.ButtonStyle.red,
                                  custom_id=f"FCID{player['color']}_deleteMsg"))
