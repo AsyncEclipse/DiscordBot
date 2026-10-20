@@ -39,15 +39,26 @@ def test_secrets_of_the_ancients_scores_controlled_artifact_sectors():
 
 def test_power_of_the_ancients_cube_comes_from_its_population_track(make_game):
     game = make_game({"board": {"107": {"artifact": 1, "player_ships": []}},
-                      "players": {"1": {"color": "blue", "money_pop_cubes": 11,
+                      "players": {"1": {"color": "blue", "colony_ships": 1, "money_pop_cubes": 11,
                                         "science_pop_cubes": 12, "material_pop_cubes": 12}}})
 
     assert game.add_disc_pop("money", "107", "1") is True
     assert game.gamestate["board"]["107"]["disc_pop"] == [1]
     assert game.gamestate["players"]["1"]["money_pop_cubes"] == 10
+    assert game.gamestate["players"]["1"]["colony_ships"] == 0
     # A disc holds one cube; the same sector is not offered twice.
     assert game.add_disc_pop("science", "107", "1") is False
     assert game.gamestate["players"]["1"]["science_pop_cubes"] == 12
+
+
+def test_power_of_the_ancients_requires_a_colony_ship(make_game):
+    game = make_game({"board": {"107": {"artifact": 1}},
+                      "players": {"1": {"color": "blue", "colony_ships": 0, "money_pop_cubes": 11}}})
+
+    assert game.add_disc_pop("money", "107", "1") is False
+    assert "disc_pop" not in game.gamestate["board"]["107"]
+    assert game.get_player(1)["money_pop_cubes"] == 11
+    assert game.get_player(1)["colony_ships"] == 0
 
 
 def test_taking_control_of_an_artifact_sector_offers_the_cube(start_game, press):

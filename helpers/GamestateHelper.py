@@ -824,10 +824,7 @@ class GamestateHelper:
             return False
         if self.gamestate["players"][playerID][f"{popType}_pop_cubes"] < 1:
             return False
-        self.gamestate["board"][position]["disc_pop"] = [1]
-        self.gamestate["players"][playerID][f"{popType}_pop_cubes"] -= 1
-        self.update()
-        return True
+        return self.add_pop_specific("disc", popType, 0, position, playerID)
     
 
     def lookAtAllTheTiles(self, color):

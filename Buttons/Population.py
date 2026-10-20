@@ -170,14 +170,14 @@ class PopulationButtons:
             return
         await interaction.channel.send(f"{player['player_name']}, your Power of the Ancients places an additional"
                                        f" population cube on your influence disc in tile {tile}."
-                                       " Choose which type of cube.", view=view)
+                                       " Spend one colony ship and choose which type of cube.", view=view)
 
     @staticmethod
     async def placeAncientsCube(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
         pop, tile = buttonID.split("_")[1:3]
         if not game.add_disc_pop(pop, tile, game.get_player_from_color(player["color"])):
-            await interaction.followup.send("Could not place the cube: the disc already holds one or"
-                                            f" your {pop} track is empty.", ephemeral=True)
+            await interaction.followup.send("Could not place the cube: you need an unused colony ship,"
+                                            f" an empty disc and a cube on your {pop} track.", ephemeral=True)
             return
         await interaction.message.edit(view=None)
         await interaction.channel.send(f"{player['player_name']} placed a {pop} population cube"
