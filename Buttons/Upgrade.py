@@ -1,6 +1,7 @@
 import asyncio
 import copy
 import json
+import logging
 import discord
 from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
@@ -189,8 +190,12 @@ class UpgradeButtons:
             part_stats = json.load(f)
         index = 0
         if newPart != "mus":
-            index = player[f"{ship}_parts"].index(oldPart)
             index = int(indexOfOldPart)
+            parts = player[f"{ship}_parts"]
+            if not 0 <= index < len(parts) or parts[index] != oldPart:
+                await interaction.followup.send("That ship slot has changed. Please use the latest upgrade menu.",
+                                                ephemeral=True)
+                return
         # in free mode "empty" really empties the slot instead of reverting it
         isFreeRemoval = newPart == "empty" and discTileUpgrade != "free"
         if isFreeRemoval:
@@ -241,7 +246,11 @@ class UpgradeButtons:
         view.add_item(Button(label="Undo", style=discord.ButtonStyle.gray,
                              custom_id=f"FCID{player['color']}_undoUpgrade_{customID.split('_')[1]}_{discTileUpgrade}"))
         if interaction.message is not None:
-            await interaction.message.delete()
+            try:
+                await interaction.message.delete()
+            except discord.DiscordServerError:
+                logging.getLogger(__name__).warning("Upgrade saved, but Discord could not delete its old menu",
+                                                    exc_info=True)
         await interaction.channel.send(f"{player['player_name']} replaced {oldName} with {part_stats[newPart]['name']}"
                                        f" on their {ship.capitalize()} which now looks like this:",
                                        file=await asyncio.to_thread(drawing.show_player_ship,
