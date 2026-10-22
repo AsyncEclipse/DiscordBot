@@ -87,9 +87,9 @@ class InfluenceButtons:
                         continue
                     playerShips = game.gamestate["board"][adjTile]["player_ships"][:]
                     playerShips.append(player["color"])
-                    # Allies are not opponents, so their ships don't make the sector contested.
+                    # AI ships are checked by pinning below, including Draco's Ancient exception.
                     colorsInTile = [c for c in Combat.findPlayersInTile(game, adjTile)
-                                    if c != player["color"] and not game.areAllied(player["color"], c)]
+                                    if c not in (player["color"], "ai") and not game.areAllied(player["color"], c)]
                     if all([game.gamestate["board"][adjTile].get("owner") == 0,
                             ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, adjTile),
                             len(colorsInTile) == 0, "ai-grd" not in playerShips]):
@@ -98,8 +98,6 @@ class InfluenceButtons:
                 for tile2 in tile_map:
                     if tile2 not in tilesViewed and tile_map[tile2].get("warp", 0) == 1:
                         tilesViewed.append(tile2)
-                        if adjTile not in game.gamestate["board"]:
-                            continue
                         if "bh" in game.gamestate["board"][tile2].get("type", ""):
                             continue
                         if "exploded" in game.gamestate["board"][tile2].get("type", ""):
@@ -109,7 +107,7 @@ class InfluenceButtons:
                         playerShips = game.gamestate["board"][tile2]["player_ships"][:]
                         playerShips.append(player["color"])
                         colorsInTile = [c for c in Combat.findPlayersInTile(game, tile2)
-                                        if c != player["color"] and not game.areAllied(player["color"], c)]
+                                        if c not in (player["color"], "ai") and not game.areAllied(player["color"], c)]
                         if all([game.gamestate["board"][tile2].get("owner") == 0,
                                 ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, tile2),
                                 len(colorsInTile) == 0]):
