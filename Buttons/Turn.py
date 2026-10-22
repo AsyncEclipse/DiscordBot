@@ -96,7 +96,10 @@ class TurnButtons:
         if "lastAction" in player and "detailsOflastAction" in player:
             msg = (f"End of {userN}'s turn. "
                    f"They used their action to {player['lastAction']}. {player['detailsOflastAction']}")
-        asyncio.create_task(interaction.message.delete())
+        try:
+            await interaction.message.delete()
+        except discord.NotFound:
+            print(f"Message {interaction.message.id} was already deleted.")
         if "-" in interaction.channel.name:
             thread_name = interaction.channel.name.split("-")[0] + "-bot-map-updates"
             thread = discord.utils.get(interaction.channel.threads, name=thread_name)
