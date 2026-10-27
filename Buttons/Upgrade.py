@@ -26,6 +26,8 @@ class UpgradeButtons:
             if record.get("install"):
                 view.add_item(Button(label=f"Undo {ship.capitalize()}", style=discord.ButtonStyle.gray,
                                      custom_id=f"FCID{player['color']}_undoUpgrade_1_tm{pos}_{ship}"))
+        view.add_item(Button(label="Finish Techno-Magic", style=discord.ButtonStyle.green,
+                             custom_id=f"FCID{player['color']}_finishTechnoMagic_{pos}"))
         view.add_item(Button(label="Restart Techno-Magic", style=discord.ButtonStyle.red,
                              custom_id=f"FCID{player['color']}_restartTechnoMagic_{pos}"))
         view.add_item(Button(label="Show Current Combat Turn", style=discord.ButtonStyle.blurple,
@@ -50,6 +52,9 @@ class UpgradeButtons:
 
     @staticmethod
     async def restartTechnoMagic(game: GamestateHelper, player, interaction: discord.Interaction, pos: str):
+        if game.gamestate["board"].get(pos, {}).get("technoMagicReady", {}).get(player["color"]):
+            await interaction.followup.send("You have already finished Techno-Magic.", ephemeral=True)
+            return
         UpgradeButtons.resetTechnoMagic(game, player, pos)
         await interaction.message.edit(content=f"{player['player_name']}, choose your Techno-Magic upgrades again.",
                                        view=UpgradeButtons.getTechnoMagicView(game, player, pos))
@@ -270,6 +275,9 @@ class UpgradeButtons:
         # Undo buttons posted before the upgrade mode joined the id carry only the action count
         mode = parts[2] if len(parts) > 2 else "dummy"
         if mode.startswith("tm"):
+            if game.gamestate["board"].get(mode[2:], {}).get("technoMagicReady", {}).get(player["color"]):
+                await interaction.followup.send("You have already finished Techno-Magic.", ephemeral=True)
+                return
             UpgradeButtons.resetTechnoMagic(game, player, mode[2:], parts[3])
             view = UpgradeButtons.getTechnoMagicView(game, player, mode[2:])
             await interaction.message.edit(content=f"{player['player_name']}, undid the Techno-Magic part."

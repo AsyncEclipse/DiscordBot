@@ -262,6 +262,36 @@ def test_two_pending_combats_do_not_strip_each_others_parts(start_game, press, r
     assert "tmParts" not in reload(game).gamestate["board"]["201"]
 
 
+def test_flux_missile_fires_before_the_ancient_it_tied_with(start_game, press, run):
+    """A Techno-Magic part can raise initiative or add missiles, so initiative waits for it."""
+    game, channel = start_game(factions=["tm", "eri"])
+    game.get_player(1)["military_tech"].append("flm")
+    tile = game.gamestate["board"]["201"]
+    tile.update({"owner": 0, "player_ships": ["ai-anc", "blue-int"]})
+    # A WA Ancient has initiative 3, tying the unupgraded interceptor; the defender wins
+    # that tie, so the Ancients would fire first without the Flux Missile.
+    game.gamestate.update({"advanced_ai": False, "wa_ai": False, "anc_type": "wa"})
+    game.setAttackerAndDefender(["blue"], ["ai"], "201")
+    tile["firstShotSide"] = []
+    tile["firstShotPhase"] = None
+    game.update()
+
+    run(Combat.startCombat(game, channel, "201"))
+    assert not any("rollDice" in cid for cid in buttons(channel))
+
+    inter = press(channel, 1, "FCIDblue_technoMagic_201_interceptor")
+    slot = next(c.custom_id for c in inter.message.edited["view"].children if c.custom_id.endswith("_tm201_3"))
+    inter = press(channel, 1, slot)
+    part = next(c.custom_id for c in inter.message.edited["view"].children
+                if c.custom_id.endswith("_flm_3_tm201"))
+    press(channel, 1, part)
+    press(channel, 1, "FCIDblue_finishTechnoMagic_201")
+
+    state = reload(game)
+    assert (state.gamestate["board"]["201"]["currentSpeed"],
+            state.gamestate["board"]["201"]["currentRoller"]) == (103, "blue")
+
+
 def test_the_attacker_is_offered_the_upgrade_first(start_game, run):
     """Where timing matters, the defender chooses last."""
     game, channel = start_game(factions=["tm", "tm"])
@@ -318,6 +348,7 @@ def test_techno_magic_keeps_other_combat_blueprints_available(start_game, press,
     menu = channel.sent[-1][1]["view"]
     assert {c.custom_id for c in menu.children} == {
         "FCIDblue_technoMagic_201_interceptor", "FCIDblue_undoUpgrade_1_tm201_cruiser",
+        "FCIDblue_finishTechnoMagic_201",
         "FCIDblue_restartTechnoMagic_201", "FCIDblue_refreshCombatPrompt_201"}
     install_part(press, channel)
     state = reload(game)

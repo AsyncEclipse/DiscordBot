@@ -157,6 +157,8 @@ class Combat:
     async def startCombat(game: GamestateHelper, channel, pos):
         # a new pairing on the tile is a new combat: last pairing's Techno-Magic parts come off first
         await Combat.revertTechnoMagic(game, channel, pos)
+        game.gamestate["board"][pos].pop("technoMagicColors", None)
+        game.gamestate["board"][pos].pop("technoMagicReady", None)
         drawing = DrawHelper(game.gamestate)
         sides = Combat.currentPairing(game, pos)
         game.setAttackerAndDefender(sides[1], sides[0], pos)
@@ -171,8 +173,9 @@ class Combat:
                 else:
                     file = await asyncio.to_thread(drawing.show_AI_stats)
                     await channel.send("AI stats look like this", file=file)
-        await Combat.offerTechnoMagic(game, channel, pos)
-        await Combat.promptNextSpeed(game, pos, channel, False)
+        tm_waiting = await Combat.offerTechnoMagic(game, channel, pos)
+        if not tm_waiting:
+            await Combat.promptNextSpeed(game, pos, channel, False)
 
     @staticmethod
     async def startCombatThreads(game: GamestateHelper, interaction: discord.Interaction):
@@ -874,6 +877,9 @@ class Combat:
         if speed != 1000 and pairing and colorOrAI not in pairing:
             await interaction.channel.send("The combat pairing changed. Press Refresh Image and roll again.")
             return
+        if Combat.technoMagicPending(game, pos):
+            await interaction.channel.send("Finish your Techno-Magic upgrades before rolling initiative.")
+            return
         if colorOrAI == "ai":
             await Combat.rollDiceAI(game, buttonID, interaction)
             return
@@ -1263,6 +1269,9 @@ class Combat:
         if len(Combat.currentPairing(game, pos)) != 2 or Combat.isDracoAgainstAncients(game, pos):
             await channel.send("There is no active combat at that position.")
             return
+        if Combat.technoMagicPending(game, pos):
+            await channel.send("Finish your Techno-Magic upgrades before rolling initiative.")
+            return
         if (tile.get("unresolvedHits", 0) > 0 or tile.get("pendingRiftDice")
                 or any(tile.get("pendingRiftBackfire", {}).values())):
             await channel.send("Resolve the pending hits and Rift Cannon effects before rolling again.")
@@ -1271,6 +1280,10 @@ class Combat:
 
     @staticmethod
     async def promptNextSpeed(game: GamestateHelper, pos: str, channel, update: bool, repeat: bool = False):
+        tile = game.gamestate["board"].get(pos, {})
+        if (Carapace.has_pending_missiles(game, pos) or Combat.technoMagicPending(game, pos)
+                or (tile.get("phaseModuleColors") and not tile.get("phaseModulePrompted"))):
+            return
         currentSpeed = None
         if "currentSpeed" in game.gamestate["board"][pos]:
             currentSpeed = game.gamestate["board"][pos]["currentSpeed"]
@@ -1469,28 +1482,59 @@ class Combat:
         await Combat.promptNextSpeed(game, pos, interaction.channel, False)
 
     @staticmethod
+    def technoMagicPending(game: GamestateHelper, pos: str):
+        """Techno-Magic upgrades change speed and missiles, so initiative waits for them."""
+        tile = game.gamestate["board"].get(pos, {})
+        ready = tile.get("technoMagicReady", {})
+        return any(not ready.get(color) for color in tile.get("technoMagicColors", []))
+
+    @staticmethod
     async def offerTechnoMagic(game: GamestateHelper, channel, pos: str):
         """Techno-Magic: at the start of a combat, one temporary Upgrade 1 per ship blueprint.
-        The attacker chooses first, the defender last."""
+        The attacker chooses first, the defender last. Returns whether initiative must wait."""
         tile = game.gamestate["board"][pos]
-        colors = Combat.sideOf(tile.get("attacker")) + Combat.sideOf(tile.get("defender"))
+        colors = []
+        for color in Combat.sideOf(tile.get("attacker")) + Combat.sideOf(tile.get("defender")):
+            if color and color != "ai" and FactionData.has(game.getPlayerObjectFromColor(color), "techno_magic"):
+                colors.append(color)
+        if not colors:
+            return False
+        tile["technoMagicColors"] = colors
+        tile["technoMagicReady"] = {}
+        game.update()
         for color in colors:
-            if not color or color == "ai":
-                continue
             player = game.getPlayerObjectFromColor(color)
-            if player["name"] != "Techno-Mages":
-                continue
-            view = UpgradeButtons.getTechnoMagicView(game, player, pos)
-            if len(view.children):
-                await channel.send(f"{player['player_name']}, Techno-Magic lets you temporarily Upgrade 1 on each"
-                                   " ship blueprint for this combat. The new parts are removed when the battle"
-                                   " ends. You may not remove ship parts or place Ancient ship parts.", view=view)
+            await channel.send(f"{player['player_name']}, Techno-Magic lets you temporarily Upgrade 1 on each"
+                               " ship blueprint for this combat. The new parts are removed when the battle"
+                               " ends. You may not remove ship parts or place Ancient ship parts.",
+                               view=UpgradeButtons.getTechnoMagicView(game, player, pos))
+        return True
+
+    @staticmethod
+    async def technoMagicDone(game: GamestateHelper, customID: str, player, interaction: discord.Interaction):
+        pos = customID.split("_")[1]
+        tile = game.gamestate["board"].get(pos, {})
+        color = player["color"]
+        if color not in tile.get("technoMagicColors", []):
+            return
+        ready = tile.setdefault("technoMagicReady", {})
+        if ready.get(color):
+            await interaction.followup.send("You have already finished Techno-Magic.", ephemeral=True)
+            return
+        ready[color] = True
+        game.update()
+        await interaction.message.edit(content=f"{player['player_name']} has finished Techno-Magic.", view=None)
+        if not Combat.technoMagicPending(game, pos):
+            await Combat.promptNextSpeed(game, pos, interaction.channel, False)
 
     @staticmethod
     async def technoMagicUpgrade(game: GamestateHelper, customID: str, player, interaction: discord.Interaction,
                                  player_helper: PlayerHelper):
         pos, ship = customID.split("_")[1:3]
         color = player["color"]
+        if game.gamestate["board"].get(pos, {}).get("technoMagicReady", {}).get(color):
+            await interaction.followup.send("You have already finished Techno-Magic.", ephemeral=True)
+            return
         # the first install anywhere holds the pre-combat blueprint, so overlapping combats
         # each remove only their own temporary part
         base = next((tile["tmParts"][color][ship]["base"]
