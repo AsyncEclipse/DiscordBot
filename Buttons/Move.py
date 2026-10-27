@@ -119,10 +119,16 @@ class MoveButtons:
             for adjTile in candidates:
                 if ("nebula_internal" in tile_map.get(adjTile, {})
                         and adjTile not in tile_map[pos].get("nebula_internal", [])):
-                    # entering a Nebula: land in the Subsector that owns the shared edge
-                    parent = tile_map[pos].get("nebula_parent", pos)
-                    edge = configs.get(parent)[0].split(",").index(adjTile)
-                    adjTile = game.nebula_subsector_for_edge(adjTile, (edge + 3) % 6)
+                    parent = adjTile
+                    subsectors = [parent, *tile_map[parent].get("nebula_internal", [])]
+                    border_subsector = next((subsector for subsector in subsectors
+                                             if pos in tile_map[subsector].get("adjacent", [])), None)
+                    if border_subsector is not None:
+                        adjTile = border_subsector
+                    else:
+                        edge_source = tile_map[pos].get("nebula_parent", pos)
+                        edge = configs.get(edge_source)[0].split(",").index(adjTile)
+                        adjTile = game.nebula_subsector_for_edge(adjTile, (edge + 3) % 6)
                 if adjTile in tile_map and InfluenceButtons.areTwoTilesAdjacent(game, pos, adjTile,
                                                                                 configs, wormHoleGen):
                     recursive_search(adjTile, distance + 1, visited, jumpDriveAvailable)

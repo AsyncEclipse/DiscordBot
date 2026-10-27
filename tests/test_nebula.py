@@ -107,6 +107,29 @@ def test_nebula_walls_need_jump_drive(make_game, monkeypatch):
     assert MoveButtons.getTilesInRange(game, player, "208", 1, 1) & {"207", "207b", "207c"} == {"207b"}
 
 
+def test_hyperlane_movement_uses_the_nebula_subsector_border(make_game, monkeypatch):
+    monkeypatch.setattr(PlayerHelper, "getTechs", lambda self: [])
+    game = make_game(_bare_gamestate())
+    game.gamestate["player_count"] = 4
+    game.gamestate["5playerhyperlane"] = True
+    game.add_tile("202", 60, "295")
+    board = game.gamestate["board"]
+    board["211"] = {"orientation": 240, "wormholes": [0, 1, 3, 4],
+                     "player_ships": ["blue-cru"], "owner": 0}
+    board["317"] = {"orientation": 180, "wormholes": [0, 3, 5],
+                     "player_ships": [], "owner": 0}
+    board["102"] = {"orientation": 0, "wormholes": [0, 1, 3, 4, 5],
+                     "player_ships": ["blue-cru"], "owner": 0}
+    player = player_stats("hyd", color="blue")
+    game.gamestate["players"] = {"1": player}
+
+    from_211 = MoveButtons.getTilesInRange(game, player, "211", 2, 0)
+    from_102 = MoveButtons.getTilesInRange(game, player, "102", 1, 0)
+
+    assert {"317", "202"} <= from_211
+    assert "202c" in from_102
+
+
 def test_influence_refused_in_nebula(make_game, run):
     from Buttons.Influence import InfluenceButtons
     from tests.fakes import FakeChannel, FakeInteraction

@@ -1,6 +1,7 @@
 import asyncio
 import copy
 import json
+import logging
 import discord
 from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
@@ -25,6 +26,8 @@ class UpgradeButtons:
             if record.get("install"):
                 view.add_item(Button(label=f"Undo {ship.capitalize()}", style=discord.ButtonStyle.gray,
                                      custom_id=f"FCID{player['color']}_undoUpgrade_1_tm{pos}_{ship}"))
+        view.add_item(Button(label="Finish Techno-Magic", style=discord.ButtonStyle.green,
+                             custom_id=f"FCID{player['color']}_finishTechnoMagic_{pos}"))
         view.add_item(Button(label="Restart Techno-Magic", style=discord.ButtonStyle.red,
                              custom_id=f"FCID{player['color']}_restartTechnoMagic_{pos}"))
         view.add_item(Button(label="Show Current Combat Turn", style=discord.ButtonStyle.blurple,
@@ -49,6 +52,9 @@ class UpgradeButtons:
 
     @staticmethod
     async def restartTechnoMagic(game: GamestateHelper, player, interaction: discord.Interaction, pos: str):
+        if game.gamestate["board"].get(pos, {}).get("technoMagicReady", {}).get(player["color"]):
+            await interaction.followup.send("You have already finished Techno-Magic.", ephemeral=True)
+            return
         UpgradeButtons.resetTechnoMagic(game, player, pos)
         await interaction.message.edit(content=f"{player['player_name']}, choose your Techno-Magic upgrades again.",
                                        view=UpgradeButtons.getTechnoMagicView(game, player, pos))
@@ -189,8 +195,12 @@ class UpgradeButtons:
             part_stats = json.load(f)
         index = 0
         if newPart != "mus":
-            index = player[f"{ship}_parts"].index(oldPart)
             index = int(indexOfOldPart)
+            parts = player[f"{ship}_parts"]
+            if not 0 <= index < len(parts) or parts[index] != oldPart:
+                await interaction.followup.send("That ship slot has changed. Please use the latest upgrade menu.",
+                                                ephemeral=True)
+                return
         # in free mode "empty" really empties the slot instead of reverting it
         isFreeRemoval = newPart == "empty" and discTileUpgrade != "free"
         if isFreeRemoval:
@@ -241,7 +251,11 @@ class UpgradeButtons:
         view.add_item(Button(label="Undo", style=discord.ButtonStyle.gray,
                              custom_id=f"FCID{player['color']}_undoUpgrade_{customID.split('_')[1]}_{discTileUpgrade}"))
         if interaction.message is not None:
-            await interaction.message.delete()
+            try:
+                await interaction.message.delete()
+            except discord.DiscordServerError:
+                logging.getLogger(__name__).warning("Upgrade saved, but Discord could not delete its old menu",
+                                                    exc_info=True)
         await interaction.channel.send(f"{player['player_name']} replaced {oldName} with {part_stats[newPart]['name']}"
                                        f" on their {ship.capitalize()} which now looks like this:",
                                        file=await asyncio.to_thread(drawing.show_player_ship,
@@ -261,6 +275,9 @@ class UpgradeButtons:
         # Undo buttons posted before the upgrade mode joined the id carry only the action count
         mode = parts[2] if len(parts) > 2 else "dummy"
         if mode.startswith("tm"):
+            if game.gamestate["board"].get(mode[2:], {}).get("technoMagicReady", {}).get(player["color"]):
+                await interaction.followup.send("You have already finished Techno-Magic.", ephemeral=True)
+                return
             UpgradeButtons.resetTechnoMagic(game, player, mode[2:], parts[3])
             view = UpgradeButtons.getTechnoMagicView(game, player, mode[2:])
             await interaction.message.edit(content=f"{player['player_name']}, undid the Techno-Magic part."
