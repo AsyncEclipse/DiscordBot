@@ -1280,9 +1280,7 @@ class Combat:
 
     @staticmethod
     async def promptNextSpeed(game: GamestateHelper, pos: str, channel, update: bool, repeat: bool = False):
-        tile = game.gamestate["board"].get(pos, {})
-        if (Carapace.has_pending_missiles(game, pos) or Combat.technoMagicPending(game, pos)
-                or (tile.get("phaseModuleColors") and not tile.get("phaseModulePrompted"))):
+        if Combat.technoMagicPending(game, pos):
             return
         currentSpeed = None
         if "currentSpeed" in game.gamestate["board"][pos]:
@@ -1495,7 +1493,7 @@ class Combat:
         tile = game.gamestate["board"][pos]
         colors = []
         for color in Combat.sideOf(tile.get("attacker")) + Combat.sideOf(tile.get("defender")):
-            if color and color != "ai" and FactionData.has(game.getPlayerObjectFromColor(color), "techno_magic"):
+            if color and color != "ai" and game.getPlayerObjectFromColor(color)["name"] == "Techno-Mages":
                 colors.append(color)
         if not colors:
             return False

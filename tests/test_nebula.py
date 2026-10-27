@@ -205,8 +205,8 @@ def test_nebula_movement_labels_preserve_saved_button_ids(make_game, run, monkey
 
     labels = {button.custom_id: button.label for content, kwargs in inter.channel.sent
               for button in getattr(kwargs.get("view"), "children", [])}
-    assert labels["FCIDblue_moveTo_207b_interceptor_207_1_q0_all"] == "207-A"
-    assert labels["FCIDblue_moveTo_207b_interceptor_207c_1_q0_all"] == "207-C"
+    assert labels["FCIDblue_moveTo_207b_interceptor_207_1"] == "207-A"
+    assert labels["FCIDblue_moveTo_207b_interceptor_207c_1"] == "207-C"
 
 
 @pytest.mark.parametrize("rotation,target", [(0, "207b"), (60, "207"), (180, "207c")])
