@@ -880,6 +880,9 @@ class Combat:
         if Combat.technoMagicPending(game, pos):
             await interaction.channel.send("Finish your Techno-Magic upgrades before rolling initiative.")
             return
+        if speed != 1000 and len(Combat.currentPairing(game, pos)) < 2:
+            await interaction.channel.send("The combat in this sector has already ended.")
+            return
         if colorOrAI == "ai":
             await Combat.rollDiceAI(game, buttonID, interaction)
             return
@@ -1280,6 +1283,8 @@ class Combat:
 
     @staticmethod
     async def promptNextSpeed(game: GamestateHelper, pos: str, channel, update: bool, repeat: bool = False):
+        if len(Combat.currentPairing(game, pos)) != 2:
+            return
         if Combat.technoMagicPending(game, pos):
             return
         currentSpeed = None
