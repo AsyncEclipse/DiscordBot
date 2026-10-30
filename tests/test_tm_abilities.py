@@ -265,6 +265,30 @@ def test_flux_missile_fires_before_the_ancient_it_tied_with(start_game, press, r
             state.gamestate["board"]["201"]["currentRoller"]) == (103, "blue")
 
 
+@pytest.mark.parametrize("first", ["techno_magic", "phase_module"])
+def test_initiative_waits_for_both_techno_magic_and_phase_module(start_game, run, first):
+    game, channel = start_game(factions=["tm", "wra"])
+    tile = game.gamestate["board"]["201"]
+    tile["player_ships"] = ["blue-int", "red-int"]
+    tile["attacker"], tile["defender"] = "blue", "red"
+    game.update()
+    run(Combat.startCombat(game, channel, "201"))
+
+    def finish(ability):
+        interaction = FakeInteraction(channel)
+        if ability == "techno_magic":
+            run(Combat.technoMagicDone(game, "finishTechnoMagic_201", game.get_player(1), interaction))
+        else:
+            run(Combat.phaseModuleDone(game, "phaseModuleDone_201_red", interaction))
+
+    finish(first)
+    assert "currentSpeed" not in tile
+    assert not any("rollDice" in cid for cid in buttons(channel))
+
+    finish("phase_module" if first == "techno_magic" else "techno_magic")
+    assert (tile["currentSpeed"], tile["currentRoller"]) == (3, "blue")
+
+
 def test_the_attacker_is_offered_the_upgrade_first(start_game, run):
     """Where timing matters, the defender chooses last."""
     game, channel = start_game(factions=["tm", "tm"])

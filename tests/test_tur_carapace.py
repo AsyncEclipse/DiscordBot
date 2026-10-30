@@ -130,6 +130,22 @@ def test_incoming_damage_is_reduced_but_never_below_one(make_game, run):
     assert reload(game).gamestate["board"]["202"]["damage_tracker"]["teal-cru"] == 1
 
 
+def test_ai_allocates_all_hits_needed_to_destroy_a_carapace_cruiser(make_game, run):
+    game = combat_game(make_game, tur_ships=("teal-cru",), red_ships=())
+    tile = game.gamestate["board"]["202"]
+    tile["player_ships"].append("ai-grd")
+    tile["attacker"], tile["defender"] = "ai", "teal"
+    engage(game, "cruiser")
+
+    allocation = Combat.getAIHitAllocation(game, "ai", "202", 2, [[6, 2, "orange"]] * 3, 0)
+    assert allocation == ["teal-cru"] * 3
+
+    for target in allocation:
+        run(Combat.assignHitTo(game, f"assignHitTo_202_ai_{target}_6_2",
+                               FakeInteraction(), False, deferEnd=True))
+    assert "teal-cru" not in tile["player_ships"]
+
+
 def test_carapace_does_not_apply_to_another_faction(make_game, run):
     game = combat_game(make_game, red_ships=("red-cru",))
     game.gamestate["board"]["202"]["player_ships"] = ["blue-drd", "red-cru"]

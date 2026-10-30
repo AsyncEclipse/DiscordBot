@@ -934,7 +934,10 @@ class Combat:
                 next_damage = damage.copy()
                 next_destroyed = destroyed.copy()
                 if target is not None:
-                    next_damage[target] += dice[die_index][1]
+                    owner, ship_type = target.split("-", 1)
+                    ship_class = models[target].ship_type if owner != "ai" else ship_type.replace("adv", "")
+                    next_damage[target] += Carapace.incoming_damage(
+                        game, pos, owner, ship_class, colorOrAI, dice[die_index][1])
                     if next_damage[target] > models[target].hull:
                         next_destroyed[target] += 1
                         next_damage[target] = 0

@@ -92,5 +92,5 @@ def targeting_game(make_game, monkeypatch, ships):
     monkeypatch.setattr(Combat, "getOpponentUnitsThatCanBeHit", staticmethod(
         lambda *args: list(dict.fromkeys(ships))))
     monkeypatch.setattr(combat_helper, "PlayerShip", lambda player, ship_type: SimpleNamespace(
-        hull=1 if ship_type == "cru" else 0, cost=5 if ship_type == "cru" else 1))
+        ship_type=ship_type, hull=1 if ship_type == "cru" else 0, cost=5 if ship_type == "cru" else 1))
     return game
