@@ -43,13 +43,28 @@ class FakeMessage:
         return thread
 
 
+class FakeClient:
+    """Stands in for discord.Client. fetch_channel finds the fake channels by id."""
+
+    channels = {}
+
+    async def fetch_channel(self, channel_id):
+        if channel_id not in FakeClient.channels:
+            raise discord.NotFound(SimpleNamespace(status=404, reason="Not Found"), "Unknown Channel")
+        return FakeClient.channels[channel_id]
+
+
 class FakeChannel:
+    _ids = itertools.count(1000)
+
     def __init__(self, name="aeb1-actions"):
+        self.id = next(FakeChannel._ids)
         self.name = name
         self.threads = []
         self.sent = []
         self.messages = []  # parallel to sent: the message each send created
         self.deleted = set()
+        FakeClient.channels[self.id] = self
 
     async def send(self, content=None, **kwargs):
         self.sent.append((content, kwargs))
@@ -59,7 +74,8 @@ class FakeChannel:
     async def fetch_message(self, message_id):
         if message_id in self.deleted:
             raise discord.NotFound(SimpleNamespace(status=404, reason="Not Found"), "Unknown Message")
-        return FakeMessage(self)
+        # Unknown ids still yield a stand-in message, as Discord would return the real one.
+        return next((message for message in self.messages if message.id == message_id), FakeMessage(self))
 
     async def edit(self, **kwargs):
         self.edited = kwargs
@@ -124,6 +140,7 @@ class FakeInteraction:
         self.created_at = datetime.now(timezone.utc)
         self.response = FakeResponder()
         self.followup = FakeResponder()
+        self.client = FakeClient()
 
 
 class FakeGame:
