@@ -157,14 +157,16 @@ class BuildButtons:
         money = int(buttonID.split("_")[6])
         spent = int(buttonID.split("_")[7])
         resource = buttonID.split("_")[8]
-        if player["name"] == "Rho Indi Syndicate" and resource == "Money":
-            spent += 2
-        else:
-            spent += 1
+        # Rho Indi trades money 3:2, everyone else 3:1
+        spent += 2 if player["name"] == "Rho Indi Syndicate" and resource == "Money" else 1
         if resource == "Science":
             science -= player["trade_value"]
         else:
             money -= player["trade_value"]
+        # the 3:2 trade buys two materials, so an odd cost leaves one of them with the player
+        if spent > int(cost):
+            material = str(int(material) + spent - int(cost))
+            spent = int(cost)
         science = str(science)
         money = str(money)
         spent = str(spent)

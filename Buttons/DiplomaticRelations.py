@@ -108,6 +108,8 @@ class DiplomaticRelationsButtons:
     def getPlayersWithWhichDiplomatcRelationsCanBeFormed(game: GamestateHelper, player):
         from Buttons.Influence import InfluenceButtons
         players = []
+        if not game.canFormMoreRelations(player):
+            return players
         configs = Properties()
         if game.gamestate.get("5playerhyperlane"):
             if game.gamestate.get("player_count") == 5:
@@ -179,8 +181,8 @@ class DiplomaticRelationsButtons:
             return
         p2 = game.gamestate["players"][pID]
         if not game.formRelationsBetween(player, p2):
-            await interaction.followup.send(f"{interaction.user.mention}, one of you has no room left on their"
-                                            " reputation track for this ambassador.")
+            await interaction.followup.send(f"{interaction.user.mention}, one of you has no free ambassador"
+                                            " left for this relation, or no free slot on their reputation track.")
             return
         await interaction.followup.send(f"{game.gamestate['players'][pID]['player_name']} your"
                                         f" relations have been accepted by {player['player_name']}")

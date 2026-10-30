@@ -1341,9 +1341,21 @@ class GamestateHelper:
         elif "Terran" in full_name:
             return full_name.lower().replace(" ", "_")
 
+    def ambassadorsGiven(self, player):
+        """Ambassador tiles this player has placed on other players' boards; there are three."""
+        color = player["color"]
+        return sum(1 for other in self.gamestate["players"].values()
+                   for tile in other["reputation_track"]
+                   if isinstance(tile, str) and "-" in tile and "minor" not in tile
+                   and tile.split("-")[2] == color)
+
+    def canFormMoreRelations(self, player):
+        """A relation needs a free slot on the board and one of the player's three ambassador tiles."""
+        return (PlayerHelper.has_reputation_slot_for_relation(player)
+                and self.ambassadorsGiven(player) < 3)
+
     def formRelationsBetween(self, player1, player2):
-        if not all(PlayerHelper.has_reputation_slot_for_relation(player)
-                   for player in (player1, player2)):
+        if not all(self.canFormMoreRelations(player) for player in (player1, player2)):
             return False
         pID = self.get_player_from_color(player1['color'])
         pID2 = self.get_player_from_color(player2['color'])

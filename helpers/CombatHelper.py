@@ -660,6 +660,66 @@ class Combat:
         return allocation
 
     @staticmethod
+    def getAIHitAllocation(game: GamestateHelper, colorOrAI, pos, speed, dice, computer):
+        """Choose targets for a whole AI salvo before any hits are applied.
+
+        shortcut: exhaustive allocation search grows exponentially; optimize
+        if AI salvo sizes become large.
+        """
+        ships = game.gamestate["board"][pos]["player_ships"][:]
+        targets_by_die = [
+            Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, ships, die[0], computer, pos, speed)
+            for die in dice
+        ]
+        models = {}
+        initial_damage = {}
+        for target in {target for options in targets_by_die for target in options}:
+            owner, ship_type = target.split("-", 1)
+            if owner == "ai":
+                advanced = game.gamestate["advanced_ai"]
+                worldsafar = game.gamestate["wa_ai"]
+                if ship_type + "_type" in game.gamestate:
+                    advanced = "adv" in game.gamestate[ship_type + "_type"]
+                    worldsafar = "wa" in game.gamestate[ship_type + "_type"]
+                model = AI_Ship(ship_type, advanced, worldsafar)
+            else:
+                player = game.get_player_from_color(owner)
+                model = PlayerShip(game.gamestate["players"][player], ship_type)
+            models[target] = model
+            initial_damage[target] = game.add_damage(target, pos, 0)
+        targets = sorted(models, key=lambda target: (models[target].cost, target), reverse=True)
+
+        best_score = None
+        best_allocation = [None] * len(dice)
+
+        def search(die_index, allocation, damage, destroyed):
+            nonlocal best_score, best_allocation
+            if die_index == len(dice):
+                candidate_score = (tuple(destroyed[target] for target in targets),
+                                   tuple(damage[target] for target in targets))
+                if best_score is None or candidate_score > best_score:
+                    best_score = candidate_score
+                    best_allocation = allocation[:]
+                return
+            options = list(dict.fromkeys(
+                target for target in targets_by_die[die_index]
+                if destroyed[target] < ships.count(target))) or [None]
+            for target in options:
+                next_damage = damage.copy()
+                next_destroyed = destroyed.copy()
+                if target is not None:
+                    next_damage[target] += dice[die_index][1]
+                    if next_damage[target] > models[target].hull:
+                        next_destroyed[target] += 1
+                        next_damage[target] = 0
+                allocation.append(target)
+                search(die_index + 1, allocation, next_damage, next_destroyed)
+                allocation.pop()
+
+        search(0, [], initial_damage, dict.fromkeys(targets, 0))
+        return best_allocation
+
+    @staticmethod
     async def applyRiftBackfire(game: GamestateHelper, colorOrAI, interaction: discord.Interaction, pos, totalDamage,
                                 deferEnd: bool = False):
         for ship, damage in Combat.getRiftBackfireAllocation(game, colorOrAI,
@@ -731,49 +791,23 @@ class Combat:
                     msg += f"\nThis ship type has a +{shipModel.computer} computer."
                 await interaction.channel.send(msg + msg2)
                 oldNumPeeps = len(Combat.findPlayersInTile(game, pos))
-                for die in dieNums:
-                    tile_map = game.gamestate["board"]
-                    player_ships = tile_map[pos]["player_ships"][:]
+                allocation = Combat.getAIHitAllocation(game, colorOrAI, pos, speed, dieNums,
+                                                       shipModel.computer)
+                for die, target in zip(dieNums, allocation):
                     dieNum = die[0]
                     dieDam = die[1]
-                    hittableShips = []
-                    hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships,
-                                                                        dieNum, shipModel.computer, pos, speed)
-                    if all([dieNum + shipModel.computer > 5, len(hittableShips) == 0, oldNumPeeps == len(Combat.findPlayersInTile(game, pos))]):
+                    hittableShips = Combat.getOpponentUnitsThatCanBeHit(
+                        game, colorOrAI, game.gamestate["board"][pos]["player_ships"][:],
+                        dieNum, shipModel.computer, pos, speed)
+                    if (dieNum + shipModel.computer > 5 and not hittableShips
+                            and oldNumPeeps == len(Combat.findPlayersInTile(game, pos))):
                         message = (f"The computer bonus for a die that rolled a {dieNum}"
                                    " was cancelled by the shields on each of the opponents ships.")
                         await interaction.channel.send(message)
-                    if len(hittableShips) > 0:
+                    if target is not None:
                         update = True
-                        if len(hittableShips) > 1:
-                            ship = hittableShips[0]
-                            oldShipVal = 0
-                            ableToKillSomething = False
-                            for option in hittableShips:
-                                damageOnShip = game.add_damage(option, pos, 0)
-                                shipType = option.split("-")[1]
-                                shipOwner = option.split("-")[0]
-                                player = game.get_player_from_color(shipOwner)
-                                shipModel2 = PlayerShip(game.gamestate["players"][player], shipType)
-                                if ableToKillSomething:
-                                    if dieDam + damageOnShip > shipModel2.hull and shipModel2.cost > oldShipVal:
-                                        oldShipVal = shipModel2.cost
-                                        ship = option
-                                else:
-                                    if dieDam + damageOnShip > shipModel2.hull:
-                                        oldShipVal = shipModel2.cost
-                                        ship = option
-                                        ableToKillSomething = True
-                                    else:
-                                        if shipModel2.cost > oldShipVal:
-                                            oldShipVal = shipModel2.cost
-                                            ship = option
-                            buttonID = f"assignHitTo_{pos}_{colorOrAI}_{ship}_{dieNum}_{dieDam}"
-                            await Combat.assignHitTo(game, buttonID, interaction, False)
-                        else:
-                            ship = hittableShips[0]
-                            buttonID = f"assignHitTo_{pos}_{colorOrAI}_{ship}_{dieNum}_{dieDam}"
-                            await Combat.assignHitTo(game, buttonID, interaction, False)
+                        buttonID = f"assignHitTo_{pos}_{colorOrAI}_{target}_{dieNum}_{dieDam}"
+                        await Combat.assignHitTo(game, buttonID, interaction, False)
         hitsToAssign = 0
         if "unresolvedHits" in game.gamestate["board"][pos]:
             hitsToAssign = game.gamestate["board"][pos]["unresolvedHits"]
