@@ -61,3 +61,35 @@ def test_ai_allocates_two_hits_to_destroy_largest_ship(make_game, no_random, run
     remaining_ships = game.gamestate["board"][POS]["player_ships"]
     assert "red-cru" not in remaining_ships
     assert "red-int" in remaining_ships
+
+
+def test_ai_destroys_smaller_ship_after_larger_ship(make_game, monkeypatch):
+    game = targeting_game(make_game, monkeypatch, ["red-cru", "red-int"])
+    allocation = Combat.getAIHitAllocation(game, "ai", POS, 2, [[6, 1]] * 3, 0)
+    assert allocation.count("red-cru") == 2
+    assert allocation.count("red-int") == 1
+
+
+def test_ai_does_not_target_destroyed_ship(make_game, monkeypatch):
+    game = targeting_game(make_game, monkeypatch, ["red-cru"])
+    allocation = Combat.getAIHitAllocation(game, "ai", POS, 2, [[6, 1]] * 3, 0)
+    assert allocation == ["red-cru", "red-cru", None]
+
+
+def test_ai_can_destroy_multiple_ships_of_same_type(make_game, monkeypatch):
+    game = targeting_game(make_game, monkeypatch, ["red-cru", "red-cru", "red-int"])
+    allocation = Combat.getAIHitAllocation(game, "ai", POS, 2, [[6, 1]] * 5, 0)
+    assert allocation.count("red-cru") == 4
+    assert allocation.count("red-int") == 1
+
+
+def targeting_game(make_game, monkeypatch, ships):
+    game = make_game({
+        "players": {1: {"color": "red"}},
+        "board": {POS: {"player_ships": ["ai-anc"] + ships}},
+    })
+    monkeypatch.setattr(Combat, "getOpponentUnitsThatCanBeHit", staticmethod(
+        lambda *args: list(dict.fromkeys(ships))))
+    monkeypatch.setattr(combat_helper, "PlayerShip", lambda player, ship_type: SimpleNamespace(
+        hull=1 if ship_type == "cru" else 0, cost=5 if ship_type == "cru" else 1))
+    return game

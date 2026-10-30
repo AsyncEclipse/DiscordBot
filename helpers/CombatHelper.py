@@ -692,32 +692,31 @@ class Combat:
         best_score = None
         best_allocation = [None] * len(dice)
 
-        def score(allocation):
-            damage = initial_damage.copy()
-            for die_index, target in enumerate(allocation):
-                if target is not None:
-                    damage[target] += dice[die_index][1]
-            return tuple(
-                value
-                for target in targets
-                for value in (damage[target] > models[target].hull, damage[target])
-            )
-
-        def search(die_index, allocation):
+        def search(die_index, allocation, damage, destroyed):
             nonlocal best_score, best_allocation
             if die_index == len(dice):
-                candidate_score = score(allocation)
+                candidate_score = (tuple(destroyed[target] for target in targets),
+                                   tuple(damage[target] for target in targets))
                 if best_score is None or candidate_score > best_score:
                     best_score = candidate_score
                     best_allocation = allocation[:]
                 return
-            options = targets_by_die[die_index] or [None]
+            options = list(dict.fromkeys(
+                target for target in targets_by_die[die_index]
+                if destroyed[target] < ships.count(target))) or [None]
             for target in options:
+                next_damage = damage.copy()
+                next_destroyed = destroyed.copy()
+                if target is not None:
+                    next_damage[target] += dice[die_index][1]
+                    if next_damage[target] > models[target].hull:
+                        next_destroyed[target] += 1
+                        next_damage[target] = 0
                 allocation.append(target)
-                search(die_index + 1, allocation)
+                search(die_index + 1, allocation, next_damage, next_destroyed)
                 allocation.pop()
 
-        search(0, [])
+        search(0, [], initial_damage, dict.fromkeys(targets, 0))
         return best_allocation
 
     @staticmethod

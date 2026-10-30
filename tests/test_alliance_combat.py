@@ -760,7 +760,7 @@ class TestAllianceDiceAssignment:
 
         run(Combat.rollDice(game, f"rollDice_{POS}_ai_2_deleteMsg", FakeInteraction()))
 
-        assert hit and all(ship == "red-int" for ship in hit)
+        assert hit == ["red-int", "green-int"]
 
 
 class TestFinishedCombatButtons:
