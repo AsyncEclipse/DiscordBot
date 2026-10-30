@@ -73,6 +73,9 @@ class MoveButtons:
                                      style=discord.ButtonStyle.blurple,
                                      custom_id=(f"FCID{player['color']}_moveThisShip_{originT}"
                                                 f"_{shipType}_{moveCount}{suffix}")))
+        if int(moveCount) > 1 and not nested:
+            view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
+                                 custom_id=f"FCID{player['color']}_finishAction"))
         return view
 
     @staticmethod
@@ -90,6 +93,9 @@ class MoveButtons:
         view.add_item(Button(label=f"Done ({selected})", style=discord.ButtonStyle.green,
                              custom_id=(f"FCID{player['color']}_moveQueueDone_{origin}_{shipType}"
                                         f"_{moveCount}_{selected}{suffix}")))
+        if int(moveCount) > 1 and "herRegroup" not in suffix:
+            view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
+                                 custom_id=f"FCID{player['color']}_finishAction"))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray,
                              custom_id=f"FCID{player['color']}_restartTurn"))
         return view
@@ -203,6 +209,11 @@ class MoveButtons:
         ship_filter = "all"
         if "_" in buttonID:
             moveCount = buttonID.split("_")[1]
+        if not nested and int(moveCount) > player["move_apt"]:
+            if button:
+                await interaction.message.delete()
+            await MoveButtons.sendMoveContinuation(player, interaction, int(moveCount) - 1)
+            return
         if buttonID == "startMove":
             player.pop("pulsarMove", None)
             if FactionData.has(player, "raid") or FactionData.has(player, "regroup"):
@@ -396,6 +407,9 @@ class MoveButtons:
             count += 1
         if nested:
             MoveButtons.addRegroupBackButton(view, player, phase)
+        elif int(moveCount) > 1:
+            view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
+                                 custom_id=f"FCID{player['color']}_finishAction"))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray,
                              custom_id=f"FCID{player['color']}_restartTurn"))
 

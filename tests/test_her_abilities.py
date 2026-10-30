@@ -64,6 +64,20 @@ def finish_standard_build(press, channel, ship="Interceptor"):
 
 # --- Raid --------------------------------------------------------------------
 
+def test_back_from_raid_after_last_move_cannot_start_a_third_move(start_game, press, run):
+    game, channel = setup_game(start_game)
+    player = game.get_player(1)
+    player["move_apt"] = 2
+    game.update()
+    run(MoveButtons.sendMoveContinuation(player, FakeInteraction(channel), 2))
+    press(channel, 1, "FCIDblue_herRaidBuild_3")
+    press(channel, 1, "FCIDblue_herBackToMove_3")
+
+    choices = buttons(channel)
+    assert "FCIDblue_finishAction" in choices
+    assert not any("moveFrom" in cid or "startMove" in cid for cid in choices)
+
+
 def test_the_player_area_prints_the_raid_and_regroup_annotations():
     """The info sheet prints +1 MOV under the build count and +1 BUI under the move count."""
     heralds = player_stats("her", color="red")
