@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import discord
 from Buttons.DiscoveryTile import DiscoveryTileButtons
 from Buttons.Explore import ExploreButtons
@@ -188,8 +189,9 @@ class InfluenceButtons:
             channel = await interaction.client.fetch_channel(offer["channel"])
             await (await channel.fetch_message(offer["message"])).delete()
         except discord.NotFound:
-            # shortcut: a thread that is already gone is skipped, upgrade if dead prompts are seen.
-            pass
+            logging.getLogger(__name__).info(
+                "Influence offer message %s in channel %s was already deleted.",
+                offer["message"], offer["channel"])
 
     @staticmethod
     async def declineInfluence(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):

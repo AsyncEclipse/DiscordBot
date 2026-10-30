@@ -60,6 +60,37 @@ def test_ancient_spirit_draws_from_the_discard_stack(make_game):
     assert game.gamestate["discTilesDiscard"] == []
 
 
+def test_ancient_spirit_replenishes_between_choices(make_game):
+    game = make_game({"discTiles": ["rep"], "discTilesDiscard": ["art"],
+                      "board": {"201": {}}})
+
+    assert DiscoveryTileButtons.drawAtlantiansDiscoveryChoices(game, "201") == ["rep", "art"]
+    assert game.gamestate["discTilesDiscard"] == []
+
+
+@pytest.mark.parametrize("sector_type, discards", [
+    ("normal", ["mat", "cru"]),
+    ("nebula", ["mat", "cru", "orb", "mon"]),
+])
+def test_ancient_spirit_stops_when_only_ineligible_discards_remain(make_game, sector_type, discards):
+    game = make_game({"discTiles": ["rep"], "discTilesDiscard": discards,
+                      "board": {"201": {"type": sector_type}}})
+
+    assert DiscoveryTileButtons.drawAtlantiansDiscoveryChoices(game, "201") == ["rep"]
+    assert game.gamestate["discTilesDiscard"] == discards
+
+
+def test_existing_ancient_spirit_choice_still_resolves(make_game, run):
+    game = make_game({"discTiles": [], "board": {"201": {"disctile": 0}}})
+    player = {"name": "Atlantians", "player_name": "Blue", "color": "blue"}
+    interaction = FakeInteraction()
+
+    run(DiscoveryTileButtons.selectDiscTile(game, interaction, "selectDiscTile_som_201", player))
+
+    assert "FCIDblue_usedDiscForAbility_som_201" in buttons(interaction.channel)
+    assert not game.gamestate.get("discTilesDiscard")
+
+
 def test_ancient_spirit_choice_shows_both_tile_images(make_game, run, monkeypatch):
     game = make_game({"discTiles": ["som", "jud"], "board": {"201": {"disctile": 1}}})
     player = {"name": "Atlantians", "player_name": "Blue", "color": "blue"}

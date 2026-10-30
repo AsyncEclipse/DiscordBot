@@ -15,7 +15,12 @@ class DiscoveryTileButtons:
         game.replenishDiscTiles()
         choices = []
         is_nebula = game.gamestate["board"].get(tile, {}).get("type") == "nebula"
-        while game.gamestate["discTiles"] and len(choices) < 2:
+        while len(choices) < 2:
+            if not game.gamestate["discTiles"]:
+                excluded = ("mat", "cru", "orb", "mon") if is_nebula else ("mat", "cru")
+                if not any(disc not in excluded for disc in game.gamestate.get("discTilesDiscard", [])):
+                    break
+                game.replenishDiscTiles()
             disc = game.gamestate["discTiles"].pop()
             if is_nebula and disc in ("orb", "mon"):
                 game.gamestate["discTiles"].insert(0, disc)
@@ -91,8 +96,11 @@ class DiscoveryTileButtons:
 
     @staticmethod
     async def selectDiscTile(game: GamestateHelper, interaction: discord.Interaction, buttonID: str, player):
-        disc, other, tile = buttonID.split("_")[1:4]
-        game.discardDiscTile(other)
+        parts = buttonID.split("_")
+        disc, tile = parts[1], parts[-1]
+        # Existing Discord prompts predate the unchosen tile in the button ID.
+        if len(parts) == 4:
+            game.discardDiscTile(parts[2])
         await interaction.message.edit(view=None)
         await DiscoveryTileButtons.sendDiscoveryTileOptions(game, tile, interaction, player, disc)
 
