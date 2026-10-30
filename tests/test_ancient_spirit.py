@@ -22,6 +22,44 @@ def test_ancient_spirit_skips_material_and_cruiser_tiles(make_game, run, deck, o
     assert game.gamestate["discTiles"] == []
 
 
+def test_ancient_spirit_discards_the_unchosen_tile(make_game, run):
+    game = make_game({"discTiles": ["som", "jud"], "board": {"201": {"disctile": 1}}})
+    player = {"name": "Atlantians", "player_name": "Blue", "color": "blue"}
+    interaction = FakeInteraction()
+
+    run(DiscoveryTileButtons.exploreDiscoveryTile(game, "201", interaction, player))
+    run(DiscoveryTileButtons.selectDiscTile(game, interaction,
+                                            "selectDiscTile_som_jud_201", player))
+
+    assert game.gamestate["discTiles"] == []
+    assert game.gamestate["discTilesDiscard"] == ["jud"]
+
+    # The pile is empty, so the discard stack is shuffled back in and drawn from.
+    assert game.getNextDiscTile("201") == "jud"
+    assert game.gamestate["discTilesDiscard"] == []
+
+
+def test_ancient_spirit_discards_material_cruiser_and_duplicate_draws(make_game, run):
+    game = make_game({"discTiles": ["som", "som", "mat", "cru"],
+                      "board": {"201": {"disctile": 1}}})
+    player = {"name": "Atlantians", "player_name": "Blue", "color": "blue"}
+    interaction = FakeInteraction()
+
+    run(DiscoveryTileButtons.exploreDiscoveryTile(game, "201", interaction, player))
+
+    assert game.gamestate["discTiles"] == []
+    assert sorted(game.gamestate["discTilesDiscard"]) == ["cru", "mat", "som"]
+
+
+def test_ancient_spirit_draws_from_the_discard_stack(make_game):
+    game = make_game({"discTiles": [], "discTilesDiscard": ["rep", "art"],
+                      "board": {"201": {}}})
+
+    assert sorted(DiscoveryTileButtons.drawAtlantiansDiscoveryChoices(game, "201")) == ["art", "rep"]
+    assert game.gamestate["discTiles"] == []
+    assert game.gamestate["discTilesDiscard"] == []
+
+
 def test_ancient_spirit_choice_shows_both_tile_images(make_game, run, monkeypatch):
     game = make_game({"discTiles": ["som", "jud"], "board": {"201": {"disctile": 1}}})
     player = {"name": "Atlantians", "player_name": "Blue", "color": "blue"}
