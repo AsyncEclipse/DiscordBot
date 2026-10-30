@@ -761,3 +761,24 @@ class TestAllianceDiceAssignment:
         run(Combat.rollDice(game, f"rollDice_{POS}_ai_2_deleteMsg", FakeInteraction()))
 
         assert hit and all(ship == "red-int" for ship in hit)
+
+
+class TestFinishedCombatButtons:
+    """Issue #404: the buttons of a combat message stay in the channel after the battle, so a
+    press days later must not prompt initiative again (the Exiles' initiative 0 orbital showed it)."""
+
+    def test_a_stale_combat_button_does_not_start_initiative_again(self, make_game, run):
+        game = _game(make_game, ("blue",), ["blue-cru", "blue-cru", "blue-orb"],
+                     attacker=["blue"], defender=["ai"], owner="blue")
+        game.gamestate["players"]["1"] = player_stats("exl", color="blue")
+        tile = game.gamestate["board"][POS]
+        tile["orbital_pop"] = [1]
+        tile["currentSpeed"] = 1
+        tile["currentRoller"] = "blue"
+        interaction = FakeInteraction()
+
+        run(Combat.rollDice(game, f"rollDice_{POS}_blue_1_deleteMsg", interaction))
+        run(Combat.promptNextSpeed(game, POS, interaction.channel, False))
+
+        assert [content for content, _view in interaction.channel.sent] == [
+            "The combat in this sector has already ended."]

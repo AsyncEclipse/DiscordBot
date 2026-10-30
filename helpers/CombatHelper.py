@@ -239,12 +239,9 @@ class Combat:
                                      custom_id=f"FCID{winner}_removeInfluenceFinish_{pos}_graveYard"))
                 message = f"{playerName}, you may destroy all enemy influence and population automatically."
                 asyncio.create_task(thread2.send(message, view=view))
-                view2 = View()
-                view2.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple,
-                                      custom_id=f"FCID{winner}_addInfluenceFinish_{pos}"))
                 message = (f"{playerName}, you may place your influence on the tile"
                            " after destroying the enemy population.")
-                asyncio.create_task(thread2.send(message, view=view2))
+                await InfluenceButtons.offerInfluenceDisc(game, thread2, pos, [winner], message)
                 view3 = View()
                 view3.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray,
                                       custom_id=f"FCID{player['color']}_startPopDrop"))
@@ -276,15 +273,8 @@ class Combat:
             pos = tile3[1]
             player = game.getPlayerObjectFromColor(playerColor)
             playerName = player['player_name']
-            view2 = View()
-            for color in playerSide:
-                label = "Place Influence"
-                if len(playerSide) > 1:
-                    label = f"Place Influence ({game.getPlayerObjectFromColor(color)['name']})"
-                view2.add_item(Button(label=label, style=discord.ButtonStyle.blurple,
-                                      custom_id=f"FCID{color}_addInfluenceFinish_{pos}"))
             message = (f"{playerName}, you may place your influence on the tile after destroying the enemy population.")
-            asyncio.create_task(thread3.send(message, view=view2))
+            await InfluenceButtons.offerInfluenceDisc(game, thread3, pos, playerSide, message)
             view3 = View()
             view3.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray,
                                   custom_id=f"FCID{player['color']}_startPopDrop"))
@@ -880,6 +870,9 @@ class Combat:
         if Combat.technoMagicPending(game, pos):
             await interaction.channel.send("Finish your Techno-Magic upgrades before rolling initiative.")
             return
+        if speed != 1000 and len(Combat.currentPairing(game, pos)) < 2:
+            await interaction.channel.send("The combat in this sector has already ended.")
+            return
         if colorOrAI == "ai":
             await Combat.rollDiceAI(game, buttonID, interaction)
             return
@@ -1234,12 +1227,9 @@ class Combat:
         await interaction.message.delete()
         if len(PopulationButtons.findFullPopulation(game, pos)) == 0:
             game.remove_control(owner, pos)
-            view2 = View()
-            view2.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple,
-                                  custom_id=f"FCID{player['color']}_addInfluenceFinish_" + pos))
             message = (f"{player['player_name']}, you may place your influence"
                        " on the tile now that you have destroyed all the enemy population.")
-            await interaction.channel.send(message, view=view2)
+            await InfluenceButtons.offerInfluenceDisc(game, interaction.channel, pos, [player['color']], message)
             view3 = View()
             view3.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray,
                                   custom_id=f"FCID{player['color']}_startPopDrop"))
@@ -1280,6 +1270,8 @@ class Combat:
 
     @staticmethod
     async def promptNextSpeed(game: GamestateHelper, pos: str, channel, update: bool, repeat: bool = False):
+        if len(Combat.currentPairing(game, pos)) != 2:
+            return
         if Combat.technoMagicPending(game, pos):
             return
         currentSpeed = None
@@ -1674,19 +1666,12 @@ class Combat:
             if owner == 0:
                 if Combat.discoveryTileClaimable(game, pos):
                     await Combat.offerDiscoveryTile(game, interaction.channel, pos, winner)
-                view2 = View()
-                for color in survivors:
-                    label = "Place Influence"
-                    if len(survivors) > 1:
-                        label = f"Place Influence ({game.getPlayerObjectFromColor(color)['name']})"
-                    view2.add_item(Button(label=label, style=discord.ButtonStyle.blurple,
-                                          custom_id=f"FCID{color}_addInfluenceFinish_{pos}"))
                 message = f"{playerName}, you may place your influence on the tile."
                 if len(survivors) > 1:
                     message = (f"{playerName}, your Alliance may place an influence disc here. "
                                "The buttons are in order of entry to the sector, so the first of you to "
                                "want the disc should take it.")
-                asyncio.create_task(interaction.channel.send(message, view=view2))
+                await InfluenceButtons.offerInfluenceDisc(game, interaction.channel, pos, survivors, message)
                 view3 = View()
                 view3.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray,
                                       custom_id=f"FCID{player['color']}_startPopDrop"))
@@ -1705,12 +1690,9 @@ class Combat:
                                          custom_id=f"FCID{winner}_removeInfluenceFinish_{pos}_graveYard"))
                     message = f"{playerName}, you may destroy all enemy influence and population automatically."
                     asyncio.create_task(interaction.channel.send(message, view=view))
-                    view2 = View()
-                    view2.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple,
-                                          custom_id=f"FCID{winner}_addInfluenceFinish_{pos}"))
                     message = (f"{playerName}, you may place your influence on the"
                                " tile after destroying the enemy population.")
-                    asyncio.create_task(interaction.channel.send(message, view=view2))
+                    await InfluenceButtons.offerInfluenceDisc(game, interaction.channel, pos, [winner], message)
                     view3 = View()
                     view3.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray,
                                           custom_id=f"FCID{player['color']}_startPopDrop"))

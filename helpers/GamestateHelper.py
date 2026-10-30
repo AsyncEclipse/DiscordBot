@@ -1579,7 +1579,20 @@ class GamestateHelper:
         self.gamestate["board"][tile]["disctile"] = 1
         self.update()
 
+    def replenishDiscTiles(self):
+        """Shuffle the discarded discovery tiles back in once the deck runs out."""
+        if not self.gamestate["discTiles"] and self.gamestate.get("discTilesDiscard"):
+            self.gamestate["discTiles"] = self.gamestate["discTilesDiscard"]
+            self.gamestate["discTilesDiscard"] = []
+            random.shuffle(self.gamestate["discTiles"])
+            self.update()
+
+    def discardDiscTile(self, disc: str):
+        self.gamestate.setdefault("discTilesDiscard", []).append(disc)
+        self.update()
+
     def getNextDiscTile(self, tile: str):
+        self.replenishDiscTiles()
         nextTile = self.gamestate["discTiles"].pop()
         self.gamestate["board"][tile]["disctile"] = 0
         self.update()

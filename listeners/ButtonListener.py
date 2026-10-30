@@ -335,6 +335,8 @@ class ButtonListener(commands.Cog):
             await InfluenceButtons.eliminatePlayer(game, player, interaction,player_helper,True)
         elif customID.startswith("addInfluenceFinish"):
             await InfluenceButtons.addInfluenceFinish(game, player, interaction, customID)
+        elif customID.startswith("declineInfluence"):
+            await InfluenceButtons.declineInfluence(game, player, interaction, customID)
         elif customID.startswith("removeInfluenceStart"):
             await InfluenceButtons.removeInfluenceStart(game, player, interaction)
         elif customID.startswith("removeInfluenceFinish"):

@@ -176,19 +176,16 @@ class ExploreButtons:
         game.update_player(player_helper)
         await interaction.channel.send(f"Tile added to position {msg[1]}")
         if game.gamestate["board"][msg[1]]["ancient"] == 0 or player["name"] == "Descendants of Draco":
-            view = View()
             if "bh" in game.gamestate["board"][msg[1]].get("type", ""):
                 await interaction.channel.send("This is a black hole tile, "
                                                "so its discovery tile cannot be claimed until a ship moves in, "
                                                "at which point a die will be rolled and it might teleport.")
             else:
-                view.add_item(Button(label="Place Influence", style=discord.ButtonStyle.blurple,
-                                     custom_id=f"FCID{player['color']}_addInfluenceFinish_" + msg[1]))
-                view.add_item(Button(label="Decline Influence Placement", style=discord.ButtonStyle.red,
-                                     custom_id=f"FCID{player['color']}_deleteMsg"))
-                await interaction.channel.send(f"{player['player_name']}, choose whether or not"
-                                               " to place influence in the tile." + game.displayPlayerStats(player),
-                                               view=view)
+                from Buttons.Influence import InfluenceButtons
+                await InfluenceButtons.offerInfluenceDisc(
+                    game, interaction.channel, msg[1], [player["color"]],
+                    f"{player['player_name']}, choose whether or not"
+                    " to place influence in the tile." + game.displayPlayerStats(player))
                 if all([game.gamestate["board"][msg[1]]["ancient"] == 0,
                         game.gamestate["board"][msg[1]]["disctile"] > 0]):
                     await DiscoveryTileButtons.exploreDiscoveryTile(game, msg[1], interaction, player)

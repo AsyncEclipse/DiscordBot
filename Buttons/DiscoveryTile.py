@@ -11,10 +11,16 @@ from discord.ui import View, Button
 class DiscoveryTileButtons:
     @staticmethod
     def drawAtlantiansDiscoveryChoices(game: GamestateHelper, tile=None):
-        """Draw two choices, removing Material Gain and Ancient Cruiser from the deck."""
+        """Draw two choices, discarding Material Gain and Ancient Cruiser."""
+        game.replenishDiscTiles()
         choices = []
         is_nebula = game.gamestate["board"].get(tile, {}).get("type") == "nebula"
-        while game.gamestate["discTiles"] and len(choices) < 2:
+        while len(choices) < 2:
+            if not game.gamestate["discTiles"]:
+                excluded = ("mat", "cru", "orb", "mon") if is_nebula else ("mat", "cru")
+                if not any(disc not in excluded for disc in game.gamestate.get("discTilesDiscard", [])):
+                    break
+                game.replenishDiscTiles()
             disc = game.gamestate["discTiles"].pop()
             if is_nebula and disc in ("orb", "mon"):
                 game.gamestate["discTiles"].insert(0, disc)
@@ -23,6 +29,8 @@ class DiscoveryTileButtons:
                 continue
             if disc not in ("mat", "cru"):
                 choices.append(disc)
+            else:
+                game.discardDiscTile(disc)
         game.update()
         return choices
 
@@ -51,23 +59,26 @@ class DiscoveryTileButtons:
             await interaction.followup.send("No discovery tile in tile " + tile)
             return
         if player.get("name") == "Atlantians":
+            drawn = DiscoveryTileButtons.drawAtlantiansDiscoveryChoices(game, tile)
             # identical draws collapse to one choice
-            choices = list(dict.fromkeys(DiscoveryTileButtons.drawAtlantiansDiscoveryChoices(game, tile)))
+            choices = list(dict.fromkeys(drawn))
             if not choices:
                 await interaction.channel.send("No eligible discovery tiles remain in the deck.")
                 return
             game.gamestate["board"][tile]["disctile"] = 0
             game.update()
+            if len(drawn) > len(choices):
+                game.discardDiscTile(choices[0])
             if len(choices) > 1:
                 view = View()
                 with open("data/discoverytiles.json") as f:
                     discTile_data = json.load(f)
                 drawing = DrawHelper(game.gamestate)
                 files = []
-                for choice in choices:
+                for choice, other in [(choices[0], choices[1]), (choices[1], choices[0])]:
                     choice_data = discTile_data[choice]
                     view.add_item(Button(label=choice_data["name"], style=discord.ButtonStyle.green,
-                                         custom_id=f"FCID{player['color']}_selectDiscTile_{choice}_{tile}"))
+                                         custom_id=f"FCID{player['color']}_selectDiscTile_{choice}_{other}_{tile}"))
                     files.append(await asyncio.to_thread(drawing.show_disc_tile, choice_data["name"]))
                 await interaction.channel.send(
                     f"{player['player_name']} drew two discovery tiles. Choose one to resolve;"
@@ -85,7 +96,11 @@ class DiscoveryTileButtons:
 
     @staticmethod
     async def selectDiscTile(game: GamestateHelper, interaction: discord.Interaction, buttonID: str, player):
-        disc, tile = buttonID.split("_")[1:3]
+        parts = buttonID.split("_")
+        disc, tile = parts[1], parts[-1]
+        # Existing Discord prompts predate the unchosen tile in the button ID.
+        if len(parts) == 4:
+            game.discardDiscTile(parts[2])
         await interaction.message.edit(view=None)
         await DiscoveryTileButtons.sendDiscoveryTileOptions(game, tile, interaction, player, disc)
 
