@@ -157,7 +157,7 @@ class ButtonListener(commands.Cog):
             if not any(substring in customID for substring in ["showGame", "AtRatio", "gain5",
                                                                "showReputation", "rollDice", "magColShip",
                                                                "rerollDie", "readyForUpkeep", "draftFaction",
-                                                               "buildShip"]):
+                                                               "autoRollCombat", "buildShip"]):
                 await interaction.followup.send(f"{interaction.user.mention}, this button ({customID}) was pressed"
                                                 " most recently, and we are attempting to prevent an accidental"
                                                 " double press. Try hitting show reputation first and then hitting this"
@@ -391,6 +391,8 @@ class ButtonListener(commands.Cog):
             await game.endGame(interaction)
         elif customID.startswith("declareWinner"):
             await game.declareWinner(interaction)
+        elif customID.startswith("autoRollCombat"):
+            await Combat.autoRollCombat(game, customID, interaction, player)
         elif customID.startswith("rollDice"):
             await Combat.rollDice(game, customID, interaction)
         elif customID.startswith("rerollDie"):

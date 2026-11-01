@@ -14,6 +14,11 @@ from helpers.PlayerHelper import PlayerHelper
 from helpers.ShipHelper import AI_Ship, PlayerShip
 from jproperties import Properties
 
+# Combats whose initiative the bot is rolling itself, as (game_id, position).
+# In memory on purpose: a restart should hand the fight back to the players.
+AUTO_ROLLING: set[tuple[str, str]] = set()
+AUTO_ROLL_LIMIT = 200
+
 
 class Combat:
     @staticmethod
@@ -381,6 +386,17 @@ class Combat:
         return len(Combat.sideOf(tile.get("attacker"))) > 1 or len(Combat.sideOf(tile.get("defender"))) > 1
 
     @staticmethod
+    def autoRollAvailable(game: GamestateHelper, pos: str):
+        """Auto-roll is for a fight with the Ancients, a Guardian or the GCDS on
+        one side. A pairing that is player against player is left to the players."""
+        if Combat.isDracoAgainstAncients(game, pos):
+            return False
+        sides = Combat.currentPairing(game, pos)
+        if len(sides) != 2:
+            return False
+        return any("ai" in side for side in sides) and any(color != "ai" for side in sides for color in side)
+
+    @staticmethod
     def getCombatantTag(game: GamestateHelper, pos: str, colorOrAI: str):
         """Faction name and icon to add to one combatant's buttons, or empty
         strings when no Alliance is in the fight and the plain label suffices."""
@@ -581,6 +597,9 @@ class Combat:
                                             custom_id=f"{checker}rollDice_{pos}_{owner}_{str(speed)}_attacker"))
         view.add_item(Button(label="Refresh Image", style=discord.ButtonStyle.blurple, custom_id=f"refreshImage_{pos}"))
         view.add_item(Button(label="Remove Units", style=discord.ButtonStyle.gray, custom_id=f"removeUnits_{pos}"))
+        if Combat.autoRollAvailable(game, pos):
+            view.add_item(Button(label="Auto-Roll Combat", style=discord.ButtonStyle.blurple,
+                                 custom_id=f"autoRollCombat_{pos}"))
         if Combat.canResolveStalemate(game, pos) and attacker:
             for color in attacker:
                 checker = "" if color == "ai" else f"FCID{color}_"
@@ -627,6 +646,110 @@ class Combat:
         view = Combat.getRemovalButtons(game, pos, player)
         await interaction.message.edit(view=view)
         await Combat.checkCombatEnd(game, interaction, pos, oldLength)
+
+    @staticmethod
+    def describeSurvivors(game: GamestateHelper, pos: str):
+        counts = {}
+        for ship in game.gamestate["board"][pos].get("player_ships", []):
+            if "orb" in ship or "mon" in ship:
+                continue
+            owner, ship_type = ship.split("-", 1)
+            label = "The AI" if owner == "ai" else owner
+            name = Combat.translateShipAbrToName(ship_type)
+            counts[(label, name)] = counts.get((label, name), 0) + 1
+        if not counts:
+            return "no ships are left in the sector"
+        sides = {}
+        for (label, name), count in counts.items():
+            sides.setdefault(label, []).append(f"{count}x {name}")
+        return "; ".join(f"{label}: {', '.join(names)}" for label, names in sides.items())
+
+    @staticmethod
+    async def autoRollCombat(game: GamestateHelper, buttonID: str, interaction: discord.Interaction, player):
+        """Roll both sides of a fight against the AI until it ends, then report
+        the salvos fired and show the survivors.
+
+        Targets are picked the way the bot picks them for the AI; the bot never
+        retreats or spends colony ships. A decision it cannot make (Techno-Magic,
+        a Lyra reroll, a stalemate) pauses it so the players keep those choices.
+        """
+        pos = buttonID.split("_")[1]
+        channel = interaction.channel
+        pairing = Combat.currentPairing(game, pos)
+        combatants = [color for side in pairing for color in side]
+        if not Combat.autoRollAvailable(game, pos) or player["color"] not in combatants:
+            await channel.send("Auto-roll is only available to a combatant fighting the AI.")
+            return
+        if Combat.technoMagicPending(game, pos):
+            await channel.send("Finish your Techno-Magic upgrades before auto-rolling.")
+            return
+        tile = game.gamestate["board"][pos]
+        if (tile.get("unresolvedHits", 0) > 0 or tile.get("pendingRiftDice")
+                or any(tile.get("pendingRiftBackfire", {}).values())):
+            await channel.send("Resolve the pending hits and Rift Cannon effects before auto-rolling.")
+            return
+        key = (game.game_id, pos)
+        if key in AUTO_ROLLING:
+            await channel.send("Auto-roll is already running in this tile.")
+            return
+        AUTO_ROLLING.add(key)
+        shots = {"ai": 0, "players": 0}
+        try:
+            await channel.send("Auto-rolling both sides until the battle ends. The bot will not retreat"
+                               " or spend colony ships, and it picks targets the way it does for the AI.")
+            for _salvo in range(AUTO_ROLL_LIMIT):
+                sides = Combat.currentPairing(game, pos)
+                if len(sides) < 2:
+                    break
+                if not any("ai" in side for side in sides):
+                    await channel.send("Auto-roll stopped: the fight left is between players.")
+                    break
+                if Combat.technoMagicPending(game, pos):
+                    await channel.send("Auto-roll paused: finish the Techno-Magic upgrades,"
+                                       " then press Auto-Roll again.")
+                    break
+                if Combat.canResolveStalemate(game, pos):
+                    break
+                nextSpeed, nextOwner, wrapped = Combat.nextInitiative(game, pos)
+                if nextOwner is None:
+                    break
+                # A retreat is a player decision; hand the destination prompt back.
+                if [nextSpeed, nextOwner] in game.getRetreatingUnits(pos):
+                    break
+                if wrapped:
+                    tile = game.gamestate["board"][pos]
+                    await Combat.checkForMorphShield(game, pos, channel, tile["player_ships"][:],
+                                                     Combat.sideOf(tile["attacker"])
+                                                     + Combat.sideOf(tile["defender"]))
+                shots["ai" if nextOwner == "ai" else "players"] += 1
+                await Combat.rollDice(game, f"rollDice_{pos}_{nextOwner}_{nextSpeed}_deleteMsg",
+                                      interaction, auto=True)
+                tile = game.gamestate["board"][pos]
+                if (tile.get("unresolvedHits", 0) > 0 or tile.get("pendingRiftDice")
+                        or any(tile.get("pendingRiftBackfire", {}).values())):
+                    await channel.send("Auto-roll paused: a manual choice is needed here."
+                                       " Resolve it, then press Auto-Roll again.")
+                    break
+            else:
+                await channel.send(f"Auto-roll stopped after {AUTO_ROLL_LIMIT} salvos."
+                                   " Press Auto-Roll again to continue.")
+        finally:
+            AUTO_ROLLING.discard(key)
+
+        tile = game.gamestate["board"][pos]
+        if len(Combat.currentPairing(game, pos)) == 2:
+            # Stopped before the end: hand the normal prompt (retreat, stalemate) back.
+            if not (tile.get("unresolvedHits", 0) > 0 or tile.get("pendingRiftDice")
+                    or any(tile.get("pendingRiftBackfire", {}).values())):
+                await Combat.promptNextSpeed(game, pos, channel, False)
+            return
+        summary = (f"**Auto-Roll Summary — system {int(tile['sector'])}, position {pos}**\n"
+                   f"The AI fired {shots['ai']} salvo{'s' if shots['ai'] != 1 else ''};"
+                   f" the players fired {shots['players']} salvo{'s' if shots['players'] != 1 else ''}.\n"
+                   f"Remaining ships: {Combat.describeSurvivors(game, pos)}")
+        drawing = DrawHelper(game.gamestate)
+        file = await asyncio.to_thread(drawing.board_tile_image_file, pos)
+        await channel.send(summary, file=file)
 
     @staticmethod
     def getRiftBackfireAllocation(game: GamestateHelper, colorOrAI, player_ships, pos, totalDamage):
@@ -891,7 +1014,7 @@ class Combat:
                 await Combat.promptNextSpeed(game, pos, interaction.channel, update)
         await interaction.message.delete()
     @staticmethod
-    async def rollDice(game: GamestateHelper, buttonID: str, interaction: discord.Interaction):
+    async def rollDice(game: GamestateHelper, buttonID: str, interaction: discord.Interaction, auto: bool = False):
         pos = buttonID.split("_")[1]
         colorOrAI = buttonID.split("_")[2]
         speed = int(buttonID.split("_")[3])
@@ -980,7 +1103,14 @@ class Combat:
                     # await interaction.channel.send(msg,file=drawing.append_images(dieFiles))
                     await interaction.channel.send(msg + msg2)
                     oldNumPeeps = len(Combat.findPlayersInTile(game, pos))
-                    for die in dieNums:
+                    allocation = None
+                    if auto:
+                        # Pool this salvo the way the bot already allocates the AI's hits.
+                        dice_for_ai = [[6 if die[2] == "pink" and die[0] > 3 else die[0], die[1], die[2]]
+                                       for die in dieNums]
+                        allocation = Combat.getAIHitAllocation(game, colorOrAI, pos, speed,
+                                                              dice_for_ai, shipModel.computer)
+                    for die_index, die in enumerate(dieNums):
                         counter = counter + 1
                         tile_map = game.gamestate["board"]
                         player_ships = tile_map[pos]["player_ships"][:]
@@ -998,7 +1128,8 @@ class Combat:
                                            " cancelled by the shields on each of the opponents ships.")
                                 asyncio.create_task( interaction.channel.send(message))
                             if len(hittableShips) == 0 or oldNumPeeps > len(Combat.findPlayersInTile(game, pos)):
-                                if all([player is not None,
+                                if all([not auto,
+                                        player is not None,
                                         "Lyra" in game.gamestate["players"][player]["name"],
                                         game.gamestate["players"][player]["colony_ships"] > 0,
                                         oldNumPeeps == len(Combat.findPlayersInTile(game, pos))]):
@@ -1015,10 +1146,11 @@ class Combat:
                                     asyncio.create_task(interaction.channel.send(message, view=viewLyr))
                                 continue
                         else:
-                            if all([player is not None,
-                                        "Lyra" in game.gamestate["players"][player]["name"],
-                                        game.gamestate["players"][player]["colony_ships"] > 0,
-                                        oldNumPeeps == len(Combat.findPlayersInTile(game, pos))]):
+                            if all([not auto,
+                                    player is not None,
+                                    "Lyra" in game.gamestate["players"][player]["name"],
+                                    game.gamestate["players"][player]["colony_ships"] > 0,
+                                    oldNumPeeps == len(Combat.findPlayersInTile(game, pos))]):
                                     viewLyr = View()
                                     label = "Reroll Die"
                                     buttonID = (f"FCID{colorOrAI}_rerollDie_{pos}_{colorOrAI}"
@@ -1073,7 +1205,11 @@ class Combat:
                                 asyncio.create_task(interaction.channel.send(msg, view=view))
                             else:
                                 update = True
-                                if len(hittableShips) > 1:
+                                if auto:
+                                    ship = allocation[die_index]
+                                    if ship is None:
+                                        continue
+                                elif len(hittableShips) > 1:
                                     msg = (f"{interaction.user.mention}, choose what ship to hit"
                                            f" with the die that rolled a {dieNum}. You will deal {dieDam} damage. "
                                            "The bot has calculated that you can hit these ships.")
@@ -1089,12 +1225,13 @@ class Combat:
                                     if "unresolvedHits" in game.gamestate["board"][pos]:
                                         hitsToAssign = game.gamestate["board"][pos]["unresolvedHits"] + 1
                                     game.setUnresolvedHits(hitsToAssign, pos)
+                                    continue
                                 else:
                                     ship = hittableShips[0]
-                                    buttonID = f"assignHitTo_{pos}_{colorOrAI}_{ship}_{dieNum}_{dieDam}"
-                                    await Combat.assignHitTo(game, buttonID, interaction, False,
-                                                             deferEnd=dieColor == "pink")
-                                    deferredEnd = deferredEnd or dieColor == "pink"
+                                buttonID = f"assignHitTo_{pos}_{colorOrAI}_{ship}_{dieNum}_{dieDam}"
+                                await Combat.assignHitTo(game, buttonID, interaction, False,
+                                                         deferEnd=dieColor == "pink")
+                                deferredEnd = deferredEnd or dieColor == "pink"
                     if shipRiftBackfire > 0:
                         await Combat.applyRiftBackfire(game, colorOrAI, interaction, pos, shipRiftBackfire,
                                                        deferEnd=True)
@@ -1303,21 +1440,16 @@ class Combat:
         await Combat.promptNextSpeed(game, pos, channel, False, repeat=True)
 
     @staticmethod
-    async def promptNextSpeed(game: GamestateHelper, pos: str, channel, update: bool, repeat: bool = False):
-        if len(Combat.currentPairing(game, pos)) != 2:
-            return
-        if Combat.technoMagicPending(game, pos):
-            return
-        currentSpeed = None
-        if "currentSpeed" in game.gamestate["board"][pos]:
-            currentSpeed = game.gamestate["board"][pos]["currentSpeed"]
-        currentRoller = None
-        if "currentRoller" in game.gamestate["board"][pos]:
-            currentRoller = game.gamestate["board"][pos]["currentRoller"]
-        attacker = Combat.sideOf(game.gamestate["board"][pos]["attacker"])
-        defender = Combat.sideOf(game.gamestate["board"][pos]["defender"])
-        ships = game.gamestate["board"][pos]["player_ships"]
-        sortedSpeeds = Combat.getBothCombatantShipsBySpeed(game, defender, attacker, ships, pos)
+    def nextInitiative(game: GamestateHelper, pos: str, repeat: bool = False):
+        """(speed, owner) of the next salvo. (None, None) when nobody can roll.
+        Wrapping into a new round is reported so Morph Shields can repair."""
+        tile = game.gamestate["board"][pos]
+        currentSpeed = tile.get("currentSpeed")
+        currentRoller = tile.get("currentRoller")
+        attacker = Combat.sideOf(tile.get("attacker"))
+        defender = Combat.sideOf(tile.get("defender"))
+        sortedSpeeds = Combat.getBothCombatantShipsBySpeed(
+            game, defender, attacker, tile["player_ships"], pos)
 
         found = False
         nextSpeed = -20
@@ -1334,13 +1466,33 @@ class Combat:
                 break
             if speed == currentSpeed and currentRoller == owner:
                 found = True
-        if nextSpeed == -20:
-            await Combat.checkForMorphShield(game, pos, channel, ships, list(attacker) + list(defender))
+        wrapped = nextSpeed == -20
+        if wrapped:
             for speed, owner in sortedSpeeds:
                 if speed < 90:
                     nextSpeed = speed
                     nextOwner = owner
                     break
+        if not nextOwner:
+            return None, None, wrapped
+        return nextSpeed, nextOwner, wrapped
+
+    @staticmethod
+    async def promptNextSpeed(game: GamestateHelper, pos: str, channel, update: bool, repeat: bool = False):
+        if len(Combat.currentPairing(game, pos)) != 2:
+            return
+        if Combat.technoMagicPending(game, pos):
+            return
+        if (game.game_id, pos) in AUTO_ROLLING:
+            return
+        attacker = Combat.sideOf(game.gamestate["board"][pos]["attacker"])
+        defender = Combat.sideOf(game.gamestate["board"][pos]["defender"])
+        ships = game.gamestate["board"][pos]["player_ships"]
+        nextSpeed, nextOwner, wrapped = Combat.nextInitiative(game, pos, repeat)
+        if wrapped:
+            await Combat.checkForMorphShield(game, pos, channel, ships, list(attacker) + list(defender))
+        if nextOwner is None:
+            return
         view = View()
         checker = ""
         if update:
