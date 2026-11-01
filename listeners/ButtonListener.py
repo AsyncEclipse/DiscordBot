@@ -157,7 +157,7 @@ class ButtonListener(commands.Cog):
             if not any(substring in customID for substring in ["showGame", "AtRatio", "gain5",
                                                                "showReputation", "rollDice", "magColShip",
                                                                "rerollDie", "readyForUpkeep", "draftFaction",
-                                                               "buildShip"]):
+                                                               "autoRollCombat", "buildShip"]):
                 await interaction.followup.send(f"{interaction.user.mention}, this button ({customID}) was pressed"
                                                 " most recently, and we are attempting to prevent an accidental"
                                                 " double press. Try hitting show reputation first and then hitting this"
@@ -253,7 +253,7 @@ class ButtonListener(commands.Cog):
         elif customID.startswith("discardTile"):
             await ExploreButtons.discardTile(game, interaction, player, customID)
         elif customID.startswith("keepDiscForPoints"):
-            await DiscoveryTileButtons.keepDiscForPoints(game, player_helper, interaction)
+            await DiscoveryTileButtons.keepDiscForPoints(game, player_helper, interaction, customID)
         elif customID.startswith("exploreDiscoveryTile"):
             await DiscoveryTileButtons.exploreDiscoveryTile(game, customID.split("_")[1], interaction, player)
         elif customID.startswith("selectDiscTile"):
@@ -282,6 +282,9 @@ class ButtonListener(commands.Cog):
             await ResearchButtons.gain5resource(game, player, player_helper, interaction, customID)
         elif customID.startswith("gain3resource"):
             await ResearchButtons.gain3resource(game, player, player_helper, interaction, customID)
+            if len(customID.split("_")) > 2:
+                game.gamestate.get("pendingDiscoveryResolutions", {}).pop(customID.split("_")[2], None)
+                game.update()
         elif customID.startswith("startBuild"):
             if "2" not in customID:
                 game.updateSaveFile()
@@ -391,6 +394,8 @@ class ButtonListener(commands.Cog):
             await game.endGame(interaction)
         elif customID.startswith("declareWinner"):
             await game.declareWinner(interaction)
+        elif customID.startswith("autoRollCombat"):
+            await Combat.autoRollCombat(game, customID, interaction, player)
         elif customID.startswith("rollDice"):
             await Combat.rollDice(game, customID, interaction)
         elif customID.startswith("rerollDie"):
