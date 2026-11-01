@@ -58,11 +58,15 @@ class DiscoveryTileButtons:
         if game.gamestate["board"][tile]["disctile"] == 0:
             await interaction.followup.send("No discovery tile in tile " + tile)
             return
+        game.gamestate.get("discoveryOffers", {}).pop(tile, None)
         if player.get("name") == "Atlantians":
             drawn = DiscoveryTileButtons.drawAtlantiansDiscoveryChoices(game, tile)
             # identical draws collapse to one choice
             choices = list(dict.fromkeys(drawn))
             if not choices:
+                # shortcut: the claim is freed when no tiles remain, revisit if a dry deck should award something.
+                game.gamestate["board"][tile]["disctile"] = 0
+                game.update()
                 await interaction.channel.send("No eligible discovery tiles remain in the deck.")
                 return
             game.gamestate["board"][tile]["disctile"] = 0
@@ -70,6 +74,8 @@ class DiscoveryTileButtons:
             if len(drawn) > len(choices):
                 game.discardDiscTile(choices[0])
             if len(choices) > 1:
+                game.gamestate.setdefault("pendingDiscChoices", {})[tile] = choices
+                game.update()
                 view = View()
                 with open("data/discoverytiles.json") as f:
                     discTile_data = json.load(f)
@@ -95,12 +101,19 @@ class DiscoveryTileButtons:
         await DiscoveryTileButtons.sendDiscoveryTileOptions(game, tile, interaction, player, disc)
 
     @staticmethod
+    def pendingDiscChoices(game: GamestateHelper):
+        """Atlantians draws still waiting on the player to pick one of the two tiles."""
+        return list(game.gamestate.get("pendingDiscChoices", {}))
+
+    @staticmethod
     async def selectDiscTile(game: GamestateHelper, interaction: discord.Interaction, buttonID: str, player):
         parts = buttonID.split("_")
         disc, tile = parts[1], parts[-1]
         # Existing Discord prompts predate the unchosen tile in the button ID.
         if len(parts) == 4:
             game.discardDiscTile(parts[2])
+        game.gamestate.get("pendingDiscChoices", {}).pop(tile, None)
+        game.update()
         await interaction.message.edit(view=None)
         await DiscoveryTileButtons.sendDiscoveryTileOptions(game, tile, interaction, player, disc)
 

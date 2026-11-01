@@ -1754,32 +1754,48 @@ class Combat:
         return tile.get("disctile", 0) != 0 and "anc" not in Combat.findShipTypesInTile(game, pos)
 
     @staticmethod
+    def discoveryClaimant(game: GamestateHelper, pos: str):
+        """FAQ: the player who Controls the sector takes the claimable Discovery Tile;
+        with nobody in control the first player with a Ship there takes it (allies in
+        entry order). None when the tile has no eligible taker."""
+        tile = game.gamestate["board"].get(pos, {})
+        if not Combat.discoveryTileClaimable(game, pos):
+            return None
+        owner = tile.get("owner", 0)
+        if owner != 0 and owner != "ai":
+            return owner
+        players = [color for color in Combat.findPlayersInTile(game, pos) if color != "ai"]
+        if not players or len(Combat.findSidesInTile(game, pos)) > 1:
+            return None
+        entryOrder = game.getEntryOrder(pos)
+        players.sort(key=lambda color: entryOrder.index(color) if color in entryOrder else len(entryOrder))
+        return players[0]
+
+    @staticmethod
+    def pendingDiscoveryClaims(game: GamestateHelper):
+        """Claimable Discovery Tiles nobody has picked up yet: the round cannot end."""
+        return [pos for pos in game.gamestate["board"] if Combat.discoveryClaimant(game, pos) is not None]
+
+    @staticmethod
     async def offerDiscoveryTile(game: GamestateHelper, channel, pos: str, color: str):
+        offered = game.gamestate.setdefault("discoveryOffers", {})
+        if offered.get(pos) == color:
+            return
         player = game.getPlayerObjectFromColor(color)
         view = View()
         view.add_item(Button(label="Explore Discovery Tile", style=discord.ButtonStyle.green,
                              custom_id=f"FCID{color}_exploreDiscoveryTile_{pos}_deleteMsg"))
         await channel.send(f"{player['player_name']}, you may explore the discovery tile.", view=view)
+        offered[pos] = color
+        game.update()
 
     @staticmethod
     async def settleDiscoveryTiles(game: GamestateHelper, channel):
-        """FAQ: at the end of the Combat Phase the player who Controls the sector
-        takes a claimable Discovery Tile. With nobody in control, the first player
-        with a Ship there takes it (allies in entry order)."""
-        for pos, tile in game.gamestate["board"].items():
-            if not Combat.discoveryTileClaimable(game, pos):
-                continue
-            owner = tile.get("owner", 0)
-            if owner != 0 and owner != "ai":
-                color = owner
-            else:
-                players = [color for color in Combat.findPlayersInTile(game, pos) if color != "ai"]
-                if not players or len(Combat.findSidesInTile(game, pos)) > 1:
-                    continue
-                entryOrder = game.getEntryOrder(pos)
-                players.sort(key=lambda color: entryOrder.index(color) if color in entryOrder else len(entryOrder))
-                color = players[0]
-            await Combat.offerDiscoveryTile(game, channel, pos, color)
+        """Offer every claimable Discovery Tile to the player the FAQ gives it to."""
+        for pos in game.gamestate["board"]:
+            color = Combat.discoveryClaimant(game, pos)
+            if color is not None:
+                await Combat.offerDiscoveryTile(game, channel, pos, color)
 
     @staticmethod
     async def declareAWinner(game: GamestateHelper, interaction: discord.Interaction, pos: str):

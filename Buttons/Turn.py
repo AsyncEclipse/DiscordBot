@@ -259,6 +259,7 @@ class TurnButtons:
     @staticmethod
     async def runUpkeep(game: GamestateHelper, interaction: discord.Interaction):
         from helpers.CombatHelper import Combat
+        from Buttons.DiscoveryTile import DiscoveryTileButtons
         # Upkeep clears every pass, so this stops a stale or queued second press from running another round.
         if not game.is_everyone_passed():
             await interaction.channel.send("Not everyone has passed, so upkeep has already run or can't run yet.")
@@ -309,12 +310,23 @@ class TurnButtons:
                            " can be run without the player entering negative money")
                 await interaction.channel.send(message, view=view)
                 return
+        # The Combat Phase ends here, so no Discovery Tile answer may wait for the next round's tech draw.
+        await Combat.settleDiscoveryTiles(game, interaction.channel)
+        claims = Combat.pendingDiscoveryClaims(game)
+        choices = DiscoveryTileButtons.pendingDiscChoices(game)
+        if claims or choices:
+            msg = " Discovery tiles still have to be claimed or chosen before upkeep can run:\n"
+            for pos in claims:
+                color = Combat.discoveryClaimant(game, pos)
+                msg += f"Tile {pos}: {game.getPlayerObjectFromColor(color)['player_name']}\n"
+            for pos in choices:
+                msg += f"Tile {pos}: the Atlantians still have to choose between the two tiles they drew\n"
+            await interaction.channel.send(msg)
+            return
         if "actions" in interaction.channel.name:
             for thread in interaction.channel.threads:
                 if "Round" in thread.name:
                     asyncio.create_task(thread.edit(archived=True))
-        # The Combat Phase ends here: hand out any Discovery Tiles still claimable.
-        await Combat.settleDiscoveryTiles(game, interaction.channel)
         await game.upkeep(interaction)
         drawing = DrawHelper(game.gamestate)
         game.saveEndRound()
