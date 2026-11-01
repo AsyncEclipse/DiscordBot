@@ -155,8 +155,10 @@ def test_harvester_placement_stores_the_planet_and_produces_at_upkeep(start_game
         player["passed"] = True
     game.update()
     press(channel, 1, "runUpkeep")
-    assert any(cid == "FCIDblue_harvesterSector_201" for cid in buttons(channel))
-    press(channel, 1, "FCIDblue_harvesterSector_201")
+    offered = {button.custom_id for _content, kwargs in channel.sent
+               for button in getattr(kwargs.get("view"), "children", [])}
+    assert "FCIDblue_harvesterSector_201" not in offered
+    assert "FCIDblue_placeHarvester_201_scienceadv_0_science" in offered
     press(channel, 1, "FCIDblue_placeHarvester_201_scienceadv_0_science")
 
     state = reload(game)
@@ -181,7 +183,6 @@ def test_harvester_blocks_settling_its_planet(start_game, press):
     game = reload(game)  # the press wrote its upkeep state to disk; edit that copy
     game.get_player(1)["nano_tech"].append("adl")
     game.update()
-    press(channel, 1, "FCIDblue_harvesterSector_201")
     press(channel, 1, "FCIDblue_placeHarvester_201_scienceadv_0_science")
     state = reload(game)
     assert "201_scienceadv_0" not in PopulationButtons.findEmptyPopulation(state, state.get_player(1))
@@ -230,6 +231,22 @@ def test_a_grey_planet_asks_for_the_resource(make_game, run):
     handler_id = choice.replace("FCIDblue_", "")
     run(HarvesterButtons.placeResource(game, player, FakeInteraction(channel, custom_id=handler_id), handler_id))
     assert reload(game).get_player(1)["harvester_placements"][0]["resource"] == "material"
+
+
+def test_a_lone_harvester_placement_is_resolved_without_a_prompt(make_game, run):
+    stats = player_stats("tur", color="blue")
+    stats["harvester_upkeep_started_round"] = 0  # this test skips upkeep, so its allocation is current
+    game = make_game({"players": {"1": stats},
+                      "board": {"202": dict(board_tile(["blue-sb"], sector=202)["202"],
+                                            money_pop=[0])}})
+    channel = FakeChannel("t-actions")
+    run(HarvesterButtons.startPlace(game, game.get_player(1), FakeInteraction(channel)))
+
+    assert all(kwargs.get("view") is None for _content, kwargs in channel.sent)
+    player = reload(game).get_player(1)
+    assert player["harvester_placements"] == [
+        {"position": "202", "square": "money", "index": 0, "resource": "money"}]
+    assert player["harvester_upkeep_allocated_round"] == 0
 
 
 def test_harvester_can_replace_its_drive_with_another_drive(start_game, press):
