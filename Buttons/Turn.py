@@ -314,13 +314,16 @@ class TurnButtons:
         await Combat.settleDiscoveryTiles(game, interaction.channel)
         claims = Combat.pendingDiscoveryClaims(game)
         choices = DiscoveryTileButtons.pendingDiscChoices(game)
-        if claims or choices:
+        resolutions = game.gamestate.get("pendingDiscoveryResolutions", {})
+        if claims or choices or resolutions:
             msg = " Discovery tiles still have to be claimed or chosen before upkeep can run:\n"
             for pos in claims:
                 color = Combat.discoveryClaimant(game, pos)
                 msg += f"Tile {pos}: {game.getPlayerObjectFromColor(color)['player_name']}\n"
             for pos in choices:
                 msg += f"Tile {pos}: the Atlantians still have to choose between the two tiles they drew\n"
+            for pos, color in resolutions.items():
+                msg += f"Tile {pos}: {game.getPlayerObjectFromColor(color)['player_name']} must resolve the discovery tile\n"
             await interaction.channel.send(msg)
             return
         if "actions" in interaction.channel.name:

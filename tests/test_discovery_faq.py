@@ -170,7 +170,7 @@ class TestUpkeepWaitsForDiscoveryTiles:
         assert "Tile 101: blue" in inter.channel.sent[-1][0]
         assert ran == []
 
-    def test_upkeep_runs_once_the_tile_is_taken(self, make_game, run, monkeypatch):
+    def test_upkeep_waits_for_the_drawn_tile_to_be_resolved(self, make_game, run, monkeypatch):
         game = _game(make_game, ("blue", "red"), [], owner="blue", extra={"disctile": 1})
         game.gamestate["roundNum"] = 9
         blue = game.getPlayerObjectFromColor("blue")
@@ -180,7 +180,7 @@ class TestUpkeepWaitsForDiscoveryTiles:
         run(DiscoveryTileButtons.exploreDiscoveryTile(game, POS, inter, blue))
         run(TurnButtons.runUpkeep(game, inter))
 
-        assert ran == [True]
+        assert ran == []
 
     def test_an_unpicked_atlantians_draw_blocks_upkeep(self, make_game, run, monkeypatch):
         game = _game(make_game, ("blue", "red"), [], owner="blue", extra={"disctile": 1},
@@ -200,4 +200,4 @@ class TestUpkeepWaitsForDiscoveryTiles:
         run(DiscoveryTileButtons.selectDiscTile(game, inter, "selectDiscTile_som_jud_101", blue))
         run(TurnButtons.runUpkeep(game, inter))
 
-        assert ran == [True]
+        assert ran == []

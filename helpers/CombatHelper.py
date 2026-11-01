@@ -670,8 +670,8 @@ class Combat:
         the salvos fired and show the survivors.
 
         Targets are picked the way the bot picks them for the AI; the bot never
-        retreats or spends colony ships. A decision it cannot make (Techno-Magic,
-        a Lyra reroll, a stalemate) pauses it so the players keep those choices.
+        retreats or spends colony ships. Lyra players must roll manually to use
+        rerolls. Techno-Magic upgrades and stalemates pause auto-roll.
         """
         pos = buttonID.split("_")[1]
         channel = interaction.channel
@@ -696,7 +696,8 @@ class Combat:
         shots = {"ai": 0, "players": 0}
         try:
             await channel.send("Auto-rolling both sides until the battle ends. The bot will not retreat"
-                               " or spend colony ships, and it picks targets the way it does for the AI.")
+                               " or spend colony ships, and it picks targets the way it does for the AI."
+                               " Lyra players must roll manually to use rerolls.")
             for _salvo in range(AUTO_ROLL_LIMIT):
                 sides = Combat.currentPairing(game, pos)
                 if len(sides) < 2:

@@ -253,7 +253,7 @@ class ButtonListener(commands.Cog):
         elif customID.startswith("discardTile"):
             await ExploreButtons.discardTile(game, interaction, player, customID)
         elif customID.startswith("keepDiscForPoints"):
-            await DiscoveryTileButtons.keepDiscForPoints(game, player_helper, interaction)
+            await DiscoveryTileButtons.keepDiscForPoints(game, player_helper, interaction, customID)
         elif customID.startswith("exploreDiscoveryTile"):
             await DiscoveryTileButtons.exploreDiscoveryTile(game, customID.split("_")[1], interaction, player)
         elif customID.startswith("selectDiscTile"):
@@ -282,6 +282,9 @@ class ButtonListener(commands.Cog):
             await ResearchButtons.gain5resource(game, player, player_helper, interaction, customID)
         elif customID.startswith("gain3resource"):
             await ResearchButtons.gain3resource(game, player, player_helper, interaction, customID)
+            if len(customID.split("_")) > 2:
+                game.gamestate.get("pendingDiscoveryResolutions", {}).pop(customID.split("_")[2], None)
+                game.update()
         elif customID.startswith("startBuild"):
             if "2" not in customID:
                 game.updateSaveFile()
