@@ -198,6 +198,17 @@ class PlayerHelper:
         if f"old_{ship}_parts" not in self.stats:
             self.stats[f"old_{ship}_parts"] = self.stats[f"{ship}_parts"]
 
+    @staticmethod
+    def sync_blueprint_slots(player):
+        """A faction's blueprint can gain a slot after a game starts; pad the save to what it prints now."""
+        printed = FactionData.BY_NAME.get(player.get("name"), {})
+        for ship in ("interceptor", "cruiser", "dread", "starbase", "orb"):
+            slots = len(printed.get(f"{ship}_parts", []))
+            for key in (f"{ship}_parts", f"old_{ship}_parts"):
+                parts = player.get(key)
+                if parts is not None and len(parts) < slots:
+                    parts.extend(["empty"] * (slots - len(parts)))
+
     def getAvailableShipParts(self):
         with open("data/parts.json", "r") as f:
             part_stats = json.load(f)

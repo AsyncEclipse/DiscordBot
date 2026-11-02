@@ -231,7 +231,10 @@ class GamestateHelper:
 
     def get_gamestate(self):
         with open(f"{config.gamestate_path}/{self.game_id}.json", "r") as f:
-            return json.load(f)
+            gamestate = json.load(f)
+        for player in gamestate.get("players", {}).values():
+            PlayerHelper.sync_blueprint_slots(player)
+        return gamestate
 
     def saveEndRound(self):
         output_dir = f'GameHistory/{self.game_id}'
