@@ -8,6 +8,7 @@ from Buttons.Research import ResearchButtons
 from helpers import FactionData
 from helpers.CombatHelper import Combat
 from helpers.DrawHelper import DrawHelper
+from helpers.PlayerHelper import PlayerHelper
 from tests.fakes import FakeInteraction, POS, player_stats
 
 
@@ -65,6 +66,15 @@ def test_rho_pays_two_resources_for_one_money_trade(run):
         run(BuildButtons.convertResource(None, player_stats(faction, color="blue", money=6), interaction,
                                          "convertResource_none_4_201_4_0_6_0_Money"))
         assert f"Resources spent: {expected}" in interaction.message.edited["content"]
+
+
+def test_rho_has_two_ambassador_slots_and_three_reputation_only_slots():
+    rho = FactionData.FACTIONS["rho"]
+    assert rho["reputation_track"] == ["mixed", "mixed", "rep", "rep", "rep"]
+    assert rho["reputation_only_slots"] == [2, 3, 4]
+    player = player_stats("rho")
+    assert [PlayerHelper.is_reputation_only_slot(player, index) for index in range(5)] == \
+        [False, False, True, True, True]
 
 
 def test_starting_ships_come_from_the_faction_data(make_game):

@@ -2128,6 +2128,11 @@
                 "abilities": [
                         "no_traitor_vp_penalty"
                 ],
+                "reputation_only_slots": [
+                        2,
+                        3,
+                        4
+                ],
                 "starting_ships": [
                         "int",
                         "int"
@@ -2209,9 +2214,9 @@
                 "reputation_track": [
                         "mixed",
                         "mixed",
-                        "mixed",
-                        "mixed",
-                        "mixed"
+                        "rep",
+                        "rep",
+                        "rep"
                 ],
                 "cost_orbital": 4,
                 "cost_monolith": 10,
