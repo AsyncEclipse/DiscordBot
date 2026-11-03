@@ -1176,6 +1176,7 @@ class Combat:
                 dieNums = []
                 msg2 = "\n"
                 shipRiftBackfire = 0
+                shielded = Carapace.engaged(game, pos, colorOrAI, shipModel.ship_type)
                 for x in range(ship[2]):
                     for die_index, die in enumerate(dice):
                         source = sources[die_index] if die_index < len(sources) else None
@@ -1208,6 +1209,10 @@ class Combat:
                             split = True
                         base_damage = Combat.translateColorToDamage(die, random_number)
                         total_damage = base_damage + damage_bonus
+                        if shielded:
+                            # Shields dock each rolled die by one before it can be split.
+                            total_damage = Carapace.weapon_damage(game, pos, colorOrAI,
+                                                                  shipModel.ship_type, total_damage)
                         if not split:
                             dieNums.append([random_number, total_damage, die, source, roll_id, total_damage])
                         else:
@@ -1215,12 +1220,6 @@ class Combat:
                                 dieNums.append([random_number, 1, die, source, roll_id, total_damage])
                 if computerVal > 0:
                     msg += f"\nThis ship type has a +{computerVal} computer."
-
-                shielded = Carapace.engaged(game, pos, colorOrAI, shipModel.ship_type)
-                if shielded:
-                    for die in dieNums:
-                        die[1] = Carapace.weapon_damage(game, pos, colorOrAI,
-                                                        shipModel.ship_type, die[1])
 
                 if len(dice) > 0:
                     # await interaction.channel.send(msg,file=drawing.append_images(dieFiles))

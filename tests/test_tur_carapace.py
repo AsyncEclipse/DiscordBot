@@ -82,6 +82,30 @@ def test_two_damage_weapon_becomes_one(make_game, run, no_random):
     assert reload(game).gamestate["board"]["202"]["damage_tracker"]["red-cru"] == 1
 
 
+def test_one_damage_dice_are_reduced_one_by_one_not_pooled(make_game, run, no_random):
+    game = combat_game(make_game, tur_parts=["iot", "nud"])  # two ion dice, 1 damage each
+    engage(game, "interceptor")
+    ch = channel()
+    no_random([6, 6])
+    inter = FakeInteraction(ch, custom_id="rollDice_202_teal_1_attacker")
+    run(Combat.rollDice(game, inter.data["custom_id"], inter))
+    assert reload(game).gamestate["board"]["202"]["damage_tracker"]["red-cru"] == 0
+
+
+def test_antimatter_die_is_reduced_before_it_splits(make_game, run, no_random):
+    game = combat_game(make_game, tur_parts=["anc", "nud"], red_ships=("red-drd",))
+    game.gamestate["players"]["1"]["military_tech"] = ["ans"]  # Antimatter Split
+    game.gamestate["players"]["2"]["dread_parts"] = ["hul", "hul", "hul", "hul"]  # survives 3 hits
+    game.update()
+    engage(game, "interceptor")
+    ch = channel()
+    no_random([6])
+    inter = FakeInteraction(ch, custom_id="rollDice_202_teal_1_attacker")
+    run(Combat.rollDice(game, inter.data["custom_id"], inter))
+    # the 4 damage die becomes 3, then splits into three 1 damage hits
+    assert reload(game).gamestate["board"]["202"]["damage_tracker"]["red-drd"] == 3
+
+
 def test_unengaged_class_keeps_its_damage(make_game, run, no_random):
     game = combat_game(make_game, tur_parts=["plc", "nus", "nud"], red_ships=("red-drd",))
     engage(game, "cruiser")
