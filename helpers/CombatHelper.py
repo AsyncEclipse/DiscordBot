@@ -219,6 +219,15 @@ class Combat:
                                        f" {bomb_ship.capitalize()} (2 blueprint Power).")
         await InfluenceButtons.removeInfluenceFinish(
             game, interaction, f"removeInfluenceFinish_{pos}_graveYard", True, player)
+        message = (f"{player['player_name']}, you may place your influence on the tile"
+                   " now that you have destroyed all the enemy population.")
+        await InfluenceButtons.offerInfluenceDisc(game, interaction.channel, pos, [player["color"]], message)
+        view = View()
+        view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray,
+                             custom_id=f"FCID{player['color']}_startPopDrop"))
+        message = (f"{player['player_name']}, if you have enough colony ships, "
+                   "you may use this to drop population after taking control of the sector.")
+        await interaction.channel.send(message, view=view)
 
     @staticmethod
     def phase_declared_planets(game: GamestateHelper, color: str, pos: str):
