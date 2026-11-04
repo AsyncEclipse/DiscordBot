@@ -2235,6 +2235,20 @@ class Combat:
         return content, view
 
     @staticmethod
+    def phase_declaration_summary(game: GamestateHelper, color: str, pos: str):
+        """The options one player declared for each blueprint, for the whole table to read."""
+        modes = game.gamestate["board"].get(pos, {}).get("phaseModes", {}).get(color, {})
+        if not modes:
+            return "No options were declared, so only the Cloaking Device applies."
+        declared = "; ".join(
+            f"{ship_type.capitalize()}: "
+            + ", ".join(label for option, (label, _cost) in Combat.PHASE_OPTIONS.items()
+                        if mode.get(option))
+            + f" ({mode.get('cost', 0)} power)"
+            for ship_type, mode in modes.items())
+        return f"{declared}. Cloaking Device is always on."
+
+    @staticmethod
     async def offerPhaseModule(game: GamestateHelper, channel, pos: str):
         """Phase Module: declare each blueprint's options before initiative is prompted."""
         tile = game.gamestate["board"][pos]
@@ -2355,8 +2369,10 @@ class Combat:
             return
         ready[color] = True
         game.update()
-        await interaction.message.edit(content=f"{player['player_name']} has finished declaring Phase Module options.",
-                                       view=None)
+        await interaction.message.edit(
+            content=(f"{player['player_name']} has finished declaring Phase Module options. "
+                     f"{Combat.phase_declaration_summary(game, color, pos)}"),
+            view=None)
         if (all(ready.get(color2) for color2 in colors)
                 and not tile.get("phaseModulePrompted")):
             tile["phaseModulePrompted"] = True
