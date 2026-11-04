@@ -1186,7 +1186,7 @@ class Combat:
                         roll_id += 1
                         random_number = random.randint(1, 6)
                         if random_number == 6:
-                            wolf_sixes[rollerType] = wolf_sixes.get(rollerType, 0) + 1
+                            wolf_sixes.setdefault(rollerType, []).append(die)
                         num = str(random_number).replace("1", "Miss").replace("6", ":boom:")
                         emojiName = f"dice_{Combat.translateColorToName(die)}_{random_number}"
                         matching_emojis = ([Emoji._app[emojiName]] if emojiName in Emoji._app
@@ -1413,11 +1413,13 @@ class Combat:
             return
         color = state["color"]
         player = game.getPlayerObjectFromColor(color)
-        sixes = sum(state["sixes"].values())
+        sixes = sum(len(colors) for colors in state["sixes"].values())
         if sixes > 0:
+            faces = " ".join(Combat.die_face(interaction, dieColor, 6)
+                             for colors in state["sixes"].values() for dieColor in colors)
             view = View()
             for index, miss in enumerate(state["misses"]):
-                if miss[3] != "pink" and state["sixes"].get(miss[0], 0) > 0:
+                if miss[3] != "pink" and state["sixes"].get(miss[0]):
                     view.add_item(Button(
                         label=f"Convert a {Combat.translateShipAbrToName(miss[0])} miss ({miss[2]} damage)",
                         style=discord.ButtonStyle.green,
@@ -1427,7 +1429,8 @@ class Combat:
             view.add_item(Button(label="Done", style=discord.ButtonStyle.gray,
                                  custom_id=f"FCID{color}_wolfPackDone_{pos}"))
             await interaction.channel.send(
-                f"{player['player_name']}, Wolf Pack: {sixes} six{'es' if sixes != 1 else ''}. "
+                f"{player['player_name']}, Wolf Pack: {sixes} six{'es' if sixes != 1 else ''}"
+                f" ({faces}). "
                 "Convert a miss from the same attack pool into a guaranteed hit (it counts as a 6),"
                 " or save a reroll for a later ship.",
                 view=view)
@@ -1512,9 +1515,9 @@ class Combat:
             index = int(parts[2])
             miss = state["misses"][index]
             pool = miss[0]
-            if state["sixes"].get(pool, 0) <= 0:
+            if not state["sixes"].get(pool):
                 return
-            state["sixes"][pool] -= 1
+            state["sixes"][pool].pop()
             state["misses"].pop(index)
             save()
             await interaction.channel.send(
@@ -1523,14 +1526,14 @@ class Combat:
                 f" {Combat.die_face(interaction, miss[3], 6)}, so it hits.")
             await targets_for(6, 0, miss[2], miss[3], miss[5], miss[6], miss[7])
         elif kind == "wolfPackSave":
-            pool = next(pool for pool, count in state["sixes"].items() if count > 0)
-            state["sixes"][pool] -= 1
+            pool = next(pool for pool, colors in state["sixes"].items() if colors)
+            state["sixes"][pool].pop()
             banks = tile.setdefault("wolfPackRerolls", {})
             banks[color] = banks.get(color, 0) + 1
             save()
             await Combat.wolfPackPrompt(game, pos, interaction)
         elif kind == "wolfPackDone":
-            state["sixes"] = {pool: 0 for pool in state["sixes"]}
+            state["sixes"] = {pool: [] for pool in state["sixes"]}
             save()
             await Combat.wolfPackPrompt(game, pos, interaction)
         elif kind == "wolfPackReroll":
@@ -1543,7 +1546,7 @@ class Combat:
             banks[color] = max(0, banks.get(color, 0) - 1)
             roll = random.randint(1, 6)
             if roll == 6:
-                state["sixes"][miss[0]] = state["sixes"].get(miss[0], 0) + 1
+                state["sixes"].setdefault(miss[0], []).append(miss[3])
             damage = Combat.translateColorToDamage(miss[3], roll) + miss[7]
             save()
             await interaction.channel.send(
