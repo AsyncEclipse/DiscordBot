@@ -1228,6 +1228,9 @@ class Combat:
                     # await interaction.channel.send(msg,file=drawing.append_images(dieFiles))
                     await interaction.channel.send(msg + msg2)
                     oldNumPeeps = len(Combat.findPlayersInTile(game, pos))
+                    # A rift die defers the salvo's combat-end check, so every hit in
+                    # the same salvo must defer too or the kill is declared twice.
+                    salvo_defer = is_wolf or any(die[2] == "pink" for die in dieNums)
                     for die in dieNums:
                         counter = counter + 1
                         tile_map = game.gamestate["board"]
@@ -1344,8 +1347,8 @@ class Combat:
                                 update = True
                                 await Combat.offerHitPrompt(game, interaction, pos, colorOrAI, hittableShips,
                                                             dieNum, dieDam, counter=counter,
-                                                            deferEnd=dieColor == "pink" or is_wolf, reports=reports)
-                                deferredEnd = deferredEnd or dieColor == "pink" or is_wolf
+                                                            deferEnd=salvo_defer, reports=reports)
+                                deferredEnd = deferredEnd or salvo_defer
                     await Combat.sendCombatReports(interaction.channel, reports)
                     if shipRiftBackfire > 0:
                         await Combat.applyRiftBackfire(game, colorOrAI, interaction, pos, shipRiftBackfire,
