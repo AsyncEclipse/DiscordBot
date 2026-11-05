@@ -972,9 +972,10 @@ class Combat:
                         emojiName = f"dice_{Combat.translateColorToName(die)}_{random_number}"
                         matching_emojis = ([Emoji._app[emojiName]] if emojiName in Emoji._app
                                            else [e for e in interaction.guild.emojis if e.name == emojiName])
-                        msg += str(num) + " "
                         if len(matching_emojis) > 0:
                             msg2 += str(matching_emojis[0]) + " "
+                        else:
+                            msg += str(num) + " "
                         dieNums.append([random_number, Combat.translateColorToDamage(die, random_number), die])
                 if shipModel.computer > 0:
                     msg += f"\nThis ship type has a +{shipModel.computer} computer."
@@ -1137,7 +1138,7 @@ class Combat:
         counter = 0
         for ship in ships:
             if ship[0] == speed or speed == (ship[0]+99) or speed == 1000:
-                name = interaction.user.mention
+                name = game.getPlayerObjectFromColor(colorOrAI)["player_name"]
                 player = game.get_player_from_color(colorOrAI)
                 rollerType = ship[1]
                 shipModel = PlayerShip(game.gamestate["players"][player], rollerType)
@@ -1191,9 +1192,10 @@ class Combat:
                         emojiName = f"dice_{Combat.translateColorToName(die)}_{random_number}"
                         matching_emojis = ([Emoji._app[emojiName]] if emojiName in Emoji._app
                                            else [e for e in interaction.guild.emojis if e.name == emojiName])
-                        msg += str(num) + " "
                         if len(matching_emojis) > 0:
                             msg2 += str(matching_emojis[0]) + " "
+                        else:
+                            msg += str(num) + " "
                         # dieFiles.append(drawing.use_image("images/resources/components/dice_faces/dice_" +
                         #                                   Combat.translateColorToName(die) +
                         #                                   "_" + str(random_number) + ".png"))
@@ -1614,9 +1616,10 @@ class Combat:
             emojiName = f"dice_{Combat.translateColorToName(die)}_{random_number}"
             matching_emojis = ([Emoji._app[emojiName]] if emojiName in Emoji._app
                                else [e for e in interaction.guild.emojis if e.name == emojiName])
-            msg += str(num) + " "
             if len(matching_emojis) > 0:
                 msg2 += str(matching_emojis[0]) + " "
+            else:
+                msg += str(num) + " "
             dieNums.append([random_number, Combat.translateColorToDamage(die, random_number), die])
 
         if computerVal > 0:
