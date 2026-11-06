@@ -1480,8 +1480,7 @@ class DrawHelper:
                 chips.append(f"+{player[f'base_{ship_key}_comp']} CMP")
             if player.get(f"base_{ship_key}_hull", 0):
                 chips.append(f"+{player[f'base_{ship_key}_hull']} HULL")
-            standard_power = 3 if ship == "sb" else 0
-            if player.get(f"base_{ship_key}_nrg", 0) > standard_power:
+            if player.get(f"base_{ship_key}_nrg", 0):
                 chips.append(f"{player[f'base_{ship_key}_nrg']} PWR")
             origin_x = 2250 + 550 * index + (161 if ship == "sb" else 0) + 16
             for chip_index, chip in enumerate(chips):

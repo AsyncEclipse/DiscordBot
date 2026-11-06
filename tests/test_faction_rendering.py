@@ -159,6 +159,8 @@ def test_faction_rendering(start_game, monkeypatch, faction):
         texts = {text for text, _bounds in player_labels}
         assert "+1 CMP" in texts
         assert "+1 HULL" in texts
+    if faction == "kur":
+        assert "3 PWR" in {text for text, _bounds in player_labels}
     if faction == "wul":
         assert not any(path.endswith("/blueprint_interceptor.png") for path in loaded)
         home_sector = game.gamestate["board"]["201"]["sector"]
