@@ -19,3 +19,28 @@ def test_pass_then_next_player_gets_turn(start_game, press):
     red = reload(game).get_player(P2)
     assert red["passed"]
     assert red["money"] == red_money
+
+
+def test_a_build_action_can_end_without_building_anything(start_game, press):
+    game, channel = start_game(factions=["hyd", "eri"])
+    press(channel, P1, "FCIDblue_startBuild")
+    press(channel, P1, "FCIDblue_buildIn_201")
+
+    assert "FCIDblue_finishAction" in buttons(channel)
+    press(channel, P1, "FCIDblue_finishAction")
+
+    assert "FCIDblue_endTurn" in buttons(channel)
+
+
+def test_put_down_population_can_be_declined(start_game, run):
+    from Buttons.Population import PopulationButtons
+    from tests.fakes import FakeInteraction
+
+    game, channel = start_game(factions=["hyd", "eri"])
+    player = game.get_player(P1)
+    run(PopulationButtons.startPopDrop(game, player, FakeInteraction(channel)))
+    assert any(cid.endswith("_declinePopDrop") for cid in buttons(channel))
+
+    message = channel.message_with("FCIDblue_declinePopDrop")
+    run(PopulationButtons.declinePopDrop(game, player, FakeInteraction(channel, message=message)))
+    assert message.id in channel.deleted

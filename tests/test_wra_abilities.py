@@ -743,3 +743,23 @@ def test_upgrade_uses_permanent_soul_power(start_game, run, souls, is_valid):
         assert ship.total_energy == souls
     else:
         assert "not valid" in interaction.followup.sent[0][0]
+
+
+def test_neutron_bombs_and_initiative_share_one_two_power_purchase(make_game, run):
+    game = phase_combat(make_game)
+    player = game.get_player(1)
+    player["military_tech"] = ["phm", "neb"]
+    player["base_interceptor_nrg"] += 2  # three power available
+    game.update()
+    channel = FakeInteraction().channel
+    message = offer_phase(game, channel)
+
+    assert any("Ignore Shields (3)" in content for content, _kwargs in channel.sent)
+    for option in ("speed", "planets"):
+        inter = FakeInteraction(channel, message=message)
+        run(Combat.phaseModuleOption(game, f"phaseModuleOption_101_blue_interceptor_{option}", inter))
+        assert not inter.followup.sent
+
+    mode = Combat.phase_mode(game, "blue", "101", "interceptor")
+    assert mode["speed"] and mode["planets"]
+    assert mode["cost"] == 2

@@ -68,7 +68,8 @@ class PlayerShip(Ship):
         if FactionData.has(player, "soul_hunters"):
             self.energy += player.get("wraithSouls", 0)
         self.total_energy = self.energy
-        self.computer = player[f"base_{self.ship_type}_comp"]
+        self.base_computer = player[f"base_{self.ship_type}_comp"]
+        self.computer = self.base_computer
 
         # added for Outcast factions
         try:

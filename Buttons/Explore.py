@@ -167,12 +167,16 @@ class ExploreButtons:
 
     @staticmethod
     async def showExploredTile(game: GamestateHelper, player, interaction: discord.Interaction,
-                               position: str, tileID: str):
+                               position: str, tileID: str, source: str = "deck"):
         drawing = DrawHelper(game.gamestate)
         view = View()
         image = await asyncio.to_thread(drawing.base_tile_image, tileID)
         file2 = await asyncio.to_thread(drawing.show_single_tile, image)
-        await interaction.channel.send(f"Tile explored in position {position}: Tile {tileID}.", file=file2)
+        message = f"Tile explored in position {position}: Tile {tileID}."
+        if source == "reserve":
+            message += (" Drawn from the Deep Space Explorers reserve"
+                        f" ({len(player.get('deep_space_sectors', []))} left).")
+        await interaction.channel.send(message, file=file2)
         playerTiles = ExploreButtons.getListOfTilesPlayerIsIn(game, player)
         view, file = await asyncio.to_thread(drawing.draw_possible_oritentations, tileID, position,
                                              playerTiles, view, player)
@@ -203,7 +207,7 @@ class ExploreButtons:
         if error == "missing":
             await interaction.followup.send("That sector is no longer in your Deep Space reserve.", ephemeral=True)
             return
-        await ExploreButtons.showExploredTile(game, player, interaction, position, tileID)
+        await ExploreButtons.showExploredTile(game, player, interaction, position, tileID, source="reserve")
         await interaction.message.delete()
 
     @staticmethod

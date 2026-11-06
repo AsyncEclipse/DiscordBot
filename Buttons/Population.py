@@ -89,6 +89,8 @@ class PopulationButtons:
     @staticmethod
     async def startPopDrop(game: GamestateHelper, player, interaction: discord.Interaction):
         view = PopulationButtons.getPopButtons(game, player)
+        view.add_item(Button(label="Decline", style=discord.ButtonStyle.gray,
+                             custom_id=f"FCID{player['color']}_declinePopDrop"))
         if len(PopulationButtons.findEmptyPopulation(game, player)) > 0:
             await interaction.channel.send(f"{player['player_name']},"
                                            " choose which planet you would like to put a population cube on.",
@@ -97,6 +99,10 @@ class PopulationButtons:
             await interaction.channel.send(f"{player['player_name']},"
                                            " the bot cannot find any empty planets for you to put population on.",
                                            view=view)
+
+    @staticmethod
+    async def declinePopDrop(game: GamestateHelper, player, interaction: discord.Interaction):
+        await interaction.message.delete()
 
     @staticmethod
     async def fillPopulation(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):

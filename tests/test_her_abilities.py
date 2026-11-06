@@ -5,9 +5,10 @@ Raid reuses the existing Build flow from a Move action; Regroup reuses the exist
 Move flow from a Build action. Both are one extra activation of the other type, once
 per action, and never a second influence disc.
 """
+from Buttons.Move import MoveButtons
 from helpers.DrawHelper import DrawHelper
 from helpers.ShipHelper import PlayerShip
-from tests.fakes import buttons, player_stats, reload
+from tests.fakes import FakeInteraction, buttons, player_stats, reload
 
 
 def setup_game(start_game):
@@ -79,6 +80,8 @@ def test_raid_build_before_the_move_spends_one_disc_and_returns_to_move(start_ga
     game, channel = setup_game(start_game)
     press(channel, 1, "FCIDblue_startMove")
     assert "FCIDblue_herRaidBuild_1" in buttons(channel)
+    assert any("Raid: this Move action also includes one Build activation" in content
+               for content, _kwargs in channel.sent)
 
     press(channel, 1, "FCIDblue_herRaidBuild_1")
     chooser = buttons(channel)
@@ -186,6 +189,8 @@ def test_regroup_move_before_building_spends_one_disc_and_returns_to_build(start
     game, channel = setup_game(start_game)
     press(channel, 1, "FCIDblue_startBuild")
     assert "FCIDblue_herRegroupMove_before" in buttons(channel)
+    assert any("Regroup: this Build action also includes one Move activation" in content
+               for content, _kwargs in channel.sent)
 
     press(channel, 1, "FCIDblue_herRegroupMove_before")
     menu = buttons(channel)
@@ -216,7 +221,7 @@ def test_regroup_move_before_building_spends_one_disc_and_returns_to_build(start
     assert "blue-int" in state.gamestate["board"]["201"]["player_ships"]
 
 
-def test_regroup_move_after_building_ends_the_build_phase(start_game, press):
+def test_regroup_move_after_building_returns_to_the_build_screen(start_game, press):
     game, channel = setup_game(start_game)
     press(channel, 1, "FCIDblue_startBuild")
     finish_standard_build(press, channel)
@@ -232,11 +237,19 @@ def test_regroup_move_after_building_ends_the_build_phase(start_game, press):
     assert player["build_action_counters"] == 1
     assert player["move_action_counters"] == 0
     assert player["herCrossUsed"] is True
-    # The move ended the build phase; only the normal end-of-action screen remains.
+    # The move is an addition to the Build action, so its second activation is still there.
     menu = buttons(channel)
-    assert "FCIDblue_endTurn" in menu
-    assert not [cid for cid in menu if "buildIn" in cid]
+    assert "FCIDblue_buildIn_201" in menu
+    assert "FCIDblue_finishAction" in menu
     assert not [cid for cid in menu if "herRegroupMove" in cid]
+
+    finish_standard_build(press, channel)
+    state = reload(game)
+    player = state.get_player(1)
+    assert player["materials"] == 0
+    assert player["buildsThisAction"] == 2
+    assert state.gamestate["board"]["201"]["player_ships"].count("blue-int") == 2
+    assert "startBuild2_deleteMsg" not in buttons(channel)
 
 
 def test_back_to_build_does_not_use_the_regroup_activation(start_game, press):
@@ -323,7 +336,7 @@ def test_the_extra_interceptor_hull_is_a_replaceable_slot(start_game, press):
     assert model.hull == 0 and model.computer == 1 and model.check_valid_ship()
 
 
-def test_only_three_more_cruisers_are_buildable_after_the_starting_one(start_game, press):
+def test_a_build_action_builds_at_most_its_two_activation_units(start_game, press):
     game, channel = setup_game(start_game)
     player = game.get_player(1)
     assert player["ship_stock"][1] == 3
@@ -332,7 +345,7 @@ def test_only_three_more_cruisers_are_buildable_after_the_starting_one(start_gam
     game.update()
 
     press(channel, 1, "FCIDblue_startBuild")
-    # Two cruisers in the first build activation batch.
+    # Two cruisers: both Build activations.
     press(channel, 1, "FCIDblue_buildIn_201")
     inter = press(channel, 1, next(cid for cid in buttons(channel)
                                    if cid.startswith("FCIDblue_buildShip_") and "Cruiser" in cid))
@@ -344,18 +357,29 @@ def test_only_three_more_cruisers_are_buildable_after_the_starting_one(start_gam
     inter = press(channel, 1, next(cid for cid in spend if cid.startswith("FCIDblue_spendMaterial_")))
     press_edited(press, channel, inter, "FCIDblue_finishSpendForBuild_")
 
-    # A third cruiser through Build Somewhere Else.
-    press(channel, 1, "startBuild2_deleteMsg")
-    press(channel, 1, "FCIDblue_buildIn_201")
-    inter = press(channel, 1, next(cid for cid in buttons(channel)
-                                   if cid.startswith("FCIDblue_buildShip_") and "Cruiser" in cid))
-    inter = press_edited(press, channel, inter, "FCIDblue_finishBuild_")
-    spend = buttons(channel)
-    inter = press(channel, 1, next(cid for cid in spend if cid.startswith("FCIDblue_spendMaterial_")))
-    press_edited(press, channel, inter, "FCIDblue_finishSpendForBuild_")
-
+    # No Build activation is left, so Build Somewhere Else cannot add a third unit.
+    assert "startBuild2_deleteMsg" not in buttons(channel)
     state = reload(game)
-    assert state.get_player(1)["ship_stock"][1] == 0
-    press(channel, 1, "startBuild2_deleteMsg")
-    press(channel, 1, "FCIDblue_buildIn_201")
-    assert not [cid for cid in buttons(channel) if "Cruiser" in cid]
+    assert state.get_player(1)["buildsThisAction"] == 2
+    assert state.get_player(1)["ship_stock"][1] == 1
+
+
+def test_a_pulsar_move_does_not_offer_a_raid_build(start_game, run):
+    game, channel = setup_game(start_game)
+    player = game.get_player(1)
+    player["pulsarMove"] = True
+    game.update()
+
+    run(MoveButtons.startMove(game, player, FakeInteraction(channel), "startMove_2", False))
+
+    assert not [cid for cid in buttons(channel) if "herRaidBuild" in cid]
+
+
+def test_a_normal_move_clears_the_pulsar_flag(start_game, press):
+    game, channel = setup_game(start_game)
+    game.get_player(1)["pulsarMove"] = True
+    game.update()
+
+    press(channel, 1, "FCIDblue_startMove")
+
+    assert "FCIDblue_herRaidBuild_1" in buttons(channel)

@@ -18,6 +18,11 @@ class BuildButtons:
         return "_herRaid_" + buttonID.rsplit("_", 1)[1]
 
     @staticmethod
+    def buildsLeft(player, build_apt):
+        """Build units a Build action may still place, across every system it visits."""
+        return max(0, build_apt - player.get("buildsThisAction", 0))
+
+    @staticmethod
     async def startBuild(game: GamestateHelper, player, interaction: discord.Interaction,
                          buttonID: str, player_helper: PlayerHelper):
         tiles = game.get_owned_tiles(player)
@@ -25,10 +30,12 @@ class BuildButtons:
         view = View()
         nested_raid = "herRaidBuild" in buttonID
         resume_build = "herRegroupResume" in buttonID
+        resume_after_move = "herRegroupResumeAfter" in buttonID
         if not nested_raid and not resume_build:
             await interaction.channel.send(f"{player['player_name']} is using their turn to build")
         if "2" not in buttonID:
             player_helper.spend_influence_on_action("build")
+            player_helper.stats["buildsThisAction"] = 0
             if FactionData.has(player, "phase_technology"):
                 player_helper.stats["phaseBuildsThisAction"] = 0
                 player_helper.stats["phaseSwappedThisAction"] = False
@@ -56,10 +63,17 @@ class BuildButtons:
               and (buttonID == "startBuild" or resume_build)):
             view.add_item(Button(label="Move Activation (1)", style=discord.ButtonStyle.green,
                                  custom_id=f"FCID{player['color']}_herRegroupMove_before"))
+        if resume_after_move:
+            view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
+                                 custom_id=f"FCID{player['color']}_finishAction"))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray,
                              custom_id=f"FCID{player['color']}_restartTurn"))
-        await interaction.channel.send(f"{player['player_name']}, choose which tile you would like to build in.",
-                                       view=view)
+        message = f"{player['player_name']}, choose which tile you would like to build in."
+        if (not player.get("passed") and FactionData.has(player, "regroup")
+                and not player.get("herCrossUsed")
+                and (buttonID == "startBuild" or resume_build)):
+            message += " Regroup: this Build action also includes one Move activation."
+        await interaction.channel.send(message, view=view)
         drawing = DrawHelper(game.gamestate)
         if len(tiles) > 0:
             asyncio.create_task(interaction.followup.send(file=await asyncio.to_thread(drawing.mergeLocationsFile,
@@ -75,6 +89,8 @@ class BuildButtons:
         buildApt = player["build_apt"]
         if suffix or player.get("passed") or player.get("pulsarBuild"):
             buildApt = 1
+        else:
+            buildApt = BuildButtons.buildsLeft(player, buildApt)
         await interaction.channel.send(f"{player['player_name']}, you have {player['materials']} materials to "
                                        f"spend on up to {str(buildApt)} units in this system.", view=view)
 
@@ -90,7 +106,9 @@ class BuildButtons:
         buildApt = player["build_apt"]
         if suffix or player.get("passed") or player.get("pulsarBuild"):
             buildApt = 1
-        if len(build) == buildApt:
+        else:
+            buildApt = BuildButtons.buildsLeft(player, buildApt)
+        if len(build) >= buildApt:
             await interaction.message.edit(content=(f"You cannot build any more units. Current build is:\n"
                                                     f"{build} for {cost} materials."))
             return
@@ -145,6 +163,9 @@ class BuildButtons:
         if build != "none":
             view.add_item(Button(label="Finished In This System", style=discord.ButtonStyle.red,
                                  custom_id="_".join(buttonElements) + suffix))
+        else:
+            view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
+                                 custom_id=f"FCID{player['color']}_finishAction"))
         view.add_item(Button(label="Reset Build", style=discord.ButtonStyle.gray,
                              custom_id=f"FCID{player['color']}_buildIn_{build_loc}" + suffix))
         if suffix:
@@ -291,6 +312,7 @@ class BuildButtons:
         player_helper.stats["money"] = money
         if suffix:
             player_helper.stats["herCrossUsed"] = True
+        player_helper.stats["buildsThisAction"] = player_helper.stats.get("buildsThisAction", 0) + len(build)
         game.update_player(player_helper)
         drawing = DrawHelper(game.gamestate)
         await interaction.channel.send("This is what the tile looks like after the build. They built the following:\n"
@@ -314,7 +336,8 @@ class BuildButtons:
                 player_helper.stats["pulsarBuild"] = False
                 game.update_player(player_helper)
         view2 = View()
-        if len(build) < buildApt:
+        if not player.get("passed") and not pulsar_build \
+                and BuildButtons.buildsLeft(player_helper.stats, buildApt) > 0:
             view2.add_item(Button(label="Build Somewhere Else", style=discord.ButtonStyle.red,
                                   custom_id="startBuild2_deleteMsg"))
         if (FactionData.has(player, "regroup") and not player.get("passed")

@@ -30,8 +30,8 @@ def test_turtugan_data_row():
     assert (row["money_pop_cubes"], row["material_pop_cubes"], row["science_pop_cubes"]) == (11, 11, 12)
     assert row["military_tech"] == ["stb"]
     assert row["grid_tech"] == [] and row["nano_tech"] == []
-    assert row["reputation_track"] == ["amb", "mixed", "mixed", "mixed"]
-    assert "reputation_only_slots" not in row
+    assert row["reputation_track"] == ["rep", "mixed", "mixed", "mixed"]
+    assert row["reputation_only_slots"] == [0]
     assert (row["cost_orbital"], row["cost_monolith"]) == (4, 10)
     assert (row["cost_interceptor"], row["cost_cruiser"], row["cost_dread"],
             row["cost_starbase"]) == (3, 5, 8, 3)
@@ -41,7 +41,7 @@ def test_turtugan_data_row():
 def test_turtugan_blueprints_and_base_stats():
     row = tur_data()
     assert row["interceptor_parts"] == ["ioc", "nus", "nud"]
-    assert row["cruiser_parts"] == ["ioc", "nus", "hul", "nud"]
+    assert row["cruiser_parts"] == ["ioc", "empty", "nus", "hul", "nud"]
     assert row["dread_parts"] == ["ioc", "ioc", "nus", "hul", "hul", "nud", "empty"]
     assert row["starbase_parts"] == ["hul", "nus", "nud"]
     for ship in ("interceptor", "cruiser", "dread", "starbase"):

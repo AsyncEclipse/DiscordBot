@@ -62,8 +62,9 @@ class DeepSpace:
         if DeepSpace.can_draw(game):
             view.add_item(Button(label="Draw Random", style=discord.ButtonStyle.blurple,
                                  custom_id=f"FCID{player['color']}_reservedTile_{position}_random_{token}"))
-        await interaction.channel.send(f"{player['player_name']}, choose a stack to draw an S3 sector"
-                                       " from for this Explore action.", view=view)
+        await interaction.channel.send(f"{player['player_name']}, Deep Space Explorers: choose a stack"
+                                       " to draw an S3 sector from for this Explore action"
+                                       f" ({len(player['deep_space_sectors'])} in reserve).", view=view)
 
     @staticmethod
     def take(game, player, position, choice, token):
@@ -356,6 +357,9 @@ class Carapace:
             return
         pending.remove(entry)
         game.update()
+        await interaction.channel.send(
+            f"{player['player_name']} chose Carapace Shields'"
+            f" {'-1 to Hit' if mode == 'hit' else '-1 Damage'} for the missile die ({entry['dieNum']}).")
         from helpers.CombatHelper import Combat
         computer = entry["computer"] - (1 if mode == "hit" else 0)
         # "-1 Damage" is the shield's own reduction (incoming_damage); "!" marks -1 to Hit, which replaces it

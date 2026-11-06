@@ -224,6 +224,7 @@ def test_wolf_pack_saves_a_reroll_for_a_later_ship(make_game, no_random, run, pr
 
     save = next(c for c in buttons(inter.channel) if c.startswith("FCIDblue_wolfPackSave_"))
     press(inter.channel, 1, save, inter.channel.message_with(save))
+    assert any("saved a reroll" in content for content, _kwargs in inter.channel.sent)
     game = reload(game)
     assert game.gamestate["board"]["101"]["wolfPackRerolls"]["blue"] == 1
 
@@ -323,3 +324,26 @@ def test_wolf_pack_bank_expires_at_the_end_of_the_engagement_round(make_game, ru
     run(Combat.promptNextSpeed(game, "101", FakeInteraction().channel, False))
 
     assert "wolfPackRerolls" not in reload(game).gamestate["board"]["101"]
+
+
+def test_the_combat_card_offers_the_spine_modes(make_game):
+    game = _combat_game(make_game, ["nus", "hul", "nud", "ioc", "ioc"])
+    view = Combat.getCombatButtons(game, "101")
+    ids = [child.custom_id for child in view.children]
+    assert any(cid.endswith("_spinehit") for cid in ids)
+    assert any(cid.endswith("_spinedmg") for cid in ids)
+    assert not [cid for cid in ids if cid.endswith("_defender")]
+
+
+def test_the_combat_card_cannot_fire_the_same_step_twice(make_game, no_random, run):
+    game = _combat_game(make_game, ["nus", "hul", "nud", "ioc", "ioc"])
+    game.gamestate["board"]["101"]["player_ships"].append("blue-drd")
+    game.update()
+
+    inter = FakeInteraction()
+    no_random([5])
+    run(Combat.rollDice(game, "rollDice_101_blue_2_attacker_deleteMsg_spinehit", inter))
+    run(Combat.rollDice(game, "rollDice_101_blue_2_attacker_deleteMsg_spinehit", inter))
+
+    assert reload(game).gamestate["board"]["101"]["damage_tracker"]["red-cru"] == 1
+    assert any("already rolled" in content for content, _kwargs in inter.channel.sent)

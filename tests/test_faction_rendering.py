@@ -155,11 +155,16 @@ def test_faction_rendering(start_game, monkeypatch, faction):
         assert_nebula_rotation(game, drawing, monkeypatch)
     if faction == "tur":
         assert_turtugan_layout(game, drawing, player, player_labels)
+    if faction in ("kur", "tur"):
+        texts = {text for text, _bounds in player_labels}
+        assert "+1 CMP" in texts
+        assert "+1 HULL" in texts
     if faction == "wul":
         assert not any(path.endswith("/blueprint_interceptor.png") for path in loaded)
+        home_sector = game.gamestate["board"]["201"]["sector"]
         with monkeypatch.context() as patch:
             def omit_number(draw, xy, text, *args, **kwargs):
-                if text != "201":
+                if text != home_sector:
                     return draw_text(draw, xy, text, *args, **kwargs)
             patch.setattr(ImageDraw.ImageDraw, "text", omit_number)
             without_number = drawing.board_tile_image("201")

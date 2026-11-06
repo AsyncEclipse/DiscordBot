@@ -2906,6 +2906,7 @@
                         "first_shot",
                         "honour_victorious"
                 ],
+                "offboard_computer_label": "Elite Warriors",
                 "reputation_only_slots": [
                         2,
                         3
@@ -3129,10 +3130,13 @@
                         0
                 ],
                 "reputation_track": [
-                        "amb",
+                        "rep",
                         "mixed",
                         "mixed",
                         "mixed"
+                ],
+                "reputation_only_slots": [
+                        0
                 ],
                 "cost_orbital": 4,
                 "cost_monolith": 10,
@@ -3169,6 +3173,7 @@
                 ],
                 "cruiser_parts": [
                         "ioc",
+                        "empty",
                         "nus",
                         "hul",
                         "nud"
@@ -3205,6 +3210,10 @@
                         "cruiser": [
                                 [
                                         1,
+                                        0
+                                ],
+                                [
+                                        2,
                                         0
                                 ],
                                 [

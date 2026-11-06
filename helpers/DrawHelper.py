@@ -294,7 +294,8 @@ class DrawHelper:
                 tile_image.paste(banner, (int(247 * mult), int(126 * mult)), mask=banner)
 
             font = ImageFont.truetype("images/resources/arial.ttf", size=int(30 * mult))
-            text = str(position)
+            # A home tile is named by its sector; other tiles are labelled by board position.
+            text = str(tile.get("sector", position)) if tile.get("type") == "home" else str(position)
             stroke_color = (0, 0, 0)
             stroke_width = 6
             text_color = (255, 255, 255)
@@ -519,6 +520,15 @@ class DrawHelper:
                     draw.ellipse((x - radius + ring, y - radius + ring,
                                   x + radius - ring, y + radius - ring),
                                  outline=(0, 0, 0), width=border)
+            engaged = [(color, ship_class)
+                       for color, state in tile.get("carapaceShields", {}).items()
+                       for ship_class in ("interceptor", "cruiser", "dread", "starbase")
+                       if state.get(ship_class)]
+            if engaged:
+                label = ", ".join(f"{ship_class} ({color})" for color, ship_class in engaged)
+                shield_font = ImageFont.truetype("images/resources/arial.ttf", size=int(18 * mult))
+                draw.text((int(20 * mult), int(20 * mult)), f"Carapace Shields: {label}",
+                          (255, 255, 255), font=shield_font, stroke_width=3, stroke_fill=(0, 0, 0))
             if tile.get("type") == "nebula":
                 tile_image = tile_image.rotate(rotation)
                 self.label_nebula_subsectors(tile_image, position, rotation)
@@ -1460,6 +1470,26 @@ class DrawHelper:
             process_parts(player["starbase_parts"], sbCoord,referenceX,sizeOfSquare,"starbase", slot_cells.get("sb"))
 
         draw = ImageDraw.Draw(context)
+        chip_font = ImageFont.truetype("images/resources/arial.ttf", size=15)
+        for index, ship in enumerate(["int", "cru", "drd", "sb"]):
+            if ship == "int" and not player.get("interceptor_parts"):
+                continue
+            ship_key = PlayerHelper.blueprint_key(ship)
+            chips = []
+            if player.get(f"base_{ship_key}_comp", 0):
+                chips.append(f"+{player[f'base_{ship_key}_comp']} CMP")
+            if player.get(f"base_{ship_key}_hull", 0):
+                chips.append(f"+{player[f'base_{ship_key}_hull']} HULL")
+            standard_power = 3 if ship == "sb" else 0
+            if player.get(f"base_{ship_key}_nrg", 0) > standard_power:
+                chips.append(f"{player[f'base_{ship_key}_nrg']} PWR")
+            origin_x = 2250 + 550 * index + (161 if ship == "sb" else 0) + 16
+            for chip_index, chip in enumerate(chips):
+                x = origin_x + chip_index * 78
+                y = 470
+                draw.rounded_rectangle((x, y, x + 70, y + 24), radius=5,
+                                       fill=(25, 38, 55), outline=(225, 225, 225), width=2)
+                draw.text((x + 35, y + 12), chip, (255, 255, 255), font=chip_font, anchor="mm")
         for ship, cells in slot_cells.items():
             # Spine Cannon slots keep the board's red (cannon) and yellow (augment) frame over the part
             # the augment frame sits below the cannon's, wrapping down past its slot as printed

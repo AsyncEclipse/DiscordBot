@@ -12,7 +12,7 @@ def test_setup_gives_turtugan_its_home_ships_and_reserve(start_game):
     assert player["color"] == "blue"
     assert player["home_planet"] == "253"
     assert player["military_tech"] == ["stb"]
-    assert player["reputation_track"] == ["amb", "mixed", "mixed", "mixed"]
+    assert player["reputation_track"] == ["rep", "mixed", "mixed", "mixed"]
     assert (player["materials"], player["science"], player["money"]) == (4, 3, 3)
     assert player["move_apt"] == 2
     assert player["ship_stock"] == [8, 4, 2, 3]

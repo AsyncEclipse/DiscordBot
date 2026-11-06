@@ -44,6 +44,8 @@ def test_reserved_sector_is_offered_on_a_ring_three_position(start_game, press):
                for cid in ids)
     assert any("_random_" in cid for cid in ids)
     assert list(ids.values()).count("Draw from Reserve") == 1
+    assert any("Deep Space Explorers" in content and "2 in reserve" in content
+               for content, _kwargs in channel.sent)
     assert all(tile not in " ".join(ids.values()) for tile in player["deep_space_sectors"])
 
 
@@ -66,6 +68,8 @@ def test_choosing_a_reserved_sector_places_it_without_drawing(start_game, press)
     choice = offer_reserved_choice(press, channel, position)
     tile = game.get_player(1)["deep_space_sectors"][0]
     press(channel, 1, choice)
+    assert any("Drawn from the Deep Space Explorers reserve" in content
+               for content, _kwargs in channel.sent)
     state = reload(game)
     assert state.get_player(1)["deep_space_sectors"] == [x for x in reserve_before if x != tile]
     placement = next(cid for cid in buttons(channel)
@@ -184,6 +188,8 @@ def test_drawing_from_the_normal_stack_keeps_the_reserve(start_game, press):
     offer_reserved_choice(press, channel, position)
     choice = next(cid for cid in buttons(channel) if "_random_" in cid)
     press(channel, 1, choice)
+    assert any("Drawn from the Deep Space Explorers reserve" in content
+               for content, _kwargs in channel.sent)
     state = reload(game)
     assert state.get_player(1)["deep_space_sectors"] == reserve
     assert len(state.gamestate["tile_deck_300"]) == len(deck) - 1

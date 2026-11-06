@@ -176,6 +176,8 @@ def test_winning_battle_adds_one_to_the_drawn_battle_rep(make_game, run):
 
     player = _draw(game, interaction, "blue", run)
 
+    assert any("drew 1 reputation tiles (+1 for the battle)" in content
+               for content, _kwargs in interaction.channel.sent)
     assert player["reputationBonuses"] == {"0": 1}
     assert DrawHelper(game.gamestate).get_public_points(player, False) == 0
     game.gamestate["gameEnded"] = True
@@ -343,3 +345,16 @@ def test_retreat_penalty_ends_with_the_pairing(make_game, run):
     assert not any(cid.startswith("FCIDblue_drawReputation_") for cid in offered_ids(interaction))
     assert "retreatPenaltyblue" not in game.gamestate["board"][POS]
     assert game.getReputationTilesToDraw(POS, "blue") == 1
+
+
+def test_a_combat_roll_names_each_computer_source(make_game, no_random, run):
+    game = _combat_game(make_game)
+    game.gamestate["players"]["1"]["cruiser_parts"] = ["elc", "ioc", "nus", "hul", "nud"]
+    game.update()
+    _start_pairing(game, ["blue-cru"], ["red-cru"])
+    inter = FakeInteraction()
+    no_random([3])
+    run(Combat.rollDice(game, f"rollDice_{POS}_blue_2_deleteMsg", inter))
+
+    assert any("+2 computer (+1 Electron Computer, +1 Elite Warriors)" in content
+               for content, _kwargs in inter.channel.sent)

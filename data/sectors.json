@@ -6508,8 +6508,8 @@
       270
     ],
     "drd_snap": [
-      820,
-      700
+      750,
+      565
     ],
     "sb_snap": [
       300,
@@ -6647,8 +6647,8 @@
       1
     ],
     "money1_snap": [
-      796,
-      670
+      793,
+      637
     ],
     "money2_snap": [],
     "moneyadv_pop": [],
@@ -6661,24 +6661,24 @@
       0
     ],
     "scienceadv1_snap": [
-      285,
-      691
+      282,
+      656
     ],
     "scienceadv2_snap": [],
     "material_pop": [
       1
     ],
     "material1_snap": [
-      280,
-      95
+      272,
+      97
     ],
     "material2_snap": [],
     "materialadv_pop": [
       0
     ],
     "materialadv1_snap": [
-      277,
-      227
+      267,
+      225
     ],
     "materialadv2_snap": [],
     "neutral_pop": [],
@@ -6688,8 +6688,8 @@
     "neutraladv1_snap": [],
     "neutraladv2_snap": [],
     "int_snap": [
-      760,
-      160
+      720,
+      195
     ],
     "cru_snap": [
       820,

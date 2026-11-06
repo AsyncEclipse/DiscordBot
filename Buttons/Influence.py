@@ -348,7 +348,8 @@ class InfluenceButtons:
         await interaction.channel.send(f"{p1['player_name']} lost control of {tileLoc}.")
         if soulCaptured:
             game.update_player(PlayerHelper(game.get_player_from_color(player["color"]), player))
-            await interaction.channel.send(f"{player['player_name']} captured a soul from the destroyed sector.")
+            await interaction.channel.send(
+                PlayerHelper.wraith_soul_message(player, game.get_tile_label(tileLoc)))
         for pop in PopulationButtons.findFullPopulation(game, tileLoc):
             neutralCubes, orbitalCubes = game.remove_pop([f"{pop}_pop"], tileLoc,
                                                          game.get_player_from_color(p1["color"]), graveYard)

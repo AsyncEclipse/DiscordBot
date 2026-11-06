@@ -189,6 +189,7 @@ def test_missile_can_take_minus_one_damage(make_game, run, no_random, press):
     damage_id = next(cid for cid in buttons(ch) if "FCIDred_carapaceMissile_202_damage_" in cid)
     press(ch, 2, damage_id)
     assert reload(game).gamestate["board"]["202"]["damage_tracker"]["teal-cru"] == 3
+    assert any("chose Carapace Shields' -1 Damage" in content for content, _kwargs in ch.sent)
 
 
 def test_missile_minus_one_to_hit_keeps_full_damage(make_game, run, no_random, press):
@@ -298,3 +299,14 @@ def test_unfinished_carapace_menu_closes_when_firing_starts(make_game, run, no_r
     new_id = f"carapaceToggle_202_interceptor_{token}"
     run(Carapace.toggle(game, game.get_player(1), FakeInteraction(ch), new_id))
     assert Carapace.engaged(game, "202", "teal", "interceptor")
+
+
+def test_a_missile_that_cannot_hit_does_not_ask_for_the_shield_choice(make_game, run, no_random):
+    game = missile_game(make_game)
+    engage(game, "cruiser")
+    ch = channel()
+    no_random([1])
+    inter = FakeInteraction(ch, custom_id="rollDice_202_red_101_attacker")
+    run(Combat.rollDice(game, inter.data["custom_id"], inter))
+
+    assert not any("carapaceMissile" in cid for cid in buttons(ch))

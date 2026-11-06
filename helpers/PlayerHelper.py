@@ -137,6 +137,12 @@ class PlayerHelper:
         return f"\n> Adjusted souls captured from {before} to {amount}"
 
     @staticmethod
+    def wraith_soul_message(player, tile_label):
+        return (f"Soul-Hunters: {player['player_name']} captured a soul in {tile_label}"
+                f" (souls: {player.get('wraithSouls', 0)}). Each soul is +1 VP and"
+                " +1 offboard power on every blueprint.")
+
+    @staticmethod
     def capture_wraith_soul(player, tile, last_cube: bool = True):
         """Soul-Hunters: one soul for a sector whose enemy player population was destroyed.
         `last_cube` is False for the destroy-all path, where the cubes are removed afterwards."""

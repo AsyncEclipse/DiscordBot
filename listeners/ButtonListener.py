@@ -376,6 +376,8 @@ class ButtonListener(commands.Cog):
             await Combat.phaseModuleDone(game, customID, interaction, True)
         elif customID.startswith("startPopDrop"):
             await PopulationButtons.startPopDrop(game, player, interaction)
+        elif customID.startswith("declinePopDrop"):
+            await PopulationButtons.declinePopDrop(game, player, interaction)
         elif customID.startswith("fillPopulation"):
             await PopulationButtons.fillPopulation(game, player, interaction, customID)
         elif customID.startswith("ancientsCube"):
