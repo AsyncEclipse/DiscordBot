@@ -629,9 +629,19 @@ class Combat:
         if len(hittableShips) > 1:
             if reports is not None:
                 await Combat.sendCombatReports(interaction.channel, reports)
+            damage = int(str(dieDam).rstrip("!"))
+            bypass = str(dieDam).endswith("!")
+            applied = {damage if bypass else Carapace.incoming_damage(
+                game, pos, ship.split("-")[0],
+                Combat.translateShipAbrToName(ship.split("-")[1]), colorOrAI, damage)
+                for ship in hittableShips}
+            if len(applied) == 1:
+                dealt = f"You will deal {applied.pop()} damage."
+            else:
+                dealt = (f"You will deal {min(applied)} to {max(applied)} damage;"
+                         " Carapace Shields reduce a hit by 1.")
             msg = (f"{interaction.user.mention}, choose what ship to hit with the die that rolled a {dieNum}."
-                   f" You will deal {str(dieDam).rstrip('!')} damage. The bot has calculated that you can hit"
-                   f" these ships.")
+                   f" {dealt} The bot has calculated that you can hit these ships.")
             view = View()
             for ship in hittableShips:
                 label, emoji = Combat.getTargetButton(game, pos, ship)

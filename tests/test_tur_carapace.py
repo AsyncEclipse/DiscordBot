@@ -310,3 +310,13 @@ def test_a_missile_that_cannot_hit_does_not_ask_for_the_shield_choice(make_game,
     run(Combat.rollDice(game, inter.data["custom_id"], inter))
 
     assert not any("carapaceMissile" in cid for cid in buttons(ch))
+
+
+def test_the_hit_prompt_shows_the_carapace_adjusted_damage(make_game, run):
+    game = combat_game(make_game, tur_ships=("teal-int", "teal-cru"), red_ships=("red-cru",))
+    engage(game, "interceptor")
+    ch = channel()
+    run(Combat.offerHitPrompt(game, FakeInteraction(ch), "202", "red",
+                              ["teal-int", "teal-cru"], 5, 2))
+
+    assert any("You will deal 1 to 2 damage" in content for content, _kwargs in ch.sent)
