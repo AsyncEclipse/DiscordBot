@@ -237,7 +237,7 @@ class MoveButtons:
                 await interaction.channel.send(f"{player['player_name']} is using their turn to move")
             await interaction.message.delete()
         message = f"{player['player_name']} Select the tile you would like to move from"
-        if raid_offer:
+        if raid_offer and not nested:
             message += ". Raid: this Move action also includes one Build activation"
         await interaction.channel.send(message, view=view)
         drawing = DrawHelper(game.gamestate)

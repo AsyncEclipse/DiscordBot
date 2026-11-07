@@ -1148,9 +1148,15 @@ class Combat:
         if speed != 1000:
             Carapace.close_controls(game, pos)
             step = [speed, colorOrAI]
-            if step in tile.get("rolledSteps", []):
+            rolled = tile.get("rolledSteps", [])
+            if step in rolled:
                 await interaction.channel.send(
                     "That initiative step has already rolled this engagement round. Use the current prompt.")
+                return
+            pending = [tile.get("currentSpeed"), tile.get("currentRoller")]
+            if (None not in pending and step != pending and pending not in rolled):
+                await interaction.channel.send(
+                    "That initiative step is not current. Roll the pending step in the combat view first.")
                 return
             tile.setdefault("rolledSteps", []).append(step)
             game.update()

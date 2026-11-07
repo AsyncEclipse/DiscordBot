@@ -338,6 +338,8 @@ class ButtonListener(commands.Cog):
             await BuildButtons.finishSpendForBuild(game, player, interaction, customID, player_helper)
         elif customID.startswith("phaseTechUpgrade"):
             await BuildButtons.phaseTechUpgrade(game, player, interaction, customID, player_helper)
+        elif customID.startswith("phaseTechResume"):
+            await BuildButtons.startBuild(game, player, interaction, "startBuild2_phaseResume", player_helper)
         elif customID.startswith("startUpgrade"):
             game.updateSaveFile()
             await UpgradeButtons.startUpgrade(game, player, interaction, True, "dummy","dum")

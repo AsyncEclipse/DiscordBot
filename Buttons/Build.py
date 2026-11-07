@@ -29,7 +29,7 @@ class BuildButtons:
         tiles.sort()
         view = View()
         nested_raid = "herRaidBuild" in buttonID
-        resume_build = "herRegroupResume" in buttonID
+        resume_build = "herRegroupResume" in buttonID or "phaseResume" in buttonID
         resume_after_move = "herRegroupResumeAfter" in buttonID
         if not nested_raid and not resume_build:
             await interaction.channel.send(f"{player['player_name']} is using their turn to build")
@@ -382,5 +382,7 @@ class BuildButtons:
             return
         player_helper.stats["phaseSwappedThisAction"] = True
         player_helper.stats["phaseBuildsThisAction"] += 1
+        # the swap spends one Build activation, so it also counts against the units left
+        player_helper.stats["buildsThisAction"] = player_helper.stats.get("buildsThisAction", 0) + 1
         game.update_player(player_helper)
         await UpgradeButtons.startUpgrade(game, player, interaction, True, "phase", "1")

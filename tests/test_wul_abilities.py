@@ -228,8 +228,11 @@ def test_wolf_pack_saves_a_reroll_for_a_later_ship(make_game, no_random, run, pr
     game = reload(game)
     assert game.gamestate["board"]["101"]["wolfPackRerolls"]["blue"] == 1
 
-    # the dread fires later in the round and may use the banked reroll on its miss
+    # the dread fires later in the round and may use the banked reroll on its miss.
+    # Its step must be the pending one, as promptNextSpeed makes it in a real round.
     game.gamestate["board"]["101"]["player_ships"].append("blue-drd")
+    game.setCurrentSpeed(1, "101")
+    game.setCurrentRoller("blue", "101")
     game.update()
     inter2 = FakeInteraction(inter.channel)
     no_random([1])

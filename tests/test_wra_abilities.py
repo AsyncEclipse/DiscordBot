@@ -67,6 +67,31 @@ def test_phase_technology_swaps_the_second_build_activation_for_one_upgrade(star
     assert state["phaseSwappedThisAction"] is True
 
 
+def test_phase_technology_keeps_the_build_activation_it_did_not_spend(start_game, press):
+    game, channel = start_game(factions=["wra", "eri"])
+    player = game.get_player(1)
+    player["build_apt"] = 3
+    player["materials"] = 8
+    game.update()
+
+    build_one_unit(press, channel)
+    press(channel, 1, "FCIDblue_phaseTechUpgrade")
+    inter = press(channel, 1, "FCIDblue_upgradeShip_1_interceptor_phase")
+    parts_menu = view_ids(inter)
+    inter = press(channel, 1, next(cid for cid in parts_menu
+                                   if cid.startswith("FCIDblue_selectOldPart_") and "_ioc_" in cid))
+    replacement = next(cid for cid in view_ids(inter)
+                       if cid.startswith("FCIDblue_chooseUpgrade_") and "_hul_" in cid)
+    press(channel, 1, replacement)
+
+    # One of the three activations is still a build, so it must still be offered.
+    assert "FCIDblue_phaseTechResume" in buttons(channel)
+    press(channel, 1, "FCIDblue_phaseTechResume")
+    assert "FCIDblue_buildIn_201" in buttons(channel)
+    press(channel, 1, "FCIDblue_buildIn_201")
+    assert any("up to 1 units" in content for content, _kwargs in channel.sent if content)
+
+
 def test_phase_technology_is_not_offered_after_two_builds(start_game, press):
     game, channel = start_game(factions=["wra", "eri"])
     game.get_player(1)["materials"] = 8

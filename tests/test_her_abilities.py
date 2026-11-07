@@ -221,6 +221,17 @@ def test_regroup_move_before_building_spends_one_disc_and_returns_to_build(start
     assert "blue-int" in state.gamestate["board"]["201"]["player_ships"]
 
 
+def test_regroup_move_never_announces_raid(start_game, press):
+    game, channel = setup_game(start_game)
+    press(channel, 1, "FCIDblue_startBuild")
+    before = len(channel.sent)
+    press(channel, 1, "FCIDblue_herRegroupMove_before")
+
+    contents = [content for content, _kwargs in channel.sent[before:] if content]
+    assert not any("Raid" in content for content in contents)
+    assert "FCIDblue_moveFrom_201_1_herRegroup_before" in buttons(channel)
+
+
 def test_regroup_move_after_building_returns_to_the_build_screen(start_game, press):
     game, channel = setup_game(start_game)
     press(channel, 1, "FCIDblue_startBuild")
