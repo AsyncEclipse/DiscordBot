@@ -6550,10 +6550,7 @@
     "money_pop": [
       1
     ],
-    "money1_snap": [
-      333,
-      137
-    ],
+    "money1_snap": [323, 137],
     "money2_snap": [],
     "moneyadv_pop": [],
     "moneyadv1_snap": [],
@@ -6569,10 +6566,7 @@
     "scienceadv_pop": [
       0
     ],
-    "scienceadv1_snap": [
-      660,
-      195
-    ],
+    "scienceadv1_snap": [650, 198],
     "scienceadv2_snap": [],
     "material_pop": [],
     "material1_snap": [],

@@ -27,9 +27,9 @@ def test_kurita_home_population_squares():
     assert sector["materialadv_pop"] == [0]
     for key in ("moneyadv_pop", "material_pop", "neutral_pop", "neutraladv_pop"):
         assert sector[key] == []
-    assert sector["money1_snap"] == [333, 137]
+    assert sector["money1_snap"] == [323, 137]
     assert sector["science1_snap"] == [762, 203]
-    assert sector["scienceadv1_snap"] == [660, 195]
+    assert sector["scienceadv1_snap"] == [650, 198]
     assert sector["materialadv1_snap"] == [334, 783]
     for key, coords in sector.items():
         if key.endswith("_snap") and coords:
