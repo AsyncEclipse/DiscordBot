@@ -423,6 +423,9 @@ class PlayerCommands(commands.GroupCog, name="player"):
         # view = Turn(interaction, player.id)
         game = GamestateHelper(interaction.channel)
         p1 = game.get_player(player.id,interaction)
+        if game.gamestate.get("pre_game") and not game.gamestate["pre_game"].get("started"):
+            await interaction.response.send_message("The game has not started yet.")
+            return
         TurnButtons.startNewTurn(p1, game)
         view = TurnButtons.getStartTurnButtons(game, p1, "dummy")
         game.updatePingTime()

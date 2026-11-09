@@ -3,6 +3,7 @@ import copy
 import json
 import logging
 import discord
+from helpers import FactionData
 from helpers.EmojiHelper import Emoji
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import DISCOVERY_PART_IDS, PlayerHelper
@@ -12,6 +13,16 @@ from helpers.ShipHelper import PlayerShip
 
 
 class UpgradeButtons:
+    @staticmethod
+    def is_drive(part):
+        with open("data/parts.json", "r") as f:
+            return json.load(f).get(part, {}).get("range", 0) > 0
+
+    @staticmethod
+    def must_keep_drive(player, ship, part):
+        """A Harvester may replace its Drive, but may not leave the slot without one."""
+        return ship == "starbase" and FactionData.has(player, "harvester") and UpgradeButtons.is_drive(part)
+
     @staticmethod
     def getTechnoMagicView(game: GamestateHelper, player, pos: str):
         tile = game.gamestate["board"][pos]
@@ -79,7 +90,7 @@ class UpgradeButtons:
         # only a discovery tile part can be saved for a later Upgrade action
         if discTileUpgrade in DISCOVERY_PART_IDS:
             view.add_item(Button(label="Save For Future Upgrade Action", style=discord.ButtonStyle.red,
-                                 custom_id=f"FCID{player['color']}_deleteMsg"))
+                                 custom_id=f"FCID{player['color']}_saveDiscoveryPart"))
         if button:
             await interaction.message.delete()
             if discTileUpgrade == "dummy":
@@ -104,13 +115,13 @@ class UpgradeButtons:
         player_helper.setOldShipParts(ship)
         game.update_player(player_helper)
         if discTileUpgrade == "mus":
-            await UpgradeButtons.chooseUpgrade(game, player, interaction,
-                                               f"chooseUpgrade_{actions}_{ship}_dummy_mus_5_mus", player_helper)
-            return
+            return await UpgradeButtons.chooseUpgrade(game, player, interaction,
+                                                      f"chooseUpgrade_{actions}_{ship}_dummy_mus_5_mus", player_helper)
         with open("data/parts.json", "r") as f:
             part_stats = json.load(f)
+        phase_slots = PlayerHelper.get_phase_module_slots(player, ship)
         for index,i in enumerate(player[f"{ship}_parts"]):
-            if i == "mus":
+            if i == "mus" or index in phase_slots:
                 continue
             oldPart = player_helper.stats[f"old_{ship}_parts"][index]
             lab = part_stats[i]["name"]
@@ -131,7 +142,7 @@ class UpgradeButtons:
                                             f"{actions}_{discTileUpgrade}")))
         if discTileUpgrade in DISCOVERY_PART_IDS:
             view.add_item(Button(label="Save For Future Upgrade Action", style=discord.ButtonStyle.red,
-                                 custom_id=f"FCID{player['color']}_deleteMsg"))
+                                 custom_id=f"FCID{player['color']}_saveDiscoveryPart"))
         await UpgradeButtons.showMenu(interaction, f"{interaction.user.mention}, "
                                                    f"pick which part of your {ship} to replace or remove.", view)
 
@@ -144,16 +155,29 @@ class UpgradeButtons:
         oldPart = customID.split("_")[3]
         discTileUpgrade = customID.split("_")[4]
         indexOfOldPart = customID.split("_")[5]
-        if discTileUpgrade not in ("dummy", "free") and not discTileUpgrade.startswith("tm"):
-            await UpgradeButtons.chooseUpgrade(game, player, interaction,
-                                               customID + "_" + discTileUpgrade, player_helper)
+        if int(indexOfOldPart) in PlayerHelper.get_phase_module_slots(player, ship):
+            await interaction.followup.send("The Phase Module is built in and cannot be replaced.", ephemeral=True)
             return
+        if discTileUpgrade not in ("dummy", "free", "phase") and not discTileUpgrade.startswith("tm"):
+            return await UpgradeButtons.chooseUpgrade(game, player, interaction,
+                                                      customID + "_" + discTileUpgrade, player_helper)
 
         available_parts = player_helper.getAvailableShipParts()
         if discTileUpgrade.startswith("tm"):
             # Techno-Magic: no removing ship parts, and no Ancient ship parts
             available_parts = {part for part in available_parts
                                if part != "empty" and part not in DISCOVERY_PART_IDS}
+        slot_note = ""
+        if UpgradeButtons.must_keep_drive(player, ship, oldPart):
+            available_parts = {part for part in available_parts
+                               if part != "empty" and UpgradeButtons.is_drive(part)}
+            slot_note = " A Harvester must keep a Drive in this slot."
+        spine_slot = int(indexOfOldPart) in PlayerHelper.get_spine_cannon_slots(player, ship)
+        if spine_slot:
+            # a Spine Cannon slot may be upgraded, but only with a gun
+            available_parts = {part for part in available_parts
+                               if part != "empty" and PlayerHelper.is_spine_gun(part)}
+            slot_note = " This is a Spine Cannon slot, so it only accepts a gun (not a Missile or Rift Weapon)."
         drawing = DrawHelper(game.gamestate)
         with open("data/parts.json", "r") as f:
             part_stats = json.load(f)
@@ -172,10 +196,11 @@ class UpgradeButtons:
         if discTileUpgrade.startswith("tm"):
             view.add_item(Button(label="Restart Techno-Magic", style=discord.ButtonStyle.red,
                                  custom_id=f"FCID{player['color']}_restartTechnoMagic_{discTileUpgrade[2:]}"))
-        removal_note = "" if discTileUpgrade.startswith("tm") else " Remove as a free action by selecting 'Empty'."
+        removal_note = "" if discTileUpgrade.startswith("tm") or spine_slot \
+            else " Remove as a free action by selecting 'Empty'."
         await UpgradeButtons.showMenu(interaction, f"{interaction.user.mention}, replace "
                                       f"{part_stats[oldPart]['name']} on your {ship} with which part?"
-                                      f"{removal_note}", view)
+                                      f"{removal_note}{slot_note}", view)
         if customID.endswith("_partsShown"):
             return
         await interaction.followup.send("Available parts",
@@ -191,6 +216,10 @@ class UpgradeButtons:
         newPart = customID.split("_")[4]
         discTileUpgrade = customID.split("_")[6]
         indexOfOldPart = customID.split("_")[5]
+        if UpgradeButtons.must_keep_drive(player, ship, oldPart) and (
+                newPart == "empty" or not UpgradeButtons.is_drive(newPart)):
+            await interaction.followup.send("A Harvester must keep a Drive in this slot.", ephemeral=True)
+            return
         with open("data/parts.json", "r") as f:
             part_stats = json.load(f)
         index = 0
@@ -242,6 +271,13 @@ class UpgradeButtons:
                 view.add_item(Button(label=ship2.capitalize(), emoji=shipEmoji, style=discord.ButtonStyle.blurple,
                                      custom_id=(f"FCID{player['color']}_upgradeShip_"
                                                 f"{actions}_{ship2}_{discTileUpgrade}")))
+        if discTileUpgrade == "phase":
+            build_apt = player_helper.stats["build_apt"]
+            if player_helper.stats.get("passed") or player_helper.stats.get("pulsarBuild"):
+                build_apt = 1
+            if player_helper.stats.get("phaseBuildsThisAction", 0) < build_apt:
+                view.add_item(Button(label="Build Activation", style=discord.ButtonStyle.green,
+                                     custom_id=f"FCID{player['color']}_phaseTechResume"))
         if discTileUpgrade == "free":
             view.add_item(Button(label="Done", style=discord.ButtonStyle.red,
                                  custom_id=f"FCID{player['color']}_deleteMsg"))
@@ -262,11 +298,16 @@ class UpgradeButtons:
                                                                     image, ship, player_helper.stats["name"]))
         if discTileUpgrade in ("dummy", "free"):
             await interaction.channel.send(f"{player['player_name']}, choose which ship you would like to upgrade "
-                                           "or finish.", view=view)
+                                           "or finish your action.", view=view)
+        elif discTileUpgrade == "phase":
+            await interaction.channel.send(f"{player['player_name']}, you may continue the Build action"
+                                           " or undo this part swap.", view=view)
         elif discTileUpgrade.startswith("tm"):
             view = UpgradeButtons.getTechnoMagicView(game, player, discTileUpgrade[2:])
             await interaction.channel.send(f"{player['player_name']}, choose another combat blueprint to upgrade"
                                            " or undo this Techno-Magic part.", view=view)
+
+        return True
 
     @staticmethod
     async def undoUpgrade(game: GamestateHelper, player, interaction: discord.Interaction,

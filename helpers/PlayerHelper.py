@@ -1,5 +1,6 @@
 import json
 
+from helpers import FactionData
 from helpers.EmojiHelper import Emoji
 
 
@@ -17,7 +18,28 @@ class PlayerHelper:
 
     @staticmethod
     def is_reputation_only_slot(player, index):
-        return player["name"] == "Atlantians" and index < 2
+        return index in FactionData.of(player).get("reputation_only_slots", [])
+
+    @staticmethod
+    def blueprint_key(ship_type):
+        """A ship's key in per-blueprint faction data: int -> interceptor, drd -> dread."""
+        return {"int": "interceptor", "cru": "cruiser", "drd": "dread", "sb": "starbase"}.get(ship_type, ship_type)
+
+    @staticmethod
+    def get_phase_module_slots(player, ship_type):
+        return FactionData.of(player).get("phase_module_slots", {}).get(PlayerHelper.blueprint_key(ship_type), [])
+
+    @staticmethod
+    def get_spine_cannon_slots(player, ship_type):
+        return FactionData.of(player).get("spine_cannon_slots", {}).get(PlayerHelper.blueprint_key(ship_type), [])
+
+    @staticmethod
+    def is_spine_gun(part):
+        """A Spine Cannon slot holds a gun: dice, no missile rack, no rift die."""
+        with open("data/parts.json", "r") as f:
+            part_stats = json.load(f).get(part, {})
+        return bool(part_stats.get("dice")) and not part_stats.get("missile") \
+            and "pink" not in part_stats["dice"]
 
     @staticmethod
     def has_reputation_slot_for_relation(player):
@@ -108,6 +130,35 @@ class PlayerHelper:
         self.stats["magPartPoints"] = amount
         return (f"\n> Adjusted magellan points for kept parts from {before} to {amount}")
 
+    def adjust_wraith_souls(self, adjustment):
+        before = self.stats.get("wraithSouls", 0)
+        amount = max(0, before + adjustment)
+        self.stats["wraithSouls"] = amount
+        return f"\n> Adjusted souls captured from {before} to {amount}"
+
+    @staticmethod
+    def wraith_soul_message(player, tile_label):
+        return (f"Soul-Hunters: {player['player_name']} captured a soul in {tile_label}"
+                f" (souls: {player.get('wraithSouls', 0)}). Each soul is +1 VP and"
+                " +1 offboard power on every blueprint.")
+
+    @staticmethod
+    def capture_wraith_soul(player, tile, last_cube: bool = True):
+        """Soul-Hunters: one soul for a sector whose enemy player population was destroyed.
+        `last_cube` is False for the destroy-all path, where the cubes are removed afterwards."""
+        if not FactionData.has(player, "soul_hunters"):
+            return False
+        owner = tile.get("owner")
+        if not isinstance(owner, str) or owner == "ai" or owner == player.get("color"):
+            return False
+        has_player_pop = any(sum(tile.get(f"{kind}_pop", [])) > 0 for kind in (
+            "money", "science", "material", "moneyadv", "scienceadv", "materialadv",
+            "orbital", "disc"))
+        if has_player_pop == last_cube:
+            return False
+        PlayerHelper(player.get("color"), player).adjust_wraith_souls(1)
+        return True
+
     def spend_influence_on_action(self, action: str):
         self.adjust_influence(-1)
         self.stats["allianceLeaveClosed"] = True
@@ -153,6 +204,17 @@ class PlayerHelper:
         if f"old_{ship}_parts" not in self.stats:
             self.stats[f"old_{ship}_parts"] = self.stats[f"{ship}_parts"]
 
+    @staticmethod
+    def sync_blueprint_slots(player):
+        """A faction's blueprint can gain a slot after a game starts; pad the save to what it prints now."""
+        printed = FactionData.BY_NAME.get(player.get("name"), {})
+        for ship in ("interceptor", "cruiser", "dread", "starbase", "orb"):
+            slots = len(printed.get(f"{ship}_parts", []))
+            for key in (f"{ship}_parts", f"old_{ship}_parts"):
+                parts = player.get(key)
+                if parts is not None and len(parts) < slots:
+                    parts.extend(["empty"] * (slots - len(parts)))
+
     def getAvailableShipParts(self):
         with open("data/parts.json", "r") as f:
             part_stats = json.load(f)
@@ -181,10 +243,11 @@ class PlayerHelper:
         cost_type = {"orb": "orbital", "mon": "monolith"}.get(ship_type, ship_type)
         if base_cost is None:
             base_cost = player[f"cost_{cost_type}"]
-        if player.get("name") != "Atlantians":
+        per_part = FactionData.of(player).get("discovery_part_ship_cost", 0)
+        if not per_part:
             return base_cost
         discovery_parts = PlayerHelper.installed_discovery_part_count(player, ship_type)
-        return base_cost + max(0, discovery_parts - 1)
+        return base_cost + per_part * max(0, discovery_parts - 1)
 
     def passTurn(self, passed: bool):
         self.stats["passed"] = passed

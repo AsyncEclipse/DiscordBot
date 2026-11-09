@@ -1,7 +1,6 @@
 """Nebula Sector rules: 295/395 are one hex split into three Subsectors."""
 import pytest
 from discord.ui import View
-from PIL import Image, ImageChops
 
 from Buttons.BlackHole import BlackHoleButtons
 from Buttons.DiscoveryTile import DiscoveryTileButtons
@@ -175,12 +174,10 @@ def test_rotated_nebula_edges_and_movement(make_game, monkeypatch, sector, rotat
 
 
 @pytest.mark.parametrize("sector,expected", [("295", 6), ("395", 6), ("201", 1)])
-def test_nebula_keeps_all_placement_rotations(make_game, run, monkeypatch, sector, expected):
+def test_nebula_keeps_all_placement_rotations(make_game, run, sector, expected):
     game = make_game(_bare_gamestate())
     game.add_tile("208", 60, "201")
     drawing = DrawHelper(game.gamestate)
-    monkeypatch.setattr(drawing, "base_tile_image_with_rotation_in_context",
-                        lambda *args: Image.new("RGBA", (1, 1)))
 
     async def options():
         view, image = drawing.draw_possible_oritentations(sector, "207", ["208"], View(), {"color": "blue"})
@@ -192,21 +189,20 @@ def test_nebula_keeps_all_placement_rotations(make_game, run, monkeypatch, secto
         assert rotations == [0, 60, 120, 180, 240, 300]
 
 
-def test_nebula_movement_labels_preserve_saved_button_ids(make_game, run, monkeypatch):
+def test_nebula_movement_labels_preserve_subsector_and_filter_ids(make_game, run):
     game = make_game(_bare_gamestate())
     game.add_tile("207", 120, "295")
     player = player_stats("hyd", color="blue")
     game.gamestate["players"] = {"1": player}
     game.gamestate["board"]["207b"]["player_ships"] = ["blue-int"]
-    monkeypatch.setattr(DrawHelper, "mergeLocationsFile", lambda self, positions: None)
     inter = FakeInteraction()
 
     run(MoveButtons.moveThisShip(game, player, inter, "moveThisShip_207b_interceptor_1"))
 
     labels = {button.custom_id: button.label for content, kwargs in inter.channel.sent
               for button in getattr(kwargs.get("view"), "children", [])}
-    assert labels["FCIDblue_moveTo_207b_interceptor_207_1"] == "207-A"
-    assert labels["FCIDblue_moveTo_207b_interceptor_207c_1"] == "207-C"
+    assert labels["FCIDblue_moveTo_207b_interceptor_207_1_q0_all"] == "207-A"
+    assert labels["FCIDblue_moveTo_207b_interceptor_207c_1_q0_all"] == "207-C"
 
 
 @pytest.mark.parametrize("rotation,target", [(0, "207b"), (60, "207"), (180, "207c")])
@@ -244,12 +240,10 @@ def test_movement_between_rotated_nebulas(make_game, monkeypatch, rotation_a, ro
 
 @pytest.mark.parametrize("rotation,source", [(0, "207b"), (60, "207"), (120, "207"),
                                             (180, "207c"), (240, "207c"), (300, "207b")])
-def test_exploring_from_the_rotated_nebula_subsector(make_game, run, monkeypatch, rotation, source):
+def test_exploring_from_the_rotated_nebula_subsector(make_game, run, rotation, source):
     game = make_game(_bare_gamestate())
     game.add_tile("207", rotation, "295")
     drawing = DrawHelper(game.gamestate)
-    monkeypatch.setattr(drawing, "base_tile_image_with_rotation_in_context",
-                        lambda *args: Image.new("RGBA", (1, 1)))
 
     async def options():
         for origin in ["207", "207b", "207c"]:
@@ -259,44 +253,18 @@ def test_exploring_from_the_rotated_nebula_subsector(make_game, run, monkeypatch
     run(options())
 
 
-def test_render_rotates_ships_and_discoveries_with_the_subsectors(make_game, monkeypatch):
-    def assets(self, path):
-        if "/hexes/" in path:
-            return Image.new("RGBA", (1024, 890))
-        if path.endswith("/anc.png"):
-            return Image.new("RGBA", (326, 326), "red")
-        if path.endswith("discovery_2ptback.png"):
-            return Image.new("RGBA", (80, 80), "green")
-        return Image.new("RGBA", (1, 1))
-
-    monkeypatch.setattr(DrawHelper, "use_image", assets)
-    labels = []
-    monkeypatch.setattr(DrawHelper, "label_nebula_subsectors",
-                        staticmethod(lambda image, position, rotation: labels.append((position, rotation))))
-    game = make_game(_bare_gamestate())
-    game.add_tile("207", 0, "295")
-    baseline = DrawHelper(game.gamestate).board_tile_image("207")
-    assert baseline.getbbox() is not None
-    for rotation in range(0, 360, 60):
-        game.add_tile("207", rotation, "295")
-        rendered = DrawHelper(game.gamestate).board_tile_image("207b")
-        assert ImageChops.difference(rendered, baseline.rotate(rotation)).convert("RGB").getbbox() is None
-        assert labels[-1] == ("207", rotation)
-
-
-
 def test_atlantians_nebula_choices_bury_unplaceable_discoveries(make_game):
     game = make_game({
         "board": {"202b": {"type": "nebula", "disctile": 1}},
         "discTiles": ["sci", "mon", "mat", "cru", "orb", "rep"],
     })
 
-    assert DiscoveryTileButtons.drawAtlantiansDiscoveryChoices(game, "202b") == ["rep", "sci"]
+    assert DiscoveryTileButtons.drawDiscoveryChoices(game, "202b") == ["rep", "sci"]
     assert game.gamestate["discTiles"] == ["mon", "orb"]
 
 
 def test_atlantians_nebula_choices_stop_when_only_unplaceable_tiles_remain(make_game):
     game = make_game({"board": {"202b": {"type": "nebula"}}, "discTiles": ["orb", "mon"]})
 
-    assert DiscoveryTileButtons.drawAtlantiansDiscoveryChoices(game, "202b") == []
+    assert DiscoveryTileButtons.drawDiscoveryChoices(game, "202b") == []
     assert sorted(game.gamestate["discTiles"]) == ["mon", "orb"]

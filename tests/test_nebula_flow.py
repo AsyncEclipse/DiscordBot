@@ -7,21 +7,11 @@ import itertools
 import os
 import shutil
 
-import pytest
 
 import config
-from helpers.DrawHelper import DrawHelper
 from tests.fakes import buttons, reload
 
 P1, P2 = 1, 2
-
-
-@pytest.fixture(autouse=True)
-def no_images(monkeypatch):
-    # rendering the map takes ~40s per press; the flow only needs the buttons
-    for name in ("mergeLocationsFile", "board_tile_image_file", "player_area", "show_player_ship_area",
-                 "show_AI_stats", "show_map", "show_game"):
-        monkeypatch.setattr(DrawHelper, name, lambda *a, **k: None)
 
 
 def _move(press, ch, pid, color, origin, ship, dest):

@@ -163,6 +163,9 @@ class GameCommands(commands.GroupCog, name="game"):
     @app_commands.command(name="undo_to_last_turn_start")
     async def undo_to_last_turn_start(self, interaction: discord.Interaction):
         game = GamestateHelper(interaction.channel)
+        if game.gamestate.get("pre_game") and not game.gamestate["pre_game"].get("started"):
+            await interaction.response.send_message("The game has not started yet, so there is no turn to undo.")
+            return
         if game.backUpToLastSaveFile():
             await interaction.response.send_message("Successfully backed up to the last save file. "
                                                     "This generally means it backed up to the"
@@ -171,7 +174,7 @@ class GameCommands(commands.GroupCog, name="game"):
                                                     + str(game.getNumberOfSaveFiles()) + " save files remain.")
             game.saveLastButtonPressed("restart")
         else:
-            await interaction.response.send_message("Ran out of save files, could not back up")
+            await interaction.response.send_message("Could not back up: the latest save is from setup or no saves remain.")
 
     @app_commands.command(name="eliminate_player")
     async def eliminate_player(self, interaction: discord.Interaction, player: discord.Member):

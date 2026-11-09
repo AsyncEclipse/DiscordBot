@@ -1,13 +1,11 @@
-import asyncio
 import random
 import config
 import discord
-from Buttons.Turn import TurnButtons
-from Buttons.DiscoveryTile import DiscoveryTileButtons
-from Buttons.Population import PopulationButtons
-from Buttons.Research import ResearchButtons
+from Buttons.PreGame import PreGameButtons
 from helpers.EmojiHelper import Emoji
+from helpers import FactionData
 from helpers.GamestateHelper import GamestateHelper
+from helpers.Turtugan import DeepSpace
 from discord.ui import View, Button
 
 
@@ -77,9 +75,8 @@ class DraftButtons:
                              ("Terran Federation (Hydran)", "ter4"),
                              ("Terran Republic (Draco)", "ter5"),
                              ("Terran Union (Planta)", "ter6")]
-        communityFactions = [("Atlantians", "atl"),
-                             ("Remnants of Ra", "ra"),
-                             ("Techno-Mages", "tm")]
+        communityFactions = [(faction["name"], key) for key, faction in FactionData.FACTIONS.items()
+                             if faction.get("community")]
         communityFactionKeys = {key for faction, key in communityFactions}
         if game.gamestate.get("community_factions", False):
             factionsAvailable.extend(communityFactions)
@@ -97,10 +94,8 @@ class DraftButtons:
             shorterName = faction
             if "(" in faction:
                 shorterName = shorterName[:(faction.find("(")-1)]
-            shortFaction = game.getShortFactionNameFromFull(shorterName)
-            if "terran" in shortFaction:
-                shortFaction += "_"
-            emoji = Emoji.getEmojiByName(shortFaction + "token")
+            shortFaction = FactionData.artwork_name(shorterName)
+            emoji = Emoji.getEmojiByName(Emoji.token_name(shortFaction))
             view.add_item(Button(label=f"{faction}", emoji=emoji, style=discord.ButtonStyle.gray,
                                  custom_id=f"draftFaction_{key}_{faction}"))
         return view
@@ -116,7 +111,8 @@ class DraftButtons:
         await interaction.channel.send(f"{interaction.user.mention} drafted {factionName}.")
         if factionKey == "exl":
             await interaction.followup.send(f"REMINDER {interaction.user.mention}: You start with one extra colony "
-                                            f"ship to be used on your first turn to populate your starting orbital.")
+                                            f"ship to be used to populate your starting orbital before the game "
+                                            f"begins.")
         await interaction.message.delete()
         game.removeFromKey("draftingPlayers", playerID)
         game.addToKey("draftedFactions", (playerID, factionKey))
@@ -136,33 +132,7 @@ class DraftButtons:
 
     @staticmethod
     def getColor(faction: str):
-        if faction == "ter6" or faction == "pla":
-            return "green"
-        if faction == "ter3" or faction == "eri":
-            return "red"
-        if faction == "ter1" or faction == "ori":
-            return "purple"
-        if faction == "ter2" or faction == "mec":
-            return "white"
-        if faction == "ter5" or faction == "dra":
-            return "yellow"
-        if faction == "ter4" or faction == "hyd":
-            return "blue"
-        if faction == "mag":
-            return "pink"
-        if faction == "lyr":
-            return "orange"
-        if faction == "rho":
-            return "brown"
-        if faction == "exl":
-            return "teal"
-        if faction == "atl":
-            return "blue"
-        if faction == "ra":
-            return "yellow"
-        if faction == "tm":
-            return "purple"
-        return "green"
+        return FactionData.FACTIONS.get(faction, {}).get("setup_color", "green")
 
     @staticmethod
     async def generalSetup(interaction: discord.Interaction, game: GamestateHelper,
@@ -249,20 +219,8 @@ class DraftButtons:
         if is_initial_setup:
             for player_id in temp_player_list:
                 player = game.get_player(player_id, interaction)
-                if player is not None and "anl" in player.get("nano_tech", []):
-                    home = game.getLocationFromID(player["home_planet"])
-                    game.addDiscTile(home)
-                    await DiscoveryTileButtons.exploreDiscoveryTile(game, home, interaction, player)
                 if player is not None:
-                    await PopulationButtons.offerAncientsCube(game, player, interaction,
-                                                              game.getLocationFromID(player["home_planet"]))
-                    await ResearchButtons.offerSetupTech(game, player, interaction)
-
-        asyncio.create_task(game.showUpdate("Start of Game", interaction))
-        player = game.get_player(temp_player_list[0],interaction)
-        TurnButtons.startNewTurn(player, game)
-        view = TurnButtons.getStartTurnButtons(game, player, "dummy")
-        game.updatePingTime()
-        await interaction.channel.send(f"## {game.getPlayerEmoji(player)} started their turn.")
-        await interaction.channel.send(f"{player['player_name']} use these buttons to do your turn"
-                                       + game.displayPlayerStats(player), view=view)
+                    await DeepSpace.post_reserve(game, player, interaction.channel)
+            await PreGameButtons.startPreGame(game, interaction, temp_player_list)
+        elif not game.preGameTasks():
+            await PreGameButtons.startGame(game, interaction, temp_player_list[0])

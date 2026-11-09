@@ -52,6 +52,8 @@ class ImageCacheHelper:
         elif "factions" in folder.lower():
             if "ambassador" in filename.lower():
                 return (58, 58)
+            elif "carapace" in filename.lower():
+                return (136, 120)
             elif "shrine_board" in filename.lower():
                 return (187*2, 171*2)
             elif "shrine" in filename.lower():

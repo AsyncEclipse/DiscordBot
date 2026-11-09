@@ -1,7 +1,8 @@
 import pytest
 
+from Buttons.Explore import ExploreButtons
 from Buttons.Move import MoveButtons
-from tests.fakes import board_tile, player_stats
+from tests.fakes import POS, board_tile, player_stats
 
 
 @pytest.mark.parametrize("ships, expected", [
@@ -22,3 +23,22 @@ def test_move_origins_require_a_mobile_unpinned_ship(make_game, ships, expected)
     })
 
     assert MoveButtons.getListOfUnpinnedShipTiles(game, player) == expected
+
+
+@pytest.mark.parametrize("faction, opponent, expected", [
+    ("hyd", "ai-anc", False),
+    ("dra", "ai-anc", True),
+    ("hyd", "ai-grd", False),
+    ("dra", "ai-grd", False),
+    ("hyd", "ai-gcds", False),
+    ("dra", "ai-gcds", False),
+])
+def test_only_draco_is_unpinned_by_ancients(make_game, faction, opponent, expected):
+    player = player_stats(faction, color="blue")
+    ships = ["blue-int", opponent]
+    game = make_game({
+        "players": {"1": player},
+        "board": board_tile(ships),
+    })
+
+    assert ExploreButtons.doesPlayerHaveUnpinnedShips(player, ships, game, POS) is expected

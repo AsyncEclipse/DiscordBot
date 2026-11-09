@@ -5,6 +5,7 @@ from Buttons.DiscoveryTile import DiscoveryTileButtons
 from Buttons.Shrine import ShrineButtons
 from helpers.DrawHelper import DrawHelper
 from helpers.EmojiHelper import Emoji
+from helpers import FactionData
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 from discord.ui import View, Button
@@ -12,21 +13,26 @@ from discord.ui import View, Button
 
 class ResearchButtons:
     @staticmethod
-    async def handle_wild_tech_selection(view: View, tech_details, tech, player):
+    async def handle_wild_tech_selection(view: View, tech_details, tech, player, setup=False):
         for tech_type, button_style in [("military", discord.ButtonStyle.red),
                                         ("grid", discord.ButtonStyle.green),
                                         ("nano", discord.ButtonStyle.gray)]:
             cost = ResearchButtons.calculate_cost(tech_details, tech_type, player)
-            if len(player[f"{tech_type}_tech"]) == 7:
+            if len(player[f"{tech_type}_tech"]) == 7 or (setup and cost > player["science"]):
                 continue
             view.add_item(Button(label=f"{tech_type.capitalize()} ({cost})",
                                  style=button_style,
-                                 custom_id=f"FCID{player['color']}_getTech_{tech}_{tech_type}"))
+                                 custom_id=f"FCID{player['color']}_getTech_{tech}_{tech_type}{'_setup' if setup else ''}"))
+        if setup:
+            view.add_item(Button(label="No thanks", style=discord.ButtonStyle.red,
+                                 custom_id=f"FCID{player['color']}_declineSetupTech"))
         return view
 
     @staticmethod
     async def handle_specific_tech_selection(interaction: discord.Interaction, game: GamestateHelper,
                                              player, player_helper: PlayerHelper, tech_details, tech_type, tech):
+        pending_task = True
+        is_setup = [game.get_player_from_color(player["color"]), "setup_tech"] in game.preGameTasks()
         cost = ResearchButtons.calculate_cost(tech_details, tech_type, player)
         game.playerResearchTech(game.get_player_from_color(player["color"]), tech, tech_type)
         with open("data/techs.json", "r") as f:
@@ -52,7 +58,7 @@ class ResearchButtons:
                     view.add_item(Button(label=f"Pay {trade_value} {resource_type.capitalize()}",
                                          style=button_style,
                                          custom_id=f"FCID{player['color']}_payAtRatio_{resource_type}"))
-            if player["colony_ships"] > 0 and game.get_short_faction_name(player["name"]) == "magellan":
+            if player["colony_ships"] > 0 and FactionData.has(player, "colony_ship_resources"):
                 emojiC = Emoji.getEmojiByName("colony_ship")
                 view.add_item(Button(label="Get 1 Science", style=discord.ButtonStyle.red, emoji=emojiC,
                                      custom_id=f"FCID{player['color']}_magColShipForSpentResource_science"))
@@ -68,10 +74,12 @@ class ResearchButtons:
                 return
             msg = player_helper.adjust_science(-paid)
             game.update_player(player_helper)
-            if player["name"] == "Rho Indi Syndicate":
+            money_ratio = FactionData.of(player).get("money_trade_ratio", 1)
+            if money_ratio > 1:
                 await interaction.channel.send(f"Attempted to pay a cost of {str(cost)}{msg}.\n"
                                                "Please pay the rest of the cost by trading other resources "
-                                               "at your materials ratio of 3:1 or your money ratio of 3:2.")
+                                               f"at your materials ratio of {trade_value}:1 or your money"
+                                               f" ratio of {trade_value}:{money_ratio}.")
             else:
                 await interaction.channel.send(f"Attempted to pay a cost of {str(cost)}{msg}.\n"
                                                "Please pay the rest of the cost by trading other resources"
@@ -86,8 +94,10 @@ class ResearchButtons:
                 view.add_item(Button(label=f"Gain 5 {resource_type.capitalize()}",
                                      style=button_style,
                                      custom_id=f"FCID{player['color']}_gain5resource_{resource_type}"))
+            done_button = "finishSetupResources" if is_setup else "deleteMsg"
             view.add_item(Button(label="Done Gaining", style=discord.ButtonStyle.red,
-                                 custom_id=f"FCID{player['color']}_deleteMsg"))
+                                 custom_id=f"FCID{player['color']}_{done_button}"))
+            pending_task = "setup_resources"
             await interaction.channel.send("You may gain 5 of any type of resource for each artifact you have.",
                                            view=view)
         if tech_details["infdisc"] == 2:
@@ -97,6 +107,7 @@ class ResearchButtons:
                 new_upkeep = f"-{player_helper.upkeepCosts()}"
             await interaction.channel.send(f"{interaction.user.mention}, after researching this tech your upkeep cost is now {new_upkeep}.")
         if tech == "wap":
+            pending_task = "setup_warp"
             view = View()
             seenTiles = []
             for tile in player["owned_tiles"]:
@@ -107,32 +118,40 @@ class ResearchButtons:
             await interaction.channel.send("Choose which tile you would like to place the warp tile in", view=view)
         if tech_details["dtile"] != 0:
             game.addDiscTile(game.getLocationFromID(player["home_planet"]))
-            await DiscoveryTileButtons.exploreDiscoveryTile(game, game.getLocationFromID(player["home_planet"]),
-                                                            interaction, player)
+            offered = await DiscoveryTileButtons.exploreDiscoveryTile(
+                game, game.getLocationFromID(player["home_planet"]), interaction, player)
+            if offered:
+                pending_task = "discovery_tile"
         lenTech = len(player[f"{tech_type}_tech"])
         if lenTech == 4 and "magDiscTileUsed" in player and not player.get("magDiscTileUsed"):
             await interaction.channel.send(player["player_name"] + " due to researching your fourth tech"
                                            " for the first time this game as Magellan, you get a discovery tile")
             game.addDiscTile(game.getLocationFromID(player["home_planet"]))
             game.useMagDisc(game.get_player_from_color(player["color"]))
-            await DiscoveryTileButtons.exploreDiscoveryTile(game, game.getLocationFromID(player["home_planet"]),
-                                                            interaction, player)
+            offered = await DiscoveryTileButtons.exploreDiscoveryTile(
+                game, game.getLocationFromID(player["home_planet"]), interaction, player)
+            if offered:
+                pending_task = "discovery_tile"
         await ResearchButtons.offerAncientInstinctUpgrade(player, interaction, tech, tech_details)
+        return pending_task
 
     @staticmethod
     async def offerSetupTech(game: GamestateHelper, player, interaction: discord.Interaction):
         """Techno-Mages may spend part of their initial science on one technology before the game begins."""
-        if player.get("name") != "Techno-Mages":
-            return
+        if not FactionData.has(player, "setup_tech"):
+            return False
         view = View()
         view.add_item(Button(label="Buy 1 Technology", style=discord.ButtonStyle.blurple,
                              custom_id=f"FCID{player['color']}_setupTech"))
+        view.add_item(Button(label="No thanks", style=discord.ButtonStyle.red,
+                             custom_id=f"FCID{player['color']}_declineSetupTech"))
         await interaction.channel.send(f"{player['player_name']}, you may spend part of your initial science to"
                                        " buy 1 technology before the game begins if you wish.", view=view)
+        return True
 
     @staticmethod
     async def offerAncientInstinctUpgrade(player, interaction: discord.Interaction, tech: str, tech_details):
-        if player["name"] != "Atlantians":
+        if not FactionData.has(player, "upgrade_after_research"):
             return
         with open("data/parts.json", "r") as f:
             if tech not in json.load(f):
@@ -174,11 +193,10 @@ class ResearchButtons:
     @staticmethod
     def getPlayerTotalAvailableScience(player, game):
         extra = 0
-        if player["colony_ships"] > 0 and game.get_short_faction_name(player["name"]) == "magellan":
+        if player["colony_ships"] > 0 and FactionData.has(player, "colony_ship_resources"):
             extra += player["colony_ships"]
         money_value = player["money"] // player["trade_value"]
-        if player["name"] == "Rho Indi Syndicate":
-            money_value *= 2
+        money_value *= FactionData.of(player).get("money_trade_ratio", 1)
 
         return player["science"] + money_value + (player["materials"] // player["trade_value"]) + extra
 
@@ -239,24 +257,39 @@ class ResearchButtons:
                     if buttonCount < 26:
                         view.add_item(Button(label=f"{tech_name} ({cost})", style=buttonStyle,
                                              emoji=Emoji.getEmojiByName(techName),
-                                             custom_id=f"FCID{player['color']}_getTech_{tech}_{tech_type}"))
+                                             custom_id=f"FCID{player['color']}_getTech_{tech}_{tech_type}{'_setup' if setup else ''}"))
                     else:
                         view2.add_item(Button(label=f"{tech_name} ({cost})", style=buttonStyle,
                                               emoji=Emoji.getEmojiByName(techName),
-                                              custom_id=f"FCID{player['color']}_getTech_{tech}_{tech_type}"))
+                                              custom_id=f"FCID{player['color']}_getTech_{tech}_{tech_type}{'_setup' if setup else ''}"))
                     buttonCount += 1
-        if player["name"] == "Rho Indi Syndicate":
+        if setup:
+            # the pre-game purchase is optional, so the menu has to be able to be declined
+            decline = Button(label="No thanks", style=discord.ButtonStyle.red,
+                             custom_id=f"FCID{player['color']}_declineSetupTech")
+            if len(view.children) < 25:
+                view.add_item(decline)
+            else:
+                view2.add_item(decline)
+        money_ratio = FactionData.of(player).get("money_trade_ratio", 1)
+        if setup:
+            await interaction.channel.send(f"{player['player_name']}, choose one technology to buy using only"
+                                           f" your {player['science']} initial science, or decline."
+                                           " The discounted cost is in parentheses.", view=view)
+        elif money_ratio > 1:
             await interaction.channel.send(f"{player['player_name']}, select the tech you would like to acquire. "
                                            "The discounted cost is in parentheses. You currently have "
-                                           f"{str(player['science'])} science, and can trade materials at a 3:1 "
-                                           "ratio or money at 3:2 ratio.", view=view)
+                                           f"{str(player['science'])} science, and can trade materials at a "
+                                           f"{player['trade_value']}:1 ratio or money at "
+                                           f"{player['trade_value']}:{money_ratio} ratio.",
+                                           view=view)
         else:
             await interaction.channel.send(f"{player['player_name']}, select the tech you would like to acquire. "
                                            "The discounted cost is in parentheses. "
                                            f"You currently have {str(player['science'])} science,"
                                            " and can trade other resources for science"
                                            f" at a {str(player['trade_value'])}:1 ratio", view=view)
-        if buttonCount > 26:
+        if view2.children:
             await interaction.channel.send(view=view2)
         await interaction.followup.send(file=await asyncio.to_thread(drawing.show_available_techs), ephemeral=True)
         if "shrine_in_storage" in player and len(ShrineButtons.getInitialShrineButtons(game, player).children) > 1:
@@ -288,20 +321,31 @@ class ResearchButtons:
     @staticmethod
     async def getTech(game: GamestateHelper, player, player_helper: PlayerHelper,
                       interaction: discord.Interaction, buttonID: str):
-        await interaction.message.delete()
-        tech = buttonID.split("_")[1]
-        tech_type = buttonID.split("_")[2]
-        view = View()
+        tech, tech_type = buttonID.split("_")[1:3]
+        is_setup = [game.get_player_from_color(player["color"]), "setup_tech"] in game.preGameTasks()
         with open("data/techs.json", "r") as f:
             tech_data = json.load(f)
         tech_details = tech_data.get(tech)
+        if buttonID.endswith("_setup") and not is_setup:
+            await interaction.followup.send("That pre-game purchase is already finished.", ephemeral=True)
+            return False
+        if is_setup:
+            if (tech not in game.gamestate["available_techs"] or tech in player_helper.getTechs()
+                    or tech_type not in ("any", "military", "grid", "nano")
+                    or (tech_details["track"] != "any" and tech_type != tech_details["track"])
+                    or ResearchButtons.calculate_cost(tech_details, tech_type, player) > player["science"]
+                    or (tech_type != "any" and len(player[f"{tech_type}_tech"]) >= 7)):
+                await interaction.followup.send("That technology is unavailable or costs more than your initial science.",
+                                                ephemeral=True)
+                return False
+        await interaction.message.delete()
         if tech_type == "any":
-            view = await ResearchButtons.handle_wild_tech_selection(view, tech_details, tech, player)
+            view = await ResearchButtons.handle_wild_tech_selection(View(), tech_details, tech, player, is_setup)
             await interaction.channel.send(f"{interaction.user.mention}, select the row of tech you would like to place"
                                            " this wild tech in. The discounted cost is in parentheses.", view=view)
-        else:
-            await ResearchButtons.handle_specific_tech_selection(interaction, game, player, player_helper,
-                                                                 tech_details, tech_type, tech)
+            return False
+        return await ResearchButtons.handle_specific_tech_selection(interaction, game, player, player_helper,
+                                                                     tech_details, tech_type, tech)
 
     @staticmethod
     async def payAtRatio(game: GamestateHelper, player, player_helper: PlayerHelper,

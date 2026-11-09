@@ -1,4 +1,5 @@
 import json
+from helpers import FactionData
 from helpers.PlayerHelper import PlayerHelper
 
 
@@ -8,6 +9,7 @@ class Ship:
         self.speed = 0
         self.energy = 0
         self.dice = []
+        self.dice_sources = []
         self.computer = 0
         self.shield = 0
         self.missile = []
@@ -18,10 +20,10 @@ class Ship:
         self.cost = 0
         self.jumpdrive = 0
 
-    def build_ship_stats(self, ship_parts):
+    def build_ship_stats(self, ship_parts, exclude_dice_indices=()):
         with open("data/parts.json", "r") as f:
             part_dict = json.load(f)
-        for part in ship_parts:
+        for index, part in enumerate(ship_parts):
             if part == "empty":
                 continue
             if part == "jud":
@@ -32,9 +34,10 @@ class Ship:
             self.energy += part_stats["nrg_src"]
             self.total_energy += part_stats["nrg_src"]
             self.energy -= part_stats["nrg_use"]
-            if part_stats["dice"]:
+            if part_stats["dice"] and index not in exclude_dice_indices:
                 for die in part_stats["dice"]:
                     self.dice.append(die)
+                    self.dice_sources.append(index)
             self.computer += part_stats["comp"]
             self.shield += part_stats["shield"]
             if part_stats["missile"]:
@@ -62,8 +65,11 @@ class PlayerShip(Ship):
         self.ship_type = self.ship_type_fixer(ship_type)
         self.speed = player[f"base_{self.ship_type}_speed"]
         self.energy = player[f"base_{self.ship_type}_nrg"]
-        self.total_energy = player[f"base_{self.ship_type}_nrg"]
-        self.computer = player[f"base_{self.ship_type}_comp"]
+        if FactionData.has(player, "soul_hunters"):
+            self.energy += player.get("wraithSouls", 0)
+        self.total_energy = self.energy
+        self.base_computer = player[f"base_{self.ship_type}_comp"]
+        self.computer = self.base_computer
 
         # added for Outcast factions
         try:
@@ -76,12 +82,36 @@ class PlayerShip(Ship):
             pass
 
         self.ship_parts = player[f"{self.ship_type}_parts"]
-        self.build_ship_stats(self.ship_parts)
+        spine = PlayerHelper.get_spine_cannon_slots(player, self.ship_type)
+        # the augment slot's weapon only feeds its own cannon slot, never a die of its own
+        self.build_ship_stats(self.ship_parts, [spine[1]] if len(spine) > 1 else [])
         base_cost = 5 if "orb" in self.ship_type else None
         self.cost = PlayerHelper.get_ship_cost(player, self.ship_type, base_cost)
 
+    def spine_augment(self):
+        """(cannon slot, augment slot, augment die colour) or None."""
+        spine = PlayerHelper.get_spine_cannon_slots(self.player, self.ship_type)
+        if len(spine) < 2:
+            return None
+        with open("data/parts.json", "r") as f:
+            part_dict = json.load(f)
+        augment = self.ship_parts[spine[1]]
+        if augment == "empty" or not part_dict.get(augment, {}).get("dice"):
+            return None
+        return spine[0], spine[1], part_dict[augment]["dice"][0]
+
     def getRange(self):
         return self.range
+
+    def check_valid_ship(self):
+        spine = PlayerHelper.get_spine_cannon_slots(self.player, self.ship_type)
+        if any(index >= len(self.ship_parts) or not PlayerHelper.is_spine_gun(self.ship_parts[index])
+               for index in spine):
+            return False
+        return not any([self.range <= 0 and self.ship_type not in ["starbase", "orb"],
+                        self.energy < 0,
+                        self.range > 0 and self.ship_type in ["starbase", "orb"]
+                        and not (self.ship_type == "starbase" and FactionData.has(self.player, "harvester"))])
 
     def getJumpDrive(self):
         return self.jumpdrive
@@ -120,11 +150,6 @@ class PlayerShip(Ship):
             return "orb"
         else:
             return ship_type
-
-    def check_valid_ship(self):
-        return not any([self.range <= 0 and self.ship_type not in ["starbase", "orb"],
-                        self.energy < 0,
-                        self.range > 0 and self.ship_type in ["starbase", "orb"]])
 
 
 class AI_Ship(Ship):

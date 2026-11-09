@@ -3,6 +3,7 @@ import discord
 from Buttons.DiscoveryTile import DiscoveryTileButtons
 from helpers.DrawHelper import DrawHelper
 from helpers.EmojiHelper import Emoji
+from helpers import FactionData
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
 from discord.ui import View, Button
@@ -31,7 +32,7 @@ class ShrineButtons:
     @staticmethod
     def getResourceAvailable(resource: str, player, game: GamestateHelper):
         extra = 0
-        if player["colony_ships"] > 0 and game.get_short_faction_name(player["name"]) == "magellan":
+        if player["colony_ships"] > 0 and FactionData.has(player, "colony_ship_resources"):
             extra += player["colony_ships"]
         trade = player["trade_value"]
         matAval = player["materials"] + player["money"] // trade + player["science"] // trade + extra
@@ -107,7 +108,7 @@ class ShrineButtons:
                     view.add_item(Button(label=f"Pay {trade_value} {resource_type.capitalize()}",
                                          style=button_style,
                                          custom_id=f"FCID{player['color']}_payAtRatio_{resource_type}"))
-            if player["colony_ships"] > 0 and game.get_short_faction_name(player["name"]) == "magellan":
+            if player["colony_ships"] > 0 and FactionData.has(player, "colony_ship_resources"):
                 emojiC = Emoji.getEmojiByName("colony_ship")
                 view.add_item(Button(label=f"Get 1 {resourceType}", style=discord.ButtonStyle.red, emoji=emojiC,
                                      custom_id=f"FCID{player['color']}_magColShipForSpentResource_{resourceType}"))

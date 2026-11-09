@@ -522,5 +522,17 @@
     "dtile": 0,
     "num": 1,
     "description": "Immediately place the Warp Portal token on any Sector you Control. The Warp Portal Tile connects this Sector to all other Warp Portal Sectors and is worth 1 VP if Controlled at the end of the game."
+  },
+  "phm": {
+    "name": "Phase Module",
+    "base_cost": 0,
+    "min_cost": 0,
+    "track": "military",
+    "activ1": 0,
+    "art_pt": 0,
+    "infdisc": 0,
+    "dtile": 0,
+    "num": 0,
+    "description": "This is built into all their ships, and they use this technology for a range of benefits, limited by how much power they have: Always: Cloaking Device; for 1 Power each: +1 to Hit, +1 Shield; for 2 Power: Neutron Bombs if researched, +2 Initiative; for 3 Power: Ignore Shields. Declare options at the start of each combat per blueprint."
   }
 }

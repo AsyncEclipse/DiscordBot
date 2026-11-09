@@ -1,16 +1,20 @@
 import asyncio
 import copy
+from contextlib import contextmanager
 import json
 import time
 import discord
 import config
 import shutil
+from helpers import FactionData
 from helpers.DrawHelper import DrawHelper
 from helpers.EmojiHelper import Emoji
 from helpers.PlayerHelper import PlayerHelper
+from helpers.Turtugan import DeepSpace, Harvester
 import os
 from jproperties import Properties
 import random
+import tempfile
 from discord.ui import View, Button
 
 # Nebula Sectors (295/395) are one hex split into three Subsectors. Edges are
@@ -32,6 +36,8 @@ class GamestateHelper:
         else:
             game_id = nameID
         self.game_id = game_id
+        self.save_batch_depth = 0
+        self.has_pending_save = False
         self.gamestate = self.get_gamestate()
 
     def getPlayersID(self, player):
@@ -219,9 +225,16 @@ class GamestateHelper:
                      if self.gamestate["board"][tile]["sector"] == str(id)),
                     None)
 
+    def preGameTasks(self):
+        """The pre-game actions still to do, as [player id, task] pairs."""
+        return self.gamestate.get("pre_game", {}).get("tasks", [])
+
     def get_gamestate(self):
         with open(f"{config.gamestate_path}/{self.game_id}.json", "r") as f:
-            return json.load(f)
+            gamestate = json.load(f)
+        for player in gamestate.get("players", {}).values():
+            PlayerHelper.sync_blueprint_slots(player)
+        return gamestate
 
     def saveEndRound(self):
         output_dir = f'GameHistory/{self.game_id}'
@@ -321,55 +334,9 @@ class GamestateHelper:
 
     @staticmethod
     def getShipsWithParts(player):
-        """Ship types this faction actually fields."""
-        ships = ["interceptor", "cruiser", "dread", "starbase", "orb"]
-        legal = []
-        for ship in ships:
-            if player['name'] == "Rho Indi Syndicate" and ship == "dread":
-                continue
-            if player['name'] == "The Exiles" and ship == "starbase":
-                continue
-            if player['name'] != "The Exiles" and ship == "orb":
-                continue
-            legal.append(ship)
-        return legal
-
-    def getShortFactionNameFromFull(self, fullName):
-        if fullName == "Descendants of Draco":
-            return "draco"
-        elif fullName == "Mechanema":
-            return "mechanema"
-        elif fullName == "Planta":
-            return "planta"
-        elif fullName == "Orian Hegemony" or fullName == "Orion Hegemony":
-            return "orion"
-        elif fullName == "Hydran Progress":
-            return "hydran"
-        elif fullName == "Eridani Empire" or fullName == "Eridian Empire":
-            return "eridani"
-        elif fullName == "Wardens of Magellan":
-            return "magellan"
-        elif fullName == "Enlightened of Lyra":
-            return "lyra"
-        elif fullName == "Rho Indi Syndicate":
-            return "rho"
-        elif fullName == "The Exiles":
-            return "exile"
-        elif fullName == "Atlantians":
-            return "atlantians"
-        elif fullName == "Remnants of Ra":
-            return "ra"
-        elif fullName == "Techno-Mages":
-            return "tm"
-        elif "Terran" in fullName:
-            return fullName.lower().replace(" ", "_")
-
-        return fullName
-
-    def find_player_faction_name_from_color(self, color):
-        if color == "ai" or self.get_player_from_color(color) == color:
-            return color
-        return self.gamestate["players"][self.get_player_from_color(color)]["name"]
+        """Ship types this faction actually fields (its blueprints live in its data)."""
+        return [ship for ship in ("interceptor", "cruiser", "dread", "starbase", "orb")
+                if FactionData.of(player).get(f"{ship}_parts")]
 
     def rotate_tile(self, position, orientation):
         tile = self.gamestate["board"][position]
@@ -432,7 +399,9 @@ class GamestateHelper:
                 discard = 0
                 if "tile_discard_deck_300" in self.gamestate:
                     discard = len(self.gamestate["tile_discard_deck_300"])
-                if adjTile not in self.gamestate["board"] and len(self.gamestate["tile_deck_300"]) + discard > 0 and adjTile in configs:
+                if (adjTile not in self.gamestate["board"] and adjTile in configs
+                        and (len(self.gamestate["tile_deck_300"]) + discard > 0
+                             or DeepSpace.keep_outer_rim(self))):
                     self.add_tile(adjTile, 0, "sector3back")
         if position is not None and tile.get("type") == "nebula":
             neighbors = configs.get(position)[0].split(",")
@@ -518,7 +487,12 @@ class GamestateHelper:
             self.gamestate["board"][position].pop("unitsToRetreat", None)
             self.gamestate["board"][position].pop("pendingRiftDice", None)
             self.gamestate["board"][position].pop("pendingRiftBackfire", None)
+            self.gamestate["board"][position].pop("carapaceShields", None)
+            self.gamestate["board"][position].pop("carapacePendingMissiles", None)
+            self.gamestate["board"][position].pop("carapaceRollOldLength", None)
             self.gamestate["board"][position].pop("combatEntryOrder", None)
+            self.gamestate["board"][position].pop("firstShotPhase", None)
+            self.gamestate["board"][position].pop("firstShotSide", None)
             for player in self.gamestate["players"]:
                 color = self.gamestate["players"][player]["color"]
                 key = "ships_destroyed_by_" + color
@@ -526,6 +500,7 @@ class GamestateHelper:
                 self.gamestate["board"][position].pop("retreatPenalty" + color, None)
             if "player_ships" in self.gamestate["board"][position]:
                 self.fixshipsOrder(position)
+        self.gamestate.pop("battleRepAdjustments", None)
         self.update()
 
     def getReputationTilesToDraw(self, position, color):
@@ -535,6 +510,11 @@ class GamestateHelper:
             count = 0
         if "damage_tracker" in self.gamestate["board"][position]:
             del self.gamestate["board"][position]["damage_tracker"]
+        if count == 0 and FactionData.has(self.getPlayerObjectFromColor(color), "honour_victorious"):
+            # Kurita's card removes every Battle Rep draw after any retreat, including destroyed ships.
+            self.gamestate["board"][position].pop(key, None)
+            self.update()
+            return 0
         if key not in self.gamestate["board"][position]:
             self.update()
             return count
@@ -567,10 +547,8 @@ class GamestateHelper:
     def updatePlayerNames(self, interaction: discord.Interaction):
         if self.gamestate.get("communityMode",False):
             for player in self.gamestate["players"]:
-                shortFaction = self.getShortFactionNameFromFull(self.gamestate["players"][player]["name"])
-                if "terran" in shortFaction:
-                    shortFaction += "_"
-                emoji = Emoji.getEmojiByName(f"{shortFaction}token")
+                shortFaction = FactionData.artwork_name(self.gamestate["players"][player]["name"])
+                emoji = Emoji.getEmojiByName(Emoji.token_name(shortFaction))
                 role = discord.utils.get(interaction.guild.roles, name=self.gamestate["players"][player]["color"])
                 if role != None:
                     self.gamestate["players"][player]["player_name"] = f"{role.mention} {emoji}"
@@ -599,7 +577,7 @@ class GamestateHelper:
                 if role:
                     await interaction.channel.send(role.mention +
                                                    " shuffling the discarded outer rim tiles back into the deck")
-            else:
+            elif not DeepSpace.keep_outer_rim(self):
                 keysToRemove = []
                 for key, value in self.gamestate["board"].items():
                     if value["sector"] == "sector3back":
@@ -705,6 +683,16 @@ class GamestateHelper:
         else:
             msg += "\nYou cannot place more money cubes because they have all been placed."
         msg += f"\nYou have {player['colony_ships']}/{player['base_colony_ships']} colony ships ready at this time."
+        if FactionData.has(player, "deep_space_explorers"):
+            reserve = player.get("deep_space_sectors", [])
+            msg += f"\nDeep Space reserve: {len(reserve)} hidden S3 sectors"
+        harvesters = player.get("harvester_placements", [])
+        if harvesters:
+            msg += "\nHarvesters: " + ", ".join(f"{item['position']} {item['square']} (+1 {item['resource']})"
+                                                for item in harvesters)
+        if FactionData.has(player, "soul_hunters"):
+            souls = player.get("wraithSouls", 0)
+            msg += f"\nSouls captured: {souls} (+{souls} offboard power, +{souls} VP)"
         return msg
 
     def setCombatants(self, players, pos):
@@ -853,17 +841,9 @@ class GamestateHelper:
             else:
                 tileCount = tileCount + 1
 
-    def refresh_two_colony_ships(self,  playerID):
+    def refresh_colony_ships(self, playerID, count):
         # "base_colony_ships"
-        minNum = min(self.gamestate["players"][playerID]["colony_ships"] + 2,
-                     self.gamestate["players"][playerID]["base_colony_ships"])
-        self.gamestate["players"][playerID]["colony_ships"] = minNum
-        self.update()
-        return minNum
-
-    def refresh_one_colony_ship(self,  playerID):
-        # "base_colony_ships"
-        minNum = min(self.gamestate["players"][playerID]["colony_ships"] + 1,
+        minNum = min(self.gamestate["players"][playerID]["colony_ships"] + count,
                      self.gamestate["players"][playerID]["base_colony_ships"])
         self.gamestate["players"][playerID]["colony_ships"] = minNum
         self.update()
@@ -947,6 +927,7 @@ class GamestateHelper:
                     self.gamestate["players"][player]["ship_stock"][2] += 1
                 if "sb" in i:
                     self.gamestate["players"][player]["ship_stock"][3] += 1
+                    Harvester.clear(self, position, color)
                 self.gamestate["board"][position]["player_ships"].remove(i)
             else:
                 if i + "adv" in self.gamestate["board"][position]["player_ships"]:
@@ -960,6 +941,10 @@ class GamestateHelper:
         for player in self.gamestate["players"]:
             p1 = PlayerHelper(player, self.get_player(player))
             neutrals, orbitals = p1.upkeep()
+            harvested = Harvester.produce(self, p1.stats)
+            if harvested:
+                await interaction.channel.send(f"{p1.stats['player_name']}'s Harvesters produced "
+                                               f"{', '.join(harvested)}.")
             for cube in range(orbitals):
                 view = View()
                 planetTypes = ["money", "science"]
@@ -1054,10 +1039,8 @@ class GamestateHelper:
         self.update()
 
     def getPlayerEmoji(self, player):
-        shortFaction = self.getShortFactionNameFromFull(player["name"])
-        if "terran" in shortFaction:
-            shortFaction += "_"
-        emoji = Emoji.getEmojiByName(f"{shortFaction}token")
+        shortFaction = FactionData.artwork_name(player["name"])
+        emoji = Emoji.getEmojiByName(Emoji.token_name(shortFaction))
         return emoji
 
     def createRoundNum(self):
@@ -1077,10 +1060,8 @@ class GamestateHelper:
         self.gamestate["players"][str(player_id)].update({"passed": False})
         self.gamestate["players"][str(player_id)].update({"perma_passed": False})
         name = self.gamestate["players"][str(player_id)]["player_name"]
-        shortFaction = self.getShortFactionNameFromFull(self.gamestate["players"][str(player_id)]["name"])
-        if "terran" in shortFaction:
-            shortFaction += "_"
-        emoji = Emoji.getEmojiByName(f"{shortFaction}token")
+        shortFaction = FactionData.artwork_name(self.gamestate["players"][str(player_id)]["name"])
+        emoji = Emoji.getEmojiByName(Emoji.token_name(shortFaction))
         self.gamestate["players"][str(player_id)]["player_name"] = f"{name} {emoji}"
         if self.gamestate.get("communityMode",False):
              role = discord.utils.get(interaction.guild.roles, name=self.gamestate["players"][str(player_id)]["color"])
@@ -1097,17 +1078,11 @@ class GamestateHelper:
             else:
                 p1 = PlayerHelper(i, self.get_player(i))
                 home = self.get_system_coord(p1.stats["home_planet"])
-                if p1.stats["name"] == "Orion Hegemony":
-                    self.gamestate["board"][home]["player_ships"].append(p1.stats["color"] + "-cru")
-                elif p1.stats["name"] == "Rho Indi Syndicate":
-                    self.gamestate["board"][home]["player_ships"] = 2 * [p1.stats["color"] + "-int"]
-                elif p1.stats["name"] == "The Exiles":
-                    self.gamestate["board"][home]["player_ships"] = [p1.stats["color"] + "-orb",
-                                                                     p1.stats["color"] + "-int"]
-                else:
-                    self.gamestate["board"][home]["player_ships"].append(p1.stats["color"] + "-int")
+                for ship in FactionData.of(p1.stats).get("starting_ships", ["int"]):
+                    self.gamestate["board"][home]["player_ships"].append(f"{p1.stats['color']}-{ship}")
+                DeepSpace.draw_reserve(self, p1.stats)
 
-                if p1.stats["name"] == "Eridani Empire":
+                if FactionData.has(p1.stats, "setup_reputation_tiles"):
                     random.shuffle(self.gamestate["reputation_tiles"])
                     p1.stats["reputation_track"][0] = self.gamestate["reputation_tiles"].pop(0)
                     p1.stats["reputation_track"][1] = self.gamestate["reputation_tiles"].pop(0)
@@ -1165,6 +1140,8 @@ class GamestateHelper:
             random.shuffle(third_sector_tiles)
             self.gamestate["tile_deck_300"].append(third_sector_tiles.pop(0))
             sector_draws -= 1
+        # the S3 sectors the game did not deal into the deck: extra ones a faction can use
+        self.gamestate["sector3_spare"] = third_sector_tiles
 
         while tech_draws > 0:
             random.shuffle(self.gamestate["tech_deck"])
@@ -1230,13 +1207,33 @@ class GamestateHelper:
         self.gamestate["players"][playerid]["discoveryTileBonusPointTiles"] = []
         self.update()
 
-    def update(self):
+    @contextmanager
+    def batch_save(self):
+        """Persist completed mutations even when resolution raises an exception."""
+        self.save_batch_depth += 1
         try:
-            with open(f"{config.gamestate_path}/{self.game_id}.json", "w") as f:
-                json.dump(self.gamestate, f)
-        except (OSError, IOError, json.JSONDecodeError, PermissionError):
-            with open(f"{config.gamestate_path}/{self.game_id}.json", "w") as f:
-                json.dump(self.gamestate, f)
+            yield
+        finally:
+            self.save_batch_depth -= 1
+            if self.save_batch_depth == 0 and self.has_pending_save:
+                self.update()
+
+    def update(self):
+        if self.save_batch_depth:
+            self.has_pending_save = True
+            return
+        path = f"{config.gamestate_path}/{self.game_id}.json"
+        temporary_path = None
+        try:
+            with tempfile.NamedTemporaryFile(mode="w", dir=config.gamestate_path,
+                                             delete=False) as save_file:
+                temporary_path = save_file.name
+                json.dump(self.gamestate, save_file)
+            os.replace(temporary_path, path)
+            self.has_pending_save = False
+        finally:
+            if temporary_path is not None and os.path.exists(temporary_path):
+                os.unlink(temporary_path)
 
     def getNumberOfSaveFiles(self):
         saveFile = self.get_saveFile()
@@ -1245,10 +1242,16 @@ class GamestateHelper:
         return newSaveNum - oldSaveNum + 1
 
     def backUpToLastSaveFile(self):
+        phase = self.gamestate.get("pre_game")
+        if phase is not None and not phase.get("started"):
+            return False
         saveFile = self.get_saveFile()
         newSaveNum = str(saveFile["newestSaveNum"])
         if newSaveNum in saveFile:
             newestSave = saveFile[newSaveNum]
+            saved_phase = newestSave.get("pre_game", {})
+            if (phase is not None or saved_phase) and not saved_phase.get("started"):
+                return False
             self.gamestate = newestSave
             saveFile["newestSaveNum"] -= 1
             self.update()
@@ -1311,36 +1314,6 @@ class GamestateHelper:
     #     self.gamestate["discTiles"]= listOfDisc
     #     self.update()
 
-    def get_short_faction_name(self, full_name):
-        if full_name == "Descendants of Draco":
-            return "draco"
-        elif full_name == "Mechanema":
-            return "mechanema"
-        elif full_name == "Planta":
-            return "planta"
-        elif full_name == "Orian Hegemony" or full_name == "Orion Hegemony":
-            return "orion"
-        elif full_name == "Hydran Progress":
-            return "hydran"
-        elif full_name == "Eridani Empire":
-            return "eridani"
-        elif full_name == "Wardens of Magellan":
-            return "magellan"
-        elif full_name == "Enlightened of Lyra":
-            return "lyra"
-        elif full_name == "Rho Indi Syndicate":
-            return "rho"
-        elif full_name == "The Exiles":
-            return "exile"
-        elif full_name == "Atlantians":
-            return "atlantians"
-        elif full_name == "Remnants of Ra":
-            return "ra"
-        elif full_name == "Techno-Mages":
-            return "tm"
-        elif "Terran" in full_name:
-            return full_name.lower().replace(" ", "_")
-
     def ambassadorsGiven(self, player):
         """Ambassador tiles this player has placed on other players' boards; there are three."""
         color = player["color"]
@@ -1362,7 +1335,7 @@ class GamestateHelper:
         found = False
         for x, tile in enumerate(player1["reputation_track"]):
             if isinstance(tile, str) and (tile == "amb" or tile == "mixed"):
-                track = f"{tile}-{self.get_short_faction_name(player2['name'])}-{player2['color']}"
+                track = f"{tile}-{FactionData.artwork_name(player2['name'])}-{player2['color']}"
                 self.gamestate["players"][pID]["reputation_track"][x] = track
                 found = True
                 break
@@ -1375,14 +1348,14 @@ class GamestateHelper:
                 if isinstance(tile, int) and tile < lowest:
                     loc = x
                     lowest = tile
-            track = f"mixed-{self.get_short_faction_name(player2['name'])}-{player2['color']}"
+            track = f"mixed-{FactionData.artwork_name(player2['name'])}-{player2['color']}"
             self.gamestate["players"][pID]["reputation_track"][loc] = track
             self.gamestate["reputation_tiles"].append(lowest)
 
         found = False
         for x, tile in enumerate(player2["reputation_track"]):
             if isinstance(tile, str) and (tile == "amb" or tile == "mixed"):
-                track = f"{tile}-{self.get_short_faction_name(player1['name'])}-{player1['color']}"
+                track = f"{tile}-{FactionData.artwork_name(player1['name'])}-{player1['color']}"
                 self.gamestate["players"][pID2]["reputation_track"][x] = track
                 found = True
                 break
@@ -1395,7 +1368,7 @@ class GamestateHelper:
                 if isinstance(tile, int) and tile < lowest:
                     loc = x
                     lowest = tile
-            track = f"mixed-{self.get_short_faction_name(player1['name'])}-{player1['color']}"
+            track = f"mixed-{FactionData.artwork_name(player1['name'])}-{player1['color']}"
             self.gamestate["players"][pID2]["reputation_track"][loc] = track
             self.gamestate["reputation_tiles"].append(lowest)
 

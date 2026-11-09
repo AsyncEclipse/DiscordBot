@@ -10,14 +10,6 @@ from helpers.DrawHelper import DrawHelper
 from tests.fakes import FakeMessage, buttons, player_stats, reload
 
 
-@pytest.fixture(autouse=True)
-def _no_tile_render(monkeypatch):
-    """These tests cover cube bookkeeping, not rendering. The flows attach tile images, and
-    rendering real art costs a one-time image-cache load the whole suite would pay for."""
-    monkeypatch.setattr(DrawHelper, "board_tile_image_file", lambda self, position: None)
-    monkeypatch.setattr(DrawHelper, "mergeLocationsFile", lambda self, positions: None)
-
-
 # A ring 1 sector with an artifact key (data/sectors.json), free in a two player start.
 ARTIFACT_SECTOR = "107"
 
@@ -127,17 +119,3 @@ def test_cube_returns_to_a_track_when_the_sector_is_lost(start_game, press):
     assert "FCIDblue_addCubeToTrack_money" in buttons(channel)
     press(channel, 1, "FCIDblue_addCubeToTrack_money")
     assert reload(game).get_player(1)["money_pop_cubes"] == 11
-
-
-@pytest.mark.parametrize("faction, refreshed", [("ra", 2), ("hyd", 3)])
-def test_influence_refreshes_one_colony_ship_only_for_remnants(start_game, press, faction, refreshed):
-    game, channel = start_game(factions=[faction, "eri"])
-    game.get_player(1)["colony_ships"] = 1
-    game.update()
-
-    press(channel, 1, "FCIDblue_startInfluence")
-    expected_label = "Refresh 1 Colony Ship" if faction == "ra" else "Refresh 2 Colony Ships"
-    assert expected_label in buttons(channel).values()
-    press(channel, 1, "FCIDblue_refreshPopShips")
-
-    assert reload(game).get_player(1)["colony_ships"] == refreshed

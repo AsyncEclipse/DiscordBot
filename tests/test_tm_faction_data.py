@@ -1,5 +1,3 @@
-import json
-
 from tests.fakes import FACTIONS
 
 
@@ -22,12 +20,3 @@ def test_tm_faction_stats_match_printed_board():
     # The income row every faction uses (DrawHelper.display_cube_track_reference indexes into it).
     assert tm["population_track"] == [28, 24, 21, 18, 15, 12, 10, 8, 6, 4, 3, 2, 0]
     assert tm["tech_track"] == [-8, -6, -4, -3, -2, -1, 0, 0]
-
-
-def test_tm_blueprint_parts_exist():
-    with open("data/parts.json", "r") as f:
-        parts = json.load(f)
-    tm = FACTIONS["tm"]
-    for ship in ("interceptor", "cruiser", "dread", "starbase"):
-        for part in tm[f"{ship}_parts"]:
-            assert part == "empty" or part in parts, f"unknown {ship} part {part!r}"

@@ -1,4 +1,5 @@
 import asyncio
+import json
 import discord
 from Buttons.Draft import DraftButtons
 import config
@@ -8,6 +9,7 @@ from typing import Optional
 from setup.GameInit import GameInit
 from helpers.GamestateHelper import GamestateHelper
 from helpers.DrawHelper import DrawHelper
+from helpers import FactionData
 
 
 class SetupCommands(commands.GroupCog, name="setup"):
@@ -44,7 +46,12 @@ class SetupCommands(commands.GroupCog, name="setup"):
                       app_commands.Choice(name="Terran Union (Planta)", value="ter6"),
                       app_commands.Choice(name="Atlantians", value="atl"),
                       app_commands.Choice(name="Remnants of Ra", value="ra"),
-                      app_commands.Choice(name="Techno-Mages", value="tm")]
+                      app_commands.Choice(name="Techno-Mages", value="tm"),
+                      app_commands.Choice(name="Heralds of Ragnarok", value="her"),
+                      app_commands.Choice(name="Kurita Prefecture", value="kur"),
+                      app_commands.Choice(name="Turtugan", value="tur"),
+                      app_commands.Choice(name="The Wulfen", value="wul"),
+                      app_commands.Choice(name="The Wraith", value="wra")]
     
     @app_commands.choices(ai_ship_type=ai_choices2)
     @app_commands.choices(ai_ship=ai_ship_choices)
@@ -297,7 +304,15 @@ class SetupCommands(commands.GroupCog, name="setup"):
         factionThread = await actions.create_thread(name="Faction Reference", auto_archive_duration=10080)
         boardPrefix = "images/resources/components/factions/"
 
+        async def sendCommunitySheet(message, board_file):
+            if community_factions:
+                await factionThread.send(message, file=drawing.get_file(boardPrefix + board_file))
+
+        with open("data/sectors.json") as sector_file:
+            sectors = json.load(sector_file)
+
         message = "\n".join(["# Eridani Empire",
+                             FactionData.starting_sector_line("eri", sectors),
                              "- 2🛡 Draw two random Reputation Tiles before the game starts,"
                              + " and place them facedown on your Reputation Track.",
                              "- -2 🔴 Start with two fewer Influence Discs"
@@ -309,11 +324,13 @@ class SetupCommands(commands.GroupCog, name="setup"):
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "eridani_board.png"))
 
         message = "\n".join(["# Hydran Progress",
+                             FactionData.starting_sector_line("hyd", sectors),
                              "- ⚗️ During game setup, place a Population Cube in the"
                              + " Advanced Science Population Square on your Starting Sector."])
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "hydran_board.png"))
 
         message = "\n".join(["# Planta",
+                             FactionData.starting_sector_line("pla", sectors),
                              "- Your Population Cubes are automatically destroyed by"
                              + " opponent Ships at the end of the Combat Phase.",
                              "- 1 extra VP for each Controlled Sector at the end of the game.",
@@ -325,6 +342,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "planta_board.png"))
 
         message = "\n".join(["# Descendants of Draco",
+                             FactionData.starting_sector_line("dra", sectors),
                              "- __Explore Action__: For each Activation, you may flip"
                              + " two Sectors from which to choose one (or none)to place."
                              + " Unplaced Sectors are discarded faceup in the corresponding Sector Discard Pile.",
@@ -337,6 +355,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "draco_board.png"))
 
         message = "\n".join(["# Mechanema",
+                             FactionData.starting_sector_line("mec", sectors),
                              "- Cheaper Building costs (instead of):",
                              "  - **Interceptor**: 2🔧 (3)",
                              "  - **Cruiser**: 4🔧 (5)",
@@ -347,6 +366,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "mechanema_board.png"))
 
         message = "\n".join(["# Orion Hegemony",
+                             FactionData.starting_sector_line("ori", sectors),
                              "- Start with a Cruiser in your Starting Sector instead of an Interceptor.",
                              "- All Ship Blueprints have increased Initiative Bonuses.",
                              "- These Ship Blueprints have additional Energy Production:",
@@ -356,6 +376,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "orion_board.png"))
 
         message = "\n".join(["# Wardens of Magellan",
+                             FactionData.starting_sector_line("mag", sectors),
                              "- Start with a Discovery Tile facedown on the Discovery Tile Symbol"
                              + " on the top Tech Track of your Species Board.",
                              "- Resolve the Discovery Tile on your Species Board the first time"
@@ -369,6 +390,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
                              + " (Note: only refresh 1 colony ship with the influence action)"])
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "magellan_board.png"))
         message = "\n".join(["# Enlightened of Lyra",
+                             FactionData.starting_sector_line("lyr", sectors),
                              "- 1 VP per Shrine\\* you control at the end of the game.",
                              "- During the Combat Phase, you may flip unused Colony Ships"
                              + " to reroll one of your own dice per Colony Ship flipped.",
@@ -395,6 +417,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
                              + " (you start with 4 extra Influence Discs in your Species Tray instead of 3)."])
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "lyra_board.png"))
         message = "\n".join(["# The Exiles",
+                             FactionData.starting_sector_line("exl", sectors),
                              "- Start with an Orbital in your Starting Sector.",
                              "- 1 VP for each Orbital with your Population Cube at the end of the game.",
                              "- Orbitals with your Population Cubes are considered Ships:",
@@ -407,6 +430,7 @@ class SetupCommands(commands.GroupCog, name="setup"):
         await factionThread.send(message, file=drawing.get_file("images/resources/components/factions/exile_board.png"))
 
         message = "\n".join(["# Rho Indi Syndicate",
+                             FactionData.starting_sector_line("rho", sectors),
                              "- Start with two Interceptors in your Starting Sector.",
                              "- You have only two Ambassador Tiles.",
                              "- After drawing Reputation Tiles, gain Money equal to"
@@ -424,10 +448,12 @@ class SetupCommands(commands.GroupCog, name="setup"):
                              "  - **Dreadnought**: -1⬛"])
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "rho_board.png"))
 
-        message = "\n".join(["# Terrans"])
+        message = "\n".join(["# Terrans",
+                             FactionData.starting_sector_line("ter2", sectors)])
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "terran_conglomerate_board.png"))
 
         message = "\n".join(["# Atlantians",
+                             FactionData.starting_sector_line("atl", sectors),
                              "- Start with Ancient Labs in the Nano Tech track.",
                              "- **Ancient Spirit:** Draw two discovery tiles and choose one to resolve. "
                              "Replace any +6 Materials or Ancient Cruiser tile with another draw.",
@@ -436,9 +462,10 @@ class SetupCommands(commands.GroupCog, name="setup"):
                              "- **Ancient Power:** Gain 1 VP for each discovery tile installed on a Ship Blueprint.",
                              "- **Price of Power:** Each ship costs 1 additional Materials for each discovery tile "
                              "beyond the first installed on its Ship Blueprint."])
-        await factionThread.send(message, file=drawing.get_file(boardPrefix + "atlantians_board.png"))
+        await sendCommunitySheet(message, "atlantians_board.png")
 
         message = "\n".join(["# Remnants of Ra",
+                             FactionData.starting_sector_line("ra", sectors),
                              "- Start with Plasma Cannon in the Military Tech track.",
                              "- **Power of the Ancients:** An additional population cube of any type in a sector"
                              " with an artifact key (placed on top of the influence disk)."
@@ -446,9 +473,10 @@ class SetupCommands(commands.GroupCog, name="setup"):
                              "- **Secrets of the Ancients:** Gain 1 additional VP for each sector you control"
                              " with an artifact key.",
                              "- You flip only 1 colony ship per Influence action."])
-        await factionThread.send(message, file=drawing.get_file(boardPrefix + "ra_board.png"))
+        await sendCommunitySheet(message, "ra_board.png")
 
         message = "\n".join(["# Techno-Mages",
+                             FactionData.starting_sector_line("tm", sectors),
                              "- Start with no technologies. You may spend part of your initial science to buy"
                              " 1 technology before the game begins if you wish.",
                              "- **Technology finds a Way:** Use 2 Colony Ships to place a resource cube of the"
@@ -460,7 +488,98 @@ class SetupCommands(commands.GroupCog, name="setup"):
                              " (e.g. vs Spiral), the Defender chooses last.",
                              "- **Limited Manufacturing:** You only get 1 Activation with a Build Action, and you"
                              " may only flip 1 Colony Ship with an Influence action."])
-        await factionThread.send(message, file=drawing.get_file(boardPrefix + "tm_board.png"))
+        await sendCommunitySheet(message, "tm_board.png")
+
+        message = "\n".join(["# The Wulfen",
+                             FactionData.starting_sector_line("wul", sectors),
+                             "- **Spine Cannons:** Each ship has two dedicated Spine Cannon slots. The"
+                             " Cannon Slot fires normally; the Augment Slot's weapon does not fire, but"
+                             " before firing each turn choose +X to Hit or +X Damage, where X is that"
+                             " weapon's damage. Spine slots hold guns only (no Missiles or Rift weapons).",
+                             "- **Wolf Pack:** 3 Move activations. Anytime you roll a 6, convert a miss from"
+                             " the same attack pool into a Hit, or save a reroll for a ship firing later"
+                             " in the round.",
+                             "- No Interceptors. Cruisers: 6 maximum, one fewer ship part slot, cost 4.",
+                             "- Start with Fusion Source in the Grid tech track.",
+                             "- 5 reputation slots (2 can hold ambassadors).",
+                             "- Home sector Lupis (252)."])
+        await sendCommunitySheet(message, "wulfen_board.png")
+
+        message = "\n".join(["# Turtugan",
+                             FactionData.starting_sector_line("tur", sectors),
+                             "- **Deep Space Explorers:** Keep 2 extra S3 sectors in a separate hidden stack."
+                             " When exploring an outer-sector position, you may draw the next tile from"
+                             " this reserve instead of the normal stack, even if the normal stack is empty.",
+                             "- **Harvesters:** Starbases are Harvesters. They can move 1 activation per Explore"
+                             " action and may be placed over an unsettled planet in their sector at the end of"
+                             " any Turn. During Production, they generate 1 resource of any type that planet"
+                             " produces, even on Advanced Planets you cannot populate. Harvesters cannot remove"
+                             " their Drive.",
+                             "- **Carapace Shields:** At the start of any combat or engagement round you may"
+                             " engage or disengage Carapace Shields for any class of ship in the battle."
+                             " Once engaged, that ship gets the following: -1 Damage from all its weapons"
+                             " (Min = 0); -1 Damage from all successful attacks against it (Min=1)."
+                             " Missiles may instead get -1 to Hit (attacker's choice).",
+                             "- Start with a Harvester (Starbase) instead of an Interceptor.",
+                             "- Modified ship designs: Slower, offboard Hull & Computer.",
+                             "- Initial Technology: Starbase."])
+        await sendCommunitySheet(message, "turtugan_board.png")
+
+        message = "\n".join(["# Kurita Prefecture",
+                             FactionData.starting_sector_line("kur", sectors),
+                             "- Start with Phase Shields, 3 Colony Ships, and 2 Money / 3 Science / 4 Materials.",
+                             "- **Honour your enemy with the first shot:** Your opponents take their missile round"
+                             " & first engagement round BEFORE you shoot. Then you take your missile round &"
+                             " first engagement round. From the 2nd engagement round onwards normal speed rules apply.",
+                             "- **Honour the Victorious, Fight to the Death:**",
+                             "  - +1 to Battle Rep score for winning battles"
+                             " (a 2-value tile is 3 VP if you win, 1 if you lost). Place a Dmg Cube next to the"
+                             " Battle Rep tile if it was a win.",
+                             "  - -1 to Battle Rep score for losing battles.",
+                             "  - If you retreat any ship you do not draw Battle Reputation at all, regardless of"
+                             " ships destroyed.",
+                             "  - The Traitor card is worth -4 VPs.",
+                             "- **Elite Warriors:** +1 to Hit off-board on all ships.",
+                             "- **Ships:** Starbases have an extra Hull.",
+                             "- Standard trade (3:1). Home system Edo (#251)."])
+        await sendCommunitySheet(message, "kurita_board.png")
+
+        message = "\n".join(["# Heralds of Ragnarok",
+                             FactionData.starting_sector_line("her", sectors),
+                             "- Start with Neutron Bombs in the Military Tech track.",
+                             "- Start with a Cruiser in your starting sector instead of an Interceptor.",
+                             "- **Raid:** Move actions include a build activation.",
+                             "- **Regroup:** Build actions include a move activation.",
+                             "- **Interceptor:** Cost 4 Materials instead of 3. One additional blueprint slot"
+                             " containing a Hull. Initiative bonus 1 instead of 2.",
+                             "- **Cruiser:** Cost 4 Materials instead of 5. One less Hull blueprint slot."
+                             " Initiative bonus 2 instead of 1.",
+                             "- 5 reputation slots: 1 ambassador-only, 2 mixed, 2 reputation-only."])
+        await sendCommunitySheet(message, "heralds_board.png")
+
+        message = "\n".join(["# The Wraith",
+                             FactionData.starting_sector_line("wra", sectors),
+                             "- Start with **Phase Module** in the Military Tech track.",
+                             "- **Phase Technology:** You may swap subsequent Build activations for Upgrade"
+                             " activations during any Build Action (you may swap all but the first).",
+                             "- **Ghosts:** The Wraith may retreat immediately when it is their turn to fire"
+                             " (there is no extra round of shooting).",
+                             "- **Soul-Hunters:** Wraith capture the souls of planets they attack. To use Neutron Bombs"
+                             " you must research and have 2 available blueprint Power using the Phase Module. You get +1 offboard"
+                             " power and +1 VP per sector you destroy with enemy population cubes in it (increment"
+                             " the Dice on your faction board). It does not matter if you do not settle the sector"
+                             " or lose it later. Offboard power permanently adds energy to every blueprint, including"
+                             " for upgrades, and is never consumed.",
+                             "- **Phase Module:** This is built into all your ships, and you use it for a range of"
+                             " benefits, limited by how much Power you have: **Always:** Cloaking Device;"
+                             " **for 1 Power each:** +1 to Hit, +1 Shield; **for 2 Power:** Neutron Bombs if"
+                             " researched, +2 Initiative; **for 3 Power:** Ignore Shields. Declare options at the"
+                             " start of each combat per blueprint.",
+                             "- **Ships:** +1 Cost, Phase Module. The board prints 1 Diplomat, 1 INF activation and"
+                             " 2 colony ships flipped per Influence action.",
+                             "- The board prints home sector 226; the bot uses the free sector 254"
+                             " (225 is the Terran Union home and 226 is the Planta home)."])
+        await sendCommunitySheet(message, "wraith_board.png")
 
         message = "\n".join(["Rift Reference"])
         await factionThread.send(message, file=drawing.get_file(boardPrefix + "Rift_Reference.png"))

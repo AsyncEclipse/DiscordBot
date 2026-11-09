@@ -27,6 +27,23 @@ def test_pass(start_game, press):
 
 Always `reload(game)` after a press: the press works on its own copy of the game.
 
+## Keep coverage focused
+
+Each test should catch a distinct rule failure, boundary case, or interaction. Extend
+an existing case when its setup and behavior already cover the change. Keep printed
+faction values as independent calibration checks; do not repeat them in setup, home,
+and first-round tests. Shared round tests cover factions together, so another faction's
+ordinary explore/pass sequence does not need its own test.
+
+`test_faction_rendering.py` has exactly one real rendering case per faction, including
+shared layout regressions. Only these cases use the `render` marker. Elsewhere the
+autouse `no_render` fixture replaces image-producing methods; rules, handlers, scoring,
+and saves still run. Exploration's legal rotation calculation also runs, with an inert
+canvas replacing pixel composition. Do not add local image-loading stubs.
+
+Run rules alone with `python -m pytest tests -m 'not render'`, or rendering alone with
+`python -m pytest tests -m render`.
+
 ## Adding tests
 
 - One file per area (`test_<module>_<topic>.py`). Plain functions; a class per rule group is fine when a file covers several (as in the alliance tests).

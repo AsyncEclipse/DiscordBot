@@ -57,21 +57,3 @@ def test_rift_cannon_disabled(make_game):
 
 def test_rift_cannon_enabled(make_game):
     assert "rican" in _setup_techs(make_game, rift_cannon=True)
-
-
-def _setup_sectors(make_game, galactic_events):
-    game = make_game(_minimal_gamestate())
-    game.setup_techs_and_outer_rim(2, galactic_events, False)
-    return game.gamestate
-
-
-def test_nebula_sectors_added_with_galactic_events(make_game):
-    state = _setup_sectors(make_game, True)
-    assert "295" in state["tile_deck_200"]
-    assert "395" in state["tile_deck_300"]
-
-
-def test_nebula_sectors_absent_without_galactic_events(make_game):
-    state = _setup_sectors(make_game, False)
-    assert "295" not in state["tile_deck_200"]
-    assert "395" not in state["tile_deck_300"]

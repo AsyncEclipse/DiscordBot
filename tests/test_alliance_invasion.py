@@ -2,13 +2,12 @@ import pytest
 
 from Buttons.BlackHole import BlackHoleButtons
 from Buttons.Move import MoveButtons
-from helpers.DrawHelper import DrawHelper
 from tests.fakes import FakeInteraction, board_tile, player_helper, players
 
 
 @pytest.mark.parametrize("arrival", ["move", "black_hole", "neutral_airspace"])
 @pytest.mark.parametrize("relationship", ["allied", "enemy", "betrayed"])
-def test_arrival_only_alerts_and_unpasses_opponents(make_game, run, monkeypatch, arrival, relationship):
+def test_arrival_only_alerts_and_unpasses_opponents(make_game, run, arrival, relationship):
     board = board_tile(["blue-int"], owner="blue")
     board.update(board_tile(["red-int"], owner=0 if arrival == "neutral_airspace" else "red", sector=102))
     game = make_game({"player_count": 4, "players": players("blue", "red"), "board": board})
@@ -21,7 +20,6 @@ def test_arrival_only_alerts_and_unpasses_opponents(make_game, run, monkeypatch,
     game.update()
     blue = game.getPlayerObjectFromColor("blue")
     interaction = FakeInteraction()
-    monkeypatch.setattr(DrawHelper, "board_tile_image_file", lambda self, tile: None)
 
     if arrival == "black_hole":
         run(BlackHoleButtons.blackHoleFinish(game, blue, "blackHoleFinish_blue-int_102_noDamage",

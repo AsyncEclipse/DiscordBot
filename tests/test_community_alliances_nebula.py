@@ -1,12 +1,8 @@
-from Buttons.DiscoveryTile import DiscoveryTileButtons
 from helpers.CombatHelper import Combat
-from helpers.DrawHelper import DrawHelper
 from tests.fakes import FakeInteraction, offered_buttons, reload
 
 
-def test_community_alliance_fights_in_nebula(start_game, run, press, monkeypatch):
-    for name in ("player_area", "show_player_ship_area", "show_player_ship", "board_tile_image_file"):
-        monkeypatch.setattr(DrawHelper, name, lambda *args: None)
+def test_community_alliance_fights_in_nebula(start_game, run, press):
     game, channel = start_game(4, factions=["tm", "atl", "ra", "hyd"])
     game.setAlliances(True)
     game.formAlliance("nova", ["blue", "red"])
@@ -40,20 +36,3 @@ def test_community_alliance_fights_in_nebula(start_game, run, press, monkeypatch
     claims = [button.custom_id for button in offered_buttons(FakeInteraction(channel))
               if "exploreDiscoveryTile" in button.custom_id]
     assert claims == ["FCIDblue_exploreDiscoveryTile_202b_deleteMsg"]
-
-
-def test_atlantians_nebula_choices_bury_unplaceable_discoveries(make_game):
-    game = make_game({
-        "board": {"202b": {"type": "nebula", "disctile": 1}},
-        "discTiles": ["sci", "mon", "mat", "cru", "orb", "rep"],
-    })
-
-    assert DiscoveryTileButtons.drawAtlantiansDiscoveryChoices(game, "202b") == ["rep", "sci"]
-    assert game.gamestate["discTiles"] == ["mon", "orb"]
-
-
-def test_atlantians_nebula_choices_stop_when_only_unplaceable_tiles_remain(make_game):
-    game = make_game({"board": {"202b": {"type": "nebula"}}, "discTiles": ["orb", "mon"]})
-
-    assert DiscoveryTileButtons.drawAtlantiansDiscoveryChoices(game, "202b") == []
-    assert sorted(game.gamestate["discTiles"]) == ["mon", "orb"]

@@ -83,6 +83,10 @@ class TileCommands(commands.GroupCog, name="tile"):
         :return:
         """
         game = GamestateHelper(interaction.channel)
+        tile_position = tile_position.lower()
+        if "-" in tile_position:
+            parent, suffix = tile_position.rsplit("-", 1)
+            tile_position = parent if suffix == "a" else parent + suffix
         player_color = color.value if color else game.get_player(str(interaction.user.id),interaction)["color"]
 
         added_units, removed_units = [], []
@@ -316,17 +320,8 @@ class TileCommands(commands.GroupCog, name="tile"):
             await interaction.followup.send(f"{discovery_id} is not a valid ID. "
                                             "Ping someone who knows the code to find the correct ID.")
             return
-        discName = discTile_data[disc]["name"]
-        drawing = DrawHelper(game.gamestate)
-        file = drawing.show_disc_tile(discName)
-        msg = (f"{interaction.user.mention} you explored a discovery tile and found a {discName}. "
-               "You may keep it for 2 points at the end of the game or use it for its ability.")
-
-        view = View()
-        view.add_item(Button(label="Use it for its ability", style=discord.ButtonStyle.green,
-                             custom_id=f"usedDiscForAbility_{disc}_{tile}"))
-        view.add_item(Button(label="Get 2 Points", style=discord.ButtonStyle.red, custom_id="keepDiscForPoints"))
-        await interaction.followup.send(msg, view=view, file=file)
+        await DiscoveryTileButtons.sendDiscoveryTileOptions(
+            game, tile, interaction, game.get_player(interaction.user.id, interaction), disc)
 
     @app_commands.command(name="explore_discovery_tile")
     async def explore_discovery_tile(self, interaction: discord.Interaction, tile_position: str):

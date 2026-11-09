@@ -10,9 +10,11 @@ from Buttons.DiplomaticRelations import DiplomaticRelationsButtons
 from Buttons.DiscoveryTile import DiscoveryTileButtons
 from Buttons.Draft import DraftButtons
 from Buttons.Explore import ExploreButtons
+from Buttons.Harvester import HarvesterButtons
 from Buttons.Influence import InfluenceButtons
 from Buttons.Move import MoveButtons
 from Buttons.Population import PopulationButtons
+from Buttons.PreGame import PreGameButtons
 from Buttons.Pulsar import PulsarButtons
 from Buttons.Research import ResearchButtons
 from Buttons.Shrine import ShrineButtons
@@ -20,6 +22,7 @@ from Buttons.Turn import TurnButtons
 from Buttons.Upgrade import UpgradeButtons
 from helpers.CombatHelper import Combat
 from helpers.GameLock import game_lock
+from helpers.Turtugan import Carapace
 from helpers.GamestateHelper import GamestateHelper
 import time
 import logging
@@ -38,7 +41,10 @@ ANSWER_BUTTONS = ("selectDiscTile", "exploreDiscoveryTile", "keepDiscForPoints",
                   "getTech", "getFreeTech", "placeWarpPortal",
                   "offerRelationsTo", "acceptRelationsWith", "declineRelationsWith", "formMinorRelations",
                   "reducePopFor", "addCubeToTrack", "drawReputation", "dontDrawReputation",
-                  "ancientsCube", "setupTech")
+                  "ancientsCube", "setupTech", "reservedTile", "carapaceDone", "carapaceMissile",
+                  "wolfPack", "phaseModuleDone", "phaseModuleNone", "phaseBombing",
+                  "preGameOrbital", "declineSetupTech", "saveDiscoveryPart", "gain3resource",
+                  "finishSetupResources")
 
 
 class ButtonListener(commands.Cog):
@@ -157,7 +163,7 @@ class ButtonListener(commands.Cog):
             if not any(substring in customID for substring in ["showGame", "AtRatio", "gain5",
                                                                "showReputation", "rollDice", "magColShip",
                                                                "rerollDie", "readyForUpkeep", "draftFaction",
-                                                               "autoRollCombat", "buildShip"]):
+                                                               "autoRollCombat", "buildShip", "wolfPack"]):
                 await interaction.followup.send(f"{interaction.user.mention}, this button ({customID}) was pressed"
                                                 " most recently, and we are attempting to prevent an accidental"
                                                 " double press. Try hitting show reputation first and then hitting this"
@@ -196,6 +202,11 @@ class ButtonListener(commands.Cog):
                                                 ephemeral=True)
                 return
 
+        # Save buttons already posted before the setup phase used the generic delete id.
+        if customID == "deleteMsg" and any(
+                getattr(button, "label", None) == "Save For Future Upgrade Action"
+                for row in interaction.message.components for button in getattr(row, "children", [])):
+            customID = "saveDiscoveryPart"
         if "deleteMsg" in customID:
             await interaction.message.delete()
         if customID == "showGame":
@@ -209,6 +220,13 @@ class ButtonListener(commands.Cog):
             return
         if player is None:
             return
+        if interaction.message.id in game.gamestate.get("obsoleteDiscoveryPrompts", []):
+            await interaction.followup.send("This discovery choice was already answered or re-sent."
+                                            " Use the latest prompt.", ephemeral=True)
+            return
+        if not await PreGameButtons.canResolve(game, interaction, player, customID):
+            return
+        task_result = False
         # The guard above compares this against the raw custom id, FCID prefix included.
         game.saveLastButtonPressed(interaction.data["custom_id"], pressed_at, interaction.message.id)
         if customID.startswith("tradeAtRatio"):
@@ -238,6 +256,20 @@ class ButtonListener(commands.Cog):
                 await interaction.message.delete()
         elif customID.startswith("finishAction"):
             await TurnButtons.finishAction(player, game, interaction, player_helper)
+        elif customID.startswith("herRaidBuild"):
+            moveCount = customID.rsplit("_", 1)[1]
+            await BuildButtons.startBuild(game, player, interaction, f"startBuild2_herRaidBuild_{moveCount}",
+                                          player_helper)
+        elif customID.startswith("herRegroupMove"):
+            phase = customID.rsplit("_", 1)[1]
+            await MoveButtons.startMove(game, player, interaction, f"startMove_1_herRegroup_{phase}", True)
+        elif customID.startswith("herBackToMove"):
+            moveCount = customID.rsplit("_", 1)[1]
+            await interaction.message.delete()
+            await MoveButtons.startMove(game, player, interaction, f"startMove_{moveCount}", False)
+        elif customID.startswith("herBackToBuild"):
+            await interaction.message.delete()
+            await BuildButtons.startBuild(game, player, interaction, "startBuild2_herRegroupResume", player_helper)
         elif customID.startswith("magColShipForResource"):
             await TurnButtons.magColShipForResource(game, interaction, player, customID, player_helper)
         elif customID.startswith("magColShipForSpentResource"):
@@ -246,6 +278,8 @@ class ButtonListener(commands.Cog):
             if "2" not in customID:
                 game.updateSaveFile()
             await ExploreButtons.startExplore(game, player, player_helper, interaction, customID)
+        elif customID.startswith("reservedTile"):
+            await ExploreButtons.reservedTile(game, player, interaction, customID)
         elif customID.startswith("exploreTile"):
             await ExploreButtons.exploreTile(game, player, interaction, customID)
         elif customID.startswith("placeTile"):
@@ -254,19 +288,23 @@ class ButtonListener(commands.Cog):
             await ExploreButtons.discardTile(game, interaction, player, customID)
         elif customID.startswith("keepDiscForPoints"):
             await DiscoveryTileButtons.keepDiscForPoints(game, player_helper, interaction, customID)
+            task_result = True
         elif customID.startswith("exploreDiscoveryTile"):
             await DiscoveryTileButtons.exploreDiscoveryTile(game, customID.split("_")[1], interaction, player)
         elif customID.startswith("selectDiscTile"):
             await DiscoveryTileButtons.selectDiscTile(game, interaction, customID, player)
         elif customID.startswith("usedDiscForAbility"):
-            await DiscoveryTileButtons.usedDiscForAbility(game, player_helper, interaction, customID, player)
+            task_result = await DiscoveryTileButtons.usedDiscForAbility(game, player_helper, interaction, customID, player)
         elif customID.startswith("getFreeTech"):
-            await DiscoveryTileButtons.getFreeTech(game, interaction, customID, player)
+            task_result = await DiscoveryTileButtons.getFreeTech(game, interaction, customID, player)
+        elif customID in ("saveDiscoveryPart", "finishSetupResources"):
+            await interaction.message.delete()
+            task_result = True
         elif customID.startswith("startResearch"):
             game.updateSaveFile()
             await ResearchButtons.startResearch(game, player, player_helper, interaction, True)
         elif customID.startswith("getTech"):
-            await ResearchButtons.getTech(game, player, player_helper, interaction, customID)
+            task_result = await ResearchButtons.getTech(game, player, player_helper, interaction, customID)
         elif customID.startswith("ancientInstinctUpgrade"):
             await interaction.message.delete()
             await UpgradeButtons.startUpgrade(game, player, interaction, False, customID.split("_")[1], "dum")
@@ -274,8 +312,11 @@ class ButtonListener(commands.Cog):
             # deleting the offer makes the pre-game purchase one technology
             await interaction.message.delete()
             await ResearchButtons.startResearch(game, player, player_helper, interaction, False, setup=True)
+        elif customID.startswith("declineSetupTech"):
+            task_result = await PreGameButtons.declineSetupTech(game, player, interaction)
         elif customID.startswith("placeWarpPortal"):
             await ResearchButtons.placeWarpPortal(interaction, game, player, customID)
+            task_result = True
         elif customID.startswith("payAtRatio"):
             await ResearchButtons.payAtRatio(game, player, player_helper, interaction, customID)
         elif customID.startswith("gain5resource"):
@@ -283,8 +324,8 @@ class ButtonListener(commands.Cog):
         elif customID.startswith("gain3resource"):
             await ResearchButtons.gain3resource(game, player, player_helper, interaction, customID)
             if len(customID.split("_")) > 2:
-                game.gamestate.get("pendingDiscoveryResolutions", {}).pop(customID.split("_")[2], None)
-                game.update()
+                DiscoveryTileButtons.clearPendingResolution(game, customID.split("_")[2])
+            task_result = True
         elif customID.startswith("startBuild"):
             if "2" not in customID:
                 game.updateSaveFile()
@@ -301,6 +342,10 @@ class ButtonListener(commands.Cog):
             await BuildButtons.finishBuild(game, player, interaction, customID)
         elif customID.startswith("finishSpendForBuild"):
             await BuildButtons.finishSpendForBuild(game, player, interaction, customID, player_helper)
+        elif customID.startswith("phaseTechUpgrade"):
+            await BuildButtons.phaseTechUpgrade(game, player, interaction, customID, player_helper)
+        elif customID.startswith("phaseTechResume"):
+            await BuildButtons.startBuild(game, player, interaction, "startBuild2_phaseResume", player_helper)
         elif customID.startswith("startUpgrade"):
             game.updateSaveFile()
             await UpgradeButtons.startUpgrade(game, player, interaction, True, "dummy","dum")
@@ -310,11 +355,11 @@ class ButtonListener(commands.Cog):
             await interaction.message.delete()
             await UpgradeButtons.startUpgrade(game, player, interaction, False, discTile,actions)
         elif customID.startswith("upgradeShip"):
-            await UpgradeButtons.upgradeShip(game, player, interaction, customID, player_helper)
+            task_result = await UpgradeButtons.upgradeShip(game, player, interaction, customID, player_helper)
         elif customID.startswith("selectOldPart"):
-            await UpgradeButtons.selectOldPart(game, player, interaction, customID, player_helper)
+            task_result = await UpgradeButtons.selectOldPart(game, player, interaction, customID, player_helper)
         elif customID.startswith("chooseUpgrade"):
-            await UpgradeButtons.chooseUpgrade(game, player, interaction, customID, player_helper)
+            task_result = await UpgradeButtons.chooseUpgrade(game, player, interaction, customID, player_helper)
         elif customID.startswith("undoUpgrade"):
             await UpgradeButtons.undoUpgrade(game, player, interaction, customID, player_helper)
         elif customID.startswith("restartTechnoMagic"):
@@ -323,12 +368,30 @@ class ButtonListener(commands.Cog):
             await Combat.technoMagicDone(game, customID, player, interaction)
         elif customID.startswith("technoMagic"):
             await Combat.technoMagicUpgrade(game, customID, player, interaction, player_helper)
+        elif customID.startswith("phaseModuleShip"):
+            await Combat.phaseModuleShip(game, customID, interaction)
+        elif customID.startswith("phaseModuleBack"):
+            await Combat.phaseModuleBack(game, customID, interaction)
+        elif customID.startswith("phaseModuleOption"):
+            await Combat.phaseModuleOption(game, customID, interaction)
+        elif customID.startswith("phaseBombing"):
+            await Combat.phaseBombing(game, player, interaction, customID)
+        elif customID.startswith("phaseModuleReset"):
+            await Combat.phaseModuleReset(game, customID, interaction)
+        elif customID.startswith("phaseModuleDone"):
+            await Combat.phaseModuleDone(game, customID, interaction)
+        elif customID.startswith("phaseModuleNone"):
+            await Combat.phaseModuleDone(game, customID, interaction, True)
         elif customID.startswith("startPopDrop"):
             await PopulationButtons.startPopDrop(game, player, interaction)
+        elif customID.startswith("declinePopDrop"):
+            await PopulationButtons.declinePopDrop(game, player, interaction)
         elif customID.startswith("fillPopulation"):
             await PopulationButtons.fillPopulation(game, player, interaction, customID)
         elif customID.startswith("ancientsCube"):
-            await PopulationButtons.placeAncientsCube(game, player, interaction, customID)
+            task_result = await PopulationButtons.placeAncientsCube(game, player, interaction, customID)
+        elif customID.startswith("preGameOrbital"):
+            task_result = await PreGameButtons.placeExilesOrbital(game, player, interaction, customID)
         elif customID.startswith("startInfluence"):
             game.updateSaveFile()
             await InfluenceButtons.startInfluence(game, player, interaction)
@@ -343,7 +406,7 @@ class ButtonListener(commands.Cog):
         elif customID.startswith("removeInfluenceStart"):
             await InfluenceButtons.removeInfluenceStart(game, player, interaction)
         elif customID.startswith("removeInfluenceFinish"):
-            await InfluenceButtons.removeInfluenceFinish(game, interaction, customID, True)
+            await InfluenceButtons.removeInfluenceFinish(game, interaction, customID, True, player)
         elif customID.startswith("addCubeToTrack"):
             await InfluenceButtons.addCubeToTrack(game, player, interaction, customID)
         elif customID.startswith("refreshPopShips"):
@@ -380,12 +443,36 @@ class ButtonListener(commands.Cog):
             await AllianceButtons.agreeJoinAlliance(game, player, interaction, customID)
         elif customID.startswith("leaveAlliance"):
             await AllianceButtons.leaveAlliance(game, player, interaction, customID)
+        elif customID.startswith("startMoveHarvester"):
+            await MoveButtons.startHarvesterMove(game, player, interaction)
         elif customID.startswith("startMove"):
             if customID == "startMove":
                 game.updateSaveFile()
             await MoveButtons.startMove(game, player, interaction, customID, True)
+        elif customID.startswith("startPlaceHarvester"):
+            await HarvesterButtons.startPlace(game, player, interaction)
+        elif customID.startswith("harvesterSector"):
+            await HarvesterButtons.showSquares(game, player, interaction, customID)
+        elif customID.startswith("placeHarvester"):
+            task_result = await HarvesterButtons.place(game, player, interaction, customID)
+        elif customID.startswith("harvesterResource"):
+            task_result = await HarvesterButtons.placeResource(game, player, interaction, customID)
+        elif customID.startswith("carapaceToggle"):
+            await Carapace.toggle(game, player, interaction, customID)
+        elif customID.startswith("carapaceDone"):
+            await Carapace.done(game, player, interaction, customID)
+        elif customID.startswith("carapaceMissile"):
+            await Carapace.resolve_missile(game, player, interaction, customID)
         elif customID.startswith("moveFrom"):
             await MoveButtons.moveFrom(game, player, interaction, customID)
+        elif customID.startswith("moveQueueAdd"):
+            await MoveButtons.moveQueueAdd(game, player, interaction, customID)
+        elif customID.startswith("moveQueueReset"):
+            await MoveButtons.moveQueueReset(game, player, interaction, customID)
+        elif customID.startswith("moveQueueDone"):
+            await MoveButtons.moveQueueDone(game, player, interaction, customID)
+        elif customID.startswith("moveQueueContinue"):
+            await MoveButtons.moveQueueContinue(game, player, interaction, customID, player_helper)
         elif customID.startswith("moveThisShip"):
             await MoveButtons.moveThisShip(game, player, interaction, customID)
         elif customID.startswith("moveTo"):
@@ -398,6 +485,8 @@ class ButtonListener(commands.Cog):
             await Combat.autoRollCombat(game, customID, interaction, player)
         elif customID.startswith("rollDice"):
             await Combat.rollDice(game, customID, interaction)
+        elif customID.startswith("wolfPack"):
+            await Combat.wolfPackChoice(game, customID, interaction)
         elif customID.startswith("rerollDie"):
             await Combat.rerollDie(game, customID, interaction, player, player_helper)
         elif customID.startswith("removeUnits"):
@@ -414,6 +503,10 @@ class ButtonListener(commands.Cog):
             await Combat.removeThisUnit(game, customID, player, interaction)
         elif customID.startswith("startToRetreatUnits"):
             await Combat.startToRetreatUnits(game, customID, interaction)
+        elif customID.startswith("ghostsRetreatTo"):
+            await Combat.ghostsRetreatTo(game, customID, interaction)
+        elif customID.startswith("ghostsRetreat"):
+            await Combat.ghostsRetreat(game, customID, interaction)
         elif customID.startswith("finishRetreatingUnits"):
             await Combat.finishRetreatingUnits(game, customID, interaction, player)
         elif customID.startswith("killPop"):
@@ -433,6 +526,8 @@ class ButtonListener(commands.Cog):
             await BlackHoleButtons.blackHoleReturnStart(game, player, customID, player_helper, interaction)
         elif customID.startswith("blackHoleFinish"):
             await BlackHoleButtons.blackHoleFinish(game, player, customID, player_helper, interaction)
+        # a pre-game action may have been the last one the game was waiting for
+        await PreGameButtons.completeTask(game, interaction, player, customID, task_result)
         end_time = time.perf_counter()
         elapsed_time = end_time - start_time
         if elapsed_time > 5:

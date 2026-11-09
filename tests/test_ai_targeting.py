@@ -35,6 +35,7 @@ def test_ai_allocates_two_hits_to_destroy_largest_ship(make_game, no_random, run
 
     def ship_model(_player, ship_type):
         return SimpleNamespace(
+            ship_type="cruiser" if ship_type == "cru" else "interceptor",
             speed=4,
             computer=0,
             shield=1 if ship_type == "cru" else 0,
@@ -91,5 +92,5 @@ def targeting_game(make_game, monkeypatch, ships):
     monkeypatch.setattr(Combat, "getOpponentUnitsThatCanBeHit", staticmethod(
         lambda *args: list(dict.fromkeys(ships))))
     monkeypatch.setattr(combat_helper, "PlayerShip", lambda player, ship_type: SimpleNamespace(
-        hull=1 if ship_type == "cru" else 0, cost=5 if ship_type == "cru" else 1))
+        ship_type=ship_type, hull=1 if ship_type == "cru" else 0, cost=5 if ship_type == "cru" else 1))
     return game

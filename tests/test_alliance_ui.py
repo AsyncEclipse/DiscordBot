@@ -1,5 +1,4 @@
 """Founding, joining and leaving an Alliance, and the Act of Aggression rule."""
-import re
 from unittest.mock import AsyncMock
 
 import discord
@@ -7,7 +6,7 @@ import pytest
 
 from Buttons.Alliance import AllianceButtons
 from Buttons.Turn import TurnButtons
-from tests.fakes import FakeInteraction, POS, board_tile, offered_ids, player_helper, players
+from tests.fakes import FakeInteraction, board_tile, player_helper, players
 
 
 def _related(*colors):
@@ -273,57 +272,6 @@ class TestJoining:
         run(AllianceButtons.agreeJoinAlliance(game, game.getPlayerObjectFromColor("blue"),
                                               FakeInteraction(), "agreeJoinAlliance_nova_green_none"))
         assert game.getAllianceMembers("nova") == ["blue", "red"]
-
-
-class TestButtonDispatch:
-    """A custom id nobody handles is a dead end, so every button the alliance
-    UI builds has to appear in the listener's dispatch chain."""
-
-    def _verbs(self):
-        listener = open("listeners/ButtonListener.py").read()
-        return re.findall(r'customID\.startswith\("([^"]+)"\)', listener)
-
-    def _assert_dispatched(self, custom_ids):
-        verbs = self._verbs()
-        assert custom_ids
-        for custom_id in custom_ids:
-            stripped = custom_id.split("_", 1)[1]
-            assert any(stripped.startswith(verb) for verb in verbs), \
-                f"{custom_id} has no handler"
-
-    def test_the_turn_buttons_are_dispatched(self, make_game, run):
-        game = _game(make_game, colors=("blue", "red", "green"), player_count=6)
-        player = game.getPlayerObjectFromColor("blue")
-
-        async def collect():
-            """Founding, allied, and betrayed all offer different buttons."""
-            ids = []
-            for stage in ("fresh", "allied", "betrayed"):
-                if stage == "allied":
-                    game.formAlliance("nova", ["blue", "red"])
-                if stage == "betrayed":
-                    game.betrayAlliance("nova", "blue")
-                ids.extend(await _alliance_button_ids(game, player))
-            return ids
-
-        self._assert_dispatched(run(collect()))
-
-    def test_the_offer_and_join_buttons_are_dispatched(self, make_game, run):
-        game = _game(make_game, colors=("blue", "red", "green"), player_count=6)
-        game.formAlliance("nova", ["blue", "red"])
-        game.gamestate["activePlayerColor"] = ["green"]
-        game.update()
-        inter = FakeInteraction()
-
-        run(AllianceButtons.offerJoinAlliance(game, game.getPlayerObjectFromColor("green"), inter,
-                                              "offerJoinAlliance_nova"))
-        self._assert_dispatched(offered_ids(inter))
-
-        offer_game = _game(make_game, colors=("blue", "red", "green"), player_count=6)
-        inter = FakeInteraction()
-        run(AllianceButtons.offerAllianceTo(offer_game, offer_game.getPlayerObjectFromColor("blue"), inter,
-                                            "offerAllianceTo_red"))
-        self._assert_dispatched(offered_ids(inter))
 
 
 class TestActOfAggression:

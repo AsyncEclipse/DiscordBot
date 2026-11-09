@@ -1,5 +1,4 @@
 import json
-from pathlib import Path
 
 from PIL import Image
 
@@ -27,7 +26,6 @@ def test_ra_home_sector_data():
 
 def test_ra_home_sector_tile_art():
     path = "images/resources/hexes/255.png"
-    assert Path(path).is_file(), path
     with Image.open(path) as tile:
         assert tile.size == (1024, 890)
         # Corners cut like every other sector tile, or the tile paints its background

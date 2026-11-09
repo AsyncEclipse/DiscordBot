@@ -1,6 +1,8 @@
 {
         "hyd": {
                 "name": "Hydran Progress",
+                "artwork": "hydran",
+                "setup_color": "blue",
                 "materials": 2,
                 "science": 6,
                 "money": 2,
@@ -135,6 +137,12 @@
         },
         "mag": {
                 "name": "Wardens of Magellan",
+                "artwork": "magellan",
+                "setup_color": "pink",
+                "abilities": [
+                        "colony_ship_resources"
+                ],
+                "influence_colony_ships": 1,
                 "materials": 3,
                 "science": 2,
                 "money": 2,
@@ -271,6 +279,12 @@
         },
         "lyr": {
                 "name": "Enlightened of Lyra",
+                "artwork": "lyra",
+                "setup_color": "orange",
+                "abilities": [
+                        "reroll_dice_with_colony_ships"
+                ],
+                "vp_per_shrine": 1,
                 "materials": 3,
                 "science": 4,
                 "money": 2,
@@ -438,6 +452,14 @@
         },
         "eri": {
                 "name": "Eridani Empire",
+                "name_aliases": [
+                        "Eridian Empire"
+                ],
+                "artwork": "eridani",
+                "setup_color": "red",
+                "abilities": [
+                        "setup_reputation_tiles"
+                ],
                 "materials": 4,
                 "science": 2,
                 "money": 26,
@@ -576,6 +598,14 @@
         },
         "ori": {
                 "name": "Orion Hegemony",
+                "name_aliases": [
+                        "Orian Hegemony"
+                ],
+                "artwork": "orion",
+                "setup_color": "purple",
+                "starting_ships": [
+                        "cru"
+                ],
                 "materials": 4,
                 "science": 3,
                 "money": 3,
@@ -713,6 +743,13 @@
         },
         "dra": {
                 "name": "Descendants of Draco",
+                "artwork": "draco",
+                "setup_color": "yellow",
+                "abilities": [
+                        "may_not_fight_ancients",
+                        "two_sector_choices"
+                ],
+                "vp_per_ancient_ship": 1,
                 "materials": 3,
                 "science": 4,
                 "money": 2,
@@ -847,6 +884,8 @@
         },
         "mec": {
                 "name": "Mechanema",
+                "artwork": "mechanema",
+                "setup_color": "white",
                 "materials": 4,
                 "science": 3,
                 "money": 3,
@@ -981,6 +1020,12 @@
         },
         "pla": {
                 "name": "Planta",
+                "artwork": "planta",
+                "setup_color": "green",
+                "abilities": [
+                        "population_destroyed_in_combat"
+                ],
+                "vp_per_owned_tile": 1,
                 "materials": 4,
                 "science": 3,
                 "money": 2,
@@ -1111,6 +1156,8 @@
         },
         "ter1": {
                 "name": "Terran Alliance",
+                "artwork": "terran_alliance",
+                "setup_color": "purple",
                 "materials": 4,
                 "science": 3,
                 "money": 3,
@@ -1246,6 +1293,8 @@
         },
         "ter2": {
                 "name": "Terran Conglomerate",
+                "artwork": "terran_conglomerate",
+                "setup_color": "white",
                 "materials": 4,
                 "science": 3,
                 "money": 3,
@@ -1381,6 +1430,8 @@
         },
         "ter3": {
                 "name": "Terran Directorate",
+                "artwork": "terran_directorate",
+                "setup_color": "red",
                 "materials": 4,
                 "science": 3,
                 "money": 3,
@@ -1516,6 +1567,8 @@
         },
         "ter4": {
                 "name": "Terran Federation",
+                "artwork": "terran_federation",
+                "setup_color": "blue",
                 "materials": 4,
                 "science": 3,
                 "money": 3,
@@ -1651,6 +1704,8 @@
         },
         "ter5": {
                 "name": "Terran Republic",
+                "artwork": "terran_republic",
+                "setup_color": "yellow",
                 "materials": 4,
                 "science": 3,
                 "money": 3,
@@ -1786,6 +1841,8 @@
         },
         "ter6": {
                 "name": "Terran Union",
+                "artwork": "terran_union",
+                "setup_color": "green",
                 "materials": 4,
                 "science": 3,
                 "money": 3,
@@ -1921,6 +1978,16 @@
         },
         "exl": {
                 "name": "The Exiles",
+                "artwork": "exile",
+                "setup_color": "teal",
+                "abilities": [
+                        "orbital_pop_ships"
+                ],
+                "starting_ships": [
+                        "orb",
+                        "int"
+                ],
+                "vp_per_orbital_pop": 1,
                 "materials": 4,
                 "science": 2,
                 "money": 3,
@@ -2056,6 +2123,22 @@
         },
         "rho": {
                 "name": "Rho Indi Syndicate",
+                "artwork": "rho",
+                "setup_color": "brown",
+                "abilities": [
+                        "no_traitor_vp_penalty"
+                ],
+                "reputation_only_slots": [
+                        2,
+                        3,
+                        4
+                ],
+                "starting_ships": [
+                        "int",
+                        "int"
+                ],
+                "money_trade_ratio": 2,
+                "reputation_draw_money": 1,
                 "materials": 3,
                 "science": 3,
                 "money": 2,
@@ -2131,9 +2214,9 @@
                 "reputation_track": [
                         "mixed",
                         "mixed",
-                        "mixed",
-                        "mixed",
-                        "mixed"
+                        "rep",
+                        "rep",
+                        "rep"
                 ],
                 "cost_orbital": 4,
                 "cost_monolith": 10,
@@ -2187,6 +2270,19 @@
         },
         "atl": {
                 "name": "Atlantians",
+                "artwork": "atlantians",
+                "setup_color": "blue",
+                "community": true,
+                "abilities": [
+                        "two_discovery_choices",
+                        "upgrade_after_research"
+                ],
+                "reputation_only_slots": [
+                        0,
+                        1
+                ],
+                "discovery_part_vp": 1,
+                "discovery_part_ship_cost": 1,
                 "materials": 3,
                 "science": 3,
                 "money": 3,
@@ -2317,14 +2413,23 @@
                         "hul",
                         "empty",
                         "hul"
-                ]
+                ],
+                "portrait_image": true
         },
         "ra": {
                 "name": "Remnants of Ra",
+                "artwork": "ra",
+                "setup_color": "yellow",
+                "community": true,
+                "abilities": [
+                        "artifact_disc_pop"
+                ],
+                "influence_colony_ships": 1,
+                "vp_per_artifact_tile": 1,
                 "materials": 3,
                 "science": 3,
                 "money": 2,
-                "colony_ships": 3,
+                "colony_ships": 4,
                 "base_colony_ships": 3,
                 "home_planet": "255",
                 "owned_tiles": [],
@@ -2451,10 +2556,20 @@
                         "hul",
                         "empty",
                         "hul"
-                ]
+                ],
+                "portrait_image": true
         },
         "tm": {
                 "name": "Techno-Mages",
+                "artwork": "tm",
+                "setup_color": "purple",
+                "community": true,
+                "abilities": [
+                        "setup_tech",
+                        "finds_a_way",
+                        "techno_magic"
+                ],
+                "influence_colony_ships": 1,
                 "materials": 2,
                 "science": 6,
                 "money": 3,
@@ -2583,6 +2698,985 @@
                         "hul",
                         "empty",
                         "hul"
-                ]
+                ],
+                "portrait_image": true
+        },
+        "her": {
+                "name": "Heralds of Ragnarok",
+                "artwork": "heralds",
+                "setup_color": "yellow",
+                "community": true,
+                "abilities": [
+                        "raid",
+                        "regroup"
+                ],
+                "starting_ships": [
+                        "cru"
+                ],
+                "reputation_only_slots": [
+                        3,
+                        4
+                ],
+                "materials": 2,
+                "science": 3,
+                "money": 3,
+                "colony_ships": 3,
+                "base_colony_ships": 3,
+                "home_planet": "299",
+                "owned_tiles": [],
+                "explore_apt": 1,
+                "research_apt": 1,
+                "upgrade_apt": 2,
+                "build_apt": 2,
+                "move_apt": 2,
+                "influence_apt": 2,
+                "trade_value": 3,
+                "influence_discs": 12,
+                "influence_track": [
+                        30,
+                        25,
+                        21,
+                        17,
+                        13,
+                        10,
+                        7,
+                        5,
+                        3,
+                        2,
+                        1,
+                        0,
+                        0
+                ],
+                "explore_action_counters": 0,
+                "research_action_counters": 0,
+                "upgrade_action_counters": 0,
+                "build_action_counters": 0,
+                "move_action_counters": 0,
+                "influence_action_counters": 0,
+                "money_pop_cubes": 11,
+                "material_pop_cubes": 12,
+                "science_pop_cubes": 11,
+                "population_track": [
+                        28,
+                        24,
+                        21,
+                        18,
+                        15,
+                        12,
+                        10,
+                        8,
+                        6,
+                        4,
+                        3,
+                        2,
+                        0
+                ],
+                "military_tech": [
+                        "neb"
+                ],
+                "grid_tech": [],
+                "nano_tech": [],
+                "ancient_parts": [],
+                "tech_track": [
+                        -8,
+                        -6,
+                        -4,
+                        -3,
+                        -2,
+                        -1,
+                        0,
+                        0
+                ],
+                "reputation_track": [
+                        "amb",
+                        "mixed",
+                        "mixed",
+                        "rep",
+                        "rep"
+                ],
+                "cost_orbital": 4,
+                "cost_monolith": 10,
+                "cost_interceptor": 4,
+                "cost_cruiser": 4,
+                "cost_dread": 8,
+                "cost_starbase": 3,
+                "ship_stock": [
+                        8,
+                        3,
+                        2,
+                        4
+                ],
+                "base_interceptor_speed": 1,
+                "base_interceptor_nrg": 0,
+                "base_interceptor_comp": 0,
+                "base_cruiser_speed": 2,
+                "base_cruiser_nrg": 0,
+                "base_cruiser_comp": 0,
+                "base_dread_speed": 0,
+                "base_dread_nrg": 0,
+                "base_dread_comp": 0,
+                "base_starbase_speed": 4,
+                "base_starbase_nrg": 3,
+                "base_starbase_comp": 0,
+                "interceptor_parts": [
+                        "ioc",
+                        "nus",
+                        "nud",
+                        "hul",
+                        "empty"
+                ],
+                "cruiser_parts": [
+                        "elc",
+                        "ioc",
+                        "nus",
+                        "empty",
+                        "nud"
+                ],
+                "dread_parts": [
+                        "elc",
+                        "ioc",
+                        "ioc",
+                        "empty",
+                        "nus",
+                        "hul",
+                        "hul",
+                        "nud"
+                ],
+                "starbase_parts": [
+                        "elc",
+                        "ioc",
+                        "hul",
+                        "empty",
+                        "hul"
+                ],
+                "blueprint_slots": {
+                        "interceptor": [
+                                [
+                                        1,
+                                        0
+                                ],
+                                [
+                                        0,
+                                        2
+                                ],
+                                [
+                                        1,
+                                        4
+                                ],
+                                [
+                                        2,
+                                        4
+                                ],
+                                [
+                                        2,
+                                        0
+                                ]
+                        ],
+                        "cruiser": [
+                                [
+                                        0,
+                                        0
+                                ],
+                                [
+                                        2,
+                                        0
+                                ],
+                                [
+                                        0,
+                                        4
+                                ],
+                                [
+                                        1,
+                                        4
+                                ],
+                                [
+                                        2,
+                                        4
+                                ]
+                        ]
+                },
+                "portrait_image": true
+        },
+        "kur": {
+                "name": "Kurita Prefecture",
+                "artwork": "kurita",
+                "setup_color": "red",
+                "community": true,
+                "abilities": [
+                        "first_shot",
+                        "honour_victorious"
+                ],
+                "offboard_computer_label": "Elite Warriors",
+                "reputation_only_slots": [
+                        2,
+                        3
+                ],
+                "materials": 4,
+                "science": 3,
+                "money": 2,
+                "colony_ships": 3,
+                "base_colony_ships": 3,
+                "home_planet": "251",
+                "owned_tiles": [],
+                "explore_apt": 1,
+                "research_apt": 1,
+                "upgrade_apt": 2,
+                "build_apt": 2,
+                "move_apt": 2,
+                "influence_apt": 2,
+                "trade_value": 3,
+                "influence_discs": 12,
+                "influence_track": [
+                        30,
+                        25,
+                        21,
+                        17,
+                        13,
+                        10,
+                        7,
+                        5,
+                        3,
+                        2,
+                        1,
+                        0,
+                        0
+                ],
+                "explore_action_counters": 0,
+                "research_action_counters": 0,
+                "upgrade_action_counters": 0,
+                "build_action_counters": 0,
+                "move_action_counters": 0,
+                "influence_action_counters": 0,
+                "money_pop_cubes": 11,
+                "material_pop_cubes": 12,
+                "science_pop_cubes": 11,
+                "population_track": [
+                        28,
+                        24,
+                        21,
+                        18,
+                        15,
+                        12,
+                        10,
+                        8,
+                        6,
+                        4,
+                        3,
+                        2,
+                        0
+                ],
+                "military_tech": [
+                        "phs"
+                ],
+                "grid_tech": [],
+                "nano_tech": [],
+                "ancient_parts": [],
+                "tech_track": [
+                        -8,
+                        -6,
+                        -4,
+                        -3,
+                        -2,
+                        -1,
+                        0,
+                        0
+                ],
+                "reputation_track": [
+                        "mixed",
+                        "mixed",
+                        "rep",
+                        "rep"
+                ],
+                "traitor_vp_penalty": -4,
+                "cost_orbital": 4,
+                "cost_monolith": 10,
+                "cost_interceptor": 3,
+                "cost_cruiser": 5,
+                "cost_dread": 8,
+                "cost_starbase": 3,
+                "ship_stock": [
+                        7,
+                        4,
+                        2,
+                        4
+                ],
+                "base_interceptor_speed": 2,
+                "base_interceptor_nrg": 0,
+                "base_interceptor_comp": 1,
+                "base_cruiser_speed": 1,
+                "base_cruiser_nrg": 0,
+                "base_cruiser_comp": 1,
+                "base_dread_speed": 0,
+                "base_dread_nrg": 0,
+                "base_dread_comp": 1,
+                "base_starbase_speed": 4,
+                "base_starbase_nrg": 3,
+                "base_starbase_comp": 1,
+                "base_starbase_hull": 1,
+                "interceptor_parts": [
+                        "ioc",
+                        "nus",
+                        "nud",
+                        "empty"
+                ],
+                "cruiser_parts": [
+                        "elc",
+                        "ioc",
+                        "empty",
+                        "nus",
+                        "hul",
+                        "nud"
+                ],
+                "dread_parts": [
+                        "elc",
+                        "ioc",
+                        "ioc",
+                        "empty",
+                        "nus",
+                        "hul",
+                        "hul",
+                        "nud"
+                ],
+                "starbase_parts": [
+                        "elc",
+                        "ioc",
+                        "hul",
+                        "empty",
+                        "hul"
+                ],
+                "portrait_image": true
+        },
+        "tur": {
+                "name": "Turtugan",
+                "artwork": "turtugan",
+                "setup_color": "teal",
+                "community": true,
+                "abilities": [
+                        "carapace_shields",
+                        "deep_space_explorers",
+                        "harvester"
+                ],
+                "starting_ships": [
+                        "sb"
+                ],
+                "materials": 4,
+                "science": 3,
+                "money": 3,
+                "colony_ships": 3,
+                "base_colony_ships": 3,
+                "home_planet": "253",
+                "owned_tiles": [],
+                "explore_apt": 1,
+                "research_apt": 1,
+                "upgrade_apt": 2,
+                "build_apt": 2,
+                "move_apt": 2,
+                "influence_apt": 2,
+                "trade_value": 3,
+                "influence_discs": 12,
+                "influence_track": [
+                        30,
+                        25,
+                        21,
+                        17,
+                        13,
+                        10,
+                        7,
+                        5,
+                        3,
+                        2,
+                        1,
+                        0,
+                        0
+                ],
+                "explore_action_counters": 0,
+                "research_action_counters": 0,
+                "upgrade_action_counters": 0,
+                "build_action_counters": 0,
+                "move_action_counters": 0,
+                "influence_action_counters": 0,
+                "money_pop_cubes": 11,
+                "material_pop_cubes": 11,
+                "science_pop_cubes": 12,
+                "population_track": [
+                        28,
+                        24,
+                        21,
+                        18,
+                        15,
+                        12,
+                        10,
+                        8,
+                        6,
+                        4,
+                        3,
+                        2,
+                        0
+                ],
+                "military_tech": [
+                        "stb"
+                ],
+                "grid_tech": [],
+                "nano_tech": [],
+                "ancient_parts": [],
+                "tech_track": [
+                        -8,
+                        -6,
+                        -4,
+                        -3,
+                        -2,
+                        -1,
+                        0,
+                        0
+                ],
+                "reputation_track": [
+                        "rep",
+                        "mixed",
+                        "mixed",
+                        "mixed"
+                ],
+                "reputation_only_slots": [
+                        0
+                ],
+                "cost_orbital": 4,
+                "cost_monolith": 10,
+                "cost_interceptor": 3,
+                "cost_cruiser": 5,
+                "cost_dread": 8,
+                "cost_starbase": 3,
+                "ship_stock": [
+                        8,
+                        4,
+                        2,
+                        3
+                ],
+                "base_interceptor_speed": 0,
+                "base_interceptor_nrg": 0,
+                "base_interceptor_comp": 1,
+                "base_interceptor_hull": 1,
+                "base_cruiser_speed": 0,
+                "base_cruiser_nrg": 0,
+                "base_cruiser_comp": 1,
+                "base_cruiser_hull": 1,
+                "base_dread_speed": 0,
+                "base_dread_nrg": 0,
+                "base_dread_comp": 1,
+                "base_dread_hull": 1,
+                "base_starbase_speed": 0,
+                "base_starbase_nrg": 0,
+                "base_starbase_comp": 0,
+                "base_starbase_hull": 1,
+                "interceptor_parts": [
+                        "ioc",
+                        "nus",
+                        "nud"
+                ],
+                "cruiser_parts": [
+                        "ioc",
+                        "empty",
+                        "nus",
+                        "hul",
+                        "nud"
+                ],
+                "dread_parts": [
+                        "ioc",
+                        "ioc",
+                        "nus",
+                        "hul",
+                        "hul",
+                        "nud",
+                        "empty"
+                ],
+                "starbase_parts": [
+                        "hul",
+                        "nus",
+                        "nud"
+                ],
+                "blueprint_slots": {
+                        "interceptor": [
+                                [
+                                        1,
+                                        0
+                                ],
+                                [
+                                        0,
+                                        2
+                                ],
+                                [
+                                        2,
+                                        2
+                                ]
+                        ],
+                        "cruiser": [
+                                [
+                                        1,
+                                        0
+                                ],
+                                [
+                                        2,
+                                        0
+                                ],
+                                [
+                                        0,
+                                        1
+                                ],
+                                [
+                                        1,
+                                        4
+                                ],
+                                [
+                                        2,
+                                        5
+                                ]
+                        ],
+                        "dread": [
+                                [
+                                        1,
+                                        0
+                                ],
+                                [
+                                        2,
+                                        0
+                                ],
+                                [
+                                        0,
+                                        1
+                                ],
+                                [
+                                        1,
+                                        4
+                                ],
+                                [
+                                        2,
+                                        4
+                                ],
+                                [
+                                        3,
+                                        5
+                                ],
+                                [
+                                        3,
+                                        1
+                                ]
+                        ],
+                        "starbase": [
+                                [
+                                        1,
+                                        0
+                                ],
+                                [
+                                        0,
+                                        3
+                                ],
+                                [
+                                        2,
+                                        3
+                                ]
+                        ]
+                },
+                "portrait_image": true
+        },
+        "wul": {
+                "name": "The Wulfen",
+                "artwork": "wulfen",
+                "setup_color": "brown",
+                "community": true,
+                "abilities": [
+                        "spine_cannons",
+                        "wolf_pack"
+                ],
+                "influence_colony_ships": 2,
+                "materials": 2,
+                "science": 3,
+                "money": 3,
+                "colony_ships": 3,
+                "base_colony_ships": 3,
+                "home_planet": "252",
+                "owned_tiles": [],
+                "explore_apt": 1,
+                "research_apt": 1,
+                "upgrade_apt": 2,
+                "build_apt": 2,
+                "move_apt": 3,
+                "influence_apt": 2,
+                "trade_value": 3,
+                "influence_discs": 12,
+                "influence_track": [
+                        30,
+                        25,
+                        21,
+                        17,
+                        13,
+                        10,
+                        7,
+                        5,
+                        3,
+                        2,
+                        1,
+                        0,
+                        0
+                ],
+                "explore_action_counters": 0,
+                "research_action_counters": 0,
+                "upgrade_action_counters": 0,
+                "build_action_counters": 0,
+                "move_action_counters": 0,
+                "influence_action_counters": 0,
+                "money_pop_cubes": 11,
+                "material_pop_cubes": 11,
+                "science_pop_cubes": 12,
+                "population_track": [
+                        28,
+                        24,
+                        21,
+                        18,
+                        15,
+                        12,
+                        10,
+                        8,
+                        6,
+                        4,
+                        3,
+                        2,
+                        0
+                ],
+                "military_tech": [],
+                "grid_tech": [
+                        "fus"
+                ],
+                "nano_tech": [],
+                "ancient_parts": [],
+                "tech_track": [
+                        -8,
+                        -6,
+                        -4,
+                        -3,
+                        -2,
+                        -1,
+                        0,
+                        0
+                ],
+                "reputation_track": [
+                        "mixed",
+                        "mixed",
+                        "rep",
+                        "rep",
+                        "rep"
+                ],
+                "reputation_only_slots": [
+                        2,
+                        3,
+                        4
+                ],
+                "cost_orbital": 4,
+                "cost_monolith": 10,
+                "cost_interceptor": 3,
+                "cost_cruiser": 4,
+                "cost_dread": 8,
+                "cost_starbase": 3,
+                "ship_stock": [
+                        0,
+                        5,
+                        2,
+                        4
+                ],
+                "starting_ships": [
+                        "cru"
+                ],
+                "base_interceptor_speed": 2,
+                "base_interceptor_nrg": 0,
+                "base_interceptor_comp": 0,
+                "base_cruiser_speed": 1,
+                "base_cruiser_nrg": 0,
+                "base_cruiser_comp": 0,
+                "base_dread_speed": 0,
+                "base_dread_nrg": 0,
+                "base_dread_comp": 0,
+                "base_starbase_speed": 4,
+                "base_starbase_nrg": 3,
+                "base_starbase_comp": 0,
+                "spine_cannon_slots": {
+                        "cruiser": [
+                                3,
+                                4
+                        ],
+                        "dread": [
+                                6,
+                                7
+                        ],
+                        "starbase": [
+                                3,
+                                4
+                        ]
+                },
+                "cruiser_parts": [
+                        "nus",
+                        "hul",
+                        "nud",
+                        "ioc",
+                        "ioc"
+                ],
+                "dread_parts": [
+                        "elc",
+                        "nus",
+                        "nud",
+                        "empty",
+                        "hul",
+                        "hul",
+                        "ioc",
+                        "ioc"
+                ],
+                "starbase_parts": [
+                        "empty",
+                        "hul",
+                        "hul",
+                        "ioc",
+                        "ioc"
+                ],
+                "blueprint_slots": {
+                        "cruiser": [
+                                [
+                                        0,
+                                        5
+                                ],
+                                [
+                                        2,
+                                        1
+                                ],
+                                [
+                                        2,
+                                        5
+                                ],
+                                [
+                                        1,
+                                        0
+                                ],
+                                [
+                                        1,
+                                        4
+                                ]
+                        ],
+                        "dread": [
+                                [
+                                        0,
+                                        1
+                                ],
+                                [
+                                        0,
+                                        5
+                                ],
+                                [
+                                        1,
+                                        0
+                                ],
+                                [
+                                        2,
+                                        0
+                                ],
+                                [
+                                        1,
+                                        4
+                                ],
+                                [
+                                        2,
+                                        4
+                                ],
+                                [
+                                        3,
+                                        1
+                                ],
+                                [
+                                        3,
+                                        5
+                                ]
+                        ],
+                        "starbase": [
+                                [
+                                        0,
+                                        0
+                                ],
+                                [
+                                        0,
+                                        4
+                                ],
+                                [
+                                        1,
+                                        2
+                                ],
+                                [
+                                        2,
+                                        0
+                                ],
+                                [
+                                        2,
+                                        4
+                                ]
+                        ]
+                },
+                "portrait_image": true
+        },
+        "wra": {
+                "name": "The Wraith",
+                "artwork": "wraith",
+                "setup_color": "white",
+                "community": true,
+                "abilities": [
+                        "phase_technology",
+                        "ghosts",
+                        "soul_hunters",
+                        "phase_module"
+                ],
+                "reputation_only_slots": [
+                        1,
+                        2,
+                        3
+                ],
+                "phase_module_slots": {
+                        "interceptor": [
+                                2
+                        ],
+                        "cruiser": [
+                                3
+                        ],
+                        "dread": [
+                                4
+                        ],
+                        "starbase": [
+                                2
+                        ]
+                },
+                "materials": 4,
+                "science": 4,
+                "money": 2,
+                "colony_ships": 3,
+                "base_colony_ships": 3,
+                "home_planet": "254",
+                "owned_tiles": [],
+                "explore_apt": 1,
+                "research_apt": 1,
+                "upgrade_apt": 2,
+                "build_apt": 2,
+                "move_apt": 2,
+                "influence_apt": 1,
+                "trade_value": 3,
+                "influence_discs": 12,
+                "influence_track": [
+                        30,
+                        25,
+                        21,
+                        17,
+                        13,
+                        10,
+                        7,
+                        5,
+                        3,
+                        2,
+                        1,
+                        0,
+                        0
+                ],
+                "explore_action_counters": 0,
+                "research_action_counters": 0,
+                "upgrade_action_counters": 0,
+                "build_action_counters": 0,
+                "move_action_counters": 0,
+                "influence_action_counters": 0,
+                "money_pop_cubes": 11,
+                "material_pop_cubes": 12,
+                "science_pop_cubes": 11,
+                "population_track": [
+                        28,
+                        24,
+                        21,
+                        18,
+                        15,
+                        12,
+                        10,
+                        8,
+                        6,
+                        4,
+                        3,
+                        2,
+                        0
+                ],
+                "military_tech": [
+                        "phm"
+                ],
+                "grid_tech": [],
+                "nano_tech": [],
+                "ancient_parts": [],
+                "tech_track": [
+                        -8,
+                        -6,
+                        -4,
+                        -3,
+                        -2,
+                        -1,
+                        0,
+                        0
+                ],
+                "reputation_track": [
+                        "mixed",
+                        "rep",
+                        "rep",
+                        "rep"
+                ],
+                "cost_orbital": 4,
+                "cost_monolith": 10,
+                "cost_interceptor": 4,
+                "cost_cruiser": 6,
+                "cost_dread": 9,
+                "cost_starbase": 3,
+                "ship_stock": [
+                        7,
+                        4,
+                        2,
+                        4
+                ],
+                "base_interceptor_speed": 2,
+                "base_interceptor_nrg": 0,
+                "base_interceptor_comp": 0,
+                "base_cruiser_speed": 1,
+                "base_cruiser_nrg": 0,
+                "base_cruiser_comp": 0,
+                "base_dread_speed": 0,
+                "base_dread_nrg": 0,
+                "base_dread_comp": 0,
+                "base_starbase_speed": 4,
+                "base_starbase_nrg": 3,
+                "base_starbase_comp": 0,
+                "interceptor_parts": [
+                        "ioc",
+                        "nus",
+                        "empty",
+                        "nud"
+                ],
+                "cruiser_parts": [
+                        "nus",
+                        "ioc",
+                        "empty",
+                        "empty",
+                        "hul",
+                        "nud"
+                ],
+                "dread_parts": [
+                        "nus",
+                        "ioc",
+                        "ioc",
+                        "empty",
+                        "empty",
+                        "hul",
+                        "hul",
+                        "nud"
+                ],
+                "starbase_parts": [
+                        "hul",
+                        "ioc",
+                        "empty",
+                        "empty",
+                        "hul"
+                ],
+                "wraithSouls": 0,
+                "portrait_image": true
         }
 }

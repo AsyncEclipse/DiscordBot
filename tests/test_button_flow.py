@@ -4,31 +4,43 @@ from tests.fakes import buttons, reload
 P1, P2 = 1, 2
 
 
-def test_press_through_listener(start_game, press):
-    _game, channel = start_game()
-    inter = press(channel, P1, "FCIDblue_showReputation")
-    assert "reputation tiles" in inter.followup.sent[0][0]
-
-
 def test_pass_then_next_player_gets_turn(start_game, press):
     game, channel = start_game()
+    blue_money = game.get_player(P1)["money"]
+    red_money = game.get_player(P2)["money"]
     press(channel, P1, "FCIDblue_passForRound")
     state = reload(game).gamestate
     assert state["players"][str(P1)]["passed"]
+    assert state["players"][str(P1)]["money"] == blue_money + 2
     assert state["activePlayerColor"] == ["red"]
     assert any(l and "Build" in l for l in buttons(channel).values())
     # a second press in the same process must not be blocked by the first one's lock
     press(channel, P2, "FCIDred_passForRound")
-    assert reload(game).gamestate["players"][str(P2)]["passed"]
+    red = reload(game).get_player(P2)
+    assert red["passed"]
+    assert red["money"] == red_money
 
 
-def test_a_repeated_press_of_the_same_button_is_refused(start_game, press):
-    game, channel = start_game()
-    press(channel, P1, "FCIDblue_passForRound")
-    # Remember the raw id, FCID prefix included, or the guard never matches.
-    assert reload(game).gamestate["lastButton"] == "FCIDblue_passForRound"
+def test_a_build_action_can_end_without_building_anything(start_game, press):
+    game, channel = start_game(factions=["hyd", "eri"])
+    press(channel, P1, "FCIDblue_startBuild")
+    press(channel, P1, "FCIDblue_buildIn_201")
 
-    inter = press(channel, P1, "FCIDblue_passForRound")
+    assert "FCIDblue_finishAction" in buttons(channel)
+    press(channel, P1, "FCIDblue_finishAction")
 
-    assert any("most recently" in content for content, _kwargs in inter.followup.sent)
+    assert "FCIDblue_endTurn" in buttons(channel)
 
+
+def test_put_down_population_can_be_declined(start_game, run):
+    from Buttons.Population import PopulationButtons
+    from tests.fakes import FakeInteraction
+
+    game, channel = start_game(factions=["hyd", "eri"])
+    player = game.get_player(P1)
+    run(PopulationButtons.startPopDrop(game, player, FakeInteraction(channel)))
+    assert any(cid.endswith("_declinePopDrop") for cid in buttons(channel))
+
+    message = channel.message_with("FCIDblue_declinePopDrop")
+    run(PopulationButtons.declinePopDrop(game, player, FakeInteraction(channel, message=message)))
+    assert message.id in channel.deleted

@@ -47,4 +47,7 @@ class PulsarButtons:
         if action == "upgrade":
             await UpgradeButtons.startUpgrade(game, player, interaction, False, "dummy","dum")
         if action == "move":
+            # A free move from a discovery tile is not a Move action, so Raid does not add a build.
+            player_helper.stats["pulsarMove"] = True
+            game.update_player(player_helper)
             await MoveButtons.startMove(game, player, interaction, "startMove_8", False)

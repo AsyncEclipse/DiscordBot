@@ -44,6 +44,7 @@ class DiscordBot(commands.Bot):
         else:
             await self.tree.sync()
         app_emojis = await self.fetch_application_emojis()
+        app_emojis = await Emoji.upload_missing_tokens(self, app_emojis)
         Emoji.load(app_emojis)
         print(f"Loaded {len(app_emojis)} application emojis")
         start_time = time.perf_counter()

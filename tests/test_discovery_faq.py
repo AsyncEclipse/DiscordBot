@@ -13,7 +13,7 @@ from Buttons.DiscoveryTile import DiscoveryTileButtons
 from Buttons.Influence import InfluenceButtons
 from Buttons.Turn import TurnButtons
 from helpers.CombatHelper import Combat
-from tests.fakes import FakeInteraction, POS, board_tile, offered_ids, players
+from tests.fakes import FakeChannel, FakeInteraction, POS, board_tile, buttons, offered_ids, players, reload
 
 
 def _game(make_game, colors, ships, owner=0, extra=None, names=None):
@@ -201,3 +201,44 @@ class TestUpkeepWaitsForDiscoveryTiles:
         run(TurnButtons.runUpkeep(game, inter))
 
         assert ran == []
+
+
+@pytest.mark.parametrize("faction, deck", [("hyd", ["som"]), ("atl", ["som", "jud"])])
+def test_upkeep_reoffers_lost_discovery_choices_without_redrawing(start_game, run, press, faction, deck):
+    game, channel = start_game(factions=[faction, "eri"])
+    tile = "201"
+    game.gamestate["discTiles"] = list(deck)
+    game.addDiscTile(tile)
+    run(DiscoveryTileButtons.exploreDiscoveryTile(game, tile, FakeInteraction(channel), game.get_player(1)))
+    old_id = next(cid for cid in buttons(channel) if "keepDiscForPoints" in cid or "selectDiscTile" in cid)
+    old_message = channel.message_with(old_id)
+    state = reload(game)
+    for player in state.gamestate["players"].values():
+        player["passed"] = True
+    state.update()
+    remaining_deck = list(state.gamestate["discTiles"])
+
+    press(channel, 1, "runUpkeep")
+
+    assert channel.message_with(old_id).id != old_message.id
+    assert reload(game).gamestate["discTiles"] == remaining_deck
+    inter = press(channel, 1, old_id, message=old_message)
+    assert "latest prompt" in inter.followup.sent[0][0]
+    press(channel, 1, old_id)
+    if faction == "atl":
+        press(channel, 1, "FCIDblue_keepDiscForPoints_201")
+    state = reload(game)
+    assert state.get_player(1)["disc_tiles_for_points"] == 1
+    assert not state.gamestate.get("pendingDiscoveryResolutions")
+    assert not state.gamestate.get("pendingDiscoveryPrompts")
+
+
+def test_upkeep_reoffers_an_unclaimed_tile_after_its_offer_was_lost(make_game, run):
+    game = _game(make_game, ("blue", "red"), [], owner="blue", extra={"disctile": 1})
+    original_channel = FakeChannel("t-old")
+    run(Combat.settleDiscoveryTiles(game, original_channel))
+    new_channel = FakeChannel("t-actions")
+
+    run(TurnButtons.runUpkeep(game, FakeInteraction(new_channel)))
+
+    assert _explore_offer("blue") in buttons(new_channel)

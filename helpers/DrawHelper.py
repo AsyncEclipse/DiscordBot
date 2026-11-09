@@ -7,6 +7,7 @@ import json
 import os
 from discord.ui import View, Button
 
+from helpers import FactionData
 from helpers.ImageCache import ImageCacheHelper
 from helpers.PlayerHelper import PlayerHelper
 from helpers.ShipHelper import PlayerShip
@@ -25,7 +26,6 @@ def load_properties(path):
 
 
 _resized_cache = {}
-
 
 class DrawHelper:
     def __init__(self, gamestate):
@@ -62,36 +62,6 @@ class DrawHelper:
                     return image.copy()
             else:
                 print(filename)
-
-    def get_short_faction_name(self, full_name):
-        if full_name == "Descendants of Draco":
-            return "draco"
-        elif full_name == "Mechanema":
-            return "mechanema"
-        elif full_name == "Planta":
-            return "planta"
-        elif full_name == "Orian Hegemony" or full_name == "Orion Hegemony":
-            return "orion"
-        elif full_name == "Hydran Progress":
-            return "hydran"
-        elif full_name == "Eridani Empire":
-            return "eridani"
-        elif full_name == "Wardens of Magellan":
-            return "magellan"
-        elif full_name == "Enlightened of Lyra":
-            return "lyra"
-        elif full_name == "Rho Indi Syndicate":
-            return "rho"
-        elif full_name == "The Exiles":
-            return "exile"
-        elif full_name == "Atlantians":
-            return "atlantians"
-        elif full_name == "Remnants of Ra":
-            return "ra"
-        elif full_name == "Techno-Mages":
-            return "tm"
-        elif "Terran" in full_name:
-            return full_name.lower().replace(" ", "_")
 
     def base_tile_image(self, sector):
         filepath = f"images/resources/hexes/{str(sector)}.png"
@@ -316,6 +286,8 @@ class DrawHelper:
                     tile_image.paste(discTile, (int(108 * mult), int(89 * mult)), mask=discTile)
 
             text_position = (int(280 * mult), int(132 * mult))
+            if tile.get("number_snap"):
+                text_position = tuple(tile["number_snap"])
             bannerPath = "images/resources/masks/banner.png"
             banner = self.use_image(bannerPath)
             if not numberless and "back" not in sector:
@@ -399,9 +371,10 @@ class DrawHelper:
                         if ship_type == "orb":
                             size = int(110 * mult)
                             if ship_tile["owner"] != 0:
-                                if all([self.getPlayerObjectFromColor(ship_tile["owner"])['name'] == "The Exiles",
-                                            ship_tile.get("orbital_pop", [0])[0] == 1]):
-                                    ship = "exile_orb"
+                                owner = self.getPlayerObjectFromColor(ship_tile["owner"])
+                                if all([FactionData.has(owner, "orbital_pop_ships"),
+                                        ship_tile.get("orbital_pop", [0])[0] == 1]):
+                                    ship = f"{FactionData.artwork_name(owner['name'])}_orb"
                                 
                     filepathShip = f"images/resources/components/fancy_ships/fancy_{ship}.png"
                     if self.gamestate.get("fancy_ships") and os.path.exists(filepathShip):
@@ -527,6 +500,34 @@ class DrawHelper:
                 for resource in ["neutral", "neutraladv", "money", "moneyadv", "science", "scienceadv",
                                  "material", "materialadv", "orbital", "disc"]:
                     paste_resourcecube(tile, tile_image, resource, color, disc_center)
+            draw = ImageDraw.Draw(tile_image)
+            for player in self.gamestate["players"].values():
+                for placement in player.get("harvester_placements", []):
+                    if placement["position"] != position:
+                        continue
+                    x, y = (345 / 1024 * mult * c for c in
+                            tile[f"{placement['square']}{int(placement['index']) + 1}_snap"])
+                    radius = 30 * mult
+                    ring = int(5 * mult)
+                    border = int(2 * mult)
+                    # a thin black ring inside and outside the coloured one, so it pops
+                    draw.ellipse((x - radius - border, y - radius - border,
+                                  x + radius + border, y + radius + border),
+                                 outline=(0, 0, 0), width=border)
+                    draw.ellipse((x - radius, y - radius, x + radius, y + radius),
+                                 outline=player["color"], width=ring)
+                    draw.ellipse((x - radius + ring, y - radius + ring,
+                                  x + radius - ring, y + radius - ring),
+                                 outline=(0, 0, 0), width=border)
+            engaged = [(color, ship_class)
+                       for color, state in tile.get("carapaceShields", {}).items()
+                       for ship_class in ("interceptor", "cruiser", "dread", "starbase")
+                       if state.get(ship_class)]
+            if engaged:
+                label = ", ".join(f"{ship_class} ({color})" for color, ship_class in engaged)
+                shield_font = ImageFont.truetype("images/resources/arial.ttf", size=int(18 * mult))
+                draw.text((int(20 * mult), int(20 * mult)), f"Carapace Shields: {label}",
+                          (255, 255, 255), font=shield_font, stroke_width=3, stroke_fill=(0, 0, 0))
             if tile.get("type") == "nebula":
                 tile_image = tile_image.rotate(rotation)
                 self.label_nebula_subsectors(tile_image, position, rotation)
@@ -657,9 +658,36 @@ class DrawHelper:
         return context
 
     def faction_portrait(self, faction):
-        if faction == "atlantians" or faction == "ra" or faction == "tm":
+        if any(row.get("artwork") == faction and row.get("portrait_image") for row in FactionData.FACTIONS.values()):
             return self.use_image(f"images/resources/components/layouts/factionImages/{faction}_image.png")
         return self.use_image(f"images/resources/components/factions/{faction}_board.png").crop((49, 252, 154, 357))
+
+    @staticmethod
+    def action_annotation(player, action):
+        """The extra activation the Heralds print under a count: Raid adds a build to a move,
+        Regroup adds a move to a build."""
+        if action == "build" and FactionData.has(player, "regroup"):
+            return "+1 MOV"
+        if action == "move" and FactionData.has(player, "raid"):
+            return "+1 BUI"
+        return None
+
+    @staticmethod
+    def blueprint_cell(origin, col, row):
+        """Top-left of a (column, half-row) cell of the 817px blueprint art, scaled to the 424px pasted blueprint."""
+        return int(origin[0] + (18 + 262 * col) * 0.52), int(origin[1] + (160 + 65.5 * row) * 0.52)
+
+    @staticmethod
+    def draw_blueprint_slots(context, origin, layout):
+        """Draw a faction's own slot shape under a blueprint header and return each slot's top-left."""
+        size = 136
+        cells = [DrawHelper.blueprint_cell(origin, col, row) for col, row in layout]
+        draw = ImageDraw.Draw(context)
+        for x, y in cells:
+            draw.rectangle((x - 7, y - 7, x + size + 7, y + size + 7), fill=(35, 61, 85))
+        for x, y in cells:
+            draw.rectangle((x, y, x + size, y + size), fill=(108, 145, 165), outline=(225, 225, 225), width=2)
+        return cells
 
     def display_turn_order(self):
         context = Image.new("RGBA", (900, 290), (0, 0, 0, 255))
@@ -719,7 +747,7 @@ class DrawHelper:
 
         for n, player in enumerate(playerOrder):
             border = 6
-            faction = self.get_short_faction_name(player["name"])
+            faction = FactionData.artwork_name(player["name"])
             pop_path = f"images/resources/components/all_boards/popcube_{player['color']}.png"
             pop_image = self.use_image(pop_path)
             pop_image = pop_image.crop((32, 32, pop_image.width - 32, pop_image.height - 32))
@@ -748,7 +776,7 @@ class DrawHelper:
             if player is None:
                 continue
             border = 4
-            faction = self.get_short_faction_name(player["name"])
+            faction = FactionData.artwork_name(player["name"])
             pop_path = f"images/resources/components/all_boards/popcube_{player['color']}.png"
             pop_image = self.use_image(pop_path)
             pop_image = pop_image.crop((32, 32, pop_image.width - 32, pop_image.height - 32))
@@ -1010,7 +1038,7 @@ class DrawHelper:
 
     def player_area(self, player):
         
-        faction = self.get_short_faction_name(player["name"])
+        faction = FactionData.artwork_name(player["name"])
         context = Image.new("RGBA", (5000, 800), (0, 0, 0, 255))
         layout_path = f"images/resources/components/layouts/player_layout.png"
         layout_image = self.use_image(layout_path)
@@ -1057,6 +1085,11 @@ class DrawHelper:
         stroke_width = 2
         textHeightForP = 670
         text_drawable = ImageDraw.Draw(context)
+        if FactionData.has(player, "deep_space_explorers"):
+            reserve_font = ImageFont.truetype("images/resources/arial.ttf", size=20)
+            # Between discovery tiles (ending at 450) and action icons (starting at 470).
+            text_drawable.text((10, 451), f"S3 reserve: {len(player.get('deep_space_sectors', []))}",
+                               fill=(255, 255, 255), font=reserve_font, anchor="lt")
         if player.get("passed"):
             text_drawable.text((10, textHeightForP), "Passed", fill=(255, 0, 0), font=font,
                                stroke_width=stroke_width, stroke_fill=stroke_color)
@@ -1175,14 +1208,15 @@ class DrawHelper:
             font = ImageFont.truetype("images/resources/arial.ttf", size=35)
             text_drawable_image.text((50 + int(116 * x), 607), f"{action_activation}", color, font=font,
                                              stroke_width=stroke_width, stroke_fill=stroke_color)
+            annotation = DrawHelper.action_annotation(player, action)
+            if annotation:
+                annotation_font = ImageFont.truetype("images/resources/arial.ttf", size=28)
+                text_drawable_image.text((50 + int(116 * x) + 10, 672), annotation, color, font=annotation_font,
+                                         anchor="mm", stroke_width=stroke_width, stroke_fill=stroke_color)
         font = ImageFont.truetype("images/resources/arial.ttf", size=35)
         # the colony ships one Influence action may flip (Buttons/Influence.py)
-        if "magellan" in faction or faction in ("ra", "tm"):
-            text_drawable_image.text((618, 417), f"1", color, font=font,
-                                             stroke_width=stroke_width, stroke_fill=stroke_color)
-        else:
-            text_drawable_image.text((618, 417), f"2", color, font=font,
-                                             stroke_width=stroke_width, stroke_fill=stroke_color)
+        text_drawable_image.text((618, 417), f"{FactionData.of(player).get('influence_colony_ships', 2)}",
+                                 color, font=font, stroke_width=stroke_width, stroke_fill=stroke_color)
             
 
 
@@ -1237,8 +1271,30 @@ class DrawHelper:
                     pop_image = self.use_resized_image(pop_path, (42,42))
                     context.paste(pop_image, (reputationX+x*150+30, 600+60), mask=pop_image)
 
-        # Alliance tiles sit to the right of the reputation track.
-        allianceX = 4600
+        font = ImageFont.truetype("images/resources/arial.ttf", size=50)
+        for slot, bonus in player.get("reputationBonuses", {}).items():
+            if isinstance(player["reputation_track"][int(slot)], int):
+                text_drawable_image.text((reputationX + int(slot) * 150 + 110, 710), f"{bonus:+d}",
+                                         (255, 255, 255), font=font, anchor="mm", stroke_width=3,
+                                         stroke_fill=(0, 0, 0))
+        if FactionData.has(player, "soul_hunters"):
+            bonus = player.get("wraithSouls", 0)
+            points = self.use_resized_image("images/resources/components/all_boards/points.png", (120, 120))
+            bonus_x = reputationX + len(player["reputation_track"]) * 150
+            context.paste(points, (bonus_x, 600), mask=points)
+            text_drawable_image.text((bonus_x + 60, 660), f"{bonus:+d}", (0, 0, 0), font=font,
+                                     anchor="mm")
+
+            source_x = bonus_x + 150
+            source = self.use_resized_image(
+                "images/resources/components/upgrades/wraith_soul_count.png", (120, 120))
+            context.paste(source, (source_x, 600), mask=source)
+            count_font = ImageFont.truetype("images/resources/arial.ttf", size=35 if bonus < 10 else 25)
+            text_drawable_image.text((source_x + 40, 688), str(bonus), (255, 255, 255),
+                                     font=count_font, anchor="mm", stroke_width=1, stroke_fill=(0, 0, 0))
+
+        # Alliance tiles sit to the right of the reputation track and soul counter.
+        allianceX = 4750 if FactionData.has(player, "soul_hunters") else 4600
         for allianceTile, betrayed in player.get("alliances", {}).items():
             side = "betrayed" if betrayed else "ally"
             alliance_path = (f"images/resources/components/alliances/"
@@ -1247,26 +1303,28 @@ class DrawHelper:
             context.paste(alliance_image, (allianceX, 600), mask=alliance_image)
             allianceX += 130
 
-        faction = self.get_short_faction_name(player["name"])
+        faction = FactionData.artwork_name(player["name"])
         ships = ["int", "cru", "drd", "sb","orb"]
         stroke_color = (0, 0, 0)
         color = (255, 255, 255)
         stroke_width = 2
         font = ImageFont.truetype("images/resources/arial.ttf", size=35)
-        for counter, ship in enumerate(ships):
+        blueprint_slots = FactionData.of(player).get("blueprint_slots", {})
+        slot_cells = {}
+        for slot, ship in enumerate(ships):
             shipFullName = self.getShipFullName(ship)
             if ship == "orb" and faction != "exile":
+                continue
+            # A faction without an Interceptor blueprint (Wulfen) leaves its space empty.
+            if ship == "int" and not player.get("interceptor_parts"):
                 continue
             ship_blueprint_path = f"images/resources/components/layouts/blueprints/blueprint_{shipFullName}.png"
             if faction == "planta":
                 ship_blueprint_path = ship_blueprint_path.replace(".png","_planta.png")
             ship_blueprint = self.use_image(ship_blueprint_path)
             if ship == "drd":
-                #ship_blueprint = ship_blueprint.resize((561,400))
                 if faction == "rho":
                     continue
-            #else:
-                #ship_blueprint = ship_blueprint.resize((424,400))
             mod = 0
             if ship == "sb" and faction == "exile":
                 continue
@@ -1274,7 +1332,13 @@ class DrawHelper:
                 mod = 161
                 if ship == "orb":
                     mod = -389
-            context.paste(ship_blueprint, (2250 + 550 * counter+mod, 70))
+            layout = blueprint_slots.get(PlayerHelper.blueprint_key(ship))
+            if layout:
+                # keep the stat header, draw the faction's own slot shape below it
+                ship_blueprint = ship_blueprint.crop((0, 0, ship_blueprint.width, 83))
+                slot_cells[ship] = self.draw_blueprint_slots(context, (2250 + 550 * slot + mod, 70), layout)
+            context.paste(ship_blueprint, (2250 + 550 * slot+mod, 70))
+            counter = slot
             shipMod = PlayerShip(player, shipFullName)
             total_energy = shipMod.total_energy
             usedEnergy = total_energy - shipMod.energy
@@ -1284,30 +1348,30 @@ class DrawHelper:
             computer = str(shipMod.computer)
             shield = str(shipMod.shield)
             cost = str(shipMod.cost)
-            text_drawable_image.text((2250 + 550 * counter+mod+40, 70+42), f"{usedEnergy}/{total_energy}", color, font=font,
+            text_drawable_image.text((2250 + 550 * slot+mod+40, 70+42), f"{usedEnergy}/{total_energy}", color, font=font,
                                              stroke_width=stroke_width, stroke_fill=stroke_color)
             if drive != "0":
-                text_drawable_image.text((2250 + 550 * counter+mod+155, 70+42), f"{drive}", color, font=font,
+                text_drawable_image.text((2250 + 550 * slot+mod+155, 70+42), f"{drive}", color, font=font,
                                                 stroke_width=stroke_width, stroke_fill=stroke_color)
 
-            text_drawable_image.text((2250 + 550 * counter+mod+230, 70+42), f"{hull}", color, font=font,
+            text_drawable_image.text((2250 + 550 * slot+mod+230, 70+42), f"{hull}", color, font=font,
                                              stroke_width=stroke_width, stroke_fill=stroke_color)
-            text_drawable_image.text((2250 + 550 * counter+mod+295, 70+42), f"{computer}", color, font=font,
+            text_drawable_image.text((2250 + 550 * slot+mod+295, 70+42), f"{computer}", color, font=font,
                                              stroke_width=stroke_width, stroke_fill=stroke_color)
-            text_drawable_image.text((2250 + 550 * counter+mod+375, 70+42), f"{shield}", color, font=font,
+            text_drawable_image.text((2250 + 550 * slot+mod+375, 70+42), f"{shield}", color, font=font,
                                              stroke_width=stroke_width, stroke_fill=stroke_color)
-            text_drawable_image.text((2250 + 550 * counter+mod+375, 68), f"{speed}", color, font=font,
+            text_drawable_image.text((2250 + 550 * slot+mod+375, 68), f"{speed}", color, font=font,
                                              stroke_width=stroke_width, stroke_fill=stroke_color)
             if ship =="drd":
                 mod += 5
-            text_drawable_image.text((2250 + 550 * counter+mod+10, 70), f"{cost}", color, font=font,
+            text_drawable_image.text((2250 + 550 * slot+mod+10, 70), f"{cost}", color, font=font,
                                              stroke_width=stroke_width, stroke_fill=stroke_color)
             shortF = faction
             if "terran" in shortF:
                 shortF = "terran"
             shipClassPath = f"images/resources/components/layouts/blueprints/classes/{shortF}_{shipFullName}_class.png"
             shipClass = self.use_image(shipClassPath)
-            context.paste(shipClass, (2250 + 550 * counter+mod+175, 74))
+            context.paste(shipClass, (2250 + 550 * slot+mod+175, 74), mask=shipClass)
 
 
             if ship != "orb":
@@ -1323,8 +1387,8 @@ class DrawHelper:
                     mod = 0
                     if ship == "drd" or ship =="sb":
                         mod = 161
-                        
-                    context.paste(ship_image, (2670 + 550 * counter+mod, 150+35 * shipCounter), ship_image)
+
+                    context.paste(ship_image, (2670 + 550 * slot+mod, 150+35 * shipCounter), ship_image)
 
 
 
@@ -1346,18 +1410,36 @@ class DrawHelper:
         with open("data/parts.json", "r") as f:
             part_data = json.load(f)
 
-        def process_parts(parts, coords, refX, square_size, shipType):
+        def process_parts(parts, coords, refX, square_size, shipType, cells=None):
+            muon_count = 0
             for counter, part in enumerate(parts):
-                if part == "empty":
+                is_phase_module = counter in PlayerHelper.get_phase_module_slots(
+                    player, "dread" if shipType == "dreadnought" else shipType)
+                if part == "empty" and not is_phase_module:
                     continue
-                part_details = part_data.get(part)  
-                partName = part_details["name"].lower().replace(" ", "_") if part_details else part  
-                part_path = f"images/resources/components/upgrades/{partName}.png"  
-                part_image = self.use_resized_image(part_path, (square_size,square_size+8))  
-                if part == "mus":  
-                    part_image = part_image.resize((int(square_size * 0.69), int(square_size * 0.69)))  
-                
-                # Scale coordinates based on square size, original square was 58  
+                part_details = part_data.get(part)
+                partName = part_details["name"].lower().replace(" ", "_") if part_details else part
+                part_path = f"images/resources/components/upgrades/{partName}.png"
+                if is_phase_module:
+                    part_path = "images/resources/components/factions/wraith_phase_module.png"
+                part_image = self.use_resized_image(part_path, (square_size,square_size+8))
+                if part == "mus":
+                    # Keep sources below the header, in a labelled column beside the blueprints.
+                    muon_column = ["interceptor", "cruiser", "dreadnought", "starbase", "orbital"].index(shipType)
+                    part_image = part_image.resize((64, 64))
+                    scaled_x = 4600 + 80 * muon_column
+                    scaled_y = 180 + muon_count * 68
+                    if muon_count == 0:
+                        text_drawable_image.text((scaled_x, 145), ships[muon_column].upper(), color, font=font)
+                    context.paste(part_image, (scaled_x, scaled_y),
+                                  mask=part_image)
+                    muon_count += 1
+                    continue
+                if cells:
+                    context.paste(part_image, cells[counter], mask=part_image)
+                    continue
+
+                # Scale coordinates based on square size, original square was 58
                 x, y = coords[counter]  
                 if shipType == "interceptor":
                     y+=8
@@ -1376,14 +1458,43 @@ class DrawHelper:
                 context.paste(part_image, (scaled_x, scaled_y+50), mask=part_image)  
         referenceX = 2220
         sizeOfSquare = 137
-        process_parts(player["interceptor_parts"], interceptCoord, referenceX,sizeOfSquare,"interceptor")
-        process_parts(player["cruiser_parts"], cruiserCoord,referenceX,sizeOfSquare,"cruiser")
-        process_parts(player["dread_parts"], dreadCoord,referenceX,sizeOfSquare,"dreadnought")
+        if player.get("interceptor_parts"):
+            process_parts(player["interceptor_parts"], interceptCoord, referenceX,sizeOfSquare,"interceptor",
+                          slot_cells.get("int"))
+        process_parts(player["cruiser_parts"], cruiserCoord,referenceX,sizeOfSquare,"cruiser", slot_cells.get("cru"))
+        process_parts(player["dread_parts"], dreadCoord,referenceX,sizeOfSquare,"dreadnought", slot_cells.get("drd"))
         if faction == "exile":
             process_parts(player["orb_parts"], orbCoord,referenceX,sizeOfSquare,"orbital")
         else:
-            process_parts(player["starbase_parts"], sbCoord,referenceX,sizeOfSquare,"starbase")
+            process_parts(player["starbase_parts"], sbCoord,referenceX,sizeOfSquare,"starbase", slot_cells.get("sb"))
 
+        draw = ImageDraw.Draw(context)
+        chip_font = ImageFont.truetype("images/resources/arial.ttf", size=15)
+        for index, ship in enumerate(["int", "cru", "drd", "sb"]):
+            if ship == "int" and not player.get("interceptor_parts"):
+                continue
+            ship_key = PlayerHelper.blueprint_key(ship)
+            chips = []
+            if player.get(f"base_{ship_key}_comp", 0):
+                chips.append(f"+{player[f'base_{ship_key}_comp']} CMP")
+            if player.get(f"base_{ship_key}_hull", 0):
+                chips.append(f"+{player[f'base_{ship_key}_hull']} HULL")
+            if player.get(f"base_{ship_key}_nrg", 0):
+                chips.append(f"{player[f'base_{ship_key}_nrg']} PWR")
+            origin_x = 2250 + 550 * index + (161 if ship == "sb" else 0) + 16
+            for chip_index, chip in enumerate(chips):
+                x = origin_x + chip_index * 78
+                y = 470
+                draw.rounded_rectangle((x, y, x + 70, y + 24), radius=5,
+                                       fill=(25, 38, 55), outline=(225, 225, 225), width=2)
+                draw.text((x + 35, y + 12), chip, (255, 255, 255), font=chip_font, anchor="mm")
+        for ship, cells in slot_cells.items():
+            # Spine Cannon slots keep the board's red (cannon) and yellow (augment) frame over the part
+            # the augment frame sits below the cannon's, wrapping down past its slot as printed
+            for index, frame, drop in zip(PlayerHelper.get_spine_cannon_slots(player, ship),
+                                          [(220, 30, 30), (240, 190, 20)], [0, 12]):
+                x, y = cells[index]
+                draw.rectangle((x - 3, y - 3 + drop, x + 139, y + 139 + drop), outline=frame, width=6)
         if "shrine_in_storage" in player:
             shrine_board_path = "images/resources/components/factions/shrine_board.png"
             shrine_board_image = self.use_image(shrine_board_path)
@@ -1408,7 +1519,7 @@ class DrawHelper:
         
 
     def player_area_old(self, player):
-        faction = self.get_short_faction_name(player["name"])
+        faction = FactionData.artwork_name(player["name"])
         filepath = "images/resources/components/factions/" + str(faction) + "_board.png"
         context = Image.new("RGBA", (1440, 625), (0, 0, 0, 255))
         board_image = self.use_image(filepath)
@@ -1674,13 +1785,14 @@ class DrawHelper:
         points = 0
         tile_map = self.gamestate["board"]
         color = player["color"]
+        vp = FactionData.of(player)
         for tile in tile_map:
             if tile_map[tile].get("owner") == color:
                 points += tile_map[tile]["vp"]
-                if "Lyra" in player["name"] and "shrines" in tile_map[tile]:
-                    points += tile_map[tile]["shrines"]
-                if player["name"] == "The Exiles" and tile_map[tile].get("orbital_pop", [0])[0] == 1:
-                    points += 1
+                if "shrines" in tile_map[tile]:
+                    points += vp.get("vp_per_shrine", 0) * tile_map[tile]["shrines"]
+                if tile_map[tile].get("orbital_pop", [0])[0] == 1:
+                    points += vp.get("vp_per_orbital_pop", 0)
                 if "warpPoint" in tile_map[tile]:
                     points += tile_map[tile]["warpPoint"]
                 if "warpDisc" in tile_map[tile]:
@@ -1692,14 +1804,13 @@ class DrawHelper:
                     for ship in tile_map[tile]["player_ships"]:
                         if "mon" in ship:
                             points += 3
-                if player["name"] == "Planta":
-                    points += 1
-                if player["name"] == "Remnants of Ra" and tile_map[tile]["artifact"] == 1:
-                    points += 1
-            if player["name"] == "Descendants of Draco" and "player_ships" in tile_map[tile]:
+                points += vp.get("vp_per_owned_tile", 0)
+                if tile_map[tile]["artifact"] == 1:
+                    points += vp.get("vp_per_artifact_tile", 0)
+            if vp.get("vp_per_ancient_ship") and "player_ships" in tile_map[tile]:
                 for ship in tile_map[tile]["player_ships"]:
                     if "anc" in ship:
-                        points += 1
+                        points += vp["vp_per_ancient_ship"]
         techTypes = ["military_tech", "grid_tech", "nano_tech"]
         for tType in techTypes:
             if len(player.get(tType, [])) > 3:
@@ -1709,8 +1820,7 @@ class DrawHelper:
                     points += len(player[tType]) - 3
         if "disc_tiles_for_points" in player:
             points += player["disc_tiles_for_points"] * 2
-        if player["name"] == "Atlantians":
-            points += PlayerHelper.installed_discovery_part_count(player)
+        points += vp.get("discovery_part_vp", 0) * PlayerHelper.installed_discovery_part_count(player)
         reputationPoints = 0
         ambass = 0
         repu = 0
@@ -1740,6 +1850,9 @@ class DrawHelper:
             points += repu
         if "magPartPoints" in player:
             points += player["magPartPoints"]
+        if "gameEnded" in self.gamestate or showPrivateRegardless:
+            points += FactionData.battle_rep_points(player)
+        points += player.get("wraithSouls", 0)
 
         if "rep" in player.get("discoveryTileBonusPointTiles", []):
             points += reputationPoints // 3
@@ -1747,11 +1860,8 @@ class DrawHelper:
             # A faceup Alliance Tile is worth 2 VP, a Betrayer tile costs 3. Rho Indi
             # gets no exemption here, unlike the Traitor Card.
             points += -3 if betrayed else 2
-        if player.get("traitor"):
-            if player["name"] == "Rho Indi Syndicate":
-                pass
-            else:
-                points -= 2
+        if player.get("traitor") and not FactionData.has(player, "no_traitor_vp_penalty"):
+            points += vp.get("traitor_vp_penalty", -2)
         return points
 
     def show_game(self):

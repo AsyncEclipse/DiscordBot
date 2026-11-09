@@ -13,11 +13,23 @@ from types import SimpleNamespace
 import discord
 
 from helpers.GamestateHelper import GamestateHelper
-
 from helpers.PlayerHelper import PlayerHelper
 
 FACTIONS = json.load(open("data/factions.json"))
 POS = "101"  # the sector board_tile() builds by default
+
+
+class FakeImage:
+    """Let exploration build real rotation choices without composing or encoding pixels."""
+
+    def paste(self, *args, **kwargs):
+        return None
+
+    def crop(self, *args, **kwargs):
+        return self
+
+    def save(self, *args, **kwargs):
+        return None
 
 
 class FakeMessage:
@@ -26,7 +38,6 @@ class FakeMessage:
     def __init__(self, channel=None):
         self.id = next(self._ids)
         self.flags = SimpleNamespace(ephemeral=False)
-
         self.channel = channel
         self.components = []
 
@@ -86,7 +97,6 @@ class FakeChannel:
             if any(getattr(c, "custom_id", None) == custom_id for c in getattr(kwargs.get("view"), "children", [])):
                 return message
         return None
-
 
 
 class FakeUser:
@@ -153,8 +163,6 @@ class FakeGame:
             "bannedFactions": [],
             "draftedFactions": [],
         }
-
-    getShortFactionNameFromFull = GamestateHelper.getShortFactionNameFromFull
 
 
 def player_stats(faction, **overrides):

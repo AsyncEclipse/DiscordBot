@@ -13,16 +13,52 @@ a temp directory. Pick the setup that fits the test:
 import asyncio
 import json
 import random
+from types import SimpleNamespace
 
 import pytest
 
 import config
 from helpers import CombatHelper
+from helpers import DrawHelper as draw_helper_module
 from helpers.CombatHelper import Combat
+from helpers.DrawHelper import DrawHelper
 from helpers.GamestateHelper import GamestateHelper
 from listeners.ButtonListener import ButtonListener
 from setup.GameInit import GameInit
-from tests.fakes import FakeChannel, FakeInteraction
+from tests.fakes import FakeChannel, FakeImage, FakeInteraction
+
+
+@pytest.fixture(autouse=True)
+def no_render(request, monkeypatch):
+    """Only the faction rendering cases compose images; rule tests still run real handlers."""
+    if request.node.get_closest_marker("render"):
+        return
+
+    def omit_image(*args, **kwargs):
+        return None
+
+    def unexpected_image(*args, **kwargs):
+        pytest.fail("Image loading belongs in test_faction_rendering.py")
+
+    for method in (
+        "base_tile_image", "base_tile_image_with_rotation", "board_tile_image_file",
+        "availablePartsFile", "mergeLocationsFile", "board_tile_image", "display_techs",
+        "display_remaining_discoveries", "faction_portrait", "display_turn_order",
+        "display_remaining_tiles", "display_cube_track_reference", "display_upkeep_track_reference",
+        "player_area", "player_area_old", "show_game", "show_map", "get_file", "append_images",
+        "show_available_techs", "show_select_techs", "show_single_tile", "show_minor_species",
+        "show_shrine_board", "show_disc_tile", "show_player_area", "show_player_ship_area",
+        "show_player_ship", "show_AI_stats", "show_ref", "show_tech_ref_image",
+        "show_part_ref_image", "show_disc_tile_ref_image",
+    ):
+        monkeypatch.setattr(DrawHelper, method, staticmethod(omit_image))
+    monkeypatch.setattr(DrawHelper, "use_image", unexpected_image)
+    monkeypatch.setattr(DrawHelper, "use_resized_image", unexpected_image)
+
+    # This method also computes legal rotations and creates buttons, so keep its logic real.
+    image = FakeImage()
+    monkeypatch.setattr(draw_helper_module, "Image", SimpleNamespace(new=lambda *a, **k: image))
+    monkeypatch.setattr(DrawHelper, "base_tile_image_with_rotation_in_context", lambda *a, **k: image)
 
 
 @pytest.fixture

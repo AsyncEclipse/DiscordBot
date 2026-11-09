@@ -1,5 +1,4 @@
 """Repeated presses: the same button within the debounce window, or any button on a used-up message."""
-from types import SimpleNamespace
 
 import pytest
 
@@ -36,13 +35,11 @@ def used_up(inter):
 
 
 @pytest.fixture
-def moving_interceptor(start_game, press, monkeypatch):
+def moving_interceptor(start_game, press):
     """Blue's interceptor at home 201 with destinations 301 and 302 offered.
 
     Moving deletes the destination message, so any later press on it is stale.
     """
-    monkeypatch.setattr("Buttons.Move.DrawHelper", lambda *_a, **_k: SimpleNamespace(
-        mergeLocationsFile=lambda _t: None, board_tile_image_file=lambda _t: None))
     game, channel = start_game()
     for tile, orientation in (("301", 0), ("302", 60)):
         game.add_tile(tile, orientation, "202")

@@ -3,11 +3,14 @@ from Buttons.BlackHole import BlackHoleButtons
 from Buttons.Alliance import AllianceButtons
 from Buttons.DiplomaticRelations import DiplomaticRelationsButtons
 from Buttons.Explore import ExploreButtons
+from Buttons.Harvester import HarvesterButtons
 from Buttons.Population import PopulationButtons
 from Buttons.Pulsar import PulsarButtons
 from helpers.EmojiHelper import Emoji
+from helpers import FactionData
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
+from helpers.Turtugan import Harvester
 from helpers.DrawHelper import DrawHelper
 from discord.ui import View, Button
 import asyncio
@@ -44,8 +47,19 @@ class TurnButtons:
     async def restartTurn(player, game: GamestateHelper, interaction: discord.Interaction):
         try:
             color = player["color"]
+            if game.gamestate.get("pre_game") and not game.gamestate["pre_game"].get("started"):
+                # the game has not started yet: there is no turn to go back to, and rolling
+                # back would undo the setup the pre-game phase is built on
+                await interaction.channel.send("The game has not started yet, so there is no turn to restart.")
+                return
             await interaction.message.delete()
-            game.backUpToLastSaveFile()
+            if not game.backUpToLastSaveFile():
+                view = TurnButtons.getStartTurnButtons(game, player, "dummy")
+                await interaction.channel.send("There is no eligible turn-start save, so the current turn remains"
+                                               " unchanged.")
+                await interaction.channel.send(player["player_name"] + " use buttons to do your turn"
+                                               + game.displayPlayerStats(player), view=view)
+                return
             game = GamestateHelper(interaction.channel)
             player = game.getPlayerObjectFromColor(color)
             view = TurnButtons.getStartTurnButtons(game, player, "dummy")
@@ -231,7 +245,7 @@ class TurnButtons:
                     view.add_item(Button(label=f"Trade {trade_value} {resource_type.capitalize()}",
                                          style=button_style,
                                          custom_id=f"FCID{p1.stats['color']}_tradeAtRatio_{resource_type}_money"))
-            if p1.stats["colony_ships"] > 0 and game.get_short_faction_name(p1.stats["name"]) == "magellan":
+            if p1.stats["colony_ships"] > 0 and FactionData.has(p1.stats, "colony_ship_resources"):
                 emojiC = Emoji.getEmojiByName("colony_ship")
                 view.add_item(Button(label="Get 1 Money", style=discord.ButtonStyle.red, emoji=emojiC,
                                      custom_id=f"FCID{p1.stats['color']}_magColShipForResource_money"))
@@ -282,10 +296,39 @@ class TurnButtons:
                 msg += f"Tile {pos}: {', '.join(offer['colors'])}\n"
             await interaction.channel.send(msg)
             return
+        round_num = game.gamestate.get("roundNum", 0)
+        if any(FactionData.has(player, "harvester")
+               for player in game.gamestate["players"].values()
+               if not player.get("eliminated")):
+            if game.gamestate.get("harvester_upkeep_started_round") != round_num:
+                game.gamestate["harvester_upkeep_started_round"] = round_num
+                for player in game.gamestate["players"].values():
+                    if FactionData.has(player, "harvester") and not player.get("eliminated"):
+                        player["harvester_placements"] = []
+                        player["harvester_upkeep_started_round"] = round_num
+                        player.pop("harvester_upkeep_allocated_round", None)
+                game.update()
+                for player in game.gamestate["players"].values():
+                    if FactionData.has(player, "harvester") and not player.get("eliminated"):
+                        await HarvesterButtons.startPlace(game, player, interaction)
+                return
+            pending = [player for player in game.gamestate["players"].values()
+                       if FactionData.has(player, "harvester") and not player.get("eliminated")
+                       and player.get("harvester_upkeep_allocated_round") != round_num]
+            if pending:
+                await interaction.channel.send("Waiting for Harvester allocations from: "
+                                               + ", ".join(player["player_name"] for player in pending) + ".")
+                for player in pending:
+                    await HarvesterButtons.startPlace(game, player, interaction)
+                return
         for player in game.gamestate["players"]:
             if game.gamestate["players"][player].get("eliminated"):
                 continue
             p1 = PlayerHelper(player, game.get_player(player))
+            harvested = Harvester.produce(game, p1.stats)
+            if harvested:
+                await interaction.channel.send(f"{p1.stats['player_name']}'s Harvesters produced "
+                                               f"{', '.join(harvested)}.")
             if p1.checkBankrupt():
                 view = View()
                 trade_value = p1.stats['trade_value']
@@ -297,7 +340,7 @@ class TurnButtons:
                         view.add_item(Button(label=f"Trade {trade_value} {resource_type.capitalize()}",
                                              style=button_style,
                                              custom_id=f"FCID{p1.stats['color']}_tradeAtRatio_{resource_type}_money"))
-                if p1.stats["colony_ships"] > 0 and game.get_short_faction_name(p1.stats["name"]) == "magellan":
+                if p1.stats["colony_ships"] > 0 and FactionData.has(p1.stats, "colony_ship_resources"):
                     emojiC = Emoji.getEmojiByName("colony_ship")
                     view.add_item(Button(label="Get 1 Money", style=discord.ButtonStyle.red, emoji=emojiC,
                                          custom_id=f"FCID{p1.stats['color']}_magColShipForResource_money"))
@@ -311,7 +354,8 @@ class TurnButtons:
                 await interaction.channel.send(message, view=view)
                 return
         # The Combat Phase ends here, so no Discovery Tile answer may wait for the next round's tech draw.
-        await Combat.settleDiscoveryTiles(game, interaction.channel)
+        await Combat.settleDiscoveryTiles(game, interaction.channel, force=True)
+        await DiscoveryTileButtons.reofferPendingPrompts(game, interaction.channel)
         claims = Combat.pendingDiscoveryClaims(game)
         choices = DiscoveryTileButtons.pendingDiscChoices(game)
         resolutions = game.gamestate.get("pendingDiscoveryResolutions", {})
@@ -449,7 +493,7 @@ class TurnButtons:
                 view.add_item(child)
         view.add_item(Button(label="Show Game", style=discord.ButtonStyle.gray, custom_id="showGame"))
         view.add_item(Button(label="Show Reputation", style=discord.ButtonStyle.gray, custom_id="showReputation"))
-        if p1["colony_ships"] > 0 and game.get_short_faction_name(p1["name"]) == "magellan":
+        if p1["colony_ships"] > 0 and FactionData.has(p1, "colony_ship_resources"):
             emojiC = Emoji.getEmojiByName("colony_ship")
             view.add_item(Button(label="Get 1 Science", style=discord.ButtonStyle.red, emoji=emojiC,
                                  custom_id=f"FCID{player['color']}_magColShipForResource_science"))
@@ -553,6 +597,12 @@ class TurnButtons:
     async def finishAction(player, game: GamestateHelper, interaction: discord.Interaction,
                            player_helper: PlayerHelper):
         player_helper.stats["allianceLeaveClosed"] = True
+        player_helper.stats.pop("influenceActionActive", None)
+        player_helper.stats.pop("influenceActionUsed", None)
+        player_helper.stats.pop("influenceActionReturned", None)
+        if FactionData.has(player, "phase_technology"):
+            player_helper.stats.pop("phaseBuildsThisAction", None)
+            player_helper.stats.pop("phaseSwappedThisAction", None)
         game.update_player(player_helper)
         await TurnButtons.checkTraitor(game, player, interaction, player_helper)
         view = View()
@@ -561,7 +611,7 @@ class TurnButtons:
         if len(PopulationButtons.findEmptyPopulation(game, player)) > 0 and player["colony_ships"] > 0:
             view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray,
                                  custom_id=f"FCID{player['color']}_startPopDrop"))
-        if player["colony_ships"] > 0 and game.get_short_faction_name(player["name"]) == "magellan":
+        if player["colony_ships"] > 0 and FactionData.has(player, "colony_ship_resources"):
             emojiC = Emoji.getEmojiByName("colony_ship")
             view.add_item(Button(label="Get 1 Science", style=discord.ButtonStyle.red, emoji=emojiC,
                                  custom_id=f"FCID{player['color']}_magColShipForResource_science"))

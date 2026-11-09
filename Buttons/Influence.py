@@ -5,6 +5,7 @@ from Buttons.DiscoveryTile import DiscoveryTileButtons
 from Buttons.Explore import ExploreButtons
 from Buttons.Population import PopulationButtons
 from Buttons.Turn import TurnButtons
+from helpers import FactionData
 from helpers.DrawHelper import DrawHelper
 from helpers.GamestateHelper import GamestateHelper
 from helpers.PlayerHelper import PlayerHelper
@@ -121,7 +122,7 @@ class InfluenceButtons:
                         ExploreButtons.doesPlayerHaveUnpinnedShips(player, playerShips, game, tile)]):
                     if any("ai" in s for s in playerShips):
                         if any("anc" in s for s in playerShips):
-                            if "Draco" not in player["name"]:
+                            if not FactionData.has(player, "may_not_fight_ancients"):
                                 continue
                         else:
                             continue
@@ -213,18 +214,22 @@ class InfluenceButtons:
     @staticmethod
     async def startInfluence(game: GamestateHelper, p1, interaction: discord.Interaction):
         view = View()
+        apt = p1.get("influence_apt", 2)
+        if not p1.get("influenceActionActive"):
+            p1["influenceActionActive"] = True
+            p1["influenceActionUsed"] = 0
+            p1["influenceActionReturned"] = 0
+            game.update()
         await interaction.channel.send(f"{p1['player_name']} is using their turn to influence.")
         view.add_item(Button(label="Remove Influence", style=discord.ButtonStyle.red,
                              custom_id=f"FCID{p1['color']}_removeInfluenceStart"))
         if len(InfluenceButtons.getTilesToInfluence(game, p1)) > 0:
             view.add_item(Button(label="Add  Influence", style=discord.ButtonStyle.green,
                                  custom_id=f"FCID{p1['color']}_addInfluenceStart"))
-        if "Magellan" in p1["name"] or p1["name"] in ("Remnants of Ra", "Techno-Mages"):
-            view.add_item(Button(label="Refresh 1 Colony Ship", style=discord.ButtonStyle.blurple,
-                                 custom_id=f"FCID{p1['color']}_refreshPopShips"))
-        else:
-            view.add_item(Button(label="Refresh 2 Colony Ships", style=discord.ButtonStyle.blurple,
-                                 custom_id=f"FCID{p1['color']}_refreshPopShips"))
+        colony_ships = FactionData.of(p1).get("influence_colony_ships", 2)
+        view.add_item(Button(label=f"Refresh {colony_ships} Colony Ship{'s' if colony_ships > 1 else ''}",
+                             style=discord.ButtonStyle.blurple,
+                             custom_id=f"FCID{p1['color']}_refreshPopShips"))
         view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray,
                              custom_id=f"FCID{p1['color']}_startPopDrop"))
         view.add_item(Button(label="Conclude Influence Action", style=discord.ButtonStyle.red,
@@ -232,9 +237,12 @@ class InfluenceButtons:
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray,
                              custom_id=f"FCID{p1['color']}_restartTurn"))
         await interaction.message.delete()
-        await interaction.channel.send(f"{p1['player_name']} you may remove up to two disks"
-                                       " and influence up to 2 spaces. You may also refresh colony ships"
-                                       " or put down population at any time during this resolution.", view=view)
+        await interaction.channel.send(f"{p1['player_name']} you have {apt}"
+                                       f" Influence activation{'s' if apt != 1 else ''}."
+                                       " Each activation moves one disc from your track or a sector you control"
+                                       " to your track or an eligible sector. To relocate a disc, remove it first,"
+                                       " then add it. You may also refresh colony ships or put down population"
+                                       " during this action.", view=view)
 
     @staticmethod
     async def addInfluenceStart(game: GamestateHelper, p1, interaction: discord.Interaction):
@@ -253,6 +261,11 @@ class InfluenceButtons:
     async def addInfluenceFinish(game: GamestateHelper, p1, interaction: discord.Interaction, buttonID: str):
         from helpers.CombatHelper import Combat
         tileLoc = buttonID.split("_")[1]
+        if (p1.get("influenceActionActive")
+                and p1.get("influenceActionUsed", 0) >= p1.get("influence_apt", 2)
+                and not p1.get("influenceActionReturned", 0)):
+            await interaction.channel.send(f"{p1['player_name']} has no Influence Activations left this action.")
+            return
         offer = game.gamestate.get("influenceOffers", {}).get(tileLoc)
         if offer is not None and p1["color"] not in offer["colors"]:
             await interaction.channel.send(f"{p1['player_name']} already declined the influence disc in {tileLoc}.")
@@ -269,6 +282,12 @@ class InfluenceButtons:
             return
         game.gamestate.get("influenceOffers", {}).pop(tileLoc, None)
         game.add_control(p1["color"], tileLoc)
+        if p1.get("influenceActionActive"):
+            if p1.get("influenceActionReturned", 0):
+                p1["influenceActionReturned"] -= 1
+            else:
+                p1["influenceActionUsed"] = p1.get("influenceActionUsed", 0) + 1
+            game.update()
         await interaction.channel.send(f"{p1['player_name']} acquired control of {tileLoc}.")
         await PopulationButtons.offerAncientsCube(game, p1, interaction, tileLoc)
         if Combat.discoveryTileClaimable(game, tileLoc):
@@ -278,10 +297,8 @@ class InfluenceButtons:
 
     @staticmethod
     async def refreshPopShips(game: GamestateHelper, player, interaction: discord.Interaction, buttonID: str):
-        if "Magellan" in player["name"] or player["name"] in ("Remnants of Ra", "Techno-Mages"):
-            numShips = game.refresh_one_colony_ship(game.get_player_from_color(player["color"]))
-        else:
-            numShips = game.refresh_two_colony_ships(game.get_player_from_color(player["color"]))
+        count = FactionData.of(player).get("influence_colony_ships", 2)
+        numShips = game.refresh_colony_ships(game.get_player_from_color(player["color"]), count)
         view = View.from_message(interaction.message)
         for button in view.children:
             if buttonID in button.custom_id:
@@ -293,6 +310,9 @@ class InfluenceButtons:
     @staticmethod
     async def finishInfluenceAction(game: GamestateHelper, player, interaction: discord.Interaction,
                                     player_helper: PlayerHelper):
+        player_helper.stats.pop("influenceActionActive", None)
+        player_helper.stats.pop("influenceActionUsed", None)
+        player_helper.stats.pop("influenceActionReturned", None)
         player_helper.spend_influence_on_action("influence")
         game.update_player(player_helper)
         await TurnButtons.finishAction(player, game, interaction, player_helper)
@@ -314,16 +334,30 @@ class InfluenceButtons:
 
     @staticmethod
     async def removeInfluenceFinish(game: GamestateHelper, interaction: discord.Interaction,
-                                    buttonID: str, delete: bool):
+                                    buttonID: str, delete: bool, player=None):
         tileLoc = buttonID.split("_")[1]
+        if (player is not None and delete and player.get("influenceActionActive")
+                and player.get("influenceActionUsed", 0) >= player.get("influence_apt", 2)):
+            await interaction.channel.send(f"{player['player_name']} has no Influence Activations left this action.")
+            return
         owner = game.gamestate["board"][tileLoc]["owner"]
         if owner == 0:
             await interaction.channel.send(f"No owner found of {tileLoc}.")
             return
         p1 = game.getPlayerObjectFromColor(owner)
         graveYard = buttonID.split("_")[2] == "graveYard"
+        soulCaptured = (graveYard and player is not None
+                        and PlayerHelper.capture_wraith_soul(player, game.gamestate["board"][tileLoc], last_cube=False))
         game.remove_control(p1["color"], tileLoc)
+        if player is not None and delete and player.get("influenceActionActive"):
+            player["influenceActionUsed"] = player.get("influenceActionUsed", 0) + 1
+            player["influenceActionReturned"] = player.get("influenceActionReturned", 0) + 1
+            game.update()
         await interaction.channel.send(f"{p1['player_name']} lost control of {tileLoc}.")
+        if soulCaptured:
+            game.update_player(PlayerHelper(game.get_player_from_color(player["color"]), player))
+            await interaction.channel.send(
+                PlayerHelper.wraith_soul_message(player, game.get_tile_label(tileLoc)))
         for pop in PopulationButtons.findFullPopulation(game, tileLoc):
             neutralCubes, orbitalCubes = game.remove_pop([f"{pop}_pop"], tileLoc,
                                                          game.get_player_from_color(p1["color"]), graveYard)
@@ -364,6 +398,11 @@ class InfluenceButtons:
     async def eliminatePlayer(game: GamestateHelper, player, interaction: discord.Interaction,
                                     player_helper: PlayerHelper, delete:bool):
         player_helper.setEliminated(True)
+        if FactionData.has(player, "harvester"):
+            player["harvester_placements"] = []
+        if FactionData.has(player, "deep_space_explorers"):
+            game.gamestate.setdefault("tile_deck_300", []).extend(player.get("deep_space_sectors", []))
+            player["deep_space_sectors"] = []
         game.update_player(player_helper)
         if delete:
             await interaction.message.delete()

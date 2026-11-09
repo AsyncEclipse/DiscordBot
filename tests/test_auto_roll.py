@@ -4,9 +4,11 @@ Covered here: the button only appears for a player-versus-AI pairing, the loop
 rolls both sides without presses, and it ends with the salvo summary and the
 board image of the survivors.
 """
+import pytest
+
 from helpers.CombatHelper import Combat
 from helpers.DrawHelper import DrawHelper
-from tests.fakes import FakeChannel, POS, player_stats, reload
+from tests.fakes import FakeChannel, FakeInteraction, POS, player_stats, reload
 
 
 def _blue_cruiser():
@@ -110,3 +112,66 @@ def test_auto_roll_pools_the_players_salvo_like_the_ai(make_game):
     })
     allocation = Combat.getAIHitAllocation(game, "blue", POS, 3, [[6, 1, "yellow"]] * 3, 0)
     assert allocation == ["ai-grd", "ai-grd", "ai-grd"]
+
+
+def test_auto_roll_fires_the_step_already_shown_in_the_prompt(make_game, no_random, press, run):
+    game = _ai_game(make_game)
+    channel = FakeChannel("t-actions")
+    run(Combat.promptNextSpeed(game, POS, channel, False))
+    no_random([6, 6, 6])
+
+    press(channel, 1, f"autoRollCombat_{POS}")
+
+    summary = next(content for content, kwargs in channel.sent if content and "Auto-Roll Summary" in content)
+    assert "The AI fired 1 salvo; the players fired 1 salvo." in summary
+
+
+@pytest.mark.parametrize("pending", [{"wolfPack": {"color": "blue"}},
+                                     {"carapacePendingMissiles": [{"color": "blue"}]}])
+def test_auto_roll_does_not_fire_while_a_faction_choice_is_pending(make_game, run, pending):
+    game = _ai_game(make_game)
+    game.gamestate["board"][POS].update(pending)
+    interaction = FakeInteraction()
+
+    run(Combat.autoRollCombat(game, f"autoRollCombat_{POS}", interaction, game.get_player(1)))
+
+    assert "pending combat choices" in interaction.channel.sent[-1][0]
+    assert not game.gamestate["board"][POS].get("rolledSteps")
+
+
+def test_auto_roll_pauses_on_a_wolf_pack_six(make_game, no_random, run):
+    game = _ai_game(make_game)
+    game.gamestate["players"]["1"] = player_stats(
+        "wul", color="blue", cruiser_parts=["nus", "hul", "nud", "ioc", "empty"], base_cruiser_speed=3)
+    no_random([6])
+    interaction = FakeInteraction()
+
+    run(Combat.autoRollCombat(game, f"autoRollCombat_{POS}", interaction, game.get_player(1)))
+
+    tile = game.gamestate["board"][POS]
+    assert tile["wolfPack"]
+    assert tile["rolledSteps"] == [[4, "blue"]]
+    assert any(content and "Auto-roll paused" in content for content, kwargs in interaction.channel.sent)
+
+
+def test_auto_roll_pauses_for_carapace_at_a_new_round_and_resumes(make_game, no_random, run, press):
+    game = _ai_game(make_game)
+    game.gamestate["players"]["1"] = player_stats(
+        "tur", color="blue", cruiser_parts=["plc", "nus", "nud", "hul"], base_cruiser_speed=3)
+    game.update()
+    channel = FakeChannel("t-actions")
+    no_random([1, 1, 1])
+
+    run(Combat.autoRollCombat(game, f"autoRollCombat_{POS}", FakeInteraction(channel), game.get_player(1)))
+
+    tile = reload(game).gamestate["board"][POS]
+    assert not tile["carapaceShields"]["blue"]["done"]
+    assert tile.get("rolledSteps", []) == []
+    assert tile["currentRoller"] == "blue"
+    done = next(button.custom_id for content, kwargs in channel.sent
+                for button in getattr(kwargs.get("view"), "children", []) if "carapaceDone" in button.custom_id)
+    press(channel, 1, done)
+    no_random([6])
+    press(channel, 1, f"autoRollCombat_{POS}")
+
+    assert "ai-anc" not in reload(game).gamestate["board"][POS]["player_ships"]

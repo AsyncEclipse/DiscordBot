@@ -5,23 +5,10 @@ per Influence action, two colony ships reaching an Advanced planet the techs do 
 and one temporary Upgrade 1 per ship blueprint at the start of each combat.
 """
 import pytest
-from PIL import Image
 
 from Buttons.Build import BuildButtons
 from helpers.CombatHelper import Combat
-from helpers.DrawHelper import DrawHelper
 from tests.fakes import FakeInteraction, buttons, reload
-
-
-@pytest.fixture(autouse=True)
-def _no_tile_render(monkeypatch):
-    """These tests cover bookkeeping, not rendering. The flows attach tile and player images,
-    and rendering real art costs a one-time image-cache load the whole suite would pay for."""
-    monkeypatch.setattr(DrawHelper, "board_tile_image_file", lambda self, position: None)
-    monkeypatch.setattr(DrawHelper, "mergeLocationsFile", lambda self, positions: None)
-    monkeypatch.setattr(DrawHelper, "use_image", lambda self, filename: Image.new("RGBA", (1024, 890)))
-    monkeypatch.setattr(DrawHelper, "use_resized_image",
-                        lambda self, filename, size: self.use_image(filename).resize(size))
 
 
 # A ring 1 sector with an advanced science square (data/sectors.json), free in a two player start.
@@ -68,20 +55,6 @@ def test_the_build_menu_offers_one_activation(start_game, press):
 
 
 # --- Limited Manufacturing: the Influence action ------------------------------
-
-@pytest.mark.parametrize("faction, refreshed", [("tm", 2), ("hyd", 3)])
-def test_influence_refreshes_one_colony_ship_only_for_techno_mages(start_game, press, faction, refreshed):
-    game, channel = start_game(factions=[faction, "eri"])
-    game.get_player(1)["colony_ships"] = 1
-    game.update()
-
-    press(channel, 1, "FCIDblue_startInfluence")
-    expected_label = "Refresh 1 Colony Ship" if faction == "tm" else "Refresh 2 Colony Ships"
-    assert expected_label in buttons(channel).values()
-    press(channel, 1, "FCIDblue_refreshPopShips")
-
-    assert reload(game).get_player(1)["colony_ships"] == refreshed
-
 
 # --- Technology finds a Way ---------------------------------------------------
 
@@ -290,6 +263,30 @@ def test_flux_missile_fires_before_the_ancient_it_tied_with(start_game, press, r
     state = reload(game)
     assert (state.gamestate["board"]["201"]["currentSpeed"],
             state.gamestate["board"]["201"]["currentRoller"]) == (103, "blue")
+
+
+@pytest.mark.parametrize("first", ["techno_magic", "phase_module"])
+def test_initiative_waits_for_both_techno_magic_and_phase_module(start_game, run, first):
+    game, channel = start_game(factions=["tm", "wra"])
+    tile = game.gamestate["board"]["201"]
+    tile["player_ships"] = ["blue-int", "red-int"]
+    tile["attacker"], tile["defender"] = "blue", "red"
+    game.update()
+    run(Combat.startCombat(game, channel, "201"))
+
+    def finish(ability):
+        interaction = FakeInteraction(channel)
+        if ability == "techno_magic":
+            run(Combat.technoMagicDone(game, "finishTechnoMagic_201", game.get_player(1), interaction))
+        else:
+            run(Combat.phaseModuleDone(game, "phaseModuleDone_201_red", interaction))
+
+    finish(first)
+    assert "currentSpeed" not in tile
+    assert not any("rollDice" in cid for cid in buttons(channel))
+
+    finish("phase_module" if first == "techno_magic" else "techno_magic")
+    assert (tile["currentSpeed"], tile["currentRoller"]) == (3, "blue")
 
 
 def test_the_attacker_is_offered_the_upgrade_first(start_game, run):

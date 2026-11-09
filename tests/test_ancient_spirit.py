@@ -55,7 +55,7 @@ def test_ancient_spirit_draws_from_the_discard_stack(make_game):
     game = make_game({"discTiles": [], "discTilesDiscard": ["rep", "art"],
                       "board": {"201": {}}})
 
-    assert sorted(DiscoveryTileButtons.drawAtlantiansDiscoveryChoices(game, "201")) == ["art", "rep"]
+    assert sorted(DiscoveryTileButtons.drawDiscoveryChoices(game, "201")) == ["art", "rep"]
     assert game.gamestate["discTiles"] == []
     assert game.gamestate["discTilesDiscard"] == []
 
@@ -64,7 +64,7 @@ def test_ancient_spirit_replenishes_between_choices(make_game):
     game = make_game({"discTiles": ["rep"], "discTilesDiscard": ["art"],
                       "board": {"201": {}}})
 
-    assert DiscoveryTileButtons.drawAtlantiansDiscoveryChoices(game, "201") == ["rep", "art"]
+    assert DiscoveryTileButtons.drawDiscoveryChoices(game, "201") == ["rep", "art"]
     assert game.gamestate["discTilesDiscard"] == []
 
 
@@ -76,7 +76,7 @@ def test_ancient_spirit_stops_when_only_ineligible_discards_remain(make_game, se
     game = make_game({"discTiles": ["rep"], "discTilesDiscard": discards,
                       "board": {"201": {"type": sector_type}}})
 
-    assert DiscoveryTileButtons.drawAtlantiansDiscoveryChoices(game, "201") == ["rep"]
+    assert DiscoveryTileButtons.drawDiscoveryChoices(game, "201") == ["rep"]
     assert game.gamestate["discTilesDiscard"] == discards
 
 
@@ -96,11 +96,11 @@ def test_ancient_spirit_choice_shows_both_tile_images(make_game, run, monkeypatc
     player = {"name": "Atlantians", "player_name": "Blue", "color": "blue"}
     interaction = FakeInteraction()
     rendered_names = []
-    render_tile = DrawHelper.show_disc_tile
+    tile_files = {name: object() for name in ("Jump Drive", "Soliton Missile")}
 
     def record_tile(drawing, name):
         rendered_names.append(name)
-        return render_tile(drawing, name)
+        return tile_files[name]
 
     monkeypatch.setattr(DrawHelper, "show_disc_tile", record_tile)
 
@@ -109,12 +109,11 @@ def test_ancient_spirit_choice_shows_both_tile_images(make_game, run, monkeypatc
     content, options = interaction.channel.sent[-1]
     assert rendered_names == ["Jump Drive", "Soliton Missile"]
     assert [button.label for button in options["view"].children] == rendered_names
-    assert len(options["files"]) == 2
-    assert all(file.fp.getbuffer().nbytes > 0 for file in options["files"])
+    assert options["files"] == [tile_files[name] for name in rendered_names]
     assert "following the normal rules" not in content
 
 
-def test_ancient_labs_research_uses_ancient_spirit_choice(make_game, run, monkeypatch):
+def test_ancient_labs_research_uses_ancient_spirit_choice(make_game, run):
     player = {
         "name": "Atlantians", "player_name": "Blue", "color": "blue", "home_planet": "home",
         "science": 20, "materials": 0, "money": 0, "trade_value": 3,
@@ -126,7 +125,6 @@ def test_ancient_labs_research_uses_ancient_spirit_choice(make_game, run, monkey
     game.update_player = lambda player_helper: None
     game.playerResearchTech = lambda player_id, tech, tech_type: player["grid_tech"].append(tech)
     game.addDiscTile = lambda tile: game.gamestate["board"][tile].update(disctile=1)
-    monkeypatch.setattr(DrawHelper, "show_tech_ref_image", lambda name, track: None)
     interaction = FakeInteraction()
 
     run(ResearchButtons.handle_specific_tech_selection(
