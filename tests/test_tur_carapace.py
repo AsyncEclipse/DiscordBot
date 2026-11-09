@@ -219,6 +219,47 @@ def test_missile_minus_one_to_hit_keeps_full_damage(make_game, run, no_random, p
     assert reload(game).gamestate["board"]["202"]["damage_tracker"]["teal-cru"] == 4
 
 
+def test_missile_can_target_an_unshielded_class_without_a_penalty(make_game, run, no_random, press):
+    game = missile_game(make_game)
+    tile = game.gamestate["board"]["202"]
+    tile["player_ships"].append("teal-drd")
+    game.get_player(1)["dread_parts"] = ["hul"] * 5
+    engage(game, "cruiser")
+    ch = channel()
+    no_random([5])
+    run(Combat.rollDice(game, "rollDice_202_red_101_attacker", FakeInteraction(ch)))
+
+    choices = buttons(ch)
+    target = next(cid for cid in choices if "carapaceMissile_202_normal_" in cid)
+    assert target.endswith("_teal-drd")
+    assert all(not cid.endswith("_teal-drd") for cid in choices if "carapaceMissile_202_hit_" in cid)
+    press(ch, 2, target)
+
+    state = reload(game).gamestate["board"]["202"]
+    assert state["damage_tracker"]["teal-drd"] == 4
+    assert state["damage_tracker"].get("teal-cru", 0) == 0
+
+
+def test_pending_missiles_finish_when_an_earlier_die_destroys_the_last_target(make_game, run, no_random, press):
+    game = missile_game(make_game)
+    game.get_player(1)["cruiser_parts"] = ["hul"]
+    game.get_player(2)["cruiser_parts"] = ["anm", "anm", "elc", "nus", "nud", "hul"]
+    engage(game, "cruiser")
+    ch = channel()
+    no_random([6, 6])
+    run(Combat.rollDice(game, "rollDice_202_red_101_attacker", FakeInteraction(ch)))
+    choices = [cid for cid in offered_ids(FakeInteraction(ch))
+               if "FCIDred_carapaceMissile_202_damage_" in cid]
+    assert len(choices) == 2
+
+    for choice in choices:
+        press(ch, 2, choice)
+
+    state = reload(game).gamestate["board"]["202"]
+    assert "teal-cru" not in state["player_ships"]
+    assert not state.get("carapacePendingMissiles")
+
+
 def test_a_double_pressed_missile_choice_applies_once(make_game, run, no_random, press):
     game = missile_game(make_game)
     engage(game, "cruiser")

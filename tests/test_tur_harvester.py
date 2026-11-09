@@ -188,6 +188,30 @@ def test_harvester_blocks_settling_its_planet(start_game, press):
     assert "201_scienceadv_0" not in PopulationButtons.findEmptyPopulation(state, state.get_player(1))
 
 
+def test_upkeep_reoffers_lost_harvester_allocations_without_resetting_them(start_game, press):
+    game, channel = start_game(factions=["tur", "eri"])
+    for player in game.gamestate["players"].values():
+        player["passed"] = True
+    game.update()
+    press(channel, 1, "runUpkeep")
+    replacement_channel = FakeChannel(channel.name)
+    state = reload(game)
+    state.gamestate["lastButtonTime"] = 0
+    state.update()
+
+    press(replacement_channel, 1, "runUpkeep")
+
+    choice = "FCIDblue_placeHarvester_201_scienceadv_0_science"
+    assert choice in buttons(replacement_channel)
+    press(replacement_channel, 1, choice)
+    player = reload(game).get_player(1)
+    assert len(player["harvester_placements"]) == 1
+    science = player["science"]
+    income = player["population_track"][player["science_pop_cubes"] - 1]
+    press(replacement_channel, 1, "runUpkeep")
+    assert reload(game).get_player(1)["science"] == science + income + 1
+
+
 def test_elimination_clears_the_harvester_placements(start_game, run):
     from Buttons.Influence import InfluenceButtons
     game, channel = start_game(factions=["tur", "eri"])
@@ -214,6 +238,21 @@ def test_a_second_placement_replaces_the_first_in_the_same_sector(start_game):
     assert Harvester.record(game, player, "201", "materialadv", 0, "material")
     assert len(player["harvester_placements"]) == 1
     assert player["harvester_placements"][0]["square"] == "materialadv"
+
+
+def test_two_harvesters_can_use_two_planets_of_the_same_type(start_game):
+    game, channel = start_game(factions=["tur", "eri"])
+    player = game.get_player(1)
+    game.gamestate["board"]["201"].update(player_ships=["blue-sb", "blue-sb"], material_pop=[0, 0])
+
+    assert Harvester.record(game, player, "201", "material", 0, "material")
+    assert Harvester.record(game, player, "201", "material", 1, "material")
+
+    assert len(player["harvester_placements"]) == 2
+    assert "201" not in dict(HarvesterButtons.pending_sectors(game, player))
+    materials = player["materials"]
+    Harvester.produce(game, player)
+    assert player["materials"] == materials + 2
 
 
 def test_a_grey_planet_asks_for_the_resource(make_game, run):

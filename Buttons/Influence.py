@@ -218,6 +218,7 @@ class InfluenceButtons:
         if not p1.get("influenceActionActive"):
             p1["influenceActionActive"] = True
             p1["influenceActionUsed"] = 0
+            p1["influenceActionReturned"] = 0
             game.update()
         await interaction.channel.send(f"{p1['player_name']} is using their turn to influence.")
         view.add_item(Button(label="Remove Influence", style=discord.ButtonStyle.red,
@@ -236,11 +237,12 @@ class InfluenceButtons:
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray,
                              custom_id=f"FCID{p1['color']}_restartTurn"))
         await interaction.message.delete()
-        await interaction.channel.send(f"{p1['player_name']} you may remove up to {apt} disk{'s' if apt != 1 else ''}"
-                                       f" and influence up to {apt} space{'s' if apt != 1 else ''}. You may also"
-                                       " refresh colony ships or put down population at any time during this"
-                                       " resolution.",
-                                       view=view)
+        await interaction.channel.send(f"{p1['player_name']} you have {apt}"
+                                       f" Influence activation{'s' if apt != 1 else ''}."
+                                       " Each activation moves one disc from your track or a sector you control"
+                                       " to your track or an eligible sector. To relocate a disc, remove it first,"
+                                       " then add it. You may also refresh colony ships or put down population"
+                                       " during this action.", view=view)
 
     @staticmethod
     async def addInfluenceStart(game: GamestateHelper, p1, interaction: discord.Interaction):
@@ -260,7 +262,8 @@ class InfluenceButtons:
         from helpers.CombatHelper import Combat
         tileLoc = buttonID.split("_")[1]
         if (p1.get("influenceActionActive")
-                and p1.get("influenceActionUsed", 0) >= p1.get("influence_apt", 2)):
+                and p1.get("influenceActionUsed", 0) >= p1.get("influence_apt", 2)
+                and not p1.get("influenceActionReturned", 0)):
             await interaction.channel.send(f"{p1['player_name']} has no Influence Activations left this action.")
             return
         offer = game.gamestate.get("influenceOffers", {}).get(tileLoc)
@@ -280,7 +283,10 @@ class InfluenceButtons:
         game.gamestate.get("influenceOffers", {}).pop(tileLoc, None)
         game.add_control(p1["color"], tileLoc)
         if p1.get("influenceActionActive"):
-            p1["influenceActionUsed"] = p1.get("influenceActionUsed", 0) + 1
+            if p1.get("influenceActionReturned", 0):
+                p1["influenceActionReturned"] -= 1
+            else:
+                p1["influenceActionUsed"] = p1.get("influenceActionUsed", 0) + 1
             game.update()
         await interaction.channel.send(f"{p1['player_name']} acquired control of {tileLoc}.")
         await PopulationButtons.offerAncientsCube(game, p1, interaction, tileLoc)
@@ -306,6 +312,7 @@ class InfluenceButtons:
                                     player_helper: PlayerHelper):
         player_helper.stats.pop("influenceActionActive", None)
         player_helper.stats.pop("influenceActionUsed", None)
+        player_helper.stats.pop("influenceActionReturned", None)
         player_helper.spend_influence_on_action("influence")
         game.update_player(player_helper)
         await TurnButtons.finishAction(player, game, interaction, player_helper)
@@ -344,6 +351,7 @@ class InfluenceButtons:
         game.remove_control(p1["color"], tileLoc)
         if player is not None and delete and player.get("influenceActionActive"):
             player["influenceActionUsed"] = player.get("influenceActionUsed", 0) + 1
+            player["influenceActionReturned"] = player.get("influenceActionReturned", 0) + 1
             game.update()
         await interaction.channel.send(f"{p1['player_name']} lost control of {tileLoc}.")
         if soulCaptured:

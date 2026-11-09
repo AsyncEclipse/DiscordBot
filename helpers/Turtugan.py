@@ -146,8 +146,6 @@ class Harvester:
         if Harvester.occupied(game, position, square, index):
             return False
         placements = player.setdefault("harvester_placements", [])
-        placements[:] = [placement for placement in placements
-                         if not (placement["position"] == position and placement["square"] == square)]
         in_sector = [placement for placement in placements if placement["position"] == position]
         if len(in_sector) >= Harvester.starbases(game, player, position):
             placements.remove(in_sector[0])
@@ -324,7 +322,7 @@ class Carapace:
 
     @staticmethod
     async def prompt_missile(game, interaction, pos, color, ship_type, computer, speed,
-                             dieNum, dieDam, counter):
+                             dieNum, dieDam, counter, ignore_shields=False):
         from helpers.CombatHelper import Combat
         tile = game.gamestate["board"][pos]
         token = tile.get("carapaceMissileToken", 0) + 1
@@ -332,21 +330,29 @@ class Carapace:
         tile.setdefault("carapaceRollOldLength", len(Combat.findPlayersInTile(game, pos)))
         tile.setdefault("carapacePendingMissiles", []).append({
             "token": token, "color": color, "shipType": ship_type, "computer": computer,
-            "speed": speed, "dieNum": dieNum, "dieDam": dieDam, "counter": counter})
+            "speed": speed, "dieNum": dieNum, "dieDam": dieDam, "counter": counter,
+            "ignoreShields": ignore_shields})
         game.update()
         view = View()
-        view.add_item(Button(label="-1 Damage", style=discord.ButtonStyle.blurple,
-                             custom_id=f"FCID{color}_carapaceMissile_{pos}_damage_{token}"))
-        view.add_item(Button(label="-1 to Hit", style=discord.ButtonStyle.green,
-                             custom_id=f"FCID{color}_carapaceMissile_{pos}_hit_{token}"))
-        await interaction.channel.send(f"{game.getPlayerObjectFromColor(color)['player_name']}, the target's"
-                                       f" Carapace Shields alter your missile die ({dieNum}). Choose -1 damage"
-                                       " or -1 to hit.", view=view)
+        targets = Combat.getOpponentUnitsThatCanBeHit(
+            game, color, tile["player_ships"], dieNum, computer, pos, speed, ignore_shields)
+        for target in targets:
+            owner, short_type = target.split("-")
+            label, emoji = Combat.getTargetButton(game, pos, target)
+            modes = (("damage", "-1 Damage"), ("hit", "-1 to Hit")) if Carapace.engaged(
+                game, pos, owner, Combat.translateShipAbrToName(short_type)) else (("normal", "Hit"),)
+            for mode, penalty in modes:
+                view.add_item(Button(label=f"{label}: {penalty}", emoji=emoji,
+                                     style=discord.ButtonStyle.blurple,
+                                     custom_id=f"FCID{color}_carapaceMissile_{pos}_{mode}_{token}_{target}"))
+        await interaction.channel.send(f"{game.getPlayerObjectFromColor(color)['player_name']}, choose the"
+                                       f" target for your missile die ({dieNum}). Against engaged Carapace"
+                                       " Shields, choose -1 damage or -1 to hit.", view=view)
 
     @staticmethod
     async def resolve_missile(game, player, interaction, customID):
-        pos, mode, token = customID.split("_")[1:4]
-        if mode not in ("damage", "hit"):
+        pos, mode, token, target = customID.split("_")[1:5]
+        if mode not in ("damage", "hit", "normal"):
             return
         tile = game.gamestate["board"].get(pos, {})
         pending = tile.get("carapacePendingMissiles", [])
@@ -355,20 +361,37 @@ class Carapace:
         if entry is None:
             await interaction.followup.send("This missile choice was already resolved.", ephemeral=True)
             return
+        from helpers.CombatHelper import Combat
+        owner, short_type = target.split("-")
+        shielded = Carapace.engaged(game, pos, owner, Combat.translateShipAbrToName(short_type))
+        targets = Combat.getOpponentUnitsThatCanBeHit(
+            game, entry["color"], tile["player_ships"], entry["dieNum"], entry["computer"],
+            pos, entry["speed"], entry["ignoreShields"])
+        if targets and target not in targets:
+            pending.remove(entry)
+            await Carapace.prompt_missile(
+                game, interaction, pos, entry["color"], entry["shipType"], entry["computer"],
+                entry["speed"], entry["dieNum"], entry["dieDam"], entry["counter"], entry["ignoreShields"])
+            await interaction.message.edit(view=None)
+            return
+        if targets and shielded != (mode != "normal"):
+            await interaction.followup.send("That missile target or shield choice is no longer available.",
+                                            ephemeral=True)
+            return
         pending.remove(entry)
         game.update()
-        await interaction.channel.send(
-            f"{player['player_name']} chose Carapace Shields'"
-            f" {'-1 to Hit' if mode == 'hit' else '-1 Damage'} for the missile die ({entry['dieNum']}).")
-        from helpers.CombatHelper import Combat
+        if shielded:
+            await interaction.channel.send(
+                f"{player['player_name']} chose Carapace Shields'"
+                f" {'-1 to Hit' if mode == 'hit' else '-1 Damage'} for the missile die ({entry['dieNum']}).")
         computer = entry["computer"] - (1 if mode == "hit" else 0)
         # "-1 Damage" is the shield's own reduction (incoming_damage); "!" marks -1 to Hit, which replaces it
         damage = entry["dieDam"] if mode == "damage" else f"{entry['dieDam']}!"
         ships = tile["player_ships"][:]
         hittable = Combat.getOpponentUnitsThatCanBeHit(game, entry["color"], ships, entry["dieNum"],
-                                                       computer, pos, entry["speed"])
-        if hittable:
-            await Combat.offerHitPrompt(game, interaction, pos, entry["color"], hittable,
+                                                       computer, pos, entry["speed"], entry["ignoreShields"])
+        if target in hittable:
+            await Combat.offerHitPrompt(game, interaction, pos, entry["color"], [target],
                                         entry["dieNum"], damage, entry["counter"], deferEnd=True)
         if not pending:
             old_length = tile.pop("carapaceRollOldLength", len(Combat.findPlayersInTile(game, pos)))

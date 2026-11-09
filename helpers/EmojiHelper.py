@@ -1,4 +1,7 @@
 import io
+import logging
+
+import discord
 
 from PIL import Image
 
@@ -184,8 +187,12 @@ class Emoji:
             with Image.open(path) as icon:
                 buffer = io.BytesIO()
                 icon.resize((128, 128), Image.BOX).save(buffer, "PNG")
-            application_emojis.append(await client.create_application_emoji(
-                name=name, image=buffer.getvalue()))
+            try:
+                application_emojis.append(await client.create_application_emoji(
+                    name=name, image=buffer.getvalue()))
+            except discord.HTTPException:
+                logging.getLogger(__name__).exception("Could not upload faction token %s", name)
+                break
         return application_emojis
 
     @staticmethod

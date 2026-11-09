@@ -318,6 +318,8 @@ class TurnButtons:
             if pending:
                 await interaction.channel.send("Waiting for Harvester allocations from: "
                                                + ", ".join(player["player_name"] for player in pending) + ".")
+                for player in pending:
+                    await HarvesterButtons.startPlace(game, player, interaction)
                 return
         for player in game.gamestate["players"]:
             if game.gamestate["players"][player].get("eliminated"):
@@ -352,7 +354,8 @@ class TurnButtons:
                 await interaction.channel.send(message, view=view)
                 return
         # The Combat Phase ends here, so no Discovery Tile answer may wait for the next round's tech draw.
-        await Combat.settleDiscoveryTiles(game, interaction.channel)
+        await Combat.settleDiscoveryTiles(game, interaction.channel, force=True)
+        await DiscoveryTileButtons.reofferPendingPrompts(game, interaction.channel)
         claims = Combat.pendingDiscoveryClaims(game)
         choices = DiscoveryTileButtons.pendingDiscChoices(game)
         resolutions = game.gamestate.get("pendingDiscoveryResolutions", {})
@@ -596,6 +599,7 @@ class TurnButtons:
         player_helper.stats["allianceLeaveClosed"] = True
         player_helper.stats.pop("influenceActionActive", None)
         player_helper.stats.pop("influenceActionUsed", None)
+        player_helper.stats.pop("influenceActionReturned", None)
         if FactionData.has(player, "phase_technology"):
             player_helper.stats.pop("phaseBuildsThisAction", None)
             player_helper.stats.pop("phaseSwappedThisAction", None)

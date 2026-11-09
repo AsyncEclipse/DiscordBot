@@ -294,8 +294,7 @@ class DrawHelper:
                 tile_image.paste(banner, (int(247 * mult), int(126 * mult)), mask=banner)
 
             font = ImageFont.truetype("images/resources/arial.ttf", size=int(30 * mult))
-            # A home tile is named by its sector; other tiles are labelled by board position.
-            text = str(tile.get("sector", position)) if tile.get("type") == "home" else str(position)
+            text = str(position)
             stroke_color = (0, 0, 0)
             stroke_width = 6
             text_color = (255, 255, 255)
