@@ -109,6 +109,9 @@ def test_wave1_community_factions_setup_and_first_round(games_dir, run, press):
     tur, tur_color = FACTIONS.index("tur") + 1, colors[FACTIONS.index("tur") + 1]
     for pid in range(1, 9):
         press(channel, pid, f"FCID{colors[pid]}_passForRound")
+    for pos, color in list(reload(game).gamestate.get("pendingDiscoveryResolutions", {}).items()):
+        pid = next(pid for pid, player_color in colors.items() if player_color == color)
+        press(channel, pid, f"FCID{color}_keepDiscForPoints_{pos}")
     press(channel, 1, "runUpkeep")
     press(channel, tur, f"FCID{tur_color}_harvesterSector_314")
     press(channel, tur, f"FCID{tur_color}_placeHarvester_314_scienceadv_0_science")

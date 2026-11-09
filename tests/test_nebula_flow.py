@@ -81,5 +81,5 @@ def test_nebula_move_combat_and_discovery(start_game, press, no_random):
     board = reload(game).gamestate["board"]
     assert board["202b"]["disctile"] == 0
     assert board["202c"]["disctile"] == 1
-    assert "FCIDred_keepDiscForPoints" in _ids(ch)
+    assert any(button.startswith("FCIDred_keepDiscForPoints_") for button in _ids(ch))
     _snapshot(game, "nebula_claimed")
