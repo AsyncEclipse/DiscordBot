@@ -234,29 +234,6 @@ class TurnButtons:
                 "Use the buttons in that sector's thread.")
             return
         game.removeFromKey("peopleToCheckWith", color)
-        if p1.checkBankrupt():
-            view = View()
-            trade_value = p1.stats['trade_value']
-            view.add_item(Button(label="Remove Control of A Sector", style=discord.ButtonStyle.blurple,
-                                 custom_id=f"FCID{player['color']}_removeInfluenceStart"))
-            for resource_type, button_style in [("materials", discord.ButtonStyle.gray),
-                                                ("science", discord.ButtonStyle.gray)]:
-                if p1.stats[resource_type] >= trade_value:
-                    view.add_item(Button(label=f"Trade {trade_value} {resource_type.capitalize()}",
-                                         style=button_style,
-                                         custom_id=f"FCID{p1.stats['color']}_tradeAtRatio_{resource_type}_money"))
-            if p1.stats["colony_ships"] > 0 and FactionData.has(p1.stats, "colony_ship_resources"):
-                emojiC = Emoji.getEmojiByName("colony_ship")
-                view.add_item(Button(label="Get 1 Money", style=discord.ButtonStyle.red, emoji=emojiC,
-                                     custom_id=f"FCID{p1.stats['color']}_magColShipForResource_money"))
-            view.add_item(Button(label="Done Resolving", style=discord.ButtonStyle.red,
-                                 custom_id=f"FCID{player['color']}_deleteMsg"))
-            message = (f"It appears that {p1.name} would be bankrupt (negative money). "
-                       f"They currently have {p1.stats['money']} money and will get {p1.money_income()} in income, "
-                       f"but they owe {p1.upkeepCosts()} money. "
-                       "Please adjust the money or systems controlled so that upkeep"
-                       " can be run without the player entering negative money")
-            await interaction.channel.send(message, view=view)
         msg = f"{player['player_name']} has marked themselves as ready for upkeep."
         if len(game.gamestate["peopleToCheckWith"]) > 0:
             msg += " Still waiting on the following factions to press the ready for upkeep button:\n"
@@ -294,6 +271,23 @@ class TurnButtons:
             msg = (" Some influence discs still have to be placed or declined in the Combat Phase:\n")
             for pos, offer in pending.items():
                 msg += f"Tile {pos}: {', '.join(offer['colors'])}\n"
+            await interaction.channel.send(msg)
+            return
+        # The Combat Phase ends here, so no Discovery Tile answer may wait for the next round's tech draw.
+        await Combat.settleDiscoveryTiles(game, interaction.channel, force=True)
+        await DiscoveryTileButtons.reofferPendingPrompts(game, interaction.channel)
+        claims = Combat.pendingDiscoveryClaims(game)
+        choices = DiscoveryTileButtons.pendingDiscChoices(game)
+        resolutions = game.gamestate.get("pendingDiscoveryResolutions", {})
+        if claims or choices or resolutions:
+            msg = " Discovery tiles still have to be claimed or chosen before upkeep can run:\n"
+            for pos in claims:
+                color = Combat.discoveryClaimant(game, pos)
+                msg += f"Tile {pos}: {game.getPlayerObjectFromColor(color)['player_name']}\n"
+            for pos in choices:
+                msg += f"Tile {pos}: the Atlantians still have to choose between the two tiles they drew\n"
+            for pos, color in resolutions.items():
+                msg += f"Tile {pos}: {game.getPlayerObjectFromColor(color)['player_name']} must resolve the discovery tile\n"
             await interaction.channel.send(msg)
             return
         round_num = game.gamestate.get("roundNum", 0)
@@ -353,23 +347,6 @@ class TurnButtons:
                            " can be run without the player entering negative money")
                 await interaction.channel.send(message, view=view)
                 return
-        # The Combat Phase ends here, so no Discovery Tile answer may wait for the next round's tech draw.
-        await Combat.settleDiscoveryTiles(game, interaction.channel, force=True)
-        await DiscoveryTileButtons.reofferPendingPrompts(game, interaction.channel)
-        claims = Combat.pendingDiscoveryClaims(game)
-        choices = DiscoveryTileButtons.pendingDiscChoices(game)
-        resolutions = game.gamestate.get("pendingDiscoveryResolutions", {})
-        if claims or choices or resolutions:
-            msg = " Discovery tiles still have to be claimed or chosen before upkeep can run:\n"
-            for pos in claims:
-                color = Combat.discoveryClaimant(game, pos)
-                msg += f"Tile {pos}: {game.getPlayerObjectFromColor(color)['player_name']}\n"
-            for pos in choices:
-                msg += f"Tile {pos}: the Atlantians still have to choose between the two tiles they drew\n"
-            for pos, color in resolutions.items():
-                msg += f"Tile {pos}: {game.getPlayerObjectFromColor(color)['player_name']} must resolve the discovery tile\n"
-            await interaction.channel.send(msg)
-            return
         if "actions" in interaction.channel.name:
             for thread in interaction.channel.threads:
                 if "Round" in thread.name:
