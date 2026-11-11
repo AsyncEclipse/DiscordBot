@@ -149,6 +149,21 @@ def test_harvester_money_counts_before_bankruptcy(make_game):
     assert helper.checkBankrupt() is False
 
 
+def test_ready_for_upkeep_defers_bankruptcy_until_harvesters_produce(start_game, press):
+    game, channel = start_game(factions=["tur", "eri"])
+    player = game.get_player(1)
+    player.update({"money": 0, "money_pop_cubes": 13, "influence_discs": 10})
+    game.gamestate["peopleToCheckWith"] = [player["color"]]
+    game.update()
+    assert PlayerHelper(1, player).checkBankrupt()
+
+    press(channel, 1, "readyForUpkeep")
+
+    assert reload(game).gamestate["peopleToCheckWith"] == []
+    assert "runUpkeep" in buttons(channel)
+    assert not any("would be bankrupt" in content for content, kwargs in channel.sent)
+
+
 def test_harvester_placement_stores_the_planet_and_produces_at_upkeep(start_game, press):
     game, channel = start_game(factions=["tur", "eri"])
     for player in game.gamestate["players"].values():

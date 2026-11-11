@@ -13,6 +13,7 @@ from Buttons.DiscoveryTile import DiscoveryTileButtons
 from Buttons.Influence import InfluenceButtons
 from Buttons.Turn import TurnButtons
 from helpers.CombatHelper import Combat
+from helpers.PlayerHelper import PlayerHelper
 from tests.fakes import FakeChannel, FakeInteraction, POS, board_tile, buttons, offered_ids, players, reload
 
 
@@ -181,6 +182,29 @@ class TestUpkeepWaitsForDiscoveryTiles:
         run(TurnButtons.runUpkeep(game, inter))
 
         assert ran == []
+
+    def test_discovery_money_can_prevent_bankruptcy(self, make_game, run, monkeypatch):
+        game = _game(make_game, ("blue",), [], owner="blue", extra={"disctile": 1})
+        game.gamestate.update({"roundNum": 9, "discTiles": ["mog"]})
+        blue = game.getPlayerObjectFromColor("blue")
+        blue.update({"money": 0, "money_pop_cubes": 13, "influence_discs": 7})
+        helper = PlayerHelper("1", blue)
+        assert helper.checkBankrupt()
+        inter = FakeInteraction()
+        ran = _stub_upkeep(game, monkeypatch)
+
+        run(TurnButtons.runUpkeep(game, inter))
+        assert _explore_offer("blue") in offered_ids(inter)
+        run(DiscoveryTileButtons.exploreDiscoveryTile(game, POS, inter, blue))
+        run(TurnButtons.runUpkeep(game, inter))
+        assert ran == []
+        assert not any("would be bankrupt" in content for content, kwargs in inter.channel.sent)
+
+        run(DiscoveryTileButtons.usedDiscForAbility(
+            game, helper, inter, "usedDiscForAbility_mog_101", blue))
+        assert not helper.checkBankrupt()
+        run(TurnButtons.runUpkeep(game, inter))
+        assert ran == [True]
 
     def test_an_unpicked_atlantians_draw_blocks_upkeep(self, make_game, run, monkeypatch):
         game = _game(make_game, ("blue", "red"), [], owner="blue", extra={"disctile": 1},
