@@ -490,6 +490,8 @@ class GamestateHelper:
             self.gamestate["board"][position].pop("carapaceShields", None)
             self.gamestate["board"][position].pop("carapacePendingMissiles", None)
             self.gamestate["board"][position].pop("carapaceRollOldLength", None)
+            self.gamestate["board"][position].pop("lyraRerollPending", None)
+            self.gamestate["board"][position].pop("lyraRerollToken", None)
             self.gamestate["board"][position].pop("combatEntryOrder", None)
             self.gamestate["board"][position].pop("firstShotPhase", None)
             self.gamestate["board"][position].pop("firstShotSide", None)

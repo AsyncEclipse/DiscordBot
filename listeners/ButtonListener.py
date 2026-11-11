@@ -43,6 +43,7 @@ ANSWER_BUTTONS = ("selectDiscTile", "exploreDiscoveryTile", "keepDiscForPoints",
                   "reducePopFor", "addCubeToTrack", "drawReputation", "dontDrawReputation",
                   "ancientsCube", "setupTech", "reservedTile", "carapaceDone", "carapaceMissile",
                   "wolfPack", "phaseModuleDone", "phaseModuleNone", "phaseBombing",
+                  "lyraReroll", "lyraDecline",
                   "preGameOrbital", "declineSetupTech", "saveDiscoveryPart", "gain3resource",
                   "finishSetupResources")
 
@@ -489,6 +490,12 @@ class ButtonListener(commands.Cog):
             await Combat.wolfPackChoice(game, customID, interaction)
         elif customID.startswith("rerollDie"):
             await Combat.rerollDie(game, customID, interaction, player, player_helper)
+        elif customID.startswith("lyraReroll_"):
+            _, pos, token = customID.split("_")
+            await Combat.resolveLyraReroll(game, interaction, pos, token)
+        elif customID.startswith("lyraDecline_"):
+            _, pos, token = customID.split("_")
+            await Combat.declineLyraReroll(game, interaction, pos, token)
         elif customID.startswith("removeUnits"):
             await Combat.removeUnits(game, customID, player, interaction)
         elif customID.startswith("assignHitTo"):

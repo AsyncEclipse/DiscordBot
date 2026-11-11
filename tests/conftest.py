@@ -98,8 +98,12 @@ def quiet_combat(monkeypatch):
     async def noop(*args, **kwargs):
         return None
 
+    # Board images come from a stub, so "send an updated view" posts no file.
+    drawing = SimpleNamespace(board_tile_image_file=lambda pos: None,
+                              player_area=lambda player: None,
+                              show_player_ship_area=lambda image: None)
     monkeypatch.setattr(Combat, "startCombat", staticmethod(noop))
-    monkeypatch.setattr(CombatHelper, "DrawHelper", lambda *a, **k: None)
+    monkeypatch.setattr(CombatHelper, "DrawHelper", lambda *a, **k: drawing)
 
 
 @pytest.fixture
