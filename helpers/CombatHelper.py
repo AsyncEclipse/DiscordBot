@@ -256,6 +256,9 @@ class Combat:
         Combat.clear_phase_module(game, pos)
         game.gamestate["board"][pos].pop("technoMagicColors", None)
         game.gamestate["board"][pos].pop("technoMagicReady", None)
+        # unanswered reroll prompts belong to the pairing that just ended
+        game.gamestate["board"][pos].pop("lyraRerollPending", None)
+        game.gamestate["board"][pos].pop("lyraRerollToken", None)
         drawing = DrawHelper(game.gamestate)
         sides = Combat.currentPairing(game, pos)
         game.setAttackerAndDefender(sides[1], sides[0], pos)
@@ -570,6 +573,16 @@ class Combat:
         owner, shipType = ship.split("-", 1)
         suffix, emoji = Combat.getCombatantTag(game, pos, owner)
         return f"Hit {Combat.translateShipAbrToName(shipType)}{suffix}", emoji
+
+    @staticmethod
+    def getPopulationTargetView(colorOrAI: str, pos: str, cubes):
+        view = View()
+        for count, cube in enumerate(cubes):
+            advanced = "advanced " if "adv" in cube else ""
+            label = f"Hit {advanced}{cube.replace('adv', '')} population"
+            view.add_item(Button(label=label, style=discord.ButtonStyle.gray,
+                                 custom_id=f"FCID{colorOrAI}_killPop_{pos}_{cube}_{count}"))
+        return view
 
     @staticmethod
     def getOpponentUnitsThatCanBeHit(game: GamestateHelper, colorOrAI: str, playerShipsList,
@@ -1224,14 +1237,7 @@ class Combat:
             if speed == 1000:
                 msg = (f"{interaction.user.name}, choose what population to hit"
                         f" with the die that rolled a {dieNum}.")
-
-                view = View()
-                for count, cube in enumerate(hittableShips):
-                    advanced = "advanced " if "adv" in cube else ""
-                    label = f"Hit {advanced}{cube.replace('adv', '')} population"
-                    buttonID = f"FCID{colorOrAI}_killPop_{pos}_{cube}_{count}"
-                    view.add_item(Button(label=label, style=discord.ButtonStyle.gray,
-                                            custom_id=buttonID))
+                view = Combat.getPopulationTargetView(colorOrAI, pos, hittableShips)
                 asyncio.create_task(interaction.channel.send(msg, view=view))
             else:
                 update = True
@@ -1416,6 +1422,15 @@ class Combat:
                             # Shields dock each rolled die by one before it can be split.
                             total_damage = Carapace.weapon_damage(game, pos, colorOrAI,
                                                                   shipModel.ship_type, total_damage)
+                        # A die that hits nothing is one miss, not one per point of damage.
+                        # Ships may have died to an earlier ship type in this salvo.
+                        if split and die != "pink" and total_damage > 1 and not Combat.getOpponentUnitsThatCanBeHit(
+                                game, colorOrAI, game.gamestate["board"][pos]["player_ships"][:],
+                                random_number,
+                                computerVal + (spine_bonus if spine_mode == "spinehit"
+                                               and source == cannon_index else 0),
+                                pos, speed, ignoreShields):
+                            split = False
                         if not split:
                             dieNums.append([random_number, total_damage, die, source, roll_id, total_damage])
                         else:
@@ -1461,6 +1476,7 @@ class Combat:
                         die_damage_bonus = (spine_bonus if spine_mode == "spinedmg"
                                             and die_source == cannon_index else 0)
                         computer_val = computerVal + hit_bonus
+                        die_hits = [entry[1] for entry in dieNums if entry[4] == die_roll_id]
                         hittableShips = []
                         # A die that cannot hit even before the shield penalty has no choice to make.
                         shield_choice = (incoming_shield and dieColor != "pink" and any(
@@ -1492,20 +1508,17 @@ class Combat:
                                                         computer_val, die_source, hit_bonus, die_damage_bonus])
                                 if all([not auto,
                                         player is not None,
-                                        "Lyra" in game.gamestate["players"][player]["name"],
+                                        FactionData.has(game.gamestate["players"][player],
+                                                        "reroll_dice_with_colony_ships"),
                                         game.gamestate["players"][player]["colony_ships"] > 0,
                                         oldNumPeeps == len(Combat.findPlayersInTile(game, pos))]):
-                                    viewLyr = View()
-                                    label = "Reroll Die"
-                                    buttonID = (f"FCID{colorOrAI}_rerollDie_{pos}_{colorOrAI}"
-                                                f"_{computerVal}_{dieColor}_{counter}_{rollerType}")
-                                    viewLyr.add_item(Button(label=label, style=discord.ButtonStyle.green,
-                                                            custom_id=buttonID))
-                                    viewLyr.add_item(Button(label="Decline", style=discord.ButtonStyle.red,
-                                                            custom_id="FCID"+colorOrAI+"_deleteMsg"+"_"+str(counter)))
-                                    message = (game.gamestate["players"][player]["player_name"] + ", you can reroll a"
-                                               f" {dieColor} die that missed using one of your colony ships.")
-                                    asyncio.create_task(interaction.channel.send(message, view=viewLyr))
+                                    await Combat.offerLyraReroll(game, interaction, pos, {
+                                        "roller": colorOrAI, "computer": computer_val, "speed": speed,
+                                        "dieColor": dieColor, "damageBonus": die_damage_bonus,
+                                        # bombing splits every die, so a reroll kills one cube per damage
+                                        "split": len(die_hits) > 1 or speed == 1000,
+                                        "shielded": shielded, "ignore": ignoreShields,
+                                        "shipType": shipModel.ship_type, "counter": counter})
                                 continue
                         else:
                             if all([not auto,
@@ -1557,14 +1570,7 @@ class Combat:
                             if speed == 1000:
                                 msg = (f"{interaction.user.name}, choose what population to hit"
                                        f" with the die that rolled a {dieNum}.")
-
-                                view = View()
-                                for count, cube in enumerate(hittableShips):
-                                    advanced = "advanced " if "adv" in cube else ""
-                                    label = f"Hit {advanced}{cube.replace('adv', '')} population"
-                                    buttonID = f"FCID{colorOrAI}_killPop_{pos}_{cube}_{count}"
-                                    view.add_item(Button(label=label, style=discord.ButtonStyle.gray,
-                                                         custom_id=buttonID))
+                                view = Combat.getPopulationTargetView(colorOrAI, pos, hittableShips)
                                 asyncio.create_task(interaction.channel.send(msg, view=view))
                             else:
                                 update = True
@@ -1868,7 +1874,8 @@ class Combat:
             hittableShips = []
             if dieColor != "pink":
                 hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships,
-                                                                    dieNum, computerVal, pos, 3, ignoreShields)
+                                                                    dieNum, computerVal, pos, speed,
+                                                                    ignoreShields)
                 if dieNum + computerVal > 5 and len(hittableShips) == 0:
                     message = (f"The computer bonus for a die that rolled a {dieNum}"
                                " was cancelled by the shields on each of the opponents ships.")
@@ -1936,9 +1943,15 @@ class Combat:
                     game.update()
                 if dieNum > 3:
                     hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships,
-                                                                        6, computerVal, pos, 3, ignoreShields)
+                                                                        6, computerVal, pos, speed,
+                                                                        ignoreShields)
             if len(hittableShips) > 0:
-                if len(hittableShips) > 1:
+                if speed == 1000:
+                    msg = (f"{interaction.user.name}, choose what population to hit"
+                           f" with the die that rolled a {dieNum}.")
+                    view = Combat.getPopulationTargetView(colorOrAI, pos, hittableShips)
+                    await interaction.channel.send(msg, view=view)
+                elif len(hittableShips) > 1:
                     if colorOrAI != "ai":
                         msg = (f"{interaction.user.mention}, choose which ship to hit"
                                f" with the die that rolled a {dieNum}. You will deal {dieDam} damage. "
@@ -1962,6 +1975,103 @@ class Combat:
             if game.gamestate["board"][pos].get("unresolvedHits", 0) == 0:
                 await Combat.checkCombatEnd(game, interaction, pos, oldNumPeeps)
         await interaction.message.delete()
+
+    @staticmethod
+    async def offerLyraReroll(game: GamestateHelper, interaction: discord.Interaction, pos: str, entry: dict):
+        """Lyra may spend a colony ship to reroll a missed die; the entry carries its full context."""
+        tile = game.gamestate["board"][pos]
+        token = tile.get("lyraRerollToken", 0) + 1
+        tile["lyraRerollToken"] = token
+        tile.setdefault("lyraRerollPending", {})[str(token)] = dict(entry)
+        game.update()
+        player = game.getPlayerObjectFromColor(entry["roller"])
+        view = View()
+        view.add_item(Button(label="Reroll Die", style=discord.ButtonStyle.green,
+                             custom_id=f"FCID{entry['roller']}_lyraReroll_{pos}_{token}"))
+        view.add_item(Button(label="Decline", style=discord.ButtonStyle.red,
+                             custom_id=f"FCID{entry['roller']}_lyraDecline_{pos}_{token}"))
+        await interaction.channel.send(
+            f"{player['player_name']}, you may reroll a {entry['dieColor']} die that missed"
+            " using one of your colony ships.", view=view)
+
+    @staticmethod
+    async def continueAfterLyraReroll(game: GamestateHelper, interaction: discord.Interaction,
+                                      pos: str, old_length: int):
+        tile = game.gamestate["board"].get(pos, {})
+        if tile.get("lyraRerollPending") or tile.get("unresolvedHits", 0):
+            return
+        # Bombing has no next initiative to offer.
+        if tile.get("currentSpeed") == 1000:
+            return
+        if len(Combat.findPlayersInTile(game, pos)) != old_length:
+            await Combat.checkCombatEnd(game, interaction, pos, old_length)
+        else:
+            await Combat.promptNextSpeed(game, pos, interaction.channel, True)
+
+    @staticmethod
+    async def resolveLyraReroll(game: GamestateHelper, interaction: discord.Interaction,
+                                pos: str, token: str):
+        tile = game.gamestate["board"].get(pos, {})
+        entry = tile.get("lyraRerollPending", {}).pop(str(token), None)
+        if entry is None:
+            await interaction.followup.send("That Lyra reroll was already resolved.", ephemeral=True)
+            return
+        old_length = len(Combat.findPlayersInTile(game, pos))
+        roller = entry["roller"]
+        player = game.getPlayerObjectFromColor(roller)
+        player_helper = PlayerHelper(game.get_player_from_color(roller), player)
+        if player_helper.adjust_colony_ships(1) is False:
+            await interaction.channel.send(
+                f"{interaction.user.mention}, you have no colony ships left to reroll with.")
+            await interaction.message.edit(view=None)
+            await Combat.continueAfterLyraReroll(game, interaction, pos, old_length)
+            return
+        game.update_player(player_helper)
+        dieNum = random.randint(1, 6)
+        total = Combat.translateColorToDamage(entry["dieColor"], dieNum) + entry["damageBonus"]
+        if entry["shielded"]:
+            total = Carapace.weapon_damage(game, pos, roller, entry["shipType"], total)
+        hits = [1] * total if entry["split"] else [total]
+        await interaction.channel.send(
+            f"{interaction.user.mention} rerolled a {entry['dieColor']} die with a colony ship:"
+            f" the die is rerolled into a {dieNum}.")
+        hittable = Combat.getOpponentUnitsThatCanBeHit(
+            game, roller, tile["player_ships"][:], dieNum, entry["computer"], pos,
+            entry["speed"], entry["ignore"])
+        if hittable and entry["speed"] == 1000:
+            for _damage in hits:
+                await interaction.channel.send(
+                    f"{interaction.user.name}, choose what population to hit"
+                    f" with the die that rolled a {dieNum}.",
+                    view=Combat.getPopulationTargetView(roller, pos, hittable))
+        elif hittable:
+            for damage in hits:
+                targets = Combat.getOpponentUnitsThatCanBeHit(
+                    game, roller, game.gamestate["board"][pos]["player_ships"][:], dieNum,
+                    entry["computer"], pos, entry["speed"], entry["ignore"])
+                if not targets:
+                    break
+                await Combat.offerHitPrompt(game, interaction, pos, roller, targets, dieNum,
+                                            damage, entry.get("counter", 0), deferEnd=True)
+        elif (FactionData.has(player, "reroll_dice_with_colony_ships")
+              and player["colony_ships"] > 0):
+            await Combat.offerLyraReroll(game, interaction, pos, entry)
+        else:
+            await interaction.channel.send("The rerolled die misses.")
+        await interaction.message.edit(view=None)
+        await Combat.continueAfterLyraReroll(game, interaction, pos, old_length)
+
+    @staticmethod
+    async def declineLyraReroll(game: GamestateHelper, interaction: discord.Interaction,
+                                pos: str, token: str):
+        tile = game.gamestate["board"].get(pos, {})
+        if tile.get("lyraRerollPending", {}).pop(str(token), None) is None:
+            await interaction.followup.send("That Lyra reroll was already resolved.", ephemeral=True)
+            return
+        await interaction.channel.send("The reroll was declined.")
+        await interaction.message.edit(view=None)
+        await Combat.continueAfterLyraReroll(game, interaction, pos,
+                                             len(Combat.findPlayersInTile(game, pos)))
 
     @staticmethod
     async def killPop(game: GamestateHelper, buttonID: str, interaction: discord.Interaction, player):
@@ -2018,8 +2128,9 @@ class Combat:
             await channel.send("Finish your Techno-Magic upgrades before rolling initiative.")
             return
         if (tile.get("unresolvedHits", 0) > 0 or tile.get("pendingRiftDice")
-                or any(tile.get("pendingRiftBackfire", {}).values())):
-            await channel.send("Resolve the pending hits and Rift Cannon effects before rolling again.")
+                or any(tile.get("pendingRiftBackfire", {}).values())
+                or tile.get("lyraRerollPending")):
+            await channel.send("Resolve the pending hits, rerolls and Rift Cannon effects before rolling again.")
             return
         if (tile.get("wolfPack") or tile.get("pendingWolfPack") or tile.get("ghostsRetreatPending")
                 or any(not tile.get("phaseModuleReady", {}).get(color)
@@ -2076,6 +2187,7 @@ class Combat:
             return
         tile = game.gamestate["board"].get(pos, {})
         if (Carapace.has_pending_missiles(game, pos) or Combat.technoMagicPending(game, pos)
+                or tile.get("lyraRerollPending")
                 or (tile.get("phaseModuleColors") and not tile.get("phaseModulePrompted"))):
             return
         if (game.game_id, pos) in AUTO_ROLLING:
