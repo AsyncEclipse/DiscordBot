@@ -350,3 +350,29 @@ def test_the_combat_card_cannot_fire_the_same_step_twice(make_game, no_random, r
 
     assert reload(game).gamestate["board"]["101"]["damage_tracker"]["red-cru"] == 1
     assert any("already rolled" in content for content, _kwargs in inter.channel.sent)
+
+
+def test_missile_to_ship_transition_preserves_wolf_pack_bank(make_game, run, monkeypatch):
+    game = _wolf_game(make_game)
+    tile = game.gamestate["board"]["101"]
+    tile["currentSpeed"] = 100
+    tile["wolfPackRerolls"] = {"blue": 1}
+    monkeypatch.setattr(Combat, "nextInitiative", lambda *args: (2, None, False))
+    run(Combat.promptNextSpeed(game, "101", FakeInteraction().channel, False))
+    assert tile.get("wolfPackRerolls") == {"blue": 1}
+
+
+def test_combat_card_omits_spine_modes_for_empty_augment(make_game):
+    game = _combat_game(make_game, ["nus", "hul", "nud", "ioc", "empty"])
+    view = Combat.getCombatButtons(game, "101")
+    assert not any(button.custom_id.endswith(("_spinehit", "_spinedmg"))
+                   for button in view.children)
+
+
+def test_declining_reputation_persists_adjustment_removal(make_game, run):
+    game = _wolf_game(make_game)
+    game.gamestate["battleRepAdjustments"] = {"101-1-blue": -1}
+    game.update()
+    run(Combat.dontDrawReputation(game, "dontDrawReputation_101_1_blue",
+                                FakeInteraction(), player_helper(game, "blue")))
+    assert "101-1-blue" not in reload(game).gamestate["battleRepAdjustments"]

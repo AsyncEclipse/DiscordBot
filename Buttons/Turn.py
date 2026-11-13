@@ -573,6 +573,7 @@ class TurnButtons:
     @staticmethod
     async def finishAction(player, game: GamestateHelper, interaction: discord.Interaction,
                            player_helper: PlayerHelper):
+        player_helper.stats.pop("pulsarBuild", None)
         player_helper.stats["allianceLeaveClosed"] = True
         player_helper.stats.pop("influenceActionActive", None)
         player_helper.stats.pop("influenceActionUsed", None)

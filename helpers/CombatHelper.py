@@ -816,7 +816,7 @@ class Combat:
                     playerObj = game.getPlayerObjectFromColor(owner)
                     spine_modes = FactionData.has(playerObj, "spine_cannons") and any(
                         speed2 == speed
-                        and len(PlayerHelper.get_spine_cannon_slots(playerObj, shipType)) > 1
+                        and PlayerShip(playerObj, shipType).spine_augment() is not None
                         for speed2, shipType, _count in Combat.getCombatantShipsBySpeed(
                             game, owner, ships, pos))
                 side = "Defender" if owner in defender else "Attacker"
@@ -2195,9 +2195,8 @@ class Combat:
         attacker = Combat.sideOf(game.gamestate["board"][pos]["attacker"])
         defender = Combat.sideOf(game.gamestate["board"][pos]["defender"])
         ships = game.gamestate["board"][pos]["player_ships"]
-        previousSpeed = game.gamestate["board"][pos].get("currentSpeed")
         nextSpeed, nextOwner, wrapped = Combat.nextInitiative(game, pos, repeat)
-        if wrapped or (previousSpeed is not None and previousSpeed > 90 and 0 <= nextSpeed < 90):
+        if wrapped:
             # Wolf Pack saved rerolls only last for the engagement round they were earned in
             game.gamestate["board"][pos].pop("wolfPackRerolls", None)
         if wrapped:
@@ -3154,6 +3153,7 @@ class Combat:
         drawOrder = int(buttonID.split("_")[2])
         color = buttonID.split("_")[3]
         game.gamestate.get("battleRepAdjustments", {}).pop(f"{system}-{drawOrder}-{color}", None)
+        game.update()
         if "tilesToResolve" in game.gamestate:
             game.removeFromKey("queuedQuestions", [system, drawOrder, color])
             await Combat.resolveQueue(game, interaction)

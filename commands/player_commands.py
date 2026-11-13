@@ -6,6 +6,7 @@ from discord import app_commands
 from typing import Optional
 from Buttons.DiplomaticRelations import DiplomaticRelationsButtons
 from Buttons.Move import MoveButtons
+from Buttons.PreGame import PreGameButtons
 from Buttons.Reputation import ReputationButtons
 from Buttons.Research import ResearchButtons
 from Buttons.Turn import TurnButtons
@@ -424,7 +425,12 @@ class PlayerCommands(commands.GroupCog, name="player"):
         game = GamestateHelper(interaction.channel)
         p1 = game.get_player(player.id,interaction)
         if game.gamestate.get("pre_game") and not game.gamestate["pre_game"].get("started"):
-            await interaction.response.send_message("The game has not started yet.")
+            phase = game.gamestate["pre_game"]
+            if phase.get("offering") or phase.get("offer_failed"):
+                await interaction.response.defer()
+                await PreGameButtons.startPreGame(game, interaction, [phase["first_player"]])
+            else:
+                await interaction.response.send_message("The game has not started yet.")
             return
         TurnButtons.startNewTurn(p1, game)
         view = TurnButtons.getStartTurnButtons(game, p1, "dummy")

@@ -423,3 +423,29 @@ def test_mid_game_undo_preserves_completed_setup_and_restores_turn_menu(
     assert reload(game).gamestate["pre_game"]["started"]
     assert any("already finished" in content for content, kwargs in
                press(channel, 4, "FCIDpurple_getTech_neb_military_setup").followup.sent)
+
+
+def test_prompt_failure_does_not_leave_offering_latched(start_game, run, monkeypatch):
+    game, channel = start_game(factions=["exl", "eri"])
+
+    async def fail_prompt(*args):
+        raise RuntimeError("Discord send failed")
+
+    monkeypatch.setattr(PreGameButtons, "offerExilesOrbital", fail_prompt)
+    with pytest.raises(RuntimeError, match="Discord send failed"):
+        run(PreGameButtons.startPreGame(game, FakeInteraction(channel), [1, 2]))
+    assert not reload(game).gamestate["pre_game"]["offering"]
+
+
+def test_start_turn_recovers_interrupted_pre_game_offer(start_game, run, press):
+    game, channel = start_game(factions=["exl", "eri"])
+    game.gamestate["pre_game"] = {"first_player": "1", "tasks": [["1", "orbital_pop"]],
+                                   "offering": True, "started": False}
+    game.gamestate["board"]["201"]["orbital_pop"] = [0]
+    game.update()
+    command = PlayerCommands(None)
+    run(command.start_turn.callback(command, FakeInteraction(channel, user_id=1)))
+    assert not reload(game).gamestate["pre_game"]["offering"]
+    choice = find_button(channel, "FCIDblue_preGameOrbital_")
+    press(channel, 1, choice)
+    assert reload(game).gamestate["pre_game"]["started"]
