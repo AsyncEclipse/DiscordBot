@@ -32,14 +32,18 @@ class DraftButtons:
             message.append(f"{x + 1}. {member.mention if member else player[1]}")
             game.addToKey("draftingPlayers", player[0])
         if not tournament:
-            message.append("For your reference, the factions currently available in the bot are the following 10,"
-                        " plus the 6 Terran equivalents. First-timers are encouraged to use the Terran factions,"
-                        " which are all the same and don't have as many quirks"
-                        " (the quirks are tame compared to TI4 asymmetry though).")
-            message.extend(["1. Hydran Progress", "2. Eridani Empire", "3. Orion Hegemony",
-                            "4. Mechanema", "5. Descendants of Draco", "6. Planta",
-                            "7. Wardens of Magellan", "8. Enlightened of Lyra",
-                            "9. Rho Indi Syndicate", "10. The Exiles"])
+            factionNames = ["Hydran Progress", "Eridani Empire", "Orion Hegemony",
+                            "Descendants of Draco", "Mechanema", "Planta",
+                            "Wardens of Magellan", "Enlightened of Lyra",
+                            "Rho Indi Syndicate", "The Exiles"]
+            if game.gamestate.get("community_factions", False):
+                factionNames += [faction["name"] for faction in FactionData.FACTIONS.values()
+                                 if faction.get("community")]
+            message.append(f"For your reference, the factions currently available in the bot are the following "
+                           f"{len(factionNames)}, plus the 6 Terran equivalents. First-timers are encouraged to use"
+                           " the Terran factions, which are all the same and don't have as many quirks"
+                           " (the quirks are tame compared to TI4 asymmetry though).")
+            message.extend(f"{i}. {name}" for i, name in enumerate(factionNames, 1))
         await channel.send("\n".join(message))
         game.initilizeKey("bannedFactions")
         if tournament:
