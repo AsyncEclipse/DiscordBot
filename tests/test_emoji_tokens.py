@@ -50,3 +50,37 @@ def test_upload_failure_preserves_existing_emojis_and_logs_the_error(run, monkey
     assert result == existing
     assert "Could not upload faction token" in caplog.text
     assert "Emoji quota exceeded" in caplog.text
+
+
+def test_one_upload_failure_does_not_skip_later_tokens(run, monkeypatch):
+    client = FakeEmojiClient()
+    calls = []
+
+    async def upload(name, image):
+        calls.append(name)
+        if len(calls) == 1:
+            raise discord.HTTPException(SimpleNamespace(status=500, reason="temporary"), "retry later")
+        return SimpleNamespace(name=name)
+
+    monkeypatch.setattr(client, "create_application_emoji", upload)
+    run(Emoji.upload_missing_tokens(client, []))
+    assert len(calls) == sum(bool(faction.get("community"))
+                             for faction in FactionData.FACTIONS.values())
+
+
+def test_missing_icon_does_not_prevent_other_uploads(run, monkeypatch, caplog):
+    open_image = Image.open
+    calls = []
+
+    def open_icon(path):
+        calls.append(path)
+        if len(calls) == 1:
+            raise FileNotFoundError(path)
+        return open_image(path)
+
+    monkeypatch.setattr(Image, "open", open_icon)
+    client = FakeEmojiClient()
+    run(Emoji.upload_missing_tokens(client, []))
+    assert len(client.uploaded) == len(calls) - 1
+    assert client.uploaded
+    assert "Could not upload faction token" in caplog.text

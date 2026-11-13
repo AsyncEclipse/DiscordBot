@@ -184,15 +184,15 @@ class Emoji:
             if not faction.get("community") or name in existing:
                 continue
             path = f"images/resources/components/layouts/factionImages/{faction['artwork']}_image.png"
-            with Image.open(path) as icon:
-                buffer = io.BytesIO()
-                icon.resize((128, 128), Image.BOX).save(buffer, "PNG")
             try:
+                with Image.open(path) as icon:
+                    buffer = io.BytesIO()
+                    icon.resize((128, 128), Image.BOX).save(buffer, "PNG")
                 application_emojis.append(await client.create_application_emoji(
                     name=name, image=buffer.getvalue()))
-            except discord.HTTPException:
+            except (discord.HTTPException, OSError):
                 logging.getLogger(__name__).exception("Could not upload faction token %s", name)
-                break
+                continue
         return application_emojis
 
     @staticmethod

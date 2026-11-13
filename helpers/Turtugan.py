@@ -22,7 +22,17 @@ class DeepSpace:
         if not FactionData.has(player, "deep_space_explorers"):
             return
         reserve = player.setdefault("deep_space_sectors", [])
-        spare = game.gamestate.setdefault("sector3_spare", [])
+        if "sector3_spare" not in game.gamestate:
+            # shortcut: old setup saves recover standard S3 sectors only; expand if event reserves are needed.
+            used = set(game.gamestate.get("tile_deck_300", []))
+            used.update(game.gamestate.get("tile_discard_deck_300", []))
+            used.update(str(tile["sector"]) for tile in game.gamestate.get("board", {}).values())
+            for other in game.gamestate.get("players", {}).values():
+                used.update(other.get("deep_space_sectors", []))
+            game.gamestate["sector3_spare"] = [
+                sector for sector in [str(number) for number in range(301, 319)] + ["381", "382"]
+                if sector not in used]
+        spare = game.gamestate["sector3_spare"]
         while len(reserve) < 2 and spare:
             reserve.append(spare.pop(0))
         game.update()
@@ -72,15 +82,16 @@ class DeepSpace:
         if (player.get("deep_space_choice") != position
                 or str(player.get("deep_space_choice_token")) != str(token)):
             return None, "stale"
-        player["deep_space_choice"] = None
         if choice == "random":
             if not DeepSpace.can_draw(game):
                 game.update()
                 return None, "empty"
+            player["deep_space_choice"] = None
             return game.tile_draw(position), None
         if choice != "reserve" or not DeepSpace.has_reserve(player):
             game.update()
             return None, "missing"
+        player["deep_space_choice"] = None
         tile = player["deep_space_sectors"].pop(0)
         game.update()
         return tile, None

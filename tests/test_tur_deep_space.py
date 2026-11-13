@@ -1,6 +1,6 @@
 from Buttons.Explore import ExploreButtons
 from helpers.Turtugan import DeepSpace
-from tests.fakes import FakeInteraction, buttons, reload
+from tests.fakes import FakeInteraction, buttons, player_stats, reload
 
 
 def ring_three_position(game, player):
@@ -193,3 +193,22 @@ def test_drawing_from_the_normal_stack_keeps_the_reserve(start_game, press):
     state = reload(game)
     assert state.get_player(1)["deep_space_sectors"] == reserve
     assert len(state.gamestate["tile_deck_300"]) == len(deck) - 1
+
+
+def test_empty_random_draw_keeps_reserve_choice_available(make_game):
+    player = {"deep_space_choice": "301", "deep_space_choice_token": 1,
+              "deep_space_sectors": ["302"]}
+    game = make_game({"players": {"1": player}, "tile_deck_300": [],
+                      "tile_discard_deck_300": []})
+    player = game.get_player(1)
+    assert DeepSpace.take(game, player, "301", "random", 1) == (None, "empty")
+    assert DeepSpace.take(game, player, "301", "reserve", 1) == ("302", None)
+
+
+def test_legacy_save_can_supply_deep_space_reserve(make_game):
+    game = make_game({"players": {"1": player_stats("tur")},
+                      "tile_deck_300": ["301"], "tile_discard_deck_300": []})
+    DeepSpace.draw_reserve(game, game.get_player(1))
+    assert DeepSpace.has_reserve(game.get_player(1))
+    assert "301" not in game.get_player(1)["deep_space_sectors"]
+    assert game.gamestate["tile_deck_300"] == ["301"]

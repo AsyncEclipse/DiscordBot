@@ -69,32 +69,44 @@ class PreGameButtons:
     @staticmethod
     async def startPreGame(game: GamestateHelper, interaction: discord.Interaction, player_ids):
         """Ask every faction that has something to do before the game starts to do it now."""
-        tasks = [[str(player_id), task] for player_id in player_ids
-                 for task in PreGameButtons.tasksForPlayer(game.get_player(player_id, interaction))]
-        # Register every task before sending prompts; a quick reply must not start the game early.
-        game.gamestate["pre_game"] = {"first_player": str(player_ids[0]), "tasks": tasks,
-                                      "offering": True, "started": False}
+        phase = game.gamestate.get("pre_game")
+        if not phase or phase.get("started"):
+            tasks = [[str(player_id), task] for player_id in player_ids
+                     for task in PreGameButtons.tasksForPlayer(game.get_player(player_id, interaction))]
+            # Register every task before sending prompts; a quick reply must not start the game early.
+            phase = {"first_player": str(player_ids[0]), "tasks": tasks, "started": False}
+            game.gamestate["pre_game"] = phase
+        tasks = phase["tasks"]
+        phase["offering"] = True
+        phase.pop("offer_failed", None)
         game.update()
-        for player_id, task in list(tasks):
-            player = game.get_player(player_id, interaction)
-            home = game.getLocationFromID(player["home_planet"])
-            if task == "orbital_pop":
-                offered = await PreGameButtons.offerExilesOrbital(game, player, interaction, home)
-            elif task == "discovery_tile":
-                game.addDiscTile(home)
-                offered = await DiscoveryTileButtons.exploreDiscoveryTile(game, home, interaction, player)
-            elif task == "artifact_cube":
-                offered = await PopulationButtons.offerAncientsCube(game, player, interaction, home)
-            else:
-                offered = await ResearchButtons.offerSetupTech(game, player, interaction)
-            if not offered:
-                # this faction cannot do this action after all, so the game does not wait for it
-                game.gamestate["pre_game"]["tasks"].remove([str(player_id), task])
-                game.update()
-        game.gamestate["pre_game"]["offering"] = False
-        game.update()
+        try:
+            for player_id, task in list(tasks):
+                player = game.get_player(player_id, interaction)
+                home = game.getLocationFromID(player["home_planet"])
+                if task == "orbital_pop":
+                    offered = await PreGameButtons.offerExilesOrbital(game, player, interaction, home)
+                elif task == "discovery_tile":
+                    game.addDiscTile(home)
+                    offered = await DiscoveryTileButtons.exploreDiscoveryTile(game, home, interaction, player)
+                elif task == "artifact_cube":
+                    offered = await PopulationButtons.offerAncientsCube(game, player, interaction, home)
+                elif task == "setup_tech":
+                    offered = await ResearchButtons.offerSetupTech(game, player, interaction)
+                else:
+                    continue
+                if not offered:
+                    # this faction cannot do this action after all, so the game does not wait for it
+                    game.gamestate["pre_game"]["tasks"].remove([str(player_id), task])
+                    game.update()
+        except Exception:
+            phase["offer_failed"] = True
+            raise
+        finally:
+            game.gamestate["pre_game"]["offering"] = False
+            game.update()
         if not game.preGameTasks():
-            await PreGameButtons.startGame(game, interaction, player_ids[0])
+            await PreGameButtons.startGame(game, interaction, phase["first_player"])
         else:
             await interaction.channel.send("The game starts once every faction has finished"
                                            " their pre-game action.")

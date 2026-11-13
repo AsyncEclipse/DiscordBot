@@ -44,3 +44,13 @@ def test_put_down_population_can_be_declined(start_game, run):
     message = channel.message_with("FCIDblue_declinePopDrop")
     run(PopulationButtons.declinePopDrop(game, player, FakeInteraction(channel, message=message)))
     assert message.id in channel.deleted
+
+
+def test_cancelled_pulsar_build_does_not_limit_next_build(start_game, press):
+    game, channel = start_game()
+    game.get_player(1)["pulsarBuild"] = True
+    game.update()
+    press(channel, 1, "FCIDblue_startBuild2")
+    press(channel, 1, "FCIDblue_buildIn_201")
+    press(channel, 1, "FCIDblue_finishAction")
+    assert not reload(game).get_player(1).get("pulsarBuild")
