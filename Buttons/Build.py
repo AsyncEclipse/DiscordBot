@@ -165,7 +165,7 @@ class BuildButtons:
         if build != "none":
             view.add_item(Button(label="Finished In This System", style=discord.ButtonStyle.red,
                                  custom_id="_".join(buttonElements) + suffix))
-        else:
+        elif not suffix:  # a Raid build returns via Back to Move; finishing here could skip the Move disc
             view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                                  custom_id=f"FCID{player['color']}_finishAction"))
         view.add_item(Button(label="Reset Build", style=discord.ButtonStyle.gray,
