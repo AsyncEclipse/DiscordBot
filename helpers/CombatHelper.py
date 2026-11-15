@@ -947,6 +947,7 @@ class Combat:
             return
         AUTO_ROLLING.add(key)
         shots = {"ai": 0, "players": 0}
+        spine_pause = False
         try:
             await channel.send("Auto-rolling both sides until the battle ends. The bot will not retreat"
                                " or spend colony ships, and it picks targets the way it does for the AI."
@@ -987,6 +988,15 @@ class Combat:
                         game.setCurrentSpeed(nextSpeed, pos)
                         await channel.send("Auto-roll paused: set Carapace Shields, then press Auto-Roll again.")
                         break
+                if (nextOwner != "ai" and nextSpeed < 99
+                        and FactionData.has(game.getPlayerObjectFromColor(nextOwner), "spine_cannons")
+                        and Combat.spine_mode_options(game, nextOwner, pos, nextSpeed)):
+                    game.setCurrentRoller(nextOwner, pos)
+                    game.setCurrentSpeed(nextSpeed, pos)
+                    spine_pause = True
+                    await channel.send("Auto-roll paused: pick a Spine Cannon mode for this roll,"
+                                       " then press Auto-Roll again.")
+                    break
                 shots["ai" if nextOwner == "ai" else "players"] += 1
                 game.setCurrentRoller(nextOwner, pos)
                 game.setCurrentSpeed(nextSpeed, pos)
@@ -1007,7 +1017,7 @@ class Combat:
         if len(Combat.currentPairing(game, pos)) == 2:
             # Stopped before the end: hand the normal prompt (retreat, stalemate) back.
             if not Combat.hasPendingCombatChoices(game, pos):
-                await Combat.promptNextSpeed(game, pos, channel, False)
+                await Combat.promptNextSpeed(game, pos, channel, False, repeat=spine_pause)
             return
         summary = (f"**Auto-Roll Summary — system {int(tile['sector'])}, position {pos}**\n"
                    f"The AI fired {shots['ai']} salvo{'s' if shots['ai'] != 1 else ''};"
