@@ -1,3 +1,6 @@
+from tests.fakes import buttons
+
+
 def test_an_unused_pulsar_build_does_not_shrink_the_next_build_action(start_game, press):
     game, channel = start_game()
     game.get_player(1)["pulsarBuild"] = True  # a Pulsar build that was finished without building
