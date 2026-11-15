@@ -1044,7 +1044,8 @@ class Combat:
         return allocation
 
     @staticmethod
-    def getAIHitAllocation(game: GamestateHelper, colorOrAI, pos, speed, dice, computer):
+    def getAIHitAllocation(game: GamestateHelper, colorOrAI, pos, speed, dice, computer,
+                           ignore_shields: bool = False):
         """Choose targets for a whole AI salvo before any hits are applied.
 
         shortcut: exhaustive allocation search grows exponentially; optimize
@@ -1052,7 +1053,8 @@ class Combat:
         """
         ships = game.gamestate["board"][pos]["player_ships"][:]
         targets_by_die = [
-            Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, ships, die[0], computer, pos, speed)
+            Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, ships, die[0], computer, pos, speed,
+                                                ignore_shields)
             for die in dice
         ]
         models = {}
@@ -1460,7 +1462,7 @@ class Combat:
                         dice_for_ai = [[6 if die[2] == "pink" and die[0] > 3 else die[0], die[1], die[2]]
                                        for die in dieNums]
                         allocation = Combat.getAIHitAllocation(game, colorOrAI, pos, speed,
-                                                              dice_for_ai, shipModel.computer)
+                                                              dice_for_ai, computerVal, ignoreShields)
                     for die_index, die in enumerate(dieNums):
                         counter = counter + 1
                         tile_map = game.gamestate["board"]

@@ -788,3 +788,18 @@ def test_neutron_bombs_and_initiative_share_one_two_power_purchase(make_game, ru
     mode = Combat.phase_mode(game, "blue", "101", "interceptor")
     assert mode["speed"] and mode["planets"]
     assert mode["cost"] == 2
+
+
+def test_auto_roll_keeps_a_hit_that_only_lands_with_phase_module_plus_to_hit(make_game, run, monkeypatch):
+    game = phase_combat(make_game)
+    tile = game.gamestate["board"]["101"]
+    tile["phaseModes"] = {"blue": {"interceptor": {
+        "comp": 1, "shield": 0, "speed": 0, "planets": False, "ignore": False, "cost": 1}}}
+    tile["phaseModuleColors"] = ["blue"]
+    tile["phaseModulePrompted"] = True
+    assert PlayerShip(game.get_player(1), "interceptor").computer == 0
+    monkeypatch.setattr("random.randint", lambda _a, _b: 5)
+
+    run(Combat.rollDice(game, "rollDice_101_blue_3_deleteMsg", FakeInteraction(), auto=True))
+
+    assert tile.get("damage_tracker", {}).get("red-cru", 0) == 1
