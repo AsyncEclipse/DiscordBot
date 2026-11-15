@@ -178,7 +178,7 @@ def test_winning_battle_adds_one_to_the_drawn_battle_rep(make_game, run):
 
     assert any("drew 1 reputation tiles (+1 for the battle)" in content
                for content, _kwargs in interaction.channel.sent)
-    assert player["reputationBonuses"] == {"0": 1}
+    assert player["reputationBonuses"] == {"2": 1}
     assert DrawHelper(game.gamestate).get_public_points(player, False) == 0
     game.gamestate["gameEnded"] = True
     # The drawn reputation tile (3) plus the winning battle marker (+1).
@@ -192,7 +192,7 @@ def test_losing_battle_subtracts_one(make_game, run):
 
     player = _draw(game, interaction, "blue", run)
 
-    assert player["reputationBonuses"] == {"0": -1}
+    assert player["reputationBonuses"] == {"2": -1}
 
 
 def test_declined_draw_leaves_no_battle_rep(make_game, run):
@@ -219,7 +219,7 @@ def test_full_track_replacement_keeps_the_adjustment(make_game, run):
 
     player = game.getPlayerObjectFromColor("blue")
     assert player["reputation_track"][0] == 5
-    assert player["reputationBonuses"] == {"0": 1}
+    assert player["reputationBonuses"] == {"2": 1}
 
 
 def test_returned_tile_drops_its_battle_marker(make_game, run):
