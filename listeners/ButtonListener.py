@@ -45,7 +45,7 @@ ANSWER_BUTTONS = ("selectDiscTile", "exploreDiscoveryTile", "keepDiscForPoints",
                   "wolfPack", "phaseModuleDone", "phaseModuleNone", "phaseBombing",
                   "lyraReroll", "lyraDecline",
                   "preGameOrbital", "declineSetupTech", "saveDiscoveryPart", "gain3resource",
-                  "finishSetupResources")
+                  "finishSetupResources", "placeHarvester", "harvesterResource")
 
 
 async def acknowledge(interaction):

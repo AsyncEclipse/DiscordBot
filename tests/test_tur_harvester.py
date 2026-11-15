@@ -352,3 +352,23 @@ def test_elimination_clears_the_exile_orbital_cube(start_game, run):
     run(InfluenceButtons.eliminatePlayer(game, player, FakeInteraction(channel),
                                          player_helper(game, "blue"), False))
     assert game.gamestate["board"][home]["orbital_pop"] == [0]
+
+
+def test_a_second_harvester_planet_press_on_one_prompt_is_ignored(start_game, press):
+    from tests.fakes import FakeMessage
+    game, channel = start_game(factions=["tur", "eri"])
+    for player in game.gamestate["players"].values():
+        player["passed"] = True
+    game.update()
+    press(channel, 1, "runUpkeep")
+    choices = [button.custom_id for _content, kwargs in channel.sent
+               for button in getattr(kwargs.get("view"), "children", [])
+               if "_placeHarvester_201_" in button.custom_id]
+    assert len(choices) >= 2
+    message = FakeMessage()
+
+    press(channel, 1, choices[0], message)
+    press(channel, 1, choices[1], message)
+
+    placed = reload(game).get_player(1)["harvester_placements"]
+    assert [p["square"] for p in placed] == [choices[0].split("_")[3]]
