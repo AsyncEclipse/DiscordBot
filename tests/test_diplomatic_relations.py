@@ -67,3 +67,15 @@ def test_initiating_relations_with_nobody_says_so(make_game, run):
     content, kwargs = inter.channel.sent[-1]
     assert "nobody" in content
     assert kwargs.get("view") is None
+
+
+def test_rho_relations_shift_a_reputation_tile_to_a_free_reputation_only_slot(make_game):
+    game = _game(make_game)
+    blue = game.getPlayerObjectFromColor("blue")
+    blue.update(player_stats("rho", color="blue"))
+    blue["reputation_track"] = [2, 3, "rep", "rep", "rep"]
+
+    assert game.formRelationsBetween(blue, game.getPlayerObjectFromColor("red"))
+
+    assert blue["reputation_track"] == ["mixed-hydran-red", 3, 2, "rep", "rep"]
+    assert game.gamestate["reputation_tiles"] == []
