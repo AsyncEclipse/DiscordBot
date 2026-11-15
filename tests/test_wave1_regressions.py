@@ -1,4 +1,5 @@
-from tests.fakes import reload
+from Buttons.Population import PopulationButtons
+from tests.fakes import FakeInteraction, buttons, player_stats, reload
 
 
 def all_buttons(channel):
@@ -26,3 +27,13 @@ def test_magellan_fourth_tech_ancient_labs_offers_both_discovery_tiles(start_gam
     offers = [c for c in all_buttons(channel) if "_keepDiscForPoints_" in c]
     assert reload(game).gamestate["board"][home]["disctile"] == 0 or len(offers) > len(first), \
         "second discovery tile was left unresolved on the home sector"
+
+
+def test_population_menu_with_25_empty_planets_does_not_overflow(run, monkeypatch):
+    squares = [f"{300 + i}_money_0" for i in range(25)]
+    monkeypatch.setattr(PopulationButtons, "findEmptyPopulation", staticmethod(lambda game, player: squares))
+    interaction = FakeInteraction()
+
+    run(PopulationButtons.startPopDrop(None, player_stats("hyd"), interaction))
+
+    assert len(buttons(interaction.channel)) == 25
