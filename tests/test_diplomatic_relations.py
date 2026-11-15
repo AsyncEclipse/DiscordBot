@@ -1,5 +1,11 @@
 """Diplomatic relations: forming them, and the Alliance option they unlock."""
+import random
+
+import pytest
+
 from Buttons.DiplomaticRelations import DiplomaticRelationsButtons
+from helpers.FactionData import FACTIONS
+from helpers.PlayerHelper import PlayerHelper
 from tests.fakes import FakeInteraction, offered_ids, player_stats
 
 
@@ -79,3 +85,27 @@ def test_rho_relations_shift_a_reputation_tile_to_a_free_reputation_only_slot(ma
 
     assert blue["reputation_track"] == ["mixed-hydran-red", "mixed", 2, 3, "rep"]
     assert game.gamestate["reputation_tiles"] == []
+
+
+@pytest.mark.parametrize("faction", sorted(FACTIONS))
+def test_relations_keep_the_best_tiles_and_slot_types_for_every_faction(make_game, faction):
+    rng = random.Random(faction)
+    for _ in range(30):
+        game = _game(make_game)
+        blue = game.getPlayerObjectFromColor("blue")
+        blue.update(player_stats(faction, color="blue"))
+        # fill some free slots with reputation tiles, as a game would
+        blue["reputation_track"] = [rng.randint(1, 4) if tile in ("rep", "mixed") and rng.random() < 0.7
+                                    else tile for tile in blue["reputation_track"]]
+        before = sorted(tile for tile in blue["reputation_track"] if isinstance(tile, int))
+        game.gamestate["minor_species"] = ["Test Species"]
+
+        assert game.formMinorSpeciesRelations(blue, "Test Species")
+
+        track = blue["reputation_track"]
+        kept = sorted(tile for tile in track if isinstance(tile, int))
+        assert kept == before or kept == before[1:], track  # at most the lowest tile goes back
+        assert sum("-minor-Test Species" in str(tile) for tile in track) == 1
+        for x, tile in enumerate(track):
+            if PlayerHelper.is_reputation_only_slot(blue, x):
+                assert isinstance(tile, int) or tile == "rep", track

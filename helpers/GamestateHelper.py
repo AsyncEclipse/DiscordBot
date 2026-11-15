@@ -1347,11 +1347,18 @@ class GamestateHelper:
         free = next((x for x, tile in enumerate(track) if tile in ("amb", "mixed")), None)
         if free is not None:
             return free
-        loc = min((x for x, tile in enumerate(track)
-                   if isinstance(tile, int) and not PlayerHelper.is_reputation_only_slot(player, x)),
-                  key=lambda x: track[x])
-        self.gamestate["reputation_tiles"].append(track[loc])
-        bonuses.pop(str(loc), None)
+        # Full track: return the lowest tile anywhere, refilling its slot from a mixed slot if needed
+        def worth(x):
+            return track[x] + bonuses.get(str(x), 0)
+        tiles = [x for x, tile in enumerate(track) if isinstance(tile, int)]
+        lowest = min(tiles, key=worth)
+        loc = min((x for x in tiles if not PlayerHelper.is_reputation_only_slot(player, x)), key=worth)
+        self.gamestate["reputation_tiles"].append(track[lowest])
+        bonuses.pop(str(lowest), None)
+        if lowest != loc:
+            track[lowest] = track[loc]
+            if str(loc) in bonuses:
+                bonuses[str(lowest)] = bonuses.pop(str(loc))
         track[loc] = "mixed"
         return loc
 
