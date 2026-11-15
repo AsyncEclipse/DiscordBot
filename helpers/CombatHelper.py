@@ -1326,7 +1326,6 @@ class Combat:
                 await interaction.channel.send("That initiative step is no longer valid. Use the current prompt.")
                 return
         if speed != 1000:
-            Carapace.close_controls(game, pos)
             step = [speed, colorOrAI]
             rolled = tile.get("rolledSteps", [])
             if step in rolled:
@@ -1338,6 +1337,8 @@ class Combat:
                 await interaction.channel.send(
                     "That initiative step is not current. Roll the pending step in the combat view first.")
                 return
+            # only a roll that goes ahead ends the shield choices for this round
+            Carapace.close_controls(game, pos)
             tile.setdefault("rolledSteps", []).append(step)
             game.update()
         if colorOrAI == "ai":
