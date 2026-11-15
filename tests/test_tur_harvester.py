@@ -341,3 +341,14 @@ def test_a_weaponless_harvester_is_not_in_the_roll_order(make_game):
     assert all(owner != "teal" for _speed, owner in speeds)
     assert any(ship[1] == "sb" for ship in Combat.getCombatantShipsBySpeed(
         game, "teal", game.gamestate["board"]["202"]["player_ships"], "202"))
+
+
+def test_elimination_clears_the_exile_orbital_cube(start_game, run):
+    from Buttons.Influence import InfluenceButtons
+    game, channel = start_game(factions=["exl", "eri"])
+    player = game.get_player(1)
+    home = game.get_system_coord(player["home_planet"])
+    game.gamestate["board"][home]["orbital_pop"] = [1]
+    run(InfluenceButtons.eliminatePlayer(game, player, FakeInteraction(channel),
+                                         player_helper(game, "blue"), False))
+    assert game.gamestate["board"][home]["orbital_pop"] == [0]
