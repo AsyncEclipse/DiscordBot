@@ -36,6 +36,8 @@ class BuildButtons:
         if "2" not in buttonID:
             player_helper.spend_influence_on_action("build")
             player_helper.stats["buildsThisAction"] = 0
+            # a Pulsar build finished without building never cleared its one-unit limit
+            player_helper.stats.pop("pulsarBuild", None)
             if FactionData.has(player, "phase_technology"):
                 player_helper.stats["phaseBuildsThisAction"] = 0
                 player_helper.stats["phaseSwappedThisAction"] = False
