@@ -207,6 +207,10 @@ class Combat:
         if game.gamestate["board"][pos]["owner"] == 0:
             await interaction.followup.send("That sector no longer has an owner to bomb.", ephemeral=True)
             return
+        owner = game.getPlayerObjectFromColor(game.gamestate["board"][pos]["owner"])
+        if owner and "nea" in PlayerHelper(game.get_player_from_color(owner["color"]), owner).getTechs():
+            await interaction.followup.send("Their Neutron Absorber stops Neutron Bombs.", ephemeral=True)
+            return
         parts = customID.split("_")
         if (len(parts) != 3 or parts[2] != str(game.gamestate["roundNum"])
                 or pos not in [tile for sector, tile in Combat.findTilesInContention(game)]
@@ -338,7 +342,8 @@ class Combat:
             player_helper = PlayerHelper(game.get_player_from_color(playerColor), player)
             player_helper2 = PlayerHelper(game.get_player_from_color(p2["color"]), p2)
             wraithNeedsDeclaration = (FactionData.has(player, "phase_module")
-                                      and "neb" in player_helper.getTechs())
+                                      and "neb" in player_helper.getTechs()
+                                      and "nea" not in player_helper2.getTechs())
             if any([FactionData.has(p2, "population_destroyed_in_combat"),
                     game.is_population_gone(pos),
                     ("neb" in player_helper.getTechs() and "nea" not in player_helper2.getTechs()

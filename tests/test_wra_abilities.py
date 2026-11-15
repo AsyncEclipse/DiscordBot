@@ -568,6 +568,25 @@ def test_phase_module_rejects_obsolete_bombing_prompt(make_game, run, press, cha
     assert "no longer current" in interaction.followup.sent[0][0]
 
 
+def test_phase_module_bombing_is_not_offered_against_a_neutron_absorber(make_game, run):
+    blue = player_stats("wra", color="blue", military_tech=["phm", "neb"], wraithSouls=2)
+    red = player_stats("hyd", color="red", owned_tiles=["101"], nano_tech=["nea"])
+    game = make_game({"player_count": 2, "players": {"1": blue, "2": red},
+                      "board": board_tile(["blue-int"], owner="red", sector=101, money_pop=[1]),
+                      "advanced_ai": False, "wa_ai": False, "reputation_tiles": [1, 2, 3],
+                      "game_id": "t", "roundNum": 1})
+    channel = FakeInteraction(role_names=["t"]).channel
+    run(Combat.startCombatThreads(game, FakeInteraction(channel, role_names=["t"])))
+
+    labels = [button.label for _content, kwargs in channel.threads[0].sent
+              for button in getattr(kwargs.get("view"), "children", [])]
+    assert labels == ["Roll to Destroy Population"]
+
+    interaction = FakeInteraction()
+    run(Combat.phaseBombing(game, game.get_player(1), interaction, "phaseBombing_101_1"))
+    assert game.gamestate["board"]["101"]["owner"] == "red"
+
+
 def test_phase_module_bombing_only_tile_without_power_leaves_only_the_roll(make_game, run):
     blue = player_stats("wra", color="blue")
     blue["military_tech"] = ["phm", "neb"]
