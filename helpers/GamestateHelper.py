@@ -502,7 +502,6 @@ class GamestateHelper:
                 self.gamestate["board"][position].pop("retreatPenalty" + color, None)
             if "player_ships" in self.gamestate["board"][position]:
                 self.fixshipsOrder(position)
-        self.gamestate.pop("battleRepAdjustments", None)
         self.update()
 
     def getReputationTilesToDraw(self, position, color):

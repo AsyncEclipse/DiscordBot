@@ -185,6 +185,17 @@ def test_winning_battle_adds_one_to_the_drawn_battle_rep(make_game, run):
     assert DrawHelper(game.gamestate).get_public_points(player, False) == 4
 
 
+def test_a_draw_pressed_after_upkeep_keeps_the_battle_marker(make_game, run):
+    game = _winner_game(make_game, ["blue"], owner="blue")
+    interaction = FakeInteraction()
+    run(Combat.declareAWinner(game, interaction, POS))
+    game.cleanAllTheTiles()
+
+    player = _draw(game, interaction, "blue", run)
+
+    assert player["reputationBonuses"] == {"2": 1}
+
+
 def test_losing_battle_subtracts_one(make_game, run):
     game = _winner_game(make_game, ["red"], owner="red")
     interaction = FakeInteraction()
