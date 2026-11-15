@@ -1330,25 +1330,29 @@ class GamestateHelper:
                 and self.ambassadorsGiven(player) < 3)
 
     def _relation_slot(self, pID):
-        """Clear a slot for an ambassador: a free one, else shift a tile to a free reputation-only
-        slot, else return the lowest tile to the bag. The slot is left as "amb" or "mixed"."""
+        """Clear a slot for an ambassador. Reputation tiles in mixed slots first move to free
+        reputation-only slots (the rules allow rearranging); only a full track returns its
+        lowest tile to the bag. The slot is left as "amb" or "mixed"."""
         player = self.gamestate["players"][pID]
         track = player["reputation_track"]
+        bonuses = player.get("reputationBonuses", {})
+        for x, tile in enumerate(track):
+            spare = track.index("rep") if "rep" in track else None
+            if spare is None:
+                break
+            if isinstance(tile, int) and not PlayerHelper.is_reputation_only_slot(player, x):
+                track[spare], track[x] = tile, "mixed"
+                # Kurita: a battle marker travels with its tile
+                if str(x) in bonuses:
+                    bonuses[str(spare)] = bonuses.pop(str(x))
         free = next((x for x, tile in enumerate(track) if tile in ("amb", "mixed")), None)
         if free is not None:
             return free
         loc = min((x for x, tile in enumerate(track)
                    if isinstance(tile, int) and not PlayerHelper.is_reputation_only_slot(player, x)),
                   key=lambda x: track[x])
-        spare = next((x for x, tile in enumerate(track) if tile == "rep"), None)
-        # Kurita: a battle marker travels with its tile
-        bonus = player.get("reputationBonuses", {}).pop(str(loc), None)
-        if spare is None:
-            self.gamestate["reputation_tiles"].append(track[loc])
-        else:
-            track[spare] = track[loc]
-            if bonus is not None:
-                player["reputationBonuses"][str(spare)] = bonus
+        self.gamestate["reputation_tiles"].append(track[loc])
+        bonuses.pop(str(loc), None)
         track[loc] = "mixed"
         return loc
 

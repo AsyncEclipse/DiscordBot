@@ -77,5 +77,5 @@ def test_rho_relations_shift_a_reputation_tile_to_a_free_reputation_only_slot(ma
 
     assert game.formRelationsBetween(blue, game.getPlayerObjectFromColor("red"))
 
-    assert blue["reputation_track"] == ["mixed-hydran-red", 3, 2, "rep", "rep"]
+    assert blue["reputation_track"] == ["mixed-hydran-red", "mixed", 2, 3, "rep"]
     assert game.gamestate["reputation_tiles"] == []

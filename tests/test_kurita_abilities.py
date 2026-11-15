@@ -219,7 +219,7 @@ def test_full_track_replacement_keeps_the_adjustment(make_game, run):
 
     player = game.getPlayerObjectFromColor("blue")
     assert player["reputation_track"][0] == 5
-    assert player["reputationBonuses"] == {"2": 1}
+    assert player["reputationBonuses"] == {"0": 1}
 
 
 def test_returned_tile_drops_its_battle_marker(make_game, run):
