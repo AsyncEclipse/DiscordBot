@@ -54,7 +54,8 @@ class ResearchButtons:
             for resource_type, button_style in [("materials", discord.ButtonStyle.gray),
                                                 ("money", discord.ButtonStyle.blurple)]:
                 if player[resource_type] >= trade_value:
-                    val += player[resource_type] // trade_value
+                    ratio = FactionData.of(player).get("money_trade_ratio", 1) if resource_type == "money" else 1
+                    val += player[resource_type] // trade_value * ratio
                     view.add_item(Button(label=f"Pay {trade_value} {resource_type.capitalize()}",
                                          style=button_style,
                                          custom_id=f"FCID{player['color']}_payAtRatio_{resource_type}"))
