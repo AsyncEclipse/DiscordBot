@@ -369,3 +369,14 @@ def test_a_combat_roll_names_each_computer_source(make_game, no_random, run):
 
     assert any("+2 computer (+1 Electron Computer, +1 Elite Warriors)" in content
                for content, _kwargs in inter.channel.sent)
+
+
+def test_returning_a_tile_by_hand_drops_its_battle_marker(make_game):
+    game = make_game({"players": {"1": _stats("kur", "blue")}, "reputation_tiles": []})
+    player = game.get_player(1)
+    player["reputation_track"] = ["mixed", 2, 3, "rep"]
+    player["reputationBonuses"] = {"2": 1}
+
+    game.returnReputation(3, player)
+
+    assert game.get_player(1)["reputationBonuses"] == {}

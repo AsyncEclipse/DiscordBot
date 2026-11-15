@@ -1404,6 +1404,8 @@ class GamestateHelper:
                 lowest = tile
                 self.gamestate["players"][pID]["reputation_track"][loc] = (
                     "rep" if PlayerHelper.is_reputation_only_slot(player, loc) else "mixed")
+                # Kurita: the battle marker leaves with its tile
+                self.gamestate["players"][pID].get("reputationBonuses", {}).pop(str(loc), None)
                 self.gamestate["reputation_tiles"].append(lowest)
                 self.update()
                 return
