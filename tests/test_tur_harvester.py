@@ -149,7 +149,7 @@ def test_harvester_money_counts_before_bankruptcy(make_game):
     assert helper.checkBankrupt() is False
 
 
-def test_ready_for_upkeep_defers_bankruptcy_until_harvesters_produce(start_game, press):
+def test_ready_for_upkeep_offers_bankruptcy_resolution_before_harvesters_produce(start_game, press):
     game, channel = start_game(factions=["tur", "eri"])
     player = game.get_player(1)
     player.update({"money": 0, "money_pop_cubes": 13, "influence_discs": 10})
@@ -161,7 +161,12 @@ def test_ready_for_upkeep_defers_bankruptcy_until_harvesters_produce(start_game,
 
     assert reload(game).gamestate["peopleToCheckWith"] == []
     assert "runUpkeep" in buttons(channel)
-    assert not any("would be bankrupt" in content for content, kwargs in channel.sent)
+    assert any("would be bankrupt" in content for content, kwargs in channel.sent)
+    prompt = next(kwargs["view"] for content, kwargs in channel.sent if "would be bankrupt" in content)
+    choices = {button.custom_id for button in prompt.children}
+    assert "FCIDblue_removeInfluenceStart" in choices
+    assert "FCIDblue_deleteMsg" in choices
+    assert reload(game).get_player(1)["money"] == 0
 
 
 def test_harvester_placement_stores_the_planet_and_produces_at_upkeep(start_game, press):
