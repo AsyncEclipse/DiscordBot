@@ -17,9 +17,10 @@ def test_relations_preserve_atlantians_reputation_only_slots(relation, monkeypat
         game.formRelationsBetween(game.gamestate["players"]["1"], other)
     else:
         game.formMinorSpeciesRelations(game.gamestate["players"]["1"], "Point Per Ambassador")
-    assert game.gamestate["players"]["1"]["reputation_track"][:3] == [1, 2, 4]
+    # the lowest tile (1) goes back; the 3 moves from its mixed slot into the freed reputation-only slot
+    assert game.gamestate["players"]["1"]["reputation_track"][:3] == [3, 2, 4]
     assert game.gamestate["players"]["1"]["reputation_track"][3].startswith("mixed-")
-    assert game.gamestate["reputation_tiles"] == [3]
+    assert game.gamestate["reputation_tiles"] == [1]
 
 
 def test_returning_reputation_preserves_slot_type(monkeypatch):

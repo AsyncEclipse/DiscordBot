@@ -45,7 +45,7 @@ ANSWER_BUTTONS = ("selectDiscTile", "exploreDiscoveryTile", "keepDiscForPoints",
                   "wolfPack", "phaseModuleDone", "phaseModuleNone", "phaseBombing",
                   "lyraReroll", "lyraDecline",
                   "preGameOrbital", "declineSetupTech", "saveDiscoveryPart", "gain3resource",
-                  "finishSetupResources")
+                  "finishSetupResources", "placeHarvester", "harvesterResource")
 
 
 async def acknowledge(interaction):
@@ -543,6 +543,8 @@ class ButtonListener(commands.Cog):
             await BlackHoleButtons.blackHoleReturnStart(game, player, customID, player_helper, interaction)
         elif customID.startswith("blackHoleFinish"):
             await BlackHoleButtons.blackHoleFinish(game, player, customID, player_helper, interaction)
+        if customID.startswith(("keepDiscForPoints", "usedDiscForAbility", "getFreeTech", "gain3resource")):
+            await DiscoveryTileButtons.offerWaitingHomeTile(game, player, interaction)
         # a pre-game action may have been the last one the game was waiting for
         await PreGameButtons.completeTask(game, interaction, player, customID, task_result)
         end_time = time.perf_counter()

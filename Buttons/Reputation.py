@@ -43,7 +43,9 @@ class ReputationButtons:
         bonuses = player_helper.stats.setdefault("reputationBonuses", {})
         marker = f" ({battle_rep_adjustment:+d})" if battle_rep_adjustment else ""
         newValue = highest + battle_rep_adjustment
-        loc = next((x for x, tile in enumerate(track) if tile in ("rep", "mixed")), None)
+        # Fill reputation-only slots first so mixed slots stay open for ambassadors
+        loc = next((x for x, tile in enumerate(track) if tile == "rep"),
+                   next((x for x, tile in enumerate(track) if tile == "mixed"), None))
         if loc is None:
             worth = {x: tile + bonuses.get(str(x), 0) for x, tile in enumerate(track) if isinstance(tile, int)}
             lowestLoc = min(worth, key=worth.get, default=None)

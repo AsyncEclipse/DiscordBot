@@ -8,7 +8,7 @@ import pytest
 
 from helpers.CombatHelper import Combat
 from helpers.DrawHelper import DrawHelper
-from tests.fakes import FakeChannel, FakeInteraction, POS, player_stats, reload
+from tests.fakes import FakeChannel, FakeInteraction, POS, offered_ids, player_stats, reload
 
 
 def _blue_cruiser():
@@ -175,3 +175,19 @@ def test_auto_roll_pauses_for_carapace_at_a_new_round_and_resumes(make_game, no_
     press(channel, 1, f"autoRollCombat_{POS}")
 
     assert "ai-anc" not in reload(game).gamestate["board"][POS]["player_ships"]
+
+
+def test_auto_roll_pauses_for_a_spine_cannon_mode(make_game, no_random, run):
+    game = _ai_game(make_game)
+    game.gamestate["players"]["1"] = player_stats(
+        "wul", color="blue", cruiser_parts=["nus", "hul", "nud", "ioc", "ioc"], base_cruiser_speed=3)
+    no_random([1] * 10)
+    interaction = FakeInteraction()
+
+    run(Combat.autoRollCombat(game, f"autoRollCombat_{POS}", interaction, game.get_player(1)))
+
+    tile = game.gamestate["board"][POS]
+    assert [tile["currentSpeed"], tile["currentRoller"]] not in tile.get("rolledSteps", [])
+    assert tile["currentRoller"] == "blue"
+    assert any(content and "Spine Cannon mode" in content for content, kwargs in interaction.channel.sent)
+    assert any(cid.endswith("_spinehit") for cid in offered_ids(interaction))
