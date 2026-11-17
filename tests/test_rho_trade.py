@@ -24,3 +24,19 @@ def test_other_factions_get_one_resource_per_trade(make_game, run):
     player, content = _press_build_trade(make_game, run, "hyd")
     assert "Materials-0" in content
     assert "Resources spent: 5" in content
+
+
+def test_rho_research_counts_money_at_its_3_to_2_ratio(make_game, run):
+    from Buttons.Research import ResearchButtons
+    from helpers.PlayerHelper import PlayerHelper
+    game = make_game({"players": {"1": player_stats("rho", science=0, materials=0, money=6)},
+                      "available_techs": ["nea"]})
+    player = game.gamestate["players"]["1"]
+    inter = FakeInteraction()
+    tech = {"base_cost": 4, "min_cost": 4, "name": "Test Tech", "track": "nano",
+            "art_pt": 0, "infdisc": 0, "activ1": 0, "dtile": 0}
+
+    run(ResearchButtons.handle_specific_tech_selection(inter, game, player, PlayerHelper("1", player),
+                                                       tech, "nano", "nea"))
+
+    assert not any("did not have enough" in content for content, _kwargs in inter.channel.sent)

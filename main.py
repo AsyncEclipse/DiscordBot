@@ -11,6 +11,7 @@ from commands.player_commands import PlayerCommands
 from commands.search_commands import SearchCommands
 # from helpers import ImageCache
 from helpers import ImageCache
+from helpers import DiscordRetry
 from helpers.EmojiHelper import Emoji
 from helpers.GameIds import list_active_game_ids
 from helpers.GamestateHelper import GamestateHelper
@@ -30,6 +31,7 @@ class DiscordBot(commands.Bot):
 
     async def setup_hook(self) -> None:
         print("Bot is starting")
+        DiscordRetry.install(self)
         await self.add_cog(SetupCommands(self))
         await self.add_cog(TileCommands(self))
         await self.add_cog(PlayerCommands(self))

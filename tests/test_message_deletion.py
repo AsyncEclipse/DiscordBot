@@ -1,3 +1,4 @@
+from contextlib import nullcontext
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
@@ -47,7 +48,7 @@ def test_reputation_deletion_handles_only_missing_messages(queued, error_type, m
     interaction.message.delete = AsyncMock(side_effect=error)
     game = SimpleNamespace(gamestate={"tilesToResolve": []} if queued else {},
                            removeFromKey=lambda *args: None,
-                           addToKey=lambda *args: None)
+                           addToKey=lambda *args: None, batch_save=nullcontext)
     if queued:
         game.gamestate["queuedDraws"] = []
     monkeypatch.setattr(Combat, "resolveQueue", AsyncMock())

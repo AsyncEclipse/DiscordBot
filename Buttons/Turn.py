@@ -234,6 +234,31 @@ class TurnButtons:
         await interaction.channel.send(msg2)
 
     @staticmethod
+    async def offerBankruptcyResolution(interaction: discord.Interaction, p1: PlayerHelper):
+        view = View()
+        trade_value = p1.stats['trade_value']
+        view.add_item(Button(label="Remove Control of A Sector", style=discord.ButtonStyle.blurple,
+                             custom_id=f"FCID{p1.stats['color']}_removeInfluenceStart"))
+        for resource_type, button_style in [("materials", discord.ButtonStyle.gray),
+                                            ("science", discord.ButtonStyle.gray)]:
+            if p1.stats[resource_type] >= trade_value:
+                view.add_item(Button(label=f"Trade {trade_value} {resource_type.capitalize()}",
+                                     style=button_style,
+                                     custom_id=f"FCID{p1.stats['color']}_tradeAtRatio_{resource_type}_money"))
+        if p1.stats["colony_ships"] > 0 and FactionData.has(p1.stats, "colony_ship_resources"):
+            emojiC = Emoji.getEmojiByName("colony_ship")
+            view.add_item(Button(label="Get 1 Money", style=discord.ButtonStyle.red, emoji=emojiC,
+                                 custom_id=f"FCID{p1.stats['color']}_magColShipForResource_money"))
+        view.add_item(Button(label="Done Resolving", style=discord.ButtonStyle.red,
+                             custom_id=f"FCID{p1.stats['color']}_deleteMsg"))
+        message = (f"It appears that {p1.name} would be bankrupt (negative money). "
+                   f"They currently have {p1.stats['money']} money and will get {p1.money_income()} in income, "
+                   f"but they owe {p1.upkeepCosts()} money. "
+                   "Please adjust the money or systems controlled so that upkeep"
+                   " can be run without the player entering negative money")
+        await interaction.channel.send(message, view=view)
+
+    @staticmethod
     async def readyForUpkeep(game: GamestateHelper, player, interaction: discord.Interaction, p1: PlayerHelper):
         from Buttons.Influence import InfluenceButtons
         color = player["color"]
@@ -245,6 +270,8 @@ class TurnButtons:
                 "Use the buttons in that sector's thread.")
             return
         game.removeFromKey("peopleToCheckWith", color)
+        if p1.checkBankrupt():
+            await TurnButtons.offerBankruptcyResolution(interaction, p1)
         msg = f"{player['player_name']} has marked themselves as ready for upkeep."
         if len(game.gamestate["peopleToCheckWith"]) > 0:
             msg += " Still waiting on the following factions to press the ready for upkeep button:\n"
@@ -335,28 +362,7 @@ class TurnButtons:
                 await interaction.channel.send(f"{p1.stats['player_name']}'s Harvesters produced "
                                                f"{', '.join(harvested)}.")
             if p1.checkBankrupt():
-                view = View()
-                trade_value = p1.stats['trade_value']
-                view.add_item(Button(label="Remove Control of A Sector", style=discord.ButtonStyle.blurple,
-                                     custom_id=f"FCID{p1.stats['color']}_removeInfluenceStart"))
-                for resource_type, button_style in [("materials", discord.ButtonStyle.gray),
-                                                    ("science", discord.ButtonStyle.gray)]:
-                    if p1.stats[resource_type] >= trade_value:
-                        view.add_item(Button(label=f"Trade {trade_value} {resource_type.capitalize()}",
-                                             style=button_style,
-                                             custom_id=f"FCID{p1.stats['color']}_tradeAtRatio_{resource_type}_money"))
-                if p1.stats["colony_ships"] > 0 and FactionData.has(p1.stats, "colony_ship_resources"):
-                    emojiC = Emoji.getEmojiByName("colony_ship")
-                    view.add_item(Button(label="Get 1 Money", style=discord.ButtonStyle.red, emoji=emojiC,
-                                         custom_id=f"FCID{p1.stats['color']}_magColShipForResource_money"))
-                view.add_item(Button(label="Done Resolving", style=discord.ButtonStyle.red,
-                                     custom_id=f"FCID{game.get_player(player)['color']}_deleteMsg"))
-                message = (f"It appears that {p1.name} would be bankrupt (negative money). "
-                           f"They currently have {p1.stats['money']} money and will get {p1.money_income()} in income, "
-                           f"but they owe {p1.upkeepCosts()} money. "
-                           "Please adjust the money or systems controlled so that upkeep"
-                           " can be run without the player entering negative money")
-                await interaction.channel.send(message, view=view)
+                await TurnButtons.offerBankruptcyResolution(interaction, p1)
                 return
         if "actions" in interaction.channel.name:
             for thread in interaction.channel.threads:

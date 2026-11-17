@@ -320,8 +320,12 @@ class TileCommands(commands.GroupCog, name="tile"):
             await interaction.followup.send(f"{discovery_id} is not a valid ID. "
                                             "Ping someone who knows the code to find the correct ID.")
             return
-        await DiscoveryTileButtons.sendDiscoveryTileOptions(
-            game, tile, interaction, game.get_player(interaction.user.id, interaction), disc)
+        # the choice belongs to the sector's owner, whoever runs the command
+        owner = game.getPlayerObjectFromColor(game.gamestate["board"].get(tile, {}).get("owner"))
+        if owner is None:
+            await interaction.followup.send(f"Nobody controls tile {tile}, so there is no one to resolve it for.")
+            return
+        await DiscoveryTileButtons.sendDiscoveryTileOptions(game, tile, interaction, owner, disc)
 
     @app_commands.command(name="explore_discovery_tile")
     async def explore_discovery_tile(self, interaction: discord.Interaction, tile_position: str):

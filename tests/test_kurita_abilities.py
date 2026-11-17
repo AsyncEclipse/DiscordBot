@@ -178,11 +178,22 @@ def test_winning_battle_adds_one_to_the_drawn_battle_rep(make_game, run):
 
     assert any("drew 1 reputation tiles (+1 for the battle)" in content
                for content, _kwargs in interaction.channel.sent)
-    assert player["reputationBonuses"] == {"0": 1}
+    assert player["reputationBonuses"] == {"2": 1}
     assert DrawHelper(game.gamestate).get_public_points(player, False) == 0
     game.gamestate["gameEnded"] = True
     # The drawn reputation tile (3) plus the winning battle marker (+1).
     assert DrawHelper(game.gamestate).get_public_points(player, False) == 4
+
+
+def test_a_draw_pressed_after_upkeep_keeps_the_battle_marker(make_game, run):
+    game = _winner_game(make_game, ["blue"], owner="blue")
+    interaction = FakeInteraction()
+    run(Combat.declareAWinner(game, interaction, POS))
+    game.cleanAllTheTiles()
+
+    player = _draw(game, interaction, "blue", run)
+
+    assert player["reputationBonuses"] == {"2": 1}
 
 
 def test_losing_battle_subtracts_one(make_game, run):
@@ -192,7 +203,7 @@ def test_losing_battle_subtracts_one(make_game, run):
 
     player = _draw(game, interaction, "blue", run)
 
-    assert player["reputationBonuses"] == {"0": -1}
+    assert player["reputationBonuses"] == {"2": -1}
 
 
 def test_declined_draw_leaves_no_battle_rep(make_game, run):
@@ -358,3 +369,14 @@ def test_a_combat_roll_names_each_computer_source(make_game, no_random, run):
 
     assert any("+2 computer: +1 Electron Computer and +1 Elite Warriors." in content
                for content, _kwargs in inter.channel.sent)
+
+
+def test_returning_a_tile_by_hand_drops_its_battle_marker(make_game):
+    game = make_game({"players": {"1": _stats("kur", "blue")}, "reputation_tiles": []})
+    player = game.get_player(1)
+    player["reputation_track"] = ["mixed", 2, 3, "rep"]
+    player["reputationBonuses"] = {"2": 1}
+
+    game.returnReputation(3, player)
+
+    assert game.get_player(1)["reputationBonuses"] == {}

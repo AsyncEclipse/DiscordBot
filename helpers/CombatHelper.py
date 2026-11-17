@@ -1,7 +1,9 @@
 import asyncio
 import json
+import logging
 import random
 
+import aiohttp
 import discord
 from discord.ui import View, Button
 from Buttons.Influence import InfluenceButtons
@@ -207,6 +209,10 @@ class Combat:
         if game.gamestate["board"][pos]["owner"] == 0:
             await interaction.followup.send("That sector no longer has an owner to bomb.", ephemeral=True)
             return
+        owner = game.getPlayerObjectFromColor(game.gamestate["board"][pos]["owner"])
+        if owner and "nea" in PlayerHelper(game.get_player_from_color(owner["color"]), owner).getTechs():
+            await interaction.followup.send("Their Neutron Absorber stops Neutron Bombs.", ephemeral=True)
+            return
         parts = customID.split("_")
         if (len(parts) != 3 or parts[2] != str(game.gamestate["roundNum"])
                 or pos not in [tile for sector, tile in Combat.findTilesInContention(game)]
@@ -340,7 +346,8 @@ class Combat:
             player_helper = PlayerHelper(game.get_player_from_color(playerColor), player)
             player_helper2 = PlayerHelper(game.get_player_from_color(p2["color"]), p2)
             wraithNeedsDeclaration = (FactionData.has(player, "phase_module")
-                                      and "neb" in player_helper.getTechs())
+                                      and "neb" in player_helper.getTechs()
+                                      and "nea" not in player_helper2.getTechs())
             if any([FactionData.has(p2, "population_destroyed_in_combat"),
                     game.is_population_gone(pos),
                     ("neb" in player_helper.getTechs() and "nea" not in player_helper2.getTechs()
@@ -746,7 +753,10 @@ class Combat:
             split_at = text.rfind("\n", 0, 2001) if len(text) > 2000 else len(text)
             if split_at <= 0:
                 split_at = 2000
-            await channel.send(text[:split_at])
+            try:
+                await channel.send(text[:split_at])
+            except (discord.HTTPException, aiohttp.ClientConnectionError, TimeoutError):
+                logging.getLogger(__name__).exception("Failed to send combat report")
             text = text[split_at:].lstrip("\n")
         reports.clear()
 
@@ -1037,6 +1047,7 @@ class Combat:
             return
         AUTO_ROLLING.add(key)
         shots = {"ai": 0, "players": 0}
+        spine_pause = False
         try:
             await channel.send("Auto-rolling both sides until the battle ends. The bot will not retreat"
                                " or spend colony ships, and it picks targets the way it does for the AI."
@@ -1077,6 +1088,15 @@ class Combat:
                         game.setCurrentSpeed(nextSpeed, pos)
                         await channel.send("Auto-roll paused: set Carapace Shields, then press Auto-Roll again.")
                         break
+                if (nextOwner != "ai" and nextSpeed < 99
+                        and FactionData.has(game.getPlayerObjectFromColor(nextOwner), "spine_cannons")
+                        and Combat.spine_mode_options(game, nextOwner, pos, nextSpeed)):
+                    game.setCurrentRoller(nextOwner, pos)
+                    game.setCurrentSpeed(nextSpeed, pos)
+                    spine_pause = True
+                    await channel.send("Auto-roll paused: pick a Spine Cannon mode for this roll,"
+                                       " then press Auto-Roll again.")
+                    break
                 shots["ai" if nextOwner == "ai" else "players"] += 1
                 game.setCurrentRoller(nextOwner, pos)
                 game.setCurrentSpeed(nextSpeed, pos)
@@ -1097,7 +1117,7 @@ class Combat:
         if len(Combat.currentPairing(game, pos)) == 2:
             # Stopped before the end: hand the normal prompt (retreat, stalemate) back.
             if not Combat.hasPendingCombatChoices(game, pos):
-                await Combat.promptNextSpeed(game, pos, channel, False)
+                await Combat.promptNextSpeed(game, pos, channel, False, repeat=spine_pause)
             return
         summary = (f"**Auto-Roll Summary — system {int(tile['sector'])}, position {pos}**\n"
                    f"The AI fired {shots['ai']} salvo{'s' if shots['ai'] != 1 else ''};"
@@ -1139,7 +1159,8 @@ class Combat:
         return allocation
 
     @staticmethod
-    def getAIHitAllocation(game: GamestateHelper, colorOrAI, pos, speed, dice, computer):
+    def getAIHitAllocation(game: GamestateHelper, colorOrAI, pos, speed, dice, computer,
+                           ignore_shields: bool = False):
         """Choose targets for a whole AI salvo before any hits are applied.
 
         shortcut: exhaustive allocation search grows exponentially; optimize
@@ -1147,7 +1168,8 @@ class Combat:
         """
         ships = game.gamestate["board"][pos]["player_ships"][:]
         targets_by_die = [
-            Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, ships, die[0], computer, pos, speed)
+            Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, ships, die[0], computer, pos, speed,
+                                                ignore_shields)
             for die in dice
         ]
         models = {}
@@ -1430,7 +1452,6 @@ class Combat:
                 await interaction.channel.send("That initiative step is no longer valid. Use the current prompt.")
                 return
         if speed != 1000:
-            Carapace.close_controls(game, pos)
             step = [speed, colorOrAI]
             rolled = tile.get("rolledSteps", [])
             if step in rolled:
@@ -1442,6 +1463,8 @@ class Combat:
                 await interaction.channel.send(
                     "That initiative step is not current. Roll the pending step in the combat view first.")
                 return
+            # only a roll that goes ahead ends the shield choices for this round
+            Carapace.close_controls(game, pos)
             tile.setdefault("rolledSteps", []).append(step)
             game.update()
         if colorOrAI == "ai":
@@ -1569,7 +1592,7 @@ class Combat:
 
                 if len(dice) > 0:
                     # await interaction.channel.send(msg,file=drawing.append_images(dieFiles))
-                    await interaction.channel.send(msg + msg2)
+                    await Combat.sendCombatReports(interaction.channel, [msg + msg2])
                     oldNumPeeps = len(Combat.findPlayersInTile(game, pos))
                     # A rift die defers the salvo's combat-end check, so every hit in
                     # the same salvo must defer too or the kill is declared twice.
@@ -1580,7 +1603,7 @@ class Combat:
                         dice_for_ai = [[6 if die[2] == "pink" and die[0] > 3 else die[0], die[1], die[2]]
                                        for die in dieNums]
                         allocation = Combat.getAIHitAllocation(game, colorOrAI, pos, speed,
-                                                              dice_for_ai, shipModel.computer)
+                                                              dice_for_ai, computerVal, ignoreShields)
                     for die_index, die in enumerate(dieNums):
                         if die[4] in deferred_nine_lives:
                             continue
@@ -1998,7 +2021,7 @@ class Combat:
 
         if computerVal > 0:
             msg += Combat.computer_message(game, pos, colorOrAI, speed, computerVal)
-        await interaction.channel.send(msg + msg2)
+        await Combat.sendCombatReports(interaction.channel, [msg + msg2])
 
         oldNumPeeps = len(Combat.findPlayersInTile(game, pos))
         for die in dieNums:
@@ -2413,6 +2436,7 @@ class Combat:
 
     @staticmethod
     async def refreshCombatPrompt(game: GamestateHelper, pos: str, channel):
+        await Combat.reofferReputation(game, pos, channel)
         tile = game.gamestate["board"][pos]
         if len(Combat.currentPairing(game, pos)) != 2 or Combat.isDracoAgainstAncients(game, pos):
             await channel.send("There is no active combat at that position.")
@@ -3154,18 +3178,6 @@ class Combat:
         game.updateSaveFile()
         Combat.clearWolfPack(game, pos)
 
-        actions_channel = discord.utils.get(interaction.guild.channels, name=game.game_id + "-actions")
-        if actions_channel is not None and isinstance(actions_channel, discord.TextChannel):
-            await actions_channel.send(f"Combat in tile {pos} has concluded. "
-                                       f"There are {len(Combat.findTilesInConflict(game))} tiles left in conflict.")
-            if len(Combat.findTilesInConflict(game)) == 0:
-                role = discord.utils.get(interaction.guild.roles, name=game.game_id)
-                view = View()
-                view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray,
-                                     custom_id="startPopDrop"))
-                asyncio.create_task(actions_channel.send(role.mention+" Please run upkeep after all post combat events are resolved. "
-                                           "You can use this button to drop pop after taking control of a tile",
-                                           view=view))
         if "combatants" in game.gamestate["board"][pos]:
             players = game.gamestate["board"][pos]["combatants"]
         else:
@@ -3174,6 +3186,9 @@ class Combat:
         # Nebula Subsectors share a sector number, so number draws after any already queued for it
         countDraw = 1 + sum(q[0] == system for q in game.gamestate.get("queuedDraws", [])
                             + game.gamestate.get("queuedQuestions", []))
+        countDraw = max([countDraw] + [offer["order"] + 1
+                         for offer in game.gamestate.get("reputationOffers", {}).values()
+                         if offer["system"] == system])
         game.removeFromKey("tilesToResolve", int(game.gamestate["board"][pos]["sector"]))
         await Combat.revertTechnoMagic(game, interaction.channel, pos)
         Carapace.clear(game, pos)
@@ -3181,35 +3196,40 @@ class Combat:
         players = sorted(players, key=lambda color: (entry_order.index(color) if color in entry_order
                                                       else len(entry_order), players.index(color)))
         survivors = [color for color in Combat.findPlayersInTile(game, pos) if color != "ai"]
-        for playerColor in players:
-            if playerColor == "ai":
-                continue
-            player = game.getPlayerObjectFromColor(playerColor)
-            count = str(game.getReputationTilesToDraw(pos, playerColor))
-            view = View()
-            label = f"Draw {count} Reputation"
-            buttonID = (f"FCID{playerColor}_drawReputation_{count}_"
-                        f"{game.gamestate['board'][pos]['sector']}_{countDraw}_{playerColor}")
-            view.add_item(Button(label=label, style=discord.ButtonStyle.green, custom_id=buttonID))
-            label = "Decline"
-            buttonID = (f"FCID{playerColor}_dontDrawReputation_"
-                        f"{game.gamestate['board'][pos]['sector']}_{countDraw}_{playerColor}")
-            view.add_item(Button(label=label, style=discord.ButtonStyle.red, custom_id=buttonID))
-            msg = (f"{player['player_name']}, the bot believes you should draw {count} reputation tiles here. "
-                   "Click to do so or press decline if the bot messed up. "
-                   "If other battles/players need to resolve first, "
-                   "your draw will be queued after you click this button")
-            if int(count) > 0:
-                if FactionData.has(player, "honour_victorious"):
-                    side_survived = any(color == playerColor or game.areAllied(playerColor, color)
-                                        for color in survivors)
-                    game.gamestate.setdefault("battleRepAdjustments", {})[
-                        f"{system}-{countDraw}-{playerColor}"] = 1 if side_survived else -1
-                if "tilesToResolve" in game.gamestate:
-                    game.addToKey("queuedQuestions", [int(game.gamestate["board"][pos]["sector"]),
-                                                      countDraw, playerColor])
+        with game.batch_save():
+            for playerColor in players:
+                if playerColor == "ai":
+                    continue
+                player = game.getPlayerObjectFromColor(playerColor)
+                count = game.getReputationTilesToDraw(pos, playerColor)
+                if count > 0:
+                    if FactionData.has(player, "honour_victorious"):
+                        side_survived = any(color == playerColor or game.areAllied(playerColor, color)
+                                            for color in survivors)
+                        game.gamestate.setdefault("battleRepAdjustments", {})[
+                            f"{system}-{countDraw}-{playerColor}"] = 1 if side_survived else -1
+                    if "tilesToResolve" in game.gamestate:
+                        game.addToKey("queuedQuestions", [int(game.gamestate["board"][pos]["sector"]),
+                                                          countDraw, playerColor])
+                    game.gamestate.setdefault("reputationOffers", {})[f"{system}-{countDraw}-{playerColor}"] = {
+                        "position": pos, "count": count, "system": system,
+                        "order": countDraw, "color": playerColor, "answered": False}
                     countDraw += 1
-                asyncio.create_task(interaction.channel.send(msg, view=view))
+            game.update()
+        await Combat.reofferReputation(game, pos, interaction.channel)
+        actions_channel = discord.utils.get(interaction.guild.channels, name=game.game_id + "-actions")
+        if actions_channel is not None and isinstance(actions_channel, discord.TextChannel):
+            await Combat.sendCombatReports(actions_channel, [
+                f"Combat in tile {pos} has concluded. "
+                f"There are {len(Combat.findTilesInConflict(game))} tiles left in conflict."])
+            if len(Combat.findTilesInConflict(game)) == 0:
+                role = discord.utils.get(interaction.guild.roles, name=game.game_id)
+                view = View()
+                view.add_item(Button(label="Put Down Population", style=discord.ButtonStyle.gray,
+                                     custom_id="startPopDrop"))
+                asyncio.create_task(actions_channel.send(role.mention+" Please run upkeep after all post combat events are resolved. "
+                                           "You can use this button to drop pop after taking control of a tile",
+                                           view=view))
         # An Alliance wins as a side. Its members decide who drops the disc in
         # order of entry to the sector, so offer it to the earliest first.
         entryOrder = game.getCombatEntryOrder(pos)
@@ -3412,7 +3432,7 @@ class Combat:
                     msg += (f"The AI destroyed the {Combat.translateShipAbrToName(shipType)}{suffix}"
                             " due to the damage exceeding the ships hull.")
         if reports is None:
-            await interaction.channel.send(msg)
+            await Combat.sendCombatReports(interaction.channel, [msg])
         else:
             reports.append(msg)
         if shipModel.hull < damage and not deferEnd:
@@ -3464,14 +3484,51 @@ class Combat:
                         success += 1
 
     @staticmethod
+    async def reofferReputation(game: GamestateHelper, pos: str, channel):
+        for offer in game.gamestate.get("reputationOffers", {}).values():
+            if offer["position"] != pos or offer["answered"]:
+                continue
+            color = offer["color"]
+            count = offer["count"]
+            suffix = f"{offer['system']}_{offer['order']}_{color}"
+            view = View()
+            view.add_item(Button(label=f"Draw {count} Reputation", style=discord.ButtonStyle.green,
+                                 custom_id=f"FCID{color}_drawReputation_{count}_{suffix}"))
+            view.add_item(Button(label="Decline", style=discord.ButtonStyle.red,
+                                 custom_id=f"FCID{color}_dontDrawReputation_{suffix}"))
+            player = game.getPlayerObjectFromColor(color)
+            message = (f"{player['player_name']}, the bot believes you should draw {count} reputation tiles here. "
+                       "Click to do so or press decline if the bot messed up. "
+                       "If other battles/players need to resolve first, "
+                       "your draw will be queued after you click this button")
+            try:
+                await channel.send(message, view=view)
+            except (discord.HTTPException, aiohttp.ClientConnectionError, TimeoutError):
+                logging.getLogger(__name__).exception("Failed to send reputation offer in tile %s", pos)
+
+    @staticmethod
+    def answerReputationOffer(game: GamestateHelper, system: int, order: int, color: str):
+        offer = game.gamestate.get("reputationOffers", {}).get(f"{system}-{order}-{color}")
+        if offer is not None:
+            if offer["answered"]:
+                return False
+            offer["answered"] = True
+        return True
+
+    @staticmethod
     async def dontDrawReputation(game: GamestateHelper, buttonID: str, interaction: discord.Interaction, player_helper):
         system = int(buttonID.split("_")[1])
         drawOrder = int(buttonID.split("_")[2])
         color = buttonID.split("_")[3]
-        game.gamestate.get("battleRepAdjustments", {}).pop(f"{system}-{drawOrder}-{color}", None)
-        game.update()
+        if not Combat.answerReputationOffer(game, system, drawOrder, color):
+            await interaction.channel.send("That reputation choice has already been answered.")
+            return
+        with game.batch_save():
+            game.gamestate.get("battleRepAdjustments", {}).pop(f"{system}-{drawOrder}-{color}", None)
+            if "tilesToResolve" in game.gamestate:
+                game.removeFromKey("queuedQuestions", [system, drawOrder, color])
+            game.update()
         if "tilesToResolve" in game.gamestate:
-            game.removeFromKey("queuedQuestions", [system, drawOrder, color])
             await Combat.resolveQueue(game, interaction)
         await interaction.message.delete()
 
@@ -3485,11 +3542,15 @@ class Combat:
         system = int(buttonID.split("_")[2])
         drawOrder = int(buttonID.split("_")[3])
         color = buttonID.split("_")[4]
+        if not Combat.answerReputationOffer(game, system, drawOrder, color):
+            await interaction.channel.send("That reputation choice has already been answered.")
+            return
         if "tilesToResolve" in game.gamestate:
             adjustment = game.gamestate.get("battleRepAdjustments", {}).get(
                 f"{system}-{drawOrder}-{color}", 0)
-            game.removeFromKey("queuedQuestions", [system, drawOrder, color])
-            game.addToKey("queuedDraws", [system, drawOrder, color, num_options])
+            with game.batch_save():
+                game.removeFromKey("queuedQuestions", [system, drawOrder, color])
+                game.addToKey("queuedDraws", [system, drawOrder, color, num_options])
             await Combat.resolveQueue(game, interaction)
             if [system, drawOrder, color, num_options] in game.gamestate["queuedDraws"]:
                 asyncio.create_task(interaction.channel.send(f"{interaction.user.name}, your reputation draw has been queued"))
@@ -3517,6 +3578,7 @@ class Combat:
     @staticmethod
     async def refreshImage(game: GamestateHelper, buttonID: str, interaction: discord.Interaction):
         pos = buttonID.split("_")[1]
+        await Combat.reofferReputation(game, pos, interaction.channel)
         drawing = DrawHelper(game.gamestate)
         view = View()
         if len(Combat.findPlayersInTile(game, pos)) > 1:

@@ -47,7 +47,17 @@ ANSWER_BUTTONS = ("selectDiscTile", "exploreDiscoveryTile", "keepDiscForPoints",
                   "wolfPack", "phaseModuleDone", "phaseModuleNone", "phaseBombing", "nineLives",
                   "lyraReroll", "lyraDecline",
                   "preGameOrbital", "midasNeutralPop", "declineSetupTech", "saveDiscoveryPart", "gain3resource",
-                  "finishSetupResources")
+                  "finishSetupResources", "placeHarvester", "harvesterResource")
+
+
+async def acknowledge(interaction):
+    """Defer the press, tolerating the duplicate Discord answers when a retry landed first."""
+    try:
+        await interaction.response.defer(thinking=False)
+    except discord.HTTPException as error:
+        # 40060 means Discord already has this defer: the first attempt did reach it.
+        if error.code != 40060:
+            raise
 
 
 class ButtonListener(commands.Cog):
@@ -72,7 +82,7 @@ class ButtonListener(commands.Cog):
                                               f" {interaction.message.jump_url} by {interaction.user.display_name}"))
 
             try:
-                await interaction.response.defer(thinking=False)
+                await acknowledge(interaction)
                 if customID == "showGame":
                     await interaction.followup.send("Show game request received,"
                                                     " please wait 5-10 seconds for the map to generate",
@@ -580,6 +590,8 @@ class ButtonListener(commands.Cog):
             await BlackHoleButtons.blackHoleReturnStart(game, player, customID, player_helper, interaction)
         elif customID.startswith("blackHoleFinish"):
             await BlackHoleButtons.blackHoleFinish(game, player, customID, player_helper, interaction)
+        if customID.startswith(("keepDiscForPoints", "usedDiscForAbility", "getFreeTech", "gain3resource")):
+            await DiscoveryTileButtons.offerWaitingHomeTile(game, player, interaction)
         # a pre-game action may have been the last one the game was waiting for
         await PreGameButtons.completeTask(game, interaction, player, customID, task_result)
         end_time = time.perf_counter()

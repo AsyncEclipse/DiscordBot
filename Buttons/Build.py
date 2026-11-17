@@ -39,6 +39,8 @@ class BuildButtons:
         if "2" not in buttonID:
             player_helper.spend_influence_on_action("build")
             player_helper.stats["buildsThisAction"] = 0
+            # a Pulsar build finished without building never cleared its one-unit limit
+            player_helper.stats.pop("pulsarBuild", None)
             if FactionData.has(player, "phase_technology"):
                 player_helper.stats["phaseBuildsThisAction"] = 0
                 player_helper.stats["phaseSwappedThisAction"] = False
@@ -168,7 +170,7 @@ class BuildButtons:
         if build != "none":
             view.add_item(Button(label="Finished In This System", style=discord.ButtonStyle.red,
                                  custom_id="_".join(buttonElements) + suffix))
-        else:
+        elif not suffix:  # a Raid build returns via Back to Move; finishing here could skip the Move disc
             view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                                  custom_id=f"FCID{player['color']}_finishAction"))
         view.add_item(Button(label="Reset Build", style=discord.ButtonStyle.gray,

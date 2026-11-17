@@ -506,7 +506,6 @@ class GamestateHelper:
                 self.gamestate["board"][position].pop("retreatPenalty" + color, None)
             if "player_ships" in self.gamestate["board"][position]:
                 self.fixshipsOrder(position)
-        self.gamestate.pop("battleRepAdjustments", None)
         self.update()
 
     def getReputationTilesToDraw(self, position, color):
@@ -1350,50 +1349,52 @@ class GamestateHelper:
         return (PlayerHelper.has_reputation_slot_for_relation(player)
                 and self.ambassadorsGiven(player) < 3)
 
+    def _relation_slot(self, pID):
+        """Clear a slot for an ambassador. Reputation tiles in mixed slots first move to free
+        reputation-only slots (the rules allow rearranging); only a full track returns its
+        lowest tile to the bag. The slot is left as "amb" or "mixed"."""
+        player = self.gamestate["players"][pID]
+        track = player["reputation_track"]
+        bonuses = player.get("reputationBonuses", {})
+        for x, tile in enumerate(track):
+            spare = track.index("rep") if "rep" in track else None
+            if spare is None:
+                break
+            if isinstance(tile, int) and not PlayerHelper.is_reputation_only_slot(player, x):
+                track[spare], track[x] = tile, "mixed"
+                # Kurita: a battle marker travels with its tile
+                if str(x) in bonuses:
+                    bonuses[str(spare)] = bonuses.pop(str(x))
+        free = next((x for x, tile in enumerate(track) if tile in ("amb", "mixed")), None)
+        if free is not None:
+            return free
+        # Full track: return the lowest tile anywhere, refilling its slot from a mixed slot if needed
+        def worth(x):
+            return track[x] + bonuses.get(str(x), 0)
+        tiles = [x for x, tile in enumerate(track) if isinstance(tile, int)]
+        lowest = min(tiles, key=worth)
+        loc = min((x for x in tiles if not PlayerHelper.is_reputation_only_slot(player, x)), key=worth)
+        self.gamestate["reputation_tiles"].append(track[lowest])
+        bonuses.pop(str(lowest), None)
+        if lowest != loc:
+            track[lowest] = track[loc]
+            if str(loc) in bonuses:
+                bonuses[str(lowest)] = bonuses.pop(str(loc))
+        track[loc] = "mixed"
+        return loc
+
     def formRelationsBetween(self, player1, player2):
         if not all(self.canFormMoreRelations(player) for player in (player1, player2)):
             return False
         pID = self.get_player_from_color(player1['color'])
         pID2 = self.get_player_from_color(player2['color'])
-        found = False
-        for x, tile in enumerate(player1["reputation_track"]):
-            if isinstance(tile, str) and (tile == "amb" or tile == "mixed"):
-                track = f"{tile}-{FactionData.artwork_name(player2['name'])}-{player2['color']}"
-                self.gamestate["players"][pID]["reputation_track"][x] = track
-                found = True
-                break
-        if not found:
-            lowest = 10
-            loc = None
-            for x, tile in enumerate(player1["reputation_track"]):
-                if PlayerHelper.is_reputation_only_slot(player1, x):
-                    continue
-                if isinstance(tile, int) and tile < lowest:
-                    loc = x
-                    lowest = tile
-            track = f"mixed-{FactionData.artwork_name(player2['name'])}-{player2['color']}"
-            self.gamestate["players"][pID]["reputation_track"][loc] = track
-            self.gamestate["reputation_tiles"].append(lowest)
+        loc = self._relation_slot(pID)
+        track = self.gamestate["players"][pID]["reputation_track"]
+        track[loc] += f"-{FactionData.artwork_name(player2['name'])}-{player2['color']}"
 
-        found = False
-        for x, tile in enumerate(player2["reputation_track"]):
-            if isinstance(tile, str) and (tile == "amb" or tile == "mixed"):
-                track = f"{tile}-{FactionData.artwork_name(player1['name'])}-{player1['color']}"
-                self.gamestate["players"][pID2]["reputation_track"][x] = track
-                found = True
-                break
-        if not found:
-            lowest = 10
-            loc = None
-            for x, tile in enumerate(player2["reputation_track"]):
-                if PlayerHelper.is_reputation_only_slot(player2, x):
-                    continue
-                if isinstance(tile, int) and tile < lowest:
-                    loc = x
-                    lowest = tile
-            track = f"mixed-{FactionData.artwork_name(player1['name'])}-{player1['color']}"
-            self.gamestate["players"][pID2]["reputation_track"][loc] = track
-            self.gamestate["reputation_tiles"].append(lowest)
+        loc = self._relation_slot(pID2)
+        track = self.gamestate["players"][pID2]["reputation_track"]
+        track[loc] += f"-{FactionData.artwork_name(player1['name'])}-{player1['color']}"
 
         self.update()
         return True
@@ -1402,23 +1403,8 @@ class GamestateHelper:
         if not PlayerHelper.has_reputation_slot_for_relation(player):
             return False
         pID = self.get_player_from_color(player['color'])
-        found = False
-        for x, tile in enumerate(player["reputation_track"]):
-            if isinstance(tile, str) and (tile == "amb" or tile == "mixed"):
-                self.gamestate["players"][pID]["reputation_track"][x] = tile + "-minor-" + minor_species_name
-                found = True
-                break
-        if not found:
-            lowest = 10
-            loc = None
-            for x, tile in enumerate(player["reputation_track"]):
-                if PlayerHelper.is_reputation_only_slot(player, x):
-                    continue
-                if isinstance(tile, int) and tile < lowest:
-                    loc = x
-                    lowest = tile
-            self.gamestate["players"][pID]["reputation_track"][loc] = f"mixed-minor-{minor_species_name}"
-            self.gamestate["reputation_tiles"].append(lowest)
+        loc = self._relation_slot(pID)
+        self.gamestate["players"][pID]["reputation_track"][loc] += f"-minor-{minor_species_name}"
         if "Discount" in minor_species_name and "Tech" not in minor_species_name:
             discountedUnit = minor_species_name.replace(" Discount", "").replace("Dreadnought", "dread").lower()
             discount = 1
@@ -1439,6 +1425,8 @@ class GamestateHelper:
                 lowest = tile
                 self.gamestate["players"][pID]["reputation_track"][loc] = (
                     "rep" if PlayerHelper.is_reputation_only_slot(player, loc) else "mixed")
+                # Kurita: the battle marker leaves with its tile
+                self.gamestate["players"][pID].get("reputationBonuses", {}).pop(str(loc), None)
                 self.gamestate["reputation_tiles"].append(lowest)
                 self.update()
                 return

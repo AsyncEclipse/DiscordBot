@@ -43,6 +43,14 @@ class DiscoveryTileButtons:
             await DiscoveryTileButtons.sendPendingPrompt(game, tile, channel, prompt["content"], view)
 
     @staticmethod
+    async def offerWaitingHomeTile(game: GamestateHelper, player, interaction):
+        """A home tile placed while another home prompt was open (Magellan + Ancient Labs) waits for it."""
+        home = game.getLocationFromID(player["home_planet"])
+        if (home is not None and game.gamestate["board"][home].get("disctile")
+                and home not in game.gamestate.get("pendingDiscoveryPrompts", {})):
+            await DiscoveryTileButtons.exploreDiscoveryTile(game, home, interaction, player)
+
+    @staticmethod
     def clearPendingResolution(game: GamestateHelper, tile):
         game.gamestate.get("pendingDiscoveryResolutions", {}).pop(tile, None)
         prompt = game.gamestate.get("pendingDiscoveryPrompts", {}).pop(tile, {})

@@ -422,24 +422,10 @@ class InfluenceButtons:
                 continue
             if game.gamestate["board"][tile]["owner"] == player_color:
                 game.gamestate["board"][tile]["owner"] = 0
-                if len(game.gamestate["board"][tile]["money_pop"]) > 0:
-                    game.gamestate["board"][tile]["money_pop"][0] = 0
-                if len(game.gamestate["board"][tile]["science_pop"]) > 0:
-                    game.gamestate["board"][tile]["science_pop"][0] = 0
-                if len(game.gamestate["board"][tile]["material_pop"]) > 0:
-                    game.gamestate["board"][tile]["material_pop"][0] = 0
-                if len(game.gamestate["board"][tile]["neutral_pop"]) > 0:
-                    game.gamestate["board"][tile]["neutral_pop"][0] = 0
-                if len(game.gamestate["board"][tile]["moneyadv_pop"]) > 0:
-                    game.gamestate["board"][tile]["moneyadv_pop"][0] = 0
-                if len(game.gamestate["board"][tile]["scienceadv_pop"]) > 0:
-                    game.gamestate["board"][tile]["scienceadv_pop"][0] = 0
-                if len(game.gamestate["board"][tile]["materialadv_pop"]) > 0:
-                    game.gamestate["board"][tile]["materialadv_pop"][0] = 0
-                if len(game.gamestate["board"][tile]["neutraladv_pop"]) > 0:
-                    game.gamestate["board"][tile]["neutraladv_pop"][0] = 0
-                if len(game.gamestate["board"][tile].get("disc_pop", [])) > 0:
-                    game.gamestate["board"][tile]["disc_pop"][0] = 0
+                # every population square, the Exiles' orbital included
+                for key, squares in game.gamestate["board"][tile].items():
+                    if key.endswith("_pop") and squares:
+                        squares[0] = 0
             game.gamestate["board"][tile]["player_ships"] = [e
                                                             for e in game.gamestate["board"][tile]["player_ships"]
                                                             if (player_color not in e or "mon" in e or "orb" in e)]

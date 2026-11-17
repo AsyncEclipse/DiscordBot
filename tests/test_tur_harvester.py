@@ -149,7 +149,7 @@ def test_harvester_money_counts_before_bankruptcy(make_game):
     assert helper.checkBankrupt() is False
 
 
-def test_ready_for_upkeep_defers_bankruptcy_until_harvesters_produce(start_game, press):
+def test_ready_for_upkeep_offers_bankruptcy_resolution_before_harvesters_produce(start_game, press):
     game, channel = start_game(factions=["tur", "eri"])
     player = game.get_player(1)
     player.update({"money": 0, "money_pop_cubes": 13, "influence_discs": 10})
@@ -161,7 +161,12 @@ def test_ready_for_upkeep_defers_bankruptcy_until_harvesters_produce(start_game,
 
     assert reload(game).gamestate["peopleToCheckWith"] == []
     assert "runUpkeep" in buttons(channel)
-    assert not any("would be bankrupt" in content for content, kwargs in channel.sent)
+    assert any("would be bankrupt" in content for content, kwargs in channel.sent)
+    prompt = next(kwargs["view"] for content, kwargs in channel.sent if "would be bankrupt" in content)
+    choices = {button.custom_id for button in prompt.children}
+    assert "FCIDblue_removeInfluenceStart" in choices
+    assert "FCIDblue_deleteMsg" in choices
+    assert reload(game).get_player(1)["money"] == 0
 
 
 def test_harvester_placement_stores_the_planet_and_produces_at_upkeep(start_game, press):
@@ -342,3 +347,34 @@ def test_a_weaponless_harvester_is_not_in_the_roll_order(make_game):
     assert all(owner != "teal" for _speed, owner in speeds)
     assert any(ship[1] == "sb" for ship in Combat.getCombatantShipsBySpeed(
         game, "teal", game.gamestate["board"]["202"]["player_ships"], "202"))
+
+
+def test_elimination_clears_the_exile_orbital_cube(start_game, run):
+    from Buttons.Influence import InfluenceButtons
+    game, channel = start_game(factions=["exl", "eri"])
+    player = game.get_player(1)
+    home = game.get_system_coord(player["home_planet"])
+    game.gamestate["board"][home]["orbital_pop"] = [1]
+    run(InfluenceButtons.eliminatePlayer(game, player, FakeInteraction(channel),
+                                         player_helper(game, "blue"), False))
+    assert game.gamestate["board"][home]["orbital_pop"] == [0]
+
+
+def test_a_second_harvester_planet_press_on_one_prompt_is_ignored(start_game, press):
+    from tests.fakes import FakeMessage
+    game, channel = start_game(factions=["tur", "eri"])
+    for player in game.gamestate["players"].values():
+        player["passed"] = True
+    game.update()
+    press(channel, 1, "runUpkeep")
+    choices = [button.custom_id for _content, kwargs in channel.sent
+               for button in getattr(kwargs.get("view"), "children", [])
+               if "_placeHarvester_201_" in button.custom_id]
+    assert len(choices) >= 2
+    message = FakeMessage()
+
+    press(channel, 1, choices[0], message)
+    press(channel, 1, choices[1], message)
+
+    placed = reload(game).get_player(1)["harvester_placements"]
+    assert [p["square"] for p in placed] == [choices[0].split("_")[3]]

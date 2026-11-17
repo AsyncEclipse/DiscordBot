@@ -377,3 +377,17 @@ def test_the_hit_prompt_shows_the_carapace_adjusted_damage(make_game, run):
                               ["teal-int", "teal-cru"], 5, 2))
 
     assert any("You will deal 1 to 2 damage" in content for content, _kwargs in ch.sent)
+
+
+def test_a_stale_roll_press_leaves_the_shield_choices_open(make_game, run):
+    game = combat_game(make_game)
+    run(Carapace.offer(game, channel(), "202"))
+    tile = game.gamestate["board"]["202"]
+    tile["rolledSteps"] = [[2, "teal"]]  # this step already rolled this round
+    game.update()
+    inter = FakeInteraction(channel())
+
+    run(Combat.rollDice(game, "rollDice_202_teal_2_attacker", inter))
+
+    assert "already rolled" in inter.channel.sent[-1][0]
+    assert not reload(game).gamestate["board"]["202"]["carapaceShields"]["teal"]["done"]
