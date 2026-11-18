@@ -272,6 +272,7 @@ class Combat:
         tile["firstShotSide"] = Combat.firstShotSideOf(game, tile["attacker"], tile["defender"])
         tile["firstShotPhase"] = "opponent" if tile["firstShotSide"] else None
         tile.pop("rolledSteps", None)
+        tile.pop("currentSpeed", None)
         game.setCurrentRoller(None, pos)
         for side in sides:
             for player in side:
@@ -807,13 +808,15 @@ class Combat:
         sides = Combat.currentPairing(game, pos)
         if len(sides) < 2:
             return view
-        game.setAttackerAndDefender(sides[1], sides[0], pos)
+        defender, attacker = sides
+        if game.gamestate["board"][pos]["owner"] in attacker:
+            defender, attacker = attacker, defender
         if len(sides) > 1:
-            attacker = Combat.sideOf(game.gamestate["board"][pos]["attacker"])
-            defender = Combat.sideOf(game.gamestate["board"][pos]["defender"])
             ships = game.gamestate["board"][pos]["player_ships"][:]
             sortedSpeeds = Combat.getBothCombatantShipsBySpeed(game, defender, attacker, ships, pos)
-            delayedSide = Combat.firstShotSide(game, pos)
+            tile = game.gamestate["board"][pos]
+            delayedSide = (Combat.firstShotSide(game, pos) if Combat.pairingStillPresent(game, pos)
+                           else Combat.firstShotSideOf(game, attacker, defender))
             if delayedSide:
                 sortedSpeeds = ([pair for pair in sortedSpeeds if pair[1] not in delayedSide]
                                 + [pair for pair in sortedSpeeds if pair[1] in delayedSide])
@@ -1306,16 +1309,20 @@ class Combat:
                       else "spinedmg" if "spinedmg" in buttonID else None)
         tile = game.gamestate["board"][pos]
         pairing = Combat.sideOf(tile.get("attacker")) + Combat.sideOf(tile.get("defender"))
-        # Initiative 1000 is population bombing, which has no pairing.
-        if speed != 1000 and pairing and colorOrAI not in pairing:
-            await interaction.channel.send("The combat pairing changed. Press Refresh Image and roll again.")
-            return
         if Combat.technoMagicPending(game, pos):
             await interaction.channel.send("Finish your Techno-Magic upgrades before rolling initiative.")
             return
         if speed != 1000 and len(Combat.currentPairing(game, pos)) < 2:
             await interaction.channel.send("The combat in this sector has already ended.")
             return
+        # Initiative 1000 is population bombing, which has no pairing.
+        if speed != 1000 and pairing:
+            if not Combat.pairingStillPresent(game, pos):
+                await interaction.channel.send(f"The matchup changed. Run `/tile resume_combat tile_position:{pos}`.")
+                return
+            if colorOrAI not in pairing:
+                await interaction.channel.send("The combat pairing changed. Press Refresh Image for updated controls.")
+                return
         if tile.get("phaseModuleColors") and not tile.get("phaseModulePrompted"):
             await interaction.channel.send("Declare Phase Module options before rolling initiative.")
             return
@@ -1340,7 +1347,8 @@ class Combat:
             pending = [tile.get("currentSpeed"), tile.get("currentRoller")]
             if (not auto and None not in pending and step != pending and pending not in rolled):
                 await interaction.channel.send(
-                    "That initiative step is not current. Roll the pending step in the combat view first.")
+                    "That initiative step is not current. "
+                    f"Run `/tile resume_combat tile_position:{pos}` to repost the pending roll.")
                 return
             # only a roll that goes ahead ends the shield choices for this round
             Carapace.close_controls(game, pos)
@@ -2142,7 +2150,13 @@ class Combat:
                             break
 
     @staticmethod
-    async def refreshCombatPrompt(game: GamestateHelper, pos: str, channel):
+    def pairingStillPresent(game: GamestateHelper, pos: str):
+        tile = game.gamestate["board"][pos]
+        present = set(Combat.findPlayersInTile(game, pos))
+        return all(present.intersection(Combat.sideOf(tile.get(side))) for side in ("attacker", "defender"))
+
+    @staticmethod
+    async def refreshCombatPrompt(game: GamestateHelper, pos: str, channel, restart: bool = False):
         await Combat.reofferReputation(game, pos, channel)
         tile = game.gamestate["board"][pos]
         if len(Combat.currentPairing(game, pos)) != 2 or Combat.isDracoAgainstAncients(game, pos):
@@ -2157,11 +2171,19 @@ class Combat:
             await channel.send("Resolve the pending hits, rerolls and Rift Cannon effects before rolling again.")
             return
         if (tile.get("wolfPack") or tile.get("pendingWolfPack") or tile.get("ghostsRetreatPending")
+                or tile.get("carapacePendingMissiles")
                 or any(not tile.get("phaseModuleReady", {}).get(color)
                        for color in tile.get("phaseModuleColors", []))):
             await channel.send("Resolve the pending faction ability choices before rolling again.")
             return
-        await Combat.promptNextSpeed(game, pos, channel, False, repeat=True)
+        if restart or not Combat.pairingStillPresent(game, pos):
+            await Combat.startCombat(game, channel, pos)
+            return
+        pending = (tile.get("currentSpeed"), tile.get("currentRoller"))
+        speeds = Combat.getBothCombatantShipsBySpeed(
+            game, Combat.sideOf(tile["defender"]), Combat.sideOf(tile["attacker"]), tile["player_ships"], pos)
+        repeat = pending in speeds and list(pending) not in tile.get("rolledSteps", [])
+        await Combat.promptNextSpeed(game, pos, channel, False, repeat=repeat)
 
     @staticmethod
     def nextInitiative(game: GamestateHelper, pos: str, repeat: bool = False):
@@ -3037,15 +3059,12 @@ class Combat:
             return True
         elif oldLength != len(players):
             tile = game.gamestate["board"][pos]
-            attacker = Combat.sideOf(tile.get("attacker"))
-            defender = Combat.sideOf(tile.get("defender"))
-            present = set(players)
-            if not attacker or not defender or not (set(attacker) & present) or not (set(defender) & present):
+            if not Combat.pairingStillPresent(game, pos):
+                await Combat.startCombat(game, interaction.channel, pos)
                 drawing = DrawHelper(game.gamestate)
                 image = await asyncio.to_thread(drawing.board_tile_image_file, pos)
                 asyncio.create_task(interaction.channel.send("Updated view",
                                                              view=Combat.getCombatButtons(game, pos), file=image))
-                await Combat.startCombat(game, interaction.channel, pos)
                 return True
             if not (tile.get("unresolvedHits", 0) > 0 or tile.get("pendingRiftDice")
                     or tile.get("carapacePendingMissiles")
