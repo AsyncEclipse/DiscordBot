@@ -29,8 +29,7 @@ def _reputation_colors(interaction):
 
 
 async def _pair(game):
-    """Run the pairing step, which records the combatants and attacker/defender."""
-    Combat.getCombatButtons(game, POS)
+    await Combat.startCombat(game, FakeInteraction().channel, POS)
 
 
 async def _noop(*_args, **_kwargs):
