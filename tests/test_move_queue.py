@@ -4,7 +4,7 @@ import pytest
 
 from Buttons.Move import MoveButtons
 from Buttons.Pulsar import PulsarButtons
-from tests.fakes import FakeInteraction, buttons, player_helper, reload
+from tests.fakes import FakeInteraction, buttons, offered_ids, player_helper, player_stats, reload
 
 
 @pytest.fixture
@@ -84,3 +84,31 @@ def test_queue_continuation_rechecks_activations(moving_ships, run, passed, coun
 
     assert game.gamestate["board"]["201"]["player_ships"].count("blue-int") == 3
     assert any("No move activations remain" in (content or "") for content, kwargs in channel.sent)
+
+
+def crowded_board_game(make_game, destinations=25):
+    """A sector whose ship has more destinations than one Discord view can hold."""
+    player = player_stats("hyd", color="blue", move_apt=3)
+    tile = {"owner": 0, "sector": 0, "disctile": 0, "player_ships": []}
+    board = {"000": dict(tile, owner="blue", player_ships=["blue-int"] * 4,
+                         adjacent=[str(100 + i) for i in range(destinations)])}
+    for i in range(destinations):
+        board[str(100 + i)] = dict(tile, adjacent=["000"])
+    return make_game({"players": {"1": player}, "board": board})
+
+
+@pytest.mark.parametrize("destinations", [25, 60])
+@pytest.mark.parametrize("move_count", [1, 2])
+def test_every_destination_and_action_button_fits_a_crowded_move(make_game, run, destinations, move_count):
+    game = crowded_board_game(make_game, destinations)
+    interaction = FakeInteraction()
+
+    run(MoveButtons.moveThisShip(game, game.get_player(1), interaction,
+                                 f"moveThisShip_000_interceptor_{move_count}_q0_all"))
+
+    views = [kwargs["view"] for _content, kwargs in interaction.channel.sent]
+    assert all(len(view.children) <= 25 for view in views)
+    ids = offered_ids(interaction)
+    assert len([cid for cid in ids if cid.startswith("FCIDblue_moveTo_000_interceptor_")]) == destinations
+    assert "FCIDblue_restartTurn" in ids
+    assert ("FCIDblue_finishAction" in ids) is (move_count > 1)

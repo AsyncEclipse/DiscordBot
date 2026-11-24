@@ -392,20 +392,18 @@ class MoveButtons:
         tiles = MoveButtons.getTilesInRange(game, player, originT, shipRange, ship.getJumpDrive())
         if originT in tiles:
             tiles.remove(originT)
-        view2 = View()
-        count = 0
-        for destination in tiles:
-            if count < 24:
-                view.add_item(Button(label=game.get_tile_label(destination), style=discord.ButtonStyle.blurple,
-                                     custom_id=(f"FCID{player['color']}_moveTo_{originT}"
-                                                f"_{shipType}_{destination}_{moveCount}"
-                                                f"_q{queue_remaining}{suffix}")))
-            else:
-                view2.add_item(Button(label=game.get_tile_label(destination), style=discord.ButtonStyle.blurple,
+        # Discord caps a view at 25 children, so the action buttons below need their slots reserved.
+        action_buttons = 2 if nested or int(moveCount) > 1 else 1
+        first_page_size = 25 - action_buttons
+        destination_buttons = [Button(label=game.get_tile_label(destination), style=discord.ButtonStyle.blurple,
                                       custom_id=(f"FCID{player['color']}_moveTo_{originT}"
                                                  f"_{shipType}_{destination}_{moveCount}"
-                                                 f"_q{queue_remaining}{suffix}")))
-            count += 1
+                                                 f"_q{queue_remaining}{suffix}"))
+                               for destination in tiles]
+        for button in destination_buttons[:first_page_size]:
+            view.add_item(button)
+        extra_pages = [destination_buttons[index:index + 25]
+                       for index in range(first_page_size, len(destination_buttons), 25)]
         if nested:
             MoveButtons.addRegroupBackButton(view, player, phase)
         elif int(moveCount) > 1:
@@ -417,8 +415,11 @@ class MoveButtons:
         await interaction.message.delete()
         await interaction.channel.send(f"{player['player_name']}, select the tile you would like to move "
                                        f"a {shipType} from {game.get_tile_label(originT)} to.", view=view)
-        if count > 24:
-            await interaction.channel.send("Additional Options", view=view2)
+        for page in extra_pages:
+            page_view = View()
+            for button in page:
+                page_view.add_item(button)
+            await interaction.channel.send("Additional Options", view=page_view)
         drawing = DrawHelper(game.gamestate)
         if len(tiles) < 15 and len(tiles) > 0:
             asyncio.create_task(interaction.followup.send(file=await asyncio.to_thread(drawing.mergeLocationsFile,
