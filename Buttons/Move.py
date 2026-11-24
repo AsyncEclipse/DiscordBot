@@ -219,6 +219,7 @@ class MoveButtons:
             return
         if buttonID == "startMove":
             reset = player.pop("infinitePossibilitiesUsed", None) is not None
+            reset = player.pop("moveActionCharged", None) is not None or reset
             reset = player.pop("pulsarMove", None) is not None or reset
             if FactionData.has(player, "raid") or FactionData.has(player, "regroup"):
                 player["herCrossUsed"] = False
@@ -246,7 +247,7 @@ class MoveButtons:
                                  custom_id=f"FCID{player['color']}_herRaidBuild_{moveCount}"))
         if buttonID == "startMove":
             UpgradeButtons.addInfinitePossibilitiesButton(view, game, player, "move")
-        if raid_resume:
+        if raid_resume or player.get("moveActionCharged"):
             view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                                  custom_id=f"FCID{player['color']}_finishAction"))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray,
@@ -445,8 +446,7 @@ class MoveButtons:
         player_color = player["color"]
         shipName = f"{player_color}-{game.getShipShortName(shipType)}"
         tile_ships = game.gamestate["board"][destination]["player_ships"]
-        game.remove_units([shipName], originT)
-        game.add_units([shipName], destination)
+        moved = game.move_unit(shipName, originT, destination)
         game.fixshipsOrder(destination)
         drawing = DrawHelper(game.gamestate)
         await interaction.channel.send(f"{player['player_name']} Moved a {shipType} from "
@@ -481,9 +481,11 @@ class MoveButtons:
                 location = " any tile with a wormhole facing an empty space."
             msg = f"This is a black hole tile, and the ship rolled a {random_number}. That means it will "
             destroyed = False
+            damage = game.ship_damage(destination, moved)
             if random_number == 1 or random_number == 6:
                 msg += " take one damage and "
-                if shipModel.hull > 0:
+                damage += 1
+                if shipModel.hull >= damage:
                     msg += f"then teleport to {location}."
                 else:
                     msg += "thus die due to lack of hull."
@@ -509,16 +511,16 @@ class MoveButtons:
                     player_helper.stats["blackHoleReturn"].append(f"{bhtype}_{shipName}_{roundNum + 2}")
                     game.update_player(player_helper)
             if destroyed:
-                game.destroy_ship(shipName, destination, "blackhole")
+                game.destroy_ship(moved, destination, "blackhole")
             else:
-                game.remove_units([shipName], destination)
+                game.remove_units([moved], destination)
             await interaction.channel.send(msg)
 
             if random_number == 1 or random_number == 6:
                 if "teleport" in msg:
                     await interaction.channel.send(player["player_name"] + " Select a tile to return the ship to",
                                                    view=BlackHoleButtons.findBlackHoleOptions(game, player, shipName,
-                                                                                              bhtype, "damage"))
+                                                                                              bhtype, damage))
             if game.gamestate["board"][destination]["disctile"] > 0:
                 await DiscoveryTileButtons.exploreDiscoveryTile(game, destination, interaction, player)
 
@@ -526,9 +528,9 @@ class MoveButtons:
         if nested:
             player_helper.stats["herCrossUsed"] = True
         elif moveCount == 1:
-            if player.get("herRaidCharged"):
-                player_helper.stats.pop("herRaidCharged", None)
-            else:
+            cog_charged = player.pop("moveActionCharged", False)
+            raid_charged = player.pop("herRaidCharged", False)
+            if not (cog_charged or raid_charged):
                 player_helper.spend_influence_on_action("move")
         if nested or moveCount == 1:
             game.update_player(player_helper)

@@ -236,3 +236,17 @@ def test_wraith_soul_counter_draws_the_accumulated_number(start_game, monkeypatc
     DrawHelper(game.gamestate).player_area(player)
 
     assert labels == [str(souls)]
+
+
+@pytest.mark.render
+def test_damage_markers_follow_individual_ships(start_game):
+    game, _ = start_game(factions=["vor", "eri"])
+    game.gamestate["board"]["201"]["player_ships"] = ["blue-cru", "blue-cru"]
+    drawing = DrawHelper(game.gamestate)
+    game.add_damage("blue-cru:0", "201", 1)
+    first = drawing.board_tile_image("201")
+    game.repair_damage("blue-cru:0", "201")
+    game.add_damage("blue-cru:1", "201", 1)
+    second = drawing.board_tile_image("201")
+
+    assert ImageChops.difference(first.convert("RGB"), second.convert("RGB")).getbbox() is not None

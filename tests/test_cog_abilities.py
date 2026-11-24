@@ -262,3 +262,27 @@ def test_discovery_part_install_does_not_offer_adaptive_transformation(start_gam
 
     assert any(cid.endswith("_mus") for cid in buttons(channel))
     assert not any("_adaptiveStart_" in cid for cid in buttons(channel))
+
+
+@pytest.mark.parametrize("moves_ship", [False, True])
+def test_first_move_upgrade_charges_the_move_once(start_game, press, run, moves_ship):
+    game, channel = start_game(factions=["cog", "eri"])
+    game.add_tile("301", 0, "202")
+    press(channel, 1, "FCIDblue_startMove")
+    press(channel, 1, "FCIDblue_infiniteUpgrade_move")
+    state = reload(game)
+    run(UpgradeButtons.chooseUpgrade(state, state.get_player(1), FakeInteraction(channel),
+                                    "chooseUpgrade_1_interceptor_ioc_hul_0_free",
+                                    player_helper(state, "blue")))
+    press(channel, 1, "FCIDblue_finishInfiniteUpgrade")
+    assert "FCIDblue_finishAction" in buttons(channel)
+    if moves_ship:
+        press(channel, 1, next(cid for cid in buttons(channel) if "_moveFrom_" in cid))
+        press(channel, 1, next(cid for cid in buttons(channel) if "_moveThisShip_" in cid))
+        press(channel, 1, next(cid for cid in buttons(channel) if "_moveTo_" in cid))
+    press(channel, 1, "FCIDblue_finishAction")
+
+    player = reload(game).get_player(1)
+    assert player["interceptor_parts"][0] == "hul"
+    assert player["influence_discs"] == 11
+    assert player["move_action_counters"] == 1

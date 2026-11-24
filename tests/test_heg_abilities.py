@@ -425,3 +425,24 @@ def test_rift_backfire_waits_for_the_held_hit(make_game, no_random, run, press):
     tile = reload(game).gamestate["board"]["101"]
     assert "red-int" not in tile["player_ships"]
     assert "blue-cru" not in tile["player_ships"]
+
+
+@pytest.mark.parametrize("choice, rolls, damage", [
+    ("pass", [2, 6], {"blue-cru": 3, "red-cru": 1}),
+    ("reroll", [2, 6, 4], {"blue-cru": 1}),
+])
+def test_nine_lives_follows_a_lyra_rift_reroll(make_game, no_random, run, press, choice, rolls, damage):
+    players = {"1": player_stats("heg", color="blue", cruiser_parts=["hul"] * 3, colony_ships=1),
+               "2": player_stats("lyr", color="red", cruiser_parts=["rican", "hul"], colony_ships=2)}
+    game = _combat_game(make_game, ["red-cru", "blue-cru"], "red", "blue", players=players)
+    channel = FakeChannel("aeb1-actions")
+    no_random(rolls)
+
+    ships = game.gamestate["board"]["101"]["player_ships"]
+    speed = Combat.getCombatantShipsBySpeed(game, "red", ships, "101")[0][0]
+    run(Combat.rollDice(game, f"rollDice_101_red_{speed}_deleteMsg", FakeInteraction(channel)))
+    press(channel, 2, next(cid for cid in buttons(channel) if "_rerollDie_" in cid))
+    assert not any("_rerollDie_" in cid for cid in buttons(channel))
+    press(channel, 1, next(cid for cid in buttons(channel) if f"_nineLives_101_{choice}_" in cid))
+
+    assert reload(game).gamestate["board"]["101"]["damage_tracker"] == damage

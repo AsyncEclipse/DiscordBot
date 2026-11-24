@@ -239,3 +239,52 @@ def test_regenerative_hull_skips_heal_when_last_ancient_dies(make_game, run):
     assert tile["defender"] != "ai"
     assert "ai-anc" not in tile["player_ships"]
     assert tile["damage_tracker"]["blue-cru"] == 1
+
+
+@pytest.mark.parametrize("second_target, remaining", [(1, (0, 0)), (0, (1, 0))])
+def test_regenerative_hull_repairs_each_damaged_cruiser_once(make_game, run, second_target, remaining):
+    ships = ["blue-cru", "blue-cru", "red-cru"]
+    game = _damaged_vorlons_cruiser(make_game, ships, ("red", "blue"))
+    game.get_player(1)["cruiser_parts"] = ["reh", "hul"]
+    game.update()
+    interaction = FakeInteraction()
+    run(Combat.offerHitPrompt(game, interaction, "101", "red", ["blue-cru"], 6, 1))
+    targets = [cid for cid in buttons(interaction.channel) if "_assignHitTo_" in cid]
+    assert len(targets) == 2
+    run(Combat.assignHitTo(game, targets[second_target].split("_", 1)[1],
+                           interaction, False, deferEnd=True))
+
+    game = reload(game)
+    run(Combat.checkForMorphShield(game, "101", interaction.channel, ships, ["blue", "red"]))
+
+    assert tuple(reload(game).ship_damage("101", f"blue-cru:{slot}") for slot in range(2)) == remaining
+
+
+def test_destroying_a_cruiser_preserves_other_cruisers_damage_and_target(make_game, run):
+    ships = ["blue-cru", "blue-cru", "red-cru"]
+    game = _damaged_vorlons_cruiser(make_game, ships, ("red", "blue"))
+    game.add_damage("blue-cru:1", "101", 1)
+
+    interaction = FakeInteraction()
+    run(Combat.assignHitTo(game, "assignHitTo_101_red_blue-cru:0_6_6",
+                           interaction, False, deferEnd=True))
+    game = reload(game)
+    assert game.gamestate["board"]["101"]["player_ships"].count("blue-cru") == 1
+    assert game.damage_targets("101", "blue-cru") == ["blue-cru:1"]
+
+    run(Combat.assignHitTo(game, "assignHitTo_101_red_blue-cru:0_6_6",
+                           interaction, False, deferEnd=True))
+    assert game.ship_damage("101", "blue-cru:1") == 1
+
+
+def test_moving_a_damaged_ship_keeps_damage_separate_at_the_destination(make_game):
+    game = _damaged_vorlons_cruiser(make_game, ["blue-cru", "red-cru"], ("red", "blue"))
+    game.gamestate["board"]["102"] = {"owner": 0, "player_ships": ["blue-cru"]}
+    game.add_damage("blue-cru", "102", 2)
+
+    moved = game.move_unit("blue-cru", "101", "102")
+
+    game = reload(game)
+    assert game.ship_damage("102", moved) == 1
+    assert game.ship_damage("102", "blue-cru:0") == 2
+    assert "blue-cru" not in game.gamestate["board"]["101"]["damage_tracker"]

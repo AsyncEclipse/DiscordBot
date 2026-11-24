@@ -139,6 +139,14 @@ class ButtonListener(commands.Cog):
 
     async def resolveButton(self, interaction: discord.Interaction):
         customID = interaction.data["custom_id"]
+        if customID.endswith("_targetSelect"):
+            view = discord.ui.View.from_message(interaction.message)
+            selection = next((item for item in view.children if item.custom_id == customID), None)
+            selected = interaction.data["values"][0]
+            if selection is None or not any(option.value == selected for option in selection.options):
+                await interaction.followup.send("That target is no longer available.", ephemeral=True)
+                return
+            customID = selected
         start_time = time.perf_counter()
         game = GamestateHelper(interaction.channel)
         userID = interaction.user.id
@@ -379,6 +387,13 @@ class ButtonListener(commands.Cog):
                                                 ephemeral=True)
                 return
             return_to = customID.split("_")[1] if "_" in customID else "finish"
+            if return_to == "move":
+                if player["influence_discs"] < 1:
+                    await interaction.followup.send("You need an Influence Disc to take a Move action.",
+                                                    ephemeral=True)
+                    return
+                player_helper.spend_influence_on_action("move")
+                player["moveActionCharged"] = True
             player["infinitePossibilitiesUsed"] = True
             player["infiniteUpgradeReturn"] = return_to
             player["infiniteUpgradeAvailable"] = True

@@ -96,16 +96,19 @@ class BlackHoleButtons:
         ship = customID.split("_")[1]
         tile = customID.split("_")[2]
         damage = customID.split("_")[3]
+        amount = int({"damage": "1", "no": "0", "noDamage": "0"}.get(damage, damage))
         from Buttons.DiplomaticRelations import DiplomaticRelationsButtons
         destination = tile
-        game.add_units([ship], tile)
+        with game.batch_save():
+            game.add_units([ship], destination)
+            game.fixshipsOrder(destination)
+            if amount:
+                returned = game.damage_targets(destination, ship)[-1]
+                game.add_damage(returned, destination, amount)
         shipName = game.getShipFullName(ship.split("-")[1])
         await interaction.channel.send(f"{player['player_name']} put a {shipName} in tile {tile}"
                                        " using the Black Hole return feature.")
-        game.fixshipsOrder(tile)
         owner = game.gamestate["board"][destination]["owner"]
-        if damage == "damage":
-            game.add_damage(ship, destination, 1)
         if (owner != 0 and isinstance(owner, str) and owner != player["color"]
                 and not game.areAllied(player["color"], owner)):
             p2 = game.getPlayerObjectFromColor(owner)

@@ -10,7 +10,7 @@ from discord.ui import View, Button
 from helpers import FactionData
 from helpers.ImageCache import ImageCacheHelper
 from helpers.PlayerHelper import PlayerHelper
-from helpers.ShipHelper import PlayerShip
+from helpers.ShipHelper import PlayerShip, ship_damage_slots
 
 
 _properties_cache = {}
@@ -351,17 +351,20 @@ class DrawHelper:
                 warppath = "images/resources/all_boards/Warp_picture.png"
                 warp_mask = self.use_image(warppath)
                 tile_image.paste(warp_mask, (int(20 * mult), int(140 * mult)), mask=warp_mask)
-            def paste_ships(ship_tile, ship_pos):
+            def paste_ships(ship_tile):
                 counts = {}  # To track counts for each ship type
-                countsShips = {}
+                damage_by_ship = {}
+                damage_markers = []
                 for ship in ship_tile["player_ships"]:
                     if "-" not in ship:
                         continue
                     ship_type = ship.split("-")[1]  # Extract ship type
                     size = int(70 * mult)
-                    if ship not in countsShips:
-                        countsShips[ship] = 0
-                    countsShips[ship] += int(10 * mult)
+                    unit = ship.removesuffix("adv")
+                    if unit not in damage_by_ship:
+                        damage_by_ship[unit] = iter(damage for damage in ship_damage_slots(ship_tile, unit)
+                                                    if damage is not None)
+                    damage = next(damage_by_ship[unit])
                     if ship_type in ["gcds", "gcdsadv", "anc", "ancadv", "grd", "grdadv"]:
                         ship = ship_type.replace("adv", "")
                         ship_type = "ai"
@@ -397,34 +400,20 @@ class DrawHelper:
                     if "sb" in ship_type:
                         yCordToUse -= 30
 
-                    tile_image.paste(ship_image,
-                                     (int(345 / 1024 * mult * xCordToUse + (counts[ship_type] - size / 2)),
-                                      int(345 / 1024 * mult * yCordToUse + (counts[ship_type] - size / 2))),
-                                     mask=ship_image)
+                    x = int(345 / 1024 * mult * xCordToUse + counts[ship_type] - size / 2)
+                    y = int(345 / 1024 * mult * yCordToUse + counts[ship_type] - size / 2)
+                    tile_image.paste(ship_image, (x, y), mask=ship_image)
+                    damage_markers.extend((x + int((15 + 10 * marker) * mult), y + int(35 * mult))
+                                          for marker in range(damage))
                     counts[ship_type] += int(10 * mult)
                     if ship_type == "ai":
                         counts[ship_type] += int(20 * mult)
-                for key, value in countsShips.items():
-                    damage = 0
-                    ship_type = "ai"
-                    if "ai-" not in key:
-                        ship_type = key.split("-")[1]
-
-                    coords = ship_tile[ship_type.replace("adv", "") + "_snap"]
-                    if "damage_tracker" in self.gamestate["board"][ship_pos]:
-                        if key in self.gamestate["board"][ship_pos]["damage_tracker"]:
-                            damage = self.gamestate["board"][ship_pos]["damage_tracker"][key]
-                    if damage > 0:
-                        for count in range(damage):
-                            damage_image = self.use_image("images/resources/components/basic_ships/marker_damage.png")
-                            tile_image.paste(damage_image,
-                                             (int(345 / 1024 * mult * coords[0] + value - size / 2 +
-                                                  10 * count * mult + 15 * mult),
-                                              int(345 / 1024 * mult * coords[1] + value - size / 2 + 35 * mult)),
-                                             mask=damage_image)
-
+                if damage_markers:
+                    damage_image = self.use_image("images/resources/components/basic_ships/marker_damage.png")
+                    for location in damage_markers:
+                        tile_image.paste(damage_image, location, mask=damage_image)
             if len(tile.get("player_ships", [])) > 0:
-                paste_ships(tile, position)
+                paste_ships(tile)
             if "nebula_internal" in tile:
                 for sib in tile["nebula_internal"]:
                     sib_tile = self.gamestate["board"][sib]
@@ -435,7 +424,7 @@ class DrawHelper:
                         tile_image.paste(discTile, (int(diamond[0] - discTile.width / 2),
                                                     int(diamond[1] - discTile.height / 2)), mask=discTile)
                     if len(sib_tile.get("player_ships", [])) > 0:
-                        paste_ships(sib_tile, sib)
+                        paste_ships(sib_tile)
 
             def paste_resourcecube(tile, tile_image, resource_type, color, disc_center):
                 if tile.get(f"{resource_type}_pop", 0):

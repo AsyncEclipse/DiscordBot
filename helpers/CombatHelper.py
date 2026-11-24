@@ -673,9 +673,30 @@ class Combat:
     def getTargetButton(game: GamestateHelper, pos: str, ship: str):
         """Label and icon for a target button. An Alliance's members field the
         same ship types, so the ship type alone does not say whose ship it is."""
-        owner, shipType = ship.split("-", 1)
+        unit, _, slot = ship.partition(":")
+        owner, shipType = unit.split("-", 1)
         suffix, emoji = Combat.getCombatantTag(game, pos, owner)
-        return f"Hit {Combat.translateShipAbrToName(shipType)}{suffix}", emoji
+        label = f"Hit {Combat.translateShipAbrToName(shipType)}{suffix}"
+        if slot:
+            label += f" #{int(slot) + 1} ({game.ship_damage(pos, ship)} damage)"
+        return label, emoji
+
+    @staticmethod
+    def targetChoiceView(game, pos, targets, custom_id):
+        view = View()
+        options = []
+        for index, ship in enumerate(targets):
+            label, emoji = Combat.getTargetButton(game, pos, ship)
+            value = custom_id(index, ship)
+            if len(targets) <= 25:
+                view.add_item(Button(label=label, emoji=emoji, style=discord.ButtonStyle.red, custom_id=value))
+            else:
+                options.append(discord.SelectOption(label=label, emoji=emoji, value=value))
+        for start in range(0, len(options), 25):
+            group = options[start:start + 25]
+            view.add_item(discord.ui.Select(placeholder=f"Targets {start + 1}–{start + len(group)}",
+                                            custom_id=f"{group[0].value}_targetSelect", options=group))
+        return view
 
     @staticmethod
     def getPopulationTargetView(colorOrAI: str, pos: str, cubes):
@@ -770,7 +791,8 @@ class Combat:
         """Offer one die's targets, or assign the hit when there is only one."""
         if not hittableShips:
             return
-        if len(hittableShips) > 1:
+        targets = [target for ship in hittableShips for target in game.damage_targets(pos, ship)]
+        if len(targets) > 1:
             if reports is not None:
                 await Combat.sendCombatReports(interaction.channel, reports)
             damage = int(str(dieDam).rstrip("!"))
@@ -786,20 +808,16 @@ class Combat:
                          " Carapace Shields reduce a hit by 1.")
             msg = (f"{interaction.user.mention}, choose what ship to hit with the die that rolled a {dieNum}."
                    f" {dealt} The bot has calculated that you can hit these ships.")
-            view = View()
-            for ship in hittableShips:
-                label, emoji = Combat.getTargetButton(game, pos, ship)
-                suffix = f"_{counter}" if counter is not None else ""
-                if deferEnd:
-                    suffix += "_defer"
-                buttonID = (f"FCID{colorOrAI}_assignHitTo_{pos}_{colorOrAI}"
-                            f"_{ship}_{dieNum}_{dieDam}{suffix}")
-                view.add_item(Button(label=label, emoji=emoji, style=discord.ButtonStyle.red,
-                                     custom_id=buttonID))
+            suffix = f"_{counter}" if counter is not None else ""
+            if deferEnd:
+                suffix += "_defer"
+            view = Combat.targetChoiceView(
+                game, pos, targets, lambda index, ship: (
+                    f"FCID{colorOrAI}_assignHitTo_{pos}_{colorOrAI}_{ship}_{dieNum}_{dieDam}{suffix}"))
             await interaction.channel.send(msg, view=view)
             game.setUnresolvedHits(game.gamestate["board"][pos].get("unresolvedHits", 0) + 1, pos)
-        else:
-            buttonID = f"assignHitTo_{pos}_{colorOrAI}_{hittableShips[0]}_{dieNum}_{dieDam}"
+        elif targets:
+            buttonID = f"assignHitTo_{pos}_{colorOrAI}_{targets[0]}_{dieNum}_{dieDam}"
             if deferEnd:
                 buttonID += "_defer"
             await Combat.assignHitTo(game, buttonID, interaction, False, deferEnd=deferEnd, reports=reports)
@@ -1145,9 +1163,10 @@ class Combat:
             shipModel = PlayerShip(game.gamestate["players"][player], shipType)
             if "pink" not in shipModel.dice:
                 continue
-            needed = shipModel.hull + 1 - game.gamestate["board"][pos].get("damage_tracker", {}).get(ship, 0)
-            entries.append((ship, shipModel.cost, needed))
-        entries.sort(key=lambda entry: entry[1], reverse=True)
+            for target in game.damage_targets(pos, ship):
+                needed = shipModel.hull + 1 - game.ship_damage(pos, target)
+                entries.append((target, shipModel.cost, needed))
+        entries.sort(key=lambda entry: (-entry[1], entry[2]))
         allocation = []
         remaining = totalDamage
         for ship, _cost, needed in entries:
@@ -1193,7 +1212,8 @@ class Combat:
                 player = game.get_player_from_color(owner)
                 model = PlayerShip(game.gamestate["players"][player], ship_type)
             models[target] = model
-            initial_damage[target] = game.add_damage(target, pos, 0)
+            initial_damage[target] = sorted(
+                (game.ship_damage(pos, ship) for ship in game.damage_targets(pos, target)), reverse=True)
         targets = sorted(models, key=lambda target: (models[target].cost, target), reverse=True)
 
         best_score = None
@@ -1203,25 +1223,28 @@ class Combat:
             nonlocal best_score, best_allocation
             if die_index == len(dice):
                 candidate_score = (tuple(destroyed[target] for target in targets),
-                                   tuple(damage[target] for target in targets))
+                                   tuple(sum(damage[target]) for target in targets))
                 if best_score is None or candidate_score > best_score:
                     best_score = candidate_score
                     best_allocation = allocation[:]
                 return
             options = list(dict.fromkeys(
                 target for target in targets_by_die[die_index]
-                if destroyed[target] < ships.count(target))) or [None]
+                if damage[target])) or [None]
             for target in options:
                 next_damage = damage.copy()
                 next_destroyed = destroyed.copy()
                 if target is not None:
                     owner, ship_type = target.split("-", 1)
                     ship_class = models[target].ship_type if owner != "ai" else ship_type.replace("adv", "")
-                    next_damage[target] += Carapace.incoming_damage(
+                    current, *remaining = damage[target]
+                    current += Carapace.incoming_damage(
                         game, pos, owner, ship_class, colorOrAI, dice[die_index][1])
-                    if next_damage[target] > models[target].hull:
+                    if current > models[target].hull:
                         next_destroyed[target] += 1
-                        next_damage[target] = 0
+                    else:
+                        remaining.insert(0, current)
+                    next_damage[target] = remaining
                 allocation.append(target)
                 search(die_index + 1, allocation, next_damage, next_destroyed)
                 allocation.pop()
@@ -1383,26 +1406,8 @@ class Combat:
                 asyncio.create_task(interaction.channel.send(msg, view=view))
             else:
                 update = True
-                if len(hittableShips) > 1:
-                    msg = (f"{interaction.user.mention}, choose what ship to hit"
-                            f" with the die that rolled a {dieNum}. You will deal {dieDam} damage. "
-                            "The bot has calculated that you can hit these ships.")
-                    view = View()
-                    for ship in hittableShips:
-                        label, emoji = Combat.getTargetButton(game, pos, ship)
-                        buttonID = (f"FCID{colorOrAI}_assignHitTo_{pos}_{colorOrAI}"
-                                    f"_{ship}_{dieNum}_{dieDam}_{counter}")
-                        view.add_item(Button(label=label, emoji=emoji, style=discord.ButtonStyle.red,
-                                                custom_id=buttonID))
-                    await interaction.channel.send(msg, view=view)
-                    hitsToAssign = 1
-                    if "unresolvedHits" in game.gamestate["board"][pos]:
-                        hitsToAssign = game.gamestate["board"][pos]["unresolvedHits"] + 1
-                    game.setUnresolvedHits(hitsToAssign, pos)
-                else:
-                    ship = hittableShips[0]
-                    buttonID = f"assignHitTo_{pos}_{colorOrAI}_{ship}_{dieNum}_{dieDam}"
-                    await Combat.assignHitTo(game, buttonID, interaction, False, deferEnd=True)
+                await Combat.offerHitPrompt(game, interaction, pos, colorOrAI, hittableShips,
+                                            dieNum, dieDam, counter, deferEnd=True)
             hitsToAssign = 0
 
         board = game.gamestate["board"][pos]
@@ -1911,6 +1916,7 @@ class Combat:
             ships = game.gamestate["board"][pos]["player_ships"][:]
             targets = Combat.getOpponentUnitsThatCanBeHit(
                 game, color, ships, die_num, computer, pos, state["speed"])
+            targets = [target for ship in targets for target in game.damage_targets(pos, ship)]
             state["pendingHit"] = {"dieNum": die_num, "dieDam": damage, "dieColor": die_color,
                                    "targets": targets, "source": die_source,
                                    "hitBonus": hit_bonus, "damageBonus": damage_bonus}
@@ -1927,11 +1933,8 @@ class Combat:
                 await Combat.wolfPackPrompt(game, pos, interaction)
             else:
                 save()
-                view = View()
-                for index, ship in enumerate(targets):
-                    label, emoji = Combat.getTargetButton(game, pos, ship)
-                    view.add_item(Button(label=label, emoji=emoji, style=discord.ButtonStyle.red,
-                                         custom_id=f"FCID{color}_wolfPackTarget_{pos}_{index}"))
+                view = Combat.targetChoiceView(
+                    game, pos, targets, lambda index, ship: f"FCID{color}_wolfPackTarget_{pos}_{index}")
                 await interaction.channel.send(
                     f"{player['player_name']}, choose the ship your Wolf Pack hit damages.", view=view)
 
@@ -2084,6 +2087,9 @@ class Combat:
                 pendingDice = game.gamestate["board"][pos]["pendingRiftDice"]
                 shipType = pendingDice.pop(dieId)
                 game.update()
+                if await Combat.offerRiftNineLives(game, interaction, pos, colorOrAI, player_ships,
+                                                   speed, dieNum, dieDam, int(dieId)):
+                    break
                 if all([player is not None,
                                         FactionData.has(player, "reroll_dice_with_colony_ships"),
                                         player["colony_ships"] > 0,
@@ -2116,9 +2122,6 @@ class Combat:
                         pendingDice[dieId] = shipType
                         game.update()
                         continue
-                if await Combat.offerRiftNineLives(game, interaction, pos, colorOrAI, player_ships,
-                                                   speed, dieNum, dieDam, int(dieId)):
-                    break
                 if dieNum == 2 or dieNum == 3:
                     continue
                 if dieNum == 1 or dieNum == 6:
@@ -2143,25 +2146,8 @@ class Combat:
                         "split": False, "shielded": False, "shipType": shipType})
                     await interaction.message.edit(view=None)
                     return
-                if len(hittableShips) > 1:
-                    if colorOrAI != "ai":
-                        msg = (f"{interaction.user.mention}, choose which ship to hit"
-                               f" with the die that rolled a {dieNum}. You will deal {dieDam} damage. "
-                               "The bot has calculated that you can hit these ships.")
-                        view = View()
-                        for ship in hittableShips:
-                            label, emoji = Combat.getTargetButton(game, pos, ship)
-                            buttonID = f"FCID{colorOrAI}_assignHitTo_{pos}_{colorOrAI}_{ship}_{dieNum}_{dieDam}"
-                            view.add_item(Button(label=label, emoji=emoji, style=discord.ButtonStyle.red, custom_id=buttonID))
-                        asyncio.create_task(interaction.channel.send(msg, view=view))
-                        hitsToAssign = 1
-                        if "unresolvedHits" in game.gamestate["board"][pos]:
-                            hitsToAssign = game.gamestate["board"][pos]["unresolvedHits"] + 1
-                        game.setUnresolvedHits(hitsToAssign, pos)
-                else:
-                    ship = hittableShips[0]
-                    buttonID = f"assignHitTo_{pos}_{colorOrAI}_{ship}_{dieNum}_{dieDam}"
-                    await Combat.assignHitTo(game, buttonID, interaction, False, deferEnd=dieColor == "pink")
+                await Combat.offerHitPrompt(game, interaction, pos, colorOrAI, hittableShips,
+                                            dieNum, dieDam, deferEnd=dieColor == "pink")
         if colorDie == "pink" and shipType not in game.gamestate["board"][pos]["pendingRiftDice"].values():
             await Combat.resolvePendingRiftBackfire(game, colorOrAI, interaction, pos, shipType, deferEnd=True)
             if (game.gamestate["board"][pos].get("unresolvedHits", 0) == 0
@@ -2176,7 +2162,7 @@ class Combat:
         oldShipVal = 0
         ableToKillSomething = False
         for option in hittableShips:
-            damageOnShip = game.gamestate["board"][pos].get("damage_tracker", {}).get(option, 0)
+            damageOnShip = game.ship_damage(pos, option)
             shipType = option.split("-")[1]
             shipOwner = option.split("-")[0]
             player = game.get_player_from_color(shipOwner)
@@ -2424,7 +2410,8 @@ class Combat:
             old_length = tile.pop("nineLivesOldLength", len(Combat.findPlayersInTile(game, pos)))
             if len(Combat.findPlayersInTile(game, pos)) != old_length:
                 await Combat.checkCombatEnd(game, interaction, pos, old_length)
-            elif not tile.get("unresolvedHits", 0) and not tile.get("lyraRerollPending"):
+            elif (not tile.get("unresolvedHits", 0) and not tile.get("lyraRerollPending")
+                  and not tile.get("pendingRiftDice")):
                 await Combat.promptNextSpeed(game, pos, interaction.channel, True)
             game.update()
         await interaction.message.edit(view=None)
@@ -2473,10 +2460,11 @@ class Combat:
                         for ship in Combat.getCombatantShipsBySpeed(game, playerColor, ships, pos):
                             shipModel = PlayerShip(game.gamestate["players"][player], ship[1])
                             shipName = playerColor + "-" + ship[1]
-                            if shipModel.repair > 0 and game.gamestate["board"][pos].get(
-                                    "damage_tracker", {}).get(shipName, 0) > 0:
-                                game.repair_damage(shipName, pos)
-                                repaired += 1
+                            if shipModel.repair > 0:
+                                for target in game.damage_targets(pos, shipName):
+                                    if game.ship_damage(pos, target) > 0:
+                                        game.repair_damage(target, pos)
+                                        repaired += 1
                         if repaired:
                             await channel.send(f"{playerObj['player_name']} repaired {repaired} damage"
                                                " with Regenerative Hull.")
@@ -2485,13 +2473,12 @@ class Combat:
                     player = game.get_player_from_color(playerColor)
                     shipModel = PlayerShip(game.gamestate["players"][player], ship[1])
                     shipName = playerColor + "-" + ship[1]
-                    if shipModel.repair > 0 and shipName in game.gamestate["board"][pos].get("damage_tracker", []):
-                        if game.gamestate["board"][pos]["damage_tracker"][shipName] > 0:
-                            game.repair_damage(shipName, pos)
-                            message = (f"{game.gamestate['players'][player]['player_name']} repaired 1 damage"
-                                       f" on their {Combat.translateShipAbrToName(ship[1])} using a morph shield.")
-                            await channel.send(message)
-                            break
+                    if shipModel.repair > 0 and game.ship_damage(pos, shipName) > 0:
+                        game.repair_damage(shipName, pos)
+                        message = (f"{game.gamestate['players'][player]['player_name']} repaired 1 damage"
+                                   f" on their {Combat.translateShipAbrToName(ship[1])} using a morph shield.")
+                        await channel.send(message)
+                        break
 
     @staticmethod
     def pairingStillPresent(game: GamestateHelper, pos: str):
@@ -2711,8 +2698,7 @@ class Combat:
                         game, colorOrAI, pos, Combat.translateShipAbrToName(shiptype)).get("speed", 0)
                         + Combat.solitary_hunter_bonus(game, pos, colorOrAI)
                         == int(speed)):
-                    game.remove_units([ship], pos)
-                    game.add_units([ship], destination)
+                    game.move_unit(ship, pos, destination)
         if playerObj is None:
             playerObj = game.getPlayerObjectFromColor(colorOrAI)
         await interaction.message.delete()
@@ -3419,26 +3405,42 @@ class Combat:
         return False
 
     @staticmethod
+    def hitTargetPresent(game, pos, target):
+        ship = target.partition(":")[0]
+        ships = game.gamestate["board"][pos]["player_ships"]
+        return (ship in ships or ship + "adv" in ships) and game.ship_damage(pos, target) is not None
+
+    @staticmethod
     async def assignHitTo(game: GamestateHelper, buttonID: str, interaction: discord.Interaction, button: bool,
                           deferEnd: bool = False, reports=None):
         pos = buttonID.split("_")[1]
         colorOrAI = buttonID.split("_")[2]
-        ship = buttonID.split("_")[3]
+        target = buttonID.split("_")[3]
+        ship = target.partition(":")[0]
         dieNum = buttonID.split("_")[4]
         dieDam = buttonID.split("_")[5]
         carapace_bypass = dieDam.endswith("!")
         dieDam = dieDam.rstrip("!")
         deferEnd = deferEnd or buttonID.endswith("_defer")
         tile = game.gamestate["board"][pos]
-        if ship not in tile["player_ships"] and ship + "adv" not in tile["player_ships"]:
+        if not Combat.hitTargetPresent(game, pos, target):
             if not button:
                 return
             view = View.from_message(interaction.message)
+
+            def target_present(custom_id):
+                if custom_id.startswith("FCID"):
+                    custom_id = custom_id.split("_", 1)[1]
+                return Combat.hitTargetPresent(game, pos, custom_id.split("_")[3])
+
             for item in list(view.children):
-                custom_id = item.custom_id.split("_", 1)[1] if item.custom_id.startswith("FCID") else item.custom_id
-                target = custom_id.split("_")[3]
-                if target not in tile["player_ships"] and target + "adv" not in tile["player_ships"]:
-                    view.remove_item(item)
+                if isinstance(item, discord.ui.Select):
+                    item.options = [option for option in item.options if target_present(option.value)]
+                    if item.options:
+                        continue
+                elif target_present(item.custom_id):
+                    continue
+                view.remove_item(item)
             if view.children:
                 await interaction.message.edit(content="That ship was destroyed. Choose a remaining target for this hit.",
                                                view=view)
@@ -3466,7 +3468,7 @@ class Combat:
         damage_value = int(dieDam) if carapace_bypass else Carapace.incoming_damage(
             game, pos, shipOwner, ship_class, colorOrAI, int(dieDam))
         with game.batch_save():
-            damage = game.add_damage(ship, pos, damage_value)
+            damage = game.add_damage(target, pos, damage_value)
             if colorOrAI != "ai":
                 msg = (f"{interaction.user.mention} dealt {damage_value} damage to a"
                        f" {Combat.translateShipAbrToName(shipType)}{suffix} with a die that rolled a {str(dieNum)}. ")
@@ -3483,7 +3485,7 @@ class Combat:
                 if colorOrAI not in ship:
                     if ship.startswith("ai-anc"):
                         game.gamestate["board"][pos]["ancientDestroyedInPairing"] = True
-                    gained = game.destroy_ship(ship, pos, colorOrAI)
+                    gained = game.destroy_ship(target, pos, colorOrAI)
                 else:
                     dummyKiller = "ai"
                     attackerSide = Combat.sideOf(game.gamestate["board"][pos].get("attacker"))
@@ -3492,7 +3494,7 @@ class Combat:
                         dummyKiller = attackerSide[0]
                     if defenderSide and colorOrAI not in defenderSide:
                         dummyKiller = defenderSide[0]
-                    gained = game.destroy_ship(ship, pos, dummyKiller)
+                    gained = game.destroy_ship(target, pos, dummyKiller)
                 if gained:
                     owner = game.getPlayerObjectFromColor(shipOwner)
                     msg += f" Call To Arms: {owner['player_name']} gained {gained} materials. "
