@@ -1,5 +1,7 @@
 """Hegemony of the Highest Cushion: Nine Lives, Pounce and Solitary Hunter."""
 
+import pytest
+
 from helpers.CombatHelper import Combat
 from helpers.DrawHelper import DrawHelper
 from tests.fakes import (FakeChannel, FakeInteraction, buttons, player_helper, player_stats,
@@ -372,3 +374,54 @@ def test_nine_lives_offers_once_for_a_split_die(make_game, no_random, run, press
     press(channel, 1, next(cid for cid in buttons(channel)
                            if cid.startswith("FCIDblue_nineLives_101_pass_")))
     assert "blue-cru" not in reload(game).gamestate["board"]["101"]["player_ships"]
+
+
+def test_auto_roll_pauses_on_ancient_nine_lives_hit(make_game, no_random, run):
+    game = _combat_game(make_game, ["ai-anc", "blue-cru"], "ai", "blue",
+                        {"currentSpeed": 2, "currentRoller": "ai", "combatants": ["blue", "ai"]})
+    no_random([6, 2])
+    interaction = FakeInteraction()
+
+    run(Combat.autoRollCombat(game, "autoRollCombat_101", interaction, game.get_player(1)))
+
+    assert any("manual choice is needed" in content for content, _ in interaction.channel.sent)
+    assert game.gamestate["board"]["101"]["nineLivesPending"]
+
+
+@pytest.mark.parametrize("choice, rolls, damage", [
+    ("pass", [6], {"blue-cru": 3, "red-int": 1}),
+    ("reroll", [6, 4], {"blue-cru": 1}),
+    ("reroll", [4, 1], {"red-int": 1}),
+])
+def test_nine_lives_resolves_only_the_final_rift_face(make_game, no_random, run, press, choice, rolls, damage):
+    players = {"1": player_stats("heg", color="blue", colony_ships=1),
+               "2": player_stats("eri", color="red", interceptor_parts=["rican", "hul"])}
+    game = _combat_game(make_game, ["red-int", "blue-cru"], "red", "blue", players=players)
+    channel = FakeChannel("aeb1-actions")
+    game.get_player(1)["cruiser_parts"] = ["hul"] * 3
+    game.update()
+    no_random(rolls)
+
+    run(Combat.rollDice(game, "rollDice_101_red_2_deleteMsg", FakeInteraction(channel)))
+    assert not game.gamestate["board"]["101"].get("damage_tracker")
+    answer = next(cid for cid in buttons(channel) if f"_nineLives_101_{choice}_" in cid)
+    press(channel, 1, answer)
+
+    assert reload(game).gamestate["board"]["101"]["damage_tracker"] == damage
+
+
+def test_rift_backfire_waits_for_the_held_hit(make_game, no_random, run, press):
+    players = {"1": player_stats("heg", color="blue", cruiser_parts=["hul"] * 2),
+               "2": player_stats("eri", color="red", interceptor_parts=["rican", "rican"])}
+    game = _combat_game(make_game, ["red-int", "blue-cru"], "red", "blue", players=players)
+    channel = FakeChannel("aeb1-actions")
+    no_random([1, 6])
+
+    run(Combat.rollDice(game, "rollDice_101_red_2_deleteMsg", FakeInteraction(channel)))
+    assert "red-int" in game.gamestate["board"]["101"]["player_ships"]
+    answer = next(cid for cid in buttons(channel) if "_nineLives_101_pass_" in cid)
+    press(channel, 1, answer)
+
+    tile = reload(game).gamestate["board"]["101"]
+    assert "red-int" not in tile["player_ships"]
+    assert "blue-cru" not in tile["player_ships"]

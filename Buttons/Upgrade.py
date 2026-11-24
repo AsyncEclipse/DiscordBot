@@ -111,7 +111,8 @@ class UpgradeButtons:
             shipEmoji = Emoji.getEmojiByName(player['color'] + game.getShipShortName(ship))
             view.add_item(Button(label=ship.capitalize(), emoji=shipEmoji, style=discord.ButtonStyle.blurple,
                                  custom_id=f"FCID{player['color']}_upgradeShip_{actions}_{ship}_{discTileUpgrade}"))
-        if FactionData.has(player, "adaptive_transformation") and int(actions) > 0:
+        if (discTileUpgrade in ("dummy", "free") and int(actions) > 0
+                and FactionData.has(player, "adaptive_transformation")):
             view.add_item(Button(label="Adaptive Transformation", style=discord.ButtonStyle.green,
                                  custom_id=f"FCID{player['color']}_adaptiveStart_{actions}_{discTileUpgrade}"))
         if not view.children:
@@ -298,8 +299,8 @@ class UpgradeButtons:
                 await interaction.followup.send("That ship slot has changed. Please use the latest upgrade menu.",
                                                 ephemeral=True)
                 return
-        # in free mode "empty" really empties the slot instead of reverting it
-        isFreeRemoval = newPart == "empty" and discTileUpgrade != "free"
+        # The manual editor allows an empty slot over a printed part.
+        isFreeRemoval = newPart == "empty" and (discTileUpgrade != "free" or cog_free)
         if isFreeRemoval:
             newPart = player[f"old_{ship}_parts"][index]
             if newPart == oldPart:
@@ -436,6 +437,9 @@ class UpgradeButtons:
                             customID: str):
         parts = customID.split("_")
         actions, mode = parts[1], parts[2]
+        if mode not in ("dummy", "free"):
+            await interaction.followup.send("That Adaptive Transformation is no longer legal.", ephemeral=True)
+            return
         view = View()
         for pos in game.gamestate["board"]:
             if UpgradeButtons.adaptiveSwaps(game, player, pos):
@@ -486,7 +490,7 @@ class UpgradeButtons:
                            customID: str, player_helper: PlayerHelper):
         parts = customID.split("_")
         source, target, pos, actions, mode = parts[1], parts[2], parts[3], int(parts[4]), parts[5]
-        if (source, target) not in ADAPTIVE_SWAPS:
+        if mode not in ("dummy", "free") or (source, target) not in ADAPTIVE_SWAPS:
             await interaction.followup.send("That Adaptive Transformation is no longer legal.", ephemeral=True)
             return
         source_count, target_count, materials = ADAPTIVE_SWAPS[(source, target)]

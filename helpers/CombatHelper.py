@@ -269,8 +269,10 @@ class Combat:
         tile["firstShotSide"] = Combat.firstShotSideOf(game, tile["attacker"], tile["defender"])
         tile["firstShotPhase"] = "opponent" if tile["firstShotSide"] else None
         tile["engagementRound"] = 1
+        tile.pop("ancientDestroyedInPairing", None)
         tile.pop("pounceRound", None)
         tile.pop("nineLivesPending", None)
+        tile.pop("nineLivesRiftBackfire", None)
         tile.pop("lyraRerollPending", None)
         tile.pop("lyraRerollToken", None)
         tile.pop("rolledSteps", None)
@@ -1018,6 +1020,7 @@ class Combat:
                     or any(tile.get("pendingRiftBackfire", {}).values())
                     or tile.get("wolfPack") or tile.get("carapacePendingMissiles")
                     or tile.get("ghostsRetreatPending")
+                    or tile.get("nineLivesPending") or tile.get("lyraRerollPending")
                     or (tile.get("phaseModuleColors") and not tile.get("phaseModulePrompted"))
                     or any(not state.get("done") for state in tile.get("carapaceShields", {}).values()))
 
@@ -1229,6 +1232,13 @@ class Combat:
     @staticmethod
     async def applyRiftBackfire(game: GamestateHelper, colorOrAI, interaction: discord.Interaction, pos, totalDamage,
                                 deferEnd: bool = False):
+        tile = game.gamestate["board"][pos]
+        if tile.get("nineLivesPending"):
+            # A shooter lost to backfire still gets all the hits from this salvo.
+            pending = tile.setdefault("nineLivesRiftBackfire", {})
+            pending[colorOrAI] = pending.get(colorOrAI, 0) + totalDamage
+            game.update()
+            return
         reports = []
         for ship, damage in Combat.getRiftBackfireAllocation(game, colorOrAI,
                                                              game.gamestate["board"][pos]["player_ships"][:],
@@ -1355,12 +1365,14 @@ class Combat:
         game.setUnresolvedHits(hitsToAssign, pos)
         pendingDice = game.gamestate["board"][pos]["pendingRiftDice"]
         shipType = pendingDice.pop(str(counter))
-        if dieNum == 1 or dieNum == 6:
+        held = await Combat.offerRiftNineLives(game, interaction, pos, colorOrAI, player_ships,
+                                              speed, dieNum, dieDam, counter)
+        if not held and (dieNum == 1 or dieNum == 6):
             pendingBackfire = game.gamestate["board"][pos].setdefault("pendingRiftBackfire", {})
             pendingBackfire[shipType] = pendingBackfire.get(shipType, 0) + 1
         game.update()
         update = False
-        if dieNum > 3:
+        if dieNum > 3 and not held:
             hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships,
                                                                 6, 0, pos, speed)
         if len(hittableShips) > 0:
@@ -1396,7 +1408,7 @@ class Combat:
         board = game.gamestate["board"][pos]
         if shipType not in pendingDice.values():
             await Combat.resolvePendingRiftBackfire(game, colorOrAI, interaction, pos, shipType, deferEnd=True)
-        if speed != 1000:
+        if speed != 1000 and not Combat.has_pending_nine_lives(game, pos):
             if "unresolvedHits" in game.gamestate["board"][pos]:
                 hitsToAssign = board["unresolvedHits"]
             salvoDone = hitsToAssign == 0 and not pendingDice
@@ -1583,7 +1595,8 @@ class Combat:
                                 pos, speed, ignoreShields):
                             hits = [sum(hits)]
                         die_total = sum(hits)
-                        for hit in hits:
+                        # A Rift miss can still backfire or be rerolled by Lyra.
+                        for hit in hits or ([0] if die == "pink" else []):
                             dieNums.append([random_number, hit, die, source, roll_id, die_total])
                 if computerVal > 0:
                     msg += Combat.computer_message(game, pos, colorOrAI, speed, computerVal, shipModel)
@@ -1718,6 +1731,9 @@ class Combat:
                                     pendingDice[str(counter)] = rollerType
                                     game.update()
                                     continue
+                            if await Combat.offerRiftNineLives(game, interaction, pos, colorOrAI, player_ships,
+                                                               speed, dieNum, dieDam, counter):
+                                continue
                             if dieNum == 2 or dieNum == 3:
                                 continue
                             if dieNum == 1 or dieNum == 6:
@@ -1758,7 +1774,8 @@ class Combat:
                                                        deferEnd=True)
                         deferredEnd = True
 
-        if deferredEnd and not is_wolf:
+        if (deferredEnd and not is_wolf
+                and (speed != 1000 or oldLength != len(Combat.findPlayersInTile(game, pos)))):
             await Combat.checkCombatEnd(game, interaction, pos, oldLength)
         hitsToAssign = 0
         if (speed != 1000 and not Carapace.has_pending_missiles(game, pos)
@@ -2099,6 +2116,9 @@ class Combat:
                         pendingDice[dieId] = shipType
                         game.update()
                         continue
+                if await Combat.offerRiftNineLives(game, interaction, pos, colorOrAI, player_ships,
+                                                   speed, dieNum, dieDam, int(dieId)):
+                    break
                 if dieNum == 2 or dieNum == 3:
                     continue
                 if dieNum == 1 or dieNum == 6:
@@ -2107,8 +2127,12 @@ class Combat:
                     game.update()
                 if dieNum > 3:
                     hittableShips = Combat.getOpponentUnitsThatCanBeHit(game, colorOrAI, player_ships,
-                                                                        6, computerVal, pos, 3, ignoreShields)
-            if len(hittableShips) > 0:
+                                                                        6, computerVal, pos, speed, ignoreShields)
+            if hittableShips and speed == 1000:
+                await interaction.channel.send(
+                    f"{interaction.user.name}, choose what population to hit with the die that rolled a {dieNum}.",
+                    view=Combat.getPopulationTargetView(colorOrAI, pos, hittableShips))
+            elif hittableShips:
                 nineLives = Combat.nine_lives_target(game, pos, colorOrAI, hittableShips)
                 if (dieColor != "pink" and nineLives
                         and oldNumPeeps == len(Combat.findPlayersInTile(game, pos))):
@@ -2140,7 +2164,8 @@ class Combat:
                     await Combat.assignHitTo(game, buttonID, interaction, False, deferEnd=dieColor == "pink")
         if colorDie == "pink" and shipType not in game.gamestate["board"][pos]["pendingRiftDice"].values():
             await Combat.resolvePendingRiftBackfire(game, colorOrAI, interaction, pos, shipType, deferEnd=True)
-            if game.gamestate["board"][pos].get("unresolvedHits", 0) == 0:
+            if (game.gamestate["board"][pos].get("unresolvedHits", 0) == 0
+                    and (speed != 1000 or oldNumPeeps != len(Combat.findPlayersInTile(game, pos)))):
                 await Combat.checkCombatEnd(game, interaction, pos, oldNumPeeps)
         await interaction.message.delete()
 
@@ -2209,6 +2234,8 @@ class Combat:
         tile = game.gamestate["board"].get(pos, {})
         if (tile.get("lyraRerollPending") or tile.get("nineLivesPending")
                 or tile.get("unresolvedHits", 0)):
+            return
+        if tile.get("currentSpeed") == 1000:
             return
         if len(Combat.findPlayersInTile(game, pos)) != old_length:
             await Combat.checkCombatEnd(game, interaction, pos, old_length)
@@ -2289,6 +2316,20 @@ class Combat:
                                              len(Combat.findPlayersInTile(game, pos)))
 
     @staticmethod
+    async def offerRiftNineLives(game, interaction, pos, roller, ships, speed, face, damage, counter):
+        if face <= 3 or speed == 1000:
+            return False
+        targets = Combat.getOpponentUnitsThatCanBeHit(game, roller, ships, 6, 0, pos, speed)
+        defender = Combat.nine_lives_target(game, pos, roller, targets)
+        if not defender:
+            return False
+        await Combat.offerNineLives(game, interaction, pos, defender, {
+            "roller": roller, "computer": 0, "speed": speed, "dieNum": face,
+            "hits": [damage], "dieColor": "pink", "counter": counter, "ignore": False,
+            "damageBonus": 0, "split": False, "shielded": False})
+        return True
+
+    @staticmethod
     async def offerNineLives(game: GamestateHelper, interaction: discord.Interaction, pos: str,
                              defender: str, entry: dict):
         """Hegemony: let their defender flip a colony ship before this die's hit is assigned."""
@@ -2338,8 +2379,10 @@ class Combat:
                     f"{interaction.user.mention} flipped a Colony Ship for Nine Lives: the die that rolled"
                     f" {Combat.die_face(interaction, entry['dieColor'], entry['dieNum'])} is rerolled into a"
                     f" {Combat.die_face(interaction, entry['dieColor'], dieNum)}.")
+        rift = entry["dieColor"] == "pink"
+        hit_face = (6 if dieNum > 3 else 1) if rift else dieNum
         hittable = Combat.getOpponentUnitsThatCanBeHit(
-            game, entry["roller"], tile["player_ships"][:], dieNum, entry["computer"],
+            game, entry["roller"], tile["player_ships"][:], hit_face, entry["computer"],
             pos, entry["speed"], entry["ignore"])
         game.update()
         defender = Combat.nine_lives_target(game, pos, entry["roller"], hittable) if mode == "reroll" else None
@@ -2355,7 +2398,7 @@ class Combat:
                 for index, damage in enumerate(hits):
                     ships = game.gamestate["board"][pos]["player_ships"][:]
                     targets = Combat.getOpponentUnitsThatCanBeHit(
-                        game, entry["roller"], ships, dieNum, entry["computer"],
+                        game, entry["roller"], ships, hit_face, entry["computer"],
                         pos, entry["speed"], entry["ignore"])
                     if not targets:
                         break
@@ -2370,8 +2413,14 @@ class Combat:
                 await Combat.offerLyraReroll(game, interaction, pos, entry)
             else:
                 await interaction.channel.send("The rerolled die misses.")
+        if rift and not defender and dieNum in (1, 6):
+            backfire = tile.setdefault("nineLivesRiftBackfire", {})
+            roller = entry["roller"]
+            backfire[roller] = backfire.get(roller, 0) + 1
         game.update()
         if not pending:
+            for roller, damage in tile.pop("nineLivesRiftBackfire", {}).items():
+                await Combat.applyRiftBackfire(game, roller, interaction, pos, damage, deferEnd=True)
             old_length = tile.pop("nineLivesOldLength", len(Combat.findPlayersInTile(game, pos)))
             if len(Combat.findPlayersInTile(game, pos)) != old_length:
                 await Combat.checkCombatEnd(game, interaction, pos, old_length)
@@ -2416,7 +2465,9 @@ class Combat:
                 playerObj = game.getPlayerObjectFromColor(playerColor)
                 if FactionData.has(playerObj, "regenerative_hull"):
                     # Heal every ship that still has a repair part, unless this pairing includes the Ancients.
-                    if not ("ai" in players and any("anc" in ship for ship in ships)):
+                    tile = game.gamestate["board"][pos]
+                    if not ("ai" in players and (tile.get("ancientDestroyedInPairing")
+                                                 or any(ship.startswith("ai-anc") for ship in ships))):
                         repaired = 0
                         player = game.get_player_from_color(playerColor)
                         for ship in Combat.getCombatantShipsBySpeed(game, playerColor, ships, pos):
@@ -3350,7 +3401,6 @@ class Combat:
             tile = game.gamestate["board"][pos]
             if not Combat.pairingStillPresent(game, pos):
                 # The pairing that just ended repairs at the end of its last round.
-                # shortcut: an Ancient killed in that round no longer blocks the heal.
                 await Combat.checkForMorphShield(game, pos, interaction.channel, tile["player_ships"],
                                                  Combat.sideOf(tile.get("attacker"))
                                                  + Combat.sideOf(tile.get("defender")))
@@ -3431,6 +3481,8 @@ class Combat:
                 game.setUnresolvedHits(hitsToAssign, pos)
             if shipModel.hull < damage:
                 if colorOrAI not in ship:
+                    if ship.startswith("ai-anc"):
+                        game.gamestate["board"][pos]["ancientDestroyedInPairing"] = True
                     gained = game.destroy_ship(ship, pos, colorOrAI)
                 else:
                     dummyKiller = "ai"

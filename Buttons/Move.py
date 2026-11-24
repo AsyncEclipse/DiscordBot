@@ -212,7 +212,7 @@ class MoveButtons:
         if "_" in buttonID:
             moveCount = buttonID.split("_")[1]
         # 8 is the free-move sentinel a discovery tile starts; it spends no activation.
-        if not nested and int(moveCount) > player["move_apt"] and int(moveCount) != 8:
+        if not nested and int(moveCount) > FactionData.action_apt(player, "move") and int(moveCount) != 8:
             if button:
                 await interaction.message.delete()
             await MoveButtons.sendMoveContinuation(game, player, interaction, int(moveCount) - 1)
@@ -590,7 +590,7 @@ class MoveButtons:
                              custom_id=f"FCID{player['color']}_finishAction"))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray,
                              custom_id=f"FCID{player['color']}_restartTurn"))
-        moves_left = max(0, player["move_apt"] - moveCount)
+        moves_left = max(0, FactionData.action_apt(player, "move") - moveCount)
         await interaction.channel.send(f"{interaction.user.mention} you may move an additional ship"
                                        f" if you still have move activations ({moves_left} left),"
                                        " or end your action.", view=view)

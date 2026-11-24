@@ -44,6 +44,8 @@ def test_tech_masters_adds_the_full_surcharge_after_discounts_and_minimum(uses, 
     player["techMasterUses"] = uses
     player["military_tech"] = ["neb", "stb", "plc", "phs", "adm", "tas"]
     tech = {"track": "grid", "base_cost": 6, "min_cost": 4}
+    assert ResearchButtons.calculate_cost(tech, "military", player) == 5 + extra
+    player["grid_tech"] = ["gas"] * 7
     assert ResearchButtons.calculate_cost(tech, "military", player) == 4 + extra
 
 
@@ -71,9 +73,9 @@ def test_tech_masters_offers_every_tray_and_records_a_wrong_one(run):
     assert player["science"] == 20 - 4
 
 
-@pytest.mark.parametrize("grid_count", [0, 7])
-def test_tech_masters_menu_uses_the_cheapest_open_tray(make_game, run, grid_count):
-    player = player_stats("vor", science=10, money=0, materials=0)
+@pytest.mark.parametrize("grid_count, cost", [(0, 15), (7, 10)])
+def test_tech_masters_menu_uses_the_cheapest_open_tray(make_game, run, grid_count, cost):
+    player = player_stats("vor", science=15, money=0, materials=0)
     player["military_tech"] = ["neb", "stb", "plc", "phs", "adm", "tas"]
     player["grid_tech"] = ["gas", "fus", "imh", "poc", "ade", "tad", "anc"][:grid_count]
     game = make_game({"players": {"1": player}, "available_techs": ["qug"]})
@@ -81,12 +83,14 @@ def test_tech_masters_menu_uses_the_cheapest_open_tray(make_game, run, grid_coun
 
     run(ResearchButtons.startResearch(game, player, PlayerHelper("1", player), interaction, False))
 
-    assert buttons(interaction.channel)["FCIDblue_getTech_qug_grid"] == "Quantum Grid (10)"
+    assert buttons(interaction.channel)["FCIDblue_getTech_qug_grid"] == f"Quantum Grid ({cost})"
     run(ResearchButtons.getTech(game, player, PlayerHelper("1", player), interaction,
                                 "getTech_qug_grid"))
-    assert buttons(interaction.channel)["FCIDblue_getTech_qug_military_tm"] == "Military (8 + 2 = 10)"
-    assert "FCIDblue_getTech_qug_grid_tm" not in buttons(interaction.channel)
-    expected = "Grid is full" if grid_count == 7 else "Grid costs 15 science and is unaffordable"
+    military_offer = buttons(interaction.channel).get("FCIDblue_getTech_qug_military_tm")
+    assert military_offer == ("Military (8 + 2 = 10)" if grid_count else None)
+    grid_offer = buttons(interaction.channel).get("FCIDblue_getTech_qug_grid_tm")
+    assert grid_offer == (None if grid_count else "Grid (15)")
+    expected = "Grid is full" if grid_count == 7 else "Military costs 17 science and is unaffordable"
     assert expected in interaction.channel.sent[-1][0]
 
 
@@ -106,7 +110,7 @@ def test_organic_tech_gives_a_free_upgrade_after_research(start_game, press):
     assert after["science"] == 38
     offer = next(cid for cid in buttons(channel)
                  if cid.startswith("FCIDblue_ancientInstinctUpgrade_"))
-    assert offer == "FCIDblue_ancientInstinctUpgrade_gas"
+    assert offer == "FCIDblue_ancientInstinctUpgrade_gas_offer"
 
     discs = after["influence_discs"]
     press(channel, 1, offer)
@@ -223,3 +227,15 @@ def test_centre_gives_vorlons_two_points_and_others_none(make_game):
     assert points("vor", "red") == 0
     assert points("hyd", "blue") == 0
     assert points("vor", "red", alliances="al") == 4  # the Centre plus the faceup Alliance Tile
+
+
+def test_regenerative_hull_skips_heal_when_last_ancient_dies(make_game, run):
+    game = _damaged_vorlons_cruiser(
+        make_game, ["ai-anc", "red-cru", "blue-cru"], ("blue", "ai"))
+
+    run(Combat.assignHitTo(game, "assignHitTo_101_blue_ai-anc_6_6", FakeInteraction(), False))
+
+    tile = reload(game).gamestate["board"]["101"]
+    assert tile["defender"] != "ai"
+    assert "ai-anc" not in tile["player_ships"]
+    assert tile["damage_tracker"]["blue-cru"] == 1

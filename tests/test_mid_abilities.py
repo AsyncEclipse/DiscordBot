@@ -1,4 +1,5 @@
 """Legion of Midas: Midas Touch and All That Glitters."""
+from Buttons.Move import MoveButtons
 from Buttons.Turn import TurnButtons
 from Buttons.Explore import ExploreButtons
 from helpers import FactionData
@@ -108,3 +109,16 @@ def test_second_explore_retires_the_first_finish_prompt(start_game, run, press):
                              for item in getattr(kwargs.get("view"), "children", []))
                       and message.id not in channel.deleted]
     assert len(finish_prompts) == 1
+
+
+def test_paid_third_move_opens_the_ship_selection(start_game, press, run):
+    game, channel = start_game(factions=["mid", "eri"])
+    player = game.get_player(1)
+    player["midasBoost"] = "move"
+    game.update()
+
+    run(MoveButtons.sendMoveContinuation(game, player, FakeInteraction(channel), 2))
+    assert "(1 left)" in channel.sent[-1][0]
+    press(channel, 1, "FCIDblue_startMove_3")
+
+    assert "FCIDblue_moveFrom_201_3" in buttons(channel)

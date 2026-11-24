@@ -36,7 +36,7 @@ def test_ancient_instinct_offers_upgrade_for_researched_part(run, faction, tech,
     run(ResearchButtons.getTech(FakeGame(player), player, PlayerHelper("1", player), interaction,
                                 f"getTech_{tech}_grid"))
 
-    expected = {f"FCIDblue_ancientInstinctUpgrade_{tech}"} if offered else set()
+    expected = {f"FCIDblue_ancientInstinctUpgrade_{tech}_offer"} if offered else set()
     assert set(buttons(interaction.channel)) == expected
 
 
@@ -68,3 +68,13 @@ def test_ancient_instinct_installs_the_researched_part_for_free(start_game, pres
     assert after["influence_discs"] == discs
     assert after["upgrade_action_counters"] == 0
     assert "Replaced Ion Cannon with Phase Shield" in after["detailsOflastAction"]
+
+
+def test_already_posted_ancient_instinct_offer_works_without_saved_offer(start_game, press):
+    game, channel = start_game(factions=["atl", "eri"])
+    game.get_player(1)["grid_tech"].append("phs")
+    game.update()
+
+    press(channel, 1, "FCIDblue_ancientInstinctUpgrade_phs")
+
+    assert "FCIDblue_upgradeShip_1_interceptor_phs" in buttons(channel)

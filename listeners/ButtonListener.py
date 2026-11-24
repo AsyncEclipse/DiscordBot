@@ -322,8 +322,11 @@ class ButtonListener(commands.Cog):
         elif customID.startswith("getTech"):
             task_result = await ResearchButtons.getTech(game, player, player_helper, interaction, customID)
         elif customID.startswith("ancientInstinctUpgrade"):
-            tech = customID.split("_")[1]
-            if player.get("researchUpgrade") != tech:
+            parts = customID.split("_")
+            tech = parts[1]
+            legacy = (len(parts) == 2 and "researchUpgrade" not in player
+                      and FactionData.has(player, "upgrade_after_research") and tech in player_helper.getTechs())
+            if not legacy and player.get("researchUpgrade") != tech:
                 await interaction.followup.send("That free upgrade offer has expired.", ephemeral=True)
                 return
             await interaction.message.delete()

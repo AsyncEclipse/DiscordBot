@@ -176,7 +176,7 @@ class ResearchButtons:
         game.update_player(PlayerHelper(game.get_player_from_color(player["color"]), player))
         view = View()
         view.add_item(Button(label="Perform Upgrade 1", style=discord.ButtonStyle.blurple,
-                             custom_id=f"FCID{player['color']}_ancientInstinctUpgrade_{tech}"))
+                             custom_id=f"FCID{player['color']}_ancientInstinctUpgrade_{tech}_offer"))
         await interaction.channel.send(f"{player['player_name']}, {ability} lets you perform one "
                                        f"free upgrade using {tech_details['name']}.", view=view)
 
@@ -190,9 +190,12 @@ class ResearchButtons:
     @staticmethod
     def calculate_cost(tech_details, tech_type, player):
         max_techs = FactionData.tech_track_max(player)
+        wrong_tray = (FactionData.has(player, "tech_masters") and tech_details["track"] != "any"
+                      and tech_type != tech_details["track"])
+        discount_track = tech_details["track"] if wrong_tray else tech_type
         prev_tech_count = 0
-        if tech_type != "any":
-            prev_tech_count = len(player[f"{tech_type}_tech"])
+        if discount_track != "any":
+            prev_tech_count = min(len(player[f"{discount_track}_tech"]), max_techs - 1)
         else:
             for track in ("nano_tech", "grid_tech", "military_tech"):
                 if len(player[track]) < max_techs:
@@ -205,8 +208,7 @@ class ResearchButtons:
                 if "tech discount" in rep:
                     discount -= 1
         cost = max(tech_details["base_cost"] + discount, tech_details["min_cost"])
-        if (FactionData.has(player, "tech_masters") and tech_details["track"] != "any"
-                and tech_type != tech_details["track"]):
+        if wrong_tray:
             # Tech Masters: placing a Tech in the wrong tray costs extra, never discounted.
             extra = FactionData.tech_masters_extra(player)
             cost += extra["first"] + extra["step"] * player.get("techMasterUses", 0)

@@ -238,3 +238,27 @@ def test_adaptive_back_returns_to_the_normal_upgrade_menu(start_game, press):
     press(channel, 1, back)
 
     assert any(cid.startswith("FCIDblue_upgradeShip_") for cid in buttons(channel))
+
+
+@pytest.mark.parametrize("old_part", ["ioc", "hul"])
+def test_free_cog_upgrade_only_removes_installed_parts(start_game, press, old_part):
+    game, channel = start_game(factions=["cog", "eri"])
+    player = game.get_player(1)
+    player["old_interceptor_parts"] = player["interceptor_parts"][:]
+    player["interceptor_parts"][0] = old_part
+    game.update()
+    press(channel, 1, "FCIDblue_startBuild")
+    press(channel, 1, "FCIDblue_infiniteUpgrade_build")
+
+    press(channel, 1, f"FCIDblue_chooseUpgrade_1_interceptor_{old_part}_empty_0_free")
+
+    assert reload(game).get_player(1)["interceptor_parts"][0] == "ioc"
+
+
+def test_discovery_part_install_does_not_offer_adaptive_transformation(start_game, run):
+    game, channel = start_game(factions=["cog", "eri"])
+
+    run(UpgradeButtons.startUpgrade(game, game.get_player(1), FakeInteraction(channel), False, "mus", "dum"))
+
+    assert any(cid.endswith("_mus") for cid in buttons(channel))
+    assert not any("_adaptiveStart_" in cid for cid in buttons(channel))
