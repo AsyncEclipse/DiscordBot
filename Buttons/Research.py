@@ -192,7 +192,8 @@ class ResearchButtons:
         max_techs = FactionData.tech_track_max(player)
         wrong_tray = (FactionData.has(player, "tech_masters") and tech_details["track"] != "any"
                       and tech_type != tech_details["track"])
-        discount_track = tech_details["track"] if wrong_tray else tech_type
+        # like a Rare Tech, the discount follows the tray the tile goes into
+        discount_track = tech_type
         prev_tech_count = 0
         if discount_track != "any":
             prev_tech_count = min(len(player[f"{discount_track}_tech"]), max_techs - 1)

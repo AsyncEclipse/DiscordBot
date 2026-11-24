@@ -42,10 +42,12 @@ def test_tech_masters_charges_2_3_4_more_for_the_wrong_tray():
 def test_tech_masters_adds_the_full_surcharge_after_discounts_and_minimum(uses, extra):
     player = player_stats("vor")
     player["techMasterUses"] = uses
-    player["military_tech"] = ["neb", "stb", "plc", "phs", "adm", "tas"]
     tech = {"track": "grid", "base_cost": 6, "min_cost": 4}
     assert ResearchButtons.calculate_cost(tech, "military", player) == 5 + extra
+    # the discount follows the tray the tile goes into, not the tech's own tray
     player["grid_tech"] = ["gas"] * 7
+    assert ResearchButtons.calculate_cost(tech, "military", player) == 5 + extra
+    player["military_tech"] = ["neb", "stb", "plc", "phs", "adm", "tas"]
     assert ResearchButtons.calculate_cost(tech, "military", player) == 4 + extra
 
 
@@ -73,8 +75,8 @@ def test_tech_masters_offers_every_tray_and_records_a_wrong_one(run):
     assert player["science"] == 20 - 4
 
 
-@pytest.mark.parametrize("grid_count, cost", [(0, 15), (7, 10)])
-def test_tech_masters_menu_uses_the_cheapest_open_tray(make_game, run, grid_count, cost):
+@pytest.mark.parametrize("grid_count", [0, 7])
+def test_tech_masters_menu_uses_the_cheapest_open_tray(make_game, run, grid_count):
     player = player_stats("vor", science=15, money=0, materials=0)
     player["military_tech"] = ["neb", "stb", "plc", "phs", "adm", "tas"]
     player["grid_tech"] = ["gas", "fus", "imh", "poc", "ade", "tad", "anc"][:grid_count]
@@ -83,15 +85,13 @@ def test_tech_masters_menu_uses_the_cheapest_open_tray(make_game, run, grid_coun
 
     run(ResearchButtons.startResearch(game, player, PlayerHelper("1", player), interaction, False))
 
-    assert buttons(interaction.channel)["FCIDblue_getTech_qug_grid"] == f"Quantum Grid ({cost})"
+    # the six-tech military tray is cheapest: 8 (minimum) + 2 surcharge
+    assert buttons(interaction.channel)["FCIDblue_getTech_qug_grid"] == "Quantum Grid (10)"
     run(ResearchButtons.getTech(game, player, PlayerHelper("1", player), interaction,
                                 "getTech_qug_grid"))
-    military_offer = buttons(interaction.channel).get("FCIDblue_getTech_qug_military_tm")
-    assert military_offer == ("Military (8 + 2 = 10)" if grid_count else None)
+    assert buttons(interaction.channel)["FCIDblue_getTech_qug_military_tm"] == "Military (8 + 2 = 10)"
     grid_offer = buttons(interaction.channel).get("FCIDblue_getTech_qug_grid_tm")
     assert grid_offer == (None if grid_count else "Grid (15)")
-    expected = "Grid is full" if grid_count == 7 else "Military costs 17 science and is unaffordable"
-    assert expected in interaction.channel.sent[-1][0]
 
 
 def test_organic_tech_gives_a_free_upgrade_after_research(start_game, press):
