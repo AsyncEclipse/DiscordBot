@@ -446,3 +446,19 @@ def test_nine_lives_follows_a_lyra_rift_reroll(make_game, no_random, run, press,
     press(channel, 1, next(cid for cid in buttons(channel) if f"_nineLives_101_{choice}_" in cid))
 
     assert reload(game).gamestate["board"]["101"]["damage_tracker"] == damage
+
+
+def test_hegemony_retreat_moves_every_declared_ship(make_game, run):
+    game = _combat_game(make_game, ["blue-cru", "blue-cru", "red-cru"], "blue", "red")
+    game.gamestate["board"]["102"] = {"owner": "blue", "sector": 102, "player_ships": []}
+    game.update()
+    speed = Combat.getCombatantShipsBySpeed(game, "blue", ["blue-cru", "blue-cru"], "101")[0][0]
+
+    run(Combat.completeRetreat(game, FakeInteraction(), "101", "blue", speed, "102"))
+
+    assert reload(game).gamestate["board"]["101"]["player_ships"] == ["red-cru"]
+
+
+def test_a_fully_shielded_split_die_is_still_one_miss(make_game):
+    game = _combat_game(make_game, ["blue-int", "red-cru"], "blue", "red")
+    assert Combat.die_damage(game, "blue", "yellow", 3, split=True, shielded=True) == [0]

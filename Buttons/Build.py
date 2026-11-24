@@ -353,8 +353,8 @@ class BuildButtons:
                                   custom_id=f"FCID{player['color']}_herRegroupMove_after"))
         # a Pulsar build is not a Build action, so it earns no extra upgrade activation
         if not pulsar_build:
-            return_to = "build" if BuildButtons.buildsLeft(player, buildApt) > 0 else "finish"
-            UpgradeButtons.addInfinitePossibilitiesButton(view2, game, player, return_to)
+            # first or LAST activation only: taking it after a build ends the action
+            UpgradeButtons.addInfinitePossibilitiesButton(view2, game, player, "finish")
         if FactionData.has(player, "phase_technology"):
             player_helper.stats["phaseBuildsThisAction"] = (
                 player_helper.stats.get("phaseBuildsThisAction", 0) + len(build))

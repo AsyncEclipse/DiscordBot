@@ -78,7 +78,10 @@ class TurnButtons:
     @staticmethod
     async def endTurn(player, game: GamestateHelper, interaction: discord.Interaction):
         if player["color"] not in game.gamestate.get("activePlayerColor", []):
-            await interaction.message.delete()
+            try:
+                await interaction.message.delete()
+            except discord.NotFound:
+                pass
             await interaction.followup.send("That turn has already ended.", ephemeral=True)
             return
         from helpers.CombatHelper import Combat

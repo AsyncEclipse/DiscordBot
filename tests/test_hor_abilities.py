@@ -184,3 +184,17 @@ def test_battle_focus_hides_an_already_upgraded_class(start_game, press):
     offered = buttons(channel)
     assert not any("interceptor" in cid for cid in offered if cid.startswith("FCIDblue_upgradeShip_"))
     assert any("cruiser" in cid for cid in offered if cid.startswith("FCIDblue_upgradeShip_"))
+
+
+def test_free_discovery_tech_skips_a_full_tray(make_game, run):
+    player = player_stats("hor")
+    player["military_tech"] = ["stb"] * FactionData.tech_track_max(player)
+    game = make_game({"players": {"1": player}, "available_techs": ["neb", "fus"],
+                      "board": {"201": {}}})
+    player = game.get_player(1)
+    interaction = FakeInteraction()
+
+    run(DiscoveryTileButtons.usedDiscForAbility(game, PlayerHelper("1", player), interaction,
+                                                "usedDiscForAbility_tec_201", player))
+
+    assert "fus" in reload(game).get_player(1)["grid_tech"]

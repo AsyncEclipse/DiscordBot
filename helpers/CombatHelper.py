@@ -273,6 +273,7 @@ class Combat:
         tile.pop("pounceRound", None)
         tile.pop("nineLivesPending", None)
         tile.pop("nineLivesRiftBackfire", None)
+        tile.pop("nineLivesOldLength", None)
         tile.pop("lyraRerollPending", None)
         tile.pop("lyraRerollToken", None)
         tile.pop("rolledSteps", None)
@@ -1436,7 +1437,8 @@ class Combat:
             total += 1
         if shielded:
             total = max(0, total - 1)
-        return [1] * total if split else [total]
+        # a fully shielded die is still one miss (Lyra rerolls, Wulfen misses)
+        return [1] * total if split and total else [total]
 
     @staticmethod
     async def rollDice(game: GamestateHelper, buttonID: str, interaction: discord.Interaction, auto: bool = False):
@@ -2689,6 +2691,8 @@ class Combat:
         game.removeCertainRetreatingUnits((int(speed), colorOrAI), pos)
         tile_map = game.gamestate["board"]
         player_ships = tile_map[pos]["player_ships"][:]
+        # fixed before any ship leaves, or the last Hegemony ship gains +1 and stays behind
+        solitary = Combat.solitary_hunter_bonus(game, pos, colorOrAI)
         for ship in player_ships:
             if colorOrAI in ship and "orb" not in ship and "mon" not in ship and "sb" not in ship:
                 shiptype = ship.split("-")[1]
@@ -2696,7 +2700,7 @@ class Combat:
                 shipM = PlayerShip(game.gamestate["players"][player], shiptype)
                 if (shipM.speed + Combat.phase_mode(
                         game, colorOrAI, pos, Combat.translateShipAbrToName(shiptype)).get("speed", 0)
-                        + Combat.solitary_hunter_bonus(game, pos, colorOrAI)
+                        + solitary
                         == int(speed)):
                     game.move_unit(ship, pos, destination)
         if playerObj is None:

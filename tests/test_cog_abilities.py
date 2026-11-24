@@ -61,7 +61,7 @@ def _press_edited(press, channel, interaction, prefix):
     return press(channel, 1, custom_id, interaction.message)
 
 
-def test_infinite_possibilities_resumes_a_partial_build(start_game, press, run):
+def test_infinite_possibilities_after_a_build_is_the_last_activation(start_game, press, run):
     game, channel = start_game(factions=["cog", "eri"])
     game.get_player(1)["materials"] = 8
     game.update()
@@ -75,31 +75,30 @@ def test_infinite_possibilities_resumes_a_partial_build(start_game, press, run):
                                    if cid.startswith("FCIDblue_spendMaterial_")))
     _press_edited(press, channel, inter, "FCIDblue_finishSpendForBuild_")
 
-    assert "FCIDblue_infiniteUpgrade_build" in buttons(channel)
+    assert "FCIDblue_infiniteUpgrade_finish" in buttons(channel)
     before = reload(game).get_player(1)["influence_discs"]
-    press(channel, 1, "FCIDblue_infiniteUpgrade_build")
+    press(channel, 1, "FCIDblue_infiniteUpgrade_finish")
     state = reload(game)
     run(UpgradeButtons.chooseUpgrade(state, state.get_player(1), FakeInteraction(channel),
                                     "chooseUpgrade_1_interceptor_empty_hul_3_free", player_helper(state, "blue")))
     press(channel, 1, "FCIDblue_finishInfiniteUpgrade")
     player = reload(game).get_player(1)
-    assert player["buildsThisAction"] == 1
     assert player["influence_discs"] == before
-    assert "FCIDblue_buildIn_201" in buttons(channel)
+    # first or last activation only: no more building after it
+    assert "FCIDblue_buildIn_201" not in buttons(channel)
     assert not any(cid.startswith("FCIDblue_infiniteUpgrade") for cid in buttons(channel))
 
 
-def test_infinite_possibilities_resumes_the_next_move_activation(start_game, press, run):
+def test_infinite_possibilities_mid_move_ends_the_action(start_game, press, run):
     game, channel = start_game(factions=["cog", "eri"])
     run(MoveButtons.sendMoveContinuation(game, game.get_player(1), FakeInteraction(channel), 1))
-    assert "FCIDblue_infiniteUpgrade_move2" in buttons(channel)
-    press(channel, 1, "FCIDblue_infiniteUpgrade_move2")
+    assert "FCIDblue_infiniteUpgrade_finish" in buttons(channel)
+    press(channel, 1, "FCIDblue_infiniteUpgrade_finish")
     state = reload(game)
     run(UpgradeButtons.chooseUpgrade(state, state.get_player(1), FakeInteraction(channel),
                                     "chooseUpgrade_1_interceptor_empty_hul_3_free", player_helper(state, "blue")))
     press(channel, 1, "FCIDblue_finishInfiniteUpgrade")
-    assert any(cid.startswith("FCIDblue_moveFrom_") and cid.endswith("_2") for cid in buttons(channel))
-    assert not any(cid.startswith("FCIDblue_moveFrom_") and cid.endswith("_1") for cid in buttons(channel))
+    assert not any(cid.startswith("FCIDblue_moveFrom_") for cid in buttons(channel))
 
 
 def test_pulsar_build_does_not_earn_the_extra_upgrade(start_game, press, run):
@@ -253,6 +252,8 @@ def test_free_cog_upgrade_only_removes_installed_parts(start_game, press, old_pa
     press(channel, 1, f"FCIDblue_chooseUpgrade_1_interceptor_{old_part}_empty_0_free")
 
     assert reload(game).get_player(1)["interceptor_parts"][0] == "ioc"
+    # emptying a slot is free, so the activation is still there to install a part
+    assert reload(game).get_player(1)["infiniteUpgradeAvailable"]
 
 
 def test_discovery_part_install_does_not_offer_adaptive_transformation(start_game, run):
@@ -286,3 +287,11 @@ def test_first_move_upgrade_charges_the_move_once(start_game, press, run, moves_
     assert player["interceptor_parts"][0] == "hul"
     assert player["influence_discs"] == 11
     assert player["move_action_counters"] == 1
+
+
+def test_free_cog_upgrade_menu_can_be_skipped(start_game, press):
+    game, channel = start_game(factions=["cog", "eri"])
+    press(channel, 1, "FCIDblue_startBuild")
+    press(channel, 1, "FCIDblue_infiniteUpgrade_build")
+
+    assert "FCIDblue_finishInfiniteUpgrade" in buttons(channel)

@@ -575,7 +575,8 @@ class MoveButtons:
                 and moveCount <= FactionData.action_apt(player, "move")):
             view.add_item(Button(label="Build Activation (1)", style=discord.ButtonStyle.green,
                                  custom_id=f"FCID{player['color']}_herRaidBuild_{moveCount + 1}"))
-        return_to = f"move{moveCount + 1}" if moveCount < FactionData.action_apt(player, "move") else "finish"
+        # Infinite Possibilities is the first or LAST activation, so mid-action it ends the action
+        return_to = "finish"
         if not player.get("pulsarMove"):
             UpgradeButtons.addInfinitePossibilitiesButton(view, game, player, return_to)
         if moveCount > 0 and FactionData.action_apt(player, "move") > moveCount and not player.get("passed"):

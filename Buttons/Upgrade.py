@@ -115,6 +115,10 @@ class UpgradeButtons:
                 and FactionData.has(player, "adaptive_transformation")):
             view.add_item(Button(label="Adaptive Transformation", style=discord.ButtonStyle.green,
                                  custom_id=f"FCID{player['color']}_adaptiveStart_{actions}_{discTileUpgrade}"))
+        if discTileUpgrade == "free" and player.get("infiniteUpgradeReturn") is not None:
+            # the move/build disc is already spent; let Cog skip the free upgrade
+            view.add_item(Button(label="Skip Upgrade", style=discord.ButtonStyle.red,
+                                 custom_id=f"FCID{player['color']}_finishInfiniteUpgrade"))
         if not view.children:
             view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                                  custom_id=f"FCID{player['color']}_finishAction"))
@@ -338,7 +342,7 @@ class UpgradeButtons:
         player_helper.stats[f"{ship}_parts"] = newParts
         if player_helper.stats.get("researchUpgrade") == discTileUpgrade:
             player_helper.stats.pop("researchUpgrade", None)
-        if cog_free:
+        if cog_free and not isFreeRemoval:
             player_helper.stats["infiniteUpgradeAvailable"] = False
         if discTileUpgrade.startswith("tm"):
             pos = discTileUpgrade[2:]

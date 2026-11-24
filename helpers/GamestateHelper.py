@@ -513,6 +513,8 @@ class GamestateHelper:
             self.gamestate["board"][position].pop("carapaceRollOldLength", None)
             self.gamestate["board"][position].pop("lyraRerollPending", None)
             self.gamestate["board"][position].pop("lyraRerollToken", None)
+            for key in ("nineLivesPending", "nineLivesOldLength", "nineLivesRiftBackfire", "nineLivesToken"):
+                self.gamestate["board"][position].pop(key, None)
             self.gamestate["board"][position].pop("combatEntryOrder", None)
             self.gamestate["board"][position].pop("firstShotPhase", None)
             self.gamestate["board"][position].pop("firstShotSide", None)

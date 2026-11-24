@@ -213,6 +213,8 @@ class DiscoveryTileButtons:
                 if tech in ownedTechs:
                     continue
                 tech_details = tech_data.get(tech)
+                if not DiscoveryTileButtons.can_gain_tech(player, tech_details):
+                    continue
                 minCost = min(minCost, tech_details["base_cost"])
             cheapestTechs = []
             for tech in techsAvailable:
