@@ -1688,8 +1688,10 @@ class GamestateHelper:
                 listHS = [302,304,306,308,310,312,314,316,318]
         for number in listHS:
             nextPlayer = self.getPlayerFromHSLocation(str(number))
-            if nextPlayer is not None and not self.gamestate["players"].get(nextPlayer, {}).get("passed", False):
-                return False
+            if nextPlayer is not None:
+                player = self.gamestate["players"][nextPlayer]
+                if not player.get("eliminated", False) and not player.get("passed", False):
+                    return False
         return True
 
     def get_next_player(self, player):

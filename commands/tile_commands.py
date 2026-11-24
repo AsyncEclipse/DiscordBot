@@ -9,6 +9,7 @@ from discord.ui import View, Button
 from typing import Optional
 from helpers.CombatHelper import Combat
 from helpers.GamestateHelper import GamestateHelper
+from helpers.GameLock import game_lock
 from helpers.DrawHelper import DrawHelper
 
 
@@ -277,6 +278,25 @@ class TileCommands(commands.GroupCog, name="tile"):
         await Combat.refreshCombatPrompt(game, tile_position, interaction.channel)
         await interaction.followup.send("Reset Techno-Magic upgrades for this combat."
                                         " Choose your temporary parts again.")
+
+    @app_commands.command(name="resume_combat", description="Repost or restart combat initiative in a sector")
+    @app_commands.describe(tile_position="Board position, such as 000",
+                           restart="Start the matchup again with surviving ships and current damage")
+    async def resume_combat(self, interaction: discord.Interaction, tile_position: str,
+                            restart: bool = False):
+        await interaction.response.defer(ephemeral=True)
+        async with game_lock(interaction.channel.name.split("-")[0]):
+            game = GamestateHelper(interaction.channel)
+            tile = game.gamestate["board"].get(tile_position)
+            if tile is None:
+                await interaction.followup.send("There is no tile at that position.", ephemeral=True)
+                return
+            if not (tile.get("combatants") or (tile.get("attacker") and tile.get("defender"))):
+                await interaction.followup.send("Combat has not started at that position.", ephemeral=True)
+                return
+            await Combat.refreshCombatPrompt(game, tile_position, interaction.channel, restart=restart)
+        await interaction.followup.send(f"Combat status for tile {tile_position} posted in this channel.",
+                                        ephemeral=True)
 
     @app_commands.command(name="declare_a_combat_winner")
     async def declare_a_combat_winner(self, interaction: discord.Interaction, tile_position: str):
