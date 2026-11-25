@@ -54,3 +54,30 @@ def test_stale_slot_is_refused_even_if_old_part_exists_elsewhere(upgrade_game, r
     assert reload(game).get_player(1) == player
     assert player["interceptor_parts"][-1] == "empty"
     assert any("changed" in content for content, kwargs in interaction.followup.sent)
+
+
+def test_empty_removes_only_installed_tiles_without_spending_a_disc(upgrade_game, run):
+    game, channel = upgrade_game
+    player = game.get_player(1)
+    player["old_interceptor_parts"] = list(player["interceptor_parts"])
+    game.update()
+    discs = player["influence_discs"]
+    interaction = FakeInteraction(channel)
+
+    result = run(UpgradeButtons.chooseUpgrade(
+        game, player, interaction, "chooseUpgrade_2_interceptor_ioc_empty_0_dummy",
+        PlayerHelper("1", player)))
+
+    assert result is False
+    assert reload(game).get_player(1) == player
+    assert any("printed blueprint" in content for content, kwargs in interaction.followup.sent)
+
+    player["interceptor_parts"][3] = "hul"
+    game.update()
+    run(UpgradeButtons.chooseUpgrade(
+        game, player, FakeInteraction(channel), "chooseUpgrade_2_interceptor_hul_empty_3_dummy",
+        PlayerHelper("1", player)))
+
+    saved = reload(game).get_player(1)
+    assert saved["interceptor_parts"][3] == "empty"
+    assert saved["influence_discs"] == discs

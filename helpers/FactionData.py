@@ -28,6 +28,53 @@ def has(player, ability):
     return ability in of(player).get("abilities", [])
 
 
+TECH_TRACK = [-8, -6, -4, -3, -2, -1, 0, 0]
+TECH_TRACK_VP = [0, 0, 0, 0, 1, 2, 3, 5]
+CALL_TO_ARMS_MATERIALS = {"int": 1, "cru": 2, "drd": 3}
+TECH_MASTERS_EXTRA = {"first": 2, "step": 1}
+
+
+def tech_track(player):
+    """The faction's printed research discounts, indexed from the last slot."""
+    return of(player).get("tech_track", TECH_TRACK)
+
+
+def tech_track_max(player):
+    """How many Tech Tiles the faction's track holds (seven unless the board prints fewer)."""
+    return of(player).get("tech_track_max", 7)
+
+
+def tech_track_vp(player):
+    """End-game VP by number of Tech Tiles on one track."""
+    return of(player).get("tech_track_vp", TECH_TRACK_VP)
+
+
+def tech_track_display(player):
+    """The printed discount cells, first printed cell first."""
+    track = tech_track(player)
+    return [track[tech_track_max(player) - 1 - index]
+            for index in range(tech_track_max(player))]
+
+
+def call_to_arms_materials(player):
+    """The printed materials gained per ship type destroyed while the sector is not yours."""
+    return of(player).get("call_to_arms_materials", CALL_TO_ARMS_MATERIALS)
+
+
+def tech_masters_extra(player):
+    """Tech Masters' extra science: the first wrong-tray cost and the step added per later use."""
+    return of(player).get("tech_masters_extra", TECH_MASTERS_EXTRA)
+
+
+def action_apt(player, action, default=None):
+    """The activations this action has, including a paid Midas Touch activation.
+
+    A default lets an old save that predates the field behave as it did before.
+    """
+    apt = player[f"{action}_apt"] if default is None else player.get(f"{action}_apt", default)
+    return apt + (1 if player.get("midasBoost") == action else 0)
+
+
 def artwork_name(full_name):
     """The image and emoji key of a faction: artwork names differ from data keys (exl -> exile)."""
     return BY_NAME.get(full_name, {}).get("artwork", full_name)

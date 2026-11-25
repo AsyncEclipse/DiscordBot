@@ -266,3 +266,35 @@ def test_upkeep_reoffers_an_unclaimed_tile_after_its_offer_was_lost(make_game, r
     run(TurnButtons.runUpkeep(game, FakeInteraction(new_channel)))
 
     assert _explore_offer("blue") in buttons(new_channel)
+
+
+@pytest.mark.parametrize("offer", ["anl", "anl_grid", "plc"])
+def test_stale_discovery_offer_clears_when_all_trays_fill(start_game, press, offer):
+    game, channel = start_game()
+    player = game.get_player(1)
+    for track in ("military", "grid", "nano"):
+        player[f"{track}_tech"] = ["gas"] * 7
+    game.gamestate["pendingDiscoveryResolutions"] = {"201": "blue"}
+    game.gamestate["pendingDiscoveryPrompts"] = {"201": {"message_id": 123}}
+    game.update()
+
+    press(channel, 1, f"FCIDblue_getFreeTech_{offer}_tile-201")
+
+    state = reload(game).gamestate
+    assert "201" not in state["pendingDiscoveryResolutions"]
+    assert "201" not in state["pendingDiscoveryPrompts"]
+
+
+def test_stale_rare_discovery_offer_reopens_other_trays(start_game, press):
+    game, channel = start_game()
+    game.get_player(1)["grid_tech"] = ["gas"] * 7
+    game.gamestate["pendingDiscoveryResolutions"] = {"201": "blue"}
+    game.update()
+
+    press(channel, 1, "FCIDblue_getFreeTech_anl_grid_tile-201")
+
+    offered = buttons(channel)
+    assert "FCIDblue_getFreeTech_anl_military_tile-201" in offered
+    assert "FCIDblue_getFreeTech_anl_nano_tile-201" in offered
+    assert "FCIDblue_getFreeTech_anl_grid_tile-201" not in offered
+    assert "201" in reload(game).gamestate["pendingDiscoveryResolutions"]

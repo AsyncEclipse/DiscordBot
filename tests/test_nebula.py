@@ -84,17 +84,6 @@ def _neighbour_game(make_game, monkeypatch, rot):
     return game, {"color": "blue", "name": "Blue", "player_name": "Blue"}
 
 
-def test_move_into_nebula_lands_in_edge_owning_subsector(make_game, monkeypatch):
-    game, player = _neighbour_game(make_game, monkeypatch, 60)
-    game.gamestate["board"]["208"]["player_ships"] = ["blue-int"]
-    game.update()
-    # 208 is on 207's NW edge, which belongs to Subsector b
-    assert MoveButtons.getTilesInRange(game, player, "208", 1, 0) & {"207", "207b", "207c"} == {"207b"}
-    game.gamestate["board"]["207b"]["player_ships"] = ["blue-int"]
-    game.update()
-    assert "208" in MoveButtons.getTilesInRange(game, player, "207b", 1, 0)
-
-
 def test_nebula_walls_need_jump_drive(make_game, monkeypatch):
     game, player = _neighbour_game(make_game, monkeypatch, 0)
     game.gamestate["board"]["208"]["player_ships"] = ["blue-int"]

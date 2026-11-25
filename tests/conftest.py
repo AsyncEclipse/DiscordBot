@@ -45,7 +45,7 @@ def no_render(request, monkeypatch):
         "availablePartsFile", "mergeLocationsFile", "board_tile_image", "display_techs",
         "display_remaining_discoveries", "faction_portrait", "display_turn_order",
         "display_remaining_tiles", "display_cube_track_reference", "display_upkeep_track_reference",
-        "player_area", "player_area_old", "show_game", "show_map", "get_file", "append_images",
+        "player_area", "show_game", "show_map", "get_file", "append_images",
         "show_available_techs", "show_select_techs", "show_single_tile", "show_minor_species",
         "show_shrine_board", "show_disc_tile", "show_player_area", "show_player_ship_area",
         "show_player_ship", "show_AI_stats", "show_ref", "show_tech_ref_image",

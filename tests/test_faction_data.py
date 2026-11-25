@@ -8,6 +8,7 @@ from Buttons.Research import ResearchButtons
 from helpers import FactionData
 from helpers.CombatHelper import Combat
 from helpers.DrawHelper import DrawHelper
+from helpers.ShipHelper import PlayerShip
 from helpers.PlayerHelper import PlayerHelper
 from tests.fakes import FakeInteraction, POS, player_stats
 
@@ -46,11 +47,28 @@ def test_all_starting_technologies_and_blueprint_parts_exist():
             assert len(cells) == len(faction[f"{ship}_parts"]), (key, ship)
 
 
+def test_standard_community_ship_stats():
+    expected = {"interceptor": (0, 1, 1, 0, 3, 3), "cruiser": (1, 1, 1, 1, 2, 5),
+                "dread": (2, 0, 1, 1, 1, 8), "starbase": (2, 2, 0, 1, 4, 3)}
+    for faction in ("cog", "mid", "heg"):
+        for ship, stats in expected.items():
+            model = PlayerShip(player_stats(faction), ship)
+            assert (model.hull, model.energy, model.range, model.computer,
+                    model.speed, model.cost) == stats, (faction, ship)
+
+
 def test_abilities_come_from_the_faction_data():
     assert FactionData.has(player_stats("tm"), "techno_magic")
     assert not FactionData.has(player_stats("hyd"), "techno_magic")
     # A faction that is not in the file at all falls back to its own fields.
     assert not FactionData.has({"name": "Homebrew", "color": "blue"}, "techno_magic")
+
+
+def test_tech_track_display_prints_the_shared_or_custom_cells_left_to_right():
+    assert FactionData.tech_track_display(player_stats("hyd")) == [0, -1, -2, -3, -4, -6, -8]
+    assert FactionData.tech_track_display(player_stats("cog")) == [0, -1, -2, -2, -2, -3, -3]
+    assert FactionData.tech_track_display(player_stats("hor")) == [0, -1, -3, -5]
+    assert FactionData.tech_track_display(player_stats("vor")) == [-1, -2, -3, -4, -5, -7, -9]
 
 
 def test_rho_trades_money_on_the_factions_own_ratio():

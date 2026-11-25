@@ -6,6 +6,7 @@ from Buttons.DiplomaticRelations import DiplomaticRelationsButtons
 from Buttons.DiscoveryTile import DiscoveryTileButtons
 from Buttons.Explore import ExploreButtons
 from Buttons.Influence import InfluenceButtons
+from Buttons.Upgrade import UpgradeButtons
 from helpers import FactionData
 from helpers.DrawHelper import DrawHelper
 from helpers.EmojiHelper import Emoji
@@ -36,9 +37,10 @@ class MoveButtons:
 
     @staticmethod
     def getRemainingMoveActivations(player, moveCount: int, nested: bool):
-        if nested or player.get("passed") or moveCount <= 0 or moveCount > player["move_apt"]:
+        apt = FactionData.action_apt(player, "move")
+        if nested or player.get("passed") or moveCount <= 0 or moveCount > apt:
             return 1
-        return player["move_apt"] - moveCount + 1
+        return apt - moveCount + 1
 
     @staticmethod
     def getMovableShipsOfType(game: GamestateHelper, player, origin: str, shipType: str):
@@ -154,10 +156,10 @@ class MoveButtons:
         parts = buttonID.split("_")
         origin, shipType, destination = parts[1], parts[2], parts[3]
         moveCount, remaining = int(parts[4]), int(parts[5])
-        if player.get("passed") or not 1 < moveCount <= player["move_apt"]:
+        if player.get("passed") or not 1 < moveCount <= FactionData.action_apt(player, "move"):
             await interaction.message.delete()
             await interaction.channel.send("No move activations remain for the queued ship.")
-            await MoveButtons.sendMoveContinuation(player, interaction, moveCount - 1)
+            await MoveButtons.sendMoveContinuation(game, player, interaction, moveCount - 1)
             return
         if (MoveButtons.getMovableShipsOfType(game, player, origin, shipType) < 1
                 or destination not in MoveButtons.getTilesInRange(
@@ -167,7 +169,7 @@ class MoveButtons:
             await interaction.message.delete()
             await interaction.channel.send(f"The queued {shipType} can no longer move to "
                                            f"{game.get_tile_label(destination)}.")
-            await MoveButtons.sendMoveContinuation(player, interaction, moveCount - 1)
+            await MoveButtons.sendMoveContinuation(game, player, interaction, moveCount - 1)
             return
         await MoveButtons.moveTo(game, player, interaction,
                                  f"moveTo_{origin}_{shipType}_{destination}_{moveCount}_q{remaining - 1}_all",
@@ -210,17 +212,21 @@ class MoveButtons:
         if "_" in buttonID:
             moveCount = buttonID.split("_")[1]
         # 8 is the free-move sentinel a discovery tile starts; it spends no activation.
-        if not nested and int(moveCount) > player["move_apt"] and int(moveCount) != 8:
+        if not nested and int(moveCount) > FactionData.action_apt(player, "move") and int(moveCount) != 8:
             if button:
                 await interaction.message.delete()
-            await MoveButtons.sendMoveContinuation(player, interaction, int(moveCount) - 1)
+            await MoveButtons.sendMoveContinuation(game, player, interaction, int(moveCount) - 1)
             return
         if buttonID == "startMove":
-            player.pop("pulsarMove", None)
+            reset = player.pop("infinitePossibilitiesUsed", None) is not None
+            reset = player.pop("moveActionCharged", None) is not None or reset
+            reset = player.pop("pulsarMove", None) is not None or reset
             if FactionData.has(player, "raid") or FactionData.has(player, "regroup"):
                 player["herCrossUsed"] = False
                 player["herRaidCharged"] = False
-            game.update()
+                reset = True
+            if reset:
+                game.update()
         if not nested and len(buttonID.split("_")) > 2 and not raid_resume:
             ship_filter = buttonID.split("_")[2]
         view = View()
@@ -233,13 +239,15 @@ class MoveButtons:
                                  custom_id=f"FCID{player['color']}_moveFrom_{tile}_{moveCount}{suffix}"))
         raid_offer = (not player.get("passed") and FactionData.has(player, "raid")
                       and not player.get("pulsarMove") and not player.get("herCrossUsed")
-                      and int(moveCount) <= player["move_apt"])
+                      and int(moveCount) <= FactionData.action_apt(player, "move"))
         if nested:
             MoveButtons.addRegroupBackButton(view, player, phase)
         elif raid_offer:
             view.add_item(Button(label="Build Activation (1)", style=discord.ButtonStyle.green,
                                  custom_id=f"FCID{player['color']}_herRaidBuild_{moveCount}"))
-        if raid_resume:
+        if buttonID == "startMove":
+            UpgradeButtons.addInfinitePossibilitiesButton(view, game, player, "move")
+        if raid_resume or player.get("moveActionCharged"):
             view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                                  custom_id=f"FCID{player['color']}_finishAction"))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray,
@@ -385,7 +393,7 @@ class MoveButtons:
             if is_queued_move:
                 await interaction.channel.send(f"The remaining {shipType}s can no longer move from "
                                                 f"{game.get_tile_label(originT)}.")
-                await MoveButtons.sendMoveContinuation(player, interaction, max(0, int(moveCount) - 1))
+                await MoveButtons.sendMoveContinuation(game, player, interaction, max(0, int(moveCount) - 1))
             else:
                 await interaction.channel.send(f"No {shipType}s can move from {game.get_tile_label(originT)} right now.")
             return
@@ -439,8 +447,7 @@ class MoveButtons:
         player_color = player["color"]
         shipName = f"{player_color}-{game.getShipShortName(shipType)}"
         tile_ships = game.gamestate["board"][destination]["player_ships"]
-        game.remove_units([shipName], originT)
-        game.add_units([shipName], destination)
+        moved = game.move_unit(shipName, originT, destination)
         game.fixshipsOrder(destination)
         drawing = DrawHelper(game.gamestate)
         await interaction.channel.send(f"{player['player_name']} Moved a {shipType} from "
@@ -467,7 +474,6 @@ class MoveButtons:
             bhtype = game.gamestate["board"][destination]["type"]
             random_number = random.randint(1, 6)
             roundNum = 1
-            game.remove_units([shipName], destination)
             shipModel = PlayerShip(player, shipName.split("-")[1])
             if "roundNum" in game.gamestate:
                 roundNum = game.gamestate["roundNum"]
@@ -475,15 +481,20 @@ class MoveButtons:
             if "border" in game.gamestate["board"][destination]["type"]:
                 location = " any tile with a wormhole facing an empty space."
             msg = f"This is a black hole tile, and the ship rolled a {random_number}. That means it will "
+            destroyed = False
+            damage = game.ship_damage(destination, moved)
             if random_number == 1 or random_number == 6:
                 msg += " take one damage and "
-                if shipModel.hull > 0:
+                damage += 1
+                if shipModel.hull >= damage:
                     msg += f"then teleport to {location}."
                 else:
                     msg += "thus die due to lack of hull."
+                    destroyed = True
             elif random_number == 2 or random_number == 3:
                 if roundNum == 8:
                     msg += "die as it would return after the game ends."
+                    destroyed = True
                 else:
                     msg += f"go away for now and return next round on one of your actions, teleporting to {location}."
                     if "blackHoleReturn" not in player_helper.stats:
@@ -493,19 +504,24 @@ class MoveButtons:
             else:
                 if roundNum > 6:
                     msg += "die as it would return after the game ends."
+                    destroyed = True
                 else:
                     msg += "go away for now and return in 2 rounds on one of your actions, teleporting to {location}."
                     if "blackHoleReturn" not in player_helper.stats:
                         player_helper.stats["blackHoleReturn"] = []
                     player_helper.stats["blackHoleReturn"].append(f"{bhtype}_{shipName}_{roundNum + 2}")
                     game.update_player(player_helper)
+            if destroyed:
+                game.destroy_ship(moved, destination, "blackhole")
+            else:
+                game.remove_units([moved], destination)
             await interaction.channel.send(msg)
 
             if random_number == 1 or random_number == 6:
                 if "teleport" in msg:
                     await interaction.channel.send(player["player_name"] + " Select a tile to return the ship to",
                                                    view=BlackHoleButtons.findBlackHoleOptions(game, player, shipName,
-                                                                                              bhtype, "damage"))
+                                                                                              bhtype, damage))
             if game.gamestate["board"][destination]["disctile"] > 0:
                 await DiscoveryTileButtons.exploreDiscoveryTile(game, destination, interaction, player)
 
@@ -513,9 +529,9 @@ class MoveButtons:
         if nested:
             player_helper.stats["herCrossUsed"] = True
         elif moveCount == 1:
-            if player.get("herRaidCharged"):
-                player_helper.stats.pop("herRaidCharged", None)
-            else:
+            cog_charged = player.pop("moveActionCharged", False)
+            raid_charged = player.pop("herRaidCharged", False)
+            if not (cog_charged or raid_charged):
                 player_helper.spend_influence_on_action("move")
         if nested or moveCount == 1:
             game.update_player(player_helper)
@@ -546,24 +562,28 @@ class MoveButtons:
                 ship_filter = ship_filter.rsplit("_", 1)[-1]
                 queue_suffix = f"_{ship_filter}" if ship_filter in ("all", "sb") else "_all"
         await interaction.message.delete()
-        await MoveButtons.sendMoveContinuation(player, interaction, moveCount, queue_remaining,
+        await MoveButtons.sendMoveContinuation(game, player, interaction, moveCount, queue_remaining,
                                                originT, shipType, queue_suffix, game.get_tile_label(destination),
                                                destination)
 
     @staticmethod
-    async def sendMoveContinuation(player, interaction: discord.Interaction, moveCount: int,
+    async def sendMoveContinuation(game: GamestateHelper, player, interaction: discord.Interaction, moveCount: int,
                                    queue_remaining: int = 0, origin: str = "", shipType: str = "",
                                    suffix: str = "", destination_label: str = "", destination: str = ""):
         view = View()
         if (moveCount > 0 and not player.get("passed") and FactionData.has(player, "raid")
                 and not player.get("pulsarMove") and not player.get("herCrossUsed")
-                and moveCount <= player["move_apt"]):
+                and moveCount <= FactionData.action_apt(player, "move")):
             view.add_item(Button(label="Build Activation (1)", style=discord.ButtonStyle.green,
                                  custom_id=f"FCID{player['color']}_herRaidBuild_{moveCount + 1}"))
-        if moveCount > 0 and player["move_apt"] > moveCount and not player.get("passed"):
+        # Infinite Possibilities is the first or LAST activation, so mid-action it ends the action
+        return_to = "finish"
+        if not player.get("pulsarMove"):
+            UpgradeButtons.addInfinitePossibilitiesButton(view, game, player, return_to)
+        if moveCount > 0 and FactionData.action_apt(player, "move") > moveCount and not player.get("passed"):
             view.add_item(Button(label="Move an additional ship", style=discord.ButtonStyle.green,
                                  custom_id=f"FCID{player['color']}_startMove_{moveCount + 1}"))
-        if (queue_remaining > 0 and moveCount > 0 and player["move_apt"] > moveCount
+        if (queue_remaining > 0 and moveCount > 0 and FactionData.action_apt(player, "move") > moveCount
                 and not player.get("passed")):
             view.add_item(Button(label=f"Move next queued {shipType} to {destination_label}"
                                        f" ({queue_remaining} left)",
@@ -574,7 +594,7 @@ class MoveButtons:
                              custom_id=f"FCID{player['color']}_finishAction"))
         view.add_item(Button(label="Restart Turn", style=discord.ButtonStyle.gray,
                              custom_id=f"FCID{player['color']}_restartTurn"))
-        moves_left = max(0, player["move_apt"] - moveCount)
+        moves_left = max(0, FactionData.action_apt(player, "move") - moveCount)
         await interaction.channel.send(f"{interaction.user.mention} you may move an additional ship"
                                        f" if you still have move activations ({moves_left} left),"
                                        " or end your action.", view=view)

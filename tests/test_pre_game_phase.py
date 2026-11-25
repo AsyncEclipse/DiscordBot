@@ -13,7 +13,7 @@ from commands.game_commands import GameCommands
 from commands.player_commands import PlayerCommands
 from helpers.GamestateHelper import GamestateHelper
 from setup.GameInit import GameInit
-from tests.fakes import FakeChannel, FakeInteraction, buttons, player_stats, reload
+from tests.fakes import FakeChannel, FakeInteraction, buttons, reload
 
 
 def find_button(channel, prefix):
@@ -25,11 +25,7 @@ def find_button(channel, prefix):
     )
 
 
-def test_turtugan_harvester_is_not_a_pre_game_task():
-    assert "harvester" not in PreGameButtons.tasksForPlayer(player_stats("tur"))
-
-
-def start_pre_game(games_dir, run, discovery_tiles=None):
+def start_pre_game(games_dir, run, discovery_tiles=None, factions=None):
     """A four player game with the four factions that act before the game starts."""
     random.seed(0)
 
@@ -43,8 +39,27 @@ def start_pre_game(games_dir, run, discovery_tiles=None):
     game.update()
     channel = FakeChannel("aeb1-actions")
     interaction = FakeInteraction(channel, role_names=["aeb1"])
-    run(DraftButtons.generalSetup(interaction, game, [1, 2, 3, 4], ["exl", "atl", "ra", "tm"]))
+    factions = factions or ["exl", "atl", "ra", "tm"]
+    run(DraftButtons.generalSetup(interaction, game, [1, 2, 3, 4], factions))
     return game, channel
+
+
+def test_midas_settles_the_home_neutral_planet_before_the_first_turn(games_dir, run, press):
+    game, channel = start_pre_game(games_dir, run, factions=["mid", "atl", "ra", "tm"])
+
+    state = reload(game).gamestate
+    assert state["pre_game"]["tasks"][0] == ["1", "neutral_pop"]
+    assert state["players"]["1"]["colony_ships"] == 4
+    assert "activePlayerColor" not in state
+
+    press(channel, 1, find_button(channel, "FCIDyellow_midasNeutralPop_money"))
+
+    state = reload(game).gamestate
+    assert state["board"]["201"]["neutral_pop"] == [1]
+    assert state["players"]["1"]["colony_ships"] == 3
+    assert state["players"]["1"]["money_pop_cubes"] == 10
+    assert ["1", "neutral_pop"] not in state["pre_game"]["tasks"]
+    assert "activePlayerColor" not in state
 
 
 def test_the_first_turn_waits_for_every_pre_game_action(games_dir, run, press):

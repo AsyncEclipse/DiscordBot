@@ -34,3 +34,17 @@ def test_arrival_only_alerts_and_unpasses_opponents(make_game, run, arrival, rel
     assert has_warning is (relationship != "allied")
     assert red["perma_passed"] is (relationship == "allied")
     assert "blue-int" in game.gamestate["board"]["102"]["player_ships"]
+
+
+@pytest.mark.parametrize("button_damage, damage", [("damage", 1), ("2", 2)])
+def test_black_hole_damage_goes_on_the_returning_ship(make_game, run, button_damage, damage):
+    board = board_tile(["blue-cru"], owner="blue", sector=102)
+    game = make_game({"player_count": 2, "players": players("blue", "red"), "board": board})
+    game.add_damage("blue-cru", "102", 1)
+    blue = game.getPlayerObjectFromColor("blue")
+
+    run(BlackHoleButtons.blackHoleFinish(game, blue, f"blackHoleFinish_blue-cru_102_{button_damage}",
+                                         player_helper(game, "blue"), FakeInteraction()))
+
+    assert game.ship_damage("102", "blue-cru:0") == 1
+    assert game.ship_damage("102", "blue-cru:1") == damage

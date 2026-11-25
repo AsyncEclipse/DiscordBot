@@ -1,5 +1,3 @@
-from types import SimpleNamespace
-
 import pytest
 
 from Buttons.Move import MoveButtons
@@ -8,9 +6,7 @@ from tests.fakes import FakeInteraction, buttons, offered_ids, player_helper, pl
 
 
 @pytest.fixture
-def moving_ships(start_game, monkeypatch):
-    monkeypatch.setattr("Buttons.Move.DrawHelper", lambda *args, **kwargs: SimpleNamespace(
-        mergeLocationsFile=lambda *args: None, board_tile_image_file=lambda *args: None))
+def moving_ships(start_game):
     game, channel = start_game()
     game.add_tile("301", 0, "202")
     game.get_player(1)["move_apt"] = 3
@@ -75,7 +71,7 @@ def test_queue_continuation_rechecks_activations(moving_ships, run, passed, coun
     player["passed"] = passed
     interaction = FakeInteraction(channel)
 
-    run(MoveButtons.sendMoveContinuation(player, interaction, count - 1, 1,
+    run(MoveButtons.sendMoveContinuation(game, player, interaction, count - 1, 1,
                                          "201", "interceptor", "_all", "301", "301"))
     assert not any("moveQueueContinue" in cid for cid in buttons(channel))
     run(MoveButtons.moveQueueContinue(game, player, interaction,

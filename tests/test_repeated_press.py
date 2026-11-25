@@ -2,7 +2,8 @@
 
 import pytest
 
-from tests.fakes import buttons, reload
+from Buttons.Turn import TurnButtons
+from tests.fakes import FakeInteraction, buttons, player_helper, reload
 
 P1 = 1
 
@@ -69,3 +70,18 @@ def test_another_button_on_a_used_up_message_is_refused(press, moving_intercepto
 
     assert used_up(press(channel, P1, to["302"]))
     assert reload(game).gamestate["board"]["302"]["player_ships"].count("blue-int") == 0
+
+
+def test_duplicate_finish_action_and_end_turn_do_not_post_another_turn(start_game, run):
+    game, channel = start_game()
+    player = game.get_player(1)
+    run(TurnButtons.finishAction(player, game, FakeInteraction(channel), player_helper(game, "blue")))
+    run(TurnButtons.finishAction(player, game, FakeInteraction(channel), player_helper(game, "blue")))
+    end_prompts = [kwargs for content, kwargs in channel.sent
+                   if any(item.custom_id == "FCIDblue_endTurn" for item in getattr(kwargs.get("view"), "children", []))]
+    assert len(end_prompts) == 1
+    run(TurnButtons.endTurn(player, game, FakeInteraction(channel)))
+    message_count = len(channel.sent)
+    run(TurnButtons.endTurn(player, game, FakeInteraction(channel)))
+    assert len(channel.sent) == message_count
+    assert game.gamestate["activePlayerColor"] == ["red"]

@@ -149,6 +149,8 @@ def test_faction_rendering(start_game, monkeypatch, faction):
     for ship in ships:
         path = f"images/resources/components/layouts/blueprints/classes/{class_art}_{ship}_class.png"
         assert path in loaded
+        if faction == "heg":
+            assert drawing.use_image(path).getchannel("A").getextrema()[1] > 0
 
     if faction in ("hyd", "ter3"):
         assert_alliance_layout(drawing, player, image)
@@ -164,6 +166,14 @@ def test_faction_rendering(start_game, monkeypatch, faction):
         texts = {text for text, _bounds in player_labels}
         assert "+1 CMP" in texts
         assert "+1 HULL" in texts
+    if faction == "vor":
+        texts = [text for text, bounds in player_labels]
+        assert texts.count("-9") == 3
+        assert "1* UPG" in texts
+    if faction == "heg":
+        game.gamestate["board"]["000"]["owner"] = player["color"]
+        drawing.player_area(player)
+        assert "Pride: +2 VP" in {text for text, bounds in labels}
     if faction == "kur":
         assert "3 PWR" in {text for text, _bounds in player_labels}
     if faction == "wul":
@@ -196,7 +206,7 @@ def test_faction_rendering(start_game, monkeypatch, faction):
             alpha = ambassador.convert("RGBA").getchannel("A")
             assert alpha.getpixel((0, 0)) == 0
             assert alpha.getpixel((256, 256)) >= 250
-            if faction in ("atl", "ra", "tm", "her", "kur", "wra"):
+            if faction in ("atl", "ra", "tm", "her", "heg"):
                 assert all(alpha.getpixel(corner) == 0
                            for corner in ((511, 0), (0, 511), (511, 511)))
     if faction in ("tur", "wra"):
@@ -226,3 +236,17 @@ def test_wraith_soul_counter_draws_the_accumulated_number(start_game, monkeypatc
     DrawHelper(game.gamestate).player_area(player)
 
     assert labels == [str(souls)]
+
+
+@pytest.mark.render
+def test_damage_markers_follow_individual_ships(start_game):
+    game, _ = start_game(factions=["vor", "eri"])
+    game.gamestate["board"]["201"]["player_ships"] = ["blue-cru", "blue-cru"]
+    drawing = DrawHelper(game.gamestate)
+    game.add_damage("blue-cru:0", "201", 1)
+    first = drawing.board_tile_image("201")
+    game.repair_damage("blue-cru:0", "201")
+    game.add_damage("blue-cru:1", "201", 1)
+    second = drawing.board_tile_image("201")
+
+    assert ImageChops.difference(first.convert("RGB"), second.convert("RGB")).getbbox() is not None

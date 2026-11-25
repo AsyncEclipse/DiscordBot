@@ -69,7 +69,7 @@ def test_back_from_raid_after_last_move_cannot_start_a_third_move(start_game, pr
     player = game.get_player(1)
     player["move_apt"] = 2
     game.update()
-    run(MoveButtons.sendMoveContinuation(player, FakeInteraction(channel), 2))
+    run(MoveButtons.sendMoveContinuation(game, player, FakeInteraction(channel), 2))
     press(channel, 1, "FCIDblue_herRaidBuild_3")
     press(channel, 1, "FCIDblue_herBackToMove_3")
 

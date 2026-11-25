@@ -13,13 +13,14 @@ class PreGameButtons:
     """The phase between setting the game up and the first turn.
 
     Factions that have something to do before the game starts do it here: the Exiles
-    populate the Orbital in their starting sector, the Atlantians resolve a discovery
-    tile, Remnants of Ra put a cube on the disc of their artifact sector and the
+    populate the Orbital in their starting sector, Midas settle their neutral planet,
+    the Atlantians resolve a discovery tile, Remnants of Ra put a cube on the disc of their artifact sector and the
     Techno-Mages may buy a technology. The first turn only starts once they are all done.
     """
 
     TASK_BUTTONS = {
         "orbital_pop": ("preGameOrbital",),
+        "neutral_pop": ("midasNeutralPop",),
         "artifact_cube": ("ancientsCube",),
         "discovery_tile": ("selectDiscTile", "keepDiscForPoints", "usedDiscForAbility"),
         "discovery_upgrade": ("upgradeShip", "selectOldPart", "chooseUpgrade", "chooseDifferentShip",
@@ -36,6 +37,8 @@ class PreGameButtons:
         tasks = []
         if FactionData.has(player, "orbital_pop_ships"):
             tasks.append("orbital_pop")
+        if FactionData.has(player, "midas_neutral_pop"):
+            tasks.append("neutral_pop")
         if "anl" in player.get("nano_tech", []):
             tasks.append("discovery_tile")
         if FactionData.has(player, "artifact_disc_pop"):
@@ -51,7 +54,8 @@ class PreGameButtons:
             return True  # Games already running before the phase was introduced keep their buttons.
         player_id = game.get_player_from_color(player["color"])
         pending = [task for seat, task in game.preGameTasks() if seat == player_id]
-        setup_button = (customID.startswith(("setupTech", "declineSetupTech", "preGameOrbital"))
+        setup_button = (customID.startswith(("setupTech", "declineSetupTech", "preGameOrbital",
+                                             "midasNeutralPop"))
                         or (customID.startswith("getTech_") and customID.endswith("_setup")))
         if not phase.get("started"):
             if customID.startswith(("showReputation", "showGame")):
@@ -86,6 +90,8 @@ class PreGameButtons:
                 home = game.getLocationFromID(player["home_planet"])
                 if task == "orbital_pop":
                     offered = await PreGameButtons.offerExilesOrbital(game, player, interaction, home)
+                elif task == "neutral_pop":
+                    offered = await PreGameButtons.offerMidasNeutralPlanet(game, player, interaction, home)
                 elif task == "discovery_tile":
                     game.addDiscTile(home)
                     offered = await DiscoveryTileButtons.exploreDiscoveryTile(game, home, interaction, player)
@@ -184,6 +190,44 @@ class PreGameButtons:
         await interaction.message.edit(view=None)
         await interaction.channel.send(f"{player['player_name']} placed a {pop} population cube on the Orbital"
                                        f" in tile {tile}.")
+        return True
+
+    @staticmethod
+    async def offerMidasNeutralPlanet(game: GamestateHelper, player, interaction: discord.Interaction, tile: str):
+        """Midas spend a colony ship to populate the neutral planet in their home sector."""
+        if game.gamestate["board"][tile].get("neutral_pop", [0])[0]:
+            return False
+        options = [pop for pop in ("money", "science", "material") if player[f"{pop}_pop_cubes"] > 0]
+        if player["colony_ships"] < 1 or not options:
+            return False
+        view = View()
+        for pop in options:
+            view.add_item(Button(label=pop.capitalize(), style=discord.ButtonStyle.blurple,
+                                 custom_id=f"FCID{player['color']}_midasNeutralPop_{pop}"))
+        await interaction.channel.send(f"{player['player_name']}, before the game starts you settle the neutral"
+                                       f" planet in your starting sector (tile {tile}). Choose which type of cube to place.",
+                                       view=view)
+        return True
+
+    @staticmethod
+    async def placeMidasNeutralPlanet(game: GamestateHelper, player, interaction: discord.Interaction,
+                                      customID: str):
+        pop = customID.split("_")[1]
+        if pop not in ("money", "science", "material"):
+            await interaction.followup.send("Choose a money, science or material cube.", ephemeral=True)
+            return False
+        tile = game.getLocationFromID(player["home_planet"])
+        if game.gamestate["board"][tile].get("neutral_pop", [0])[0]:
+            await interaction.followup.send("Your neutral planet already has a population cube.", ephemeral=True)
+            return False
+        if player[f"{pop}_pop_cubes"] < 1 or not game.add_pop_specific(
+                "neutral", pop, 0, tile, game.get_player_from_color(player["color"])):
+            await interaction.followup.send("You need an unused colony ship and a cube to settle your neutral planet.",
+                                            ephemeral=True)
+            return False
+        await interaction.message.edit(view=None)
+        await interaction.channel.send(f"{player['player_name']} settled the neutral planet in tile {tile} with a"
+                                       f" {pop} population cube.")
         return True
 
     @staticmethod

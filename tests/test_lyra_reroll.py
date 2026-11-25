@@ -117,3 +117,30 @@ def test_lyra_bombing_reroll_can_hit_population(make_game, no_random, quiet_comb
     assert len([i for i in offered_ids(inter) if "killPop" in i]) == 12
     assert not game.gamestate["board"][POS]["lyraRerollPending"]
     assert "FCIDred_rollDice_101_red_4_deleteMsg" not in offered_ids(inter)
+
+
+def test_lyra_rift_bombing_reroll_offers_population_target(make_game, no_random, run):
+    players = _lyra_ships()
+    players[0][1]["cruiser_parts"] = ["rican", "hul"]
+    players[0][1]["colony_ships"] = 1
+    game = _game(make_game, players, ["blue-cru"],
+                 {"owner": "red", "money_pop": [1]})
+    no_random([2, 4])
+    interaction = FakeInteraction()
+
+    run(Combat.rollDice(game, f"rollDice_{POS}_blue_1000_deleteMsg", interaction))
+    reroll = next(cid for cid in offered_ids(interaction) if "_rerollDie_" in cid)
+    run(Combat.rerollDie(game, reroll.removeprefix("FCIDblue_"), interaction,
+                        game.get_player(1), PlayerHelper("1", game.get_player(1))))
+
+    assert any("killPop" in cid for cid in offered_ids(interaction))
+
+
+def test_bombing_reroll_continuation_skips_combat_initiative(make_game, monkeypatch, run):
+    game = _game(make_game, _lyra_ships(), ["blue-int", "red-int"], {"currentSpeed": 1000})
+
+    async def unexpected_initiative(*args, **kwargs):
+        raise AssertionError("Bombing has no next initiative")
+
+    monkeypatch.setattr(Combat, "promptNextSpeed", unexpected_initiative)
+    run(Combat.continueAfterLyraReroll(game, FakeInteraction(), POS, 2))

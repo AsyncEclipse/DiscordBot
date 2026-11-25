@@ -229,12 +229,6 @@ class Carapace:
         return bool(state and state.get(ship_type))
 
     @staticmethod
-    def weapon_damage(game, pos, color, ship_type, damage):
-        if Carapace.engaged(game, pos, color, ship_type):
-            return max(0, damage - 1)
-        return damage
-
-    @staticmethod
     def incoming_damage(game, pos, owner, ship_type, attacker, damage):
         if attacker == owner or damage <= 0:
             return damage

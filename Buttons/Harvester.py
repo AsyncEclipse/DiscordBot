@@ -59,8 +59,9 @@ class HarvesterButtons:
                           position: str, available, message=None):
         if len(available) == 1:
             square, index = available[0]
-            return await HarvesterButtons.resolve(game, player, interaction, position, square, index,
-                                                  message=message)
+            await HarvesterButtons.resolve(game, player, interaction, position, square, index,
+                                           message=message)
+            return
         view = View()
         for square, index in available:
             resource = Harvester.resource_for(square)
@@ -96,23 +97,24 @@ class HarvesterButtons:
         parts = customID.split("_")
         position, square, index = parts[1], parts[2], parts[3]
         resource = parts[4] if len(parts) > 4 else None
-        return await HarvesterButtons.resolve(game, player, interaction, position, square, index,
-                                              resource, interaction.message)
+        await HarvesterButtons.resolve(game, player, interaction, position, square, index,
+                                       resource, interaction.message)
 
     @staticmethod
     async def placeResource(game: GamestateHelper, player, interaction: discord.Interaction, customID: str):
         parts = customID.split("_")
         position, square, index, resource = parts[1], parts[2], parts[3], parts[4]
-        return await HarvesterButtons.finishPlace(game, player, interaction, position, square, index,
-                                                  resource, interaction.message)
+        await HarvesterButtons.finishPlace(game, player, interaction, position, square, index,
+                                           resource, interaction.message)
 
     @staticmethod
     async def resolve(game: GamestateHelper, player, interaction: discord.Interaction,
                       position: str, square: str, index: str, resource=None, message=None):
         resource = resource or Harvester.resource_for(square)
         if resource is not None:
-            return await HarvesterButtons.finishPlace(game, player, interaction, position, square, index,
-                                                      resource, message)
+            await HarvesterButtons.finishPlace(game, player, interaction, position, square, index,
+                                               resource, message)
+            return
         view = View()
         for choice in Harvester.RESOURCES:
             view.add_item(Button(label=HarvesterButtons.RESOURCE_LABELS[choice],
@@ -133,10 +135,9 @@ class HarvesterButtons:
         if not Harvester.record(game, player, position, square, index, resource):
             await interaction.followup.send("That planet is no longer available for this Harvester.",
                                             ephemeral=True)
-            return False
+            return
         if message is not None:
             await message.delete()
         await interaction.channel.send(f"{player['player_name']} placed a Harvester over the {square} planet"
                                        f" in {position}, producing 1 {resource} this Upkeep.")
         await HarvesterButtons.startPlace(game, player, interaction)
-        return True

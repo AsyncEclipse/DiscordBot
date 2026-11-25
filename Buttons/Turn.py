@@ -21,6 +21,10 @@ def _has_ship(color, sector_ships):
     return any(color in ship and "orb" not in ship and "mon" not in ship for ship in sector_ships)
 
 
+MIDAS_SURCHARGE_AT = 7
+MIDAS_SURCHARGE = 1
+
+
 class TurnButtons:
 
     @staticmethod
@@ -73,6 +77,13 @@ class TurnButtons:
 
     @staticmethod
     async def endTurn(player, game: GamestateHelper, interaction: discord.Interaction):
+        if player["color"] not in game.gamestate.get("activePlayerColor", []):
+            try:
+                await interaction.message.delete()
+            except discord.NotFound:
+                pass
+            await interaction.followup.send("That turn has already ended.", ephemeral=True)
+            return
         from helpers.CombatHelper import Combat
         from Buttons.Influence import InfluenceButtons
         await InfluenceButtons.declinePendingInfluence(game, player, interaction)
@@ -137,8 +148,10 @@ class TurnButtons:
         else:
 
             if TurnButtons.noOneElsePassed(player, game):
-                player_helper.adjust_money(2)
-                await interaction.channel.send(f"{player['player_name']} you gained 2 money"
+                gain = 1 if FactionData.has(player, "all_that_glitters") else 2
+                player_helper.adjust_money(gain)
+                ability = "All That Glitters: " if FactionData.has(player, "all_that_glitters") else ""
+                await interaction.channel.send(f"{ability}{player['player_name']} you gained {gain} money"
                                                " and the first player marker for next round for passing first.")
                 player_helper.setFirstPlayer(True)
                 for p2 in game.gamestate["players"]:
@@ -151,6 +164,7 @@ class TurnButtons:
                     game.update_player(player_helper2)
             else:
                 await interaction.channel.send(f"{player['player_name']} passed.")
+        player_helper.stats.pop("midasBoost", None)
         player_helper.passTurn(True)
         game.update_player(player_helper)
         nextPlayer = game.get_next_player(player)
@@ -424,6 +438,7 @@ class TurnButtons:
     def startNewTurn(player, game: GamestateHelper):
         """Open Alliance leaving until the player takes an action or passes."""
         player["allianceLeaveClosed"] = False
+        player.pop("actionFinished", None)
         game.gamestate["activePlayerColor"] = [player["color"]]
         game.update()
 
@@ -463,6 +478,9 @@ class TurnButtons:
                                      custom_id=f"FCID{player['color']}_startInfluence"))
                 view.add_item(Button(label=f"Pass ({number_passed + 1}{ordinal(number_passed + 1)})",
                                      style=discord.ButtonStyle.red, custom_id=f"FCID{p1['color']}_passForRound"))
+                if FactionData.has(p1, "midas_touch"):
+                    view.add_item(Button(label="Midas Touch", style=discord.ButtonStyle.blurple,
+                                         custom_id=f"FCID{p1['color']}_midasTouch"))
         else:
             if p1.get("passed"):
                 view.add_item(Button(label="Pass On Reaction", style=discord.ButtonStyle.red,
@@ -531,6 +549,87 @@ class TurnButtons:
         game.update_player(player_helper)
 
     @staticmethod
+    def midas_touch_cost(player, action):
+        costs = FactionData.of(player).get("midas_touch_costs", {})
+        surcharge = MIDAS_SURCHARGE if player["influence_discs"] <= MIDAS_SURCHARGE_AT else 0
+        return costs.get(action, 0) + surcharge
+
+    @staticmethod
+    async def midasTouch(player, game: GamestateHelper, interaction: discord.Interaction):
+        """Legion of Midas: pay gold before an action for one more activation of that action."""
+        if not FactionData.has(player, "midas_touch") or player.get("passed"):
+            await interaction.followup.send("Midas Touch is not available now.", ephemeral=True)
+            return
+        if player.get("midasBoost"):
+            await interaction.followup.send("You already paid for an extra activation this action.", ephemeral=True)
+            return
+        costs = FactionData.of(player).get("midas_touch_costs", {})
+        view = View()
+        for action in costs:
+            if action == "explore" and not ExploreButtons.getTilesToExplore(game, player):
+                continue
+            cost = TurnButtons.midas_touch_cost(player, action)
+            if player["money"] >= cost:
+                view.add_item(Button(label=f"{action.capitalize()} (+1 activation, {cost} money)",
+                                     style=discord.ButtonStyle.blurple,
+                                     custom_id=f"FCID{player['color']}_midasAction_{action}"))
+        if not view.children:
+            await interaction.followup.send("You do not have enough money for Midas Touch.", ephemeral=True)
+            return
+        view.add_item(Button(label="Not now", style=discord.ButtonStyle.gray,
+                             custom_id=f"FCID{player['color']}_midasCancel"))
+        await interaction.message.delete()
+        await interaction.channel.send(f"{player['player_name']}, choose the action to extend with Midas Touch."
+                                       f" Each costs 1 more while you have 7 or fewer action disks.", view=view)
+
+    @staticmethod
+    async def midasCancel(player, game: GamestateHelper, interaction: discord.Interaction):
+        await interaction.message.delete()
+        view = TurnButtons.getStartTurnButtons(game, player, "dummy")
+        await interaction.channel.send(player["player_name"] + " use buttons to do your turn"
+                                       + game.displayPlayerStats(player), view=view)
+
+    @staticmethod
+    async def midasAction(player, game: GamestateHelper, interaction: discord.Interaction, buttonID: str):
+        from Buttons.Build import BuildButtons
+        from Buttons.Explore import ExploreButtons
+        from Buttons.Influence import InfluenceButtons
+        from Buttons.Move import MoveButtons
+        from Buttons.Research import ResearchButtons
+        from Buttons.Upgrade import UpgradeButtons
+        action = buttonID.split("_")[1]
+        if action not in FactionData.of(player).get("midas_touch_costs", {}):
+            await interaction.followup.send("Unknown action for Midas Touch.", ephemeral=True)
+            return
+        if player.get("midasBoost"):
+            await interaction.followup.send("You already paid for an extra activation this action.", ephemeral=True)
+            return
+        cost = TurnButtons.midas_touch_cost(player, action)
+        if player["money"] < cost:
+            await interaction.followup.send("You do not have enough money for Midas Touch.", ephemeral=True)
+            return
+        # The paid action starts a turn like any other: undo must return to this point.
+        game.updateSaveFile()
+        player_helper = PlayerHelper(game.get_player_from_color(player["color"]), player)
+        player_helper.adjust_money(-cost)
+        player_helper.stats["midasBoost"] = action
+        game.update_player(player_helper)
+        await interaction.channel.send(f"{player['player_name']} paid {cost} money for Midas Touch:"
+                                       f" +1 {action.capitalize()} activation.")
+        if action == "explore":
+            await ExploreButtons.startExplore(game, player, player_helper, interaction, "startExplore")
+        elif action == "research":
+            await ResearchButtons.startResearch(game, player, player_helper, interaction, True)
+        elif action == "upgrade":
+            await UpgradeButtons.startUpgrade(game, player, interaction, True, "dummy", "dum")
+        elif action == "build":
+            await BuildButtons.startBuild(game, player, interaction, "startBuild", player_helper)
+        elif action == "move":
+            await MoveButtons.startMove(game, player, interaction, "startMove", True)
+        else:
+            await InfluenceButtons.startInfluence(game, player, interaction)
+
+    @staticmethod
     async def undoLastTurn(player, game: GamestateHelper, interaction: discord.Interaction):
         view = View()
         await interaction.message.delete()
@@ -580,13 +679,28 @@ class TurnButtons:
     async def finishAction(player, game: GamestateHelper, interaction: discord.Interaction,
                            player_helper: PlayerHelper):
         player_helper.stats.pop("pulsarBuild", None)
+        if interaction.message is not None:
+            try:
+                await interaction.message.delete()
+            except discord.NotFound:
+                print(f"Message {interaction.message.id} was already deleted.")
+        if player.get("actionFinished"):
+            await interaction.followup.send("That action has already finished. Use the End Turn prompt.",
+                                            ephemeral=True)
+            return
+        player_helper.stats["actionFinished"] = True
         player_helper.stats["allianceLeaveClosed"] = True
         player_helper.stats.pop("influenceActionActive", None)
         player_helper.stats.pop("influenceActionUsed", None)
         player_helper.stats.pop("influenceActionReturned", None)
+        player_helper.stats.pop("influenceColonyShipsRefreshed", None)
         if FactionData.has(player, "phase_technology"):
             player_helper.stats.pop("phaseBuildsThisAction", None)
             player_helper.stats.pop("phaseSwappedThisAction", None)
+        for key in ("midasBoost", "infinitePossibilitiesUsed", "battleFocusUsed",
+                    "adaptiveUndo", "upgradeUndo", "infiniteUpgradeReturn", "infiniteUpgradeAvailable",
+                    "researchUpgrade", "exploreFinishMessage"):
+            player_helper.stats.pop(key, None)
         game.update_player(player_helper)
         await TurnButtons.checkTraitor(game, player, interaction, player_helper)
         view = View()
@@ -620,4 +734,3 @@ class TurnButtons:
                                        "Do any end of turn abilities and then end your turn.", view=view)
         game.initilizeKey("20MinReminder")
         game.addToKey("20MinReminder",player["color"])
-        await interaction.message.delete()

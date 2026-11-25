@@ -10,6 +10,7 @@ from helpers import FactionData
 from helpers.DrawHelper import DrawHelper
 from helpers.EmojiHelper import Emoji
 from helpers.PlayerHelper import PlayerHelper
+from helpers.ShipHelper import ship_damage_slots
 from helpers.Turtugan import DeepSpace, Harvester
 import os
 from jproperties import Properties
@@ -25,6 +26,12 @@ NEBULA_WEDGES = {"": (1, 2), "b": (0, 5), "c": (3, 4)}
 
 ALLIANCE_TILES = ["nova", "flare", "vortex"]
 LAST_ROUND = 8
+
+
+def areAlliedByPlayer(playerA, playerB):
+    """True when two player dicts share a trade tile neither has betrayed."""
+    shared = set(playerA.get("alliances", {})).intersection(playerB.get("alliances", {}))
+    return any(not playerA["alliances"][tile] and not playerB["alliances"][tile] for tile in shared)
 
 
 class GamestateHelper:
@@ -436,50 +443,64 @@ class GamestateHelper:
         self.gamestate["players"][self.get_player_from_color(color)]["influence_discs"] = amount
         self.update()
 
-    def add_damage(self, ship, position, damage):
-        if "damage_tracker" in self.gamestate["board"][position]:
-            if ship in self.gamestate["board"][position]["damage_tracker"]:
-                damage = self.gamestate["board"][position]["damage_tracker"][ship] + damage
-            else:
-                self.gamestate["board"][position]["damage_tracker"][ship] = [0]
-        else:
-            self.gamestate["board"][position]["damage_tracker"] = {}
-            self.gamestate["board"][position]["damage_tracker"][ship] = [0]
-        self.gamestate["board"][position]["damage_tracker"][ship] = damage
+    def damage_targets(self, position, ship):
+        tile = self.gamestate["board"][position]
+        slots = ship_damage_slots(tile, ship)
+        if len(slots) == 1:
+            return [ship]
+        return [f"{ship}:{index}" for index, damage in enumerate(slots) if damage is not None]
+
+    def ship_damage(self, position, target):
+        ship, _, slot = target.partition(":")
+        slots = ship_damage_slots(self.gamestate["board"][position], ship)
+        if slot:
+            index = int(slot)
+            return slots[index] if 0 <= index < len(slots) else None
+        return max((damage for damage in slots if damage is not None), default=0)
+
+    def add_damage(self, target, position, damage):
+        ship, _, slot = target.partition(":")
+        tile = self.gamestate["board"][position]
+        slots = ship_damage_slots(tile, ship)
+        index = int(slot) if slot else slots.index(max(value for value in slots if value is not None))
+        slots[index] = max(slots[index] + damage, 0)
+        tracker = tile.setdefault("damage_tracker", {})
+        ship = ship.removesuffix("adv")
+        tracker.pop(ship + "adv", None)
+        tracker[ship] = slots[0] if len(slots) == 1 else slots
         self.update()
-        return damage
+        return slots[index]
 
     def repair_damage(self, ship, position):
-        damage = 0
-        if "damage_tracker" in self.gamestate["board"][position]:
-            if all([ship in self.gamestate["board"][position]["damage_tracker"],
-                    self.gamestate["board"][position]["damage_tracker"][ship] > 0]):
-                damage = self.gamestate["board"][position]["damage_tracker"][ship] - 1
-            else:
-                self.gamestate["board"][position]["damage_tracker"][ship] = [0]
-        else:
-            self.gamestate["board"][position]["damage_tracker"] = {}
-            self.gamestate["board"][position]["damage_tracker"][ship] = [0]
-        self.gamestate["board"][position]["damage_tracker"][ship] = damage
-        self.update()
-        return damage
+        return self.add_damage(ship, position, -1)
 
-    def destroy_ship(self, ship: str, position, destroyer):
+    def destroy_ship(self, target: str, position, destroyer):
+        ship = target.partition(":")[0]
+        gained = 0
+        owner = ship.split("-")[0]
+        tile = self.gamestate["board"][position]
+        if ship not in tile["player_ships"] and ship + "adv" not in tile["player_ships"]:
+            return 0
         if "orb" not in ship:
-            self.remove_units([ship], position)
+            self.remove_units([target], position)
         else:
             self.remove_pop(["orbital_pop"], position,
                             self.get_player_from_color(self.gamestate["board"][position]["owner"]), True)
+            tile.get("damage_tracker", {}).pop(ship, None)
+        if owner != "ai" and tile.get("owner") != owner:
+            player = self.getPlayerObjectFromColor(owner)
+            if FactionData.has(player, "call_to_arms"):
+                gained = FactionData.call_to_arms_materials(player).get(
+                    ship.split("-")[1].replace("adv", ""), 0)
+                player["materials"] += gained
 
-        if "damage_tracker" in self.gamestate["board"][position]:
-            if ship in self.gamestate["board"][position]["damage_tracker"]:
-                del self.gamestate["board"][position]["damage_tracker"][ship]
         if destroyer != "ai" and destroyer not in ship:
             key = "ships_destroyed_by_" + destroyer
             if key not in self.gamestate["board"][position]:
                 self.gamestate["board"][position][key] = []
             self.gamestate["board"][position][key].append(ship.split("-")[1])
         self.update()
+        return gained
 
     def cleanAllTheTiles(self):
         for position in self.gamestate["board"]:
@@ -492,6 +513,8 @@ class GamestateHelper:
             self.gamestate["board"][position].pop("carapaceRollOldLength", None)
             self.gamestate["board"][position].pop("lyraRerollPending", None)
             self.gamestate["board"][position].pop("lyraRerollToken", None)
+            for key in ("nineLivesPending", "nineLivesOldLength", "nineLivesRiftBackfire", "nineLivesToken"):
+                self.gamestate["board"][position].pop(key, None)
             self.gamestate["board"][position].pop("combatEntryOrder", None)
             self.gamestate["board"][position].pop("firstShotPhase", None)
             self.gamestate["board"][position].pop("firstShotSide", None)
@@ -915,10 +938,36 @@ class GamestateHelper:
                     return False
         return True
 
+    def move_unit(self, ship, origin, destination):
+        """Move a ship with its damage, choosing the healthiest copy of its type."""
+        with self.batch_save():
+            target = min(self.damage_targets(origin, ship), key=lambda unit: self.ship_damage(origin, unit))
+            damage = self.ship_damage(origin, target)
+            self.remove_units([target], origin)
+            self.add_units([ship], destination)
+            moved = self.damage_targets(destination, ship)[-1]
+            if damage:
+                self.add_damage(moved, destination, damage)
+        return moved
+
     def remove_units(self, unit_list, position):
         color = unit_list[0].split("-")[0]
         player = self.get_player_from_color(color)
-        for i in unit_list:
+        tile = self.gamestate["board"][position]
+        for target in unit_list:
+            i, _, slot = target.partition(":")
+            if i in tile["player_ships"] or i + "adv" in tile["player_ships"]:
+                tracker = tile.get("damage_tracker", {})
+                ship = i.removesuffix("adv")
+                slots = ship_damage_slots(tile, ship)
+                if len(slots) > 1 or ship in tracker or ship + "adv" in tracker:
+                    index = int(slot) if slot else slots.index(self.ship_damage(position, ship))
+                    slots[index] = None
+                    tracker.pop(ship + "adv", None)
+                    if any(damage is not None for damage in slots):
+                        tile.setdefault("damage_tracker", {})[ship] = slots
+                    else:
+                        tracker.pop(ship, None)
             if i in self.gamestate["board"][position]["player_ships"]:
                 if "int" in i:
                     self.gamestate["players"][player]["ship_stock"][0] += 1
@@ -1023,7 +1072,7 @@ class GamestateHelper:
                                                                          False)
                         units = self.gamestate["board"][position]["player_ships"][:]
                         for unit in units:
-                            self.remove_units([unit], position)
+                            self.destroy_ship(unit, position, "supernova")
                         del self.gamestate["board"][position]
                         self.add_tile(position, 0, "supernovaExploded")
                     else:
@@ -1058,6 +1107,17 @@ class GamestateHelper:
 
         self.gamestate["players"][str(player_id)].update({"color": color})
         self.gamestate["players"][str(player_id)].update(faction_data[faction])
+        # Starting techs are copied in, not researched, so apply their activation bonus here.
+        with open("data/techs.json", "r") as f:
+            tech_data = json.load(f)
+        for tech in (faction_data[faction].get("military_tech", [])
+                     + faction_data[faction].get("grid_tech", [])
+                     + faction_data[faction].get("nano_tech", [])):
+            details = tech_data.get(tech, {})
+            if details.get("activ1"):
+                self.gamestate["players"][str(player_id)][f"{details['activ1']}_apt"] += 1
+                if details["activ1"] == "upgrade":
+                    self.gamestate["players"][str(player_id)][f"{details['activ1']}_apt"] += 1
         self.gamestate["players"][str(player_id)].update({"passed": False})
         self.gamestate["players"][str(player_id)].update({"perma_passed": False})
         name = self.gamestate["players"][str(player_id)]["player_name"]
@@ -1081,6 +1141,12 @@ class GamestateHelper:
                 home = self.get_system_coord(p1.stats["home_planet"])
                 for ship in FactionData.of(p1.stats).get("starting_ships", ["int"]):
                     self.gamestate["board"][home]["player_ships"].append(f"{p1.stats['color']}-{ship}")
+                if FactionData.has(p1.stats, "money_is_power"):
+                    tile = self.gamestate["board"][home]
+                    if tile.get("moneyadv_pop") == [0] and p1.stats["money_pop_cubes"] > 0:
+                        tile["moneyadv_pop"] = [1]
+                        p1.stats["money_pop_cubes"] -= 1
+                        self.update_player(p1)
                 DeepSpace.draw_reserve(self, p1.stats)
 
                 if FactionData.has(p1.stats, "setup_reputation_tiles"):
@@ -1464,8 +1530,7 @@ class GamestateHelper:
         playerB = self.getPlayerObjectFromColor(colorB)
         if playerA is None or playerB is None:
             return False
-        shared = set(playerA.get("alliances", {})).intersection(playerB.get("alliances", {}))
-        return any(not playerA["alliances"][tile] and not playerB["alliances"][tile] for tile in shared)
+        return areAlliedByPlayer(playerA, playerB)
 
     def isFormerAlly(self, colorA, colorB):
         """True when colorA betrayed a tile colorB still holds faceup."""

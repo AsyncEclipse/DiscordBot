@@ -92,6 +92,13 @@ class ExploreButtons:
     @staticmethod
     async def startExplore(game: GamestateHelper, player, player_helper: PlayerHelper,
                            interaction: discord.Interaction, buttonID: str):
+        previous_finish = player.pop("exploreFinishMessage", None)
+        if previous_finish is not None:
+            try:
+                await (await interaction.channel.fetch_message(previous_finish)).delete()
+            except discord.NotFound:
+                print(f"Explore finish prompt {previous_finish} was already deleted.")
+            game.update_player(player_helper)
         if "2" not in buttonID:
             player_helper.spend_influence_on_action("explore")
             await interaction.channel.send(f"{player['player_name']} is using their turn to explore")
@@ -110,7 +117,7 @@ class ExploreButtons:
                              custom_id=f"FCID{player['color']}_restartTurn"))
         await interaction.channel.send(f"{player['player_name']} select the tile you would like to explore",
                                        view=view)
-        if player["explore_apt"] > 1 and "2" not in buttonID:
+        if FactionData.action_apt(player, "explore") > 1 and "2" not in buttonID:
             view2 = View()
             view2.add_item(Button(label="Start 2nd explore", style=discord.ButtonStyle.green,
                                   custom_id=f"FCID{player['color']}_startExplore2"))
@@ -256,8 +263,10 @@ class ExploreButtons:
         ExploreButtons.addHarvesterMoveButton(game, player, view2)
         view2.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                               custom_id=f"FCID{player['color']}_finishAction"))
-        await interaction.channel.send(f"{player['player_name']} when you're finished resolving your action, "
-                                       "you proceed to end of turn things with this button.", view=view2)
+        finish = await interaction.channel.send(f"{player['player_name']} when you're finished resolving your action, "
+                                                "you proceed to end of turn things with this button.", view=view2)
+        player["exploreFinishMessage"] = finish.id
+        game.update_player(player_helper)
         await interaction.message.delete()
 
     @staticmethod
@@ -269,6 +278,8 @@ class ExploreButtons:
         ExploreButtons.addHarvesterMoveButton(game, player, view)
         view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                              custom_id=f"FCID{player['color']}_finishAction"))
-        await interaction.channel.send(f"{player['player_name']} when finished you may resolve your action "
-                                       f"with this button.", view=view)
+        finish = await interaction.channel.send(f"{player['player_name']} when finished you may resolve your action "
+                                                "with this button.", view=view)
+        player["exploreFinishMessage"] = finish.id
+        game.update()
         await interaction.message.delete()

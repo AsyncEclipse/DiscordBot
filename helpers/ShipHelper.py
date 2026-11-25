@@ -3,6 +3,18 @@ from helpers import FactionData
 from helpers.PlayerHelper import PlayerHelper
 
 
+def ship_damage_slots(tile, ship):
+    """Return per-ship damage, keeping empty slots so pending hit buttons stay valid."""
+    ship = ship.removesuffix("adv")
+    tracker = tile.get("damage_tracker", {})
+    saved = tracker.get(ship, tracker.get(ship + "adv", 0))
+    count = sum(unit.removesuffix("adv") == ship for unit in tile.get("player_ships", []))
+    if isinstance(saved, list):
+        return saved + [0] * (count - sum(damage is not None for damage in saved))
+    # Legacy saves placed all accumulated damage on one ship of each type.
+    return [saved] + [0] * (count - 1)
+
+
 class Ship:
     def __init__(self):
         self.range = 0

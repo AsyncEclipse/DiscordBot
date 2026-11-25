@@ -27,6 +27,7 @@ class DraftButtons:
                              ("The Exiles", "exl")]
         game.initilizeKey("draftedFactions")
         game.initilizeKey("draftingPlayers")
+        game.initilizeKey("draftMessages")
         for x, player in enumerate(player_list):
             member = interaction.guild.get_member(player[0])
             message.append(f"{x + 1}. {member.mention if member else player[1]}")
@@ -38,7 +39,7 @@ class DraftButtons:
                             "Rho Indi Syndicate", "The Exiles"]
             if game.gamestate.get("community_factions", False):
                 factionNames += [faction["name"] for faction in FactionData.FACTIONS.values()
-                                 if faction.get("community")]
+                                 if faction.get("community") and faction["name"] != FactionData.FACTIONS["heg"]["name"]]
             message.append(f"For your reference, the factions currently available in the bot are the following "
                            f"{len(factionNames)}, plus the 6 Terran equivalents. First-timers are encouraged to use"
                            " the Terran factions, which are all the same and don't have as many quirks"
@@ -46,6 +47,7 @@ class DraftButtons:
             message.extend(f"{i}. {name}" for i, name in enumerate(factionNames, 1))
         await channel.send("\n".join(message))
         game.initilizeKey("bannedFactions")
+        game.addToKey("bannedFactions", "heg")  # ponytail: Hegemony hidden from draft; delete this line to re-enable
         if tournament:
             msg2 = "The following factions have been banned:"
             for i in range(1, 10-len(player_list)):
@@ -56,13 +58,32 @@ class DraftButtons:
             await channel.send(msg2)
         playerID = game.gamestate["draftingPlayers"][0]
         member = interaction.guild.get_member(playerID)
-        await channel.send(f"{member.mention if member else game.get_player(playerID)['player_name']},"
-                           " please draft a faction from those available.",
-                           view=DraftButtons.getDraftButtons(game))
+        await DraftButtons.sendDraftOptions(
+            game, channel,
+            f"{member.mention if member else game.get_player(playerID)['player_name']},"
+            " please draft a faction from those available.")
 
     @staticmethod
-    def getDraftButtons(game: GamestateHelper):
-        view = View()
+    async def sendDraftOptions(game: GamestateHelper, channel, prompt: str):
+        factions = DraftButtons.getOfferedFactions(game)
+        for start in range(0, len(factions), 25):
+            message = await channel.send(
+                prompt if start == 0 else "More factions:",
+                view=DraftButtons.getDraftButtons(game, start))
+            game.addToKey("draftMessages", message.id)
+
+    @staticmethod
+    async def clearDraftOptions(game: GamestateHelper, channel):
+        for message_id in game.gamestate.get("draftMessages", []):
+            try:
+                message = await channel.fetch_message(message_id)
+            except discord.NotFound:
+                continue
+            await message.delete()
+        game.initilizeKey("draftMessages")
+
+    @staticmethod
+    def getOfferedFactions(game: GamestateHelper):
         factionsAvailable = [("Hydran Progress", "hyd"),
                              ("Eridani Empire", "eri"),
                              ("Orion Hegemony", "ori"),
@@ -88,13 +109,16 @@ class DraftButtons:
         draftedFactionKeys = {key for playerID, key in game.gamestate["draftedFactions"]}
         colorsAlreadyChosen = {DraftButtons.getColor(key) for key in draftedFactionKeys
                                if key not in communityFactionKeys}
-        for faction, key in factionsAvailable:
-            if key in draftedFactionKeys:
-                continue
-            if key not in communityFactionKeys and DraftButtons.getColor(key) in colorsAlreadyChosen:
-                continue
-            if key in bannedFactions:
-                continue
+        return [(faction, key) for faction, key in factionsAvailable
+                if key not in draftedFactionKeys
+                and (key in communityFactionKeys or DraftButtons.getColor(key) not in colorsAlreadyChosen)
+                and key not in bannedFactions]
+
+    @staticmethod
+    def getDraftButtons(game: GamestateHelper, start: int = 0):
+        view = View()
+        offered = DraftButtons.getOfferedFactions(game)
+        for faction, key in offered[start:start + 25]:
             shorterName = faction
             if "(" in faction:
                 shorterName = shorterName[:(faction.find("(")-1)]
@@ -105,7 +129,17 @@ class DraftButtons:
         return view
 
     @staticmethod
+    async def draftMore(game: GamestateHelper, interaction: discord.Interaction, customID: str):
+        start = int(customID.split("_")[1])
+        await interaction.message.delete()
+        message = await interaction.channel.send("More factions:", view=DraftButtons.getDraftButtons(game, start))
+        game.addToKey("draftMessages", message.id)
+
+    @staticmethod
     async def draftFaction(game: GamestateHelper, interaction: discord.Interaction, customID: str):
+        if not game.gamestate["draftingPlayers"]:
+            await interaction.followup.send("This draft is already complete", ephemeral=True)
+            return
         playerID = game.gamestate["draftingPlayers"][0]
         if interaction.user.id != playerID and not (config.dev_mode and config.is_tester(interaction.user.id)):
             await interaction.followup.send("These buttons are not for you", ephemeral=True)
@@ -117,15 +151,16 @@ class DraftButtons:
             await interaction.followup.send(f"REMINDER {interaction.user.mention}: You start with one extra colony "
                                             f"ship to be used to populate your starting orbital before the game "
                                             f"begins.")
-        await interaction.message.delete()
+        await DraftButtons.clearDraftOptions(game, interaction.channel)
         game.removeFromKey("draftingPlayers", playerID)
         game.addToKey("draftedFactions", (playerID, factionKey))
         if len(game.gamestate["draftingPlayers"]) > 0:
             playerID = game.gamestate["draftingPlayers"][0]
             member = interaction.guild.get_member(playerID)
-            await interaction.channel.send(f"{member.mention if member else game.get_player(playerID)['player_name']},"
-                                           " please draft a faction from those available.",
-                                           view=DraftButtons.getDraftButtons(game))
+            await DraftButtons.sendDraftOptions(
+                game, interaction.channel,
+                f"{member.mention if member else game.get_player(playerID)['player_name']},"
+                " please draft a faction from those available.")
         else:
             factionsList = []
             playerIDList = []
@@ -219,6 +254,12 @@ class DraftButtons:
             game.setup_finished()
         # game.fillInDiscTiles()
         await interaction.channel.send("Done With Setup!")
+        for player_id in temp_player_list:
+            player = game.get_player(player_id, interaction)
+            if player is not None and FactionData.has(player, "battle_focus"):
+                await interaction.channel.send(f"{player['player_name']} is ready: Neutron Bombs and Nanorobots,"
+                                               " a four-slot Tech Track, and reduced ship Initiative."
+                                               " Battle Focus upgrades must use different ship classes.")
 
         if is_initial_setup:
             for player_id in temp_player_list:

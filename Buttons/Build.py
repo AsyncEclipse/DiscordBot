@@ -1,5 +1,6 @@
 import asyncio
 import discord
+from Buttons.Upgrade import UpgradeButtons
 from helpers import FactionData
 from helpers.DrawHelper import DrawHelper
 from helpers.EmojiHelper import Emoji
@@ -33,6 +34,8 @@ class BuildButtons:
         resume_after_move = "herRegroupResumeAfter" in buttonID
         if not nested_raid and not resume_build:
             await interaction.channel.send(f"{player['player_name']} is using their turn to build")
+        if buttonID == "startBuild":
+            player_helper.stats.pop("infinitePossibilitiesUsed", None)
         if "2" not in buttonID:
             player_helper.spend_influence_on_action("build")
             player_helper.stats["buildsThisAction"] = 0
@@ -65,6 +68,8 @@ class BuildButtons:
               and (buttonID == "startBuild" or resume_build)):
             view.add_item(Button(label="Move Activation (1)", style=discord.ButtonStyle.green,
                                  custom_id=f"FCID{player['color']}_herRegroupMove_before"))
+        if buttonID == "startBuild":
+            UpgradeButtons.addInfinitePossibilitiesButton(view, game, player, "build")
         if resume_after_move:
             view.add_item(Button(label="Finish Action", style=discord.ButtonStyle.red,
                                  custom_id=f"FCID{player['color']}_finishAction"))
@@ -88,7 +93,7 @@ class BuildButtons:
         view = View()
         view = BuildButtons.buildBuildButtonsView(interaction, "", 0, loc, view, player, game, suffix)
         await interaction.message.delete()
-        buildApt = player["build_apt"]
+        buildApt = FactionData.action_apt(player, "build")
         if suffix or player.get("passed") or player.get("pulsarBuild"):
             buildApt = 1
         else:
@@ -105,7 +110,7 @@ class BuildButtons:
         loc = buttonID.split("_")[3]
         ship = str(buttonID.split("_")[4])
         suffix = BuildButtons.raidSuffix(buttonID)
-        buildApt = player["build_apt"]
+        buildApt = FactionData.action_apt(player, "build")
         if suffix or player.get("passed") or player.get("pulsarBuild"):
             buildApt = 1
         else:
@@ -321,7 +326,7 @@ class BuildButtons:
                                        + textSum,
                                        file=await asyncio.to_thread(drawing.board_tile_image_file, loc))
         if suffix:
-            if moveCount <= player["move_apt"]:
+            if moveCount <= FactionData.action_apt(player, "move"):
                 await interaction.message.delete()
                 from Buttons.Move import MoveButtons
                 await MoveButtons.startMove(game, player, interaction,
@@ -330,7 +335,7 @@ class BuildButtons:
                 from Buttons.Turn import TurnButtons
                 await TurnButtons.finishAction(player, game, interaction, player_helper)
             return
-        buildApt = player["build_apt"]
+        buildApt = FactionData.action_apt(player, "build")
         pulsar_build = player.get("pulsarBuild")
         if player.get("passed") or pulsar_build:
             buildApt = 1
@@ -346,6 +351,10 @@ class BuildButtons:
                 and not pulsar_build and not player.get("herCrossUsed")):
             view2.add_item(Button(label="Move Activation (1)", style=discord.ButtonStyle.green,
                                   custom_id=f"FCID{player['color']}_herRegroupMove_after"))
+        # a Pulsar build is not a Build action, so it earns no extra upgrade activation
+        if not pulsar_build:
+            # first or LAST activation only: taking it after a build ends the action
+            UpgradeButtons.addInfinitePossibilitiesButton(view2, game, player, "finish")
         if FactionData.has(player, "phase_technology"):
             player_helper.stats["phaseBuildsThisAction"] = (
                 player_helper.stats.get("phaseBuildsThisAction", 0) + len(build))
@@ -365,7 +374,7 @@ class BuildButtons:
                                buttonID: str, player_helper: PlayerHelper):
         """Phase Technology: spend the remaining Build activation as an Upgrade 1 activation."""
         from Buttons.Upgrade import UpgradeButtons
-        buildApt = player["build_apt"]
+        buildApt = FactionData.action_apt(player, "build")
         if player.get("passed") or player.get("pulsarBuild"):
             buildApt = 1
         if not FactionData.has(player, "phase_technology"):

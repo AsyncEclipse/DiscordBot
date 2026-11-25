@@ -18,7 +18,8 @@ class ResearchButtons:
                                         ("grid", discord.ButtonStyle.green),
                                         ("nano", discord.ButtonStyle.gray)]:
             cost = ResearchButtons.calculate_cost(tech_details, tech_type, player)
-            if len(player[f"{tech_type}_tech"]) == 7 or (setup and cost > player["science"]):
+            if len(player[f"{tech_type}_tech"]) >= FactionData.tech_track_max(player) \
+                    or (setup and cost > player["science"]):
                 continue
             view.add_item(Button(label=f"{tech_type.capitalize()} ({cost})",
                                  style=button_style,
@@ -34,12 +35,23 @@ class ResearchButtons:
         pending_task = True
         is_setup = [game.get_player_from_color(player["color"]), "setup_tech"] in game.preGameTasks()
         cost = ResearchButtons.calculate_cost(tech_details, tech_type, player)
+        surcharge = 0
+        if (FactionData.has(player, "tech_masters") and tech_details["track"] != "any"
+                and tech_type != tech_details["track"]):
+            extra = FactionData.tech_masters_extra(player)
+            surcharge = extra["first"] + extra["step"] * player.get("techMasterUses", 0)
         game.playerResearchTech(game.get_player_from_color(player["color"]), tech, tech_type)
+        if (FactionData.has(player, "tech_masters") and tech_details["track"] != "any"
+                and tech_type != tech_details["track"]):
+            player_helper.stats["techMasterUses"] = player_helper.stats.get("techMasterUses", 0) + 1
+            game.update_player(player_helper)
         with open("data/techs.json", "r") as f:
             tech_data = json.load(f)
         tech_details = tech_data.get(tech)
         image = DrawHelper.show_tech_ref_image(tech_details["name"], tech_details['track'])
-        await interaction.channel.send(f"{player['player_name']} acquired the tech {tech_details['name']}.",
+        pricing = (f" Tech Masters: {cost - surcharge} base + {surcharge} extra = {cost} science."
+                   if surcharge else "")
+        await interaction.channel.send(f"{player['player_name']} acquired the tech {tech_details['name']}.{pricing}",
                                        file=image)
         player_helper.specifyDetailsOfAction(f"Researched {tech_details['name']}.")
         if player["science"] >= cost:
@@ -133,7 +145,7 @@ class ResearchButtons:
                 game, game.getLocationFromID(player["home_planet"]), interaction, player)
             if offered:
                 pending_task = "discovery_tile"
-        await ResearchButtons.offerAncientInstinctUpgrade(player, interaction, tech, tech_details)
+        await ResearchButtons.offerAncientInstinctUpgrade(game, player, interaction, tech, tech_details)
         return pending_task
 
     @staticmethod
@@ -151,17 +163,22 @@ class ResearchButtons:
         return True
 
     @staticmethod
-    async def offerAncientInstinctUpgrade(player, interaction: discord.Interaction, tech: str, tech_details):
-        if not FactionData.has(player, "upgrade_after_research"):
+    async def offerAncientInstinctUpgrade(game: GamestateHelper, player, interaction: discord.Interaction,
+                                         tech: str, tech_details):
+        if not (FactionData.has(player, "upgrade_after_research")
+                or FactionData.has(player, "organic_tech")):
             return
         with open("data/parts.json", "r") as f:
             if tech not in json.load(f):
                 return
+        ability = "Ancient Instinct" if FactionData.has(player, "upgrade_after_research") else "Organic Tech"
+        player["researchUpgrade"] = tech
+        game.update_player(PlayerHelper(game.get_player_from_color(player["color"]), player))
         view = View()
         view.add_item(Button(label="Perform Upgrade 1", style=discord.ButtonStyle.blurple,
-                             custom_id=f"FCID{player['color']}_ancientInstinctUpgrade_{tech}"))
-        await interaction.channel.send(f"{player['player_name']}, Ancient Instinct lets you perform one "
-                                       f"upgrade using {tech_details['name']}.", view=view)
+                             custom_id=f"FCID{player['color']}_ancientInstinctUpgrade_{tech}_offer"))
+        await interaction.channel.send(f"{player['player_name']}, {ability} lets you perform one "
+                                       f"free upgrade using {tech_details['name']}.", view=view)
 
     @staticmethod
     async def placeWarpPortal(interaction: discord.Interaction, game: GamestateHelper, player, customID):
@@ -172,24 +189,31 @@ class ResearchButtons:
 
     @staticmethod
     def calculate_cost(tech_details, tech_type, player):
+        max_techs = FactionData.tech_track_max(player)
+        wrong_tray = (FactionData.has(player, "tech_masters") and tech_details["track"] != "any"
+                      and tech_type != tech_details["track"])
+        # like a Rare Tech, the discount follows the tray the tile goes into
+        discount_track = tech_type
         prev_tech_count = 0
-        if tech_type != "any":
-            prev_tech_count = len(player[f"{tech_type}_tech"]) 
+        if discount_track != "any":
+            prev_tech_count = min(len(player[f"{discount_track}_tech"]), max_techs - 1)
         else:
-            if len(player["nano_tech"]) < 7:
-                prev_tech_count = max(len(player["nano_tech"]),prev_tech_count)
-            if len(player["grid_tech"]) < 7:
-                prev_tech_count = max(len(player["grid_tech"]),prev_tech_count)
-            if len(player["military_tech"]) < 7:
-                prev_tech_count = max(len(player["military_tech"]),prev_tech_count)
-        track = [-8, -6, -4, -3, -2, -1, 0, 0]
-        discount = track[6 - prev_tech_count]
+            for track in ("nano_tech", "grid_tech", "military_tech"):
+                if len(player[track]) < max_techs:
+                    prev_tech_count = max(len(player[track]), prev_tech_count)
+        track = FactionData.tech_track(player)
+        discount = track[max_techs - 1 - prev_tech_count]
         for rep in player["reputation_track"]:
             if isinstance(rep, str):
                 rep = rep.lower()
                 if "tech discount" in rep:
                     discount -= 1
-        return max(tech_details["base_cost"] + discount, tech_details["min_cost"])
+        cost = max(tech_details["base_cost"] + discount, tech_details["min_cost"])
+        if wrong_tray:
+            # Tech Masters: placing a Tech in the wrong tray costs extra, never discounted.
+            extra = FactionData.tech_masters_extra(player)
+            cost += extra["first"] + extra["step"] * player.get("techMasterUses", 0)
+        return cost
 
     @staticmethod
     def getPlayerTotalAvailableScience(player, game):
@@ -227,10 +251,18 @@ class ResearchButtons:
             tech_details = tech_data.get(tech)
             if tech_details:
                 tech_type = tech_details["track"]
-                if tech_type != "any":
-                    if len(player[f"{tech_type}_tech"]) == 7:
+                if not setup and FactionData.has(player, "tech_masters") and tech_type != "any":
+                    costs = [ResearchButtons.calculate_cost(tech_details, track, player)
+                             for track in ("military", "grid", "nano")
+                             if len(player[f"{track}_tech"]) < FactionData.tech_track_max(player)]
+                    if not costs:
                         continue
-                cost = ResearchButtons.calculate_cost(tech_details, tech_type, player)
+                    cost = min(costs)
+                else:
+                    max_techs = FactionData.tech_track_max(player)
+                    if tech_type != "any" and len(player[f"{tech_type}_tech"]) >= max_techs:
+                        continue
+                    cost = ResearchButtons.calculate_cost(tech_details, tech_type, player)
                 tech_groups[tech_type].append((tech, tech_details["name"], cost))
         displayedTechs = []
         researchedTech = player_helper.getTechs()
@@ -290,6 +322,9 @@ class ResearchButtons:
                                            f"You currently have {str(player['science'])} science,"
                                            " and can trade other resources for science"
                                            f" at a {str(player['trade_value'])}:1 ratio", view=view)
+        if not setup and not view.children and not view2.children:
+            await interaction.channel.send("No available technology fits an open Tech Tray and your resources,"
+                                           " including trades. Finish the action or restart your turn.")
         if view2.children:
             await interaction.channel.send(view=view2)
         await interaction.followup.send(file=await asyncio.to_thread(drawing.show_available_techs), ephemeral=True)
@@ -298,7 +333,7 @@ class ResearchButtons:
                                            " with this research action by paying its cost",
                                            view=ShrineButtons.getInitialShrineButtons(game, player))
         if buttonCommand:
-            if player["research_apt"] > 1:
+            if FactionData.action_apt(player, "research") > 1:
                 if buttonCount < 25:
                     view.add_item(Button(label="Decline 2nd Tech", style=discord.ButtonStyle.red,
                                          custom_id=f"FCID{player['color']}_deleteMsg"))
@@ -335,10 +370,46 @@ class ResearchButtons:
                     or tech_type not in ("any", "military", "grid", "nano")
                     or (tech_details["track"] != "any" and tech_type != tech_details["track"])
                     or ResearchButtons.calculate_cost(tech_details, tech_type, player) > player["science"]
-                    or (tech_type != "any" and len(player[f"{tech_type}_tech"]) >= 7)):
+                    or (tech_type != "any"
+                        and len(player[f"{tech_type}_tech"]) >= FactionData.tech_track_max(player))):
                 await interaction.followup.send("That technology is unavailable or costs more than your initial science.",
                                                 ephemeral=True)
                 return False
+        if (not is_setup and FactionData.has(player, "tech_masters")
+                and not buttonID.endswith("_tm") and tech_details["track"] != "any"):
+            max_techs = FactionData.tech_track_max(player)
+            view = View()
+            unavailable = []
+            for track in ("military", "grid", "nano"):
+                if len(player[f"{track}_tech"]) >= max_techs:
+                    unavailable.append(f"{track.capitalize()} is full")
+                    continue
+                cost = ResearchButtons.calculate_cost(tech_details, track, player)
+                if cost > ResearchButtons.getPlayerTotalAvailableScience(player, game):
+                    unavailable.append(f"{track.capitalize()} costs {cost} science and is unaffordable")
+                    continue
+                extra_cost = 0
+                if track != tech_details["track"]:
+                    extra = FactionData.tech_masters_extra(player)
+                    extra_cost = extra["first"] + extra["step"] * player.get("techMasterUses", 0)
+                label = (f"{track.capitalize()} ({cost - extra_cost} + {extra_cost} = {cost})"
+                         if extra_cost else f"{track.capitalize()} ({cost})")
+                view.add_item(Button(label=label, style=discord.ButtonStyle.blurple,
+                                     custom_id=f"FCID{player['color']}_getTech_{tech}_{track}_tm"))
+            explanation = " The extra surcharge is added after discounts and cannot be discounted."
+            if unavailable:
+                explanation += " Unavailable: " + "; ".join(unavailable) + "."
+            if view.children:
+                await interaction.message.delete()
+                await interaction.channel.send(f"{interaction.user.mention}, Tech Masters: choose which Tech Tray"
+                                               f" to place this technology in.{explanation}", view=view)
+                return False
+            await interaction.followup.send(f"No eligible Tech Tray.{explanation}", ephemeral=True)
+            return False
+        if (not is_setup and tech_type in ("military", "grid", "nano")
+                and len(player[f"{tech_type}_tech"]) >= FactionData.tech_track_max(player)):
+            await interaction.followup.send("That Tech Tray is full.", ephemeral=True)
+            return False
         await interaction.message.delete()
         if tech_type == "any":
             view = await ResearchButtons.handle_wild_tech_selection(View(), tech_details, tech, player, is_setup)

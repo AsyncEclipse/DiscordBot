@@ -806,5 +806,21 @@
     "hull": 0,
     "repair": 0,
     "external": 0
+  },
+  "reh": {
+    "name": "Regenerative Hull",
+    "description": "Vorlons start with this Ship Part on every Blueprint. A Regenerative Hull absorbs 1 hit and repairs 1 damage at the end of each combat round; the repair does not work against Ancients, but does against Guardians and the GCDS.",
+    "range": 0,
+    "speed": 0,
+    "nrg_use": 0,
+    "nrg_src": 0,
+    "tech_req": "reh",
+    "dice": [],
+    "comp": 0,
+    "shield": 0,
+    "missile": [],
+    "hull": 1,
+    "repair": 1,
+    "external": 0
   }
 }

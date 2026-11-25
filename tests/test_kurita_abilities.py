@@ -367,7 +367,7 @@ def test_a_combat_roll_names_each_computer_source(make_game, no_random, run):
     no_random([3])
     run(Combat.rollDice(game, f"rollDice_{POS}_blue_2_deleteMsg", inter))
 
-    assert any("+2 computer (+1 Electron Computer, +1 Elite Warriors)" in content
+    assert any("+2 computer: +1 Electron Computer and +1 Elite Warriors." in content
                for content, _kwargs in inter.channel.sent)
 
 

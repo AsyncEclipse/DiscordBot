@@ -1,10 +1,13 @@
 """Combat pairs SIDES, not colours: allies fight together and never each other."""
 import asyncio
 
+import discord
 import pytest
 
 from helpers.CombatHelper import Combat
-from tests.fakes import FakeInteraction, POS, board_tile, offered_ids, offered_labels, player_stats, players
+from listeners.ButtonListener import ButtonListener
+from tests.fakes import (FakeInteraction, POS, board_tile, offered_ids, offered_labels, player_stats,
+                         players, reload)
 
 
 def _game(make_game, colors, ships, attacker=None, defender=None, owner=0, entry=None):
@@ -34,6 +37,32 @@ async def _pair(game):
 
 async def _noop(*_args, **_kwargs):
     return None
+
+
+def test_large_alliance_fleet_can_target_a_ship_in_the_second_menu(start_game, run, monkeypatch):
+    game, channel = start_game(player_count=4)
+    tile = game.gamestate["board"]["201"]
+    targets = {"red-int": 7, "red-drd": 2, "red-cru": 4,
+               "green-int": 7, "green-drd": 2, "green-cru": 4}
+    tile.update(player_ships=["blue-cru"] + [ship for ship, count in targets.items() for _ in range(count)],
+                attacker=["blue"], defender=["red", "green"], currentSpeed=2, currentRoller="blue")
+    game.update()
+    monkeypatch.setattr(Combat, "promptNextSpeed", staticmethod(_noop))
+    run(Combat.offerHitPrompt(game, FakeInteraction(channel), "201", "blue",
+                              list(targets), 6, 1))
+    view = channel.sent[-1][1]["view"]
+    assert [len(item.options) for item in view.children] == [25, 1]
+    menu = view.children[-1]
+    message = channel.messages[-1]
+    message.components = [discord.ActionRow(row) for row in view.to_components()]
+    interaction = FakeInteraction(channel, menu.custom_id, 1, [game.game_id], message)
+    interaction.data["values"] = [menu.options[0].value]
+
+    run(ButtonListener(None).resolveButton(interaction))
+
+    state = reload(game)
+    assert state.ship_damage("201", "green-cru:3") == 1
+    assert state.ship_damage("201", "green-cru:2") == 0
 
 
 def _record_declared_winners(monkeypatch):

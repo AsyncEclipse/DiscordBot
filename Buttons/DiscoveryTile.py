@@ -11,6 +11,13 @@ from discord.ui import View, Button
 
 class DiscoveryTileButtons:
     @staticmethod
+    def can_gain_tech(player, tech_details):
+        tracks = (("military", "grid", "nano") if tech_details["track"] == "any"
+                  else (tech_details["track"],))
+        return any(len(player[f"{track}_tech"]) < FactionData.tech_track_max(player)
+                   for track in tracks)
+
+    @staticmethod
     async def sendPendingPrompt(game: GamestateHelper, tile, channel, content, view, **kwargs):
         prompts = game.gamestate.setdefault("pendingDiscoveryPrompts", {})
         previous = prompts.get(tile, {})
@@ -206,16 +213,19 @@ class DiscoveryTileButtons:
                 if tech in ownedTechs:
                     continue
                 tech_details = tech_data.get(tech)
+                if not DiscoveryTileButtons.can_gain_tech(player, tech_details):
+                    continue
                 minCost = min(minCost, tech_details["base_cost"])
             cheapestTechs = []
             for tech in techsAvailable:
                 if tech in ownedTechs:
                     continue
                 tech_details = tech_data.get(tech)
-                if minCost == tech_details["base_cost"] and tech not in cheapestTechs:
+                if minCost == tech_details["base_cost"] and tech not in cheapestTechs \
+                        and DiscoveryTileButtons.can_gain_tech(player, tech_details):
                     cheapestTechs.append(tech)
             if not cheapestTechs:
-                await interaction.channel.send("No unowned technology remains to gain.")
+                await interaction.channel.send("No unowned technology remains that fits this faction's trays.")
             elif len(cheapestTechs) > 1:
                 view = View()
                 for tech in cheapestTechs:
@@ -271,28 +281,39 @@ class DiscoveryTileButtons:
         track = next((part for part in buttonID.split("_") if part in ("military", "grid", "nano")), None)
         with open("data/techs.json", "r") as f:
             tech_data = json.load(f)
-        tech_type = tech_data.get(tech)["track"]
+        tech_details = tech_data[tech]
+        tech_type = tech_details["track"]
+        max_techs = FactionData.tech_track_max(player)
         if "spoof" not in buttonID:
             await interaction.message.delete()
         if tech_type == "any":
-            if track:
+            if track and len(player[f"{track}_tech"]) < max_techs:
                 tech_type = track
             else:
                 view = View()
-                view.add_item(Button(label="Military (Pink)", style=discord.ButtonStyle.red,
-                                         custom_id=f"FCID{player['color']}_getFreeTech_{tech}_military" + (f"_tile-{tile}" if tile else "")))
-                view.add_item(Button(label="Grid (Green)", style=discord.ButtonStyle.green,
-                                         custom_id=f"FCID{player['color']}_getFreeTech_{tech}_grid" + (f"_tile-{tile}" if tile else "")))
-                view.add_item(Button(label="Nano (Yellow)", style=discord.ButtonStyle.gray,
-                                         custom_id=f"FCID{player['color']}_getFreeTech_{tech}_nano" + (f"_tile-{tile}" if tile else "")))
+                for track_name, label, style in (("military", "Military (Pink)", discord.ButtonStyle.red),
+                                                 ("grid", "Grid (Green)", discord.ButtonStyle.green),
+                                                 ("nano", "Nano (Yellow)", discord.ButtonStyle.gray)):
+                    if len(player[f"{track_name}_tech"]) >= max_techs:
+                        continue
+                    view.add_item(Button(label=label, style=style,
+                                         custom_id=f"FCID{player['color']}_getFreeTech_{tech}_{track_name}"
+                                                   + (f"_tile-{tile}" if tile else "")))
+                if not view.children:
+                    await interaction.channel.send("Every technology tray is full.")
+                    DiscoveryTileButtons.clearPendingResolution(game, tile)
+                    return True
                 await DiscoveryTileButtons.sendPendingPrompt(
                     game, tile, interaction.channel,
                     f"{player['player_name']} please choose the track this ancient tech should go on.", view)
                 return "discovery_tech"
+        if len(player[f"{tech_type}_tech"]) >= max_techs:
+            await interaction.channel.send("That technology tray is full.")
+            DiscoveryTileButtons.clearPendingResolution(game, tile)
+            return True
         game.playerResearchTech(game.get_player_from_color(player["color"]), tech, tech_type)
         if tile:
             DiscoveryTileButtons.clearPendingResolution(game, tile)
-        tech_details = tech_data.get(tech)
         image = DrawHelper.show_tech_ref_image(tech_details["name"], tech_details['track'])
         await interaction.channel.send(f"{player['player_name']} acquired the tech {tech_details['name']}.",
                                         file=image)

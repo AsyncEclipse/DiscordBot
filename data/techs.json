@@ -534,5 +534,17 @@
     "dtile": 0,
     "num": 0,
     "description": "This is built into all their ships, and they use this technology for a range of benefits, limited by how much power they have: Always: Cloaking Device; for 1 Power each: +1 to Hit, +1 Shield; for 2 Power: Neutron Bombs if researched, +2 Initiative; for 3 Power: Ignore Shields. Declare options at the start of each combat per blueprint."
+  },
+  "reh": {
+    "name": "Regenerative Hull",
+    "base_cost": 0,
+    "min_cost": 0,
+    "track": "nano",
+    "activ1": 0,
+    "art_pt": 0,
+    "infdisc": 0,
+    "dtile": 0,
+    "num": 0,
+    "description": "All Vorlons ships start with a Regenerative Hull Ship Part."
   }
 }

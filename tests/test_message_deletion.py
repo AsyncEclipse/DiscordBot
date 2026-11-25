@@ -7,7 +7,7 @@ import pytest
 
 from Buttons.Turn import TurnButtons
 from helpers.CombatHelper import Combat
-from tests.fakes import FakeInteraction
+from tests.fakes import FakeInteraction, buttons, player_helper
 
 
 def missing_message():
@@ -24,6 +24,19 @@ def test_end_turn_handles_an_already_deleted_message(start_game, run, capsys):
 
     interaction.message.delete.assert_awaited_once()
     assert "was already deleted" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("is_deleted", [False, True])
+def test_finish_action_deletes_once_and_handles_missing_message(start_game, run, capsys, is_deleted):
+    game, channel = start_game()
+    interaction = FakeInteraction(channel)
+    interaction.message.delete = AsyncMock(side_effect=missing_message() if is_deleted else None)
+
+    run(TurnButtons.finishAction(game.get_player(1), game, interaction, player_helper(game, "blue")))
+
+    interaction.message.delete.assert_awaited_once()
+    assert "FCIDblue_endTurn" in buttons(channel)
+    assert ("was already deleted" in capsys.readouterr().out) == is_deleted
 
 
 @pytest.mark.parametrize("queued", [False, True])
