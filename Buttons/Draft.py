@@ -39,7 +39,7 @@ class DraftButtons:
                             "Rho Indi Syndicate", "The Exiles"]
             if game.gamestate.get("community_factions", False):
                 factionNames += [faction["name"] for faction in FactionData.FACTIONS.values()
-                                 if faction.get("community")]
+                                 if faction.get("community") and faction["name"] != FactionData.FACTIONS["heg"]["name"]]
             message.append(f"For your reference, the factions currently available in the bot are the following "
                            f"{len(factionNames)}, plus the 6 Terran equivalents. First-timers are encouraged to use"
                            " the Terran factions, which are all the same and don't have as many quirks"
@@ -47,6 +47,7 @@ class DraftButtons:
             message.extend(f"{i}. {name}" for i, name in enumerate(factionNames, 1))
         await channel.send("\n".join(message))
         game.initilizeKey("bannedFactions")
+        game.addToKey("bannedFactions", "heg")  # ponytail: Hegemony hidden from draft; delete this line to re-enable
         if tournament:
             msg2 = "The following factions have been banned:"
             for i in range(1, 10-len(player_list)):
